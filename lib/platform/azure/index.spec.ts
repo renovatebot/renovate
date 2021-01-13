@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import {
+  GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
@@ -1004,10 +1005,90 @@ describe('platform/azure', () => {
       );
     });
   });
-  describe('Not supported by Azure DevOps (yet!)', () => {
-    it('mergePr', async () => {
-      const res = await azure.mergePr(0, undefined);
+
+  describe('mergePr', () => {
+    it('should complete the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      const updatePullRequestMock = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: lastMergeSourceCommitMock,
+              targetRefName: 'refs/heads/ding',
+            })),
+            updatePullRequest: updatePullRequestMock,
+          } as any)
+      );
+
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
+      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+
+      expect(updatePullRequestMock).toHaveBeenCalledWith(
+        {
+          status: PullRequestStatus.Completed,
+          lastMergeSourceCommit: lastMergeSourceCommitMock,
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+          },
+        },
+        '1',
+        pullRequestIdMock
+      );
+      expect(res).toBe(true);
+    });
+    it('should return false if the PR does not update successfully', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: lastMergeSourceCommitMock,
+            })),
+            updatePullRequest: jest
+              .fn()
+              .mockRejectedValue(new Error(`oh no pr couldn't be updated`)),
+          } as any)
+      );
+
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
+      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
       expect(res).toBe(false);
+    });
+
+    it('should cache the mergeMethod for subsequent merges', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: { commitId: 'abcd1234' },
+              targetRefName: 'refs/heads/ding',
+            })),
+            updatePullRequest: jest.fn(),
+          } as any)
+      );
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
+      await azure.mergePr(1234, 'test-branch-1');
+      await azure.mergePr(5678, 'test-branch-2');
+
+      expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
     });
   });
 

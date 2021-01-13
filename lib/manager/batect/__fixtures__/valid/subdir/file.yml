@@ -1,0 +1,11 @@
+include:
+  - ../include.yml
+
+  - type: git
+    repo: https://file.com/my-repo.git
+    ref: 4.5.6
+
+containers:
+  file-container-1:
+    image: ubuntu:19.04
+

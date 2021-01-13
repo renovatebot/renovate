@@ -236,6 +236,7 @@ Object {
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
     },
   ],
@@ -375,6 +376,7 @@ Object {
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
     },
   ],
@@ -447,6 +449,7 @@ Object {
       "lookupName": "com.github.gseitz:sbt-release",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
     },
   ],

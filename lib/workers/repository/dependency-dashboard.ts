@@ -119,6 +119,7 @@ export async function ensureMasterIssue(
   }
   const rateLimited = branches.filter(
     (branch) =>
+      branch.res === ProcessBranchResult.BranchLimitReached ||
       branch.res === ProcessBranchResult.PrLimitReached ||
       branch.res === ProcessBranchResult.CommitLimitReached
   );
@@ -185,6 +186,7 @@ export async function ensureMasterIssue(
     ProcessBranchResult.NotScheduled,
     ProcessBranchResult.PrLimitReached,
     ProcessBranchResult.CommitLimitReached,
+    ProcessBranchResult.BranchLimitReached,
     ProcessBranchResult.AlreadyExisted,
     ProcessBranchResult.Error,
     ProcessBranchResult.Automerged,

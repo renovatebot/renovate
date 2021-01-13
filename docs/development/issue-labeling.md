@@ -16,6 +16,22 @@ Most issues should have a label relating to either a platform, manager, datasour
 
 ## Label categories
 
+### Status
+
+<details>
+    <summary>Status of issue</summary>
+
+    status:requirements
+    status:blocked
+    status:ready
+    status:in-progress
+
+</details>
+
+Use these to label the status of an issue.
+For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
+All open issues should have some `status:*` label applied.
+
 ### Type of issue
 
 <details>

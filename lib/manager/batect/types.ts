@@ -11,6 +11,7 @@ export type BatectInclude = string | BatectFileInclude | BatectGitInclude;
 
 export interface BatectFileInclude {
   type: 'file';
+  path: string;
 }
 
 export interface BatectGitInclude {

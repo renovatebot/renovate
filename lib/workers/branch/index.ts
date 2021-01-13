@@ -30,6 +30,7 @@ import {
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -60,9 +61,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 export async function processBranch(
-  branchConfig: BranchConfig,
-  prLimitReached?: boolean,
-  commitLimitReached?: boolean
+  branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -153,15 +152,15 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      prLimitReached &&
+      isLimitReached(Limit.Branches) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.debug('Reached PR limit - skipping branch creation');
-      return ProcessBranchResult.PrLimitReached;
+      logger.debug('Reached branch limit - skipping branch creation');
+      return ProcessBranchResult.BranchLimitReached;
     }
     if (
-      commitLimitReached &&
+      isLimitReached(Limit.Commits) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
@@ -170,6 +169,7 @@ export async function processBranch(
     }
     if (branchExists) {
       logger.debug('Checking if PR has been edited');
+      const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== PrState.Open) {
@@ -178,7 +178,6 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        const branchIsModified = await isBranchModified(config.branchName);
         if (
           branchIsModified ||
           (branchPr.targetBranch &&
@@ -206,6 +205,9 @@ export async function processBranch(
             return ProcessBranchResult.PrEdited;
           }
         }
+      } else if (branchIsModified) {
+        logger.debug('Branch has been edited');
+        return ProcessBranchResult.PrEdited;
       }
     }
 
@@ -583,7 +585,7 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prResult: result, pr } = await ensurePr(config, prLimitReached);
+    const { prResult: result, pr } = await ensurePr(config);
     if (result === PrResult.LimitReached) {
       logger.debug('Reached PR limit - skipping PR creation');
       return ProcessBranchResult.PrLimitReached;
