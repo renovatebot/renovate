@@ -172,11 +172,11 @@ function cleanSimpleHtml(html: string): string {
       .replace(/<\/?pre>/, '')
       // Certain simple repositories like artifactory don't escape > and <
       .replace(
-        /data-requires-python="(.*?)>(.*?)"/g,
+        /data-requires-python="([^\"]*?)>([^\"]*?)"/g,
         'data-requires-python="$1&gt;$2"'
       )
       .replace(
-        /data-requires-python="(.*?)<(.*?)"/g,
+        /data-requires-python="([^\"]*?)<([^\"]*?)"/g,
         'data-requires-python="$1&lt;$2"'
       )
   );
