@@ -64,7 +64,7 @@ export function getNewValue({
       return currentValue;
     }
   }
-  if (!['replace', 'bump'].includes(rangeStrategy)) {
+  if (!['extend', 'bump'].includes(rangeStrategy)) {
     logger.debug(
       'Unsupported rangeStrategy: ' +
         rangeStrategy +
