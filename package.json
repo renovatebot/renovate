@@ -209,7 +209,7 @@
     "@types/global-agent": "2.1.0",
     "@types/ini": "1.3.30",
     "@types/jest": "26.0.19",
-    "@types/js-yaml": "3.12.5",
+    "@types/js-yaml": "3.12.6",
     "@types/jsdom": "16.2.5",
     "@types/json-dup-key-validator": "1.0.0",
     "@types/json5": "0.0.30",
