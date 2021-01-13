@@ -96,7 +96,7 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer pack
 
 Override the default renovate sidecar Docker containers name prefix from `renovate_` to a custom value, so renovate will name and label images from a custom prefix.
 
-If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_renovate_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
+If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_renovate_node` instead of currently used `renovate_renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
 
 ## dockerImagePrefix
 
