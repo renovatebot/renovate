@@ -1,5 +1,10 @@
 import { PackageDependency } from '../common';
 
+export { MAVEN_REPO } from '../../datasource/maven/common';
+
+export const JCENTER_REPO = 'https://jcenter.bintray.com/';
+export const GOOGLE_REPO = 'https://dl.google.com/android/maven2/';
+
 export interface ManagerData {
   fileReplacePosition: number;
   packageFile?: string;
