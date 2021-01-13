@@ -48,12 +48,13 @@ It's not very often that you'll need to close a PR, but you can certainly do it 
 Sometimes a bug is fixed with a PR that links to a issue.
 When the PR is merged, the issue is automatically closed.
 Sometimes the bug was not really fixed, and someone says: "Hey this is still broken for me."
-In that case, re-open the issue.
+In that case, re-open the issue only if it's definitely the same problem (users often associate different problems together incorrectly).
+Otherwise, ask the user to open a new issue if it seems like it is different.
 
 ### Assign issues
 
 You can assign a issue to yourself, so that others know you're going to work on the issue.
-You can also assign another user, if they have said they want to volunteer to fix the bug or implement a feature.
+GitHub allows issues to be assigned to any project collaborator or to any non-collaborator who has created or commented on the issue, so you can also assign in either of those cases if it makes sense.
 
 ### Mark duplicate issues and pull requests
 
@@ -68,8 +69,6 @@ You can request a review from one of the maintainers, in case this is needed to 
 
 Sometimes a discussion can go sour, like when people call each other names, or post spam, or veer off-topic.
 In those cases you can lock the discussion to prevent further escalation.
-
-**Question:** What should the criteria be to unlock a locked discussion?
 
 ### Individually convert issues to discussions
 
