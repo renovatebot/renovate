@@ -28,12 +28,11 @@ description: How to setup Renovate for Azure DevOps
      - task: npmAuthenticate@0
        inputs:
          workingFile: .npmrc
-   
+
      - bash: |
          git config --global user.email 'bot@renovateapp.com'
          git config --global user.name 'Renovate Bot'
-         cp .npmrc ~/.npmrc
-         npx renovate
+         npx --userconfig .npmrc renovate
        env:
          TOKEN: $(System.AccessToken)
    ```
@@ -42,7 +41,7 @@ description: How to setup Renovate for Azure DevOps
    (replacing `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed)
 
    ```
-   @enpowerx:registry=https://pkgs.dev.azure.com/YOUR-ORG/_packaging/YOUR-FEED/npm/registry/ 
+   registry=https://pkgs.dev.azure.com/YOUR-ORG/_packaging/YOUR-FEED/npm/registry/
    always-auth=true
    ```
 
@@ -73,7 +72,7 @@ If you wish to use a single Renovate pipeline to update multiple repositories:
 
 1. Add the names of the repositories to `config.js`.
 
-1. Make sure that the "Project Collection Build Service" user has the following permissions on the repositores:
+1. Make sure that the "Project Collection Build Service (YOUR-PROJECT)" user has the following permissions on the repositores:
    - Contribute
    - Contribute to pull requests
    - Create branch
