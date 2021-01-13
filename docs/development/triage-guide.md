@@ -63,7 +63,8 @@ If you see an issue that's an obvious duplicate:
 1. Attach a `duplicate` label
 1. Use the "Duplicate of" functionality [GitHub docs, about duplicate issues and pull requests](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/about-duplicate-issues-and-pull-requests)
 1. Close the issue
-Same for PRs.
+
+Follow the same workflow to mark duplicate PRs.
 
 ### Request PR reviews
 
