@@ -80,8 +80,11 @@ export async function parseConfigs(
     delete config.privateKeyPath;
   }
 
-  // Set log level
-  levels('stdout', config.logLevel);
+  // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
+  // istanbul ignore if
+  if (config.logLevel) {
+    levels('stdout', config.logLevel);
+  }
 
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
