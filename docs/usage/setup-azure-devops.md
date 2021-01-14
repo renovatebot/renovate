@@ -37,7 +37,7 @@ description: How to setup Renovate for Azure DevOps
          TOKEN: $(System.AccessToken)
    ```
 
-1. Add a file named `.npmrc` to your repository with the following contents:  
+1. Add a file named `.npmrc` to your repository with the following contents:
    (replacing `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed)
 
    ```
@@ -45,7 +45,7 @@ description: How to setup Renovate for Azure DevOps
    always-auth=true
    ```
 
-1. Add a file named `config.js` to your repository with the following contents:  
+1. Add a file named `config.js` to your repository with the following contents:
    (replacing `YOUR-ORG` with your Azure DevOps organization and `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository)
 
    ```javascript
@@ -58,11 +58,9 @@ description: How to setup Renovate for Azure DevOps
          hostName: 'pkgs.dev.azure.com',
          username: 'apikey',
          password: process.env.TOKEN,
-       }
+       },
      ],
-     repositories: [
-       'YOUR-PROJECT/YOUR-REPO'
-     ]
+     repositories: ['YOUR-PROJECT/YOUR-REPO'],
    };
    ```
 
