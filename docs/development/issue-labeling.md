@@ -132,6 +132,7 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     help wanted
     reproduced
     reproduction needed
+    duplicate
 
 </details>
 
@@ -142,6 +143,8 @@ Add the label `help wanted` to indicate that we need the original poster or some
 
 Add a label `reproduction needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduced` once there is a public reproduction.
+
+Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 
 ### Self hosted
 
