@@ -99,6 +99,7 @@ metadata:
 data:
   config.json: |-
     {
+      "logLevel" : "debug",
       "repositories": ["orgname/repo","username/repo"],
       "dryRun" : "true"
     }
@@ -273,6 +274,7 @@ module.exports = {
   endpoint: 'https://self-hosted.gitlab/api/v4/',
   token: '**gitlab_token**',
   platform: 'gitlab',
+  logLevel: 'debug',
   onboardingConfig: {
     extends: ['config:base'],
   },
