@@ -25,8 +25,8 @@ For example, all the following are valid tags:
 
 ```sh
 $ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:24.11.3
-$ docker run --rm renovate/renovate:24.11
+$ docker run --rm renovate/renovate:24.14.0
+$ docker run --rm renovate/renovate:24.14
 $ docker run --rm renovate/renovate:24
 ```
 
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:24.11.3
+              image: renovate/renovate:24.14.0
               args:
                 - user/repo
               # Environment Variables
@@ -101,7 +101,6 @@ metadata:
 data:
   config.json: |-
     {
-      "logLevel" : "debug",
       "repositories": ["orgname/repo","username/repo"],
       "dryRun" : "true"
     }
@@ -119,7 +118,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:24.11.3
+            - image: renovate/renovate:24.14.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -280,7 +279,6 @@ module.exports = {
   endpoint: 'https://self-hosted.gitlab/api/v4/',
   token: '**gitlab_token**',
   platform: 'gitlab',
-  logLevel: 'debug',
   onboardingConfig: {
     extends: ['config:base'],
   },
@@ -405,7 +403,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:24.11.3
+              image: renovate/renovate:24.14.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
