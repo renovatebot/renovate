@@ -24,8 +24,8 @@ All the following are valid:
 
 ```sh
 $ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:24.10.1
-$ docker run --rm renovate/renovate:24.10
+$ docker run --rm renovate/renovate:24.14.0
+$ docker run --rm renovate/renovate:24.14
 $ docker run --rm renovate/renovate:24
 ```
 
@@ -60,7 +60,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:24.10.1
+              image: renovate/renovate:24.14.0
               args:
                 - user/repo
               # Environment Variables
@@ -117,7 +117,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:24.10.1
+            - image: renovate/renovate:24.14.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -398,7 +398,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:24.10.1
+              image: renovate/renovate:24.14.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

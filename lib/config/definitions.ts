@@ -1198,6 +1198,13 @@ const options: RenovateOptions[] = [
     default: 0, // no limit
   },
   {
+    name: 'branchConcurrentLimit',
+    description:
+      'Limit to a maximum of x concurrent branches. 0 means no limit, `null` (default) inherits value from `prConcurrentLimit`.',
+    type: 'integer',
+    default: null, // inherit prConcurrentLimit
+  },
+  {
     name: 'prPriority',
     description:
       'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
