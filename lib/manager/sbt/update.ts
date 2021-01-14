@@ -1,6 +1,6 @@
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
-import { BumpPackageVersionResult } from "../common";
+import { BumpPackageVersionResult } from '../common';
 
 export function bumpPackageVersion(
   content: string,
@@ -17,7 +17,7 @@ export function bumpPackageVersion(
     newVersion = inc(currentValue, bumpVersion as ReleaseType);
     if (!newVersion) {
       logger.warn('Version incremental failed');
-      return { bumpedContent }
+      return { bumpedContent };
     }
     bumpedContent = content.replace(
       /^(version\s*:=\s*).*$/m,
@@ -39,5 +39,5 @@ export function bumpPackageVersion(
       'Failed to sbt.bumpVersion'
     );
   }
-  return { bumpedContent: content };
+  return { bumpedContent };
 }
