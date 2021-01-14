@@ -8,14 +8,14 @@ Object {
       "currentValue": "0.9.0",
       "depName": "redis",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable/",
       ],
     },
     Object {
       "currentValue": "0.8.1",
       "depName": "postgresql",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable/",
       ],
     },
   ],
@@ -74,7 +74,7 @@ Object {
       "currentValue": "0.9.0",
       "depName": "redis",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable/",
       ],
     },
     Object {

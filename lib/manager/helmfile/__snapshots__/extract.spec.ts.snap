@@ -8,7 +8,7 @@ Object {
       "currentValue": undefined,
       "depName": "example",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable",
       ],
       "skipReason": "local-chart",
     },
@@ -88,7 +88,7 @@ Object {
       "currentValue": "1.0.0",
       "depName": "{{\`{{ .Release.Name }}\`}}",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable",
       ],
       "skipReason": "unsupported-chart-type",
     },
@@ -96,7 +96,7 @@ Object {
       "currentValue": "1.0.0",
       "depName": "example",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable",
       ],
     },
   ],
