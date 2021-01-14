@@ -342,11 +342,10 @@ const options: RenovateOptions[] = [
   // Log options
   {
     name: 'logLevel',
-    description: 'Logging level',
+    description: 'Logging level. Deprecated, use `LOG_LEVEL` environment.',
     stage: 'global',
     type: 'string',
     allowedValues: ['fatal', 'error', 'warn', 'info', 'debug', 'trace'],
-    default: 'info',
     env: 'LOG_LEVEL',
   },
   {
