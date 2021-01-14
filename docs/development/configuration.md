@@ -52,11 +52,7 @@ $ node renovate --help
 To configure any `<list>` items, separate with commas.
 E.g. `renovate --labels=renovate,dependency`.
 
-To enable debug logging run:
-
-```sh
-$ LOG_LEVEL=debug node renovate
-```
+To enable debug logging export `LOG_LEVEL=debug` to your environment.
 
 ### renovate.json
 
