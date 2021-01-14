@@ -83,6 +83,9 @@ export async function parseConfigs(
   // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
   // istanbul ignore if
   if (config.logLevel) {
+    logger.warn(
+      'Configuring logLevel is deprecated. Use LOG_LEVEL environment variable instead'
+    );
     levels('stdout', config.logLevel);
   }
 
