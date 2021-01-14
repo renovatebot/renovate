@@ -9,26 +9,38 @@ describe('lib/manager/helmv3/update', () => {
       version: '0.0.2',
     });
     it('increments', () => {
-      const res = helmv3Updater.bumpPackageVersion(content, '0.0.2', 'patch');
-      expect(res).toMatchSnapshot();
-      expect(res).not.toEqual(content);
+      const { bumpedContent } = helmv3Updater.bumpPackageVersion(
+        content,
+        '0.0.2',
+        'patch'
+      );
+      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).not.toEqual(content);
     });
     it('no ops', () => {
-      const res = helmv3Updater.bumpPackageVersion(content, '0.0.1', 'patch');
-      expect(res).toEqual(content);
+      const { bumpedContent } = helmv3Updater.bumpPackageVersion(
+        content,
+        '0.0.1',
+        'patch'
+      );
+      expect(bumpedContent).toEqual(content);
     });
     it('updates', () => {
-      const res = helmv3Updater.bumpPackageVersion(content, '0.0.1', 'minor');
-      expect(res).toMatchSnapshot();
-      expect(res).not.toEqual(content);
+      const { bumpedContent } = helmv3Updater.bumpPackageVersion(
+        content,
+        '0.0.1',
+        'minor'
+      );
+      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).not.toEqual(content);
     });
     it('returns content if bumping errors', () => {
-      const res = helmv3Updater.bumpPackageVersion(
+      const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,
         '0.0.2',
         true as any
       );
-      expect(res).toEqual(content);
+      expect(bumpedContent).toEqual(content);
     });
   });
 });

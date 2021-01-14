@@ -131,10 +131,10 @@ Object {
       "datasource": "helm",
       "depName": "prometheus-operator",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable",
       ],
       "replaceString": "chart:
-          repository: https://kubernetes-charts.storage.googleapis.com/
+          repository: https://charts.helm.sh/stable
           name: prometheus-operator
           version: 8.12.13
 ",

@@ -24,9 +24,9 @@ All the following are valid:
 
 ```sh
 $ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:19.181.2
-$ docker run --rm renovate/renovate:19.181
-$ docker run --rm renovate/renovate:19
+$ docker run --rm renovate/renovate:24.14.0
+$ docker run --rm renovate/renovate:24.14
+$ docker run --rm renovate/renovate:24
 ```
 
 (Please look up what the latest actual tags are though, do not use the above literally).
@@ -60,7 +60,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:23.19.2
+              image: renovate/renovate:24.14.0
               args:
                 - user/repo
               # Environment Variables
@@ -99,7 +99,6 @@ metadata:
 data:
   config.json: |-
     {
-      "logLevel" : "debug",
       "repositories": ["orgname/repo","username/repo"],
       "dryRun" : "true"
     }
@@ -117,7 +116,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:23.22.1
+            - image: renovate/renovate:24.14.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -274,7 +273,6 @@ module.exports = {
   endpoint: 'https://self-hosted.gitlab/api/v4/',
   token: '**gitlab_token**',
   platform: 'gitlab',
-  logLevel: 'debug',
   onboardingConfig: {
     extends: ['config:base'],
   },
@@ -398,7 +396,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:23.19.2
+              image: renovate/renovate:24.14.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

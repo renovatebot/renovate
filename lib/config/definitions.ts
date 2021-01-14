@@ -182,7 +182,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     default: {
       documentation: 'https://docs.renovatebot.com/',
-      help: 'https://github.com/renovatebot/config-help/issues',
+      help: 'https://github.com/renovatebot/renovate/discussions',
       homepage: 'https://github.com/renovatebot/renovate',
     },
     additionalProperties: {
@@ -342,11 +342,10 @@ const options: RenovateOptions[] = [
   // Log options
   {
     name: 'logLevel',
-    description: 'Logging level',
+    description: 'Logging level. Deprecated, use `LOG_LEVEL` environment.',
     stage: 'global',
     type: 'string',
     allowedValues: ['fatal', 'error', 'warn', 'info', 'debug', 'trace'],
-    default: 'info',
     env: 'LOG_LEVEL',
   },
   {
@@ -1185,6 +1184,13 @@ const options: RenovateOptions[] = [
       'Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.',
     type: 'integer',
     default: 0, // no limit
+  },
+  {
+    name: 'branchConcurrentLimit',
+    description:
+      'Limit to a maximum of x concurrent branches. 0 means no limit, `null` (default) inherits value from `prConcurrentLimit`.',
+    type: 'integer',
+    default: null, // inherit prConcurrentLimit
   },
   {
     name: 'prPriority',

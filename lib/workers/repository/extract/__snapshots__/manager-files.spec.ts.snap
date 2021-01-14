@@ -45,7 +45,6 @@ Array [
         "replaceString": "abc",
       },
     ],
-    "manager": "html",
     "packageFile": "Dockerfile",
   },
 ]

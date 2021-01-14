@@ -168,6 +168,8 @@ By configuring using the environment it means that debug logging starts from the
 
 Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
 
+Warning: Configuring `logLevel` config option or `--log-level` cli option is deprecated and will be removed in a major version.
+
 ## onboarding
 
 Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
