@@ -346,7 +346,6 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     allowedValues: ['fatal', 'error', 'warn', 'info', 'debug', 'trace'],
-    env: 'LOG_LEVEL',
   },
   {
     name: 'logFile',
