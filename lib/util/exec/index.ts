@@ -13,7 +13,6 @@ import {
 } from './common';
 import {
   generateDockerCommand,
-  getContainerLabel,
   getContainerName,
   removeDanglingContainers,
   removeDockerContainer,
@@ -37,7 +36,7 @@ export async function setExecConfig(
     execConfig[key] = value || null;
   }
   if (execConfig.binarySource === 'docker') {
-    await removeDanglingContainers(getContainerLabel(config.dockerChildPrefix));
+    await removeDanglingContainers(config.dockerChildPrefix);
   }
 }
 

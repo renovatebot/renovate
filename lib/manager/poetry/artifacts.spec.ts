@@ -31,6 +31,7 @@ const hostRules = mocked(_hostRules);
 
 const config = {
   localDir: join('/tmp/github/some/repo'),
+  dockerChildPrefix: 'renovate_',
 };
 
 describe('.updateArtifacts()', () => {

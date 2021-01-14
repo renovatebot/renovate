@@ -27,6 +27,7 @@ const multiProjectUpdatesReport = () =>
   fsExtra.readFile(`${fixtures}/MultiProjectUpdatesReport.json`, 'utf8');
 
 const baseConfig = {
+  dockerChildPrefix: 'renovate_',
   gradle: {
     timeout: 60,
   },

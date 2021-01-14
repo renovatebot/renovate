@@ -111,17 +111,11 @@ async function getDockerTag(
 }
 
 export function getContainerName(image: string, prefix: string): string {
-  if (prefix) {
-    return prefix.concat(image.replace(/\//g, '_'));
-  }
-  return 'renovate_'.concat(image.replace(/\//g, '_'));
+  return `${prefix}${image.replace(/\//g, '_')}`;
 }
 
 export function getContainerLabel(prefix: string): string {
-  if (prefix) {
-    return `${prefix}child`;
-  }
-  return 'renovate_child';
+  return `${prefix}child`;
 }
 
 export async function removeDockerContainer(
@@ -150,13 +144,14 @@ export async function removeDockerContainer(
 }
 
 // istanbul ignore next
-export async function removeDanglingContainers(
-  childLabel: string
-): Promise<void> {
+export async function removeDanglingContainers(prefix: string): Promise<void> {
   try {
-    const res = await rawExec(`docker ps --filter label=${childLabel} -aq`, {
-      encoding: 'utf-8',
-    });
+    const res = await rawExec(
+      `docker ps --filter label=${getContainerLabel(prefix)} -aq`,
+      {
+        encoding: 'utf-8',
+      }
+    );
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
         .trim()

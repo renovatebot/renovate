@@ -39,6 +39,7 @@ describe('bundler.updateArtifacts()', () => {
       localDir: join('/tmp/github/some/repo'),
       cacheDir: join('/tmp/cache'),
       dockerUser: 'foobar',
+      dockerChildPrefix: 'renovate_',
     };
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);

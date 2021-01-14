@@ -27,6 +27,7 @@ delete process.env.CP_HOME_DIR;
 const config = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  dockerChildPrefix: 'renovate_',
 };
 
 describe('.updateArtifacts()', () => {

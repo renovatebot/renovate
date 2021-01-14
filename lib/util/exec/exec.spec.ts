@@ -33,6 +33,7 @@ describe(`Child process execution wrapper`, () => {
 
   const cacheDir = '/tmp/renovate/cache/';
   const cwd = '/tmp/renovate/github/some/repo/';
+  const dockerChildPrefix = 'renovate_';
 
   const defaultCwd = `-w "${cwd}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" -v "${cacheDir}":"${cacheDir}"`;
@@ -40,6 +41,7 @@ describe(`Child process execution wrapper`, () => {
   const execConfig = {
     cacheDir,
     localDir: cwd,
+    dockerChildPrefix,
   };
 
   beforeEach(() => {
