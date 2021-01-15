@@ -7,6 +7,7 @@ import {
   mockExecSequence,
 } from '../../../test/exec-util';
 import { env, getName } from '../../../test/util';
+import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
 import * as extract from './extract';
@@ -40,11 +41,12 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.resetAllMocks();
       jest.resetModules();
       extract.resetModule();
 
+      await setUtilConfig(config);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py

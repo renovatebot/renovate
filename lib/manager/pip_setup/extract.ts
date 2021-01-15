@@ -1,3 +1,4 @@
+import { basename, dirname } from 'upath';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -44,17 +45,17 @@ export async function extractSetupFile(
   packageFile: string,
   config: ExtractConfig
 ): Promise<PythonSetup> {
-  const cwd = config.localDir;
   let cmd = 'python';
-  const extractPy = await copyExtractFile();
-  const args = [`"${extractPy}"`, `"${packageFile}"`];
+  const packageDirectory = dirname(packageFile);
+  const extractPy = await copyExtractFile(packageDirectory);
+  const args = [`"${extractPy}"`, `"${basename(packageFile)}"`];
   if (config.binarySource !== BinarySource.Docker) {
     logger.debug('Running python via global command');
     cmd = await getPythonAlias();
   }
   logger.debug({ cmd, args }, 'python command');
   const res = await exec(`${cmd} ${args.join(' ')}`, {
-    cwd,
+    cwdFile: packageFile,
     timeout: 30000,
     docker: {
       image: 'renovate/pip',
@@ -69,7 +70,7 @@ export async function extractSetupFile(
       logger.warn({ stdout: res.stdout, stderr }, 'Error in read setup file');
     }
   }
-  return parseReport();
+  return parseReport(packageDirectory);
 }
 
 export async function extractPackageFile(

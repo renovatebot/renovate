@@ -1,3 +1,4 @@
+import { join } from 'upath';
 import dataFiles from '../../data-files.generated';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 
@@ -7,12 +8,12 @@ const EXTRACT = 'renovate-pip_setup-extract.py';
 
 let extractPy: string | undefined;
 
-export async function copyExtractFile(): Promise<string> {
+export async function copyExtractFile(directory: string): Promise<string> {
   if (extractPy === undefined) {
     extractPy = dataFiles.get('extract.py');
   }
 
-  await writeLocalFile(EXTRACT, extractPy);
+  await writeLocalFile(join(directory, EXTRACT), extractPy);
 
   return EXTRACT;
 }
@@ -22,7 +23,7 @@ export interface PythonSetup {
   install_requires: string[];
 }
 
-export async function parseReport(): Promise<PythonSetup> {
-  const data = await readLocalFile(REPORT, 'utf8');
+export async function parseReport(directory: string): Promise<PythonSetup> {
+  const data = await readLocalFile(join(directory, REPORT), 'utf8');
   return JSON.parse(data);
 }

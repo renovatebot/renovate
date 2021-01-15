@@ -5,7 +5,7 @@ Array [
   Object {
     "cmd": "python --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -23,7 +23,7 @@ Array [
   Object {
     "cmd": "python3 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -41,7 +41,7 @@ Array [
   Object {
     "cmd": "python3.8 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -57,9 +57,9 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
+    "cmd": "<extract.py> \\"foobar.py\\"",
     "options": Object {
-      "cwd": "/tmp/github/some/repo",
+      "cwd": "/tmp/github/some/repo/tmp/folders",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -338,7 +338,7 @@ Array [
   Object {
     "cmd": "python --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -356,7 +356,7 @@ Array [
   Object {
     "cmd": "python3 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -374,7 +374,7 @@ Array [
   Object {
     "cmd": "python3.8 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -390,9 +390,9 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"lib/manager/pip_setup/__fixtures__/setup.py\\"",
+    "cmd": "<extract.py> \\"setup.py\\"",
     "options": Object {
-      "cwd": "/tmp/github/some/repo",
+      "cwd": "/tmp/github/some/repo/lib/manager/pip_setup/__fixtures__",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -415,7 +415,7 @@ Array [
   Object {
     "cmd": "python --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -433,7 +433,7 @@ Array [
   Object {
     "cmd": "python3 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -451,7 +451,7 @@ Array [
   Object {
     "cmd": "python3.8 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -467,9 +467,9 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"lib/manager/pip_setup/__fixtures__/setup.py\\"",
+    "cmd": "<extract.py> \\"setup.py\\"",
     "options": Object {
-      "cwd": "/tmp/github/some/repo",
+      "cwd": "/tmp/github/some/repo/lib/manager/pip_setup/__fixtures__",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -492,7 +492,7 @@ Array [
   Object {
     "cmd": "python --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -510,7 +510,7 @@ Array [
   Object {
     "cmd": "python3 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -528,7 +528,7 @@ Array [
   Object {
     "cmd": "python3.8 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -544,9 +544,9 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
+    "cmd": "<extract.py> \\"foobar.py\\"",
     "options": Object {
-      "cwd": "/tmp/github/some/repo",
+      "cwd": "/tmp/github/some/repo/tmp/folders",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
