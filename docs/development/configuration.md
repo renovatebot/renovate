@@ -38,6 +38,7 @@ e.g. apply one set of labels for `backend/package.json` and a different set of l
 module.exports = {
   npmrc: '//registry.npmjs.org/:_authToken=abc123',
   baseDir: '/tmp/renovate',
+  logLevel: 'debug',
   includeForks: true,
   gradle: { enabled: false },
 };
@@ -51,8 +52,6 @@ $ node renovate --help
 
 To configure any `<list>` items, separate with commas.
 E.g. `renovate --labels=renovate,dependency`.
-
-To enable debug logging export `LOG_LEVEL=debug` to your environment.
 
 ### renovate.json
 
