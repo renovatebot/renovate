@@ -119,8 +119,8 @@ export async function getReleases(
   }
   const res =
     source.datasource === github.id
-      ? await github.getReleases({ ...config, source })
-      : await gitlab.getReleases({ ...config, source });
+      ? await github.getReleases({ ...config, ...source })
+      : await gitlab.getReleases({ ...config, ...source });
   // istanbul ignore if
   if (!res) {
     return res;
