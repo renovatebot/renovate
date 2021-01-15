@@ -260,6 +260,19 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: handleAssignment,
   },
   {
+    // set('foo', 'bar')
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'set' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
+  {
     // 'foo.bar:baz:1.2.3'
     matchers: [
       {
