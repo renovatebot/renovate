@@ -108,9 +108,10 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  *  - Call the respective getReleases in github/gitlab to retrieve the tags
  *  - Filter module tags according to the module path
  */
-export async function getReleases({
-  lookupName,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { lookupName } = config;
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
   if (source?.datasource !== github.id && source?.datasource !== gitlab.id) {
@@ -118,8 +119,8 @@ export async function getReleases({
   }
   const res =
     source.datasource === github.id
-      ? await github.getReleases(source)
-      : await gitlab.getReleases(source);
+      ? await github.getReleases({ ...config, source })
+      : await gitlab.getReleases({ ...config, source });
   // istanbul ignore if
   if (!res) {
     return res;

@@ -444,6 +444,8 @@ Array [
 ]
 `;
 
+exports[`datasource/crate getReleases refuses to clone if trustLevel is not high 1`] = `null`;
+
 exports[`datasource/crate getReleases returns null for 404 1`] = `
 Array [
   Object {

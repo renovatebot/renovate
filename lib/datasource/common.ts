@@ -1,3 +1,5 @@
+import { RenovateConfig } from '../config/common';
+
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -9,7 +11,7 @@ export interface DigestConfig extends Config {
   registryUrl?: string;
 }
 
-interface ReleasesConfigBase {
+interface ReleasesConfigBase extends RenovateConfig {
   constraints?: Record<string, string>;
   npmrc?: string;
   registryUrls?: string[];

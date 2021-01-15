@@ -192,6 +192,19 @@ describe('datasource/crate', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('refuses to clone if trustLevel is not high', async () => {
+      const { mockClone } = setupGitMocks();
+
+      const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalledTimes(0);
+      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
+    });
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
 
@@ -200,6 +213,7 @@ describe('datasource/crate', () => {
         datasource,
         depName: 'mypkg',
         registryUrls: [url],
+        trustLevel: 'high',
       });
       expect(mockClone).toHaveBeenCalled();
       expect(res).toMatchSnapshot();
@@ -214,6 +228,7 @@ describe('datasource/crate', () => {
         datasource,
         depName: 'mypkg',
         registryUrls: [url],
+        trustLevel: 'high',
       });
       expect(mockClone).toHaveBeenCalled();
       expect(res).toMatchSnapshot();
@@ -228,6 +243,7 @@ describe('datasource/crate', () => {
         datasource,
         depName: 'mypkg',
         registryUrls: [url],
+        trustLevel: 'high',
       });
       await getPkgReleases({
         datasource,

@@ -130,6 +130,7 @@ function cacheDirFromUrl(url: URL): string {
  * url and clones it to cache.
  */
 async function fetchRegistryInfo(
+  config: GetReleasesConfig,
   registryUrl: string
 ): Promise<RegistryInfo | null> {
   let url: URL;
@@ -156,6 +157,13 @@ async function fetchRegistryInfo(
   };
 
   if (flavor !== RegistryFlavor.CratesIo) {
+    if (config.trustLevel !== 'high') {
+      logger.warn(
+        'crate datasource: trustLevel=high is required for registries other than crates.io, bailing out'
+      );
+      return null;
+    }
+
     const cacheKey = `crate-datasource/registry-clone-path/${registryUrl}`;
 
     let clonePath: string = memCache.get(cacheKey);
@@ -183,10 +191,11 @@ export function areReleasesCacheable(registryUrl: string): boolean {
   return registryUrl === 'https://crates.io';
 }
 
-export async function getReleases({
-  lookupName,
-  registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { lookupName, registryUrl } = config;
+
   // istanbul ignore if
   if (!registryUrl) {
     logger.warn(
@@ -211,7 +220,7 @@ export async function getReleases({
     }
   }
 
-  const registryInfo = await fetchRegistryInfo(registryUrl);
+  const registryInfo = await fetchRegistryInfo(config, registryUrl);
   if (!registryInfo) {
     logger.debug({ registryUrl }, 'Could not fetch registry info');
     return null;
