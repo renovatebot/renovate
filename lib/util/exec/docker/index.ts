@@ -84,7 +84,11 @@ async function getDockerTag(
     { constraint },
     `Found ${scheme} version constraint - checking for a compatible ${depName} image to use`
   );
-  const imageReleases = await getPkgReleases({ datasource: 'docker', depName });
+  const imageReleases = await getPkgReleases({
+    datasource: 'docker',
+    depName,
+    versioning: scheme,
+  });
   if (imageReleases?.releases) {
     let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
