@@ -85,6 +85,16 @@ describe('manager/gradle-lite/parser', () => {
     ]);
 
     ({ deps } = parseGradle(
+      "implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'foo:bar',
+        currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
       'group: "com.example", name: "my.dependency", version: depVersion'
     ));
     expect(deps).toBeEmpty();
