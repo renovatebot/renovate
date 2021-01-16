@@ -1,4 +1,4 @@
-import { basename, dirname } from 'upath';
+import { basename } from 'upath';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -7,7 +7,7 @@ import { BinarySource } from '../../util/exec/common';
 import { isSkipComment } from '../../util/ignore';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { dependencyPattern } from '../pip_requirements/extract';
-import { PythonSetup, copyExtractFile, parseReport } from './util';
+import { PythonSetup, getExtractFile, parseReport } from './util';
 
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
@@ -46,9 +46,8 @@ export async function extractSetupFile(
   config: ExtractConfig
 ): Promise<PythonSetup> {
   let cmd = 'python';
-  const packageDirectory = dirname(packageFile);
-  const extractPy = await copyExtractFile(packageDirectory);
-  const args = [`"${extractPy}"`, `"${basename(packageFile)}"`];
+  const extractPy = await getExtractFile();
+  const args = [`"${extractPy}"`, `"${packageFile}"`];
   if (config.binarySource !== BinarySource.Docker) {
     logger.debug('Running python via global command');
     cmd = await getPythonAlias();
@@ -70,7 +69,7 @@ export async function extractSetupFile(
       logger.warn({ stdout: res.stdout, stderr }, 'Error in read setup file');
     }
   }
-  return parseReport(packageDirectory);
+  return parseReport(packageFile);
 }
 
 export async function extractPackageFile(

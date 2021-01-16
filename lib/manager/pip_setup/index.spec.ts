@@ -21,6 +21,7 @@ const jsonContent = readFileSync(packageFileJson, 'utf8');
 
 const config = {
   localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
 };
 
 jest.mock('child_process');
@@ -107,7 +108,7 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(
           'raise Exception()',
-          '/tmp/folders/foobar.py',
+          'folders/foobar.py',
           config
         )
       ).toBeNull();
@@ -119,7 +120,7 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(
           'raise Exception()',
-          '/tmp/folders/foobar.py',
+          'folders/foobar.py',
           config
         )
       ).toBeNull();
