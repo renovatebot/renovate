@@ -2,7 +2,7 @@ import sys
 import json
 import os
 import distutils.core
-from os.path import basename, dirname, realpath
+from os.path import basename
 
 if sys.version_info[:2] >= (3, 3):
   from importlib.machinery import SourceFileLoader
@@ -33,8 +33,6 @@ except ImportError:
 @mock.patch.object(setuptools, 'setup')
 @mock.patch.object(distutils.core, 'setup')
 def invoke(mock1, mock2):
-  # Inserting the parent directory of the target setup.py in Python import path:
-  sys.path.append(dirname(realpath(sys.argv[-1])))
   # This is setup.py which calls setuptools.setup
   load_source('_target_setup_', basename(sys.argv[-1]))
   # called arguments are in `mock_setup.call_args`

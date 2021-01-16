@@ -1,4 +1,3 @@
-import { basename } from 'upath';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
