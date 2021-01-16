@@ -92,6 +92,10 @@ If you configure this to be different to the `baseDir`, it means you can have on
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
 
+## customEnvForChild
+
+Custom environment variables for sidecar Docker containers. This configuration will be applied after all other environment variables so that it can be used to override defaults.
+
 ## dockerImagePrefix
 
 Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.

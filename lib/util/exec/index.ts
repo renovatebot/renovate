@@ -20,6 +20,7 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
+  customEnvForChild: null,
   dockerImagePrefix: null,
   dockerUser: null,
   localDir: null,
@@ -61,7 +62,7 @@ function createChildEnv(
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
 
-  const childEnv =
+  let childEnv =
     env || extraEnv
       ? {
           ...extraEnv,
@@ -69,6 +70,7 @@ function createChildEnv(
           ...env,
         }
       : getChildProcessEnv();
+  childEnv = { ...childEnv, ...execConfig.customEnvForChild };
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {

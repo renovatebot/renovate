@@ -198,13 +198,17 @@ export async function generateDockerCommand(
 
   result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
 
+  const customEnvForChild = config.customEnvForChild || {};
   if (envVars) {
     result.push(
       ...uniq(envVars)
-        .filter((x) => typeof x === 'string')
+        .filter((x) => typeof x === 'string' && !customEnvForChild[x])
         .map((e) => `-e ${e}`)
     );
   }
+  Object.entries(customEnvForChild).forEach(([key, val]) => {
+    result.push(`-e ${key}=${val}`);
+  });
 
   if (cwd) {
     result.push(`-w "${cwd}"`);

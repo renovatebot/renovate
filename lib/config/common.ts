@@ -78,6 +78,7 @@ export interface RenovateAdminConfig {
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
 
+  customEnvForChild?: Record<string, string>;
   dockerImagePrefix?: string;
   dockerUser?: string;
 
