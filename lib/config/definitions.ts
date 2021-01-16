@@ -309,6 +309,14 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
+    name: 'customEnvForChild',
+    description:
+      'Custom environment variables for sidecar Docker containers. This configuration will be applied after all other environment variables so that it can be used to override defaults.',
+    admin: true,
+    type: 'object',
+    default: false,
+  },
+  {
     name: 'dockerMapDotfiles',
     description:
       'Map relevant home directory dotfiles into containers when binarySource=docker.',
