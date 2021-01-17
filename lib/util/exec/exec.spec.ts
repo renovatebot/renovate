@@ -541,7 +541,7 @@ describe(`Child process execution wrapper`, () => {
       {
         execConfig: {
           ...execConfig,
-          customEnvForChild: {
+          customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_VALUE',
           },
         },
@@ -566,7 +566,7 @@ describe(`Child process execution wrapper`, () => {
       {
         execConfig: {
           ...execConfig,
-          customEnvForChild: {
+          customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
           },
         },
@@ -592,7 +592,7 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          customEnvForChild: {
+          customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_VALUE',
           },
         },
@@ -624,7 +624,7 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          customEnvForChild: {
+          customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
           },
         },

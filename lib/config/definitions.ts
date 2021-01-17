@@ -309,9 +309,9 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
-    name: 'customEnvForChild',
+    name: 'customEnvVariables',
     description:
-      'Custom environment variables for sidecar Docker containers. This configuration will be applied after all other environment variables so that it can be used to override defaults.',
+      'Custom environment variables for child processes and sidecar Docker containers. This configuration will be applied after all other environment variables so that it can be used to override defaults.',
     admin: true,
     type: 'object',
     default: false,
