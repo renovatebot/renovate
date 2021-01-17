@@ -962,6 +962,28 @@ export async function mergePr(
   return true;
 }
 
+export async function invalidatePr(branchName: string): Promise<void> {
+  const pr: Pr = await getBranchPr(branchName);
+  const prNo = pr?.number;
+  if (prNo) {
+    logger.debug(`Invalidating PR #${prNo}`);
+    const prUpdate = {
+      number: prNo,
+      prTitle: `${pr.title} - autoclosed`,
+      state: PrState.Closed as PrState.Closed,
+      bitbucketInvalidReviewers: undefined,
+    };
+    await updatePr(prUpdate);
+
+    // Even though the PR in the repo has been updated correctly, we need to manually
+    // update the local PR cache in order to create a new PR for this branch
+    const prCacheIndexToDelete = config.prList.findIndex(
+      (prToCheck) => prToCheck.number === prNo
+    );
+    config.prList.splice(prCacheIndexToDelete, 1);
+  }
+}
+
 export function getPrBody(input: string): string {
   logger.debug(`getPrBody(${input.split('\n')[0]})`);
   // Remove any HTML we use

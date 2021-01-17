@@ -17,6 +17,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { platform } from '../../platform';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
@@ -569,33 +570,54 @@ export type CommitFilesConfig = {
   files: File[];
   message: string;
   force?: boolean;
-  shouldUseForcePush: boolean;
+  gitDeleteBeforePush: boolean;
 };
 
 async function pushBranch(
   branchName: string,
   gitDeleteBeforePush: boolean
 ): Promise<void> {
-  if (gitDeleteBeforePush) {
+  if (platform.invalidatePr && gitDeleteBeforePush) {
+    try {
+      await platform.invalidatePr(branchName);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug({ err }, 'PR could not be invalidated or does not exist.');
+    }
+    try {
+      await git.raw('push', 'origin', '--delete', `${branchName}`);
+      logger.debug(`Deleted branch origin/${branchName}.`);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug(
+        { err },
+        `Branch origin/${branchName} could not be deleted or does not exist.`
+      );
+    }
     try {
       await git.push('origin', `${branchName}:${branchName}`, {
-        '--delete': null,
+        '-u': null,
+        '--no-verify': null,
+      });
+      logger.debug(`Pushed branch origin/${branchName}.`);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug({ err }, `Branch origin/${branchName} could not be pushed.`);
+    }
+  } else {
+    try {
+      await git.push('origin', `${branchName}:${branchName}`, {
+        '--force': null,
+        '-u': null,
         '--no-verify': null,
       });
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
-      logger.debug({ err }, 'Branch could not be deleted or does not exist.');
+      logger.debug(
+        { err },
+        `Branch origin/${branchName} could not be force pushed.`
+      );
     }
-    await git.push('origin', `${branchName}:${branchName}`, {
-      '-u': null,
-      '--no-verify': null,
-    });
-  } else {
-    await git.push('origin', `${branchName}:${branchName}`, {
-      '--force': null,
-      '-u': null,
-      '--no-verify': null,
-    });
   }
 }
 export async function commitFiles({

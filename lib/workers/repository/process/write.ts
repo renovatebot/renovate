@@ -47,7 +47,7 @@ export async function writeUpdates(
     const branchExisted = branchExists(branch.branchName);
     const prExisted = await prExists(branch.branchName);
 
-    branch.shouldUseForcePush = config.shouldUseForcePush;
+    branch.gitDeleteBeforePush = config.gitDeleteBeforePush;
 
     const res = await processBranch(branch);
     branch.res = res;
