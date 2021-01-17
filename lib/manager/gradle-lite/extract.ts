@@ -13,6 +13,21 @@ import {
   toAbsolutePath,
 } from './utils';
 
+// Enables reverse sorting in generateBranchConfig()
+//
+// Required for grouped dependencies to be upgraded
+// correctly in single branch.
+//
+// https://github.com/renovatebot/renovate/issues/8224
+function elevateFileReplacePositionField(
+  deps: PackageDependency<ManagerData>[]
+): PackageDependency<ManagerData>[] {
+  return deps.map((dep) => ({
+    ...dep,
+    fileReplacePosition: dep?.managerData?.fileReplacePosition,
+  }));
+}
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
@@ -57,7 +72,7 @@ export async function extractAllPackageFiles(
     return null;
   }
 
-  extractedDeps.forEach((dep) => {
+  elevateFileReplacePositionField(extractedDeps).forEach((dep) => {
     const key = dep.managerData.packageFile;
     const pkgFile: PackageFile = packageFilesByName[key];
     const { deps } = pkgFile;

@@ -4,6 +4,9 @@ import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { PackageDependency } from '../common';
 import {
+  GOOGLE_REPO,
+  JCENTER_REPO,
+  MAVEN_REPO,
   ManagerData,
   PackageVariables,
   StringInterpolation,
@@ -188,7 +191,7 @@ function processPlugin({
   return { deps: [dep] };
 }
 
-function processRegistryUrl({
+function processCustomRegistryUrl({
   tokenMap,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const registryUrl = tokenMap.registryUrl?.value;
@@ -203,6 +206,18 @@ function processRegistryUrl({
     // no-op
   }
   return null;
+}
+
+function processPredefinedRegistryUrl({
+  tokenMap,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const registryName = tokenMap.registryName?.value;
+  const registryUrl = {
+    mavenCentral: MAVEN_REPO,
+    jcenter: JCENTER_REPO,
+    google: GOOGLE_REPO,
+  }[registryName];
+  return { urls: [registryUrl] };
 }
 
 function processLongFormDep({
@@ -240,6 +255,19 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
       { matchType: TokenType.Assignment },
       { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
+  {
+    // set('foo', 'bar')
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'set' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
     handler: handleAssignment,
@@ -297,13 +325,27 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processPlugin,
   },
   {
+    // mavenCentral()
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: ['mavenCentral', 'jcenter', 'google'],
+        tokenMapKey: 'registryName',
+      },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processPredefinedRegistryUrl,
+  },
+  {
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
       { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
       endOfInstruction,
     ],
-    handler: processRegistryUrl,
+    handler: processCustomRegistryUrl,
   },
   {
     // url('https://repo.spring.io/snapshot/')
@@ -314,7 +356,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
-    handler: processRegistryUrl,
+    handler: processCustomRegistryUrl,
   },
   {
     // group: "com.example", name: "my.dependency", version: "1.2.3"
@@ -330,6 +372,26 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.Word, matchValue: 'version' },
       { matchType: TokenType.Colon },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
+    // (group: "com.example", name: "my.dependency", version: "1.2.3")
+    matchers: [
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'group' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'name' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
     handler: processLongFormDep,
