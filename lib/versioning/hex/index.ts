@@ -77,7 +77,8 @@ const getNewValue = ({
   } else if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
     newSemver = newSemver.replace(
       /\^\s*(\d+\.\d+)/,
-      (_str, p1: string) => `~> ${rangeStrategy !== 'bump' ? p1.slice(0, -2) : p1}`
+      (_str, p1: string) =>
+        `~> ${rangeStrategy !== 'bump' ? p1.slice(0, -2) : p1}`
     );
   } else {
     newSemver = newSemver.replace(/~\s*(\d+\.\d+\.\d)/, '~> $1');
