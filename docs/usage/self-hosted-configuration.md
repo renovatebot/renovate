@@ -94,7 +94,7 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer pack
 
 ## customEnvVariables
 
-Custom environment variables for child processes and sidecar Docker containers. This configuration will be applied after all other environment variables so that it can be used to override defaults.
+This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
 ## dockerImagePrefix
 

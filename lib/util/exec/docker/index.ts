@@ -202,7 +202,9 @@ export async function generateDockerCommand(
   if (envVars) {
     result.push(
       ...uniq(envVars)
-        .filter((x) => typeof x === 'string' && !customEnvVariables[x])
+        .filter(
+          (x) => typeof x === 'string' && customEnvVariables[x] === undefined
+        )
         .map((e) => `-e ${e}`)
     );
   }
