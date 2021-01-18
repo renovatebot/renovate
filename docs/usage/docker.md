@@ -209,7 +209,7 @@ module.exports = {
 #### ChartMuseum
 
 Maybe you're running your own ChartMuseum server to host your private Helm Charts.
-Here is how you would connect to a private Helm repository:
+This is how you connect to a private Helm repository:
 
 ```js
 module.exports = {
