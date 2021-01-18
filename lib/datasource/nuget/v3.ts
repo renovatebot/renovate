@@ -165,6 +165,13 @@ export async function getReleases(
     return null;
   }
 
+  // istanbul ignore if: only happens when no stable version exists
+  if (latestStable === null) {
+    const last = catalogEntries.pop();
+    latestStable = removeBuildMeta(last.version);
+    homepage ??= last.projectUrl;
+  }
+
   const dep: ReleaseResult = {
     pkgName,
     releases,
