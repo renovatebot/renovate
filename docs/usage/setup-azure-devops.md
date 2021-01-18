@@ -9,15 +9,15 @@ This document explains how to setup Renovate for use on Azure DevOps.
 
 ## Setting up a new pipeline
 
-Create a brand new pipeline within Azure DevOps, and select your source.
+Create a brand new pipeline within Azure DevOps, and select your source:
 ![Azure DevOps create new pipeline](assets/images/azure-devops-setup-1.png)
 
-Select your repository.
+Then select your repository.
 
-Within _Configure your pipeline_ select: **Starter pipeline file**
+Within _Configure your pipeline_ select: **Starter pipeline**
 ![Azure DevOps starter pipeline template](assets/images/azure-devops-setup-2.png)
 
-Replace all content in the starter pipeline with:
+Replace _all_ content in the starter pipeline with:
 
 ```yaml
 schedules:
@@ -46,18 +46,18 @@ steps:
 
 ## Create a .npmrc file
 
-Add a file named `.npmrc` to your repository with the following contents.
-Note: replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed.
+Create a `.npmrc` file in your repository:
 
 ```json
 registry=https://pkgs.dev.azure.com/YOUR-ORG/_packaging/YOUR-FEED/npm/registry/
 always-auth=true
 ```
 
+Note: replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed.
+
 ## Create a config.js file
 
-Add a file named `config.js` to your repository with the following contents.
-Note: replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository.
+Create a `config.js` file in your repository:
 
 ```javascript
 module.exports = {
@@ -74,6 +74,8 @@ module.exports = {
   repositories: ['YOUR-PROJECT/YOUR-REPO'],
 };
 ```
+
+Note: replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository.
 
 ### Add renovate.json file
 
