@@ -1,3 +1,5 @@
+import URL from 'url';
+
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
@@ -27,7 +29,12 @@ export async function getChangeLogJSON(
 
     let res: ChangeLogResult | null = null;
 
-    if (args.sourceUrl?.includes('gitlab')) {
+    if (
+      args.sourceUrl?.includes('gitlab') ||
+      (args.platform === 'gitlab' &&
+        URL.parse(args.sourceUrl).hostname ===
+          URL.parse(args.endpoint).hostname)
+    ) {
       res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
     } else {
       res = await sourceGithub.getChangeLogJSON({ ...args, releases });
