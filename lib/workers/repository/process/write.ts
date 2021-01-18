@@ -46,9 +46,6 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     const prExisted = await prExists(branch.branchName);
-
-    branch.gitDeleteBeforePush = config.gitDeleteBeforePush;
-
     const res = await processBranch(branch);
     branch.res = res;
     if (

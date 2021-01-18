@@ -48,6 +48,5 @@ export function commitFilesToBranch(
     files: updatedFiles,
     message: config.commitMessage,
     force: !!config.forceCommit,
-    gitDeleteBeforePush: config.gitDeleteBeforePush,
   });
 }

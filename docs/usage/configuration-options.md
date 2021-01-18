@@ -1980,9 +1980,7 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 ## gitDeleteBeforePush
 
-Configure this to `true` to change branch push behavior from using force push to deleting the branch (if it exists) and repushing.
-This is generally reserved for environments where force push has been disabled. This will cause open pull requests for
-the deleted branch to be closed.
+Configure this to `true` to change branch push behavior from using force push to deleting the branch (if it exists) and repushing (Bitbucket-server-only). This is generally reserved for environments where force push has been disabled. This will cause open pull requests for the deleted branch to be removed.
 
 ## stabilityDays
 

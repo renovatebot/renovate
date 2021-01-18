@@ -56,6 +56,5 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
-    gitDeleteBeforePush: config.gitDeleteBeforePush,
   });
 }

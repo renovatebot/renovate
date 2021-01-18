@@ -23,7 +23,6 @@ const buildExpectedCommitFilesArgument = (
     },
   ],
   message,
-  gitDeleteBeforePush: false,
 });
 
 describe('workers/repository/onboarding/branch', () => {

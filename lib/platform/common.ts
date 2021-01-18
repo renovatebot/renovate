@@ -19,6 +19,7 @@ export interface PlatformParams {
   token?: string;
   username?: string;
   password?: string;
+  gitDeleteBeforePush?: boolean;
 }
 
 export interface PlatformResult {
@@ -181,5 +182,5 @@ export interface Platform {
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
-  invalidatePr?(branchName: string);
+  invalidatePr?(branchName: string): Promise<void>;
 }

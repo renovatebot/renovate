@@ -13,6 +13,7 @@ export interface BbsConfig {
   prVersions: Map<number, number>;
   ignorePrAuthor: boolean;
   username: string;
+  gitDeleteBeforePush: boolean;
 }
 
 export interface BbsPr extends Pr {

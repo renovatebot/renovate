@@ -67,6 +67,5 @@ export async function rebaseOnboardingBranch(
       },
     ],
     message: commitMessage,
-    gitDeleteBeforePush: config.gitDeleteBeforePush,
   });
 }

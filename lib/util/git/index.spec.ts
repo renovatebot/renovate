@@ -182,7 +182,6 @@ describe('platform/git', () => {
         branchName: 'renovate/branch_with_changes',
         files: [file],
         message: 'Create something',
-        gitDeleteBeforePush: false,
       });
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes'
@@ -235,7 +234,7 @@ describe('platform/git', () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
   });
-  describe('commitFiles({branchName, files, message, gitDeleteBeforePush})', () => {
+  describe('commitFiles({branchName, files, messages})', () => {
     it('creates file', async () => {
       const file = {
         name: 'some-new-file',
@@ -245,20 +244,6 @@ describe('platform/git', () => {
         branchName: 'renovate/past_branch',
         files: [file],
         message: 'Create something',
-        gitDeleteBeforePush: false,
-      });
-      expect(commit).not.toBeNull();
-    });
-    it('creates file when gitDeleteBeforePush is true', async () => {
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-      const commit = await git.commitFiles({
-        branchName: 'renovate/past_branch',
-        files: [file],
-        message: 'Create something',
-        gitDeleteBeforePush: true,
       });
       expect(commit).not.toBeNull();
     });
@@ -271,7 +256,6 @@ describe('platform/git', () => {
         branchName: 'renovate/something',
         files: [file],
         message: 'Delete something',
-        gitDeleteBeforePush: false,
       });
       expect(commit).not.toBeNull();
     });
@@ -290,7 +274,6 @@ describe('platform/git', () => {
         branchName: 'renovate/something',
         files,
         message: 'Update something',
-        gitDeleteBeforePush: false,
       });
       expect(commit).not.toBeNull();
     });
@@ -305,7 +288,6 @@ describe('platform/git', () => {
         branchName: 'renovate/something',
         files,
         message: 'Update something',
-        gitDeleteBeforePush: false,
       });
       expect(commit).not.toBeNull();
     });
@@ -322,7 +304,6 @@ describe('platform/git', () => {
         branchName,
         files,
         message: 'Update something',
-        gitDeleteBeforePush: false,
       });
       expect(commit).toBeNull();
     });
