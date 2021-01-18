@@ -8,8 +8,8 @@
 $ npm install -g renovate
 ```
 
-Starting from version 20, Renovate does not embed `npm`, `pnpm` and `yarn` anymore.
-If you want to use these package managers to update your lockfiles, you must install them globally.
+Renovate does not embed `npm`, `pnpm` and `yarn` as its own dependencies.
+If you want to use these package managers to update your lockfiles, you must ensure that the correct versions are already installed globally.
 
 ```sh
 $ npm install -g yarn pnpm
