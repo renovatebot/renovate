@@ -62,7 +62,7 @@ function createChildEnv(
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
 
-  let childEnv =
+  const childEnv =
     env || extraEnv
       ? {
           ...extraEnv,
@@ -70,7 +70,6 @@ function createChildEnv(
           ...env,
         }
       : getChildProcessEnv();
-  childEnv = { ...childEnv, ...execConfig.customEnvVariables };
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {
@@ -99,7 +98,8 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker, cwdFile } = opts;
+  const { env, docker, cwdFile } = opts;
+  const extraEnv = { ...opts.extraEnv, ...execConfig.customEnvVariables };
   let cwd;
   // istanbul ignore if
   if (cwdFile) {
