@@ -1,5 +1,13 @@
+import { dir } from 'tmp-promise';
 import { getName } from '../../../test/util';
-import { getSubDirectory, localPathExists, readLocalFile } from '.';
+import {
+  findLocalSiblingOrParent,
+  getSubDirectory,
+  localPathExists,
+  readLocalFile,
+  setFsConfig,
+  writeLocalFile,
+} from '.';
 
 describe(getName(__filename), () => {
   describe('readLocalFile', () => {
@@ -29,6 +37,40 @@ describe(getName(__filename), () => {
       expect(await localPathExists(__filename.replace('.ts', '.txt'))).toBe(
         false
       );
+    });
+  });
+});
+
+describe(getName(__filename), () => {
+  describe('findLocalSiblingOrParent', () => {
+    it('returns path for file', async () => {
+      const localDir = await dir();
+
+      setFsConfig({
+        localDir: localDir.path,
+      });
+
+      await writeLocalFile('crates/one/Cargo.toml', '');
+      await writeLocalFile('Cargo.lock', '');
+
+      expect(
+        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock')
+      ).toBe('Cargo.lock');
+      expect(
+        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock')
+      ).toBeNull();
+
+      await writeLocalFile('crates/one/Cargo.lock', '');
+
+      expect(
+        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock')
+      ).toBe('crates/one/Cargo.lock');
+      expect(await findLocalSiblingOrParent('crates/one', 'Cargo.lock')).toBe(
+        'Cargo.lock'
+      );
+      expect(
+        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock')
+      ).toBeNull();
     });
   });
 });
