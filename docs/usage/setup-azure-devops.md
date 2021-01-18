@@ -48,7 +48,7 @@ steps:
 
 Create a `.npmrc` file in your repository:
 
-```json
+```ini
 registry=https://pkgs.dev.azure.com/YOUR-ORG/_packaging/YOUR-FEED/npm/registry/
 always-auth=true
 ```
