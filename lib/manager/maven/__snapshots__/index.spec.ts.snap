@@ -103,6 +103,7 @@ Array [
         "currentValue": "1.2.3",
         "datasource": "maven",
         "depName": "org.example:quuz",
+        "depType": "test",
         "fileReplacePosition": 2832,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -113,7 +114,7 @@ Array [
         "currentValue": "it's not a version",
         "datasource": "maven",
         "depName": "org.example:quuuz",
-        "fileReplacePosition": 2972,
+        "fileReplacePosition": 2998,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -123,7 +124,7 @@ Array [
         "currentValue": "[1.0.0]",
         "datasource": "maven",
         "depName": "org.example:hard-range",
-        "fileReplacePosition": 3130,
+        "fileReplacePosition": 3156,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -133,7 +134,7 @@ Array [
         "currentValue": "\${profile-placeholder}",
         "datasource": "maven",
         "depName": "org.example:profile-artifact",
-        "fileReplacePosition": 3392,
+        "fileReplacePosition": 3418,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -144,7 +145,7 @@ Array [
         "currentValue": "2.17",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
-        "fileReplacePosition": 3668,
+        "fileReplacePosition": 3694,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
