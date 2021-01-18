@@ -1,4 +1,4 @@
-import { dir } from 'tmp-promise';
+import { withDir } from 'tmp-promise';
 import { getName } from '../../../test/util';
 import {
   findLocalSiblingOrParent,
@@ -44,33 +44,55 @@ describe(getName(__filename), () => {
 describe(getName(__filename), () => {
   describe('findLocalSiblingOrParent', () => {
     it('returns path for file', async () => {
-      const localDir = await dir();
+      await withDir(
+        async (localDir) => {
+          setFsConfig({
+            localDir: localDir.path,
+          });
 
-      setFsConfig({
-        localDir: localDir.path,
-      });
+          await writeLocalFile('crates/one/Cargo.toml', '');
+          await writeLocalFile('Cargo.lock', '');
 
-      await writeLocalFile('crates/one/Cargo.toml', '');
-      await writeLocalFile('Cargo.lock', '');
+          expect(
+            await findLocalSiblingOrParent(
+              'crates/one/Cargo.toml',
+              'Cargo.lock'
+            )
+          ).toBe('Cargo.lock');
+          expect(
+            await findLocalSiblingOrParent(
+              'crates/one/Cargo.toml',
+              'Cargo.mock'
+            )
+          ).toBeNull();
 
-      expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock')
-      ).toBe('Cargo.lock');
-      expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock')
-      ).toBeNull();
+          await writeLocalFile('crates/one/Cargo.lock', '');
 
-      await writeLocalFile('crates/one/Cargo.lock', '');
-
-      expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock')
-      ).toBe('crates/one/Cargo.lock');
-      expect(await findLocalSiblingOrParent('crates/one', 'Cargo.lock')).toBe(
-        'Cargo.lock'
+          expect(
+            await findLocalSiblingOrParent(
+              'crates/one/Cargo.toml',
+              'Cargo.lock'
+            )
+          ).toBe('crates/one/Cargo.lock');
+          expect(
+            await findLocalSiblingOrParent('crates/one', 'Cargo.lock')
+          ).toBe('Cargo.lock');
+          expect(
+            await findLocalSiblingOrParent(
+              'crates/one/Cargo.toml',
+              'Cargo.mock'
+            )
+          ).toBeNull();
+        },
+        {
+          unsafeCleanup: true,
+        }
       );
-      expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock')
-      ).toBeNull();
+    });
+
+    it('immediately returns null when either path is absolute', async () => {
+      expect(await findLocalSiblingOrParent('/etc/hosts', 'other')).toBeNull();
+      expect(await findLocalSiblingOrParent('other', '/etc/hosts')).toBeNull();
     });
   });
 });
