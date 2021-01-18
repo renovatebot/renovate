@@ -53,7 +53,7 @@ registry=https://pkgs.dev.azure.com/YOUR-ORG/_packaging/YOUR-FEED/npm/registry/
 always-auth=true
 ```
 
-Note: replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed.
+In the `registry` variable, replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed.
 
 ## Create a config.js file
 
@@ -75,16 +75,17 @@ module.exports = {
 };
 ```
 
-Note: replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository.
+For the `endpoint` key, replace `YOUR-ORG` with your Azure DevOps organization.
+For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository.
 
 ### Add renovate.json file
 
-Additionally, you can add `renovate.json` with Renovate configurations in the root of the repo.
-[Read more about configuration options](https://docs.renovatebot.com/configuration-options/)
+Additionally, you can create a `renovate.json` file which holds the Renovate configuration, in the root of the repo.
+[Read more about the Renovate configuration options](https://docs.renovatebot.com/configuration-options/)
 
 ### Using a single pipeline to update multiple repositories
 
-If you want to use a single Renovate pipeline to update multiple repositories you need to take the following steps.
+If you want to use a single Renovate pipeline to update multiple repositories you must take the following steps.
 
 Add the names of the repositories to `config.js`.
 Make sure that the "Project Collection Build Service (YOUR-PROJECT)" user has the following permissions on the repositories:
