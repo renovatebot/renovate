@@ -80,6 +80,15 @@ export async function ensureCacheDir(
   return cacheDirName;
 }
 
+/**
+ * Return the path of the private cache directory. This directory is wiped
+ * between repositories, so they can be used to store private registries' index
+ * without risk of that information leaking to other repositories/users.
+ */
+export function privateCacheDir(): string {
+  return join(cacheDir, '__renovate-private-cache');
+}
+
 export function localPathExists(pathName: string): Promise<boolean> {
   // Works for both files as well as directories
   return fs

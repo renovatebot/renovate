@@ -272,8 +272,6 @@ If you had configured debug logging in a file config, then the debug logging sta
 
 Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
 
-Warning: Configuring `logLevel` config option or `--log-level` cli option is deprecated and will be removed in a major version.
-
 ## onboarding
 
 Set this to `false` only if all three statements are true:

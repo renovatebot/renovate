@@ -260,6 +260,19 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: handleAssignment,
   },
   {
+    // set('foo', 'bar')
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'set' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
+  {
     // 'foo.bar:baz:1.2.3'
     matchers: [
       {
@@ -359,6 +372,26 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.Word, matchValue: 'version' },
       { matchType: TokenType.Colon },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
+    // (group: "com.example", name: "my.dependency", version: "1.2.3")
+    matchers: [
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'group' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'name' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
     handler: processLongFormDep,
