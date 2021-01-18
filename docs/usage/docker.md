@@ -199,4 +199,18 @@ module.exports = {
 };
 ```
 
+You might be hosting your own chartmuseum somewhere to manage your private Helm Charts. Here is how you would connect to a private Helm repository :
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      hostName: 'your.host.io',
+      username: '<your-username>',
+      password: 'process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD',
+    },
+  ],
+};
+```
+
 If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`).
