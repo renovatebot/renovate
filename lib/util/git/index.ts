@@ -17,7 +17,6 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
@@ -570,16 +569,25 @@ export type CommitFilesConfig = {
   files: File[];
   message: string;
   force?: boolean;
-  gitDeleteBeforePush: boolean;
 };
 
-async function pushBranch(
-  branchName: string,
-  gitDeleteBeforePush: boolean
-): Promise<void> {
-  if (platform.invalidatePr && gitDeleteBeforePush) {
+let gitDeleteBeforePush: boolean;
+let invalidatePr: (branchName: string) => Promise<void>;
+
+export function setInvalidatePr(
+  method: (branchName: string) => Promise<void>
+): void {
+  invalidatePr = method;
+}
+
+export function setGitDeleteBeforePush(value: boolean): void {
+  gitDeleteBeforePush = value;
+}
+
+async function pushBranch(branchName: string): Promise<void> {
+  if (gitDeleteBeforePush && invalidatePr) {
     try {
-      await platform.invalidatePr(branchName);
+      await invalidatePr(branchName);
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       logger.debug({ err }, 'PR could not be invalidated or does not exist.');
@@ -591,7 +599,7 @@ async function pushBranch(
       checkForPlatformFailure(err);
       logger.debug(
         { err },
-        `Branch origin/${branchName} could not be deleted or does not exist.`
+        `Remote branch ${branchName} could not be deleted or does not exist.`
       );
     }
     try {
@@ -599,10 +607,10 @@ async function pushBranch(
         '-u': null,
         '--no-verify': null,
       });
-      logger.debug(`Pushed branch origin/${branchName}.`);
+      logger.debug(`Pushed remote branch ${branchName}.`);
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
-      logger.debug({ err }, `Branch origin/${branchName} could not be pushed.`);
+      logger.debug({ err }, `Remote branch ${branchName} could not be pushed.`);
     }
   } else {
     try {
@@ -615,7 +623,7 @@ async function pushBranch(
       checkForPlatformFailure(err);
       logger.debug(
         { err },
-        `Branch origin/${branchName} could not be force pushed.`
+        `Remote branch ${branchName} could not be force pushed.`
       );
     }
   }
@@ -625,7 +633,6 @@ export async function commitFiles({
   files,
   message,
   force = false,
-  gitDeleteBeforePush,
 }: CommitFilesConfig): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
@@ -686,7 +693,7 @@ export async function commitFiles({
       );
       return null;
     }
-    await pushBranch(branchName, gitDeleteBeforePush);
+    await pushBranch(branchName);
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
@@ -713,6 +720,7 @@ export async function commitFiles({
       return null;
     }
     logger.debug({ err }, 'Error committing files');
+    debugger;
     throw new Error(REPOSITORY_CHANGED);
   }
 }
