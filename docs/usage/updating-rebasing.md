@@ -24,7 +24,8 @@ If you've edited a Renovate branch but wish for Renovate to take over again, you
 - Tick the refresh checkbox in the PR (if supported by your platform)
 - Rename the PR to start with `rebase!`
 - Add a `rebase` label to the PR
-  Doing so means that any additional commits will be lost once Renovate refreshes the branch.
+
+Doing so means that any additional commits will be lost once Renovate refreshes the branch.
 
 ## Refreshing conflicted PRs
 
