@@ -157,6 +157,28 @@ describe(getName(__filename), () => {
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should return release list for self-hosted gitlab project', async () => {
+      httpMock
+        .scope('https://git.test.com/')
+        .get(
+          '/api/v4/projects/some%2fyet-other-repository/releases?per_page=100'
+        )
+        .reply(200, [
+          { tag_name: `v1.0.0` },
+          {
+            tag_name: `v1.0.1`,
+            body:
+              'some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+      const res = await getReleaseList(
+        'https://git.test.com/api/v4/',
+        'some/yet-other-repository',
+        'gitlab'
+      );
+      expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('getReleaseNotes()', () => {
     it('should return null for release notes without body', async () => {

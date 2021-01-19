@@ -123,6 +123,38 @@ Array [
 ]
 `;
 
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for self-hosted gitlab project 1`] = `
+Array [
+  Object {
+    "body": undefined,
+    "name": undefined,
+    "tag": "v1.0.0",
+    "url": "https://git.test.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0",
+  },
+  Object {
+    "body": undefined,
+    "name": undefined,
+    "tag": "v1.0.1",
+    "url": "https://git.test.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for self-hosted gitlab project 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "git.test.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.test.com/api/v4/projects/some%2fyet-other-repository/releases?per_page=100",
+  },
+]
+`;
+
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 1`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
