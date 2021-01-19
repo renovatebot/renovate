@@ -1,3 +1,4 @@
+import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
@@ -28,9 +29,9 @@ export async function getChangeLogJSON(
     let res: ChangeLogResult | null = null;
 
     if (
-      args.sourceUrl?.includes('gitlab') ||
-      (args.platform === 'gitlab' &&
-        new URL(args.sourceUrl).hostname === new URL(args.endpoint).hostname)
+      (args.platform === PLATFORM_TYPE_GITLAB &&
+        new URL(args.sourceUrl).hostname === new URL(args.endpoint).hostname) ||
+      args.sourceUrl?.includes('gitlab')
     ) {
       res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
     } else {
