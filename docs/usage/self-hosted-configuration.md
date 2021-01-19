@@ -145,6 +145,10 @@ e.g.
 }
 ```
 
+## customEnvVariables
+
+This configuration will be applied after all other environment variables so that it can be used to override defaults.
+
 ## dockerImagePrefix
 
 By default Renovate pulls the sidecar Docker containers from `docker.io/renovate`.

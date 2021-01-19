@@ -7,6 +7,7 @@ import {
   mockExecSequence,
 } from '../../../test/exec-util';
 import { env, getName } from '../../../test/util';
+import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
 import * as extract from './extract';
@@ -20,6 +21,7 @@ const jsonContent = readFileSync(packageFileJson, 'utf8');
 
 const config = {
   localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
 };
 
 jest.mock('child_process');
@@ -40,11 +42,12 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.resetAllMocks();
       jest.resetModules();
       extract.resetModule();
 
+      await setUtilConfig(config);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py
@@ -105,7 +108,7 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(
           'raise Exception()',
-          '/tmp/folders/foobar.py',
+          'folders/foobar.py',
           config
         )
       ).toBeNull();
@@ -117,7 +120,7 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(
           'raise Exception()',
-          '/tmp/folders/foobar.py',
+          'folders/foobar.py',
           config
         )
       ).toBeNull();

@@ -2,7 +2,7 @@ import { quote } from 'shlex';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
-  getSiblingFileName,
+  findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
@@ -64,8 +64,16 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(packageFileName, 'Cargo.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName);
+  // For standalone package crates, the `Cargo.lock` will be in the same
+  // directory as `Cargo.toml` (ie. a sibling). For cargo workspaces, it
+  // will be further up.
+  const lockFileName = await findLocalSiblingOrParent(
+    packageFileName,
+    'Cargo.lock'
+  );
+  const existingLockFileContent = lockFileName
+    ? await readLocalFile(lockFileName)
+    : null;
   if (!existingLockFileContent) {
     logger.debug('No Cargo.lock found');
     return null;
