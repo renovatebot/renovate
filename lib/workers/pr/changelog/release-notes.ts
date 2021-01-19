@@ -21,7 +21,7 @@ markdown.enable(['heading', 'lheading']);
 export async function getReleaseList(
   apiBaseUrl: string,
   repository: string,
-  platform: string
+  platform: string = PLATFORM_TYPE_GITHUB
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   // istanbul ignore if
@@ -47,7 +47,7 @@ export async function getReleaseList(
 export function getCachedReleaseList(
   apiBaseUrl: string,
   repository: string,
-  platform: string
+  platform: string = PLATFORM_TYPE_GITHUB
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
@@ -95,7 +95,7 @@ export async function getReleaseNotes(
   depName: string,
   baseUrl: string,
   apiBaseUrl: string,
-  platform: string
+  platform: string = PLATFORM_TYPE_GITHUB
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
   const releaseList = await getCachedReleaseList(
@@ -176,7 +176,7 @@ function isUrl(url: string): boolean {
 export async function getReleaseNotesMdFileInner(
   repository: string,
   apiBaseUrl: string,
-  platform: string
+  platform: string = PLATFORM_TYPE_GITHUB
 ): Promise<ChangeLogFile> | null {
   try {
     if (platform === PLATFORM_TYPE_GITLAB || apiBaseUrl.includes('gitlab')) {
@@ -196,7 +196,7 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   repository: string,
   apiBaseUrl: string,
-  platform: string
+  platform: string = PLATFORM_TYPE_GITHUB
 ): Promise<ChangeLogFile | null> {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
@@ -218,7 +218,7 @@ export async function getReleaseNotesMd(
   version: string,
   baseUrl: string,
   apiBaseUrl: string,
-  platform: string
+  platform: string = PLATFORM_TYPE_GITHUB
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
