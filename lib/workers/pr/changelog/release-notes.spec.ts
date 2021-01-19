@@ -404,9 +404,7 @@ describe(getName(__filename), () => {
       jest.setTimeout(0);
       httpMock
         .scope('https://git.test.com/api/v4/')
-        .get(
-          '/projects/group%2fproject/repository/tree?per_page=100'
-        )
+        .get('/projects/group%2fproject/repository/tree?per_page=100')
         .reply(200, gitlabTreeResponse)
         .get('/projects/group%2fproject/repository/blobs/abcd/raw')
         .reply(200, gitterWebappChangelogMd);
