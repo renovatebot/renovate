@@ -85,7 +85,7 @@ Currently it is needed/supported for the `helm-requirements` manager only.
 ```json
 {
   "aliases": {
-    "stable": "https://kubernetes-charts.storage.googleapis.com/"
+    "stable": "https://charts.helm.sh/stable"
   }
 }
 ```
@@ -206,6 +206,23 @@ If so then Renovate will reflect this setting in its description and use package
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
 
+## branchConcurrentLimit
+
+By default, Renovate won't enforce any concurrent branch limits. If you want the same limit for both concurrent branches
+and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
+However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (
+e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
+
+This limit is enforced on a per-repository basis.
+
+Example config:
+
+```json
+{
+  "branchConcurrentLimit": 3
+}
+```
+
 ## branchName
 
 Warning: it's strongly recommended not to configure this field directly.
@@ -234,7 +251,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3` and `npm` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 

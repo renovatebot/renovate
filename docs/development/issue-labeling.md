@@ -16,6 +16,22 @@ Most issues should have a label relating to either a platform, manager, datasour
 
 ## Label categories
 
+### Status
+
+<details>
+    <summary>Status of issue</summary>
+
+    status:requirements
+    status:blocked
+    status:ready
+    status:in-progress
+
+</details>
+
+Use these to label the status of an issue.
+For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
+All open issues should have some `status:*` label applied.
+
 ### Type of issue
 
 <details>
@@ -116,6 +132,7 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     help wanted
     reproduced
     reproduction needed
+    duplicate
 
 </details>
 
@@ -126,6 +143,8 @@ Add the label `help wanted` to indicate that we need the original poster or some
 
 Add a label `reproduction needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduced` once there is a public reproduction.
+
+Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 
 ### Self hosted
 
