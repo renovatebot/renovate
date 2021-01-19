@@ -53,7 +53,7 @@ registry=https://pkgs.dev.azure.com/YOUR-ORG/_packaging/YOUR-FEED/npm/registry/
 always-auth=true
 ```
 
-In the `registry` variable, replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed.
+For the `registry` key, replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed.
 
 ## Create a config.js file
 
