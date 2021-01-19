@@ -4,6 +4,10 @@ import { linkify } from 'linkify-markdown';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 
+import {
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../../constants/platforms';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
@@ -16,7 +20,8 @@ markdown.enable(['heading', 'lheading']);
 
 export async function getReleaseList(
   apiBaseUrl: string,
-  repository: string
+  repository: string,
+  platform: string
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   // istanbul ignore if
@@ -25,7 +30,7 @@ export async function getReleaseList(
     return [];
   }
   try {
-    if (apiBaseUrl.includes('gitlab')) {
+    if (platform === PLATFORM_TYPE_GITLAB || apiBaseUrl.includes('gitlab')) {
       return await gitlab.getReleaseList(apiBaseUrl, repository);
     }
     return await github.getReleaseList(apiBaseUrl, repository);
@@ -41,7 +46,8 @@ export async function getReleaseList(
 
 export function getCachedReleaseList(
   apiBaseUrl: string,
-  repository: string
+  repository: string,
+  platform: string
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
@@ -49,7 +55,7 @@ export function getCachedReleaseList(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseList(apiBaseUrl, repository);
+  const promisedRes = getReleaseList(apiBaseUrl, repository, platform);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -88,10 +94,15 @@ export async function getReleaseNotes(
   version: string,
   depName: string,
   baseUrl: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  platform: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
-  const releaseList = await getCachedReleaseList(apiBaseUrl, repository);
+  const releaseList = await getCachedReleaseList(
+    apiBaseUrl,
+    repository,
+    platform
+  );
   logger.trace({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
   releaseList.forEach((release) => {
@@ -103,9 +114,10 @@ export async function getReleaseNotes(
       release.tag === `${depName}@${version}`
     ) {
       releaseNotes = release;
-      releaseNotes.url = baseUrl.includes('gitlab')
-        ? `${baseUrl}${repository}/tags/${release.tag}`
-        : `${baseUrl}${repository}/releases/${release.tag}`;
+      releaseNotes.url =
+        platform === PLATFORM_TYPE_GITLAB || baseUrl.includes('gitlab')
+          ? `${baseUrl}${repository}/tags/${release.tag}`
+          : `${baseUrl}${repository}/releases/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
       if (!releaseNotes.body.length) {
         releaseNotes = null;
@@ -163,10 +175,11 @@ function isUrl(url: string): boolean {
 
 export async function getReleaseNotesMdFileInner(
   repository: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  platform: string
 ): Promise<ChangeLogFile> | null {
   try {
-    if (apiBaseUrl.includes('gitlab')) {
+    if (platform === PLATFORM_TYPE_GITLAB || apiBaseUrl.includes('gitlab')) {
       return await gitlab.getReleaseNotesMd(repository, apiBaseUrl);
     }
     return await github.getReleaseNotesMd(repository, apiBaseUrl);
@@ -182,7 +195,8 @@ export async function getReleaseNotesMdFileInner(
 
 export function getReleaseNotesMdFile(
   repository: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  platform: string
 ): Promise<ChangeLogFile | null> {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
@@ -190,7 +204,11 @@ export function getReleaseNotesMdFile(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseNotesMdFileInner(repository, apiBaseUrl);
+  const promisedRes = getReleaseNotesMdFileInner(
+    repository,
+    apiBaseUrl,
+    platform
+  );
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -199,7 +217,8 @@ export async function getReleaseNotesMd(
   repository: string,
   version: string,
   baseUrl: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  platform: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
@@ -207,7 +226,11 @@ export async function getReleaseNotesMd(
   if (skippedRepos.includes(repository)) {
     return null;
   }
-  const changelog = await getReleaseNotesMdFile(repository, apiBaseUrl);
+  const changelog = await getReleaseNotesMdFile(
+    repository,
+    apiBaseUrl,
+    platform
+  );
   if (!changelog) {
     return null;
   }
@@ -318,7 +341,8 @@ export async function addReleaseNotes(
         repository,
         v.version,
         input.project.baseUrl,
-        input.project.apiBaseUrl
+        input.project.apiBaseUrl,
+        input.project.github ? PLATFORM_TYPE_GITHUB : PLATFORM_TYPE_GITLAB
       );
       // istanbul ignore else: should be tested
       if (!releaseNotes) {
@@ -327,7 +351,8 @@ export async function addReleaseNotes(
           v.version,
           input.project.depName,
           input.project.baseUrl,
-          input.project.apiBaseUrl
+          input.project.apiBaseUrl,
+          input.project.github ? PLATFORM_TYPE_GITHUB : PLATFORM_TYPE_GITLAB
         );
       }
       // Small hack to force display of release notes when there is a compare url
