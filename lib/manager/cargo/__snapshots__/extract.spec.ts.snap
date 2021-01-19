@@ -437,6 +437,116 @@ Array [
 ]
 `;
 
+exports[`lib/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config (legacy path) 1`] = `
+Array [
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "registryUrls": Array [
+      "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
+    ],
+  },
+  Object {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "registryUrls": Array [
+      "https://github.com/mcorbin/testregistry",
+    ],
+  },
+  Object {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+]
+`;
+
+exports[`lib/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config.toml 1`] = `
+Array [
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "registryUrls": Array [
+      "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
+    ],
+  },
+  Object {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "registryUrls": Array [
+      "https://github.com/mcorbin/testregistry",
+    ],
+  },
+  Object {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+]
+`;
+
+exports[`lib/manager/cargo/extract extractPackageFile() fails to parse cargo config with invalid TOML 1`] = `
+Array [
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
+  },
+  Object {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
+  },
+  Object {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+]
+`;
+
 exports[`lib/manager/cargo/extract extractPackageFile() handles inline tables 1`] = `
 Array [
   Object {
@@ -580,6 +690,55 @@ Array [
       "nestedVersion": false,
     },
     "skipReason": "invalid-dependency-specification",
+  },
+]
+`;
+
+exports[`lib/manager/cargo/extract extractPackageFile() ignore cargo config registries with missing index 1`] = `
+Array [
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
+  },
+  Object {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
+  },
+  Object {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+]
+`;
+
+exports[`lib/manager/cargo/extract extractPackageFile() skips unknown registries 1`] = `
+Array [
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "foobar",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
   },
 ]
 `;

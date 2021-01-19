@@ -165,6 +165,11 @@ If you want Renovate to commit directly to your base branch without opening a PR
 
 ### Registry authentication
 
+There are many different registries, and many ways to authenticate to those registries.
+We will explain how to authenticate for the most common registries.
+
+#### DockerHub
+
 Here is an example of configuring a default Docker username/password in `config.js`.
 The Docker Hub password is stored in a process environment variable.
 
@@ -182,6 +187,8 @@ module.exports = {
 
 You can add additional host rules, read the [hostrules documentation](https://docs.renovatebot.com/configuration-options/#hostrules) for more information.
 
+#### Self-hosted Docker registry
+
 Say you host some Docker images yourself, and use a password to access your self-hosted Docker images.
 In addition to self-hosting, you also pull images from Docker Hub, without a password.
 In this example you would configure a specific Docker host like this:
@@ -194,6 +201,23 @@ module.exports = {
       hostName: 'your.host.io',
       username: '<your-username>',
       password: 'process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD',
+    },
+  ],
+};
+```
+
+#### ChartMuseum
+
+Maybe you're running your own ChartMuseum server to host your private Helm Charts.
+This is how you connect to a private Helm repository:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      hostName: 'your.host.io',
+      username: '<your-username>',
+      password: 'process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD',
     },
   ],
 };

@@ -13,6 +13,7 @@ interface ReleasesConfigBase {
   constraints?: Record<string, string>;
   npmrc?: string;
   registryUrls?: string[];
+  trustLevel?: 'low' | 'high';
 }
 
 export interface GetReleasesConfig extends ReleasesConfigBase {
