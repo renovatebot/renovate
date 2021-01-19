@@ -38,6 +38,25 @@ Object {
 }
 `;
 
+exports[`workers/pr/changelog/release-notes addReleaseNotes() returns ChangeLogResult without release notes from self-hosted gitlab instance 1`] = `
+Object {
+  "a": 1,
+  "hasReleaseNotes": false,
+  "project": Object {
+    "gitlab": "https://git.test.com/group/project/",
+  },
+  "versions": Array [
+    Object {
+      "compare": Object {
+        "url": "",
+      },
+      "releaseNotes": null,
+      "version": "20.26.0",
+    },
+  ],
+}
+`;
+
 exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for github repo 1`] = `
 Array [
   Object {

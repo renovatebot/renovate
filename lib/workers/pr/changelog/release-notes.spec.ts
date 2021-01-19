@@ -102,6 +102,14 @@ describe(getName(__filename), () => {
       };
       expect(await addReleaseNotes(input as never)).toMatchSnapshot();
     });
+    it('returns ChangeLogResult without release notes from self-hosted gitlab instance', async () => {
+      const input = {
+        a: 1,
+        project: { gitlab: 'https://git.test.com/group/project/' },
+        versions: [{ version: '20.26.0', compare: { url: '' } }],
+      };
+      expect(await addReleaseNotes(input as never)).toMatchSnapshot();
+    });
   });
   describe('getReleaseList()', () => {
     it('should return empty array if no apiBaseUrl', async () => {
