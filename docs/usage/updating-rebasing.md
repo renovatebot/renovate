@@ -20,10 +20,11 @@ Here is a list of the most common cases where Renovate must refresh the branch:
 
 Renovate _won't_ refresh a branch automatically if it thinks another account has added or force-pushed commits to it.
 If you've edited a Renovate branch but wish for Renovate to take over again, you can either:
- * Tick the refresh checkbox in the PR (if supported by your platform)
- * Rename the PR to start with `rebase!`
- * Add a `rebase` label to the PR
-Doing so means that any additional commits will be lost once Renovate refreshes the branch.
+
+- Tick the refresh checkbox in the PR (if supported by your platform)
+- Rename the PR to start with `rebase!`
+- Add a `rebase` label to the PR
+  Doing so means that any additional commits will be lost once Renovate refreshes the branch.
 
 ## Refreshing conflicted PRs
 
