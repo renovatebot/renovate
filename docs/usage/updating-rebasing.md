@@ -5,7 +5,8 @@ description: How Renovate refreshes branches
 
 # Refreshing branches
 
-There are many situations in which Renovate must refresh a branch.
+In Renovate terminology, _refreshing_ a branch means Renovate will re-apply all dependency updates in the branch on top of the latest commit from the base branch (e.g. `main`/`master`).
+There are many situations in which Renovate might refresh a branch.
 
 Here is a list of the most common cases where Renovate must refresh the branch:
 
@@ -17,9 +18,12 @@ Here is a list of the most common cases where Renovate must refresh the branch:
 
 ## If you made edits to a Renovate branch
 
-First of all, here is the one time when Renovate _won't_ refresh branches.
-If you edit a Renovate branch directly (e.g. to make a code fix to allow tests to pass again) then Renovate stops all updates of that branch.
-It is up to you to either finish the job and merge the PR, or rename it and close it so that Renovate can take back over again.
+Renovate _won't_ refresh a branch automatically if it thinks another account has added or force-pushed commits to it.
+If you've edited a Renovate branch but wish for Renovate to take over again, you can either:
+ * Tick the refresh checkbox in the PR (if supported by your platform)
+ * Rename the PR to start with `rebase!`
+ * Add a `rebase` label to the PR
+Doing so means that any additional commits will be lost once Renovate refreshes the branch.
 
 ## Refreshing conflicted PRs
 
@@ -39,7 +43,7 @@ In that case Renovate PRs will be continuously refreshed off the repository's ba
 
 ## Newer dependency versions
 
-If you have a existing PR to upgrade dependency "foo" to 1.1.0, and later 1.1.1 is released, then Renovate will regenerate the branch.
+If you have an existing PR but even newer versions exist of a dependency in the PR then Renovate will refresh the branch to apply the newer version.
 This way:
 
 - Each Renovate branch always has 1 and only 1 commit
@@ -48,6 +52,8 @@ This way:
 ## Manual refresh
 
 You can request that Renovate refresh a PR by ticking the refresh checkbox on GitHub or Gitlab.
+
+You can instead request a PR refresh by renaming the PR title to begin with `refresh!`.
 Or you can add a "refresh" label to the PR.
 The label name is configurable via the `refreshLabel` option.
 
