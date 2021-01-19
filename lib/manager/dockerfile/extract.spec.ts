@@ -6,6 +6,11 @@ const d1 = readFileSync(
   'utf8'
 );
 
+const d2 = readFileSync(
+  'lib/manager/dockerfile/__fixtures__/Dockerfile2',
+  'utf8'
+);
+
 describe('lib/manager/dockerfile/extract', () => {
   describe('extractPackageFile()', () => {
     it('handles no FROM', () => {
@@ -141,6 +146,11 @@ describe('lib/manager/dockerfile/extract', () => {
       const res = extractPackageFile(d1).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
+    });
+    it('extracts images from all sorts of (maybe multiline) FROM and COPY --from statements', () => {
+      const res = extractPackageFile(d2).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(11);
     });
     it('handles calico/node', () => {
       const res = extractPackageFile('FROM calico/node\n').deps;
