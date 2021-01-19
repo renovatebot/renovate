@@ -84,7 +84,7 @@ export async function parseConfigs(
   // istanbul ignore if
   if (config.logLevel) {
     logger.warn(
-      'Configuring logLevel is deprecated. Use LOG_LEVEL environment variable instead'
+      'Configuring logLevel in CLI or file is deprecated. Use LOG_LEVEL environment variable instead'
     );
     levels('stdout', config.logLevel);
   }
