@@ -39,7 +39,7 @@ In that case Renovate PRs will be continuously refreshed off the repository's ba
 
 ## Newer dependency versions
 
-If you have a exiting PR to upgrade dependency "foo" to 1.1.0, and later 1.1.1 is released, then Renovate will regenerate the branch.
+If you have a existing PR to upgrade dependency "foo" to 1.1.0, and later 1.1.1 is released, then Renovate will regenerate the branch.
 This way:
 
 - Each Renovate branch always has 1 and only 1 commit
