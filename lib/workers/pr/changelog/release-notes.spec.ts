@@ -248,6 +248,33 @@ describe(getName(__filename), () => {
       }
     );
     it.each([[''], ['v'], ['other-']])(
+      'gets release notes with body from self-hosted gitlab repo %s',
+      async (prefix) => {
+        httpMock
+          .scope('https://git.test.com/api/v4/')
+          .get('/projects/some%2fother-repository/releases?per_page=100')
+          .reply(200, [
+            { tag_name: `${prefix}1.0.0` },
+            {
+              tag_name: `${prefix}1.0.1`,
+              body:
+                'some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)',
+            },
+          ]);
+
+        const res = await getReleaseNotes(
+          'some/other-repository',
+          '1.0.1',
+          'other',
+          'https://git.test.com/',
+          'https://git.test.com/api/v4/',
+          'gitlab'
+        );
+        expect(res).toMatchSnapshot();
+        expect(httpMock.getTrace()).toMatchSnapshot();
+      }
+    );
+    it.each([[''], ['v'], ['other-']])(
       'gets null from repository without gitlab/github in domain %s',
       async (prefix) => {
         const res = await getReleaseNotes(
