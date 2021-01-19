@@ -92,11 +92,17 @@ If you configure this to be different to the `baseDir`, it means you can have on
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
 
+## customEnvVariables
+
+This configuration will be applied after all other environment variables so that it can be used to override defaults.
+
 ## dockerChildPrefix
 
 Override the default renovate sidecar Docker containers name prefix from `renovate_` to a custom value, so renovate will name and label images from a custom prefix.
 
 If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_renovate_node` instead of currently used `renovate_renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
+
+Note that dangling containers will not be removed until Renovate is run with the same prefix again.
 
 ## dockerImagePrefix
 
@@ -173,6 +179,8 @@ It's recommended to run at debug level if you can, and configure it using the en
 By configuring using the environment it means that debug logging starts from the beginning of the app, while if you configure it using file config then the debug logging can only start after the file config is parsed.
 
 Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
+
+Warning: Configuring `logLevel` config option or `--log-level` cli option is deprecated and will be removed in a major version.
 
 ## onboarding
 

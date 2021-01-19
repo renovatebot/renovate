@@ -309,6 +309,14 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
+    name: 'customEnvVariables',
+    description:
+      'Custom environment variables for child processes and sidecar Docker containers.',
+    admin: true,
+    type: 'object',
+    default: false,
+  },
+  {
     name: 'dockerChildPrefix',
     description:
       'Change this value in order to override the default renovate docker sidecar container name and label prefix.',
@@ -350,12 +358,10 @@ const options: RenovateOptions[] = [
   // Log options
   {
     name: 'logLevel',
-    description: 'Logging level',
+    description: 'Logging level. Deprecated, use `LOG_LEVEL` environment.',
     stage: 'global',
     type: 'string',
     allowedValues: ['fatal', 'error', 'warn', 'info', 'debug', 'trace'],
-    default: 'info',
-    env: 'LOG_LEVEL',
   },
   {
     name: 'logFile',

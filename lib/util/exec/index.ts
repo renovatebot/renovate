@@ -21,6 +21,7 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
+  customEnvVariables: null,
   dockerImagePrefix: null,
   dockerChildPrefix: null,
   dockerUser: null,
@@ -63,14 +64,11 @@ function createChildEnv(
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
 
-  const childEnv =
-    env || extraEnv
-      ? {
-          ...extraEnv,
-          ...getChildProcessEnv(extraEnvKeys),
-          ...env,
-        }
-      : getChildProcessEnv();
+  const childEnv = {
+    ...extraEnv,
+    ...getChildProcessEnv(extraEnvKeys),
+    ...env,
+  };
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {
@@ -99,7 +97,8 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker, cwdFile } = opts;
+  const { env, docker, cwdFile } = opts;
+  const extraEnv = { ...opts.extraEnv, ...execConfig.customEnvVariables };
   let cwd;
   // istanbul ignore if
   if (cwdFile) {

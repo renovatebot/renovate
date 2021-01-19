@@ -567,6 +567,120 @@ describe(`Child process execution wrapper`, () => {
         ],
       },
     ],
+
+    [
+      'Custom environment variables for child',
+      {
+        execConfig: {
+          ...execConfig,
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_VALUE',
+          },
+        },
+        processEnv: envMock.basic,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
+
+    [
+      'Custom environment variables for child should override',
+      {
+        execConfig: {
+          ...execConfig,
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+        },
+        processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
+
+    [
+      'Custom environment variables for child (Docker)',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_VALUE',
+          },
+        },
+        processEnv,
+        inCmd,
+        inOpts: { docker, cwd },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
+
+    [
+      'Custom environment variables for child should override (Docker)',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+        },
+        processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
+        inCmd,
+        inOpts: { docker, cwd },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
   ];
 
   test.each(testInputs)('%s', async (_msg, testOpts) => {

@@ -1,3 +1,5 @@
+version := "1.0"
+
 scalaVersion := "2.9.10"
 
 // libraryDependencies += "org.example" % "foo" % "0.0.0"
