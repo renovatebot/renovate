@@ -20,7 +20,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { writePrivateKey } from './private-key';
+import { configSigningKey, writePrivateKey } from './private-key';
 
 export * from './private-key';
 
@@ -580,9 +580,10 @@ export async function commitFiles({
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
-    await writePrivateKey(config.localDir);
+    await writePrivateKey();
     privateKeySet = true;
   }
+  await configSigningKey(config.localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
