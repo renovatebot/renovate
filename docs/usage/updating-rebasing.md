@@ -1,19 +1,22 @@
 ---
-title: Updating and Recreating branches
-description: How Renovate Updates and Recreates branches
+title: Updating and Rebasing branches
+description: How Renovate Updates and Rebases branches
 ---
 
-# Updating and Recreating branches
+# Updating and Rebasing branches
 
-There are many situations in which Renovate must update/recreate a branch.
+There are many situations in which Renovate must update/rebase a branch.
 
-Here is a list of the most common cases where Renovate must update/recreate the branch:
+Here is a list of the most common cases where Renovate must update/rebase the branch:
 
 - When a pull request has conflicts due to changes on the base branch
 - When you have enabled "Require branches to be up to date before merging" on GitHub
-- When you have manually told Renovate to recreate the branch when it gets behind the base branch with `"recreateWhen": "behind-base-branch"`
+- When you have manually told Renovate to rebase when behind the base branch with `"rebaseWhen": "behind-base-branch"`
 - When a newer version of the dependency is released
-- When you request Renovate bot to recreate the branch
+- When you request a manual rebase from the Renovate bot
+
+Renovate uses its own version of "rebasing", which is _not the same_ as doing a `git rebase` with Git.
+Instead of doing a `git rebase`, Renovate manually recreates the PR commit based off of the latest commit in the base branch.
 
 ## If you made edits to a Renovate branch
 
@@ -21,21 +24,21 @@ First of all, here is the one time when Renovate _won't_ update branches.
 If you edit a Renovate branch directly (e.g. to make a code fix to allow tests to pass again) then Renovate stops all updates of that branch.
 It is up to you to either finish the job and merge the PR, or rename it and close it so that Renovate can take back over again.
 
-## Recreating conflicted PRs
+## Rebasing conflicted PRs
 
-If new commits to the base branch - such as merging another Renovate PR - result in an open Renovate PR having merge conflicts, then Renovate will recreate any conflicted PRs.
+If new commits to the base branch - such as merging another Renovate PR - result in an open Renovate PR having merge conflicts, then Renovate will recreate ("rebase") any conflicted PRs.
 This applies both to commits to dependency files such as `package.json` as well as lock files such as `yarn.lock`.
 You should not ever need to resolve such conflicts manually.
-You can disable this functionality by configuring `"recreateWhen": "never"` (not recommended).
+You can disable this functionality by configuring `"rebaseWhen": "never"` (not recommended).
 
-## Recreating out-of-date branches
+## Rebasing out-of-date branches
 
-There are two cases where Renovate will recreate its branches off the base branch every time they are out of date:
+There are two cases where Renovate will rebase its branches off the base branch every time they are out of date:
 
-1. If you manually configure `"recreateWhen": "behind-base-branch"`
-1. If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings, and `recreateWhen` has default value `"auto"`
+1. If you manually configure `"rebaseWhen": "behind-base-branch"`
+1. If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings, and `rebaseWhen` has default value `"auto"`
 
-In that case Renovate PRs will be continuously recreated off the repository's base branch whenever necessary, even if the PRs are not conflicted.
+In that case Renovate PRs will be continuously rebased off the repository's base branch whenever necessary, even if the PRs are not conflicted.
 
 ## Newer dependency versions
 
@@ -45,15 +48,15 @@ This way:
 - Each Renovate branch always has 1 and only 1 commit
 - The newest version will be based off the latest base branch commit at the time
 
-## Manual branch recreation
+## Manual rebasing
 
-You can request that Renovate recreate a PR by ticking the recreate/retry checkbox on GitHub or Gitlab.
-Or you can add a "recreate" label to the PR.
-The label name is configurable via the `recreateLabel` option.
+You can request that Renovate rebase a PR by ticking the rebase/retry checkbox on GitHub or Gitlab.
+Or you can add a "rebase" label to the PR.
+The label name is configurable via the `rebaseLabel` option.
 
-If you apply a recreate label then Renovate will regenerate its commit for the branch, even if the branch has been modified.
+If you apply a rebase label then Renovate will regenerate its commit for the branch, even if the branch has been modified.
 Therefore it is useful in situations such as:
 
-- If a branch is stale but you don't have `recreateWhen=behind-base-branch` enabled
+- If a branch is stale but you don't have `rebaseWhen=behind-base-branch` enabled
 - If a branch has been edited and you want to discard the edits and have Renovate create it again
 - If a branch was created with an error (e.g. lockfile generation) and you want Renovate to try again
