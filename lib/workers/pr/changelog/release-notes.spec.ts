@@ -343,6 +343,27 @@ describe(getName(__filename), () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
+    it('parses self-hosted gitlab git.test.com/group/project', async () => {
+      jest.setTimeout(0);
+      httpMock
+        .scope('https://git.test.com/api/v4/')
+        .get(
+          '/projects/group%2fproject/repository/tree?per_page=100'
+        )
+        .reply(200, gitlabTreeResponse)
+        .get('/projects/group%2fproject/repository/blobs/abcd/raw')
+        .reply(200, gitterWebappChangelogMd);
+      const res = await getReleaseNotesMd(
+        'group/project',
+        '20.26.0',
+        'https://git.test.com/',
+        'https://git.test.com/api/v4/',
+        'gitlab'
+      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
     it('parses jest', async () => {
       httpMock
         .scope('https://api.github.com')
