@@ -2519,10 +2519,10 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.11.0.tgz#d61f46d83b2519250e2784daf5b09479a8b41c59"
   integrity sha512-xh1Rl34h6Fi1DC2WWKfxUTVqRsNnr6LsKz2+hfwDxQJWmrx8+c7ylaqBMcHfl1U1r2dsifOvKX3LQuLNZ+XSvA==
 
-azure-devops-node-api@10.2.0:
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/azure-devops-node-api/-/azure-devops-node-api-10.2.0.tgz#3faea4ac40bb62e554ec5174a8cc6d19cc36ae73"
-  integrity sha512-5yXGb0kBszCiLw1qZNtS/y3EqGI/nVtkndX5n9qsdU26pJjFwyg9pAOjixni34R+IX4u243p34oXQwXaKbyD8g==
+azure-devops-node-api@10.2.1:
+  version "10.2.1"
+  resolved "https://registry.yarnpkg.com/azure-devops-node-api/-/azure-devops-node-api-10.2.1.tgz#835080164f8c30cec6506c47198b044c053f1f36"
+  integrity sha512-XuSiUaYpk0tQpd9fD8qfRa5y1IdavupKNVmwxy0w/RhmxG2Wl8uAYnNJchUoWd3Rn9On0mYTCCZSn+UlYdYFSg==
   dependencies:
     tunnel "0.0.6"
     typed-rest-client "^1.8.0"
