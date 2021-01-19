@@ -20,6 +20,7 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
+  customEnvVariables: null,
   dockerImagePrefix: null,
   dockerUser: null,
   localDir: null,
@@ -97,7 +98,8 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker, cwdFile } = opts;
+  const { env, docker, cwdFile } = opts;
+  const extraEnv = { ...opts.extraEnv, ...execConfig.customEnvVariables };
   let cwd;
   // istanbul ignore if
   if (cwdFile) {
