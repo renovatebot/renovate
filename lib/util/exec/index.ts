@@ -62,14 +62,11 @@ function createChildEnv(
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
 
-  const childEnv =
-    env || extraEnv
-      ? {
-          ...extraEnv,
-          ...getChildProcessEnv(extraEnvKeys),
-          ...env,
-        }
-      : getChildProcessEnv();
+  const childEnv = {
+    ...extraEnv,
+    ...getChildProcessEnv(extraEnvKeys),
+    ...env,
+  };
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {
