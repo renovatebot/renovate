@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
@@ -149,17 +148,14 @@ async function mergeRegistries(
 
 function resolveRegistryUrls(
   datasource: Datasource,
-  extractedUrls: string[]
+  extractedUrls: string[] = []
 ): string[] {
   const { defaultRegistryUrls = [], appendRegistryUrls = [] } = datasource;
-  const customUrls = extractedUrls?.filter(Boolean);
-  let registryUrls: string[];
-  if (is.nonEmptyArray(customUrls)) {
-    registryUrls = [...extractedUrls, ...appendRegistryUrls];
-  } else {
-    registryUrls = [...defaultRegistryUrls, ...appendRegistryUrls];
-  }
-  return registryUrls.filter(Boolean);
+  return [
+    ...defaultRegistryUrls,
+    ...extractedUrls,
+    ...appendRegistryUrls,
+  ].filter(Boolean);
 }
 
 async function fetchReleases(
