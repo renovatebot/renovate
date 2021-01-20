@@ -285,7 +285,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  2`] = `
 Array [
@@ -302,7 +309,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "other-1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/other-1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 2`] = `
 Array [
@@ -319,7 +333,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "v1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/v1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 2`] = `
 Array [
@@ -336,7 +357,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo  1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo  1`] = `
+Object {
+  "body": "some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "1.0.1",
+  "url": "https://git.test.com/some/other-repository/tags/1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo  2`] = `
 Array [
@@ -353,7 +381,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo other- 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo other- 1`] = `
+Object {
+  "body": "some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "other-1.0.1",
+  "url": "https://git.test.com/some/other-repository/tags/other-1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo other- 2`] = `
 Array [
@@ -370,7 +405,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo v 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo v 1`] = `
+Object {
+  "body": "some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "v1.0.1",
+  "url": "https://git.test.com/some/other-repository/tags/v1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo v 2`] = `
 Array [
