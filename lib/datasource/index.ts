@@ -152,10 +152,12 @@ function resolveRegistryUrls(
 ): string[] {
   const { defaultRegistryUrls = [], appendRegistryUrls = [] } = datasource;
   return [
-    ...defaultRegistryUrls,
-    ...extractedUrls,
-    ...appendRegistryUrls,
-  ].filter(Boolean);
+    ...new Set(
+      [...defaultRegistryUrls, ...extractedUrls, ...appendRegistryUrls].filter(
+        Boolean
+      )
+    ),
+  ];
 }
 
 async function fetchReleases(
