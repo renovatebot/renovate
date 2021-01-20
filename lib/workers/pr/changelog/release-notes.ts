@@ -47,7 +47,7 @@ export async function getReleaseList(
 export function getCachedReleaseList(
   apiBaseUrl: string,
   repository: string,
-  platform: string = PLATFORM_TYPE_GITHUB
+  platform: string
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
@@ -176,7 +176,7 @@ function isUrl(url: string): boolean {
 export async function getReleaseNotesMdFileInner(
   repository: string,
   apiBaseUrl: string,
-  platform: string = PLATFORM_TYPE_GITHUB
+  platform: string
 ): Promise<ChangeLogFile> | null {
   try {
     if (platform === PLATFORM_TYPE_GITLAB || apiBaseUrl.includes('gitlab')) {
@@ -196,7 +196,7 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   repository: string,
   apiBaseUrl: string,
-  platform: string = PLATFORM_TYPE_GITHUB
+  platform: string
 ): Promise<ChangeLogFile | null> {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
