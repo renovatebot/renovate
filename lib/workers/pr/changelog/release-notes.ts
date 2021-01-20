@@ -123,7 +123,12 @@ export async function getReleaseNotes(
         releaseNotes = null;
       } else {
         try {
-          if (baseUrl !== 'https://gitlab.com/') {
+          // do not linkify if we have a gitlab repository, as currently
+          // linkify-markdown does not correctly extract gitlab repository urls
+          if (
+            platform !== PLATFORM_TYPE_GITLAB &&
+            !baseUrl.includes('gitlab')
+          ) {
             releaseNotes.body = linkify(releaseNotes.body, {
               repository: `${baseUrl}${repository}`,
             });
