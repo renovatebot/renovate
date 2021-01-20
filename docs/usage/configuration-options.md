@@ -165,7 +165,9 @@ Example use:
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
 
 Automerging defaults to using Pull Requests (`automergeType="pr"`).
-In that case Renovate first creates a branch, then an associated Pull Request, and then automerges the first time it detects that the Pull Requests status checks are "green".
+In that case Renovate first creates a branch and associated Pull Request, and then automerges the PR on a subsequent run once it detects the PR's status checks are "green".
+If by the next run the PR is already behind master branch then it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
+If Renovate is scheduled for hourly runs on the repository but commits are made every 15 minutes to the main branch, then an automerge like this will keep getting deferred with every rebase.
 
 Note: if you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
 
