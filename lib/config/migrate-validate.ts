@@ -38,7 +38,6 @@ export async function migrateAndValidate(
     }
     massagedConfig.errors = (config.errors || []).concat(errors);
     if (!config.repoIsOnboarded) {
-      // TODO #556 - enable warnings in real PRs
       massagedConfig.warnings = (config.warnings || []).concat(warnings);
     }
     return massagedConfig;
