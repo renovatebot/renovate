@@ -75,7 +75,6 @@ export interface DatasourceApi {
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   defaultRegistryUrls?: string[];
-  appendRegistryUrls?: string[];
   defaultConfig?: Record<string, unknown>;
   registryStrategy?: 'first' | 'hunt' | 'merge';
 }
