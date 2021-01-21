@@ -14,6 +14,14 @@ npm.getPreset = jest.fn((_) => null);
 const ignoredPresets = ['default:group', 'default:timezone'];
 
 describe('config/presets/internal', () => {
+  it('fails for undefined internal preset', async () => {
+    const preset = 'foo:bar';
+    const presetConfig = { extends: [preset] };
+    await expect(resolveConfigPresets(presetConfig)).rejects.toThrow(
+      'config-validation'
+    );
+  });
+
   for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
     for (const [presetName, presetConfig] of Object.entries(groupPresets)) {
       const preset = `${groupName}:${presetName}`;

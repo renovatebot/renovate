@@ -150,7 +150,6 @@ export async function getPreset(
     presetName,
     baseConfig,
   });
-  // istanbul ignore if
   if (!presetConfig) {
     throw new Error('dep not found');
   }
