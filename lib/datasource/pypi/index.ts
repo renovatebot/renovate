@@ -4,7 +4,6 @@ import { logger } from '../../logger';
 import { parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
-import { matches } from '../../versioning/pep440';
 import * as pep440 from '../../versioning/pep440';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
@@ -12,6 +11,7 @@ export const id = 'pypi';
 export const defaultRegistryUrls = [
   process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/',
 ];
+export const defaultVersioning = pep440.id;
 export const registryStrategy = 'merge';
 
 const githubRepoPattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
@@ -50,7 +50,7 @@ function compatibleVersions(
       if (!release.requires_python) {
         return true;
       }
-      return matches(constraints.python, release.requires_python);
+      return pep440.matches(constraints.python, release.requires_python);
     })
   );
 }

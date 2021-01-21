@@ -1,9 +1,11 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
+import * as hexVersioning from '../../versioning/hex';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'hex';
+export const defaultVersioning = hexVersioning.id;
 
 const http = new Http(id);
 

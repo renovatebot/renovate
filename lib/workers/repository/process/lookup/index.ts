@@ -5,6 +5,7 @@ import {
 } from '../../../../config';
 import {
   Release,
+  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   isGetPkgReleasesConfig,
@@ -139,7 +140,10 @@ export async function lookupUpdates(
   let config: LookupUpdateConfig = { ...inconfig };
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = allVersioning.get(config.versioning);
+  // Use the datasource's default versioning if none is configured
+  const version = allVersioning.get(
+    config.versioning || getDefaultVersioning(config.datasource)
+  );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
   const isValid = currentValue && version.isValid(currentValue);
