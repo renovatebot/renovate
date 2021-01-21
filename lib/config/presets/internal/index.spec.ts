@@ -1,4 +1,5 @@
 import { mocked } from '../../../../test/util';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { massageConfig } from '../../massage';
 import { validateConfig } from '../../validation';
 import { resolveConfigPresets } from '../index';
@@ -18,7 +19,7 @@ describe('config/presets/internal', () => {
     const preset = 'foo:bar';
     const presetConfig = { extends: [preset] };
     await expect(resolveConfigPresets(presetConfig)).rejects.toThrow(
-      'config-validation'
+      CONFIG_VALIDATION
     );
   });
 
