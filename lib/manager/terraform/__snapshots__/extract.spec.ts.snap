@@ -10,7 +10,7 @@ Object {
       "depNameShort": "redis",
       "depType": "helm",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com",
+        "https://charts.helm.sh/stable",
       ],
     },
     Object {
@@ -19,7 +19,7 @@ Object {
       "depNameShort": "redis",
       "depType": "helm",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com",
+        "https://charts.helm.sh/stable",
       ],
     },
     Object {
@@ -39,7 +39,7 @@ Object {
       "depNameShort": undefined,
       "depType": "helm",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com",
+        "https://charts.helm.sh/stable",
       ],
       "skipReason": "invalid-name",
     },
@@ -50,7 +50,7 @@ Object {
       "depNameShort": "redis",
       "depType": "helm",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com",
+        "https://charts.helm.sh/stable",
       ],
     },
     Object {

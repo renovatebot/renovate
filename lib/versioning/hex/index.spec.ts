@@ -128,7 +128,15 @@ describe('lib/versioning/hex', () => {
           fromVersion: '1.2.3',
           toVersion: '2.0.7',
         })
-      ).toEqual('~> 2');
+      ).toEqual('~> 2.0');
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '~> 1.2',
+          rangeStrategy: 'bump',
+          fromVersion: '1.2.3',
+          toVersion: '1.3.1',
+        })
+      ).toEqual('~> 1.3');
       expect(
         hexScheme.getNewValue({
           currentValue: '~> 1.2.0',

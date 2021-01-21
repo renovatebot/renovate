@@ -151,13 +151,13 @@ function resolveRegistryUrls(
   datasource: Datasource,
   extractedUrls: string[]
 ): string[] {
-  const { defaultRegistryUrls = [], appendRegistryUrls = [] } = datasource;
+  const { defaultRegistryUrls = [] } = datasource;
   const customUrls = extractedUrls?.filter(Boolean);
   let registryUrls: string[];
   if (is.nonEmptyArray(customUrls)) {
-    registryUrls = [...extractedUrls, ...appendRegistryUrls];
+    registryUrls = [...customUrls];
   } else {
-    registryUrls = [...defaultRegistryUrls, ...appendRegistryUrls];
+    registryUrls = [...defaultRegistryUrls];
   }
   return registryUrls.filter(Boolean);
 }
