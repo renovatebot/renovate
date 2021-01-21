@@ -21,16 +21,6 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  ignoreSbtLatestIntegration: {
-    description: 'Do not upgrade sbt latest.integration',
-    packageRules: [
-      {
-        managers: ['sbt'],
-        matchCurrentVersion: '/^latest\\.integration$/',
-        enabled: false,
-      },
-    ],
-  },
   ignoreSpringCloudNumeric: {
     description: 'Ignore spring cloud 1.x releases',
     packageRules: [
