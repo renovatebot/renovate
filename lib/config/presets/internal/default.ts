@@ -585,8 +585,7 @@ export const presets: Record<string, Preset> = {
     extends: ['config:js-lib'],
   },
   disableControls: {
-    description:
-      'Remove the checkbox controls from PRs',
+    description: 'Remove the checkbox controls from PRs',
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
   },
