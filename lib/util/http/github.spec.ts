@@ -388,5 +388,32 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toHaveLength(2);
       expect(items).toHaveLength(2);
     });
+    it('shrinks items count on 50x', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(500)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(query, 'testItem');
+      expect(items).toHaveLength(3);
+
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(4);
+      expect(trace).toMatchSnapshot();
+    });
+    it('throws on 50x if count < 10', async () => {
+      httpMock.scope(githubApiHost).post('/graphql').reply(500);
+      await expect(
+        githubApi.queryRepoField(query, 'testItem', {
+          count: 9,
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
   });
 });

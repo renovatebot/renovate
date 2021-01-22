@@ -235,8 +235,22 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         opts
       );
       result = res?.body?.data?.repository;
-    } catch (gotErr) {
-      handleGotError(gotErr, path, opts);
+    } catch (err) {
+      if (err instanceof ExternalHostError) {
+        const gotError = err.err as GotLegacyError;
+        const statusCode = gotError?.statusCode;
+        const count = options.count;
+        if (
+          count &&
+          count > 10 &&
+          statusCode &&
+          statusCode >= 500 &&
+          statusCode < 600
+        ) {
+          return null;
+        }
+      }
+      handleGotError(err, path, opts);
     }
     return result;
   }
@@ -263,7 +277,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         replacement += cursor ? `, after: "${cursor}", ` : ', ';
         query = query.replace(regex, replacement);
       }
-      const gqlRes = await this.queryRepo<T>(query, options);
+      const gqlRes = await this.queryRepo<T>(query, { ...options, count });
       if (gqlRes?.[fieldName]) {
         const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
         result.push(...nodes);
