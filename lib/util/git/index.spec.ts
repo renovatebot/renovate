@@ -234,7 +234,7 @@ describe('platform/git', () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
   });
-  describe('commitFiles({branchName, files, messages})', () => {
+  describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
       const file = {
         name: 'some-new-file',
