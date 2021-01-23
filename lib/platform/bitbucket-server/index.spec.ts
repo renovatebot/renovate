@@ -199,6 +199,7 @@ describe(getName(__filename), () => {
           endpoint,
           username: 'abc',
           password: '123',
+          gitDeleteBeforePush: false,
         });
       });
 
@@ -219,6 +220,7 @@ describe(getName(__filename), () => {
               endpoint: 'https://stash.renovatebot.com',
               username: 'abc',
               password: '123',
+              gitDeleteBeforePush: false,
             })
           ).toMatchSnapshot();
         });
@@ -1624,6 +1626,52 @@ Followed by some information.
         it('returns empty array', async () => {
           expect.assertions(1);
           expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
+        });
+      });
+
+      describe('invalidatePr()', () => {
+        const mockPr = prMock('https://renovate.com', 'SOME', 'repo');
+        it('updates PR name and declines when PR exists for branch', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
+            })
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/${mockPr.id}`
+            )
+            .twice()
+            .reply(200, {
+              ...prMock(url, 'SOME', 'repo'),
+            })
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/${mockPr.id}/merge`
+            )
+            .twice()
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/${mockPr.id}`
+            )
+            .reply(200);
+          await bitbucket.invalidatePr('userName1/pullRequest5');
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+        it('does nothing when a PR does not exist for branch', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+          await bitbucket.invalidatePr('userName1/pullRequest5');
+          expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
 

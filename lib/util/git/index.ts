@@ -720,7 +720,6 @@ export async function commitFiles({
       return null;
     }
     logger.debug({ err }, 'Error committing files');
-    debugger;
     throw new Error(REPOSITORY_CHANGED);
   }
 }

@@ -959,40 +959,11 @@ export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }
 
-export async function deletePr(pr: BbsPr): Promise<boolean> {
-  logger.debug(`deletePr(${pr.number})`);
-  // Used for "gitDeleteBeforePush" feature
-  try {
-    await bitbucketServerHttp.deleteJson<{ version: string }>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}`,
-      {
-        body: {
-          version: pr.version,
-        },
-      }
-    );
-  } catch (err) {
-    if (err.statusCode === 404) {
-      throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
-      logger.warn({ err }, `Failed to delete PR`);
-      return false;
-    } else {
-      logger.warn({ err }, `Failed to delete PR`);
-      return false;
-    }
-  }
-  logger.debug({ pr: pr.number }, 'PR deleted');
-  return true;
-}
-
 export async function invalidatePr(branchName: string): Promise<void> {
   const pr: Pr = await getBranchPr(branchName);
   const prNo = pr?.number;
   if (prNo) {
     logger.debug(`Invalidating PR #${prNo}`);
-    // await deletePr(pr);
-
     const prUpdate = {
       number: prNo,
       prTitle: `${pr.title} - autoclosed`,
