@@ -179,7 +179,7 @@ module.exports = {
     {
       hostType: 'docker',
       username: '<your-username>',
-      password: 'process.env.DOCKER_HUB_PASSWORD',
+      password: process.env.DOCKER_HUB_PASSWORD,
     },
   ],
 };
@@ -200,7 +200,7 @@ module.exports = {
       hostType: 'docker',
       hostName: 'your.host.io',
       username: '<your-username>',
-      password: 'process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD',
+      password: process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD,
     },
   ],
 };
@@ -217,7 +217,7 @@ module.exports = {
     {
       hostName: 'your.host.io',
       username: '<your-username>',
-      password: 'process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD',
+      password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
     },
   ],
 };

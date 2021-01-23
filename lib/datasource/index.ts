@@ -151,15 +151,20 @@ function resolveRegistryUrls(
   datasource: Datasource,
   extractedUrls: string[]
 ): string[] {
-  const { defaultRegistryUrls = [], appendRegistryUrls = [] } = datasource;
+  const { defaultRegistryUrls = [] } = datasource;
   const customUrls = extractedUrls?.filter(Boolean);
   let registryUrls: string[];
   if (is.nonEmptyArray(customUrls)) {
-    registryUrls = [...extractedUrls, ...appendRegistryUrls];
+    registryUrls = [...customUrls];
   } else {
-    registryUrls = [...defaultRegistryUrls, ...appendRegistryUrls];
+    registryUrls = [...defaultRegistryUrls];
   }
   return registryUrls.filter(Boolean);
+}
+
+export function getDefaultVersioning(datasourceName: string): string {
+  const datasource = load(datasourceName);
+  return datasource.defaultVersioning || 'semver';
 }
 
 async function fetchReleases(
@@ -273,8 +278,10 @@ export async function getPkgReleases(
       })
       .filter(Boolean);
   }
-  // Filter by versioning
-  const version = allVersioning.get(config.versioning);
+  // Use the datasource's default versioning if none is configured
+  const versioning =
+    config.versioning || getDefaultVersioning(config.datasource);
+  const version = allVersioning.get(versioning);
   // Return a sorted list of valid Versions
   function sortReleases(release1: Release, release2: Release): number {
     return version.sortVersions(release1.version, release2.version);

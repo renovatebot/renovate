@@ -2,6 +2,7 @@ import URL from 'url';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
+import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 
@@ -10,6 +11,7 @@ export const defaultRegistryUrls = [
   'https://registry.terraform.io',
   'https://releases.hashicorp.com',
 ];
+export const defaultVersioning = hashicorpVersioning.id;
 export const registryStrategy = 'hunt';
 
 const http = new Http(id);
