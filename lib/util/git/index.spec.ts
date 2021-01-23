@@ -452,71 +452,44 @@ describe('platform/git', () => {
       git.setGitDeleteBeforePush(undefined);
       git.setInvalidatePr(undefined);
     });
-    it('uses force push when both invalidatePr() and gitDeleteBeforePush are falsy', async () => {
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-      expect(
-        await git.commitFiles({
-          branchName: 'renovate/branch_with_changes',
-          files: [file],
-          message: 'Create something',
-        })
-      ).toMatchSnapshot();
-    });
 
-    it('uses force push when invalidatePr() is truthy but gitDeleteBeforePush is falsy', async () => {
+    it('does not call invalidatePr() when gitDeleteBeforePush is falsy', async () => {
       const invalidatePr = jest
         .fn()
         .mockImplementation((branchName: string) => true);
       git.setInvalidatePr(invalidatePr);
+
       const file = {
         name: 'some-new-file',
         contents: 'some new-contents',
       };
-      expect(
-        await git.commitFiles({
-          branchName: 'renovate/branch_with_changes',
-          files: [file],
-          message: 'Create something',
-        })
-      ).toMatchSnapshot();
+      await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [file],
+        message: 'Create something',
+      });
+
       expect(invalidatePr).not.toHaveBeenCalled();
     });
 
-    it('uses force push when invalidatePr() is falsy but gitDeleteBeforePush is truthy', async () => {
-      git.setGitDeleteBeforePush(true);
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-      expect(
-        await git.commitFiles({
-          branchName: 'renovate/branch_with_changes',
-          files: [file],
-          message: 'Create something',
-        })
-      ).toMatchSnapshot();
-    });
-
-    it('uses delete and push when invalidatePr() and gitDeleteBeforePush are truthy', async () => {
+    it('calls invalidatePr() when gitDeleteBeforePush is true', async () => {
       const invalidatePr = jest
         .fn()
         .mockImplementation((branchName: string) => true);
-      git.setGitDeleteBeforePush(true);
       git.setInvalidatePr(invalidatePr);
+
+      git.setGitDeleteBeforePush(true);
+
       const file = {
         name: 'some-new-file',
         contents: 'some new-contents',
       };
-      expect(
-        await git.commitFiles({
-          branchName: 'renovate/branch_with_changes',
-          files: [file],
-          message: 'Create something',
-        })
-      ).toMatchSnapshot();
+      await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [file],
+        message: 'Create something',
+      });
+
       expect(invalidatePr).toHaveBeenCalled();
     });
   });
