@@ -382,7 +382,12 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        if (!dependencyDashboardCheck && isLimitReached(Limit.PullRequests)) {
+        if (
+          !dependencyDashboardCheck &&
+          isLimitReached(Limit.PullRequests) &&
+          !config.vulnerabilityAlert
+        ) {
+          logger.debug('Skipping PR - limit reached');
           return { prResult: PrResult.LimitReached };
         }
         pr = await platform.createPr({
