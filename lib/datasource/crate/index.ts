@@ -7,10 +7,12 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { privateCacheDir, readFile } from '../../util/fs';
 import { Http } from '../../util/http';
+import * as cargoVersioning from '../../versioning/cargo';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
 export const id = 'crate';
 export const defaultRegistryUrls = ['https://crates.io'];
+export const defaultVersioning = cargoVersioning.id;
 export const registryStrategy = 'first';
 
 const http = new Http(id);

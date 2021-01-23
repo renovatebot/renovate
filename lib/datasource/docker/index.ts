@@ -11,6 +11,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import * as dockerVersioning from '../../versioning/docker';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 // TODO: add got typings when available
@@ -18,6 +19,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'docker';
 export const defaultRegistryUrls = ['https://index.docker.io'];
+export const defaultVersioning = dockerVersioning.id;
 export const registryStrategy = 'first';
 
 export const defaultConfig = {

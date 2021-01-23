@@ -45,3 +45,29 @@ Array [
   },
 ]
 `;
+
+exports[`workers/repository/process/sort sortBranches() sorts based on vulnerabilityAlert 1`] = `
+Array [
+  Object {
+    "prPriority": -1,
+    "prTitle": "a minor update",
+    "updateType": "minor",
+    "vulnerabilityAlert": true,
+  },
+  Object {
+    "prPriority": 1,
+    "prTitle": "some major update",
+    "updateType": "major",
+  },
+  Object {
+    "prPriority": 0,
+    "prTitle": "some other pin",
+    "updateType": "pin",
+  },
+  Object {
+    "prPriority": -1,
+    "prTitle": "some pin",
+    "updateType": "pin",
+  },
+]
+`;

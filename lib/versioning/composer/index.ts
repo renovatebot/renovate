@@ -124,6 +124,17 @@ function getNewValue({
   if (rangeStrategy === 'pin') {
     return toVersion;
   }
+  if (rangeStrategy === 'update-lockfile') {
+    if (matches(toVersion, currentValue)) {
+      return currentValue;
+    }
+    return getNewValue({
+      currentValue,
+      rangeStrategy: 'replace',
+      fromVersion,
+      toVersion,
+    });
+  }
   const toMajor = getMajor(toVersion);
   const toMinor = getMinor(toVersion);
   let newValue: string;
