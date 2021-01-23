@@ -16,6 +16,7 @@ const repoGroups = {
   'aspnet AspNetWebStack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet Extensions': 'https://github.com/aspnet/Extensions',
   'aws-cdk': 'https://github.com/aws/aws-cdk',
+  'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'azure azure-libraries-for-net':
     'https://github.com/Azure/azure-libraries-for-net',
   'azure azure-sdk-for-net': 'https://github.com/Azure/azure-sdk-for-net',
@@ -81,6 +82,7 @@ const repoGroups = {
   jasmine: 'https://github.com/jasmine/jasmine',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
+  junit5: 'https://github.com/junit-team/junit5',
   lerna: 'https://github.com/lerna/lerna',
   lingui: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',

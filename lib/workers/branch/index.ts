@@ -152,12 +152,12 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      isLimitReached(Limit.PullRequests) &&
+      isLimitReached(Limit.Branches) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.debug('Reached PR limit - skipping branch creation');
-      return ProcessBranchResult.PrLimitReached;
+      logger.debug('Reached branch limit - skipping branch creation');
+      return ProcessBranchResult.BranchLimitReached;
     }
     if (
       isLimitReached(Limit.Commits) &&
@@ -586,7 +586,7 @@ export async function processBranch(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
     const { prResult: result, pr } = await ensurePr(config);
-    if (result === PrResult.LimitReached) {
+    if (result === PrResult.LimitReached && !config.vulnerabilityAlert) {
       logger.debug('Reached PR limit - skipping PR creation');
       return ProcessBranchResult.PrLimitReached;
     }

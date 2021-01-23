@@ -216,7 +216,7 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.PrEdited);
     });
-    it('returns if pr creation limit exceeded', async () => {
+    it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
       });
@@ -227,7 +227,7 @@ describe('workers/branch', () => {
       limits.isLimitReached.mockReturnValueOnce(true);
       limits.isLimitReached.mockReturnValueOnce(false);
       expect(await branchWorker.processBranch(config)).toEqual(
-        ProcessBranchResult.PrLimitReached
+        ProcessBranchResult.BranchLimitReached
       );
     });
     it('returns if pr creation limit exceeded and branch exists', async () => {

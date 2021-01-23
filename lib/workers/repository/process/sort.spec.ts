@@ -51,5 +51,32 @@ describe('workers/repository/process/sort', () => {
       sortBranches(branches);
       expect(branches).toMatchSnapshot();
     });
+    it('sorts based on vulnerabilityAlert', () => {
+      const branches = [
+        {
+          updateType: 'major' as UpdateType,
+          prTitle: 'some major update',
+          prPriority: 1,
+        },
+        {
+          updateType: 'pin' as UpdateType,
+          prTitle: 'some pin',
+          prPriority: -1,
+        },
+        {
+          updateType: 'pin' as UpdateType,
+          prTitle: 'some other pin',
+          prPriority: 0,
+        },
+        {
+          updateType: 'minor' as UpdateType,
+          prTitle: 'a minor update',
+          prPriority: -1,
+          vulnerabilityAlert: true,
+        },
+      ];
+      sortBranches(branches);
+      expect(branches).toMatchSnapshot();
+    });
   });
 });
