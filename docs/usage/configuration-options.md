@@ -594,6 +594,10 @@ If configured, Renovate bypasses its normal major/minor/patch upgrade logic and 
 Beware that Renovate follows tags strictly.
 For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
 
+## gitDeleteBeforePush
+
+Configure this to `true` to change branch push behavior from using force push to deleting the branch (if it exists) and repushing (Bitbucket-server-only). This is generally reserved for environments where force push has been disabled. This will cause open pull requests for the deleted branch to be removed.
+
 ## gitLabAutomerge
 
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
@@ -1996,10 +2000,6 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 Configure this to `true` if you wish to receive one PR for every separate major version upgrade of a dependency.
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
-
-## gitDeleteBeforePush
-
-Configure this to `true` to change branch push behavior from using force push to deleting the branch (if it exists) and repushing (Bitbucket-server-only). This is generally reserved for environments where force push has been disabled. This will cause open pull requests for the deleted branch to be removed.
 
 ## stabilityDays
 
