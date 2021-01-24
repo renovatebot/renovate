@@ -35,7 +35,6 @@ describe('workers/repository/updates/flatten', () => {
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
               {
-                depName: 'a1',
                 updateTypes: ['pin'],
                 updates: [{ newValue: '2.0.0' }],
               },
@@ -78,7 +77,7 @@ describe('workers/repository/updates/flatten', () => {
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
-      expect(res.filter((r) => r.depNameShort)).toHaveLength(7); // lockFileMaintenance has no depName
+      expect(res.filter((r) => r.depNameShort)).toHaveLength(6); // lockFileMaintenance has no depName
     });
   });
 });
