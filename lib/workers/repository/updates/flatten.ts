@@ -83,6 +83,7 @@ export async function flattenUpdates(
                   .replace('@', '')
                   .replace(/\//g, '-')
                   .replace(/\s+/g, '-')
+                  .replace(/-+/, '-')
                   .toLowerCase()
               : undefined;
             if (
