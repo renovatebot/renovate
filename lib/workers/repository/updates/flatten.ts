@@ -77,6 +77,8 @@ export async function flattenUpdates(
             // Apply again in case any were added by the updateType config
             updateConfig = applyPackageRules(updateConfig);
             delete updateConfig.packageRules;
+            // TODO: Remove next line once #8075 is complete
+            updateConfig.depNameShort ||= updateConfig.depName;
             updateConfig.depNameSanitized = updateConfig.depName
               ? updateConfig.depName
                   .replace('@types/', '')
