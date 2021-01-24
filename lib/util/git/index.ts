@@ -594,7 +594,7 @@ async function pushBranch(branchName: string): Promise<void> {
     }
     try {
       await git.raw('push', 'origin', '--delete', `${branchName}`);
-      logger.debug(`Deleted branch origin/${branchName}.`);
+      logger.debug(`Deleted remote branch ${branchName}.`);
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       logger.debug(
