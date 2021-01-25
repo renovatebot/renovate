@@ -33,6 +33,8 @@ except ImportError:
 @mock.patch.object(setuptools, 'setup')
 @mock.patch.object(distutils.core, 'setup')
 def invoke(mock1, mock2):
+  # Inserting the parent directory of the target setup.py in Python import path:
+  sys.path.append(os.getcwd())
   # This is setup.py which calls setuptools.setup
   load_source('_target_setup_', basename(sys.argv[-1]))
   # called arguments are in `mock_setup.call_args`
