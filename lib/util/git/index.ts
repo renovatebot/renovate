@@ -10,6 +10,7 @@ import Git, {
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import {
+  CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
@@ -58,7 +59,7 @@ function checkForPlatformFailure(err: Error): void {
   if (process.env.NODE_ENV === 'test') {
     return;
   }
-  const platformFailureStrings = [
+  const externalHostFailureStrings = [
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
@@ -70,10 +71,29 @@ function checkForPlatformFailure(err: Error): void {
     'malformed object name',
     'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
   ];
-  for (const errorStr of platformFailureStrings) {
+  for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
       logger.debug({ err }, 'Converting git error to ExternalHostError');
       throw new ExternalHostError(err, 'git');
+    }
+  }
+
+  const gitLabPushRuleFailureStrings = [
+    [
+      'GitLab: Branch name does not follow the pattern',
+      "Cannot push because branch name does not follow project's push rules",
+    ],
+    [
+      'GitLab: Commit message does not follow the pattern',
+      "Cannot push because commit message does not follow project's push rules",
+    ],
+  ];
+  for (const [errorStr, validationError] of gitLabPushRuleFailureStrings) {
+    if (err.message.includes(errorStr)) {
+      logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationError = validationError;
+      throw error;
     }
   }
 }
