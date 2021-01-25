@@ -309,6 +309,14 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
+    name: 'customEnvVariables',
+    description:
+      'Custom environment variables for child processes and sidecar Docker containers.',
+    admin: true,
+    type: 'object',
+    default: false,
+  },
+  {
     name: 'dockerMapDotfiles',
     description:
       'Map relevant home directory dotfiles into containers when binarySource=docker.',
@@ -342,12 +350,10 @@ const options: RenovateOptions[] = [
   // Log options
   {
     name: 'logLevel',
-    description: 'Logging level',
+    description: 'Logging level. Deprecated, use `LOG_LEVEL` environment.',
     stage: 'global',
     type: 'string',
     allowedValues: ['fatal', 'error', 'warn', 'info', 'debug', 'trace'],
-    default: 'info',
-    env: 'LOG_LEVEL',
   },
   {
     name: 'logFile',

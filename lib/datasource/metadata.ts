@@ -65,6 +65,7 @@ const manualSourceUrls = {
       'https://github.com/hyper-expanse/library-release-workflows',
   },
   docker: {
+    'amd64/traefik': 'https://github.com/containous/traefik',
     'docker/compose': 'https://github.com/docker/compose',
     'drone/drone': 'https://github.com/drone/drone',
     'drone/drone-runner-docker':

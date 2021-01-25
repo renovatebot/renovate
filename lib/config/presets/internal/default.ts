@@ -584,4 +584,9 @@ export const presets: Record<string, Preset> = {
     description: 'deprecated alias for config:js-lib',
     extends: ['config:js-lib'],
   },
+  disablePrControls: {
+    description: 'Remove the checkbox controls from PRs',
+    prBodyTemplate:
+      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
+  },
 };

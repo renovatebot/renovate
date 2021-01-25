@@ -2,7 +2,7 @@
 ## complete example
 resource "helm_release" "example" {
   name       = "my-redis-release"
-  repository = "https://kubernetes-charts.storage.googleapis.com"
+  repository = "https://charts.helm.sh/stable"
   chart      = "redis"
   version    = "1.0.1"
 }
@@ -10,7 +10,7 @@ resource "helm_release" "example" {
 ## example without version, this will default to latest in Terraform
 resource "helm_release" "example" {
   name       = "my-redis-release"
-  repository = "https://kubernetes-charts.storage.googleapis.com"
+  repository = "https://charts.helm.sh/stable"
   chart      = "redis"
 }
 
@@ -23,12 +23,12 @@ resource "helm_release" "local" {
 ## malformed examples
 resource "helm_release" "example" {
   name       = "my-redis-release"
-  repository = "https://kubernetes-charts.storage.googleapis.com"
+  repository = "https://charts.helm.sh/stable"
   version    = "4.0.1"
 }
 
 resource "helm_release" "example" {
-  repository = "https://kubernetes-charts.storage.googleapis.com"
+  repository = "https://charts.helm.sh/stable"
   chart      = "redis"
   version    = "5.0.1"
 }

@@ -557,7 +557,26 @@ describe('config/migration', () => {
         extends: [':unpublishSafeDisabled', 'npm:unpublishSafe'],
       });
     });
+    it('migrates combinations of packageRules', () => {
+      let config: RenovateConfig;
+      let res: MigratedConfig;
 
+      config = {
+        packages: [{ matchPackagePatterns: ['*'] }],
+        packageRules: { matchPackageNames: [] },
+      } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig.packageRules).toHaveLength(2);
+
+      config = {
+        packageRules: { matchPpackageNames: [] },
+        packages: [{ matchPackagePatterns: ['*'] }],
+      } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig.packageRules).toHaveLength(2);
+    });
     it('it migrates packageRules', () => {
       const config: RenovateConfig = {
         packageRules: [

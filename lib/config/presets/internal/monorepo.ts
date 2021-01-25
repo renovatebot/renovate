@@ -82,6 +82,7 @@ const repoGroups = {
   jasmine: 'https://github.com/jasmine/jasmine',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
+  junit5: 'https://github.com/junit-team/junit5',
   lerna: 'https://github.com/lerna/lerna',
   lingui: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',

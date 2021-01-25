@@ -7,8 +7,8 @@ export const presets: Record<string, Preset> = {
     ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
-      'workarounds:ignoreSbtLatestIntegration',
       'workarounds:ignoreSpringCloudNumeric',
+      'workarounds:ignoreHttp4sDigestMilestones',
     ],
   },
   mavenCommonsAncientVersion: {
@@ -17,16 +17,6 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['maven', 'sbt-package'],
         matchPackagePatterns: ['^commons-'],
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
-      },
-    ],
-  },
-  ignoreSbtLatestIntegration: {
-    description: 'Do not upgrade sbt latest.integration',
-    packageRules: [
-      {
-        matchManagers: ['sbt'],
-        matchCurrentVersion: '/^latest\\.integration$/',
-        enabled: false,
       },
     ],
   },
@@ -39,6 +29,16 @@ export const presets: Record<string, Preset> = {
           'org.springframework.cloud:spring-cloud-starter-parent',
         ],
         allowedVersions: '/^[A-Z]/',
+      },
+    ],
+  },
+  ignoreHttp4sDigestMilestones: {
+    description: 'Ignore http4s digest-based 1.x milestones',
+    packageRules: [
+      {
+        matchManagers: ['sbt'],
+        matchPackagePatterns: ['^org\\.http4s:'],
+        allowedVersions: `!/^1\\.0-\\d+-[a-fA-F0-9]{7}$/`,
       },
     ],
   },

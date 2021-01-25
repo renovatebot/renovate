@@ -59,13 +59,20 @@ function depFromNode(node: XmlElement): PackageDependency | null {
     const fileReplacePosition = versionNode.position;
     const datasource = datasourceMaven.id;
     const registryUrls = [MAVEN_REPO];
-    return {
+    const result: PackageDependency = {
       datasource,
       depName,
       currentValue,
       fileReplacePosition,
       registryUrls,
     };
+
+    const depType = node.valueWithPath('scope');
+    if (depType) {
+      result.depType = depType;
+    }
+
+    return result;
   }
   return null;
 }

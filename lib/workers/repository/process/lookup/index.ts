@@ -5,6 +5,7 @@ import {
 } from '../../../../config';
 import {
   Release,
+  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   isGetPkgReleasesConfig,
@@ -139,7 +140,10 @@ export async function lookupUpdates(
   let config: LookupUpdateConfig = { ...inconfig };
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = allVersioning.get(config.versioning);
+  // Use the datasource's default versioning if none is configured
+  const version = allVersioning.get(
+    config.versioning || getDefaultVersioning(config.datasource)
+  );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
   const isValid = currentValue && version.isValid(currentValue);
@@ -461,7 +465,11 @@ export async function lookupUpdates(
     );
   if (res.updates.some((update) => update.updateType === 'pin')) {
     for (const update of res.updates) {
-      if (update.updateType !== 'pin' && update.updateType !== 'rollback') {
+      if (
+        update.updateType !== 'pin' &&
+        update.updateType !== 'rollback' &&
+        !vulnerabilityAlert
+      ) {
         update.blockedByPin = true;
       }
     }
