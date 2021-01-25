@@ -14,7 +14,7 @@ export async function raiseConfigWarningIssue(
   }
   body += `Error type: ${error.validationError}\n`;
   if (error.validationMessage) {
-    body += `Message: \`${error.validationMessage}\`\n`;
+    body += `Message: \`${error.validationMessage.replace(/`/g, "'")}\`\n`;
   }
   const pr = await platform.getBranchPr(config.onboardingBranch);
   if (pr?.state === PrState.Open) {

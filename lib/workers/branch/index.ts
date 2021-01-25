@@ -152,12 +152,12 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      isLimitReached(Limit.PullRequests) &&
+      isLimitReached(Limit.Branches) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.debug('Reached PR limit - skipping branch creation');
-      return ProcessBranchResult.PrLimitReached;
+      logger.debug('Reached branch limit - skipping branch creation');
+      return ProcessBranchResult.BranchLimitReached;
     }
     if (
       isLimitReached(Limit.Commits) &&
@@ -169,6 +169,7 @@ export async function processBranch(
     }
     if (branchExists) {
       logger.debug('Checking if PR has been edited');
+      const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== PrState.Open) {
@@ -177,7 +178,6 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        const branchIsModified = await isBranchModified(config.branchName);
         if (
           branchIsModified ||
           (branchPr.targetBranch &&
@@ -205,6 +205,9 @@ export async function processBranch(
             return ProcessBranchResult.PrEdited;
           }
         }
+      } else if (branchIsModified) {
+        logger.debug('Branch has been edited');
+        return ProcessBranchResult.PrEdited;
       }
     }
 
@@ -583,7 +586,7 @@ export async function processBranch(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
     const { prResult: result, pr } = await ensurePr(config);
-    if (result === PrResult.LimitReached) {
+    if (result === PrResult.LimitReached && !config.vulnerabilityAlert) {
       logger.debug('Reached PR limit - skipping PR creation');
       return ProcessBranchResult.PrLimitReached;
     }

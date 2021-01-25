@@ -248,7 +248,8 @@ export async function initRepo({
     logger.debug('Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
-      err.message === REPOSITORY_RENAMED
+      err.message === REPOSITORY_RENAMED ||
+      err.message === REPOSITORY_NOT_FOUND
     ) {
       throw err;
     }
@@ -432,7 +433,11 @@ async function getClosedPrs(): Promise<PrList> {
       query = `
       query {
         repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(states: [CLOSED, MERGED], orderBy: {field: UPDATED_AT, direction: DESC}) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
             nodes {
               number
               state
@@ -451,10 +456,7 @@ async function getClosedPrs(): Promise<PrList> {
       `;
       const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
         query,
-        'pullRequests',
-        {
-          paginate: false,
-        }
+        'pullRequests'
       );
       const prNumbers: number[] = [];
       // istanbul ignore if
@@ -495,7 +497,11 @@ async function getOpenPrs(): Promise<PrList> {
       query = `
       query {
         repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(states: [OPEN], orderBy: {field: UPDATED_AT, direction: DESC}) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
             nodes {
               number
               headRefName
@@ -549,7 +555,6 @@ async function getOpenPrs(): Promise<PrList> {
         query,
         'pullRequests',
         {
-          paginate: false,
           acceptHeader: 'application/vnd.github.merge-info-preview+json',
         }
       );

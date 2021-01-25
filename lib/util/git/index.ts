@@ -20,7 +20,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { writePrivateKey } from './private-key';
+import { configSigningKey, writePrivateKey } from './private-key';
 
 export * from './private-key';
 
@@ -68,6 +68,7 @@ function checkForPlatformFailure(err: Error): void {
     'Failed to connect to',
     'Connection timed out',
     'malformed object name',
+    'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -579,9 +580,10 @@ export async function commitFiles({
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
-    await writePrivateKey(config.localDir);
+    await writePrivateKey();
     privateKeySet = true;
   }
+  await configSigningKey(config.localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
