@@ -15,7 +15,6 @@ import {
 } from '../../constants/error-messages';
 import { logger, removeMeta } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
-import { getAdditionalFilesTerraform } from '../../manager/terraform/post-update';
 import { Pr, platform } from '../../platform';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -330,13 +329,6 @@ export async function processBranch(
     );
     config.updatedArtifacts = (config.updatedArtifacts || []).concat(
       npmAdditionalFiles.updatedArtifacts
-    );
-    const terraformAdditionalFiles = await getAdditionalFilesTerraform(config);
-    config.artifactErrors = (config.artifactErrors || []).concat(
-      terraformAdditionalFiles.artifactErrors
-    );
-    config.updatedArtifacts = (config.updatedArtifacts || []).concat(
-      terraformAdditionalFiles.updatedArtifacts
     );
     if (config.updatedArtifacts?.length) {
       logger.debug(
