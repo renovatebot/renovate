@@ -78,7 +78,7 @@ function checkForPlatformFailure(err: Error): void {
     }
   }
 
-  const gitLabPushRuleFailureStrings = [
+  const configErrorStrings = [
     [
       'GitLab: Branch name does not follow the pattern',
       "Cannot push because branch name does not follow project's push rules",
@@ -88,7 +88,7 @@ function checkForPlatformFailure(err: Error): void {
       "Cannot push because commit message does not follow project's push rules",
     ],
   ];
-  for (const [errorStr, validationError] of gitLabPushRuleFailureStrings) {
+  for (const [errorStr, validationError] of configErrorStrings) {
     if (err.message.includes(errorStr)) {
       logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
       const error = new Error(CONFIG_VALIDATION);
