@@ -61,7 +61,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -98,7 +98,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Bearer some-token",
       "host": "index.docker.io",
@@ -133,7 +133,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Bearer some-token",
       "host": "index.docker.io",
@@ -184,7 +184,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -210,7 +210,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -236,7 +236,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -272,7 +272,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic abcdef",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
@@ -308,7 +308,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -334,7 +334,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -371,7 +371,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Bearer some-token",
       "host": "index.docker.io",
@@ -442,7 +442,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "host": "index.docker.io",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -498,7 +498,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "host": "index.docker.io",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -554,7 +554,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "host": "k8s.gcr.io",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -684,7 +684,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
@@ -759,7 +759,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
@@ -835,7 +835,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
@@ -893,7 +893,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
@@ -940,7 +940,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
