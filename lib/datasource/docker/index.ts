@@ -267,7 +267,8 @@ async function getManifestResponse(
       logger.debug('No docker auth found - returning');
       return null;
     }
-    headers.accept = 'application/vnd.docker.distribution.manifest.v2+json';
+    headers.accept =
+      'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
     const url = `${registry}/v2/${repository}/manifests/${tag}`;
     const manifestResponse = await http.get(url, {
       headers,
