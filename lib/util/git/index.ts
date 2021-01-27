@@ -93,6 +93,7 @@ function checkForPlatformFailure(err: Error): void {
       logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
       const error = new Error(CONFIG_VALIDATION);
       error.validationError = validationError;
+      error.validationMessage = err.message;
       throw error;
     }
   }
