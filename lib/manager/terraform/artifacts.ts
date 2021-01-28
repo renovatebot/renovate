@@ -10,7 +10,7 @@ import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 const lockFile = '.terraform.lock.hcl';
 
-async function terraformLockUpdate(manifestPath: string): Promise<void> {
+async function terraformLockUpdate(): Promise<void> {
   await deleteLocalFile(lockFile);
   const cmd = 'terraform providers lock';
 
@@ -49,7 +49,7 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    await terraformLockUpdate(packageFileName);
+    await terraformLockUpdate();
     logger.debug(`Returning updated ${lockFile}`);
     const terraformProviderLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === terraformProviderLockContent) {
