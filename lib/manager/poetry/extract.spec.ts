@@ -1,8 +1,7 @@
 import { readFileSync } from 'fs';
 import { parse } from '@iarna/toml';
 import { add } from '../../util/host-rules';
-import { extractRegistries } from './extract';
-import { extractPackageFile } from './extract';
+import { extractPackageFile, extractRegistries } from './extract';
 
 const pyproject1toml = readFileSync(
   'lib/manager/poetry/__fixtures__/pyproject.1.toml',
@@ -153,7 +152,7 @@ describe('lib/manager/poetry/extract', () => {
     it('supports authenticated registries via hostRules', () => {
       add({ hostName: 'pypi.fury.io', username: 'itsasecret' });
       const pyprojectfile = parse(
-        '[tool.poetry.source]\r\nname = "fury"\r\nurl = "https://pypi.fury.io/renovate/"');
+        '[[tool.poetry.source]]\r\nname = "fury"\r\nurl = "https://pypi.fury.io/renovate/"');
       const res = extractRegistries(pyprojectfile);
       expect(res[0]).toBe('https://itsasecret:@pypi.fury.io/renovate/');
       expect(res).toHaveLength(2);
