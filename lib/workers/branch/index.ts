@@ -320,15 +320,15 @@ export async function processBranch(
     } else {
       logger.debug('No package files need updating');
     }
-    const npmAdditionalFiles = await getAdditionalFiles(
+    const additionalFiles = await getAdditionalFiles(
       config,
       branchConfig.packageFiles
     );
     config.artifactErrors = (config.artifactErrors || []).concat(
-      npmAdditionalFiles.artifactErrors
+      additionalFiles.artifactErrors
     );
     config.updatedArtifacts = (config.updatedArtifacts || []).concat(
-      npmAdditionalFiles.updatedArtifacts
+      additionalFiles.updatedArtifacts
     );
     if (config.updatedArtifacts?.length) {
       logger.debug(
