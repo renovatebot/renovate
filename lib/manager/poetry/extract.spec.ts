@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { parse } from '@iarna/toml';
 import { add } from '../../util/host-rules';
 import { extractRegistries } from './extract';
 import { extractPackageFile } from './extract';
@@ -151,9 +152,9 @@ describe('lib/manager/poetry/extract', () => {
   describe('extractRegistries()', () => {
     it('supports authenticated registries via hostRules', () => {
       add({ hostName: 'pypi.fury.io', username: 'itsasecret' });
-      const content =
-        '[tool.poetry.source]\r\nname = "fury"\r\nurl = "https://pypi.fury.io/renovate/"';
-      const res = extractRegistries(content);
+      const pyprojectfile = parse(
+        '[tool.poetry.source]\r\nname = "fury"\r\nurl = "https://pypi.fury.io/renovate/"');
+      const res = extractRegistries(pyprojectfile);
       expect(res[0]).toBe('https://itsasecret:@pypi.fury.io/renovate/');
       expect(res).toHaveLength(2);
     });
