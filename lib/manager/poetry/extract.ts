@@ -84,7 +84,7 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
       const url = URL.parse(source.url);
       // rebuild the url with any auth set in host rules
       const matchingHostRule = find({ url: source.url });
-      if (matchingHostRule) {
+      if (matchingHostRule.username || matchingHostRule.password) {
         url.auth = '';
         url.auth += matchingHostRule.username || '';
         url.auth += ':';
