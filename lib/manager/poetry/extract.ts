@@ -1,8 +1,10 @@
+import URL from 'url';
 import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { find } from '../../util/host-rules';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import { PackageDependency, PackageFile } from '../common';
@@ -79,7 +81,16 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
   const registryUrls = new Set<string>();
   for (const source of sources) {
     if (source.url) {
-      registryUrls.add(source.url);
+      const url = URL.parse(source.url);
+      // rebuild the url with any auth set in host rules
+      const matchingHostRule = find({ url: source.url });
+      if (matchingHostRule) {
+        url.auth = '';
+        url.auth += matchingHostRule.username || '';
+        url.auth += ':';
+        url.auth += matchingHostRule.password || '';
+      }
+      registryUrls.add(URL.format(url));
     }
   }
   registryUrls.add(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
