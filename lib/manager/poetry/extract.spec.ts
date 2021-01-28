@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { add } from '../../util/host-rules';
+import { extractRegistries } from './extract';
 import { extractPackageFile } from './extract';
 
 const pyproject1toml = readFileSync(
