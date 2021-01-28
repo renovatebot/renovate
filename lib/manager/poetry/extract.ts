@@ -71,7 +71,7 @@ function extractFromSection(
   return deps;
 }
 
-function extractRegistries(pyprojectfile: PoetryFile): string[] {
+export function extractRegistries(pyprojectfile: PoetryFile): string[] {
   const sources = pyprojectfile.tool?.poetry?.source;
 
   if (!Array.isArray(sources) || sources.length === 0) {
