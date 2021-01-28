@@ -16,13 +16,15 @@ describe('manager/gradle-lite/parser', () => {
     let deps;
 
     ({ deps } = parseGradle(
-      ['version = "1.2.3"', '"foo:bar:$version"', 'version = "3.2.1"'].join(
-        '\n'
-      )
+      [
+        'version = "1.2.3"',
+        '"foo:bar_$version:$version"',
+        'version = "3.2.1"',
+      ].join('\n')
     ));
     expect(deps).toMatchObject([
       {
-        depName: 'foo:bar',
+        depName: 'foo:bar_1.2.3',
         currentValue: '1.2.3',
       },
     ]);
