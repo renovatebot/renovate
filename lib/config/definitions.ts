@@ -1696,7 +1696,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'insecureRegistry',
-    description: 'Explicitly turn on insecure Docker registry access (http)',
+    description: 'Explicitly turn on insecure Docker registry access (HTTP)',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
