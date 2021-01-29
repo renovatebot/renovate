@@ -7,7 +7,6 @@ import { promisify } from 'util';
 export type Opt<T> = T | null | undefined;
 
 export enum BinarySource {
-  Auto = 'auto',
   Docker = 'docker',
   Global = 'global',
 }
