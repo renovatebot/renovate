@@ -487,6 +487,14 @@ Object {
 }
 `;
 
+exports[`config/presets resolvePreset resolves self-hosted presets without baseConfig 1`] = `
+Object {
+  "labels": Array [
+    "self-hosted resolved",
+  ],
+}
+`;
+
 exports[`config/presets resolvePreset returns same if no presets 1`] = `
 Object {
   "foo": 1,
