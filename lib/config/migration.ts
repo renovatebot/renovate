@@ -505,6 +505,29 @@ export function migrateConfig(
       migratedConfig.hostRules = migratedConfig.endpoints;
       delete migratedConfig.endpoints;
     }
+    if (is.array(migratedConfig.packageRules)) {
+      const renameMap = {
+        paths: 'matchPaths',
+        languages: 'matchLanguages',
+        baseBranchList: 'matchBaseBranches',
+        managers: 'matchManagers',
+        datasources: 'matchDatasources',
+        depTypeList: 'matchDepTypes',
+        packageNames: 'matchPackageNames',
+        packagePatterns: 'matchPackagePatterns',
+        sourceUrlPrefixes: 'matchSourceUrlPrefixes',
+        updateTypes: 'matchUpdateTypes',
+      };
+      for (const packageRule of migratedConfig.packageRules) {
+        for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
+          const newKey = renameMap[oldKey];
+          if (newKey) {
+            packageRule[newKey] = ruleVal;
+            delete packageRule[oldKey];
+          }
+        }
+      }
+    }
     const isMigrated = !equal(config, migratedConfig);
     if (isMigrated) {
       // recursive call in case any migrated configs need further migrating

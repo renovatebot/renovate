@@ -11,13 +11,16 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import * as dockerVersioning from '../../versioning/docker';
 import { GetReleasesConfig, ReleaseResult } from '../common';
+import { Image, ImageList, MediaType } from './types';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
 export const id = 'docker';
 export const defaultRegistryUrls = ['https://index.docker.io'];
+export const defaultVersioning = dockerVersioning.id;
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
@@ -253,6 +256,7 @@ function extractDigestFromResponse(manifestResponse: HttpResponse): string {
   return manifestResponse.headers['docker-content-digest'] as string;
 }
 
+// TODO: make generic to return json object
 async function getManifestResponse(
   registry: string,
   repository: string,
@@ -265,7 +269,8 @@ async function getManifestResponse(
       logger.debug('No docker auth found - returning');
       return null;
     }
-    headers.accept = 'application/vnd.docker.distribution.manifest.v2+json';
+    headers.accept =
+      'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
     const url = `${registry}/v2/${repository}/manifests/${tag}`;
     const manifestResponse = await http.get(url, {
       headers,
@@ -490,7 +495,7 @@ async function getLabels(
       );
       return {};
     }
-    const manifest = JSON.parse(manifestResponse.body);
+    const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
     // istanbul ignore if
     if (manifest.schemaVersion !== 2) {
       logger.debug(
@@ -499,8 +504,14 @@ async function getLabels(
       );
       return {};
     }
+
     let labels: Record<string, string> = {};
-    const configDigest: string = manifest.config.digest;
+    let configDigest: string;
+    if (manifest.mediaType === MediaType.manifestListV2) {
+      configDigest = manifest.manifests[0].digest;
+    } else {
+      configDigest = manifest.config.digest;
+    }
     const headers = await getAuthHeaders(registry, repository);
     // istanbul ignore if: Should never be happen
     if (!headers) {

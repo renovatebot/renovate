@@ -290,7 +290,7 @@ const options: RenovateOptions[] = [
   {
     name: 'redisUrl',
     description:
-      'If defined, this redis url will be used for caching instead of the file system',
+      'If defined, this Redis URL will be used for caching instead of the file system',
     admin: true,
     type: 'string',
   },
@@ -327,7 +327,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dockerImagePrefix',
     description:
-      'Change this value in order to override the default renovate docker sidecar image name prefix.',
+      'Change this value in order to override the default Renovate Docker sidecar image name prefix.',
     type: 'string',
     default: 'docker.io/renovate',
     admin: true,
@@ -335,14 +335,14 @@ const options: RenovateOptions[] = [
   {
     name: 'dockerUser',
     description:
-      'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
+      'Specify UID and GID for Docker-based binaries when binarySource=docker is used.',
     admin: true,
     type: 'string',
   },
   {
     name: 'composerIgnorePlatformReqs',
     description:
-      'Enable / disable use of --ignore-platform-reqs in the composer package manager.',
+      'Enable / disable use of --ignore-platform-reqs in the Composer package manager.',
     type: 'boolean',
     default: true,
     admin: true,
@@ -395,7 +395,7 @@ const options: RenovateOptions[] = [
   {
     name: 'includeForks',
     description:
-      'Whether to process forked repositories or not. By default, all forked repositories are skipped over.',
+      'Whether to process forked repositories or not. By default, all forked repositories are skipped.',
     stage: 'repository',
     type: 'boolean',
     default: false,
@@ -661,13 +661,13 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'gitAuthor',
-    description: 'Author to use for git commits. RFC5322',
+    description: 'Author to use for Git commits. RFC5322',
     type: 'string',
     admin: true,
   },
   {
     name: 'gitPrivateKey',
-    description: 'PGP key to use for signing git commits',
+    description: 'PGP key to use for signing Git commits',
     type: 'string',
     cli: false,
     admin: true,
@@ -737,7 +737,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'versioning',
-    description: 'versioning to use for filtering and comparisons',
+    description: 'Versioning to use for filtering and comparisons',
     type: 'string',
     allowedValues: getVersioningList(),
     default: semverVersioning.id,
@@ -777,7 +777,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'languages',
+    name: 'matchLanguages',
     description:
       'List of languages to match (e.g. ["python"]). Valid only within `packageRules` object',
     type: 'array',
@@ -790,7 +790,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'baseBranchList',
+    name: 'matchBaseBranches',
     description:
       'List of branches to match (e.g. ["master"]). Valid only within `packageRules` object',
     type: 'array',
@@ -803,7 +803,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'managers',
+    name: 'matchManagers',
     description:
       'List of package managers to match (e.g. ["pipenv"]). Valid only within `packageRules` object',
     type: 'array',
@@ -816,7 +816,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'datasources',
+    name: 'matchDatasources',
     description:
       'List of datasources to match (e.g. ["orb"]). Valid only within `packageRules` object',
     type: 'array',
@@ -829,7 +829,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'depTypeList',
+    name: 'matchDepTypes',
     description:
       'List of depTypes to match (e.g. [`peerDependencies`]). Valid only within `packageRules` object',
     type: 'array',
@@ -842,7 +842,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'packageNames',
+    name: 'matchPackageNames',
     description:
       'Package names to match. Valid only within `packageRules` object',
     type: 'array',
@@ -868,7 +868,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'packagePatterns',
+    name: 'matchPackagePatterns',
     description:
       'Package name patterns to match. Valid only within `packageRules` object.',
     type: 'array',
@@ -907,7 +907,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'sourceUrlPrefixes',
+    name: 'matchSourceUrlPrefixes',
     description:
       'A list of source URL prefixes to match against, commonly used for grouping of monorepos or packages from the same organization.',
     type: 'array',
@@ -920,11 +920,10 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'updateTypes',
+    name: 'matchUpdateTypes',
     description:
       'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',
     type: 'array',
-    // TODO: add allowedValues
     subType: 'string',
     allowedValues: [
       'major',
@@ -944,7 +943,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'paths',
+    name: 'matchPaths',
     description:
       'List of strings or glob patterns to match against package files. Applicable inside packageRules only',
     type: 'array',
@@ -994,7 +993,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'ignoreUnstable',
-    description: 'Ignore versions with unstable semver',
+    description: 'Ignore versions with unstable SemVer',
     stage: 'package',
     type: 'boolean',
   },
@@ -1114,20 +1113,20 @@ const options: RenovateOptions[] = [
   // Semantic commit / Semantic release
   {
     name: 'semanticCommits',
-    description: 'Enable semantic commit prefixes for commits and PR titles',
+    description: 'Enable Semantic Commit prefixes for commits and PR titles',
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
     default: 'auto',
   },
   {
     name: 'semanticCommitType',
-    description: 'Commit type to use if semantic commits is enabled',
+    description: 'Commit type to use if Semantic Commits is enabled',
     type: 'string',
     default: 'chore',
   },
   {
     name: 'semanticCommitScope',
-    description: 'Commit scope to use if semantic commits are enabled',
+    description: 'Commit scope to use if Semantic Commits are enabled',
     type: 'string',
     default: 'deps',
   },
@@ -1503,7 +1502,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'js',
-    description: 'Configuration object for javascript language',
+    description: 'Configuration object for JavaScript language',
     stage: 'package',
     type: 'object',
     default: {},
@@ -1538,7 +1537,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'ruby',
-    description: 'Configuration object for ruby language',
+    description: 'Configuration object for Ruby language',
     stage: 'package',
     type: 'object',
     default: {},
@@ -1557,7 +1556,7 @@ const options: RenovateOptions[] = [
   {
     name: 'supportPolicy',
     description:
-      'Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)',
+      'Dependency support policy, e.g. used for LTS vs non-LTS etc (Node only)',
     type: 'array',
     subType: 'string',
     stage: 'package',
@@ -1565,7 +1564,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'node',
-    description: 'Configuration object for node version renovation',
+    description: 'Configuration object for Node version renovation',
     stage: 'package',
     type: 'object',
     default: {
@@ -1590,7 +1589,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'php',
-    description: 'Configuration object for php',
+    description: 'Configuration object for PHP',
     stage: 'package',
     type: 'object',
     default: {},
@@ -1599,7 +1598,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'python',
-    description: 'Configuration object for python',
+    description: 'Configuration object for Python',
     stage: 'package',
     type: 'object',
     default: {
@@ -1611,7 +1610,7 @@ const options: RenovateOptions[] = [
   {
     name: 'constraints',
     description:
-      'Configuration object for define language or manager version constraints',
+      'Configuration object to define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,
@@ -1688,7 +1687,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'timeout',
-    description: 'timeout (in milliseconds) for queries to external endpoints',
+    description: 'Timeout (in milliseconds) for queries to external endpoints',
     type: 'integer',
     stage: 'repository',
     parent: 'hostRules',
@@ -1697,7 +1696,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'insecureRegistry',
-    description: 'explicitly turn on insecure docker registry access (http)',
+    description: 'Explicitly turn on insecure Docker registry access (HTTP)',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -1707,7 +1706,7 @@ const options: RenovateOptions[] = [
   {
     name: 'abortOnError',
     description:
-      'If enabled, Renovate will abort its run when http request errors occur.',
+      'If enabled, Renovate will abort its run when HTTP request errors occur.',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -1728,7 +1727,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'enableHttp2',
-    description: 'Enable got http2 support.',
+    description: 'Enable got HTTP/2 support.',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',

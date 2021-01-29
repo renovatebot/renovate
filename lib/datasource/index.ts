@@ -162,6 +162,11 @@ function resolveRegistryUrls(
   return registryUrls.filter(Boolean);
 }
 
+export function getDefaultVersioning(datasourceName: string): string {
+  const datasource = load(datasourceName);
+  return datasource.defaultVersioning || 'semver';
+}
+
 async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
@@ -273,8 +278,10 @@ export async function getPkgReleases(
       })
       .filter(Boolean);
   }
-  // Filter by versioning
-  const version = allVersioning.get(config.versioning);
+  // Use the datasource's default versioning if none is configured
+  const versioning =
+    config.versioning || getDefaultVersioning(config.datasource);
+  const version = allVersioning.get(versioning);
   // Return a sorted list of valid Versions
   function sortReleases(release1: Release, release2: Release): number {
     return version.sortVersions(release1.version, release2.version);

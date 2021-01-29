@@ -15,10 +15,6 @@
       "extends": ["schedule:monthly"]
     },
     {
-      "datasources": ["docker"],
-      "automerge": false
-    },
-    {
       "depTypeList": ["dependencies"],
       "semanticCommitType": "build"
     },

@@ -13,6 +13,9 @@ export function sortBranches(branches: Partial<BranchConfig>[]): void {
   ];
   logger.trace({ branches }, 'branches');
   branches.sort((a, b) => {
+    if (a.vulnerabilityAlert && !b.vulnerabilityAlert) {
+      return -1;
+    }
     if (a.prPriority !== b.prPriority) {
       return b.prPriority - a.prPriority;
     }
