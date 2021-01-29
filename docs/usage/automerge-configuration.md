@@ -46,8 +46,8 @@ However, in many cases the new version(s) will pass tests, and if so then there'
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
-      "packagePatterns": ["lint", "prettier"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePatterns": ["lint", "prettier"],
       "automerge": true
     }
   ]
@@ -62,7 +62,7 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
 {
   "packageRules": [
     {
-      "updateTypes": ["minor", "patch"],
+      "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
     }

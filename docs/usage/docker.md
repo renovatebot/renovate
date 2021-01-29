@@ -42,8 +42,8 @@ You could then use this `packageRules` array, to tell Renovate to use `semver` v
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["foo/bar"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["foo/bar"],
       "versioning": "semver"
     }
   ]
@@ -57,8 +57,8 @@ You can tell Renovate to use the `pep440` versioning scheme with this set of `pa
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["python"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
       "versioning": "pep440"
     }
   ]

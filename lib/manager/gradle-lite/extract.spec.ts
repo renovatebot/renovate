@@ -66,4 +66,34 @@ describe('manager/gradle-lite/extract', () => {
       },
     ]);
   });
+
+  it('inherits gradle variables', async () => {
+    const fsMock = {
+      'gradle.properties': 'foo=1.0.0',
+      'build.gradle': 'foo = "1.0.1"',
+      'aaa/gradle.properties': 'bar = "2.0.0"',
+      'aaa/build.gradle': 'bar = "2.0.1"',
+      'aaa/bbb/build.gradle': ['foo:foo:$foo', 'bar:bar:$bar']
+        .map((x) => `"${x}"`)
+        .join('\n'),
+    };
+
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+
+    expect(res).toMatchObject([
+      { packageFile: 'gradle.properties', deps: [] },
+      {
+        packageFile: 'build.gradle',
+        deps: [{ depName: 'foo:foo', currentValue: '1.0.1' }],
+      },
+      { packageFile: 'aaa/gradle.properties', deps: [] },
+      {
+        packageFile: 'aaa/build.gradle',
+        deps: [{ depName: 'bar:bar', currentValue: '2.0.1' }],
+      },
+      { packageFile: 'aaa/bbb/build.gradle', deps: [] },
+    ]);
+  });
 });

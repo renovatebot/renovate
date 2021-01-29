@@ -777,7 +777,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'languages',
+    name: 'matchLanguages',
     description:
       'List of languages to match (e.g. ["python"]). Valid only within `packageRules` object',
     type: 'array',
@@ -790,7 +790,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'baseBranchList',
+    name: 'matchBaseBranches',
     description:
       'List of branches to match (e.g. ["master"]). Valid only within `packageRules` object',
     type: 'array',
@@ -803,7 +803,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'managers',
+    name: 'matchManagers',
     description:
       'List of package managers to match (e.g. ["pipenv"]). Valid only within `packageRules` object',
     type: 'array',
@@ -816,7 +816,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'datasources',
+    name: 'matchDatasources',
     description:
       'List of datasources to match (e.g. ["orb"]). Valid only within `packageRules` object',
     type: 'array',
@@ -829,7 +829,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'depTypeList',
+    name: 'matchDepTypes',
     description:
       'List of depTypes to match (e.g. [`peerDependencies`]). Valid only within `packageRules` object',
     type: 'array',
@@ -842,7 +842,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'packageNames',
+    name: 'matchPackageNames',
     description:
       'Package names to match. Valid only within `packageRules` object',
     type: 'array',
@@ -868,7 +868,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'packagePatterns',
+    name: 'matchPackagePatterns',
     description:
       'Package name patterns to match. Valid only within `packageRules` object.',
     type: 'array',
@@ -907,7 +907,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'sourceUrlPrefixes',
+    name: 'matchSourceUrlPrefixes',
     description:
       'A list of source URL prefixes to match against, commonly used for grouping of monorepos or packages from the same organization.',
     type: 'array',
@@ -920,11 +920,10 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'updateTypes',
+    name: 'matchUpdateTypes',
     description:
       'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',
     type: 'array',
-    // TODO: add allowedValues
     subType: 'string',
     allowedValues: [
       'major',
@@ -944,7 +943,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'paths',
+    name: 'matchPaths',
     description:
       'List of strings or glob patterns to match against package files. Applicable inside packageRules only',
     type: 'array',
