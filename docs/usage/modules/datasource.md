@@ -7,8 +7,8 @@ You do not need to ever configure/override datasources directly, but you may use
 {
   "packageRules": [
     {
-      "datasources": ["npm"],
-      "packageNames": ["lodash"],
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["lodash"],
       "automerge": true
     }
   ]

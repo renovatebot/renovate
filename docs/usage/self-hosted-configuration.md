@@ -29,7 +29,7 @@ The command to install dependencies (`npm ci --ignore-scripts`) is necessary bec
 {
   "packageRules": [
     {
-      "packageNames": ["@angular/core"],
+      "matchPackageNames": ["@angular/core"],
       "postUpgradeTasks": {
         "commands": [
           "npm ci --ignore-scripts",
