@@ -1171,7 +1171,7 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = datasourceNpmId;
       config.packageRules = [
         {
-          sourceUrlPrefixes: ['https://github.com/kriskowal/q'],
+          matchSourceUrlPrefixes: ['https://github.com/kriskowal/q'],
           allowedVersions: '< 1.4.0',
         },
       ];

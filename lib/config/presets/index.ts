@@ -171,9 +171,9 @@ export async function getPreset(
   }
   const packageListKeys = [
     'description',
-    'packageNames',
+    'matchPackageNames',
     'excludePackageNames',
-    'packagePatterns',
+    'matchPackagePatterns',
     'excludePackagePatterns',
   ];
   if (presetKeys.every((key) => packageListKeys.includes(key))) {
