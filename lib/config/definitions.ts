@@ -593,7 +593,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'npmToken',
-    description: 'NPM token used for authenticating with the default registry',
+    description: 'npm token used for authenticating with the default registry',
     stage: 'branch',
     type: 'string',
   },
@@ -1015,7 +1015,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'respectLatest',
-    description: 'Ignore versions newer than NPM "latest" version',
+    description: 'Ignore versions newer than npm "latest" version',
     stage: 'package',
     type: 'boolean',
   },
