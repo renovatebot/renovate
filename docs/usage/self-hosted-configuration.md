@@ -1,6 +1,6 @@
 ---
 title: Self-Hosted configuration
-description: Self-Hosted configuration usable in renovate.json or package.json
+description: Self-Hosted configuration usable in config file, CLI or environment variables
 ---
 
 # Self-Hosted configuration options
@@ -65,12 +65,11 @@ e.g.
 ## autodiscover
 
 When you enable `autodiscover`, by default, Renovate will run on _every_ repository that the bot account can access.
-This is probably not what you want.
-Use the `autodiscoverFilter` option to limit the bot to only the wanted repositories.
+If you want Renovate to run on only a subset of those, use the `autodiscoverFilter` option to limit the bot to only the wanted repositories.
 
 ## autodiscoverFilter
 
-You can use this option to filter the list of repositories that the Renovate bot account can access trough `autodiscover`.
+You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern.
 
 e.g.
@@ -96,25 +95,12 @@ e.g.
 
 ## binarySource
 
-By default Renovate uses the binaries that are bundled with the Renovate bot.
-Use the `binarySource` option to override this default.
-You can use globally installed binaries, or Docker-based binaries.
+Renovate often needs to use third party binaries in its PRs, e.g. `npm` to update `package-lock.json` or `go` to update `go.sum`.
+By default, Renovate will use a child process to run such tools, so they need to be pre-installed before running Renovate and available in the path.
 
-To use your globally installed binaries (`npm`, `yarn`, etc):
-
-```json
-{
-  "binarySource": "global"
-}
-```
-
-To use Docker-based binaries:
-
-```json
-{
-  "binarySource": "docker"
-}
-```
+As an alternative, Renovate can use "sidecar" containers for third party tools.
+If configured, Renovate will use `docker run` to create containers such as Node.js or Python to run tools within as-needed.
+For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
 
 ## cacheDir
 
