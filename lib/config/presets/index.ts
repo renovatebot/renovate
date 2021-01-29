@@ -214,7 +214,7 @@ export async function resolveConfigPresets(
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
         try {
-          fetchedPreset = await getPreset(preset, baseConfig);
+          fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if

@@ -1,13 +1,16 @@
 import { RenovateConfig } from '..';
 import { mocked } from '../../../test/util';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
+import * as _local from './local';
 import * as _npm from './npm';
 import * as presets from '.';
 
 jest.mock('./npm');
 jest.mock('./github');
+jest.mock('./local');
 
 const npm = mocked(_npm);
+const local = mocked(_local);
 
 npm.getPreset = jest.fn(({ packageName, presetName }) => {
   if (packageName === 'renovate-config-ikatyang') {
@@ -175,6 +178,20 @@ describe('config/presets', () => {
         'config:base',
       ]);
       expect(config).toMatchObject(res);
+      expect(res).toMatchSnapshot();
+    });
+
+    it('resolves self-hosted presets without baseConfig', async () => {
+      config.extends = ['local>username/preset-repo'];
+      local.getPreset = jest.fn(({ packageName, presetName, baseConfig }) =>
+        Promise.resolve({ labels: ['self-hosted resolved'] })
+      );
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res.labels).toEqual(['self-hosted resolved']);
+      expect(local.getPreset.mock.calls).toHaveLength(1);
+      expect(local.getPreset.mock.calls[0][0].baseConfig).not.toBeUndefined();
       expect(res).toMatchSnapshot();
     });
   });

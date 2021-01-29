@@ -16,7 +16,7 @@ Let's look at an example of configuring packages with existing Angular migration
 Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`
 
 ```javascript
-module.export = {
+module.exports = {
   allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
