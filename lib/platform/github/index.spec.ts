@@ -209,10 +209,16 @@ describe('platform/github', () => {
       })
       // getRepos
       .get('/user/repos?per_page=100')
-      .reply(200, forkedRepo ? [{ full_name: forkedRepo }] : [])
+      .reply(
+        200,
+        forkedRepo ? [{ full_name: forkedRepo, default_branch: 'master' }] : []
+      )
       // getBranchCommit
       .post(`/repos/${repository}/forks`)
-      .reply(200, forkedRepo ? { full_name: forkedRepo } : {});
+      .reply(
+        200,
+        forkedRepo ? { full_name: forkedRepo, default_branch: 'master' } : {}
+      );
   }
 
   describe('initRepo', () => {
