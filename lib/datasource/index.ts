@@ -323,10 +323,8 @@ export async function getPkgReleases(
     }
   }
   // Strip constraints from releases result
-  res.releases = res.releases.map((rawRelease) => {
-    const release = { ...rawRelease };
-    delete release.constraints;
-    return release;
+  res.releases.forEach((release) => {
+    delete release.constraints; // eslint-disable-line no-param-reassign
   });
   return res;
 }
