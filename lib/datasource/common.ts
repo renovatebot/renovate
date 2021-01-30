@@ -48,6 +48,7 @@ export interface Release {
   releaseTimestamp?: any;
   version: string;
   newDigest?: string;
+  constraints?: Record<string, string | string[]>;
 }
 
 export interface ReleaseResult {

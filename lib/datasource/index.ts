@@ -298,6 +298,36 @@ export async function getPkgReleases(
         (findRelease) => findRelease.version === filterRelease.version
       ) === filterIndex
   );
+  // Filter releases for compatibility
+  for (const [constraintName, constraintValue] of Object.entries(
+    config.constraints || {}
+  )) {
+    if (version.isVersion(constraintValue)) {
+      res.releases = res.releases.filter((release) => {
+        if (!release.constraints) {
+          return true;
+        }
+        if (!release.constraints[constraintName]) {
+          return true;
+        }
+        let releaseConstraints = release.constraints[constraintName];
+        if (is.string(releaseConstraints)) {
+          releaseConstraints = [releaseConstraints];
+        }
+        return releaseConstraints.some(
+          (releaseConstraint) =>
+            !releaseConstraint ||
+            version.matches(constraintValue, releaseConstraint)
+        );
+      });
+    }
+  }
+  // Strip constraints from releases result
+  res.releases = res.releases.map((rawRelease) => {
+    const release = { ...rawRelease };
+    delete release.constraints;
+    return release;
+  });
   return res;
 }
 

@@ -37,28 +37,9 @@ function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
 }
 
-function compatibleVersions(
-  releases: Releases,
-  constraints: Record<string, string>
-): string[] {
-  const versions = Object.keys(releases);
-  if (!(constraints?.python && pep440.isVersion(constraints.python))) {
-    return versions;
-  }
-  return versions.filter((version) =>
-    releases[version].some((release) => {
-      if (!release.requires_python) {
-        return true;
-      }
-      return pep440.matches(constraints.python, release.requires_python);
-    })
-  );
-}
-
 async function getDependency(
   packageName: string,
-  hostUrl: string,
-  constraints: Record<string, string>
+  hostUrl: string
 ): Promise<ReleaseResult | null> {
   const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
   const dependency: ReleaseResult = { releases: null };
@@ -121,7 +102,7 @@ async function getDependency(
 
   dependency.releases = [];
   if (dep.releases) {
-    const versions = compatibleVersions(dep.releases, constraints);
+    const versions = Object.keys(dep.releases);
     dependency.releases = versions.map((version) => {
       const releases = dep.releases[version] || [];
       const { upload_time: releaseTimestamp } = releases[0] || {};
@@ -132,6 +113,14 @@ async function getDependency(
       };
       if (isDeprecated) {
         result.isDeprecated = isDeprecated;
+      }
+      const pythonConstraint = releases.map(
+        ({ requires_python }) => requires_python
+      );
+      if (pythonConstraint) {
+        result.constraints = {
+          python: pythonConstraint,
+        };
       }
       return result;
     });
@@ -184,8 +173,7 @@ function cleanSimpleHtml(html: string): string {
 
 async function getSimpleDependency(
   packageName: string,
-  hostUrl: string,
-  constraints: Record<string, string>
+  hostUrl: string
 ): Promise<ReleaseResult | null> {
   const lookupUrl = url.resolve(hostUrl, `${packageName}`);
   const dependency: ReleaseResult = { releases: null };
@@ -214,13 +202,21 @@ async function getSimpleDependency(
       releases[version].push(release);
     }
   }
-  const versions = compatibleVersions(releases, constraints);
+  const versions = Object.keys(releases);
   dependency.releases = versions.map((version) => {
     const versionReleases = releases[version] || [];
     const isDeprecated = versionReleases.some(({ yanked }) => yanked);
     const result: Release = { version };
     if (isDeprecated) {
       result.isDeprecated = isDeprecated;
+    }
+    const pythonConstraint = versionReleases.map(
+      ({ requires_python }) => requires_python
+    );
+    if (pythonConstraint) {
+      result.constraints = {
+        python: pythonConstraint,
+      };
     }
     return result;
   });
@@ -238,12 +234,12 @@ export async function getReleases({
   // not all simple indexes use this identifier, but most do
   if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
     logger.trace({ lookupName, hostUrl }, 'Looking up pypi simple dependency');
-    dependency = await getSimpleDependency(lookupName, hostUrl, constraints);
+    dependency = await getSimpleDependency(lookupName, hostUrl);
   } else {
     logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
     try {
       // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
-      dependency = await getDependency(lookupName, hostUrl, constraints);
+      dependency = await getDependency(lookupName, hostUrl);
     } catch (err) {
       if (err.statusCode !== 404) {
         throw err;
@@ -254,7 +250,7 @@ export async function getReleases({
         { lookupName, hostUrl },
         'Looking up pypi simple dependency via fallback'
       );
-      dependency = await getSimpleDependency(lookupName, hostUrl, constraints);
+      dependency = await getSimpleDependency(lookupName, hostUrl);
     }
   }
   return dependency;
