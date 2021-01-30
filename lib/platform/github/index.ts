@@ -308,6 +308,16 @@ export async function initRepo({
       });
       config.repository = forkedRepo.body.full_name;
       config.forkDefaultBranch = forkedRepo.body.default_branch;
+      // istanbul ignore if
+      if (config.forkDefaultBranch !== config.defaultBranch) {
+        logger.debug(
+          {
+            defaultBranch: config.defaultBranch,
+            forkDefaultBranch: config.forkDefaultBranch,
+          },
+          'Fork has different default branch to parent'
+        );
+      }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
