@@ -118,7 +118,6 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
-    const authorization = !!options?.headers?.authorization;
 
     const cacheKey = crypto
       .createHash('md5')
@@ -151,7 +150,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     try {
       const res = await resPromise;
-      res.authorization = authorization;
+      res.authorization = !!options?.headers?.authorization;
       return cloneResponse(res);
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
