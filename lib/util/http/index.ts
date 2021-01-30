@@ -53,7 +53,7 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
     statusCode: response.statusCode,
     body: clone<T>(response.body),
     headers: clone(response.headers),
-    authorization: response.authorization,
+    authorization: !!response.authorization,
   };
 }
 
