@@ -44,6 +44,7 @@ export interface HttpResponse<T = string> {
   statusCode: number;
   body: T;
   headers: any;
+  authorization?: boolean;
 }
 
 function cloneResponse<T>(response: any): HttpResponse<T> {
@@ -52,6 +53,7 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
     statusCode: response.statusCode,
     body: clone<T>(response.body),
     headers: clone(response.headers),
+    authorization: response.authorization,
   };
 }
 
@@ -116,6 +118,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
+    const authorization = !!options?.headers?.authorization;
 
     const cacheKey = crypto
       .createHash('md5')
@@ -148,6 +151,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     try {
       const res = await resPromise;
+      res.authorization = authorization;
       return cloneResponse(res);
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
