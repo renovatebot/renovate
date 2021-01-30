@@ -570,6 +570,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -594,7 +595,7 @@ describe(getName(__filename), () => {
       httpMock
         .scope('https://registry.company.com/v2')
         .get('/')
-        .times(3)
+        .times(4)
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['latest'] })
@@ -602,7 +603,13 @@ describe(getName(__filename), () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestListV2,
-          manifests: [{ digest: 'some-config-digest' }],
+          manifests: [{ digest: 'some-image-digest' }],
+        })
+        .get('/node/manifests/some-image-digest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
@@ -613,6 +620,47 @@ describe(getName(__filename), () => {
             },
           },
         });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
+    it('ignores unsupported manifest', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV1,
+        });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
+    it('ignores unsupported schema version', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {});
       const res = await getPkgReleases({
         datasource: docker.id,
         depName: 'registry.company.com/node',
@@ -633,6 +681,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
