@@ -10,7 +10,6 @@ export interface DigestConfig extends Config {
 }
 
 interface ReleasesConfigBase {
-  constraints?: Record<string, string>;
   npmrc?: string;
   registryUrls?: string[];
   trustLevel?: 'low' | 'high';
@@ -27,6 +26,7 @@ export interface GetPkgReleasesConfig extends ReleasesConfigBase {
   lookupName?: string;
   versioning?: string;
   extractVersion?: string;
+  constraints?: Record<string, string>;
 }
 
 export function isGetPkgReleasesConfig(
