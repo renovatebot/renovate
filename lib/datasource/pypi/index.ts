@@ -114,14 +114,10 @@ async function getDependency(
       if (isDeprecated) {
         result.isDeprecated = isDeprecated;
       }
-      const pythonConstraint = releases.map(
-        ({ requires_python }) => requires_python
-      );
-      if (pythonConstraint) {
-        result.constraints = {
-          python: pythonConstraint,
-        };
-      }
+      // There may be multiple releases with different requires_python, so we return all in an array
+      result.constraints = {
+        python: releases.map(({ requires_python }) => requires_python),
+      };
       return result;
     });
   }
@@ -210,21 +206,16 @@ async function getSimpleDependency(
     if (isDeprecated) {
       result.isDeprecated = isDeprecated;
     }
-    const pythonConstraint = versionReleases.map(
-      ({ requires_python }) => requires_python
-    );
-    if (pythonConstraint) {
-      result.constraints = {
-        python: pythonConstraint,
-      };
-    }
+    // There may be multiple releases with different requires_python, so we return all in an array
+    result.constraints = {
+      python: versionReleases.map(({ requires_python }) => requires_python),
+    };
     return result;
   });
   return dependency;
 }
 
 export async function getReleases({
-  constraints,
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
