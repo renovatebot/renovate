@@ -28,6 +28,180 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
 We will do our best to answer your question(s).
 
+## Guide to working with JSON
+
+The Renovate documentation assumes you use a `renovate.json` file to configure the bot.
+This section explains how to work with JSON.
+
+### What is JSON?
+
+JSON stands for JavaScript Object Notation.
+This is a format that's used by the JavaScript programming language to create an `object`.
+You don't need to know the JavaScript programming language to use JSON though.
+
+The JSON file is read by the Renovate bot to determine what configuration the bot should use.
+
+### What types can I use?
+
+Each configuration option accepts only one type.
+A type is a kind of data format, say a number, or a "string" of characters.
+
+Renovate uses the following types:
+
+| Format  | Example    |
+| ------- | ---------- |
+| String  | `"string"` |
+| Boolean | `true`     |
+| Array   | `[]`       |
+| Integer | `1`        |
+| Object  | `{}`       |
+
+Renovate doesn't use `floats`, which are numbers with a decimal (`1.2.3.`).
+
+### How read the tables
+
+Throughout the Renovate documenation you'll find tables that describe the wanted format for a configuration option.
+It can be tricky to read those tables if you're new to the JSON format, so let's go over some examples now.
+
+### Configure a string property
+
+A string is a sequence of characters, think of a string of yarn, with letters attached to them.
+A string must be enclosed within `'` or `"` characters.
+So `string` is not valid, but `'string'` or `"string"` are valid.
+
+When configuring Renovate bot, do not use a string with numbers in it, like this: `"1"`.
+
+Let's say that the `snorgleborf` config option has this table:
+
+| Name    | Value  |
+| ------- | ------ |
+| type    | string |
+| default | `null` |
+
+You would create the following JSON:
+
+```json
+{
+  "snorgleborf": "string"
+}
+```
+
+### Configure a Boolean property
+
+A Boolean is a logical operator.
+It can be `true` or `false`.
+Think of a Boolean as a light switch: `true` is on, and `false` is off.
+Renovate usually uses a Boolean for binary choices: either you want something to happen or you don't.
+
+Let's say that the `snorgleborf` config option has this table:
+
+| Name    | Value   |
+| ------- | ------- |
+| type    | boolean |
+| default | `false` |
+
+You would create the following JSON:
+
+```json
+{
+  "snorgleborf": false
+}
+```
+
+### Configure a array property
+
+A array is a list of one or multiple items.
+
+Let's say that the `snorgleborf` config option has this table:
+
+| Name    | Value |
+| ------- | ----- |
+| type    | array |
+| default | `[]`  |
+
+You would create the following JSON:
+
+```json
+{
+  "snorgleborf": []
+}
+```
+
+Note that this example is just an empty array.
+Usually a `subtype` row in the table says what type you should use within the array:
+
+| Name    | Value  |
+| ------- | ------ |
+| type    | array  |
+| subtype | string |
+| default | `[""]` |
+
+```json
+{
+  "snorgleborf": [
+    "overrideDefaultConfig",
+    "separate each new item in the array with a comma"
+  ]
+}
+```
+
+### Configure a Integer property
+
+A integer is a whole number, that does not contain a comma or decimal.
+
+| Input | Is integer |
+| ----- | ---------- |
+| `1`   | Yes        |
+| `1.2` | No         |
+| `1,2` | No         |
+
+Let's say that the `snorgleborf` config option has this table:
+
+| Name    | Value   |
+| ------- | ------- |
+| type    | integer |
+| default | `0`     |
+
+You would create the following JSON:
+
+```json
+{
+  "snorgleborf": 1
+}
+```
+
+### Configure a Object property
+
+A object is created by using the `{}` characters.
+A object usually contains multiple key/value pairs.
+
+Let's say that the `snorgleborf` config option has this table:
+
+| Name    | Value  |
+| ------- | ------ |
+| type    | object |
+| default | `{}`   |
+
+You would create the following JSON:
+
+```json
+{
+  "snorgleborf": {}
+}
+```
+
+### What does `subtype` mean?
+
+A subtype in the configuration table specifies what type you're allowed to use within the main element.
+
+### What does `parent` mean?
+
+// TODO: Add example of parent here.
+
+### What does `mergeable` mean?
+
+// TODO: Explain what mergeable means.
+
 ## addLabels
 
 The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
