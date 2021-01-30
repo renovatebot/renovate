@@ -304,14 +304,10 @@ export async function getPkgReleases(
   )) {
     if (version.isVersion(constraintValue)) {
       res.releases = res.releases.filter((release) => {
-        if (!release.constraints?.[constraintName]) {
+        if (!is.nonEmptyArray(release.constraints?.[constraintName])) {
           return true;
         }
-        let releaseConstraints = release.constraints[constraintName];
-        if (is.string(releaseConstraints)) {
-          releaseConstraints = [releaseConstraints];
-        }
-        return releaseConstraints.some(
+        return release.constraints[constraintName].some(
           (releaseConstraint) =>
             !releaseConstraint ||
             version.matches(constraintValue, releaseConstraint)
