@@ -30,7 +30,7 @@
     "prepare:generate": "run-s generate:*",
     "prestart": "run-s generate:* ",
     "pretest": "run-s generate:* ",
-    "prettier": "prettier --list-different \"**/*.{ts,js,mjs,json,md}\"",
+    "prettier": "prettier --check \"**/*.{ts,js,mjs,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,mjs,json,md}\"",
     "release": "node --experimental-modules tools/release.mjs",
     "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
