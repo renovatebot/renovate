@@ -200,6 +200,7 @@ describe('datasource/pypi', () => {
             ],
             '0.31.1': [{ requires_python: '>=3.4' }],
             '0.4.0': [{ requires_python: '>=3.4' }, { requires_python: null }],
+            '0.4.1': [],
           },
         });
       expect(
