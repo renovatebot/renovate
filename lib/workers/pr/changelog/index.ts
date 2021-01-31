@@ -1,12 +1,12 @@
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
+import { compareHosts } from '../../../util/url';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogResult } from './common';
 import { getInRangeReleases } from './releases';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
-import { compareHosts } from '../../../util/url';
 
 export * from './common';
 
