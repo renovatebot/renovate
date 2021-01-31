@@ -6,6 +6,7 @@ import { ChangeLogResult } from './common';
 import { getInRangeReleases } from './releases';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
+import { compareHosts } from '../../../util/url';
 
 export * from './common';
 
@@ -30,7 +31,7 @@ export async function getChangeLogJSON(
 
     if (
       (args.platform === PLATFORM_TYPE_GITLAB &&
-        new URL(args.sourceUrl).hostname === new URL(args.endpoint).hostname) ||
+        compareHosts(args.sourceUrl, args.endpoint)) ||
       args.sourceUrl?.includes('gitlab')
     ) {
       res = await sourceGitlab.getChangeLogJSON({ ...args, releases });

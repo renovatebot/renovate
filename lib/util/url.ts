@@ -17,3 +17,17 @@ export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
 
   return host ? inputString : urlJoin(baseUrl, pathname || '');
 }
+
+export function compareHosts(url1: string | URL, url2: string | URL): boolean {
+  let host1;
+  let host2;
+
+  try {
+    ({ host: host1 } = new URL(url1));
+    ({ host: host2 } = new URL(url2));
+
+    return host1 === host2;
+  } catch (e) {
+    return false;
+  }
+}
