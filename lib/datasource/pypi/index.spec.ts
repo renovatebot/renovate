@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import * as hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 
 const res1: any = fs.readFileSync(
@@ -88,6 +89,23 @@ describe('datasource/pypi', () => {
         depName: 'azure-cli-monitor',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('sets private if authorization privided', async () => {
+      hostRules.add({ hostName: 'customprivate.pypi.net', token: 'abc123' });
+      httpMock
+        .scope('https://customprivate.pypi.net/foo')
+        .get('/azure-cli-monitor/json')
+        .reply(200, JSON.parse(res1));
+      const config = {
+        registryUrls: ['https://customprivate.pypi.net/foo'],
+      };
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        depName: 'azure-cli-monitor',
+      });
+      expect(res.isPrivate).toBe(true);
     });
     it('supports multiple custom datasource urls', async () => {
       httpMock
@@ -247,6 +265,23 @@ describe('datasource/pypi', () => {
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('sets private simple if authorization provided', async () => {
+      hostRules.add({ hostName: 'some.private.registry.org', token: 'abc123' });
+      httpMock
+        .scope('https://some.private.registry.org/+simple/')
+        .get('/dj-database-url')
+        .reply(200, htmlResponse);
+      const config = {
+        registryUrls: ['https://some.private.registry.org/+simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        constraints: { python: '2.7' },
+        depName: 'dj-database-url',
+      });
+      expect(res.isPrivate).toBe(true);
     });
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock

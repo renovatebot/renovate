@@ -13,6 +13,7 @@ export const defaultRegistryUrls = [
 ];
 export const defaultVersioning = pep440.id;
 export const registryStrategy = 'merge';
+export const caching = true;
 
 const githubRepoPattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
@@ -49,6 +50,9 @@ async function getDependency(
   if (!dep) {
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
+  }
+  if (rep.authorization) {
+    dependency.isPrivate = true;
   }
   logger.trace({ lookupUrl }, 'Got pypi api result');
   if (
@@ -178,6 +182,9 @@ async function getSimpleDependency(
   if (!dep) {
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
+  }
+  if (response.authorization) {
+    dependency.isPrivate = true;
   }
   const root: HTMLElement = parse(cleanSimpleHtml(dep));
   const links = root.querySelectorAll('a');
