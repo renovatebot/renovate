@@ -69,6 +69,7 @@ export interface ReleaseResult {
   tags?: Record<string, string>;
   versions?: any;
   registryUrl?: string;
+  isPrivate?: boolean;
 }
 
 export interface DatasourceApi {
@@ -79,6 +80,7 @@ export interface DatasourceApi {
   defaultVersioning?: string;
   defaultConfig?: Record<string, unknown>;
   registryStrategy?: 'first' | 'hunt' | 'merge';
+  caching?: boolean;
 }
 
 // TODO: remove, only for compatibility
