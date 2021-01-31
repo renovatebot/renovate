@@ -59,6 +59,7 @@ async function getRegistryReleases(
       cacheNamespace,
       cacheKey
     );
+    // istanbul ignore if
     if (cachedResult) {
       logger.debug({ cacheKey }, 'Returning cached datasource response');
       return cachedResult;
