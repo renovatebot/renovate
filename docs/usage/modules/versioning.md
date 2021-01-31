@@ -14,8 +14,8 @@ Configuring or overriding the default `versioning` can be helpful for ecosystems
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["python"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
       "versioning": "pep440"
     }
   ]
