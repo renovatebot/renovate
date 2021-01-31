@@ -1,4 +1,4 @@
-import { resolveBaseUrl, compareHosts } from './url';
+import { compareHosts, resolveBaseUrl } from './url';
 
 describe('util/url/resolveBaseUrl', () => {
   test.each([
