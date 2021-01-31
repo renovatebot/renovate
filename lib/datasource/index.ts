@@ -302,12 +302,16 @@ export async function getPkgReleases(
   for (const [constraintName, constraintValue] of Object.entries(
     config.constraints || {}
   )) {
+    // Currently we only support if the constraint is a plain version
+    // TODO: Support range/range compatibility filtering #8476
     if (version.isVersion(constraintValue)) {
       res.releases = res.releases.filter((release) => {
         if (!is.nonEmptyArray(release.constraints?.[constraintName])) {
+          // A release with no constraints is OK
           return true;
         }
         return release.constraints[constraintName].some(
+          // If any of the release's constraints match, then it's OK
           (releaseConstraint) =>
             !releaseConstraint ||
             version.matches(constraintValue, releaseConstraint)
