@@ -23,8 +23,8 @@ export function compareHosts(url1: string | URL, url2: string | URL): boolean {
   let host2;
 
   try {
-    ({ host: host1 } = new URL(url1));
-    ({ host: host2 } = new URL(url2));
+    ({ host: host1 } = new URL(url1?.toString()));
+    ({ host: host2 } = new URL(url2?.toString()));
 
     return host1 === host2;
   } catch (e) {
