@@ -41,11 +41,11 @@ Consider this example:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "packagePatterns": ["eslint"],
+      "matchPackagePatterns": ["eslint"],
       "labels": ["linting"]
     },
     {
-      "depTypeList": ["optionalDependencies"],
+      "matchDepTypes": ["optionalDependencies"],
       "addLabels": ["optional"]
     }
   ]
@@ -123,7 +123,7 @@ You could configure Renovate to automerge all but major this way:
 {
   "packageRules": [
     {
-      "updateTypes": ["minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
     }
   ]
@@ -137,7 +137,7 @@ So for example you could elect to automerge all (passing) `devDependencies` only
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
+      "matchDepTypes": ["devDependencies"],
       "automerge": true
     }
   ]
@@ -405,7 +405,7 @@ If instead you mean to apply settings to any package manager that updates using 
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "labels": ["docker-update"]
     }
   ]
@@ -447,7 +447,7 @@ To disable Renovate for all `eslint` packages, you can configure a package rule 
 {
   "packageRules": [
     {
-      "packagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["^eslint"],
       "enabled": false
     }
   ]
@@ -460,8 +460,8 @@ To disable Renovate for npm `devDependencies` but keep it for `dependencies` you
 {
   "packageRules": [
     {
-      "managers": ["npm"],
-      "depTypeList": ["devDependencies"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
       "enabled": false
     }
   ]
@@ -517,7 +517,7 @@ For example, to extract only the major.minor precision from a GitHub release, th
 {
   "packageRules": [
     {
-      "packageNames": ["foo"],
+      "matchPackageNames": ["foo"],
       "extractVersion": "^(?<version>v\\d+\\.\\d+)"
     }
   ]
@@ -532,7 +532,7 @@ Alternatively, to strip a `release-` prefix:
 {
   "packageRules": [
     {
-      "packageNames": ["bar"],
+      "matchPackageNames": ["bar"],
       "extractVersion": "^release-(?<version>.*)$"
     }
   ]
@@ -546,7 +546,7 @@ A similar one could strip leading `v` prefixes:
 {
   "packageRules": [
     {
-      "packageNames": ["baz"],
+      "matchPackageNames": ["baz"],
       "extractVersion": "^v(?<version>.*)$"
     }
   ]
@@ -625,8 +625,8 @@ For example, to group all non-major devDependencies updates together into a sing
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
-      "updateTypes": ["patch", "minor"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
       "groupName": "devDependencies (non-major)"
     }
   ]
@@ -643,8 +643,8 @@ If you wished to override this then you could configure like this:
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
-      "updateTypes": ["patch", "minor"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
       "groupName": "devDependencies (non-major)",
       "groupSlug": "dev-dependencies"
     }
@@ -870,7 +870,7 @@ The above is the same as if you wrote this package rule:
 {
   "packageRules": [
     {
-      "packageNames": ["eslint", "eslint-config-base"],
+      "matchPackageNames": ["eslint", "eslint-config-base"],
       "enabled": false
     }
   ]
@@ -959,7 +959,7 @@ Consider this example:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "packagePatterns": ["eslint"],
+      "matchPackagePatterns": ["eslint"],
       "labels": ["linting"]
     }
   ]
@@ -1020,14 +1020,14 @@ Here is an example if you want to group together all packages starting with `esl
 {
   "packageRules": [
     {
-      "packagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["^eslint"],
       "groupName": "eslint packages"
     }
   ]
 }
 ```
 
-Note how the above uses `packagePatterns` with a regex value.
+Note how the above uses `matchPackagePatterns` with a regex value.
 
 Here is an example where you might want to limit the "noisy" package `aws-sdk` to updates just once per week:
 
@@ -1035,26 +1035,26 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
 {
   "packageRules": [
     {
-      "packageNames": ["aws-sdk"],
+      "matchPackageNames": ["aws-sdk"],
       "schedule": ["after 9pm on sunday"]
     }
   ]
 }
 ```
 
-For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"packageNames": ["com.thoughtworks.xstream:xstream"]`
+For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
 
-Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name.
-This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler.
-However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if _either_ match.
+Note how the above uses `matchPackageNames` instead of `matchPackagePatterns` because it is an exact match package name.
+This is the equivalent of defining `"matchPackagePatterns": ["^aws\-sdk$"]` and hence much simpler.
+However you can mix together both `matchPackageNames` and `matchPackagePatterns` in the same package rule and the rule will be applied if _either_ match.
 Example:
 
 ```json
 {
   "packageRules": [
     {
-      "packageNames": ["neutrino"],
-      "packagePatterns": ["^@neutrino/"],
+      "matchPackageNames": ["neutrino"],
+      "matchPackagePatterns": ["^@neutrino/"],
       "groupName": "neutrino monorepo"
     }
   ]
@@ -1070,21 +1070,21 @@ For example, if you have an `examples` directory and you want all updates to tho
 {
   "packageRules": [
     {
-      "paths": ["examples/**"],
+      "matchPaths": ["examples/**"],
       "extends": [":semanticCommitTypeAll(chore)"]
     }
   ]
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern.
+If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "paths": ["+(package.json)"],
+      "matchPaths": ["+(package.json)"],
       "dependencyDashboardApproval": true
     }
   ]
@@ -1103,7 +1103,7 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 {
   "packageRules": [
     {
-      "packageNames": ["angular"],
+      "matchPackageNames": ["angular"],
       "allowedVersions": "<=1.5"
     }
   ]
@@ -1119,7 +1119,7 @@ For example, the following will enforce that only 3 or 4-section versions are su
 {
   "packageRules": [
     {
-      "packageNames": ["com.thoughtworks.xstream:xstream"],
+      "matchPackageNames": ["com.thoughtworks.xstream:xstream"],
       "allowedVersions": "/^[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)?$/"
     }
   ]
@@ -1133,14 +1133,14 @@ Use the syntax `!/ /` like the following:
 {
   "packageRules": [
     {
-      "packageNames": ["chalk"],
+      "matchPackageNames": ["chalk"],
       "allowedVersions": "!/java$/"
     }
   ]
 }
 ```
 
-### depTypeList
+### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
@@ -1151,13 +1151,13 @@ Invalid if used outside of a `packageRule`.
 Use `ignoreDeps` instead if all you want to do is have a list of package names for Renovate to ignore.
 
 Use `excludePackageNames` if you want to have one or more exact name matches excluded in your package rule.
-See also `packageNames`.
+See also `matchPackageNames`.
 
 ```json
 {
   "packageRules": [
     {
-      "packagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["^eslint"],
       "excludePackageNames": ["eslint-foo"]
     }
   ]
@@ -1169,13 +1169,13 @@ The above will match all package names starting with `eslint` but exclude the sp
 ### excludePackagePatterns
 
 Use this field if you want to have one or more package name patterns excluded in your package rule.
-See also `packagePatterns`.
+See also `matchPackagePatterns`.
 
 ```json
 {
   "packageRules": [
     {
-      "packagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["^eslint"],
       "excludePackagePatterns": ["^eslint-foo"]
     }
   ]
@@ -1184,7 +1184,7 @@ See also `packagePatterns`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
-### languages
+### matchLanguages
 
 Use this field to restrict rules to a particular language. e.g.
 
@@ -1192,15 +1192,15 @@ Use this field to restrict rules to a particular language. e.g.
 {
   "packageRules": [
     {
-      "packageNames": ["request"],
-      "languages": ["python"],
+      "matchPackageNames": ["request"],
+      "matchLanguages": ["python"],
       "enabled": false
     }
   ]
 }
 ```
 
-### baseBranchList
+### matchBaseBranches
 
 Use this field to restrict rules to a particular branch. e.g.
 
@@ -1208,7 +1208,7 @@ Use this field to restrict rules to a particular branch. e.g.
 {
   "packageRules": [
     {
-      "baseBranchList": ["master"],
+      "matchBaseBranches": ["master"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
@@ -1216,7 +1216,7 @@ Use this field to restrict rules to a particular branch. e.g.
 }
 ```
 
-### managers
+### matchManagers
 
 Use this field to restrict rules to a particular package manager. e.g.
 
@@ -1224,15 +1224,15 @@ Use this field to restrict rules to a particular package manager. e.g.
 {
   "packageRules": [
     {
-      "packageNames": ["node"],
-      "managers": ["dockerfile"],
+      "matchPackageNames": ["node"],
+      "matchManagers": ["dockerfile"],
       "enabled": false
     }
   ]
 }
 ```
 
-### datasources
+### matchDatasources
 
 Use this field to restrict rules to a particular datasource. e.g.
 
@@ -1240,7 +1240,7 @@ Use this field to restrict rules to a particular datasource. e.g.
 {
   "packageRules": [
     {
-      "datasources": ["orb"],
+      "matchDatasources": ["orb"],
       "labels": ["circleci-orb!!"]
     }
   ]
@@ -1258,7 +1258,7 @@ For example, the following will enforce that only `1.*` versions:
 {
   "packageRules": [
     {
-      "packagePatterns": ["io.github.resilience4j"],
+      "matchPackagePatterns": ["io.github.resilience4j"],
       "matchCurrentVersion": "/^1\\./"
     }
   ]
@@ -1272,23 +1272,23 @@ Use the syntax `!/ /` like the following:
 {
   "packageRules": [
     {
-      "packagePatterns": ["io.github.resilience4j"],
+      "matchPackagePatterns": ["io.github.resilience4j"],
       "allowedVersions": "!/^0\\./"
     }
   ]
 }
 ```
 
-### packageNames
+### matchPackageNames
 
 Use this field if you want to have one or more exact name matches in your package rule.
-See also `excludedPackageNames`.
+See also `excludePackageNames`.
 
 ```json
 {
   "packageRules": [
     {
-      "packageNames": ["angular"],
+      "matchPackageNames": ["angular"],
       "rangeStrategy": "pin"
     }
   ]
@@ -1297,7 +1297,7 @@ See also `excludedPackageNames`.
 
 The above will configure `rangeStrategy` to `pin` only for the package `angular`.
 
-### packagePatterns
+### matchPackagePatterns
 
 Use this field if you want to have one or more package names patterns in your package rule.
 See also `excludePackagePatterns`.
@@ -1306,7 +1306,7 @@ See also `excludePackagePatterns`.
 {
   "packageRules": [
     {
-      "packagePatterns": ["^angular"],
+      "matchPackagePatterns": ["^angular"],
       "rangeStrategy": "replace"
     }
   ]
@@ -1315,22 +1315,22 @@ See also `excludePackagePatterns`.
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-### paths
+### matchPaths
 
-Renovate will match `paths` against both a partial string match or a minimatch glob pattern.
+Renovate will match `matchPaths` against both a partial string match or a minimatch glob pattern.
 If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
 
 ```
-  "paths": ["+(package.json)"],
+  "matchPaths": ["+(package.json)"],
 ```
 
 The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
 
 ```
-  "paths": ["package.json"],
+  "matchPaths": ["package.json"],
 ```
 
-### sourceUrlPrefixes
+### matchSourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the Vue monorepo:
 
@@ -1338,7 +1338,7 @@ Here's an example of where you use this to group together all packages from the 
 {
   "packageRules": [
     {
-      "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+      "matchSourceUrlPrefixes": ["https://github.com/vuejs/vue"],
       "groupName": "Vue monorepo packages"
     }
   ]
@@ -1351,14 +1351,14 @@ Here's an example of where you use this to group together all packages from the 
 {
   "packageRules": [
     {
-      "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+      "matchSourceUrlPrefixes": ["https://github.com/renovatebot/"],
       "groupName": "All renovate packages"
     }
   ]
 }
 ```
 
-### updateTypes
+### matchUpdateTypes
 
 Use this field to match rules against types of updates.
 For example to apply a special label for Major updates:
@@ -1367,7 +1367,7 @@ For example to apply a special label for Major updates:
 {
   "packageRules": [
     {
-      "updateTypes": ["major"],
+      "matchUpdateTypes": ["major"],
       "labels": ["UPDATE-MAJOR"]
     }
   ]
@@ -1559,11 +1559,11 @@ Here's an example of how you would define PR priority so that devDependencies ar
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
+      "matchDepTypes": ["devDependencies"],
       "prPriority": -1
     },
     {
-      "packageNames": ["react"],
+      "matchPackageNames": ["react"],
       "prPriority": 5
     }
   ]
@@ -1854,7 +1854,7 @@ In case there is a need to configure them manually, it can be done using this `r
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "registryUrls": ["https://docker.mycompany.domain"]
     }
   ]
@@ -1942,7 +1942,7 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 {
   "packageRules": [
     {
-      "packageNames": ["aws-sdk"],
+      "matchPackageNames": ["aws-sdk"],
       "extends": ["schedule:monthly"]
     }
   ]

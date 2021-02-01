@@ -58,8 +58,8 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       ][]) {
         if (updateTypes.includes(key)) {
           const newRule = clone(rule);
-          newRule.updateTypes = rule.updateTypes || [];
-          newRule.updateTypes.push(key);
+          newRule.matchUpdateTypes = rule.matchUpdateTypes || [];
+          newRule.matchUpdateTypes.push(key);
           Object.assign(newRule, val);
           newRules.push(newRule);
         }

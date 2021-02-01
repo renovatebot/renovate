@@ -67,6 +67,7 @@ export interface LocalRepoConfig {
   issueList: any[] | null;
   mergeMethod: string;
   defaultBranch: string;
+  forkDefaultBranch?: string;
   repositoryOwner: string;
   repository: string | null;
   localDir: string;

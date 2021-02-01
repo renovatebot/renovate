@@ -300,14 +300,24 @@ export async function initRepo({
         )
       ).body.map((r) => r.full_name);
     try {
-      config.repository = (
-        await githubApi.postJson<{ full_name: string }>(
-          `repos/${repository}/forks`,
+      const forkedRepo = await githubApi.postJson<{
+        full_name: string;
+        default_branch: string;
+      }>(`repos/${repository}/forks`, {
+        token: forkToken || opts.token,
+      });
+      config.repository = forkedRepo.body.full_name;
+      config.forkDefaultBranch = forkedRepo.body.default_branch;
+      // istanbul ignore if
+      if (config.forkDefaultBranch !== config.defaultBranch) {
+        logger.debug(
           {
-            token: forkToken || opts.token,
-          }
-        )
-      ).body.full_name;
+            defaultBranch: config.defaultBranch,
+            forkDefaultBranch: config.forkDefaultBranch,
+          },
+          'Fork has different default branch to parent'
+        );
+      }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
@@ -317,14 +327,14 @@ export async function initRepo({
         { repository_fork: config.repository },
         'Found existing fork'
       );
-      // This is a lovely "hack" by GitHub that lets us force update our fork's master
+      // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
       // with the base commit from the parent repository
       try {
         logger.debug(
           'Updating forked repository default sha to match upstream'
         );
         await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
+          `repos/${config.repository}/git/refs/heads/${config.forkDefaultBranch}`,
           {
             body: {
               sha: repo.defaultBranchRef.target.oid,
