@@ -62,6 +62,10 @@ const fixturePulseaudio = fs.readFileSync(
   `${__dirname}/__fixtures__/pulseaudio.json`,
   'utf8'
 );
+const fixtureJdk = fs.readFileSync(
+  `${__dirname}/__fixtures__/openjdk.json`,
+  'utf8'
+);
 
 describe(getName(__filename), () => {
   describe('getReleases', () => {
@@ -297,10 +301,32 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('returns null for ambiguous package results', async () => {
+    it('returns multiple versions if they are present in repository', async () => {
+      mockResolverCall('centos_8', 'java-11-openjdk', 'binname', {
+        status: 404,
+      });
+      mockResolverCall('centos_8', 'java-11-openjdk', 'srcname', {
+        status: 200,
+        body: fixtureJdk,
+      });
+
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        depName: 'centos_8/java-11-openjdk',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(6);
+      expect(res.releases[0].version).toEqual('1:11.0.7.10-1.el8_1');
+      expect(res.releases[5].version).toEqual('1:11.0.9.11-3.el8_3');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns null for scenario when repo is not in package results', async () => {
+      console.log('trying missing repo');
       const pkgs: RepologyPackage[] = [
-        { repo: 'dummy', version: '1.0.0', visiblename: 'example' },
-        { repo: 'dummy', version: '2.0.0', visiblename: 'example' },
+        { repo: 'not-dummy', version: '1.0.0', visiblename: 'example' },
+        { repo: 'not-dummy', version: '2.0.0', visiblename: 'example' },
       ];
       const pkgsJSON = JSON.stringify(pkgs);
 
