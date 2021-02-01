@@ -323,7 +323,6 @@ describe(getName(__filename), () => {
     });
 
     it('returns null for scenario when repo is not in package results', async () => {
-      console.log('trying missing repo');
       const pkgs: RepologyPackage[] = [
         { repo: 'not-dummy', version: '1.0.0', visiblename: 'example' },
         { repo: 'not-dummy', version: '2.0.0', visiblename: 'example' },
