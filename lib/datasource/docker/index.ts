@@ -339,14 +339,6 @@ async function getConfigDigest(
   // be possible
   // istanbul ignore if
   if (!manifestResponse) {
-    logger.debug(
-      {
-        registry,
-        dockerRepository: repository,
-        tag,
-      },
-      'docker registry failure: failed to get manifest for tag'
-    );
     return null;
   }
   const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
