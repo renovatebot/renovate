@@ -3,7 +3,7 @@ import * as datasourceMaven from '../../datasource/maven';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import { ManagerData, VariableRegistry } from './common';
+import { ManagerData, PackageVariables, VariableRegistry } from './common';
 import { parseGradle, parseProps } from './parser';
 import {
   getVars,
@@ -12,6 +12,21 @@ import {
   reorderFiles,
   toAbsolutePath,
 } from './utils';
+
+// Enables reverse sorting in generateBranchConfig()
+//
+// Required for grouped dependencies to be upgraded
+// correctly in single branch.
+//
+// https://github.com/renovatebot/renovate/issues/8224
+function elevateFileReplacePositionField(
+  deps: PackageDependency<ManagerData>[]
+): PackageDependency<ManagerData>[] {
+  return deps.map((dep) => ({
+    ...dep,
+    fileReplacePosition: dep?.managerData?.fileReplacePosition,
+  }));
+}
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
@@ -31,18 +46,30 @@ export async function extractAllPackageFiles(
     try {
       const content = await readLocalFile(packageFile, 'utf8');
       const dir = upath.dirname(toAbsolutePath(packageFile));
+
+      const updateVars = (newVars: PackageVariables): void => {
+        const oldVars = registry[dir] || {};
+        registry[dir] = { ...oldVars, ...newVars };
+      };
+
       if (isPropsFile(packageFile)) {
         const { vars, deps } = parseProps(content, packageFile);
-        registry[dir] = vars;
+        updateVars(vars);
         extractedDeps.push(...deps);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
-        const { deps, urls } = parseGradle(content, vars, packageFile);
+        const { deps, urls, vars: gradleVars } = parseGradle(
+          content,
+          vars,
+          packageFile
+        );
         urls.forEach((url) => {
           if (!registryUrls.includes(url)) {
             registryUrls.push(url);
           }
         });
+        registry[dir] = { ...registry[dir], ...gradleVars };
+        updateVars(gradleVars);
         extractedDeps.push(...deps);
       }
     } catch (e) {
@@ -57,7 +84,7 @@ export async function extractAllPackageFiles(
     return null;
   }
 
-  extractedDeps.forEach((dep) => {
+  elevateFileReplacePositionField(extractedDeps).forEach((dep) => {
     const key = dep.managerData.packageFile;
     const pkgFile: PackageFile = packageFilesByName[key];
     const { deps } = pkgFile;

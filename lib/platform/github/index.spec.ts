@@ -209,10 +209,16 @@ describe('platform/github', () => {
       })
       // getRepos
       .get('/user/repos?per_page=100')
-      .reply(200, forkedRepo ? [{ full_name: forkedRepo }] : [])
+      .reply(
+        200,
+        forkedRepo ? [{ full_name: forkedRepo, default_branch: 'master' }] : []
+      )
       // getBranchCommit
       .post(`/repos/${repository}/forks`)
-      .reply(200, forkedRepo ? { full_name: forkedRepo } : {});
+      .reply(
+        200,
+        forkedRepo ? { full_name: forkedRepo, default_branch: 'master' } : {}
+      );
   }
 
   describe('initRepo', () => {
@@ -460,8 +466,10 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
-        .reply(200, {})
+        .twice() // getOpenPrs() and getClosedPrs()
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
@@ -500,8 +508,10 @@ describe('platform/github', () => {
       forkInitRepoMock(scope, 'some/repo', 'forked/repo');
       scope
         .post('/graphql')
-        .twice()
-        .reply(200, {})
+        .twice() // getOpenPrs() and getClosedPrs()
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
@@ -1359,7 +1369,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [])
         .post('/repos/some/repo/issues/42/comments')
@@ -1398,7 +1410,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .patch('/repos/some/repo/issues/comments/1234')
@@ -1418,7 +1432,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }]);
       await github.initRepo({
@@ -1436,7 +1452,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '!merge' }]);
       await github.initRepo({
@@ -1456,7 +1474,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/repos/some/repo/issues/comments/1234')
@@ -1470,7 +1490,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: 'some-content' }])
         .delete('/repos/some/repo/issues/comments/1234')

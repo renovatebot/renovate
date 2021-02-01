@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { RenovateConfig } from '../../config';
 import { logger, setMeta } from '../../logger';
-import { deleteLocalFile } from '../../util/fs';
+import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
@@ -61,6 +61,11 @@ export async function renovateRepository(
     } catch (err) /* istanbul ignore if */ {
       logger.warn({ err }, 'localDir deletion error');
     }
+  }
+  try {
+    await fs.remove(privateCacheDir());
+  } catch (err) /* istanbul ignore if */ {
+    logger.warn({ err }, 'privateCacheDir deletion error');
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');

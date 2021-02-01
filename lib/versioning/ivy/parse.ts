@@ -10,12 +10,13 @@ export interface Revision {
   value: string;
 }
 
-function parseDynamicRevision(str: string): Revision {
+export const LATEST_REGEX = /^latest\.|^latest$/i;
+
+function parseDynamicRevision(str: string): Revision | null {
   if (!str) {
     return null;
   }
 
-  const LATEST_REGEX = /^latest\.|^latest$/i;
   if (LATEST_REGEX.test(str)) {
     const value = str.replace(LATEST_REGEX, '').toLowerCase() || null;
     return {

@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import path from 'path';
+import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO } from './common';
 import { parseGradle, parseProps } from './parser';
 
 function getGradleFile(fileName: string): string {
@@ -15,7 +16,25 @@ describe('manager/gradle-lite/parser', () => {
     let deps;
 
     ({ deps } = parseGradle(
-      '\nversion = "1.2.3"\n"foo:bar:$version"\nversion = "3.2.1"'
+      [
+        'version = "1.2.3"',
+        '"foo:bar_$version:$version"',
+        'version = "3.2.1"',
+      ].join('\n')
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'foo:bar_1.2.3',
+        currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
+      [
+        'set("version", "1.2.3")',
+        '"foo:bar:$version"',
+        'set("version", "3.2.1")',
+      ].join('\n')
     ));
     expect(deps).toMatchObject([
       {
@@ -41,6 +60,19 @@ describe('manager/gradle-lite/parser', () => {
 
     ({ urls } = parseGradle('url("https://example.com")'));
     expect(urls).toStrictEqual(['https://example.com']);
+
+    ({ urls } = parseGradle('uri "https://example.com"'));
+    expect(urls).toStrictEqual(['https://example.com']);
+
+    ({ urls } = parseGradle(
+      'mavenCentral(); uri("https://example.com"); jcenter(); google();'
+    ));
+    expect(urls).toStrictEqual([
+      MAVEN_REPO,
+      'https://example.com',
+      JCENTER_REPO,
+      GOOGLE_REPO,
+    ]);
   });
   it('parses long form deps', () => {
     let deps;
@@ -50,6 +82,16 @@ describe('manager/gradle-lite/parser', () => {
     expect(deps).toMatchObject([
       {
         depName: 'com.example:my.dependency',
+        currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
+      "implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'foo:bar',
         currentValue: '1.2.3',
       },
     ]);

@@ -557,5 +557,51 @@ describe('config/migration', () => {
         extends: [':unpublishSafeDisabled', 'npm:unpublishSafe'],
       });
     });
+    it('migrates combinations of packageRules', () => {
+      let config: RenovateConfig;
+      let res: MigratedConfig;
+
+      config = {
+        packages: [{ matchPackagePatterns: ['*'] }],
+        packageRules: { matchPackageNames: [] },
+      } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig.packageRules).toHaveLength(2);
+
+      config = {
+        packageRules: { matchPpackageNames: [] },
+        packages: [{ matchPackagePatterns: ['*'] }],
+      } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig.packageRules).toHaveLength(2);
+    });
+    it('it migrates packageRules', () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          {
+            paths: ['package.json'],
+            languages: ['python'],
+            baseBranchList: ['master'],
+            managers: ['dockerfile'],
+            datasources: ['orb'],
+            depTypeList: ['peerDependencies'],
+            packageNames: ['foo'],
+            packagePatterns: ['^bar'],
+            excludePackageNames: ['baz'],
+            excludePackagePatterns: ['^baz'],
+            sourceUrlPrefixes: ['https://github.com/vuejs/vue'],
+            updateTypes: ['major'],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig).toMatchSnapshot();
+    });
   });
 });

@@ -217,19 +217,19 @@ export async function validateConfig(
             }
 
             const selectors = [
-              'paths',
-              'languages',
-              'baseBranchList',
-              'managers',
-              'datasources',
-              'depTypeList',
-              'packageNames',
-              'packagePatterns',
+              'matchPaths',
+              'matchLanguages',
+              'matchBaseBranches',
+              'matchManagers',
+              'matchDatasources',
+              'matchDepTypes',
+              'matchPackageNames',
+              'matchPackagePatterns',
               'excludePackageNames',
               'excludePackagePatterns',
-              'sourceUrlPrefixes',
-              'updateTypes',
               'matchCurrentVersion',
+              'matchSourceUrlPrefixes',
+              'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
               for (const packageRule of val) {
@@ -266,6 +266,7 @@ export async function validateConfig(
             }
             if (key === 'regexManagers') {
               const allowedKeys = [
+                'description',
                 'fileMatch',
                 'matchStrings',
                 'matchStringsStrategy',
@@ -333,7 +334,10 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
+            if (
+              key === 'matchPackagePatterns' ||
+              key === 'excludePackagePatterns'
+            ) {
               for (const pattern of val as string[]) {
                 if (pattern !== '*') {
                   try {

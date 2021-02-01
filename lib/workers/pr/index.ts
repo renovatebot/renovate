@@ -14,8 +14,9 @@ import {
   getBranchLastCommitTime,
   isBranchModified,
 } from '../../util/git';
+import * as template from '../../util/template';
 import { BranchConfig, PrResult } from '../common';
-import { Limit, isLimitReached } from '../global/limits';
+import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
 import { codeOwnersForPr } from './code-owners';
@@ -381,7 +382,12 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        if (!dependencyDashboardCheck && isLimitReached(Limit.PullRequests)) {
+        if (
+          !dependencyDashboardCheck &&
+          isLimitReached(Limit.PullRequests) &&
+          !config.vulnerabilityAlert
+        ) {
+          logger.debug('Skipping PR - limit reached');
           return { prResult: PrResult.LimitReached };
         }
         pr = await platform.createPr({
@@ -389,10 +395,13 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: [...new Set([...config.labels, ...config.addLabels])],
+          labels: [
+            ...new Set([...config.labels, ...config.addLabels]),
+          ].map((label) => template.compile(label, config)),
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
+        incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr.number, prTitle }, 'PR created');
       }
     } catch (err) /* istanbul ignore next */ {

@@ -7,10 +7,12 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
+import * as composerVersioning from '../../versioning/composer';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'packagist';
 export const defaultRegistryUrls = ['https://packagist.org'];
+export const defaultVersioning = composerVersioning.id;
 export const registryStrategy = 'hunt';
 
 const http = new Http(id);

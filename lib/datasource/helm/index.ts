@@ -12,9 +12,7 @@ export const id = 'helm';
 
 const http = new Http(id);
 
-export const defaultRegistryUrls = [
-  'https://kubernetes-charts.storage.googleapis.com/',
-];
+export const defaultRegistryUrls = ['https://charts.helm.sh/stable'];
 export const registryStrategy = 'first';
 
 export const defaultConfig = {

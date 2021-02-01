@@ -11,13 +11,16 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import * as dockerVersioning from '../../versioning/docker';
 import { GetReleasesConfig, ReleaseResult } from '../common';
+import { Image, ImageList, MediaType } from './types';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
 export const id = 'docker';
 export const defaultRegistryUrls = ['https://index.docker.io'];
+export const defaultVersioning = dockerVersioning.id;
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
@@ -253,6 +256,7 @@ function extractDigestFromResponse(manifestResponse: HttpResponse): string {
   return manifestResponse.headers['docker-content-digest'] as string;
 }
 
+// TODO: make generic to return json object
 async function getManifestResponse(
   registry: string,
   repository: string,
@@ -265,7 +269,8 @@ async function getManifestResponse(
       logger.debug('No docker auth found - returning');
       return null;
     }
-    headers.accept = 'application/vnd.docker.distribution.manifest.v2+json';
+    headers.accept =
+      'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
     const url = `${registry}/v2/${repository}/manifests/${tag}`;
     const manifestResponse = await http.get(url, {
       headers,
@@ -321,6 +326,44 @@ async function getManifestResponse(
     );
     return null;
   }
+}
+
+async function getConfigDigest(
+  registry: string,
+  repository: string,
+  tag: string
+): Promise<string> {
+  const manifestResponse = await getManifestResponse(registry, repository, tag);
+  // If getting the manifest fails here, then abort
+  // This means that the latest tag doesn't have a manifest, which shouldn't
+  // be possible
+  // istanbul ignore if
+  if (!manifestResponse) {
+    return null;
+  }
+  const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
+  if (manifest.schemaVersion !== 2) {
+    logger.debug(
+      { registry, dockerRepository: repository, tag },
+      'Manifest schema version is not 2'
+    );
+    return null;
+  }
+
+  if (manifest.mediaType === MediaType.manifestListV2) {
+    logger.trace(
+      { registry, dockerRepository: repository, tag },
+      'Found manifest list, using first image'
+    );
+    return getConfigDigest(registry, repository, manifest.manifests[0].digest);
+  }
+
+  if (manifest.mediaType === MediaType.manifestV2) {
+    return manifest.config.digest;
+  }
+
+  logger.debug({ manifest }, 'Invalid manifest - returning');
+  return null;
 }
 
 /**
@@ -470,37 +513,12 @@ async function getLabels(
     return cachedResult;
   }
   try {
-    const manifestResponse = await getManifestResponse(
-      registry,
-      repository,
-      tag
-    );
-    // If getting the manifest fails here, then abort
-    // This means that the latest tag doesn't have a manifest, which shouldn't
-    // be possible
-    // istanbul ignore if
-    if (!manifestResponse) {
-      logger.debug(
-        {
-          registry,
-          dockerRepository: repository,
-          tag,
-        },
-        'docker registry failure: failed to get manifest for tag'
-      );
-      return {};
-    }
-    const manifest = JSON.parse(manifestResponse.body);
-    // istanbul ignore if
-    if (manifest.schemaVersion !== 2) {
-      logger.debug(
-        { registry, dockerRepository: repository, tag },
-        'Manifest schema version is not 2'
-      );
-      return {};
-    }
     let labels: Record<string, string> = {};
-    const configDigest: string = manifest.config.digest;
+    const configDigest = await getConfigDigest(registry, repository, tag);
+    if (!configDigest) {
+      return {};
+    }
+
     const headers = await getAuthHeaders(registry, repository);
     // istanbul ignore if: Should never be happen
     if (!headers) {

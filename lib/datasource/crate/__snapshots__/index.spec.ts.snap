@@ -1,5 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/crate getReleases clones cloudsmith private registry 1`] = `
+Object {
+  "dependencyUrl": "https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg",
+  "releases": Array [
+    Object {
+      "version": "0.1.0",
+    },
+    Object {
+      "version": "0.1.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/crate getReleases clones other private registry 1`] = `
+Object {
+  "dependencyUrl": "https://github.com/mcorbin/testregistry/mypkg",
+  "releases": Array [
+    Object {
+      "version": "0.1.0",
+    },
+    Object {
+      "version": "0.1.1",
+    },
+  ],
+}
+`;
+
 exports[`datasource/crate getReleases processes real data: amethyst 1`] = `
 Object {
   "dependencyUrl": "https://crates.io/crates/amethyst",
@@ -415,6 +443,8 @@ Array [
   },
 ]
 `;
+
+exports[`datasource/crate getReleases refuses to clone if trustLevel is not high 1`] = `null`;
 
 exports[`datasource/crate getReleases returns null for 404 1`] = `
 Array [
