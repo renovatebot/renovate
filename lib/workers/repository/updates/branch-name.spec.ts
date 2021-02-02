@@ -134,6 +134,24 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toEqual('dep-df9ca0f34833f3e0');
     });
 
+    it('hashedBranchLength too short', () => {
+      const upgrade: RenovateConfig = {
+        hashedBranchLength: 3,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        groupName: 'some group name',
+        group: {
+          branchName:
+            '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+          branchTopic:
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('dep-df9ca0');
+    });
+
     it('enforces valid git branch name', () => {
       const fixtures = [
         {
