@@ -210,10 +210,10 @@ export async function getReleases({
 
     // Always prefer origversion if available, otherwise default to version
     // This is required as source packages usually have no origversion
-    const version = pkg.map((item) => ({
+    const releases = pkg.map((item) => ({
       version: item.origversion ?? item.version,
     }));
-    return { releases: version };
+    return { releases };
   } catch (err) {
     if (err.message === HOST_DISABLED) {
       // istanbul ignore next
