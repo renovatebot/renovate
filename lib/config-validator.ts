@@ -6,7 +6,9 @@ import { configFileNames } from './config/app-strings';
 import { RenovateConfig } from './config/common';
 import { getConfig } from './config/file';
 import { massageConfig } from './config/massage';
+import { migrateConfig } from './config/migration';
 import { validateConfig } from './config/validation';
+import { logger } from './logger';
 
 /* eslint-disable no-console */
 
@@ -17,7 +19,18 @@ async function validate(
   config: RenovateConfig,
   isPreset = false
 ): Promise<void> {
-  const res = await validateConfig(massageConfig(config), isPreset);
+  const { isMigrated, migratedConfig } = migrateConfig(config);
+  if (isMigrated) {
+    logger.info(
+      {
+        oldConfig: config,
+        newConfig: migratedConfig,
+      },
+      'Config migration necessary'
+    );
+  }
+  const massagedConfig = massageConfig(migratedConfig);
+  const res = await validateConfig(massagedConfig, isPreset);
   if (res.errors.length) {
     console.log(
       `${desc} contains errors:\n\n${JSON.stringify(res.errors, null, 2)}`
