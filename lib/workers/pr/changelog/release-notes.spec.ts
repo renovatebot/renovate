@@ -152,7 +152,8 @@ describe(getName(__filename), () => {
         ]);
       const res = await getReleaseList(
         'https://gitlab.com/api/v4/',
-        'some/yet-other-repository'
+        'some/yet-other-repository',
+        'gitlab'
       );
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -241,7 +242,8 @@ describe(getName(__filename), () => {
           '1.0.1',
           'other',
           'https://gitlab.com/',
-          'https://api.gitlab.com/'
+          'https://api.gitlab.com/',
+          'gitlab'
         );
         expect(res).toMatchSnapshot();
         expect(httpMock.getTrace()).toMatchSnapshot();
@@ -394,7 +396,8 @@ describe(getName(__filename), () => {
         'gitlab-org/gitter/webapp',
         '20.26.0',
         'https://gitlab.com/',
-        'https://api.gitlab.com/'
+        'https://api.gitlab.com/',
+        'gitlab'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -523,7 +526,8 @@ describe(getName(__filename), () => {
           'itentialopensource/adapter-utils',
           '4.33.0',
           'https://gitlab.com/',
-          'https://gitlab.com/api/v4/'
+          'https://gitlab.com/api/v4/',
+          'gitlab'
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();

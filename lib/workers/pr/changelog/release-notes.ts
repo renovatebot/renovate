@@ -30,10 +30,7 @@ export async function getReleaseList(
     return [];
   }
   try {
-    if (
-      changelogPlatform === PLATFORM_TYPE_GITLAB ||
-      apiBaseUrl.includes('gitlab')
-    ) {
+    if (changelogPlatform === PLATFORM_TYPE_GITLAB) {
       return await gitlab.getReleaseList(apiBaseUrl, repository);
     }
     return await github.getReleaseList(apiBaseUrl, repository);
@@ -118,7 +115,7 @@ export async function getReleaseNotes(
     ) {
       releaseNotes = release;
       releaseNotes.url =
-        changelogPlatform === PLATFORM_TYPE_GITLAB || baseUrl.includes('gitlab')
+        changelogPlatform === PLATFORM_TYPE_GITLAB
           ? `${baseUrl}${repository}/tags/${release.tag}`
           : `${baseUrl}${repository}/releases/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
@@ -128,10 +125,7 @@ export async function getReleaseNotes(
         try {
           // do not linkify if we have a gitlab repository, as currently
           // linkify-markdown does not correctly extract gitlab repository urls
-          if (
-            changelogPlatform !== PLATFORM_TYPE_GITLAB &&
-            !baseUrl.includes('gitlab')
-          ) {
+          if (changelogPlatform !== PLATFORM_TYPE_GITLAB) {
             releaseNotes.body = linkify(releaseNotes.body, {
               repository: `${baseUrl}${repository}`,
             });
@@ -187,10 +181,7 @@ export async function getReleaseNotesMdFileInner(
   changelogPlatform: string
 ): Promise<ChangeLogFile> | null {
   try {
-    if (
-      changelogPlatform === PLATFORM_TYPE_GITLAB ||
-      apiBaseUrl.includes('gitlab')
-    ) {
+    if (changelogPlatform === PLATFORM_TYPE_GITLAB) {
       return await gitlab.getReleaseNotesMd(repository, apiBaseUrl);
     }
     return await github.getReleaseNotesMd(repository, apiBaseUrl);
@@ -348,12 +339,19 @@ export async function addReleaseNotes(
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
     if (!releaseNotes) {
+      const changelogPlatform =
+        input.project.gitlab ||
+        input.project.apiBaseUrl?.includes('gitlab') ||
+        input.project.baseUrl?.includes('gitlab')
+          ? PLATFORM_TYPE_GITLAB
+          : PLATFORM_TYPE_GITHUB;
+
       releaseNotes = await getReleaseNotesMd(
         repository,
         v.version,
         input.project.baseUrl,
         input.project.apiBaseUrl,
-        input.project.github ? PLATFORM_TYPE_GITHUB : PLATFORM_TYPE_GITLAB
+        changelogPlatform
       );
       // istanbul ignore else: should be tested
       if (!releaseNotes) {
@@ -363,7 +361,7 @@ export async function addReleaseNotes(
           input.project.depName,
           input.project.baseUrl,
           input.project.apiBaseUrl,
-          input.project.github ? PLATFORM_TYPE_GITHUB : PLATFORM_TYPE_GITLAB
+          changelogPlatform
         );
       }
       // Small hack to force display of release notes when there is a compare url
