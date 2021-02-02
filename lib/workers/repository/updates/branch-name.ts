@@ -65,7 +65,13 @@ export function generateBranchName(update: RenovateConfig): void {
       ? template.compile(String(update.branchTopic), update)
       : '';
 
-    const hash = hasha(additionalBranchPrefix + branchTopic);
+    let hashInput = additionalBranchPrefix + branchTopic;
+
+    // Compile extra times in case of nested templates
+    hashInput = template.compile(hashInput, update);
+    hashInput = template.compile(hashInput, update);
+
+    const hash = hasha(hashInput);
 
     update.branchName = update.branchPrefix + hash.slice(0, hashLength);
   } else {
