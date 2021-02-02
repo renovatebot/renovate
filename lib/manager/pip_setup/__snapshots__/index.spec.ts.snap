@@ -57,6 +57,24 @@ Array [
     },
   },
   Object {
+    "cmd": "python3.9 --version",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
     "cmd": "<extract.py> \\"folders/foobar.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo/folders",
@@ -372,24 +390,6 @@ Array [
     },
   },
   Object {
-    "cmd": "python3.8 --version",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-  Object {
     "cmd": "<extract.py> \\"lib/manager/pip_setup/__fixtures__/setup.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo/lib/manager/pip_setup/__fixtures__",
@@ -449,24 +449,6 @@ Array [
     },
   },
   Object {
-    "cmd": "python3.8 --version",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-  Object {
     "cmd": "<extract.py> \\"lib/manager/pip_setup/__fixtures__/setup.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo/lib/manager/pip_setup/__fixtures__",
@@ -509,24 +491,6 @@ Array [
   },
   Object {
     "cmd": "python3 --version",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-  Object {
-    "cmd": "python3.8 --version",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

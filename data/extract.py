@@ -1,7 +1,6 @@
 import sys
 import json
 import os
-import distutils.core
 from os.path import basename
 
 if sys.version_info[:2] >= (3, 3):
@@ -23,6 +22,8 @@ except ImportError:
   class setuptools:
     def setup():
       pass
+
+import distutils.core
 
 try:
   from unittest import mock
