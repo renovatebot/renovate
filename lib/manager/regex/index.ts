@@ -47,11 +47,10 @@ function createDependency(
     const fieldTemplate = `${field}Template`;
     if (config[fieldTemplate]) {
       try {
-        const filterFields = false;
         dependency[field] = template.compile(
           config[fieldTemplate],
           groups,
-          filterFields
+          false
         );
       } catch (err) {
         logger.warn(
