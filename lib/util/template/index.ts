@@ -117,5 +117,5 @@ export function compile(
 ): string {
   const filteredInput = filterFields ? getFilteredObject(input) : input;
   logger.trace({ template, filteredInput }, 'Compiling template');
-  return handlebars.compile(template)(input);
+  return handlebars.compile(template)(filteredInput);
 }
