@@ -656,6 +656,13 @@ As a result of the above, the branchName would be `renovate/dev-dependencies` in
 
 Note: you shouldn't usually need to configure this unless you really care about your branch names.
 
+## hashedBranchLength
+
+Some code hosting systems have restrictions on the branch name lengths, this option lets you get around these restrictions.
+You can set the `hashedBranchLength` option to a number of characters that works for your system and then Renovate will generate branch names with the appropriate length by hashing `additionalBranchPrefix` and `branchTopic`, and then truncating the hash so that the full branch name (including `branchPrefix`) has the right number of characters.
+
+Example: If you have set `branchPrefix: "deps-"` and `hashedBranchLength: 10` it will result in a branch name like `deps-5bf36`
+
 ## hostRules
 
 Currently the purpose of `hostRules` is to configure credentials for host authentication.
@@ -1373,13 +1380,6 @@ For example to apply a special label for Major updates:
   ]
 }
 ```
-
-## hashedBranchLength
-
-Some code hosting systems have restrictions on the branch name lengths, this option lets you get around these restrictions.
-You can set the `hashedBranchLength` option to a number of characters that works for your system and then Renovate will generate branch names with the appropriate length by hashing `additionalBranchPrefix` and `branchTopic`, and then truncating the hash so that the full branch name (including `branchPrefix`) has the right number of characters.
-
-Example: If you have set `branchPrefix: "deps-"` and `hashedBranchLength: 10` it will result in a branch name like `deps-5bf36`
 
 ## patch
 
