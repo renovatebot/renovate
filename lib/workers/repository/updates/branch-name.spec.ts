@@ -100,13 +100,13 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toEqual('renovate/jest-42.x');
     });
 
-    it('maxBranchLength hashing', () => {
+    it('hashedBranchLength hashing', () => {
       const upgrade: RenovateConfig = {
         branchName:
           '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
         branchTopic:
           '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
-        maxBranchLength: 14,
+        hashedBranchLength: 14,
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
         newMajor: '42',
@@ -116,9 +116,9 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toEqual('dep-df9ca0f348');
     });
 
-    it('maxBranchLength hashing with group name', () => {
+    it('hashedBranchLength hashing with group name', () => {
       const upgrade: RenovateConfig = {
-        maxBranchLength: 20,
+        hashedBranchLength: 20,
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
         newMajor: '42',

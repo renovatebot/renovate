@@ -1394,8 +1394,9 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
-    name: 'maxBranchLength',
-    description: 'If enabled, branch names will use a hashing function to ensure each branch has that length.',
+    name: 'hashedBranchLength',
+    description:
+      'If enabled, branch names will use a hashing function to ensure each branch has that length.',
     type: 'integer',
     default: null,
     cli: false,

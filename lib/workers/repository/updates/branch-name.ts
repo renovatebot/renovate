@@ -46,11 +46,11 @@ export function generateBranchName(update: RenovateConfig): void {
     update.branchName = update.group.branchName || update.branchName;
   }
 
-  if (update.maxBranchLength) {
-    let hashLength = update.maxBranchLength - update.branchPrefix.length;
+  if (update.hashedBranchLength) {
+    let hashLength = update.hashedBranchLength - update.branchPrefix.length;
     if (hashLength <= 10) {
       logger.warn(
-        '`maxBranchLength` must allow for at least 10 characters hashing in addition to `branchPrefix`. Using 10 character hash instead.'
+        '`hashedBranchLength` must allow for at least 10 characters hashing in addition to `branchPrefix`. Using 10 character hash instead.'
       );
       hashLength = 10;
     }
