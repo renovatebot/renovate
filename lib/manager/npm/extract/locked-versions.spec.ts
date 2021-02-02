@@ -58,7 +58,7 @@ describe('manager/npm/extract/locked-versions', () => {
         const packageFiles = [
           {
             npmLock: 'package-lock.json',
-            constraints: { npm: '>=6.0.0' },
+            constraints: {},
             deps: [
               {
                 depName: 'a',
@@ -75,6 +75,36 @@ describe('manager/npm/extract/locked-versions', () => {
         expect(packageFiles).toMatchSnapshot();
       }
     );
+    it('appends <7 to npm constraints', async () => {
+      npm.getNpmLock.mockReturnValue({
+        lockedVersions: {
+          a: '1.0.0',
+          b: '2.0.0',
+          c: '3.0.0',
+        },
+        lockfileVersion: 1,
+      });
+      const packageFiles = [
+        {
+          npmLock: 'package-lock.json',
+          constraints: {
+            npm: '>=6.0.0',
+          },
+          deps: [
+            {
+              depName: 'a',
+              currentValue: '1.0.0',
+            },
+            {
+              depName: 'b',
+              currentValue: '2.0.0',
+            },
+          ],
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toMatchSnapshot();
+    });
     it('ignores pnpm', async () => {
       const packageFiles = [
         {
