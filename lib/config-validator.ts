@@ -4,7 +4,7 @@ import { readFileSync } from 'fs-extra';
 import JSON5 from 'json5';
 import { configFileNames } from './config/app-strings';
 import { RenovateConfig } from './config/common';
-import { getConfig } from './config/file';
+import { getConfig as getFileConfig } from './config/file';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import { validateConfig } from './config/validation';
@@ -91,7 +91,7 @@ type PackageJson = {
     // ignore
   }
   try {
-    const fileConfig = getConfig(process.env);
+    const fileConfig = getFileConfig(process.env);
     console.log(`Validating config.js`);
     try {
       await validate('config.js', fileConfig);
