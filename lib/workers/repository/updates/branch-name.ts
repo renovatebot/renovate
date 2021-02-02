@@ -1,4 +1,5 @@
 import { clean as cleanGitRef } from 'clean-git-ref';
+import hasha from 'hasha';
 import slugify from 'slugify';
 import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
@@ -45,11 +46,33 @@ export function generateBranchName(update: RenovateConfig): void {
     update.branchName = update.group.branchName || update.branchName;
   }
 
-  update.branchName = template.compile(update.branchName, update);
+  if (update.maxBranchLength) {
+    let hashLength = update.maxBranchLength - update.branchPrefix.length;
+    if (hashLength <= 0) {
+      logger.warn(
+        '`maxBranchLength` must be larger than the length of `branchPrefix`. using 10 character hash instead.'
+      );
+      hashLength = 10;
+    }
 
-  // Compile extra times in case of nested templates
-  update.branchName = template.compile(update.branchName, update);
-  update.branchName = cleanBranchName(
-    template.compile(update.branchName, update)
-  );
+    const additionalBranchPrefix = update.additionalBranchPrefix
+      ? template.compile(String(update.additionalBranchPrefix), update)
+      : '';
+
+    const branchTopic = update.branchTopic
+      ? template.compile(String(update.branchTopic), update)
+      : '';
+
+    const hash = hasha(additionalBranchPrefix + branchTopic);
+
+    update.branchName = update.branchPrefix + hash.slice(0, hashLength);
+  } else {
+    update.branchName = template.compile(update.branchName, update);
+
+    // Compile extra times in case of nested templates
+    update.branchName = template.compile(update.branchName, update);
+    update.branchName = template.compile(update.branchName, update);
+  }
+
+  update.branchName = cleanBranchName(update.branchName);
 }

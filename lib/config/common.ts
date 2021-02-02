@@ -39,6 +39,7 @@ export interface RenovateSharedConfig {
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
+  maxBranchLength?: number;
   npmrc?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;

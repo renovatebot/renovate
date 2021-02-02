@@ -1393,6 +1393,13 @@ const options: RenovateOptions[] = [
     cli: false,
     mergeable: true,
   },
+  {
+    name: 'maxBranchLength',
+    description: 'Maximum number of characters in the branch name.',
+    type: 'integer',
+    default: null,
+    cli: false,
+  },
   // Dependency Groups
   {
     name: 'groupName',

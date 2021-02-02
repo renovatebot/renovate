@@ -84,6 +84,56 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toEqual('dep');
     });
+
+    it('realistic defaults', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('renovate/jest-42.x');
+    });
+
+    it('maxBranchLength hashing', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        maxBranchLength: 14,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('dep-df9ca0f348');
+    });
+
+    it('maxBranchLength hashing with group name', () => {
+      const upgrade: RenovateConfig = {
+        maxBranchLength: 20,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        groupName: 'some group name',
+        group: {
+          branchName:
+            '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+          branchTopic:
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('dep-df9ca0f34833f3e0');
+    });
+
     it('enforces valid git branch name', () => {
       const fixtures = [
         {
