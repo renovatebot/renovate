@@ -8,7 +8,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'repology';
 
 const http = new Http(id);
-const cacheNamespace = `datasource-${id}`;
+const cacheNamespace = `datasource-${id}-list`;
 const cacheMinutes = 60;
 
 export type RepologyPackageType = 'binname' | 'srcname';
