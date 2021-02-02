@@ -22,7 +22,7 @@ async function validate(
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
-    logger.info(
+    logger.warn(
       {
         oldConfig: config,
         newConfig: migratedConfig,
@@ -90,7 +90,7 @@ type PackageJson = {
   try {
     const fileConfig = getFileConfig(process.env);
     if (!equal(fileConfig, {})) {
-      logger.info(`Validating config.js`);
+      logger.info(`Validating ${process.env.RENOVATE_CONFIG_FILE ?? 'config.js'}`);
       try {
         await validate('config.js', fileConfig);
       } catch (err) {
