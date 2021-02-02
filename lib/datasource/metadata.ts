@@ -77,7 +77,7 @@ const manualSourceUrls = {
       'https://github.com/drone-runners/drone-runner-ssh',
     'gcr.io/kaniko-project/executor':
       'https://github.com/GoogleContainerTools/kaniko',
-    'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',
+    'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/gitlab-foss',
     'gitlab/gitlab-runner': 'https://gitlab.com/gitlab-org/gitlab-runner',
     'hashicorp/terraform': 'https://github.com/hashicorp/terraform',
     node: 'https://github.com/nodejs/node',
