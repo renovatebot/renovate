@@ -1284,6 +1284,14 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'hashBranchTopic',
+    description: 'Branch topic hashing configuration.',
+    type: 'object',
+    default: { enabled: false },
+    cli: false,
+    mergeable: true,
+  },
+  {
     name: 'commitMessage',
     description: 'Message to use for commit messages and pull request titles.',
     type: 'string',

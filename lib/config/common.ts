@@ -11,6 +11,11 @@ export type RenovateConfigStage =
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 
+export interface HashBranchTopicConfig {
+  enabled?: boolean;
+  length?: number;
+}
+
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
   branchTopic?: string;
@@ -33,6 +38,7 @@ export interface RenovateSharedConfig {
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
+  hashBranchTopic?: HashBranchTopicConfig;
   includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];

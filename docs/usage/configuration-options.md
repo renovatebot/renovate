@@ -656,6 +656,24 @@ As a result of the above, the branchName would be `renovate/dev-dependencies` in
 
 Note: you shouldn't usually need to configure this unless you really care about your branch names.
 
+## hashBranchTopic
+
+This option allows you to replace the `branchTopic` with a SHA512 hashed version
+of itself. Some code hosting systems have restrictions on the branch name
+lengths and using the `hashBranchTopic` option in combination with `length: 10`
+lets you get around these restrictions.
+
+Example configuration:
+
+```json
+{
+  "hashBranchTopic": {
+    "enabled": true,
+    "length": 42
+  }
+}
+```
+
 ## hostRules
 
 Currently the purpose of `hostRules` is to configure credentials for host authentication.

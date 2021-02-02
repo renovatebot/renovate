@@ -1,4 +1,5 @@
 import { clean as cleanGitRef } from 'clean-git-ref';
+import hasha from 'hasha';
 import slugify from 'slugify';
 import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
@@ -17,6 +18,23 @@ function cleanBranchName(branchName: string): string {
     .replace(/^\.|\.$/, '') // leading or trailing dot
     .replace(/\/\./g, '/') // leading dot after slash
     .replace(/\s/g, ''); // whitespace
+}
+
+function preprocessBranchTopic(
+  branchTopic: string,
+  update: RenovateConfig
+): string {
+  let result = template.compile(branchTopic, update);
+
+  if (update.hashBranchTopic?.enabled) {
+    result = hasha(result);
+
+    if (update.hashBranchTopic.length != null) {
+      result = result.slice(0, update.hashBranchTopic.length);
+    }
+  }
+
+  return result;
 }
 
 /* eslint-disable no-param-reassign */
@@ -42,11 +60,23 @@ export function generateBranchName(update: RenovateConfig): void {
       update.groupSlug = `patch-${update.groupSlug}`;
     }
     update.branchTopic = update.group.branchTopic || update.branchTopic;
+    if (update.branchTopic) {
+      update.branchTopic = preprocessBranchTopic(
+        update.branchTopic as string,
+        update
+      );
+    }
     update.branchName = template.compile(
       update.group.branchName || update.branchName,
       update
     );
   } else {
+    if (update.branchTopic) {
+      update.branchTopic = preprocessBranchTopic(
+        update.branchTopic as string,
+        update
+      );
+    }
     update.branchName = template.compile(update.branchName, update);
   }
   // Compile extra times in case of nested templates

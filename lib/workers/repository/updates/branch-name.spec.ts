@@ -84,6 +84,58 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toEqual('dep');
     });
+
+    it('realistic defaults', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('renovate/jest-42.x');
+    });
+
+    it('branch topic hashing', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        hashBranchTopic: { enabled: true, length: 10 },
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('dep-df9ca0f348');
+    });
+
+    it('branch topic hashing with group name', () => {
+      const upgrade: RenovateConfig = {
+        hashBranchTopic: { enabled: true },
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        groupName: 'some group name',
+        group: {
+          branchName:
+            '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+          branchTopic:
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual(
+        'dep-df9ca0f34833f3e0fa78e343965936ad59530c431f7c676538dfce7be3a6b16d00aaa55d1ed101e17427e8e0375ae0578a266c4549aec830b5ed49b6fe3b4204'
+      );
+    });
+
     it('enforces valid git branch name', () => {
       const fixtures = [
         {
