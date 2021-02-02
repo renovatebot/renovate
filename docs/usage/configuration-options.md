@@ -1376,16 +1376,10 @@ For example to apply a special label for Major updates:
 
 ### maxBranchLength
 
-Some code hosting systems have restrictions on the branch name lengths,
-this option lets you get around these restrictions. You can set the
-`maxBranchLength` option to a number of characters that works for your
-system and then Renovate will generate branch names with the appropriate length
-by hashing `additionalBranchPrefix` and `branchTopic`, and then truncating the
-hash so that the full branch name (including `branchPrefix`) has the right
-number of characters.
+Some code hosting systems have restrictions on the branch name lengths, this option lets you get around these restrictions.
+You can set the `maxBranchLength` option to a number of characters that works for your system and then Renovate will generate branch names with the appropriate length by hashing `additionalBranchPrefix` and `branchTopic`, and then truncating the hash so that the full branch name (including `branchPrefix`) has the right number of characters.
 
-Example: If you have set `branchPrefix: "deps-"` and `maxBranchLength: 10` it
-will result in a branch name like `deps-5bf36`
+Example: If you have set `branchPrefix: "deps-"` and `maxBranchLength: 10` it will result in a branch name like `deps-5bf36`
 
 ## patch
 

@@ -1395,7 +1395,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'maxBranchLength',
-    description: 'Maximum number of characters in the branch name.',
+    description: 'If enabled, branch names will use a hashing function to ensure each branch has that length.',
     type: 'integer',
     default: null,
     cli: false,

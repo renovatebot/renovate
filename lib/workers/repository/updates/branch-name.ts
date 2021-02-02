@@ -48,9 +48,9 @@ export function generateBranchName(update: RenovateConfig): void {
 
   if (update.maxBranchLength) {
     let hashLength = update.maxBranchLength - update.branchPrefix.length;
-    if (hashLength <= 0) {
+    if (hashLength <= 10) {
       logger.warn(
-        '`maxBranchLength` must be larger than the length of `branchPrefix`. using 10 character hash instead.'
+        '`maxBranchLength` must allow for at least 10 characters hashing in addition to `branchPrefix`. Using 10 character hash instead.'
       );
       hashLength = 10;
     }
