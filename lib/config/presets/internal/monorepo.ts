@@ -113,6 +113,7 @@ const repoGroups = {
   react: 'https://github.com/facebook/react',
   reactrouter: 'https://github.com/ReactTraining/react-router',
   reakit: 'https://github.com/reakit/reakit',
+  redwood: 'https://github.com/redwoodjs/redwood/',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
   sentry: 'https://github.com/getsentry/sentry-javascript',
