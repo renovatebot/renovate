@@ -30,7 +30,10 @@ export async function getReleaseList(
     return [];
   }
   try {
-    if (changelogPlatform === PLATFORM_TYPE_GITLAB || apiBaseUrl.includes('gitlab')) {
+    if (
+      changelogPlatform === PLATFORM_TYPE_GITLAB ||
+      apiBaseUrl.includes('gitlab')
+    ) {
       return await gitlab.getReleaseList(apiBaseUrl, repository);
     }
     return await github.getReleaseList(apiBaseUrl, repository);
@@ -184,7 +187,10 @@ export async function getReleaseNotesMdFileInner(
   changelogPlatform: string
 ): Promise<ChangeLogFile> | null {
   try {
-    if (changelogPlatform === PLATFORM_TYPE_GITLAB || apiBaseUrl.includes('gitlab')) {
+    if (
+      changelogPlatform === PLATFORM_TYPE_GITLAB ||
+      apiBaseUrl.includes('gitlab')
+    ) {
       return await gitlab.getReleaseNotesMd(repository, apiBaseUrl);
     }
     return await github.getReleaseNotesMd(repository, apiBaseUrl);
