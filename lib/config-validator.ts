@@ -90,7 +90,9 @@ type PackageJson = {
   try {
     const fileConfig = getFileConfig(process.env);
     if (!equal(fileConfig, {})) {
-      logger.info(`Validating ${process.env.RENOVATE_CONFIG_FILE ?? 'config.js'}`);
+      logger.info(
+        `Validating ${process.env.RENOVATE_CONFIG_FILE ?? 'config.js'}`
+      );
       try {
         await validate('config.js', fileConfig);
       } catch (err) {
