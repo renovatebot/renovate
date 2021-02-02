@@ -8,7 +8,7 @@ import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { dependencyPattern } from '../pip_requirements/extract';
 import { PythonSetup, getExtractFile, parseReport } from './util';
 
-export const pythonVersions = ['python', 'python3', 'python3.8'];
+export const pythonVersions = ['python', 'python3', 'python3.8', 'python3.9'];
 let pythonAlias: string | null = null;
 
 export function resetModule(): void {
@@ -31,6 +31,7 @@ export async function getPythonAlias(): Promise<string> {
       const version = parsePythonVersion(stdout || stderr);
       if (version[0] >= 3 && version[1] >= 7) {
         pythonAlias = pythonVersion;
+        break;
       }
     } catch (err) {
       logger.debug(`${pythonVersion} alias not found`);

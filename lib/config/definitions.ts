@@ -1256,6 +1256,7 @@ const options: RenovateOptions[] = [
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
     },
+    mergeable: true,
     cli: false,
     env: false,
   },
