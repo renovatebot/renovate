@@ -42,13 +42,11 @@ export function generateBranchName(update: RenovateConfig): void {
       update.groupSlug = `patch-${update.groupSlug}`;
     }
     update.branchTopic = update.group.branchTopic || update.branchTopic;
-    update.branchName = template.compile(
-      update.group.branchName || update.branchName,
-      update
-    );
-  } else {
-    update.branchName = template.compile(update.branchName, update);
+    update.branchName = update.group.branchName || update.branchName;
   }
+
+  update.branchName = template.compile(update.branchName, update);
+
   // Compile extra times in case of nested templates
   update.branchName = template.compile(update.branchName, update);
   update.branchName = cleanBranchName(
