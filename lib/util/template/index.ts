@@ -83,6 +83,7 @@ export const allowedFields = {
   upgrades: 'An array of upgrade objects in the branch',
   url: 'The url of the release notes',
   version: 'The version number of the changelog',
+  versioning: 'The versioning scheme in use',
   versions: 'An array of ChangeLogRelease objects in the upgrade',
 };
 
@@ -117,5 +118,5 @@ export function compile(
 ): string {
   const filteredInput = filterFields ? getFilteredObject(input) : input;
   logger.trace({ template, filteredInput }, 'Compiling template');
-  return handlebars.compile(template)(input);
+  return handlebars.compile(template)(filteredInput);
 }
