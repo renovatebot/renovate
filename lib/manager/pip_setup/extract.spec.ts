@@ -36,7 +36,7 @@ describe(getName(__filename), () => {
       expect(result).toMatchSnapshot();
       expect(await getPythonAlias()).toEqual(result);
       expect(execSnapshots).toMatchSnapshot();
-      expect(execSnapshots).toHaveLength(4);
+      expect(execSnapshots).toHaveLength(3);
     });
   });
 });

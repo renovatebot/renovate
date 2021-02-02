@@ -31,6 +31,7 @@ export async function getPythonAlias(): Promise<string> {
       const version = parsePythonVersion(stdout || stderr);
       if (version[0] >= 3 && version[1] >= 7) {
         pythonAlias = pythonVersion;
+        break;
       }
     } catch (err) {
       logger.debug(`${pythonVersion} alias not found`);
