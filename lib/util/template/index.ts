@@ -87,6 +87,8 @@ export const allowedFields = {
   versions: 'An array of ChangeLogRelease objects in the upgrade',
 };
 
+const allowedFieldsList = Object.keys(allowedFields);
+
 type CompileInput = Record<string, unknown>;
 
 function getFilteredObject(input: CompileInput): any {
@@ -111,6 +113,8 @@ function getFilteredObject(input: CompileInput): any {
   return res;
 }
 
+const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g;
+
 export function compile(
   template: string,
   input: CompileInput,
@@ -118,5 +122,15 @@ export function compile(
 ): string {
   const filteredInput = filterFields ? getFilteredObject(input) : input;
   logger.trace({ template, filteredInput }, 'Compiling template');
+  const matches = template.matchAll(templateRegex);
+  for (const match of matches) {
+    const varName = match[3];
+    if (!allowedFieldsList.includes(varName)) {
+      logger.warn(
+        { varName, template },
+        'Disallowed variable name in template'
+      );
+    }
+  }
   return handlebars.compile(template)(filteredInput);
 }
