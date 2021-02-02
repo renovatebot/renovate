@@ -5,6 +5,8 @@ import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
 
+const MIN_HASH_LENGTH = 6;
+
 /**
  * Clean git branch name
  *
@@ -48,11 +50,11 @@ export function generateBranchName(update: RenovateConfig): void {
 
   if (update.hashedBranchLength) {
     let hashLength = update.hashedBranchLength - update.branchPrefix.length;
-    if (hashLength <= 10) {
+    if (hashLength <= MIN_HASH_LENGTH) {
       logger.warn(
-        '`hashedBranchLength` must allow for at least 10 characters hashing in addition to `branchPrefix`. Using 10 character hash instead.'
+        `\`hashedBranchLength\` must allow for at least 6 characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`
       );
-      hashLength = 10;
+      hashLength = MIN_HASH_LENGTH;
     }
 
     const additionalBranchPrefix = update.additionalBranchPrefix
