@@ -307,13 +307,12 @@ export async function initRepo({
         token: forkToken || opts.token,
       });
       config.repository = forkedRepo.body.full_name;
-      config.forkDefaultBranch = forkedRepo.body.default_branch;
-      // istanbul ignore if
-      if (config.forkDefaultBranch !== config.defaultBranch) {
+      const forkDefaultBranch = forkedRepo.body.default_branch;
+      if (forkDefaultBranch !== config.defaultBranch) {
         logger.debug(
           {
             defaultBranch: config.defaultBranch,
-            forkDefaultBranch: config.forkDefaultBranch,
+            forkDefaultBranch,
           },
           'Fork has different default branch to parent'
         );
@@ -334,7 +333,7 @@ export async function initRepo({
           'Updating forked repository default sha to match upstream'
         );
         await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.forkDefaultBranch}`,
+          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
           {
             body: {
               sha: repo.defaultBranchRef.target.oid,
