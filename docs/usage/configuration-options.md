@@ -43,7 +43,7 @@ The JSON file is read by the Renovate bot to determine what configuration the bo
 
 ### What types can I use?
 
-Each configuration option accepts only one type.
+Each configuration option includes a type definition.
 A type is a kind of data format, say a number, or a "string" of characters.
 
 Renovate uses the following types:
@@ -82,15 +82,13 @@ You would create the following JSON:
 
 ```json
 {
-  "snorgleborf": "string"
+  "snorgleborf": "abc123"
 }
 ```
 
 ### Configure a Boolean property
 
-A Boolean is a logical operator.
-It can be `true` or `false`.
-Think of a Boolean as a light switch: `true` is on, and `false` is off.
+A Boolean property can be `true` or `false`.
 Renovate usually uses a Boolean for binary choices: either you want something to happen or you don't.
 
 Let's say that the `snorgleborf` config option has this table:
@@ -104,7 +102,7 @@ You would create the following JSON:
 
 ```json
 {
-  "snorgleborf": false
+  "snorgleborf": true
 }
 ```
 
@@ -123,21 +121,6 @@ You would create the following JSON:
 
 ```json
 {
-  "snorgleborf": []
-}
-```
-
-Note that this example is just an empty array.
-Usually a `subtype` row in the table says what type you should use within the array:
-
-| Name    | Value  |
-| ------- | ------ |
-| type    | array  |
-| subtype | string |
-| default | `[""]` |
-
-```json
-{
   "snorgleborf": [
     "overrideDefaultConfig",
     "separate each new item in the array with a comma"
@@ -146,14 +129,6 @@ Usually a `subtype` row in the table says what type you should use within the ar
 ```
 
 ### Configure a Integer property
-
-A integer is a whole number, that does not contain a comma or decimal.
-
-| Input | Is integer |
-| ----- | ---------- |
-| `1`   | Yes        |
-| `1.2` | No         |
-| `1,2` | No         |
 
 Let's say that the `snorgleborf` config option has this table:
 
@@ -170,7 +145,7 @@ You would create the following JSON:
 }
 ```
 
-### Configure a Object property
+### Configure an Object property
 
 A object is created by using the `{}` characters.
 A object usually contains multiple key/value pairs.
@@ -186,7 +161,9 @@ You would create the following JSON:
 
 ```json
 {
-  "snorgleborf": {}
+  "snorgleborf": {
+    "enabled": false
+  }
 }
 ```
 
@@ -196,11 +173,11 @@ A subtype in the configuration table specifies what type you're allowed to use w
 
 ### What does `parent` mean?
 
-// TODO: Add example of parent here.
+If a config option has a `parent` defined, it means it's only allowed to configure it within an object with the parent name, such as `packageRules` or `hostRules`.
 
 ### What does `mergeable` mean?
 
-// TODO: Explain what mergeable means.
+When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
 ## addLabels
 
