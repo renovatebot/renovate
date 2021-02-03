@@ -308,7 +308,6 @@ export async function initRepo({
       });
       config.repository = forkedRepo.body.full_name;
       const forkDefaultBranch = forkedRepo.body.default_branch;
-      // istanbul ignore if
       if (forkDefaultBranch !== config.defaultBranch) {
         const body = {
           ref: `refs/heads/config.defaultBranch`,
@@ -327,7 +326,7 @@ export async function initRepo({
             token: forkToken || opts.token,
           });
           logger.debug('Created new default branch in fork');
-        } catch (err) {
+        } catch (err) /* istanbul ignore next */ {
           logger.warn({ err }, 'Could not create parent defaultBranch in fork');
         }
         logger.debug(
@@ -338,7 +337,7 @@ export async function initRepo({
             body: { default_branch: config.defaultBranch },
           });
           logger.debug('Successfully changed default branch for fork');
-        } catch (err) {
+        } catch (err) /* istanbul ignore next */ {
           logger.warn({ err }, 'Could not set default branch');
         }
       }
