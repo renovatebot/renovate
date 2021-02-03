@@ -478,6 +478,14 @@ async function getTags(
       );
       throw new ExternalHostError(err);
     }
+    // prettier-ignore
+    if (err.statusCode === 401 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+      logger.warn(
+        { registry, dockerRepository: repository, err },
+        'docker registry failure: unauthorized'
+      );
+      throw new ExternalHostError(err);
+    }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
         { registry, dockerRepository: repository, err },
