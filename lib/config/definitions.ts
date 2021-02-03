@@ -1393,6 +1393,14 @@ const options: RenovateOptions[] = [
     cli: false,
     mergeable: true,
   },
+  {
+    name: 'hashedBranchLength',
+    description:
+      'If enabled, branch names will use a hashing function to ensure each branch has that length.',
+    type: 'integer',
+    default: null,
+    cli: false,
+  },
   // Dependency Groups
   {
     name: 'groupName',
