@@ -173,6 +173,8 @@ If a config option has a `parent` defined, it means it's only allowed to configu
 
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
+---
+
 ## addLabels
 
 The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
