@@ -213,8 +213,7 @@ const options: RenovateOptions[] = [
   {
     name: 'description',
     description: 'Plain text description for a config or preset.',
-    type: 'array',
-    subType: 'string',
+    type: 'string',
     stage: 'repository',
     allowString: true,
     mergeable: true,
