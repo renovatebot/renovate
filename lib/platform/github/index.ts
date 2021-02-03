@@ -310,7 +310,7 @@ export async function initRepo({
       const forkDefaultBranch = forkedRepo.body.default_branch;
       if (forkDefaultBranch !== config.defaultBranch) {
         const body = {
-          ref: `refs/heads/config.defaultBranch`,
+          ref: `refs/heads/${config.defaultBranch}`,
           sha: repo.defaultBranchRef.target.oid,
         };
         logger.debug(
@@ -323,6 +323,7 @@ export async function initRepo({
         );
         try {
           await githubApi.postJson(`repos/${config.repository}/git/refs`, {
+            body,
             token: forkToken || opts.token,
           });
           logger.debug('Created new default branch in fork');
