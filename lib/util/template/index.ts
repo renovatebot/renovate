@@ -85,6 +85,8 @@ export const allowedFields = {
   releases: 'An array of releases for an upgrade',
   releaseNotes: 'A ChangeLogNotes object for the release',
   repository: 'The current repository',
+  semanticPrefix: 'The fully generated semantic prefix for commit messages',
+  sourceUrl: 'The source URL for the package',
   toVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   updateType: 'One of digest, pin, rollback, patch, minor, major',
   upgrades: 'An array of upgrade objects in the branch',
@@ -144,14 +146,16 @@ export function compile(
 ): string {
   const filteredInput = filterFields ? getFilteredObject(input) : input;
   logger.trace({ template, filteredInput }, 'Compiling template');
-  const matches = template.matchAll(templateRegex);
-  for (const match of matches) {
-    const varName = match[3];
-    if (!allowedFieldsList.includes(varName)) {
-      logger.info(
-        { varName, template },
-        'Disallowed variable name in template'
-      );
+  if (filterFields) {
+    const matches = template.matchAll(templateRegex);
+    for (const match of matches) {
+      const varName = match[3];
+      if (!allowedFieldsList.includes(varName)) {
+        logger.info(
+          { varName, template },
+          'Disallowed variable name in template'
+        );
+      }
     }
   }
   return handlebars.compile(template)(filteredInput);

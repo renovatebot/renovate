@@ -46,6 +46,8 @@ describe('config/migration', () => {
         gomodTidy: true,
         upgradeInRange: true,
         automergeType: 'branch-push',
+        branchName:
+          '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}',
         baseBranch: 'next',
         managerBranchPrefix: 'foo',
         branchPrefix: 'renovate/{{parentDir}}-',
