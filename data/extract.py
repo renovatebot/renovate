@@ -40,11 +40,15 @@ def invoke(mock1, mock2):
   load_source('_target_setup_', basename(sys.argv[-1]))
   # called arguments are in `mock_setup.call_args`
   call_args = mock1.call_args or mock2.call_args
-  args, kwargs = call_args
-  for arg_name in ('ext_modules', 'distclass', 'cmdclass', 'test_loader'):
-    if arg_name in kwargs:
-      del kwargs[arg_name]
-  with open('renovate-pip_setup-report.json', 'w', encoding='utf-8') as f:
-    json.dump(kwargs, f, ensure_ascii=False, indent=2)
+
+  if call_args:
+    # get only install_requires and extras_require arguments
+    kwargs = {
+      k: v for k, v in call_args[1].items()
+      if k in ('install_requires', 'extras_require')
+    }
+    # save report.json
+    with open('renovate-pip_setup-report.json', 'w', encoding='utf-8') as f:
+      json.dump(kwargs, f, ensure_ascii=False, indent=2)
 
 invoke()
