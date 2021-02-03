@@ -366,13 +366,12 @@ describe(getName(__filename), () => {
         .get('/')
         .reply(200, '', {})
         .get('/library/node/tags/list?n=10000')
-        .reply(401);
-      await expect(
-        getPkgReleases({
-          datasource: docker.id,
-          depName: 'node',
-        })
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+        .reply(403);
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'node',
+      });
+      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('uses custom registry with registryUrls', async () => {
