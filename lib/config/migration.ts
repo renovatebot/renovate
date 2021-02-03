@@ -491,11 +491,7 @@ export function migrateConfig(
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (
-        key.startsWith('commitMessage') &&
-        is.string(val) &&
-        (val.includes('currentVersion') || val.includes('newVersion'))
-      ) {
+      } else if (key.startsWith('commitMessage') && is.string(val)) {
         migratedConfig[key] = val
           .replace(/currentVersion/g, 'currentValue')
           .replace(/newVersion/g, 'newValue')
