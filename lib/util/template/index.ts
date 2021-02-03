@@ -22,6 +22,7 @@ export const exposedConfigOptions = [
   'commitMessagePrefix',
   'commitMessageSuffix',
   'commitMessageTopic',
+  'gitAuthor',
   'group',
   'groupName',
   'groupSlug',
@@ -30,9 +31,12 @@ export const exposedConfigOptions = [
   'prBodyDefinitions',
   'prBodyNotes',
   'prTitle',
+  'semanticCommitScope',
+  'semanticCommitType',
 ];
 
 export const allowedFields = {
+  baseBranch: 'The baseBranch for this branch/PR',
   baseDir: 'The full directory with path that the dependency has been found in',
   body: 'The body of the release notes',
   currentValue: 'The extracted current value of the dependency being updated',
@@ -53,6 +57,8 @@ export const allowedFields = {
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
+  isPin: 'true if the upgrade is pinning dependencies',
+  isRollback: 'true if the upgrade is a rollback PR',
   isRange: 'true if the new value is a range',
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
@@ -72,6 +78,7 @@ export const allowedFields = {
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
+  prettyDepType: 'Massaged depType',
   project: 'ChangeLogProject object',
   recreateClosed: 'If true, this PR will be recreated if closed',
   references: 'A list of references for the upgrade',
