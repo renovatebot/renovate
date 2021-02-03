@@ -33,13 +33,7 @@ We will do our best to answer your question(s).
 The Renovate documentation assumes you use a `renovate.json` file to configure the bot.
 This section explains how to work with JSON.
 
-### What is JSON?
-
-JSON stands for JavaScript Object Notation.
-This is a format that's used by the JavaScript programming language to create an `object`.
-You don't need to know the JavaScript programming language to use JSON though.
-
-The JSON file is read by the Renovate bot to determine what configuration the bot should use.
+To learn more about JSON, read the [MDN Web Docs Glossary: Definitions of Web-related terms > JSON](https://developer.mozilla.org/en-US/docs/Glossary/JSON).
 
 ### What types can I use?
 
