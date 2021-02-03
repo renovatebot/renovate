@@ -41,6 +41,9 @@ def invoke(mock1, mock2):
   # called arguments are in `mock_setup.call_args`
   call_args = mock1.call_args or mock2.call_args
   args, kwargs = call_args
+  for arg_name in ('ext_modules', 'distclass', 'cmdclass', 'test_loader'):
+    if arg_name in kwargs:
+      del kwargs[arg_name]
   with open('renovate-pip_setup-report.json', 'w', encoding='utf-8') as f:
     json.dump(kwargs, f, ensure_ascii=False, indent=2)
 

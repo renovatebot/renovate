@@ -4,6 +4,19 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from distutils.core import Extension
+from distutils.command.sdist import sdist as _sdist
+
+module_RF24 = Extension(
+    'RF24',
+    libraries=['rf24-bcm', 'boost_python'],
+    sources=['pyRF24.cpp']
+)
+
+class sdist(_sdist):
+    """Custom script run during setup.py sdist"""
+    pass
+
 setup(
     author='Simon Davy',
     author_email='simon.davy@canonical.com',
@@ -85,4 +98,10 @@ setup(
     url='https://github.com/canonical-ols/talisker',
     version='0.9.16',
     zip_safe=False,
+    ext_modules=[
+        module_RF24
+    ],
+    cmdclass={
+        'sdist': sdist
+    }
 )

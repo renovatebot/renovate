@@ -103,7 +103,7 @@ Object {
       "datasource": "pypi",
       "depName": "celery",
       "managerData": Object {
-        "lineNumber": 36,
+        "lineNumber": 49,
       },
     },
     Object {
@@ -111,7 +111,7 @@ Object {
       "datasource": "pypi",
       "depName": "logging_tree",
       "managerData": Object {
-        "lineNumber": 39,
+        "lineNumber": 52,
       },
     },
     Object {
@@ -119,7 +119,7 @@ Object {
       "datasource": "pypi",
       "depName": "pygments",
       "managerData": Object {
-        "lineNumber": 40,
+        "lineNumber": 53,
       },
     },
     Object {
@@ -127,7 +127,7 @@ Object {
       "datasource": "pypi",
       "depName": "psutil",
       "managerData": Object {
-        "lineNumber": 41,
+        "lineNumber": 54,
       },
     },
     Object {
@@ -135,7 +135,7 @@ Object {
       "datasource": "pypi",
       "depName": "objgraph",
       "managerData": Object {
-        "lineNumber": 42,
+        "lineNumber": 55,
       },
     },
     Object {
@@ -143,7 +143,7 @@ Object {
       "datasource": "pypi",
       "depName": "django",
       "managerData": Object {
-        "lineNumber": 45,
+        "lineNumber": 58,
       },
     },
     Object {
@@ -151,7 +151,7 @@ Object {
       "datasource": "pypi",
       "depName": "flask",
       "managerData": Object {
-        "lineNumber": 48,
+        "lineNumber": 61,
       },
     },
     Object {
@@ -159,7 +159,7 @@ Object {
       "datasource": "pypi",
       "depName": "blinker",
       "managerData": Object {
-        "lineNumber": 49,
+        "lineNumber": 62,
       },
     },
     Object {
@@ -167,7 +167,7 @@ Object {
       "datasource": "pypi",
       "depName": "gunicorn",
       "managerData": Object {
-        "lineNumber": 61,
+        "lineNumber": 74,
       },
     },
     Object {
@@ -175,7 +175,7 @@ Object {
       "datasource": "pypi",
       "depName": "statsd",
       "managerData": Object {
-        "lineNumber": 62,
+        "lineNumber": 75,
       },
     },
     Object {
@@ -183,7 +183,7 @@ Object {
       "datasource": "pypi",
       "depName": "Werkzeug",
       "managerData": Object {
-        "lineNumber": 62,
+        "lineNumber": 75,
       },
     },
     Object {
@@ -191,7 +191,7 @@ Object {
       "datasource": "pypi",
       "depName": "requests",
       "managerData": Object {
-        "lineNumber": 63,
+        "lineNumber": 76,
       },
       "skipReason": "ignored",
     },
@@ -200,7 +200,7 @@ Object {
       "datasource": "pypi",
       "depName": "raven",
       "managerData": Object {
-        "lineNumber": 64,
+        "lineNumber": 77,
       },
     },
     Object {
@@ -208,7 +208,7 @@ Object {
       "datasource": "pypi",
       "depName": "future",
       "managerData": Object {
-        "lineNumber": 65,
+        "lineNumber": 78,
       },
     },
     Object {
@@ -216,7 +216,7 @@ Object {
       "datasource": "pypi",
       "depName": "ipaddress",
       "managerData": Object {
-        "lineNumber": 66,
+        "lineNumber": 79,
       },
     },
   ],
@@ -231,7 +231,7 @@ Object {
       "datasource": "pypi",
       "depName": "celery",
       "managerData": Object {
-        "lineNumber": 36,
+        "lineNumber": 49,
       },
     },
     Object {
@@ -239,7 +239,7 @@ Object {
       "datasource": "pypi",
       "depName": "logging_tree",
       "managerData": Object {
-        "lineNumber": 39,
+        "lineNumber": 52,
       },
     },
     Object {
@@ -247,7 +247,7 @@ Object {
       "datasource": "pypi",
       "depName": "pygments",
       "managerData": Object {
-        "lineNumber": 40,
+        "lineNumber": 53,
       },
     },
     Object {
@@ -255,7 +255,7 @@ Object {
       "datasource": "pypi",
       "depName": "psutil",
       "managerData": Object {
-        "lineNumber": 41,
+        "lineNumber": 54,
       },
     },
     Object {
@@ -263,7 +263,7 @@ Object {
       "datasource": "pypi",
       "depName": "objgraph",
       "managerData": Object {
-        "lineNumber": 42,
+        "lineNumber": 55,
       },
     },
     Object {
@@ -271,7 +271,7 @@ Object {
       "datasource": "pypi",
       "depName": "django",
       "managerData": Object {
-        "lineNumber": 45,
+        "lineNumber": 58,
       },
     },
     Object {
@@ -279,7 +279,7 @@ Object {
       "datasource": "pypi",
       "depName": "flask",
       "managerData": Object {
-        "lineNumber": 48,
+        "lineNumber": 61,
       },
     },
     Object {
@@ -287,7 +287,7 @@ Object {
       "datasource": "pypi",
       "depName": "blinker",
       "managerData": Object {
-        "lineNumber": 49,
+        "lineNumber": 62,
       },
     },
     Object {
@@ -295,7 +295,7 @@ Object {
       "datasource": "pypi",
       "depName": "gunicorn",
       "managerData": Object {
-        "lineNumber": 61,
+        "lineNumber": 74,
       },
     },
     Object {
@@ -303,7 +303,7 @@ Object {
       "datasource": "pypi",
       "depName": "statsd",
       "managerData": Object {
-        "lineNumber": 62,
+        "lineNumber": 75,
       },
     },
     Object {
@@ -311,7 +311,7 @@ Object {
       "datasource": "pypi",
       "depName": "Werkzeug",
       "managerData": Object {
-        "lineNumber": 62,
+        "lineNumber": 75,
       },
     },
     Object {
@@ -319,7 +319,7 @@ Object {
       "datasource": "pypi",
       "depName": "requests",
       "managerData": Object {
-        "lineNumber": 63,
+        "lineNumber": 76,
       },
       "skipReason": "ignored",
     },
@@ -328,7 +328,7 @@ Object {
       "datasource": "pypi",
       "depName": "raven",
       "managerData": Object {
-        "lineNumber": 64,
+        "lineNumber": 77,
       },
     },
     Object {
@@ -336,7 +336,7 @@ Object {
       "datasource": "pypi",
       "depName": "future",
       "managerData": Object {
-        "lineNumber": 65,
+        "lineNumber": 78,
       },
     },
     Object {
@@ -344,7 +344,7 @@ Object {
       "datasource": "pypi",
       "depName": "ipaddress",
       "managerData": Object {
-        "lineNumber": 66,
+        "lineNumber": 79,
       },
     },
   ],
