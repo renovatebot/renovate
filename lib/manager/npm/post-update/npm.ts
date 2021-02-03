@@ -27,9 +27,9 @@ export async function generateLockFile(
   let lockFile = null;
   try {
     let installNpm = 'npm i -g npm';
-    const npmCompatibility = config.constraints?.npm;
+    const npmCompatibility = config.constraints?.npm as string;
     if (validRange(npmCompatibility)) {
-      installNpm += `@${quote(npmCompatibility)}`;
+      installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)}`;
     }
     const preCommands = [installNpm, 'hash -d npm'];
     const commands = [];

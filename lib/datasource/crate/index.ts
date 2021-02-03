@@ -85,6 +85,8 @@ export async function fetchCrateRecordsPayload(
       ) {
         throw new ExternalHostError(err);
       }
+
+      throw err;
     }
   }
 

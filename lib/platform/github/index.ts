@@ -307,16 +307,40 @@ export async function initRepo({
         token: forkToken || opts.token,
       });
       config.repository = forkedRepo.body.full_name;
-      config.forkDefaultBranch = forkedRepo.body.default_branch;
-      // istanbul ignore if
-      if (config.forkDefaultBranch !== config.defaultBranch) {
+      const forkDefaultBranch = forkedRepo.body.default_branch;
+      if (forkDefaultBranch !== config.defaultBranch) {
+        const body = {
+          ref: `refs/heads/${config.defaultBranch}`,
+          sha: repo.defaultBranchRef.target.oid,
+        };
         logger.debug(
           {
             defaultBranch: config.defaultBranch,
-            forkDefaultBranch: config.forkDefaultBranch,
+            forkDefaultBranch,
+            body,
           },
-          'Fork has different default branch to parent'
+          'Fork has different default branch to parent, attempting to create branch'
         );
+        try {
+          await githubApi.postJson(`repos/${config.repository}/git/refs`, {
+            body,
+            token: forkToken || opts.token,
+          });
+          logger.debug('Created new default branch in fork');
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ err }, 'Could not create parent defaultBranch in fork');
+        }
+        logger.debug(
+          `Setting ${config.defaultBranch} as default branch for ${config.repository}`
+        );
+        try {
+          await githubApi.patchJson(`repos/${config.repository}`, {
+            body: { default_branch: config.defaultBranch },
+          });
+          logger.debug('Successfully changed default branch for fork');
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ err }, 'Could not set default branch');
+        }
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error forking repository');
@@ -334,7 +358,7 @@ export async function initRepo({
           'Updating forked repository default sha to match upstream'
         );
         await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.forkDefaultBranch}`,
+          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
           {
             body: {
               sha: repo.defaultBranchRef.target.oid,

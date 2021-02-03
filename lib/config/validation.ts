@@ -266,6 +266,7 @@ export async function validateConfig(
             }
             if (key === 'regexManagers') {
               const allowedKeys = [
+                'description',
                 'fileMatch',
                 'matchStrings',
                 'matchStringsStrategy',
