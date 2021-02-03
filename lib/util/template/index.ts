@@ -11,6 +11,8 @@ handlebars.registerHelper('replace', (find, replace, context) =>
 );
 
 export const exposedConfigOptions = [
+  'additionalBranchPrefix',
+  'addLabels',
   'branchName',
   'branchPrefix',
   'branchTopic',
@@ -21,10 +23,8 @@ export const exposedConfigOptions = [
   'commitMessageSuffix',
   'commitMessageTopic',
   'group',
-  'groupSlug',
   'groupName',
-  'additionalBranchPrefix',
-  'addLabels',
+  'groupSlug',
   'labels',
   'prBodyColumns',
   'prBodyDefinitions',
@@ -87,7 +87,22 @@ export const allowedFields = {
   versions: 'An array of ChangeLogRelease objects in the upgrade',
 };
 
-const allowedFieldsList = Object.keys(allowedFields);
+const prBodyFields = [
+  'header',
+  'table',
+  'notes',
+  'changelogs',
+  'configDescription',
+  'controls',
+  'footer',
+];
+
+const handlebarsUtilityFields = ['else'];
+
+const allowedFieldsList = Object.keys(allowedFields)
+  .concat(exposedConfigOptions)
+  .concat(prBodyFields)
+  .concat(handlebarsUtilityFields);
 
 type CompileInput = Record<string, unknown>;
 
@@ -126,7 +141,7 @@ export function compile(
   for (const match of matches) {
     const varName = match[3];
     if (!allowedFieldsList.includes(varName)) {
-      logger.warn(
+      logger.info(
         { varName, template },
         'Disallowed variable name in template'
       );
