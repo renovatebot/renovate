@@ -4831,6 +4831,34 @@ Array [
     "url": "https://api.github.com/repos/some/repo/forks",
   },
   Object {
+    "body": "{\\"ref\\":\\"refs/heads/master\\",\\"sha\\":\\"1234\\"}",
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": "40",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/repos/forked/repo/git/refs",
+  },
+  Object {
+    "body": "{\\"default_branch\\":\\"master\\"}",
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": "27",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PATCH",
+    "url": "https://api.github.com/repos/forked/repo",
+  },
+  Object {
     "body": "{\\"sha\\":\\"1234\\",\\"force\\":true}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",

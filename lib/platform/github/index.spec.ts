@@ -258,6 +258,8 @@ describe('platform/github', () => {
     it('detects fork default branch mismatch', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true, 'not_master');
+      scope.post('/repos/forked/repo/git/refs').reply(200);
+      scope.patch('/repos/forked/repo').reply(200);
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
