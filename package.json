@@ -12,6 +12,7 @@
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
     "compile:dts": "tsc -p tsconfig.dts.json",
+    "config-validator": "babel-node --extensions \".ts,.js\" -- lib/config-validator.ts",
     "generate": "run-s generate:*",
     "generate:imports": "node tmp/tools/generate-imports.js",
     "create-json-schema": "babel-node --extensions \".ts,.js\" -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",

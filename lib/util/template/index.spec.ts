@@ -10,8 +10,9 @@ describe('util/template', () => {
     expect(missingOptions).toEqual([]);
   });
   it('filters out disallowed fields', () => {
-    const userTemplate = '{{platform}} token = "{{token}}"';
-    const input = { platform: 'github', token: 'abc123 ' };
+    const userTemplate =
+      '{{#if isFoo}}foo{{/if}}{{platform}} token = "{{token}}"';
+    const input = { isFoo: true, platform: 'github', token: 'abc123 ' };
     const output = template.compile(userTemplate, input);
     expect(output).toMatchSnapshot();
     expect(output).toContain('github');
