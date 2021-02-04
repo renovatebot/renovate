@@ -465,7 +465,11 @@ export async function lookupUpdates(
     );
   if (res.updates.some((update) => update.updateType === 'pin')) {
     for (const update of res.updates) {
-      if (update.updateType !== 'pin' && update.updateType !== 'rollback') {
+      if (
+        update.updateType !== 'pin' &&
+        update.updateType !== 'rollback' &&
+        !vulnerabilityAlert
+      ) {
         update.blockedByPin = true;
       }
     }

@@ -5,6 +5,7 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, mocked } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
+import { MediaType } from './types';
 import * as docker from '.';
 
 const hostRules = mocked(_hostRules);
@@ -365,7 +366,7 @@ describe(getName(__filename), () => {
         .get('/')
         .reply(200, '', {})
         .get('/library/node/tags/list?n=10000')
-        .reply(401);
+        .reply(403);
       const res = await getPkgReleases({
         datasource: docker.id,
         depName: 'node',
@@ -569,6 +570,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -589,6 +591,85 @@ describe(getName(__filename), () => {
       expect(trace).toMatchSnapshot();
     });
 
+    it('supports manifest lists', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(4)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestListV2,
+          manifests: [{ digest: 'some-image-digest' }],
+        })
+        .get('/node/manifests/some-image-digest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(200, {
+          config: {
+            Labels: {
+              'org.opencontainers.image.source':
+                'https://github.com/renovatebot/renovate',
+            },
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
+    it('ignores unsupported manifest', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV1,
+        });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
+    it('ignores unsupported schema version', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {});
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
     it('supports redirect', async () => {
       httpMock
         .scope('https://registry.company.com/v2')
@@ -600,6 +681,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')

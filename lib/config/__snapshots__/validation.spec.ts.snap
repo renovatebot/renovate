@@ -51,7 +51,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`packageRules[3].packagePatterns\` should be a list (Array)",
+    "message": "Configuration option \`packageRules[3].matchPackagePatterns\` should be a list (Array)",
   },
   Object {
     "depName": "Configuration Error",
@@ -79,7 +79,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageRules: Each packageRule must contain at least one selector (paths, languages, baseBranchList, managers, datasources, depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns, sourceUrlPrefixes, updateTypes, matchCurrentVersion). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "packageRules: Each packageRule must contain at least one selector (matchPaths, matchLanguages, matchBaseBranches, matchManagers, matchDatasources, matchDepTypes, matchPackageNames, matchPackagePatterns, excludePackageNames, excludePackagePatterns, matchCurrentVersion, matchSourceUrlPrefixes, matchUpdateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
   },
   Object {
     "depName": "Configuration Error",
@@ -152,7 +152,7 @@ exports[`config/validation validateConfig(config) included managers of the wrong
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`packageRules[0].managers\` should be a list (Array)",
+    "message": "Configuration option \`packageRules[0].matchManagers\` should be a list (Array)",
   },
   Object {
     "depName": "Configuration Error",
@@ -191,11 +191,11 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "docker.minor.packageNames: packageNames should be inside a \`packageRule\` only",
+    "message": "docker.minor.matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageNames: packageNames should be inside a \`packageRule\` only",
+    "message": "matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
   },
 ]
 `;

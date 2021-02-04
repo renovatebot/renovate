@@ -34,6 +34,12 @@ function createSingleConfig(option) {
         temp.items.enum = option.allowedValues;
       }
     }
+    if (option.subType == 'string' && option.allowString === true) {
+      const items = temp.items;
+      delete temp.items;
+      delete temp.type;
+      temp.oneOf = [{ type: 'array', items }, { ...items }];
+    }
   } else {
     if (option.format) {
       temp.format = option.format;

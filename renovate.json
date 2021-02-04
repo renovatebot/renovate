@@ -9,29 +9,25 @@
   "stabilityDays": 3,
   "packageRules": [
     {
-      "packageNames": [
+      "matchPackageNames": [
         "mcr.microsoft.com/vscode/devcontainers/typescript-node"
       ],
       "extends": ["schedule:monthly"]
     },
     {
-      "datasources": ["docker"],
-      "automerge": false
-    },
-    {
-      "depTypeList": ["dependencies"],
+      "matchDepTypes": ["dependencies"],
       "semanticCommitType": "build"
     },
     {
-      "packageNames": ["semantic-release"],
+      "matchPackageNames": ["semantic-release"],
       "semanticCommitType": "build"
     },
     {
-      "packageNames": ["@types/jest"],
+      "matchPackageNames": ["@types/jest"],
       "groupName": "jest monorepo"
     },
     {
-      "paths": ["**/__fixtures__/**"],
+      "matchPaths": ["**/__fixtures__/**"],
       "enabled": false
     }
   ]
