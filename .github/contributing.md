@@ -3,7 +3,7 @@
 ## Security
 
 If you think you've found a **security issue**, please do not mention it in this repository.
-Instead, email security@renovatebot.com with as much details as possible so that it can be handled confidentially.
+Instead, email renovate-disclosure@whitesourcesoftware.com with as much details as possible so that it can be handled confidentially.
 
 ## Support
 
