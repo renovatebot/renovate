@@ -11,15 +11,15 @@ export const id = 'bitbucket-tags';
 export const registryStrategy = 'first';
 export const defaultRegistryUrls = ['https://bitbucket.org'];
 
-function getRegistryURL(depHost: string): string {
+function getRegistryURL(registryUrl: string): string {
   // fallback to default API endpoint if custom not provided
-  return depHost ?? defaultRegistryUrls[0];
+  return registryUrl ?? defaultRegistryUrls[0];
 }
 
 const cacheNamespace = 'datasource-bitbucket';
 
-function getCacheKey(depHost: string, repo: string, type: string): string {
-  return `${getRegistryURL(depHost)}:${repo}:${type}`;
+function getCacheKey(registryUrl: string, repo: string, type: string): string {
+  return `${getRegistryURL(registryUrl)}:${repo}:${type}`;
 }
 
 type BitbucketTag = {
@@ -32,13 +32,13 @@ type BitbucketTag = {
 
 // getReleases fetches list of tags for the repository
 export async function getReleases({
-  registryUrl: depHost,
+  registryUrl,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const type = 'tags';
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(depHost, repo, type)
+    getCacheKey(registryUrl, repo, type)
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -52,7 +52,7 @@ export async function getReleases({
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: `${ensureTrailingSlash(getRegistryURL(depHost))}${repo}`,
+    sourceUrl: `${ensureTrailingSlash(getRegistryURL(registryUrl))}${repo}`,
     releases: null,
   };
   dependency.releases = bitbucketTags.values.map(({ name, target }) => ({
@@ -64,7 +64,7 @@ export async function getReleases({
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(depHost, repo, type),
+    getCacheKey(registryUrl, repo, type),
     dependency,
     cacheMinutes
   );
@@ -78,14 +78,14 @@ type BitbucketCommit = {
 
 // getTagCommit fetched the commit has for specified tag
 async function getTagCommit(
-  depHost: string,
+  registryUrl: string,
   repo: string,
   tag: string
 ): Promise<string | null> {
   const type = `tag-${tag}`;
   const cachedResult = await packageCache.get<string>(
     cacheNamespace,
-    getCacheKey(depHost, repo, type)
+    getCacheKey(registryUrl, repo, type)
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -101,7 +101,7 @@ async function getTagCommit(
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(depHost, repo, type),
+    getCacheKey(registryUrl, repo, type),
     hash,
     cacheMinutes
   );
@@ -112,17 +112,17 @@ async function getTagCommit(
 // getDigest fetched the latest commit for repository main branch
 // however, if newValue is provided, then getTagCommit is called
 export async function getDigest(
-  { lookupName: repo, registryUrl: depHost }: Partial<DigestConfig>,
+  { lookupName: repo, registryUrl }: Partial<DigestConfig>,
   newValue?: string
 ): Promise<string | null> {
   if (newValue?.length) {
-    return getTagCommit(depHost, repo, newValue);
+    return getTagCommit(registryUrl, repo, newValue);
   }
 
   const type = 'digest';
   const cachedResult = await packageCache.get<string>(
     cacheNamespace,
-    getCacheKey(depHost, repo, type)
+    getCacheKey(registryUrl, repo, type)
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -144,7 +144,7 @@ export async function getDigest(
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(depHost, repo, type),
+    getCacheKey(registryUrl, repo, type),
     latestCommit,
     cacheMinutes
   );
