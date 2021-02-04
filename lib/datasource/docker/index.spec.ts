@@ -366,7 +366,7 @@ describe(getName(__filename), () => {
         .get('/')
         .reply(200, '', {})
         .get('/library/node/tags/list?n=10000')
-        .reply(401);
+        .reply(403);
       const res = await getPkgReleases({
         datasource: docker.id,
         depName: 'node',

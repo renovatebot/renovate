@@ -81,8 +81,8 @@ async function getDockerTag(
   }
 
   logger.debug(
-    { constraint },
-    `Found ${scheme} version constraint - checking for a compatible ${depName} image to use`
+    { depName, scheme, constraint },
+    `Found version constraint - checking for a compatible image to use`
   );
   const imageReleases = await getPkgReleases({
     datasource: 'docker',
@@ -98,8 +98,8 @@ async function getDockerTag(
     if (versions.length) {
       const version = versions.pop();
       logger.debug(
-        { constraint, version },
-        `Found compatible ${scheme} version`
+        { depName, scheme, constraint, version },
+        `Found compatible image version`
       );
       return version;
     }

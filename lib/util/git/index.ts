@@ -70,6 +70,7 @@ function checkForPlatformFailure(err: Error): void {
     'Connection timed out',
     'malformed object name',
     'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
+    'Could not resolve host',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -393,7 +394,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   try {
     config.currentBranch = branchName;
     config.currentBranchSha = (
-      await git.raw(['rev-parse', 'origin/' + branchName, '--'])
+      await git.raw(['rev-parse', 'origin/' + branchName])
     ).trim();
     await git.checkout([branchName, '-f']);
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;

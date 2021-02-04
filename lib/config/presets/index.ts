@@ -100,6 +100,7 @@ export function parsePreset(input: string): ParsedPreset {
     'npm',
     'packages',
     'preview',
+    'regexManagers',
     'schedule',
     'workarounds',
   ];

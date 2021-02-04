@@ -457,7 +457,7 @@ async function getTags(
       url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
       page += 1;
     } while (url && page < 20);
-    const cacheMinutes = 15;
+    const cacheMinutes = 30;
     await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
@@ -475,6 +475,14 @@ async function getTags(
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
+      );
+      throw new ExternalHostError(err);
+    }
+    // prettier-ignore
+    if (err.statusCode === 401 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+      logger.warn(
+        { registry, dockerRepository: repository, err },
+        'docker registry failure: unauthorized'
       );
       throw new ExternalHostError(err);
     }
