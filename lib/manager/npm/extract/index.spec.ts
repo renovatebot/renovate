@@ -108,7 +108,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { global: {} }
+        {}
       );
       expect(res.npmrc).toBeDefined();
     });
@@ -123,7 +123,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { global: {} }
+        {}
       );
       expect(res.npmrc).toBeUndefined();
     });

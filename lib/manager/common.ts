@@ -1,6 +1,5 @@
 import { ReleaseType } from 'semver';
 import {
-  GlobalConfig,
   MatchStringsStrategy,
   UpdateType,
   ValidationMessage,
@@ -23,7 +22,6 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
-  global?: GlobalConfig;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
