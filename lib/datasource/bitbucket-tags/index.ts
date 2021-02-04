@@ -129,7 +129,7 @@ export async function getDigest(
     return cachedResult;
   }
 
-  const url = `/2.0/repositories/${repo}/commits/${getDefaultBranch()}`;
+  const url = `/2.0/repositories/${repo}/commits/${getDefaultBranch() ?? ''}`;
 
   const bitbucketCommits = (
     await bitbucketHttp.getJson<utils.PagedResult<BitbucketCommit>>(url)
