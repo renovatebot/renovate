@@ -63,6 +63,9 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
 }
 
+export interface RepoAdminConfig {
+}
+
 export interface RenovateAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
