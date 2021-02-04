@@ -248,7 +248,7 @@ Object {
       "version": "v2.0.0",
     },
   ],
-  "sourceUrl": "https://api.bitbucket.org/golang/text",
+  "sourceUrl": "https://bitbucket.org/golang/text",
 }
 `;
 
