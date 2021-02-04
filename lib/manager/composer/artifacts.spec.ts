@@ -1,6 +1,6 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITHUB,
@@ -142,7 +142,7 @@ describe('.updateArtifacts()', () => {
     const foo = join('vendor/foo/Foo.php');
     const bar = join('vendor/bar/Bar.php');
     const baz = join('vendor/baz/Baz.php');
-
+    fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({

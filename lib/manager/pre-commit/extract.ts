@@ -150,30 +150,39 @@ function findDependencies(
   return packageDependencies;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  filename: string
+): PackageFile | null {
   let parsedContent: Record<string, unknown> | PreCommitConfig;
   try {
     parsedContent = yaml.safeLoad(content, { json: true }) as any;
   } catch (err) {
-    logger.debug({ err }, 'Failed to parse pre-commit config YAML');
+    logger.debug({ filename, err }, 'Failed to parse pre-commit config YAML');
     return null;
   }
   if (!is.plainObject<Record<string, unknown>>(parsedContent)) {
-    logger.warn(`Parsing of pre-commit config YAML returned invalid result`);
+    logger.warn(
+      { filename },
+      `Parsing of pre-commit config YAML returned invalid result`
+    );
     return null;
   }
   if (!matchesPrecommitConfigHeuristic(parsedContent)) {
-    logger.info(`File does not look like a pre-commit config file`);
+    logger.debug(
+      { filename },
+      `File does not look like a pre-commit config file`
+    );
     return null;
   }
   try {
     const deps = findDependencies(parsedContent);
     if (deps.length) {
-      logger.debug({ deps }, 'Found dependencies in pre-commit config');
+      logger.trace({ deps }, 'Found dependencies in pre-commit config');
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ err }, 'Error scanning parsed pre-commit config');
+    logger.error({ filename, err }, 'Error scanning parsed pre-commit config');
   }
   return null;
 }

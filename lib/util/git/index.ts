@@ -1,5 +1,6 @@
 import URL from 'url';
 import fs from 'fs-extra';
+import GitUrlParse from 'git-url-parse';
 import Git, {
   DiffResult as DiffResult_,
   ResetMode,
@@ -7,7 +8,9 @@ import Git, {
   StatusResult as StatusResult_,
 } from 'simple-git';
 import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import {
+  CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
@@ -18,7 +21,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { writePrivateKey } from './private-key';
+import { configSigningKey, writePrivateKey } from './private-key';
 
 export * from './private-key';
 
@@ -56,7 +59,7 @@ function checkForPlatformFailure(err: Error): void {
   if (process.env.NODE_ENV === 'test') {
     return;
   }
-  const platformFailureStrings = [
+  const externalHostFailureStrings = [
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
@@ -66,11 +69,33 @@ function checkForPlatformFailure(err: Error): void {
     'Failed to connect to',
     'Connection timed out',
     'malformed object name',
+    'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
+    'Could not resolve host',
   ];
-  for (const errorStr of platformFailureStrings) {
+  for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
       logger.debug({ err }, 'Converting git error to ExternalHostError');
       throw new ExternalHostError(err, 'git');
+    }
+  }
+
+  const configErrorStrings = [
+    [
+      'GitLab: Branch name does not follow the pattern',
+      "Cannot push because branch name does not follow project's push rules",
+    ],
+    [
+      'GitLab: Commit message does not follow the pattern',
+      "Cannot push because commit message does not follow project's push rules",
+    ],
+  ];
+  for (const [errorStr, validationError] of configErrorStrings) {
+    if (err.message.includes(errorStr)) {
+      logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationError = validationError;
+      error.validationMessage = err.message;
+      throw error;
     }
   }
 }
@@ -577,9 +602,10 @@ export async function commitFiles({
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
-    await writePrivateKey(config.localDir);
+    await writePrivateKey();
     privateKeySet = true;
   }
+  await configSigningKey(config.localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
@@ -606,7 +632,7 @@ export async function commitFiles({
       }
     }
     // istanbul ignore if
-    if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
+    if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
       fileNames.unshift('-f');
     }
     if (fileNames.length) {
@@ -691,4 +717,10 @@ export function getUrl({
     host,
     pathname: repository + '.git',
   });
+}
+
+export function getHttpUrl(url: string, token?: string): string {
+  const parsedUrl = GitUrlParse(url);
+  parsedUrl.token = token;
+  return parsedUrl.toString('https');
 }

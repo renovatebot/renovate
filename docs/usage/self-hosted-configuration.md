@@ -16,7 +16,7 @@ Let's look at an example of configuring packages with existing Angular migration
 Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`
 
 ```javascript
-module.export = {
+module.exports = {
   allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
@@ -30,7 +30,7 @@ The command to install dependencies is necessary because, by default, the instal
 {
   "packageRules": [
     {
-      "packageNames": ["@angular/core"],
+      "matchPackageNames": ["@angular/core"],
       "postUpgradeTasks": {
         "commands": [
           "npm ci --ignore-scripts",
@@ -91,6 +91,10 @@ If you configure this to be different to the `baseDir`, it means you can have on
 ## composerIgnorePlatformReqs
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
+
+## customEnvVariables
+
+This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
 ## dockerImagePrefix
 
@@ -168,6 +172,8 @@ By configuring using the environment it means that debug logging starts from the
 
 Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
 
+Warning: Configuring `logLevel` config option or `--log-level` cli option is deprecated and will be removed in a major version.
+
 ## onboarding
 
 Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
@@ -183,6 +189,11 @@ If you have an existing Renovate installation and you change `onboardingBranch` 
 Note that if `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
 
 ## onboardingConfig
+
+## onboardingConfigFileName
+
+If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
+Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingPrTitle
 

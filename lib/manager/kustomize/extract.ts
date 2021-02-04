@@ -48,11 +48,22 @@ export function extractBase(base: string): PackageDependency | null {
 
 export function extractImage(image: Image): PackageDependency | null {
   if (image?.name && image.newTag) {
+    const replaceString = image.newTag;
+    let currentValue;
+    let currentDigest;
+    if (replaceString.startsWith('sha256:')) {
+      currentDigest = replaceString;
+      currentValue = undefined;
+    } else {
+      currentValue = replaceString;
+    }
     return {
       datasource: datasourceDocker.id,
       versioning: dockerVersioning.id,
       depName: image.newName ?? image.name,
-      currentValue: image.newTag,
+      currentValue,
+      currentDigest,
+      replaceString,
     };
   }
 

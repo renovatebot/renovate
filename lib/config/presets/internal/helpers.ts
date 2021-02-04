@@ -4,10 +4,9 @@ export const presets: Record<string, Preset> = {
   disableTypesNodeMajor: {
     packageRules: [
       {
-        packageNames: ['@types/node'],
-        major: {
-          enabled: false,
-        },
+        matchPackageNames: ['@types/node'],
+        matchUpdateTypes: ['major'],
+        enabled: false,
       },
     ],
   },

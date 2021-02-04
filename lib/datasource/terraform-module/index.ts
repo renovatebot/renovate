@@ -2,10 +2,12 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
+import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-module';
 export const defaultRegistryUrls = ['https://registry.terraform.io'];
+export const defaultVersioning = hashicorpVersioning.id;
 export const registryStrategy = 'first';
 
 const http = new Http(id);
@@ -135,9 +137,9 @@ export async function getReleases({
       dep.homepage = `https://registry.terraform.io/modules/${repository}`;
     }
     // set published date for latest release
-    const currentVersion = dep.releases.find((release) => {
-      return res.version === release.version;
-    });
+    const currentVersion = dep.releases.find(
+      (release) => res.version === release.version
+    );
     if (currentVersion) {
       currentVersion.releaseTimestamp = res.published_at;
     }

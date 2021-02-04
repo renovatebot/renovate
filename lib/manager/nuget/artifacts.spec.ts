@@ -1,6 +1,6 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';

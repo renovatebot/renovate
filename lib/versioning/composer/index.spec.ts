@@ -82,22 +82,22 @@ describe('semver.isLessThanRange()', () => {
     expect(semver.isLessThanRange('0.5.1', '~0.4')).toBe(false);
   });
 });
-describe('semver.maxSatisfyingVersion()', () => {
+describe('semver.getSatisfyingVersion()', () => {
   it('handles massaged tilde', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~4'
       )
     ).toBe('4.2.0');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0'],
         '~4'
       )
     ).toBe('4.2.0');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~0.4'
       )
@@ -105,7 +105,7 @@ describe('semver.maxSatisfyingVersion()', () => {
   });
   it('handles prereleases', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         [
           '0.4.0',
           '0.5.0',
@@ -391,6 +391,58 @@ describe('semver.getNewValue()', () => {
         toVersion: '3.2.0',
       })
     ).toEqual('v3.2.*'); // #5388
+  });
+  it('handles update-lockfile strategy', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^0.1',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '0.1.0',
+        toVersion: '0.1.1',
+      })
+    ).toEqual('^0.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '^0.1',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '0.1.0',
+        toVersion: '0.2.0',
+      })
+    ).toEqual('^0.2');
+
+    expect(
+      semver.getNewValue({
+        currentValue: '^5.1',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '5.1.0',
+        toVersion: '5.2.0',
+      })
+    ).toEqual('^5.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '^5.1',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '5.1.0',
+        toVersion: '6.0.0',
+      })
+    ).toEqual('^6.0');
+
+    expect(
+      semver.getNewValue({
+        currentValue: '^5',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '5.1.0',
+        toVersion: '5.2.0',
+      })
+    ).toEqual('^5');
+    expect(
+      semver.getNewValue({
+        currentValue: '^5',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '5.1.0',
+        toVersion: '6.0.0',
+      })
+    ).toEqual('^6');
   });
 });
 describe('.sortVersions', () => {

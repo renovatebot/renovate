@@ -82,7 +82,7 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
       registryUrls.add(source.url);
     }
   }
-  registryUrls.add('https://pypi.org/pypi/');
+  registryUrls.add(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
 
   return Array.from(registryUrls);
 }

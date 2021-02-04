@@ -33,6 +33,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -69,6 +70,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -234,9 +236,25 @@ Object {
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+      ],
+    },
+    Object {
+      "currentValue": "(,8.4.0]",
+      "datasource": "sbt-package",
+      "depName": "org.example:fred",
+      "lookupName": "org.example:fred",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
       ],
     },
   ],
+  "packageFileVersion": "1.0",
 }
 `;
 
@@ -372,9 +390,11 @@ Object {
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
     },
   ],
+  "packageFileVersion": "3.2.1",
 }
 `;
 
@@ -391,6 +411,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -417,6 +438,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -441,8 +463,10 @@ Object {
       "lookupName": "com.github.gseitz:sbt-release",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
     },
   ],
+  "packageFileVersion": "1.0.1",
 }
 `;

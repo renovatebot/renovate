@@ -15,7 +15,7 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   const { username, password, token, enabled } = foundRules;
   if (options.headers?.authorization || options.password || options.token) {
     logger.trace({ url }, `Authorization already set`);
-  } else if (password) {
+  } else if (password !== undefined) {
     logger.trace({ url }, `Applying Basic authentication`);
     options.username = username;
     options.password = password;
@@ -36,4 +36,12 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
     options.http2 = true;
   }
   return options;
+}
+
+export function getRequestLimit(url: string): number | null {
+  const hostRule = hostRules.find({
+    url,
+  });
+  const limit = hostRule.concurrentRequestLimit;
+  return typeof limit === 'number' && limit > 0 ? limit : null;
 }

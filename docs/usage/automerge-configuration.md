@@ -17,6 +17,8 @@ For example, if you have `jest` or `mocha` as a dependency, and it has an upgrad
 If you have a linter like `eslint` or `tslint` and its update passes... automerge them!
 If you have an API with 100% test coverage and `express` is updated... automerge it!
 
+![Automerged PR](assets/images/automerged-pr.png)
+
 ## Configuration examples
 
 ### Automerge lock file maintenance
@@ -44,8 +46,8 @@ However, in many cases the new version(s) will pass tests, and if so then there'
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
-      "packagePatterns": ["lint", "prettier"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePatterns": ["lint", "prettier"],
       "automerge": true
     }
   ]
@@ -60,7 +62,7 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
 {
   "packageRules": [
     {
-      "updateTypes": ["minor", "patch"],
+      "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
     }

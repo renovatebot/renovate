@@ -5,6 +5,7 @@ import {
 } from '../../../../config';
 import {
   Release,
+  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   isGetPkgReleasesConfig,
@@ -103,7 +104,7 @@ function getFromVersion(
   }
   if (rangeStrategy === 'pin') {
     return (
-      lockedVersion || version.maxSatisfyingVersion(useVersions, currentValue)
+      lockedVersion || version.getSatisfyingVersion(useVersions, currentValue)
     );
   }
   if (rangeStrategy === 'bump') {
@@ -111,7 +112,7 @@ function getFromVersion(
     return version.minSatisfyingVersion(useVersions, currentValue);
   }
   // Use the highest version in the current range
-  return version.maxSatisfyingVersion(useVersions, currentValue);
+  return version.getSatisfyingVersion(useVersions, currentValue);
 }
 
 function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
@@ -139,7 +140,10 @@ export async function lookupUpdates(
   let config: LookupUpdateConfig = { ...inconfig };
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = allVersioning.get(config.versioning);
+  // Use the datasource's default versioning if none is configured
+  const version = allVersioning.get(
+    config.versioning || getDefaultVersioning(config.datasource)
+  );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
   const isValid = currentValue && version.isValid(currentValue);
@@ -348,12 +352,8 @@ export async function lookupUpdates(
       // TODO: think more about whether to just Object.assign this
       const releaseFields: (keyof Pick<
         Release,
-        | 'releaseTimestamp'
-        | 'canBeUnpublished'
-        | 'downloadUrl'
-        | 'checksumUrl'
-        | 'newDigest'
-      >)[] = ['releaseTimestamp', 'canBeUnpublished', 'newDigest'];
+        'releaseTimestamp' | 'downloadUrl' | 'checksumUrl' | 'newDigest'
+      >)[] = ['releaseTimestamp', 'newDigest'];
       releaseFields.forEach((field) => {
         if (updateRelease[field] !== undefined) {
           update[field] = updateRelease[field] as never;
@@ -465,7 +465,11 @@ export async function lookupUpdates(
     );
   if (res.updates.some((update) => update.updateType === 'pin')) {
     for (const update of res.updates) {
-      if (update.updateType !== 'pin' && update.updateType !== 'rollback') {
+      if (
+        update.updateType !== 'pin' &&
+        update.updateType !== 'rollback' &&
+        !vulnerabilityAlert
+      ) {
         update.blockedByPin = true;
       }
     }

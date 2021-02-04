@@ -1,4 +1,4 @@
-import * as httpMock from '../../../../test/httpMock';
+import * as httpMock from '../../../../test/http-mock';
 import { getName } from '../../../../test/util';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
@@ -186,6 +186,23 @@ describe(getName(__filename), () => {
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
           endpoint: 'https://gitlab-enterprise.example.com/',
+        })
+      ).toMatchSnapshot();
+    });
+    it('supports self-hosted gitlab changelog', async () => {
+      httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
+      hostRules.add({
+        hostType: PLATFORM_TYPE_GITLAB,
+        baseUrl: 'https://git.test.com/',
+        token: 'abc',
+      });
+      process.env.GITHUB_ENDPOINT = '';
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          platform: PLATFORM_TYPE_GITLAB,
+          sourceUrl: 'https://git.test.com/meno/dropzone/',
+          endpoint: 'https://git.test.com/api/v4/',
         })
       ).toMatchSnapshot();
     });

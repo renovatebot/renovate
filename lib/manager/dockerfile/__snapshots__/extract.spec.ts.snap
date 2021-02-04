@@ -33,6 +33,110 @@ Array [
 ]
 `;
 
+exports[`lib/manager/dockerfile/extract extractPackageFile() extracts images from all sorts of (maybe multiline) FROM and COPY --from statements 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image1",
+    "depType": "stage",
+    "replaceString": "image1",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": "sha256:abcdef",
+    "currentValue": "1.0.0",
+    "datasource": "docker",
+    "depName": "image2",
+    "depType": "stage",
+    "replaceString": "image2:1.0.0@sha256:abcdef",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image4",
+    "depType": "stage",
+    "replaceString": "image4",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image5",
+    "depType": "stage",
+    "replaceString": "image5",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image6",
+    "depType": "stage",
+    "replaceString": "image6",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": "sha256:abcdef",
+    "currentValue": "1.0.0",
+    "datasource": "docker",
+    "depName": "image7",
+    "depType": "stage",
+    "replaceString": "image7:1.0.0@sha256:abcdef",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image9",
+    "depType": "stage",
+    "replaceString": "image9",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image10",
+    "depType": "stage",
+    "replaceString": "image10",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image11",
+    "depType": "stage",
+    "replaceString": "image11",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image12",
+    "depType": "stage",
+    "replaceString": "image12",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "image13",
+    "depType": "final",
+    "replaceString": "image13",
+  },
+]
+`;
+
 exports[`lib/manager/dockerfile/extract extractPackageFile() extracts images on adjacent lines 1`] = `
 Array [
   Object {
@@ -304,6 +408,21 @@ Array [
 ]
 `;
 
+exports[`lib/manager/dockerfile/extract extractPackageFile() handles ubuntu 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "18.04",
+    "datasource": "docker",
+    "depName": "ubuntu",
+    "depType": "final",
+    "replaceString": "ubuntu:18.04",
+    "versioning": "ubuntu",
+  },
+]
+`;
+
 exports[`lib/manager/dockerfile/extract extractPackageFile() is case insensitive 1`] = `
 Array [
   Object {
@@ -362,4 +481,10 @@ Array [
     "replaceString": "node:6.12.3",
   },
 ]
+`;
+
+exports[`lib/manager/dockerfile/extract getDep() rejects null 1`] = `
+Object {
+  "skipReason": "invalid-value",
+}
 `;

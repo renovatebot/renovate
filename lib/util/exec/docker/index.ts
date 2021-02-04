@@ -52,18 +52,14 @@ function uniq<T = unknown>(
   array: T[],
   eql = (x: T, y: T): boolean => x === y
 ): T[] {
-  return array.filter((x, idx, arr) => {
-    return arr.findIndex((y) => eql(x, y)) === idx;
-  });
+  return array.filter((x, idx, arr) => arr.findIndex((y) => eql(x, y)) === idx);
 }
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter((vol) => vol !== null);
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
-  return unique.map(([from, to]) => {
-    return `-v "${from}":"${to}"`;
-  });
+  return unique.map(([from, to]) => `-v "${from}":"${to}"`);
 }
 
 function prepareCommands(commands: Opt<string>[]): string[] {
@@ -85,10 +81,14 @@ async function getDockerTag(
   }
 
   logger.debug(
-    { constraint },
-    `Found ${scheme} version constraint - checking for a compatible ${depName} image to use`
+    { depName, scheme, constraint },
+    `Found version constraint - checking for a compatible image to use`
   );
-  const imageReleases = await getPkgReleases({ datasource: 'docker', depName });
+  const imageReleases = await getPkgReleases({
+    datasource: 'docker',
+    depName,
+    versioning: scheme,
+  });
   if (imageReleases?.releases) {
     let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
@@ -98,8 +98,8 @@ async function getDockerTag(
     if (versions.length) {
       const version = versions.pop();
       logger.debug(
-        { constraint, version },
-        `Found compatible ${scheme} version`
+        { depName, scheme, constraint, version },
+        `Found compatible image version`
       );
       return version;
     }

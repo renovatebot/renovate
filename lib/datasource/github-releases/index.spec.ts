@@ -1,5 +1,5 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 import * as github from '.';
@@ -24,7 +24,7 @@ const responseBody = [
 
 describe('datasource/github-releases', () => {
   beforeEach(() => {
-    hostRules.hosts = jest.fn(() => []);
+    hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
       token: 'some-token',
     });

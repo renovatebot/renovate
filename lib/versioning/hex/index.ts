@@ -50,8 +50,8 @@ const isValid = (input: string): string | boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(hex2npm(version), hex2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
@@ -69,10 +69,16 @@ const getNewValue = ({
     toVersion,
   });
   newSemver = npm2hex(newSemver);
-  if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
+  if (/~>\s*(\d+\.\d+\.\d+)$/.test(currentValue)) {
     newSemver = newSemver.replace(
-      /\^\s*(\d+\.\d+(\.\d)?)/,
-      (_str, p1: string) => `~> ${p1.slice(0, -2)}`
+      /[\^~]\s*(\d+\.\d+\.\d+)/,
+      (_str, p1: string) => `~> ${p1}`
+    );
+  } else if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
+    newSemver = newSemver.replace(
+      /\^\s*(\d+\.\d+)/,
+      (_str, p1: string) =>
+        `~> ${rangeStrategy !== 'bump' ? p1.slice(0, -2) : p1}`
     );
   } else {
     newSemver = newSemver.replace(/~\s*(\d+\.\d+\.\d)/, '~> $1');
@@ -90,7 +96,7 @@ export const api: VersioningApi = {
   isLessThanRange,
   isValid,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
 };

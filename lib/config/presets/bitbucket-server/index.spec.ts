@@ -1,4 +1,4 @@
-import * as httpMock from '../../../../test/httpMock';
+import * as httpMock from '../../../../test/http-mock';
 import { getName, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { PRESET_DEP_NOT_FOUND } from '../util';

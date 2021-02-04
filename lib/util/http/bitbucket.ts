@@ -1,4 +1,3 @@
-import { URL } from 'url';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 

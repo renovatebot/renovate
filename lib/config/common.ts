@@ -38,8 +38,8 @@ export interface RenovateSharedConfig {
   ignorePaths?: string[];
   labels?: string[];
   addLabels?: string[];
-  managers?: string | string[];
   dependencyDashboardApproval?: boolean;
+  hashedBranchLength?: number;
   npmrc?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
@@ -78,6 +78,7 @@ export interface RenovateAdminConfig {
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
 
+  customEnvVariables?: Record<string, string>;
   dockerImagePrefix?: string;
   dockerUser?: string;
 
@@ -98,6 +99,7 @@ export interface RenovateAdminConfig {
   onboardingCommitMessage?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
+  onboardingConfigFileName?: string;
 
   platform?: string;
   postUpdateOptions?: string[];
@@ -214,19 +216,19 @@ export interface PackageRule
   extends RenovateSharedConfig,
     UpdateConfig,
     Record<string, any> {
-  paths?: string[];
-  languages?: string[];
-  baseBranchList?: string[];
-  datasources?: string[];
-  depTypeList?: string[];
-  packageNames?: string[];
-  packagePatterns?: string[];
+  matchPaths?: string[];
+  matchLanguages?: string[];
+  matchBaseBranches?: string[];
+  matchManagers?: string | string[];
+  matchDatasources?: string[];
+  matchDepTypes?: string[];
+  matchPackageNames?: string[];
+  matchPackagePatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   matchCurrentVersion?: string | Range;
-  sourceUrlPrefixes?: string[];
-
-  updateTypes?: UpdateType[];
+  matchSourceUrlPrefixes?: string[];
+  matchUpdateTypes?: UpdateType[];
 }
 
 export interface ValidationMessage {

@@ -36,7 +36,15 @@ function parseUrl(urlString: string): UrlParsedResult | null {
   }
   if (path[2] === 'archive') {
     datasource = datasourceGithubTags.id;
-    currentValue = path[3].replace(/\.tar\.gz$/, '');
+    currentValue = path[3];
+    // Strip archive extension to get hash or tag.
+    // Tolerates formats produced by Git(Hub|Lab) and allowed by http_archive
+    // Note: Order matters in suffix list to strip, e.g. .tar.gz.
+    for (const extension of ['.gz', '.bz2', '.xz', '.tar', '.tgz', '.zip']) {
+      if (currentValue.endsWith(extension)) {
+        currentValue = currentValue.slice(0, -extension.length);
+      }
+    }
   }
   if (currentValue) {
     return { datasource, repo, currentValue };

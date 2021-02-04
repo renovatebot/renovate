@@ -20,12 +20,18 @@ export async function getChangeLogJSON(
     if (version.equals(fromVersion, toVersion)) {
       return null;
     }
-
+    logger.debug(
+      `Fetching changelog: ${sourceUrl} (${fromVersion} -> ${toVersion})`
+    );
     const releases = args.releases || (await getInRangeReleases(args));
 
     let res: ChangeLogResult | null = null;
 
-    if (args.sourceUrl?.includes('gitlab')) {
+    if (
+      args.sourceUrl?.includes('gitlab') ||
+      (args.platform === 'gitlab' &&
+        new URL(args.sourceUrl).hostname === new URL(args.endpoint).hostname)
+    ) {
       res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
     } else {
       res = await sourceGithub.getChangeLogJSON({ ...args, releases });

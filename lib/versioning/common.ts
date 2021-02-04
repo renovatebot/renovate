@@ -29,7 +29,7 @@ export interface VersioningApi {
   equals(version: string, other: string): boolean;
   isGreaterThan(version: string, other: string): boolean;
   isLessThanRange?(version: string, range: string): boolean;
-  maxSatisfyingVersion(versions: string[], range: string): string | null;
+  getSatisfyingVersion(versions: string[], range: string): string | null;
   minSatisfyingVersion(versions: string[], range: string): string | null;
   getNewValue(newValueConfig: NewValueConfig): string;
   sortVersions(version: string, other: string): number;

@@ -2649,7 +2649,7 @@
               "addin"
             ],
             "title": "NUnit",
-            "version": "3.12.0"
+            "version": "3.12.0+build-632"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.3.12.0.nupkg",
           "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"

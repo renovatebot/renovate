@@ -1,5 +1,5 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import * as versioning from '../../versioning/docker';
 import jenkinsPluginsVersions from './__fixtures__/plugin-versions.json';

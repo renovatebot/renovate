@@ -30,7 +30,7 @@ In order to achieve these goals, preset configs allow for a very modular approac
 
 ## Preset Hosting
 
-In general, GitHub or GitLab-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
 An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
 | name                    | example use          | preset    | resolves as                          | filename                          |
@@ -39,6 +39,8 @@ An additional benefit of using source code hosting is that the same token/authen
 | GitHub with preset name | `github>abc/foo:xyz` | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`                        |
 | GitLab default          | `gitlab>abc/foo`     | `default` | `https://gitlab.com/abc/foo`         | `default.json` or `renovate.json` |
 | GitLab with preset name | `gitlab>abc/foo:xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`                        |
+| Gitea default           | `gitea>abc/foo`      | `default` | `https://gitea.com/abc/foo`          | `default.json` or `renovate.json` |
+| Gitea with preset name  | `gitea>abc/foo:xyz`  | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`                        |
 | Local default           | `local>abc/foo`      | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |
 
 ## Example configs
@@ -65,7 +67,7 @@ A typical onboarding `renovate.json` looks like this:
 }
 ```
 
-Say you want to modify the default behaviour, for example scheduling Renovate to process upgrades during non-office hours only.
+Say you want to modify the default behavior, for example scheduling Renovate to process upgrades during non-office hours only.
 To do this you can modify the default `renovate.json` file like this:
 
 ```json
@@ -180,11 +182,22 @@ To host your preset config on GitLab:
 - Add a renovate.json to this new repo containing the preset config. No other files are necessary
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
+## Gitea-hosted Presets
+
+It is also possible to host your preset config using just a regular Gitea repository and without needing to publish it to npmjs.
+In such cases Renovate will simply look for a `renovate.json` file in the default branch, (for now only the _master_ branch is supported).
+
+To host your preset config on Gitea:
+
+- Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
+- Add a `renovate.json` to this new repository containing the preset config. No other files are necessary
+- In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
+
 ## Local presets
 
 Renovate also supports local presets, e.g. presets that are hosted on the same platform as the target repository.
 This is especially helpful in self-hosted scenarios where public presets cannot be used.
-Local presets are only supported on GitHub, GitLab and Bitbucket Server.
+Local presets are only supported on GitHub, GitLab, Gitea and Bitbucket Server.
 Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`.
 Renovate will determine the current platform and look up the preset from there.
 
