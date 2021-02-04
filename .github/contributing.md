@@ -41,8 +41,8 @@ Read more about this in the [GitHub docs, Re-requesting a review](https://docs.g
 Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor.
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
-For that reason, we have a Slack channel dedicated to helping anyone who's working on Pull Requests for Renovate.
-Please email rhys@renovatebot.com and simply mention that you need an invitation to the channel.
+For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
+Please email rhys@arkins.net and simply mention that you need an invitation to the channel and you'll be added ASAP.
 
 ## Legal
 
