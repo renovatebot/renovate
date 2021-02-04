@@ -64,6 +64,7 @@ export interface RenovateSharedConfig {
 }
 
 export interface RepoAdminConfig {
+  dockerUser?: string;
 }
 
 export interface RenovateAdminConfig {
@@ -78,7 +79,6 @@ export interface RenovateAdminConfig {
 
   customEnvVariables?: Record<string, string>;
   dockerImagePrefix?: string;
-  dockerUser?: string;
 
   dryRun?: boolean;
 

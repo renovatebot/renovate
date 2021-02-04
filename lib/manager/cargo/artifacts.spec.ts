@@ -22,7 +22,6 @@ const env = mocked(_env);
 const config = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
-  dockerUser: 'foobar',
 };
 
 describe('.updateArtifacts()', () => {
