@@ -12,7 +12,17 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2/commits/",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2/commits/master",
   },
 ]
 `;

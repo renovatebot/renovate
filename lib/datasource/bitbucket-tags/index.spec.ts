@@ -63,7 +63,11 @@ describe('datasource/bitbucket-tags', () => {
       };
       httpMock
         .scope('https://api.bitbucket.org')
-        .get('/2.0/repositories/some/dep2/commits/')
+        .get('/2.0/repositories/some/dep2')
+        .reply(200, { mainbranch: { name: 'master' } });
+      httpMock
+        .scope('https://api.bitbucket.org')
+        .get('/2.0/repositories/some/dep2/commits/master')
         .reply(200, body);
       const res = await getDigest({
         datasource,
