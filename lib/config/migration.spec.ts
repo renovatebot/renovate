@@ -46,6 +46,8 @@ describe('config/migration', () => {
         gomodTidy: true,
         upgradeInRange: true,
         automergeType: 'branch-push',
+        branchName:
+          '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}',
         baseBranch: 'next',
         managerBranchPrefix: 'foo',
         branchPrefix: 'renovate/{{parentDir}}-',
@@ -562,20 +564,46 @@ describe('config/migration', () => {
       let res: MigratedConfig;
 
       config = {
-        packages: [{ packagePatterns: ['*'] }],
-        packageRules: { packageNames: [] },
+        packages: [{ matchPackagePatterns: ['*'] }],
+        packageRules: { matchPackageNames: [] },
       } as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBe(true);
       expect(res.migratedConfig.packageRules).toHaveLength(2);
 
       config = {
-        packageRules: { packageNames: [] },
-        packages: [{ packagePatterns: ['*'] }],
+        packageRules: { matchPpackageNames: [] },
+        packages: [{ matchPackagePatterns: ['*'] }],
       } as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBe(true);
       expect(res.migratedConfig.packageRules).toHaveLength(2);
+    });
+    it('it migrates packageRules', () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          {
+            paths: ['package.json'],
+            languages: ['python'],
+            baseBranchList: ['master'],
+            managers: ['dockerfile'],
+            datasources: ['orb'],
+            depTypeList: ['peerDependencies'],
+            packageNames: ['foo'],
+            packagePatterns: ['^bar'],
+            excludePackageNames: ['baz'],
+            excludePackagePatterns: ['^baz'],
+            sourceUrlPrefixes: ['https://github.com/vuejs/vue'],
+            updateTypes: ['major'],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig).toMatchSnapshot();
     });
   });
 });

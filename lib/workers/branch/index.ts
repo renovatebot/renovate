@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../config';
 import {
+  CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -574,6 +575,9 @@ export async function processBranch(
     } else if (err.message?.includes('fatal: bad revision')) {
       logger.debug({ err }, 'Aborting job due to bad revision error');
       throw new Error(REPOSITORY_CHANGED);
+    } else if (err.message === CONFIG_VALIDATION) {
+      logger.debug('Passing config validation error up');
+      throw err;
     } else if (!(err instanceof ExternalHostError)) {
       logger.error({ err }, `Error updating branch: ${String(err.message)}`);
     }

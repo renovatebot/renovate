@@ -101,6 +101,7 @@ export function parsePreset(input: string): ParsedPreset {
     'npm',
     'packages',
     'preview',
+    'regexManagers',
     'schedule',
     'workarounds',
   ];
@@ -175,9 +176,9 @@ export async function getPreset(
   }
   const packageListKeys = [
     'description',
-    'packageNames',
+    'matchPackageNames',
     'excludePackageNames',
-    'packagePatterns',
+    'matchPackagePatterns',
     'excludePackagePatterns',
   ];
   if (presetKeys.every((key) => packageListKeys.includes(key))) {
@@ -218,7 +219,7 @@ export async function resolveConfigPresets(
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
         try {
-          fetchedPreset = await getPreset(preset, baseConfig);
+          fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
