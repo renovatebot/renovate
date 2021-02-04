@@ -63,11 +63,6 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
 }
 
-export interface GlobalConfig {
-  prBanner?: string;
-  prFooter?: string;
-}
-
 export interface RenovateAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
@@ -85,8 +80,6 @@ export interface RenovateAdminConfig {
   dryRun?: boolean;
 
   endpoint?: string;
-
-  global?: GlobalConfig;
 
   localDir?: string;
   logFile?: string;
