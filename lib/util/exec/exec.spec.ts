@@ -5,6 +5,7 @@ import {
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
 import { setAdminConfig } from '../../config/admin';
+import { RepoAdminConfig } from '../../config/common';
 import {
   BinarySource,
   ExecConfig,
@@ -26,7 +27,7 @@ interface TestInput {
   outCmd: string[];
   outOpts: RawExecOptions[];
   trustLevel?: 'high' | 'low';
-  dockerUser?: string;
+  adminConfig?: RepoAdminConfig;
 }
 
 describe(`Child process execution wrapper`, () => {
@@ -412,7 +413,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
-        dockerUser: 'foobar',
+        adminConfig: { dockerUser: 'foobar' },
       },
     ],
 
@@ -662,7 +663,7 @@ describe(`Child process execution wrapper`, () => {
       outCmd: outCommand,
       outOpts,
       trustLevel,
-      dockerUser,
+      adminConfig = {},
     } = testOpts;
 
     process.env = procEnv;
@@ -685,7 +686,7 @@ describe(`Child process execution wrapper`, () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-    setAdminConfig({ dockerUser }, ['dockerUser']);
+    setAdminConfig(adminConfig as any, Object.keys(adminConfig));
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
