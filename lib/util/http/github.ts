@@ -247,6 +247,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           statusCode >= 500 &&
           statusCode < 600
         ) {
+          logger.info('Reducing pagination count to workaround graphql 5xx');
           return null;
         }
       }
