@@ -396,7 +396,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'origin/' + branchName])
     ).trim();
-    await git.checkout([branchName, '-f']);
+    await git.checkout(['-f', branchName, '--']);
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
