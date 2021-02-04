@@ -215,6 +215,4 @@ export async function getDigest(
       return null;
     }
   }
-
-  return null;
 }

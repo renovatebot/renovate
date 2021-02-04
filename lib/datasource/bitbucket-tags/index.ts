@@ -128,12 +128,9 @@ export async function getDigest(
     return cachedResult;
   }
 
-  const mainBranch =
-    (
-      await bitbucketHttp.getJson<utils.RepoInfoBody>(
-        `/2.0/repositories/${repo}`
-      )
-    ).body.mainbranch.name ?? '';
+  const mainBranch = (
+    await bitbucketHttp.getJson<utils.RepoInfoBody>(`/2.0/repositories/${repo}`)
+  ).body.mainbranch.name;
 
   const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
 
