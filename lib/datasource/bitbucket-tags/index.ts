@@ -7,13 +7,20 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 const bitbucketHttp = new BitbucketHttp();
 
 export const id = 'bitbucket-tags';
-export const defaultRegistryUrls = ['https://bitbucket.org'];
 export const registryStrategy = 'first';
+export const defaultRegistryUrls = ['https://bitbucket.org'];
+
+function getRegistryURL(depHost: string): string {
+  // fallback to default API endpoint if custom not provided
+  return depHost ?? defaultRegistryUrls[0];
+}
 
 const cacheNamespace = 'datasource-bitbucket';
+
 function getCacheKey(depHost: string, repo: string): string {
   const type = 'tags';
-  return `${depHost}:${repo}:${type}`;
+
+  return `${getRegistryURL(depHost)}:${repo}:${type}`;
 }
 
 type BitbucketTag = {
@@ -24,14 +31,12 @@ type BitbucketTag = {
 };
 
 export async function getReleases({
-  registryUrl,
+  registryUrl: depHost,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  // fallback to default API endpoint if custom not provided
-
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(registryUrl, repo)
+    getCacheKey(depHost, repo)
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -45,7 +50,7 @@ export async function getReleases({
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: `${ensureTrailingSlash(registryUrl)}${repo}`,
+    sourceUrl: `${ensureTrailingSlash(getRegistryURL(depHost))}${repo}`,
     releases: null,
   };
   dependency.releases = bitbucketTags.values.map(({ name, target }) => ({
@@ -57,7 +62,7 @@ export async function getReleases({
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(registryUrl, repo),
+    getCacheKey(depHost, repo),
     dependency,
     cacheMinutes
   );
