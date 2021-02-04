@@ -17,7 +17,7 @@ Object {
       "version": "v1.1.1",
     },
   ],
-  "sourceUrl": "https://api.bitbucket.org/2.0/some/dep2",
+  "sourceUrl": "https://bitbucket.org/some/dep2",
 }
 `;
 
