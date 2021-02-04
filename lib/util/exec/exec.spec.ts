@@ -423,7 +423,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          dockerImagePrefix: 'ghcr.io/renovatebot',
         },
         processEnv,
         inCmd,
@@ -444,6 +443,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { dockerImagePrefix: 'ghcr.io/renovatebot' },
       },
     ],
 

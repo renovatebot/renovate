@@ -21,7 +21,6 @@ import { getChildProcessEnv } from './env';
 const execConfig: ExecConfig = {
   binarySource: null,
   customEnvVariables: null,
-  dockerImagePrefix: null,
   localDir: null,
   cacheDir: null,
 };

@@ -188,7 +188,7 @@ export async function generateDockerCommand(
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
   const { localDir, cacheDir } = config;
-  const { dockerUser } = getAdminConfig();
+  const { dockerUser, dockerImagePrefix } = getAdminConfig();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image);
   result.push(`--name=${containerName}`);
@@ -211,10 +211,10 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  if (config.dockerImagePrefix) {
+  if (dockerImagePrefix) {
     image = image.replace(
       /^renovate\//,
-      ensureTrailingSlash(config.dockerImagePrefix)
+      ensureTrailingSlash(dockerImagePrefix)
     );
   }
 
