@@ -196,11 +196,25 @@ export async function getDigest(
   value?: string
 ): Promise<string | null> {
   const source = await getDatasource(lookupName);
-  if (source && source.datasource === github.id) {
-    // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
-    const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
-    const digest = await github.getDigest(source, tag);
-    return digest;
+  if (!source) {
+    return null;
   }
+
+  // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
+  const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
+
+  switch (source.datasource) {
+    case github.id: {
+      return github.getDigest(source, tag);
+    }
+    case bitbucket.id: {
+      return bitbucket.getDigest(source, tag);
+    }
+    /* istanbul ignore next */
+    default: {
+      return null;
+    }
+  }
+
   return null;
 }
