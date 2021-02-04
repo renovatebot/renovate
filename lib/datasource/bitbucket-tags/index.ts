@@ -1,4 +1,3 @@
-import { getDefaultBranch } from '../../platform/bitbucket/index';
 import * as utils from '../../platform/bitbucket/utils';
 import * as packageCache from '../../util/cache/package';
 import { BitbucketHttp } from '../../util/http/bitbucket';
@@ -129,7 +128,14 @@ export async function getDigest(
     return cachedResult;
   }
 
-  const url = `/2.0/repositories/${repo}/commits/${getDefaultBranch() ?? ''}`;
+  const mainBranch =
+    (
+      await bitbucketHttp.getJson<utils.RepoInfoBody>(
+        `/2.0/repositories/${repo}`
+      )
+    ).body.mainbranch.name ?? '';
+
+  const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
 
   const bitbucketCommits = (
     await bitbucketHttp.getJson<utils.PagedResult<BitbucketCommit>>(url)
