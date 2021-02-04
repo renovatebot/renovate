@@ -70,6 +70,35 @@ describe('datasource/go', () => {
       expect(res).toBe('abcdefabcdefabcdefabcdef');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('support bitbucket digest', async () => {
+      httpMock
+        .scope('https://api.bitbucket.org')
+        .get('/2.0/repositories/golang/text')
+        .reply(200, { mainbranch: { name: 'master' } });
+      httpMock
+        .scope('https://api.bitbucket.org')
+        .get('/2.0/repositories/golang/text/commits/master')
+        .reply(200, {
+          pagelen: 1,
+          values: [
+            {
+              hash: '123',
+              date: '2020-11-19T09:05:35+00:00',
+            },
+          ],
+          page: 1,
+        });
+      const res = await getDigest(
+        {
+          lookupName: 'bitbucket.org/golang/text',
+        },
+        null
+      );
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
@@ -152,7 +181,7 @@ describe('datasource/go', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('support bitbucket', async () => {
+    it('support bitbucket tags', async () => {
       httpMock
         .scope('https://api.bitbucket.org/')
         .get('/2.0/repositories/golang/text/refs/tags')

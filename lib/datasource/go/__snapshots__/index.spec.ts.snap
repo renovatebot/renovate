@@ -52,6 +52,33 @@ Array [
 ]
 `;
 
+exports[`datasource/go getDigest support bitbucket digest 1`] = `"123"`;
+
+exports[`datasource/go getDigest support bitbucket digest 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/golang/text",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/golang/text/commits/master",
+  },
+]
+`;
+
 exports[`datasource/go getReleases falls back to old behaviour 1`] = `
 Array [
   Object {
@@ -236,7 +263,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases support bitbucket 1`] = `
+exports[`datasource/go getReleases support bitbucket tags 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -252,7 +279,7 @@ Object {
 }
 `;
 
-exports[`datasource/go getReleases support bitbucket 2`] = `
+exports[`datasource/go getReleases support bitbucket tags 2`] = `
 Array [
   Object {
     "headers": Object {
