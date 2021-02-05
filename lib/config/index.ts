@@ -129,11 +129,6 @@ export async function parseConfigs(
   delete config.logFile;
   delete config.logFileLevel;
 
-  // Move global variables that we need to use later
-  global.trustLevel =
-    config.trustLevel || /* istanbul ignore next: never happen? */ 'low';
-  delete config.trustLevel;
-
   return config;
 }
 

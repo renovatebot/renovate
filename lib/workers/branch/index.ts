@@ -336,7 +336,7 @@ export async function processBranch(
       (config.updatedPackageFiles?.length > 0 ||
         /* ... or changes to artifacts */
         config.updatedArtifacts?.length > 0) &&
-      global.trustLevel === 'high' &&
+      getAdminConfig().trustLevel === 'high' &&
       is.nonEmptyArray(allowedPostUpgradeCommands)
     ) {
       for (const upgrade of config.upgrades) {

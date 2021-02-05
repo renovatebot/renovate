@@ -1,6 +1,7 @@
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
+import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
@@ -67,7 +68,7 @@ export async function generateLockFile(
       },
     };
     // istanbul ignore if
-    if (global.trustLevel === 'high') {
+    if (getAdminConfig().trustLevel === 'high') {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
       execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;

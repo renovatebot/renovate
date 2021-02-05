@@ -4,6 +4,7 @@ import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { setAdminConfig } from '../../config/admin';
 import * as memCache from '../../util/cache/memory';
 import { setFsConfig } from '../../util/fs';
 import {
@@ -71,11 +72,12 @@ describe('datasource/crate', () => {
       });
       simpleGit.mockReset();
       memCache.init();
+      setAdminConfig();
     });
     afterEach(() => {
       fs.rmdirSync(tmpDir.path, { recursive: true });
       tmpDir = null;
-      delete global.trustLevel;
+      setAdminConfig();
     });
     it('returns null for missing registry url', async () => {
       expect(
@@ -208,9 +210,8 @@ describe('datasource/crate', () => {
     });
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
-
+      setAdminConfig({ trustLevel: 'high' });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
-      global.trustLevel = 'high';
       const res = await getPkgReleases({
         datasource,
         depName: 'mypkg',
@@ -223,9 +224,8 @@ describe('datasource/crate', () => {
     });
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
-
+      setAdminConfig({ trustLevel: 'high' });
       const url = 'https://github.com/mcorbin/testregistry';
-      global.trustLevel = 'high';
       const res = await getPkgReleases({
         datasource,
         depName: 'mypkg',
@@ -238,9 +238,8 @@ describe('datasource/crate', () => {
     });
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
-
+      setAdminConfig({ trustLevel: 'high' });
       const url = 'https://github.com/mcorbin/othertestregistry';
-      global.trustLevel = 'high';
       await getPkgReleases({
         datasource,
         depName: 'mypkg',
