@@ -63,6 +63,11 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
 }
 
+export interface RepoAdminConfig {
+  dockerImagePrefix?: string;
+  dockerUser?: string;
+}
+
 export interface RenovateAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
@@ -74,8 +79,6 @@ export interface RenovateAdminConfig {
   configWarningReuseIssue?: boolean;
 
   customEnvVariables?: Record<string, string>;
-  dockerImagePrefix?: string;
-  dockerUser?: string;
 
   dryRun?: boolean;
 

@@ -1920,6 +1920,10 @@ export function getOptions(): RenovateOptions[] {
   return options;
 }
 
+export function getAdminOptionNames(): string[] {
+  return options.filter((option) => option.admin).map((option) => option.name);
+}
+
 function loadManagerOptions(): void {
   for (const [name, config] of getManagers().entries()) {
     if (config.defaultConfig) {

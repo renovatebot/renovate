@@ -11,7 +11,6 @@ export type Result<T> = T | Promise<T>;
 
 export interface ManagerConfig {
   binarySource?: string;
-  dockerUser?: string;
   localDir?: string;
   registryUrls?: string[];
 }
