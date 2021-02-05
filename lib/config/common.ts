@@ -94,7 +94,6 @@ export interface RepoAdminConfig {
 export interface RenovateAdminConfig {
   baseDir?: string;
   cacheDir?: string;
-  configWarningReuseIssue?: boolean;
 
   customEnvVariables?: Record<string, string>;
 
@@ -165,7 +164,7 @@ export interface RenovateConfig
   isFork?: boolean;
 
   fileList?: string[];
-
+  configWarningReuseIssue?: boolean;
   dependencyDashboard?: boolean;
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
