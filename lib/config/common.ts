@@ -1,7 +1,6 @@
 import { LogLevel } from 'bunyan';
 import { Range } from 'semver';
 import { HostRule } from '../types';
-import { Opt } from '../util/exec/common';
 
 export type RenovateConfigStage =
   | 'global'
@@ -65,7 +64,7 @@ export interface RenovateSharedConfig {
 }
 
 export interface RepoAdminConfig {
-  dockerImagePrefix?: Opt<string>;
+  dockerImagePrefix?: string;
   dockerUser?: string;
 }
 
