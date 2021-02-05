@@ -86,6 +86,7 @@ export interface RepoAdminConfig {
   allowedPostUpgradeCommands?: string[];
   dockerImagePrefix?: string;
   dockerUser?: string;
+  privateKey?: string | Buffer;
   trustLevel?: 'low' | 'high';
 }
 
@@ -113,7 +114,6 @@ export interface RenovateAdminConfig {
 
   platform?: string;
   postUpdateOptions?: string[];
-  privateKey?: string | Buffer;
   requireConfig?: boolean;
 }
 

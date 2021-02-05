@@ -8,6 +8,7 @@ export const repoAdminOptions = [
   'allowedPostUpgradeCommands',
   'dockerImagePrefix',
   'dockerUser',
+  'privateKey',
   'trustLevel',
 ];
 
