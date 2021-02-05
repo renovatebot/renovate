@@ -29,17 +29,24 @@ async function importKey(): Promise<void> {
   await fs.remove(keyFileName);
 }
 
-export async function writePrivateKey(cwd: string): Promise<void> {
+export async function writePrivateKey(): Promise<void> {
   if (!gitPrivateKey) {
     return;
   }
   logger.debug('Setting git private key');
   try {
     await importKey();
-    await exec(`git config user.signingkey ${keyId}`, { cwd });
-    await exec(`git config commit.gpgsign true`, { cwd });
   } catch (err) {
     logger.warn({ err }, 'Error writing git private key');
     throw new Error(PLATFORM_GPG_FAILED);
   }
+}
+
+export async function configSigningKey(cwd: string): Promise<void> {
+  if (!gitPrivateKey) {
+    return;
+  }
+  logger.debug('Configuring commits signing');
+  await exec(`git config user.signingkey ${keyId}`, { cwd });
+  await exec(`git config commit.gpgsign true`, { cwd });
 }

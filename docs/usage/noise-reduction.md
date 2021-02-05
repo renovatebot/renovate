@@ -14,7 +14,7 @@ Of course, please keep in mind that people's definitions of "noise" may differ.
 For some people, it's noisy only if they get a notification or email from GitHub.
 For others, too many commits in their `master` branch may be "noise".
 In other words, your mileage may vary.
-If you have any ideas on this topic, please contact the author by opening an [issue on the Renovate repository](https://github.com/renovatebot/renovate/issues).
+If you have any ideas on this topic, please contact the author by starting a [new discussion on the Renovate repository](https://github.com/renovatebot/renovate/discussions).
 
 ## Package Grouping
 
@@ -30,13 +30,13 @@ In that case you might create a config like this:
 ```json
   "packageRules": [
     {
-      "packagePatterns": [ "eslint" ],
+      "matchPackagePatterns": [ "eslint" ],
       "groupName": "eslint"
     }
   ]
 ```
 
-By setting `packagePatterns` to "eslint", it means that any package with ESLint anywhere in its name will be grouped into a `renovate/eslint` branch and related PR.
+By setting `matchPackagePatterns` to "eslint", it means that any package with ESLint anywhere in its name will be grouped into a `renovate/eslint` branch and related PR.
 
 **Caution**: Any time you group dependencies together, you naturally increase the chance that the branch will have an error ("break" your build).
 When you have more than one package upgrade in a PR, it's going to take you longer to work out which one broke than if they were all in separate PRs.
@@ -79,7 +79,7 @@ You don't want to get too far behind, so how about we update `eslint` packages o
 ```json
   "packageRules": [
     {
-      "packagePatterns": [ "eslint" ],
+      "matchPackagePatterns": [ "eslint" ],
       "groupName": "eslint",
       "schedule": ["on the first day of the month"]
     }
@@ -91,7 +91,7 @@ Or perhaps at least weekly:
 ```json
   "packageRules": [
     {
-      "packagePatterns": [ "eslint" ],
+      "matchPackagePatterns": [ "eslint" ],
       "groupName": "eslint",
       "schedule": ["before 2am on monday"]
     }
@@ -147,7 +147,7 @@ Let's automerge it if all the linting updates pass:
 ```json
   "packageRules": [
     {
-      "packagePatterns": [ "eslint" ],
+      "matchPackagePatterns": [ "eslint" ],
       "groupName": "eslint",
       "schedule": ["before 2am on monday"],
       "automerge": true,

@@ -18,6 +18,7 @@ function getDep(
       lineNumber,
     },
     depName,
+    lookupName: depName,
     depType: type,
     currentValue,
   };
@@ -26,11 +27,11 @@ function getDep(
   } else {
     if (depName.startsWith('gopkg.in/')) {
       const [pkg] = depName.replace('gopkg.in/', '').split('.');
-      dep.depNameShort = pkg;
+      dep.depName = pkg;
     } else if (depName.startsWith('github.com/')) {
-      dep.depNameShort = depName.replace('github.com/', '');
+      dep.depName = depName.replace('github.com/', '');
     } else {
-      dep.depNameShort = depName;
+      dep.depName = depName;
     }
     dep.datasource = datasourceGo.id;
   }

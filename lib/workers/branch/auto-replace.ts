@@ -37,7 +37,7 @@ export async function confirmIfDepUpdated(
     logger.debug({ manager, packageFile }, 'No newUpgrade');
     return false;
   }
-  // istanbul ignore if
+
   if (upgrade.depName !== newUpgrade.depName) {
     logger.debug(
       {
@@ -48,6 +48,7 @@ export async function confirmIfDepUpdated(
       },
       'depName mismatch'
     );
+    return false;
   }
   if (newUpgrade.currentValue !== newValue) {
     logger.debug(

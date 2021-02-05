@@ -103,7 +103,6 @@ export function analyseTerraformResource(
       dep.depType = 'helm';
       dep.registryUrls = [dep.managerData.repository];
       dep.depName = dep.managerData.chart;
-      dep.depNameShort = dep.managerData.chart;
       dep.datasource = datasourceHelm.id;
       break;
 

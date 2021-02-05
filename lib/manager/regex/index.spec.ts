@@ -106,7 +106,7 @@ describe(getName(__filename), () => {
       spec:
         releaseName: prometheus-operator
         chart:
-          repository: https://kubernetes-charts.storage.googleapis.com/
+          repository: https://charts.helm.sh/stable
           name: prometheus-operator
           version: 8.12.13
       `,

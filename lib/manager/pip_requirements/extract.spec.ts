@@ -45,8 +45,14 @@ describe('lib/manager/pip_requirements/extract', () => {
   });
   describe('extractPackageFile()', () => {
     let config;
+    const OLD_ENV = process.env;
     beforeEach(() => {
       config = { registryUrls: ['AnExistingDefaultUrl'] };
+      process.env = { ...OLD_ENV };
+      delete process.env.PIP_INDEX_URL;
+    });
+    afterEach(() => {
+      process.env = OLD_ENV;
     });
     it('returns null for empty', () => {
       expect(

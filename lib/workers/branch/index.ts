@@ -2,7 +2,9 @@ import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../config';
+import { getAdminConfig } from '../../config/admin';
 import {
+  CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -30,6 +32,7 @@ import {
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -60,9 +63,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 export async function processBranch(
-  branchConfig: BranchConfig,
-  prLimitReached?: boolean,
-  commitLimitReached?: boolean
+  branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -153,15 +154,15 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      prLimitReached &&
+      isLimitReached(Limit.Branches) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.debug('Reached PR limit - skipping branch creation');
-      return ProcessBranchResult.PrLimitReached;
+      logger.debug('Reached branch limit - skipping branch creation');
+      return ProcessBranchResult.BranchLimitReached;
     }
     if (
-      commitLimitReached &&
+      isLimitReached(Limit.Commits) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
@@ -170,6 +171,7 @@ export async function processBranch(
     }
     if (branchExists) {
       logger.debug('Checking if PR has been edited');
+      const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== PrState.Open) {
@@ -178,7 +180,6 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        const branchIsModified = await isBranchModified(config.branchName);
         if (
           branchIsModified ||
           (branchPr.targetBranch &&
@@ -206,6 +207,9 @@ export async function processBranch(
             return ProcessBranchResult.PrEdited;
           }
         }
+      } else if (branchIsModified) {
+        logger.debug('Branch has been edited');
+        return ProcessBranchResult.PrEdited;
       }
     }
 
@@ -322,20 +326,25 @@ export async function processBranch(
       logger.debug('No updated lock files in branch');
     }
 
+    const {
+      allowedPostUpgradeCommands,
+      allowPostUpgradeCommandTemplating,
+    } = getAdminConfig();
+
     if (
       /* Only run post-upgrade tasks if there are changes to package files... */
       (config.updatedPackageFiles?.length > 0 ||
         /* ... or changes to artifacts */
         config.updatedArtifacts?.length > 0) &&
       global.trustLevel === 'high' &&
-      is.nonEmptyArray(config.allowedPostUpgradeCommands)
+      is.nonEmptyArray(allowedPostUpgradeCommands)
     ) {
       for (const upgrade of config.upgrades) {
         addMeta({ dep: upgrade.depName });
         logger.trace(
           {
             tasks: upgrade.postUpgradeTasks,
-            allowedCommands: config.allowedPostUpgradeCommands,
+            allowedCommands: allowedPostUpgradeCommands,
           },
           'Checking for post-upgrade tasks'
         );
@@ -360,19 +369,19 @@ export async function processBranch(
 
           for (const cmd of commands) {
             if (
-              !config.allowedPostUpgradeCommands.some((pattern) =>
+              !allowedPostUpgradeCommands.some((pattern) =>
                 regEx(pattern).test(cmd)
               )
             ) {
               logger.warn(
                 {
                   cmd,
-                  allowedPostUpgradeCommands: config.allowedPostUpgradeCommands,
+                  allowedPostUpgradeCommands,
                 },
                 'Post-upgrade task did not match any on allowed list'
               );
             } else {
-              const compiledCmd = config.allowPostUpgradeCommandTemplating
+              const compiledCmd = allowPostUpgradeCommandTemplating
                 ? template.compile(cmd, upgrade)
                 : cmd;
 
@@ -572,6 +581,9 @@ export async function processBranch(
     } else if (err.message?.includes('fatal: bad revision')) {
       logger.debug({ err }, 'Aborting job due to bad revision error');
       throw new Error(REPOSITORY_CHANGED);
+    } else if (err.message === CONFIG_VALIDATION) {
+      logger.debug('Passing config validation error up');
+      throw err;
     } else if (!(err instanceof ExternalHostError)) {
       logger.error({ err }, `Error updating branch: ${String(err.message)}`);
     }
@@ -583,8 +595,8 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prResult: result, pr } = await ensurePr(config, prLimitReached);
-    if (result === PrResult.LimitReached) {
+    const { prResult: result, pr } = await ensurePr(config);
+    if (result === PrResult.LimitReached && !config.vulnerabilityAlert) {
       logger.debug('Reached PR limit - skipping PR creation');
       return ProcessBranchResult.PrLimitReached;
     }

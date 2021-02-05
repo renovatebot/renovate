@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { join, parse } from 'upath';
+import { isAbsolute, join, parse } from 'upath';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 
@@ -80,10 +80,48 @@ export async function ensureCacheDir(
   return cacheDirName;
 }
 
+/**
+ * Return the path of the private cache directory. This directory is wiped
+ * between repositories, so they can be used to store private registries' index
+ * without risk of that information leaking to other repositories/users.
+ */
+export function privateCacheDir(): string {
+  return join(cacheDir, '__renovate-private-cache');
+}
+
 export function localPathExists(pathName: string): Promise<boolean> {
   // Works for both files as well as directories
   return fs
     .stat(join(localDir, pathName))
     .then((s) => !!s)
     .catch(() => false);
+}
+
+/**
+ * Tries to find `otherFileName` in the directory where
+ * `existingFileNameWithPath` is, then in its parent directory, then in the
+ * grandparent, until we reach the top-level directory. All paths
+ * must be relative to `localDir`.
+ */
+export async function findLocalSiblingOrParent(
+  existingFileNameWithPath: string,
+  otherFileName: string
+): Promise<string | null> {
+  if (isAbsolute(existingFileNameWithPath)) {
+    return null;
+  }
+  if (isAbsolute(otherFileName)) {
+    return null;
+  }
+
+  let current = existingFileNameWithPath;
+  while (current !== '') {
+    current = getSubDirectory(current);
+    const candidate = join(current, otherFileName);
+    if (await localPathExists(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
 }

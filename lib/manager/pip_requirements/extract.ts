@@ -44,7 +44,7 @@ export function extractPackageFile(
     registryUrls = registryUrls.concat(config.registryUrls);
   } else if (extraUrls.length) {
     // Use default registry first if extra URLs are present and index URL is not
-    registryUrls.push('https://pypi.org/pypi/');
+    registryUrls.push(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
   }
   registryUrls = registryUrls.concat(extraUrls);
 

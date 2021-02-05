@@ -2,6 +2,7 @@
   "data": {
     "repository": {
       "pullRequests": {
+        "pageInfo": {},
         "nodes": [
           {
             "number": 2433,

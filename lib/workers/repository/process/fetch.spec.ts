@@ -29,7 +29,7 @@ describe('workers/repository/process/fetch', () => {
       config.ignoreDeps = ['abcd'];
       config.packageRules = [
         {
-          packageNames: ['foo'],
+          matchPackageNames: ['foo'],
           enabled: false,
         },
       ];

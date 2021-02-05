@@ -29,6 +29,7 @@ describe(getName(__filename), () => {
         { stdout: '', stderr: 'Python 2.7.17\\n' },
         new Error(),
         { stdout: 'Python 3.8.0\\n', stderr: '' },
+        new Error(),
       ]);
       const result = await getPythonAlias();
       expect(pythonVersions).toContain(result);

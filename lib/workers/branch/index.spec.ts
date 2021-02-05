@@ -1,5 +1,6 @@
 import * as _fs from 'fs-extra';
 import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -9,6 +10,7 @@ import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
@@ -29,6 +31,7 @@ jest.mock('../pr');
 jest.mock('../../util/exec');
 jest.mock('../../util/git');
 jest.mock('fs-extra');
+jest.mock('../global/limits');
 
 const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);
@@ -40,6 +43,7 @@ const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const fs = mocked(_fs);
+const limits = mocked(_limits);
 
 describe('workers/branch', () => {
   describe('processBranch', () => {
@@ -61,6 +65,7 @@ describe('workers/branch', () => {
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('abc123');
+      setAdminConfig({}, []);
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
@@ -207,7 +212,13 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.PrEdited);
     });
-    it('returns if pr creation limit exceeded', async () => {
+    it('skips branch if branch edited and no PR found', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual(ProcessBranchResult.PrEdited);
+    });
+    it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
       });
@@ -215,9 +226,10 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-      git.branchExists.mockReturnValue(false);
-      expect(await branchWorker.processBranch(config, true)).toEqual(
-        ProcessBranchResult.PrLimitReached
+      limits.isLimitReached.mockReturnValueOnce(true);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      expect(await branchWorker.processBranch(config)).toEqual(
+        ProcessBranchResult.BranchLimitReached
       );
     });
     it('returns if pr creation limit exceeded and branch exists', async () => {
@@ -232,7 +244,8 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.LimitReached,
       });
-      expect(await branchWorker.processBranch(config, true)).toEqual(
+      limits.isLimitReached.mockReturnValue(false);
+      expect(await branchWorker.processBranch(config)).toEqual(
         ProcessBranchResult.PrLimitReached
       );
     });
@@ -245,7 +258,9 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       git.branchExists.mockReturnValue(false);
-      expect(await branchWorker.processBranch(config, false, true)).toEqual(
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual(
         ProcessBranchResult.CommitLimitReached
       );
     });
@@ -680,6 +695,12 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: true,
+      };
+      setAdminConfig(adminConfig, Object.keys(adminConfig));
+
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
@@ -687,8 +708,6 @@ describe('workers/branch', () => {
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: true,
         upgrades: [
           {
             ...defaultConfig,
@@ -744,7 +763,11 @@ describe('workers/branch', () => {
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: false,
+      };
+      setAdminConfig(adminConfig, Object.keys(adminConfig));
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
@@ -752,8 +775,6 @@ describe('workers/branch', () => {
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: false,
         upgrades: [
           {
             ...defaultConfig,
@@ -820,6 +841,12 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
+        allowPostUpgradeCommandTemplating: true,
+      };
+      setAdminConfig(adminConfig, Object.keys(adminConfig));
+
       const inconfig = {
         ...config,
         postUpgradeTasks: {
@@ -832,8 +859,6 @@ describe('workers/branch', () => {
           ],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
-        allowPostUpgradeCommandTemplating: true,
         upgrades: [
           {
             ...defaultConfig,
