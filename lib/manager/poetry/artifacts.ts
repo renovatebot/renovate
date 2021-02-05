@@ -121,9 +121,7 @@ export async function updateArtifacts({
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.constraints?.poetry || 'poetry';
-    // TODO: Stop pinning poetry-core once https://github.com/python-poetry/poetry/issues/3650 is fixed
-    const poetryInstall =
-      'pip install poetry-core==1.0.0 ' + quote(poetryRequirement);
+    const poetryInstall = 'pip install ' + quote(poetryRequirement);
     const extraEnv = getSourceCredentialVars(
       newPackageFileContent,
       packageFileName
