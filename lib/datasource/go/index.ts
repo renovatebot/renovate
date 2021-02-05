@@ -138,7 +138,7 @@ export async function getReleases({
       res = await bitbucket.getReleases(source);
       break;
     }
-    /* istanbul ignore next */
+    /* istanbul ignore next: can never happen, makes lint happy */
     default: {
       return null;
     }
@@ -210,7 +210,6 @@ export async function getDigest(
     case bitbucket.id: {
       return bitbucket.getDigest(source, tag);
     }
-    /* istanbul ignore next */
     default: {
       return null;
     }
