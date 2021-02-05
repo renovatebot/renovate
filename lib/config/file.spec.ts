@@ -37,7 +37,6 @@ describe('config/file', () => {
         "platform": "github",
         "token":"abcdef",
         "logFileLevel": "warn",
-        "logLevel": "info",
         "onboarding": false,
         "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
         "onboardingConfig": {

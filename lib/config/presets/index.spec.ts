@@ -1,13 +1,16 @@
 import { RenovateConfig } from '..';
 import { mocked } from '../../../test/util';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
+import * as _local from './local';
 import * as _npm from './npm';
 import * as presets from '.';
 
 jest.mock('./npm');
 jest.mock('./github');
+jest.mock('./local');
 
 const npm = mocked(_npm);
+const local = mocked(_local);
 
 npm.getPreset = jest.fn(({ packageName, presetName }) => {
   if (packageName === 'renovate-config-ikatyang') {
@@ -143,14 +146,14 @@ describe('config/presets', () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.packagePatterns).toHaveLength(2);
+      expect(res.matchPackagePatterns).toHaveLength(2);
     });
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.packageNames).toHaveLength(3);
-      expect(res.packagePatterns).toHaveLength(5);
+      expect(res.matchPackageNames).toHaveLength(3);
+      expect(res.matchPackagePatterns).toHaveLength(5);
     });
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
@@ -158,8 +161,8 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
       expect(rule.automerge).toBe(true);
-      expect(rule.packageNames).toHaveLength(3);
-      expect(rule.packagePatterns).toHaveLength(5);
+      expect(rule.matchPackageNames).toHaveLength(3);
+      expect(rule.matchPackagePatterns).toHaveLength(5);
     });
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
@@ -175,6 +178,20 @@ describe('config/presets', () => {
         'config:base',
       ]);
       expect(config).toMatchObject(res);
+      expect(res).toMatchSnapshot();
+    });
+
+    it('resolves self-hosted presets without baseConfig', async () => {
+      config.extends = ['local>username/preset-repo'];
+      local.getPreset = jest.fn(({ packageName, presetName, baseConfig }) =>
+        Promise.resolve({ labels: ['self-hosted resolved'] })
+      );
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res.labels).toEqual(['self-hosted resolved']);
+      expect(local.getPreset.mock.calls).toHaveLength(1);
+      expect(local.getPreset.mock.calls[0][0].baseConfig).not.toBeUndefined();
       expect(res).toMatchSnapshot();
     });
   });
@@ -326,7 +343,7 @@ describe('config/presets', () => {
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
-      expect(res.packageNames).toHaveLength(1);
+      expect(res.matchPackageNames).toHaveLength(1);
       expect(res.extends).toHaveLength(4);
     });
     it('gets parameterised configs', async () => {

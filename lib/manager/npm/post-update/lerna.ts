@@ -81,7 +81,6 @@ export async function generateLockFiles(
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
-        YARN_CACHE_FOLDER: env.YARN_CACHE_FOLDER,
       },
       docker: {
         image: 'renovate/node',

@@ -14,6 +14,20 @@ Array [
 ]
 `;
 
+exports[`workers/pr ensurePr should add and deduplicate additionalReviewers to empty reviewers on new PR 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "bar",
+      "baz",
+      "boo",
+      "foo",
+    ],
+  ],
+]
+`;
+
 exports[`workers/pr ensurePr should add assignees and reviewers to new PR 1`] = `
 Array [
   Array [

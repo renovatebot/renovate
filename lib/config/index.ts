@@ -3,7 +3,7 @@ import { get, getLanguageList, getManagerList } from '../manager';
 import { readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
 import * as cliParser from './cli';
-import { RenovateConfig, RenovateConfigStage } from './common';
+import { GlobalConfig, RenovateConfig, RenovateConfigStage } from './common';
 import * as defaultsParser from './defaults';
 import * as definitions from './definitions';
 import * as envParser from './env';
@@ -44,7 +44,7 @@ export function getManagerConfig(
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
   argv: string[]
-): Promise<RenovateConfig> {
+): Promise<GlobalConfig> {
   logger.debug('Parsing configs');
 
   // Get configs
@@ -80,8 +80,14 @@ export async function parseConfigs(
     delete config.privateKeyPath;
   }
 
-  // Set log level
-  levels('stdout', config.logLevel);
+  // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
+  // istanbul ignore if
+  if (config.logLevel) {
+    logger.warn(
+      'Configuring logLevel in CLI or file is deprecated. Use LOG_LEVEL environment variable instead'
+    );
+    levels('stdout', config.logLevel);
+  }
 
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
@@ -132,9 +138,9 @@ export async function parseConfigs(
 }
 
 export function filterConfig(
-  inputConfig: RenovateConfig,
+  inputConfig: GlobalConfig,
   targetStage: RenovateConfigStage
-): RenovateConfig {
+): GlobalConfig {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
   const outputConfig: RenovateConfig = { ...inputConfig };
   const stages = ['global', 'repository', 'package', 'branch', 'pr'];

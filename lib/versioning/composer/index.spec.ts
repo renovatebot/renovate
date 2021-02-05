@@ -392,6 +392,58 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('v3.2.*'); // #5388
   });
+  it('handles update-lockfile strategy', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^0.1',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '0.1.0',
+        toVersion: '0.1.1',
+      })
+    ).toEqual('^0.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '^0.1',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '0.1.0',
+        toVersion: '0.2.0',
+      })
+    ).toEqual('^0.2');
+
+    expect(
+      semver.getNewValue({
+        currentValue: '^5.1',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '5.1.0',
+        toVersion: '5.2.0',
+      })
+    ).toEqual('^5.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '^5.1',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '5.1.0',
+        toVersion: '6.0.0',
+      })
+    ).toEqual('^6.0');
+
+    expect(
+      semver.getNewValue({
+        currentValue: '^5',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '5.1.0',
+        toVersion: '5.2.0',
+      })
+    ).toEqual('^5');
+    expect(
+      semver.getNewValue({
+        currentValue: '^5',
+        rangeStrategy: 'update-lockfile',
+        fromVersion: '5.1.0',
+        toVersion: '6.0.0',
+      })
+    ).toEqual('^6');
+  });
 });
 describe('.sortVersions', () => {
   it('sorts versions in an ascending order', () => {

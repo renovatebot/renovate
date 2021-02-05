@@ -49,8 +49,14 @@ const pyproject9toml = readFileSync(
 describe('lib/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
+    const OLD_ENV = process.env;
     beforeEach(() => {
       filename = '';
+      process.env = { ...OLD_ENV };
+      delete process.env.PIP_INDEX_URL;
+    });
+    afterEach(() => {
+      process.env = OLD_ENV;
     });
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', filename)).toBeNull();

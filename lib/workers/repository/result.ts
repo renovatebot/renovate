@@ -11,6 +11,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
   REPOSITORY_MIRRORED,
+  REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
 } from '../../constants/error-messages';
@@ -40,6 +41,7 @@ export function processResult(
     REPOSITORY_RENAMED,
     REPOSITORY_UNINITIATED,
     REPOSITORY_EMPTY,
+    REPOSITORY_NOT_FOUND,
   ];
   const enabledStatuses = [CONFIG_SECRETS_EXPOSED, CONFIG_VALIDATION];
   let status: ProcessStatus;

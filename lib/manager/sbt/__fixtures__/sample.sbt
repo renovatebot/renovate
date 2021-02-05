@@ -1,3 +1,5 @@
+version := "1.0"
+
 scalaVersion := "2.9.10"
 
 // libraryDependencies += "org.example" % "foo" % "0.0.0"
@@ -31,3 +33,5 @@ resolvers ++= Seq(
 resolvers ++= Seq("Repo #5" at "https://example.com/repos/5/")
 
 addSbtPlugin("org.example" % "waldo" % "0.0.9")
+
+libraryDependencies += "org.example" % "fred" % "(,8.4.0]"
