@@ -101,20 +101,16 @@ export async function getDigest(
   }
 
   const branchCacheKey = getCacheKey(registryUrl, repo, 'mainbranch');
-  const cachedMainBranch = await packageCache.get<string>(
+  let mainBranch = await packageCache.get<string>(
     cacheNamespace,
     branchCacheKey
   );
-
-  const mainBranch =
-    cachedMainBranch ??
-    (
+  if (!mainBranch) {
+    mainBranch = (
       await bitbucketHttp.getJson<utils.RepoInfoBody>(
         `/2.0/repositories/${repo}`
       )
     ).body.mainbranch.name;
-
-  if (!cachedMainBranch) {
     await packageCache.set(cacheNamespace, branchCacheKey, mainBranch, 60);
   }
 
