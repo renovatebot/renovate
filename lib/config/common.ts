@@ -113,7 +113,6 @@ export interface RenovateAdminConfig {
   onboardingConfigFileName?: string;
 
   platform?: string;
-  postUpdateOptions?: string[];
   requireConfig?: boolean;
 }
 
@@ -177,6 +176,7 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
+  postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
