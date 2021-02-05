@@ -298,7 +298,7 @@ const options: RenovateOptions[] = [
     name: 'baseDir',
     description:
       'The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.',
-    admin: true,
+    stage: 'global',
     type: 'string',
   },
   {

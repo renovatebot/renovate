@@ -68,6 +68,7 @@ export interface RenovateSharedConfig {
 export interface GlobalAdminConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
+  baseDir?: string;
   forceCli?: boolean;
   gitPrivateKey?: string;
   logFile?: string;
@@ -92,7 +93,6 @@ export interface RepoAdminConfig {
 }
 
 export interface RenovateAdminConfig {
-  baseDir?: string;
   cacheDir?: string;
 
   customEnvVariables?: Record<string, string>;

@@ -1,15 +1,15 @@
 import os from 'os';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { RenovateConfig } from '../../config/common';
+import { GlobalConfig, RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import { initPlatform } from '../../platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { Limit, setMaxLimit } from './limits';
 
-async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
-  const config: RenovateConfig = { ...input };
+async function setDirectories(input: GlobalConfig): Promise<GlobalConfig> {
+  const config: GlobalConfig = { ...input };
   process.env.TMPDIR = process.env.RENOVATE_TMPDIR || os.tmpdir();
   if (config.baseDir) {
     logger.debug('Using configured baseDir: ' + config.baseDir);
