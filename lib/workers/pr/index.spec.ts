@@ -514,6 +514,15 @@ describe('workers/pr', () => {
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
+    it('should add and deduplicate additionalReviewers to empty reviewers on new PR', async () => {
+      config.reviewers = [];
+      config.additionalReviewers = ['bar', 'baz', '@boo', '@foo', 'bar'];
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+      expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       config.semanticCommitScope = null;

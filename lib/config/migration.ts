@@ -509,6 +509,8 @@ export function migrateConfig(
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
         }
+      } else if (key === 'binarySource' && val === 'auto') {
+        migratedConfig.binarySource = 'global';
       }
     }
     if (migratedConfig.endpoints) {

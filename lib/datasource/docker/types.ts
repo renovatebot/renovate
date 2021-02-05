@@ -5,7 +5,7 @@
 export enum MediaType {
   manifestV1 = 'pplication/vnd.docker.distribution.manifest.v1+json',
   manifestV2 = 'application/vnd.docker.distribution.manifest.v2+json',
-  manifestListV2 = 'application/vnd.docker.distribution.manifest.list.v2+jso',
+  manifestListV2 = 'application/vnd.docker.distribution.manifest.list.v2+json',
 }
 
 export interface MediaObject {

@@ -39,6 +39,7 @@ describe('config/migration', () => {
         suppressNotifications: ['lockFileErrors', 'prEditNotification'],
         automerge: 'none' as never,
         automergeMajor: false,
+        binarySource: 'auto',
         automergeMinor: true,
         automergePatch: true,
         masterIssue: 'true',

@@ -4,6 +4,8 @@ import {
   exec as _cpExec,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
+import { setAdminConfig } from '../../config/admin';
+import { RepoAdminConfig } from '../../config/common';
 import {
   BinarySource,
   ExecConfig,
@@ -25,6 +27,7 @@ interface TestInput {
   outCmd: string[];
   outOpts: RawExecOptions[];
   trustLevel?: 'high' | 'low';
+  adminConfig?: RepoAdminConfig;
 }
 
 describe(`Child process execution wrapper`, () => {
@@ -390,7 +393,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          dockerUser: 'foobar',
         },
         processEnv,
         inCmd,
@@ -411,6 +413,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { dockerUser: 'foobar' },
       },
     ],
 
@@ -420,7 +423,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          dockerImagePrefix: 'ghcr.io/renovatebot',
         },
         processEnv,
         inCmd,
@@ -441,6 +443,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { dockerImagePrefix: 'ghcr.io/renovatebot' },
       },
     ],
 
@@ -660,6 +663,7 @@ describe(`Child process execution wrapper`, () => {
       outCmd: outCommand,
       outOpts,
       trustLevel,
+      adminConfig = {},
     } = testOpts;
 
     process.env = procEnv;
@@ -682,7 +686,7 @@ describe(`Child process execution wrapper`, () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-
+    setAdminConfig(adminConfig as any, Object.keys(adminConfig));
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);

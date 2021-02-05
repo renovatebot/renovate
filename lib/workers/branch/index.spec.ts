@@ -1,5 +1,6 @@
 import * as _fs from 'fs-extra';
 import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -64,6 +65,7 @@ describe('workers/branch', () => {
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('abc123');
+      setAdminConfig({}, []);
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
@@ -693,6 +695,12 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: true,
+      };
+      setAdminConfig(adminConfig, Object.keys(adminConfig));
+
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
@@ -700,8 +708,6 @@ describe('workers/branch', () => {
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: true,
         upgrades: [
           {
             ...defaultConfig,
@@ -757,7 +763,11 @@ describe('workers/branch', () => {
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: false,
+      };
+      setAdminConfig(adminConfig, Object.keys(adminConfig));
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
@@ -765,8 +775,6 @@ describe('workers/branch', () => {
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: false,
         upgrades: [
           {
             ...defaultConfig,
@@ -833,6 +841,12 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
+        allowPostUpgradeCommandTemplating: true,
+      };
+      setAdminConfig(adminConfig, Object.keys(adminConfig));
+
       const inconfig = {
         ...config,
         postUpgradeTasks: {
@@ -845,8 +859,6 @@ describe('workers/branch', () => {
           ],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
-        allowPostUpgradeCommandTemplating: true,
         upgrades: [
           {
             ...defaultConfig,
