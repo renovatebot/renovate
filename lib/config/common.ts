@@ -81,6 +81,7 @@ export interface RepoAdminConfig {
   allowedPostUpgradeCommands?: string[];
   dockerImagePrefix?: string;
   dockerUser?: string;
+  trustLevel?: 'low' | 'high';
 }
 
 export interface RenovateAdminConfig {

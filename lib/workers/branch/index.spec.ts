@@ -72,6 +72,7 @@ describe('workers/branch', () => {
       platform.ensureCommentRemoval.mockClear();
       commit.commitFilesToBranch.mockClear();
       jest.resetAllMocks();
+      setAdminConfig({}, []);
     });
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -687,7 +688,6 @@ describe('workers/branch', () => {
         not_added: [],
         deleted: ['deleted_file'],
       } as StatusResult);
-      global.trustLevel = 'high';
 
       fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
@@ -698,6 +698,7 @@ describe('workers/branch', () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
+        trustLevel: 'high',
       };
       setAdminConfig(adminConfig, Object.keys(adminConfig));
 
@@ -756,7 +757,6 @@ describe('workers/branch', () => {
         not_added: [],
         deleted: ['deleted_file'],
       } as StatusResult);
-      global.trustLevel = 'high';
 
       fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
@@ -766,6 +766,7 @@ describe('workers/branch', () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
+        trustLevel: 'high',
       };
       setAdminConfig(adminConfig, Object.keys(adminConfig));
       const result = await branchWorker.processBranch({
@@ -829,7 +830,6 @@ describe('workers/branch', () => {
           not_added: [],
           deleted: ['deleted_file', 'modified_then_deleted_file'],
         } as StatusResult);
-      global.trustLevel = 'high';
 
       fs.outputFile.mockReturnValue();
       fs.readFile
@@ -844,6 +844,7 @@ describe('workers/branch', () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
+        trustLevel: 'high',
       };
       setAdminConfig(adminConfig, Object.keys(adminConfig));
 

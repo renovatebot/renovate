@@ -1,6 +1,7 @@
 import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { getName, mocked } from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
 import * as _env from '../../../util/exec/env';
 import * as _lernaHelper from './lerna';
 
@@ -108,14 +109,13 @@ describe(getName(__filename), () => {
     });
     it('allows scripts for trust level high', async () => {
       const execSnapshots = mockExecAll(exec);
-      global.trustLevel = 'high';
+      setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
         {},
         {}
       );
-      delete global.trustLevel;
       expect(res.error).toBe(false);
       expect(execSnapshots).toMatchSnapshot();
     });

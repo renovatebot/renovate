@@ -1,4 +1,5 @@
 import nock from 'nock';
+import { setAdminConfig } from '../../admin';
 import * as npm from '.';
 
 jest.mock('registry-auth-token');
@@ -8,7 +9,7 @@ describe('config/presets/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    global.trustLevel = 'low';
+    setAdminConfig({}, []);
     nock.cleanAll();
   });
   afterEach(() => {

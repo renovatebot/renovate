@@ -1,4 +1,5 @@
 import { getName, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import * as _sanitize from '../../util/sanitize';
 import { getNpmrc, setNpmrc } from './npmrc';
 
@@ -9,8 +10,8 @@ const sanitize = mocked(_sanitize);
 describe(getName(__filename), () => {
   beforeEach(() => {
     delete process.env.NPM_TOKEN;
-    delete global.trustLevel;
     setNpmrc('');
+    setAdminConfig({}, []);
     jest.resetAllMocks();
   });
 
@@ -38,7 +39,7 @@ describe(getName(__filename), () => {
   });
 
   it('sanitize _authtoken with high trust', () => {
-    global.trustLevel = 'high';
+    setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
     process.env.TEST_TOKEN = 'test';
     setNpmrc(
       // eslint-disable-next-line no-template-curly-in-string

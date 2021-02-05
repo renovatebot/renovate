@@ -12,8 +12,6 @@ declare interface Error {
 declare namespace NodeJS {
   interface Global {
     gitAuthor?: { name: string; email: string };
-
-    trustLevel?: string;
   }
 }
 

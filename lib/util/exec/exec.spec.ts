@@ -26,13 +26,11 @@ interface TestInput {
   inOpts: ExecOptions;
   outCmd: string[];
   outOpts: RawExecOptions[];
-  trustLevel?: 'high' | 'low';
   adminConfig?: RepoAdminConfig;
 }
 
 describe(`Child process execution wrapper`, () => {
   let processEnvOrig;
-  let trustLevelOrig;
 
   const cacheDir = '/tmp/renovate/cache/';
   const cwd = '/tmp/renovate/github/some/repo/';
@@ -51,12 +49,12 @@ describe(`Child process execution wrapper`, () => {
     jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
-    trustLevelOrig = global.trustLevel;
+    setAdminConfig({}, []);
   });
 
   afterEach(() => {
     process.env = processEnvOrig;
-    global.trustLevel = trustLevelOrig;
+    setAdminConfig({}, []);
   });
 
   const image = 'renovate/image';
@@ -193,7 +191,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
-        trustLevel: 'high',
+        adminConfig: { trustLevel: 'high' },
       },
     ],
 
@@ -662,14 +660,10 @@ describe(`Child process execution wrapper`, () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      trustLevel,
       adminConfig = {},
     } = testOpts;
 
     process.env = procEnv;
-    if (trustLevel) {
-      global.trustLevel = trustLevel;
-    }
 
     if (config) {
       jest
