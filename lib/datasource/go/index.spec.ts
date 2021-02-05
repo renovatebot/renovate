@@ -57,6 +57,18 @@ describe('datasource/go', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('gitlab digest is not supported at the moment', async () => {
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/golang/text?go-get=1')
+        .reply(200, '');
+      const res = await getDigest(
+        { lookupName: 'gitlab.com/golang/text' },
+        null
+      );
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns digest', async () => {
       httpMock
         .scope('https://golang.org/')

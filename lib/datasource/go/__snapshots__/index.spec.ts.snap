@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/go getDigest gitlab is not supported at the moment 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/golang/text?go-get=1",
+  },
+]
+`;
+
 exports[`datasource/go getDigest returns digest 1`] = `
 Array [
   Object {

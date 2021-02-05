@@ -3,6 +3,7 @@ import * as packageCache from '../../util/cache/package';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../util/url';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
+import { BitbucketCommit, BitbucketTag } from './types';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -21,23 +22,15 @@ function getCacheKey(registryUrl: string, repo: string, type: string): string {
   return `${getRegistryURL(registryUrl)}:${repo}:${type}`;
 }
 
-type BitbucketTag = {
-  name: string;
-  target?: {
-    date?: string;
-    hash: string;
-  };
-};
-
 // getReleases fetches list of tags for the repository
 export async function getReleases({
   registryUrl,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const type = 'tags';
+  const cacheKey = getCacheKey(registryUrl, repo, 'tags');
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(registryUrl, repo, type)
+    cacheKey
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -61,19 +54,9 @@ export async function getReleases({
   }));
 
   const cacheMinutes = 10;
-  await packageCache.set(
-    cacheNamespace,
-    getCacheKey(registryUrl, repo, type),
-    dependency,
-    cacheMinutes
-  );
+  await packageCache.set(cacheNamespace, cacheKey, dependency, cacheMinutes);
   return dependency;
 }
-
-type BitbucketCommit = {
-  hash: string;
-  date?: string;
-};
 
 // getTagCommit fetched the commit has for specified tag
 async function getTagCommit(
@@ -81,11 +64,8 @@ async function getTagCommit(
   repo: string,
   tag: string
 ): Promise<string | null> {
-  const type = `tag-${tag}`;
-  const cachedResult = await packageCache.get<string>(
-    cacheNamespace,
-    getCacheKey(registryUrl, repo, type)
-  );
+  const cacheKey = getCacheKey(registryUrl, repo, `tag-${tag}`);
+  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
@@ -98,12 +78,7 @@ async function getTagCommit(
   const hash = bitbucketTag.target.hash;
 
   const cacheMinutes = 10;
-  await packageCache.set(
-    cacheNamespace,
-    getCacheKey(registryUrl, repo, type),
-    hash,
-    cacheMinutes
-  );
+  await packageCache.set(cacheNamespace, cacheKey, hash, cacheMinutes);
 
   return hash;
 }
@@ -118,22 +93,32 @@ export async function getDigest(
     return getTagCommit(registryUrl, repo, newValue);
   }
 
-  const type = 'digest';
-  const cachedResult = await packageCache.get<string>(
-    cacheNamespace,
-    getCacheKey(registryUrl, repo, type)
-  );
+  const cacheKey = getCacheKey(registryUrl, repo, 'digest');
+  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
 
-  const mainBranch = (
-    await bitbucketHttp.getJson<utils.RepoInfoBody>(`/2.0/repositories/${repo}`)
-  ).body.mainbranch.name;
+  const branchCacheKey = getCacheKey(registryUrl, repo, 'mainbranch');
+  const cachedMainBranch = await packageCache.get<string>(
+    cacheNamespace,
+    branchCacheKey
+  );
+
+  const mainBranch =
+    cachedMainBranch ??
+    (
+      await bitbucketHttp.getJson<utils.RepoInfoBody>(
+        `/2.0/repositories/${repo}`
+      )
+    ).body.mainbranch.name;
+
+  if (!cachedMainBranch) {
+    await packageCache.set(cacheNamespace, branchCacheKey, mainBranch, 60);
+  }
 
   const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
-
   const bitbucketCommits = (
     await bitbucketHttp.getJson<utils.PagedResult<BitbucketCommit>>(url)
   ).body;
@@ -145,12 +130,7 @@ export async function getDigest(
   const latestCommit = bitbucketCommits.values[0].hash;
 
   const cacheMinutes = 10;
-  await packageCache.set(
-    cacheNamespace,
-    getCacheKey(registryUrl, repo, type),
-    latestCommit,
-    cacheMinutes
-  );
+  await packageCache.set(cacheNamespace, cacheKey, latestCommit, cacheMinutes);
 
   return latestCommit;
 }

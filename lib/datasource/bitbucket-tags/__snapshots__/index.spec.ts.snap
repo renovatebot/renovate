@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/bitbucket-tags getDigest returns commits from bitbucket cloud 1`] = `"123"`;
+exports[`datasource/bitbucket-tags/index getDigest returns commits from bitbucket cloud 1`] = `"123"`;
 
-exports[`datasource/bitbucket-tags getDigest returns commits from bitbucket cloud 2`] = `
+exports[`datasource/bitbucket-tags/index getDigest returns commits from bitbucket cloud 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -27,9 +27,9 @@ Array [
 ]
 `;
 
-exports[`datasource/bitbucket-tags getDigest with no commits returns commits from bitbucket cloud 1`] = `null`;
+exports[`datasource/bitbucket-tags/index getDigest with no commits returns commits from bitbucket cloud 1`] = `null`;
 
-exports[`datasource/bitbucket-tags getDigest with no commits returns commits from bitbucket cloud 2`] = `
+exports[`datasource/bitbucket-tags/index getDigest with no commits returns commits from bitbucket cloud 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -54,7 +54,7 @@ Array [
 ]
 `;
 
-exports[`datasource/bitbucket-tags getReleases returns tags from bitbucket cloud 1`] = `
+exports[`datasource/bitbucket-tags/index getReleases returns tags from bitbucket cloud 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -75,7 +75,7 @@ Object {
 }
 `;
 
-exports[`datasource/bitbucket-tags getReleases returns tags from bitbucket cloud 2`] = `
+exports[`datasource/bitbucket-tags/index getReleases returns tags from bitbucket cloud 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -90,9 +90,9 @@ Array [
 ]
 `;
 
-exports[`datasource/bitbucket-tags getTagCommit returns tags commit hash from bitbucket cloud 1`] = `"123"`;
+exports[`datasource/bitbucket-tags/index getTagCommit returns tags commit hash from bitbucket cloud 1`] = `"123"`;
 
-exports[`datasource/bitbucket-tags getTagCommit returns tags commit hash from bitbucket cloud 2`] = `
+exports[`datasource/bitbucket-tags/index getTagCommit returns tags commit hash from bitbucket cloud 2`] = `
 Array [
   Object {
     "headers": Object {

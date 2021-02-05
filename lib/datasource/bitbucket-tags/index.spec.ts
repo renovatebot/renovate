@@ -1,8 +1,9 @@
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { id as datasource } from '.';
 
-describe('datasource/bitbucket-tags', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     httpMock.reset();
     httpMock.setup();
