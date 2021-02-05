@@ -55,3 +55,22 @@ We recommend that you define this support policy inside the `node` configuration
 This way, it is applied to all Node.js-related files.
 
 For additional language support see the [`supportPolicy` documentation](/configuration-options/#supportpolicy).
+
+## Configuring which version of npm Renovate uses
+
+There is no configuration option to tell Renovate to use the npm version that comes pre-installed with Node.
+
+You must use the `engines.npm` property in your `package.json` file to specify which major version of npm your project supports.
+Renovate bot will then use that version of npm when it creates a pull request.
+
+In your `package.json` create a `engines` key-value pair and specify which major version of npm your project works with.
+
+For example, if you want to use at least npm `6.14.11` and also allow newer versions of npm in the `6.x` range, you would put this in your `package.json` file:
+
+```json
+{
+  "engines": {
+    "npm": "^6.14.11"
+  }
+}
+```
