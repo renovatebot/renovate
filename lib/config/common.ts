@@ -64,6 +64,7 @@ export interface RenovateSharedConfig {
 }
 
 // Config options used only within the global worker
+// The below should contain config options where stage=global
 export interface GlobalAdminConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
@@ -77,7 +78,8 @@ export interface GlobalAdminConfig {
   repositories?: RenovateRepository[];
 }
 
-// Config options used within the repository worker, but non-user configurable
+// Config options used within the repository worker, but not user configurable
+// The below should contain config options where admin=true
 export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
