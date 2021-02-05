@@ -128,7 +128,7 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('should replace env vars in high trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
-      setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
+      setAdminConfig({ trustLevel: 'high' });
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',

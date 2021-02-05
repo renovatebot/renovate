@@ -109,7 +109,7 @@ describe(getName(__filename), () => {
     });
     it('allows scripts for trust level high', async () => {
       const execSnapshots = mockExecAll(exec);
-      setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
+      setAdminConfig({ trustLevel: 'high' });
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',

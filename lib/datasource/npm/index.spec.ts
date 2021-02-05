@@ -284,14 +284,14 @@ describe(getName(__filename), () => {
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
     process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
-    setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
+    setAdminConfig({ trustLevel: 'high' });
     // eslint-disable-next-line no-template-curly-in-string
     const npmrc = 'registry=${REGISTRY}';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should throw error if necessary env var is not present', () => {
-    setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
+    setAdminConfig({ trustLevel: 'high' });
     // eslint-disable-next-line no-template-curly-in-string
     expect(() => setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
       Error('env-replace')

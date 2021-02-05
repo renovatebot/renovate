@@ -63,7 +63,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
     git.getRepoStatus.mockResolvedValue(repoStatus);
-    setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
+    setAdminConfig({ trustLevel: 'high' });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',

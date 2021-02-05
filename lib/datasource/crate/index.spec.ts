@@ -210,7 +210,7 @@ describe('datasource/crate', () => {
     });
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
+      setAdminConfig({ trustLevel: 'high' });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
@@ -224,7 +224,7 @@ describe('datasource/crate', () => {
     });
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
+      setAdminConfig({ trustLevel: 'high' });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -238,7 +238,7 @@ describe('datasource/crate', () => {
     });
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' }, ['trustLevel']);
+      setAdminConfig({ trustLevel: 'high' });
       const url = 'https://github.com/mcorbin/othertestregistry';
       await getPkgReleases({
         datasource,
