@@ -213,7 +213,6 @@
     "@types/js-yaml": "3.12.6",
     "@types/jsdom": "16.2.6",
     "@types/json-dup-key-validator": "1.0.0",
-    "@types/json5": "0.0.30",
     "@types/linkify-markdown": "1.0.0",
     "@types/luxon": "1.25.1",
     "@types/markdown-it": "10.0.3",
