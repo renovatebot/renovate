@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/go getDigest gitlab is not supported at the moment 1`] = `
+exports[`datasource/go getDigest gitlab digest is not supported at the moment 1`] = `
 Array [
   Object {
     "headers": Object {
