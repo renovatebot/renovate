@@ -210,7 +210,6 @@ export async function getDigest(
     case bitbucket.id: {
       return bitbucket.getDigest(source, tag);
     }
-    /* istanbul ignore next */
     default: {
       return null;
     }
