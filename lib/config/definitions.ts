@@ -281,17 +281,17 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`.',
+      'Controls whether third party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
     admin: true,
     type: 'string',
-    allowedValues: ['auto', 'global', 'docker'],
-    default: 'auto',
+    allowedValues: ['global', 'docker'],
+    default: 'global',
   },
   {
     name: 'redisUrl',
     description:
       'If defined, this Redis URL will be used for caching instead of the file system.',
-    admin: true,
+    stage: 'global',
     type: 'string',
   },
   {
@@ -371,7 +371,7 @@ const options: RenovateOptions[] = [
   {
     name: 'logContext',
     description: 'Add a global or per-repo log context to each log entry.',
-    stage: 'global',
+    admin: true,
     type: 'string',
     default: null,
   },
@@ -537,7 +537,7 @@ const options: RenovateOptions[] = [
     name: 'trustLevel',
     description:
       'Set this to "high" if the bot should trust the repository owners/contents.',
-    stage: 'global',
+    admin: true,
     type: 'string',
     default: 'low',
   },
@@ -1524,7 +1524,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      commitMessageTopic: 'module {{depNameShort}}',
+      commitMessageTopic: 'module {{depName}}',
     },
     mergeable: true,
     cli: false,
@@ -1918,6 +1918,10 @@ const options: RenovateOptions[] = [
 
 export function getOptions(): RenovateOptions[] {
   return options;
+}
+
+export function getAdminOptionNames(): string[] {
+  return options.filter((option) => option.admin).map((option) => option.name);
 }
 
 function loadManagerOptions(): void {

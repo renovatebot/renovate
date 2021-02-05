@@ -491,7 +491,10 @@ export function migrateConfig(
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (key.startsWith('commitMessage') && is.string(val)) {
+      } else if (
+        (key.startsWith('commitMessage') || key.startsWith('prTitle')) &&
+        is.string(val)
+      ) {
         migratedConfig[key] = val
           .replace(/currentVersion/g, 'currentValue')
           .replace(/newVersion/g, 'newValue')
@@ -506,6 +509,8 @@ export function migrateConfig(
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
         }
+      } else if (key === 'binarySource' && val === 'auto') {
+        migratedConfig.binarySource = 'global';
       }
     }
     if (migratedConfig.endpoints) {
