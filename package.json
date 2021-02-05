@@ -113,6 +113,7 @@
     "yarn": "^1.17.0"
   },
   "dependencies": {
+    "@aws-sdk/client-ecr": "3.2.0",
     "@breejs/later": "4.0.2",
     "@iarna/toml": "2.2.5",
     "@renovate/pep440": "0.4.1",
@@ -120,7 +121,6 @@
     "@sindresorhus/is": "4.0.0",
     "@yarnpkg/core": "2.4.0",
     "@yarnpkg/parsers": "2.3.0",
-    "aws-sdk": "2.827.0",
     "azure-devops-node-api": "10.2.1",
     "bunyan": "1.8.15",
     "cacache": "15.0.5",
@@ -231,7 +231,6 @@
     "@types/xmldoc": "1.1.5",
     "@typescript-eslint/eslint-plugin": "4.6.0",
     "@typescript-eslint/parser": "4.6.0",
-    "aws-sdk-mock": "5.1.0",
     "babel-jest": "26.6.3",
     "babel-plugin-dynamic-import-node": "2.3.3",
     "conventional-changelog-conventionalcommits": "4.5.0",
