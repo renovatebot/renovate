@@ -75,6 +75,7 @@ describe('datasource/crate', () => {
     afterEach(() => {
       fs.rmdirSync(tmpDir.path, { recursive: true });
       tmpDir = null;
+      delete global.trustLevel;
     });
     it('returns null for missing registry url', async () => {
       expect(
@@ -209,11 +210,11 @@ describe('datasource/crate', () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
+      global.trustLevel = 'high';
       const res = await getPkgReleases({
         datasource,
         depName: 'mypkg',
         registryUrls: [url],
-        trustLevel: 'high',
       });
       expect(mockClone).toHaveBeenCalled();
       expect(res).toMatchSnapshot();
@@ -224,11 +225,11 @@ describe('datasource/crate', () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://github.com/mcorbin/testregistry';
+      global.trustLevel = 'high';
       const res = await getPkgReleases({
         datasource,
         depName: 'mypkg',
         registryUrls: [url],
-        trustLevel: 'high',
       });
       expect(mockClone).toHaveBeenCalled();
       expect(res).toMatchSnapshot();
@@ -239,11 +240,11 @@ describe('datasource/crate', () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://github.com/mcorbin/othertestregistry';
+      global.trustLevel = 'high';
       await getPkgReleases({
         datasource,
         depName: 'mypkg',
         registryUrls: [url],
-        trustLevel: 'high',
       });
       await getPkgReleases({
         datasource,

@@ -161,7 +161,7 @@ async function fetchRegistryInfo(
   };
 
   if (flavor !== RegistryFlavor.CratesIo) {
-    if (config.trustLevel !== 'high') {
+    if (global.trustLevel !== 'high') {
       logger.warn(
         'crate datasource: trustLevel=high is required for registries other than crates.io, bailing out'
       );
