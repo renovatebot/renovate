@@ -14,7 +14,7 @@ jobs:
   lint-fix:
     runs-on: ubuntu-latest
 
-    # lint shouldn't need more than 10 min
+    # lint shouldn't need more than 15 min
     timeout-minutes: 15
 
     steps:
@@ -50,8 +50,6 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
-      # - name: fetch pr head
-      #   run: git fetch
 
       - name: checkout pr head
         uses: actions/checkout@v2.3.3
