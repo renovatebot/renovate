@@ -1,0 +1,11 @@
+[package]
+name = "renovate-test"
+version = "0.1.0"
+authors = ["John Doe <john.doe@example.org>"]
+edition = "2018"
+
+[dependencies]
+proprietary-crate = { version = "0.1.0", registry = "private-crates" }
+mcorbin-test = { version = "3.0.0", registry = "mcorbin" }
+tokio = "0.2"
+

@@ -70,15 +70,12 @@ export async function addAssigneesReviewers(
   if (config.reviewersFromCodeOwners) {
     reviewers = await addCodeOwners(reviewers, pr);
   }
+  if (config.additionalReviewers.length > 0) {
+    reviewers = reviewers.concat(config.additionalReviewers);
+  }
   if (reviewers.length > 0) {
     try {
-      reviewers = reviewers.map(noLeadingAtSymbol);
-      if (config.additionalReviewers.length > 0) {
-        const additionalReviewers = config.additionalReviewers.map(
-          noLeadingAtSymbol
-        );
-        reviewers = [...new Set(reviewers.concat(additionalReviewers))];
-      }
+      reviewers = [...new Set(reviewers.map(noLeadingAtSymbol))];
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
@@ -382,7 +379,12 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        if (!dependencyDashboardCheck && isLimitReached(Limit.PullRequests)) {
+        if (
+          !dependencyDashboardCheck &&
+          isLimitReached(Limit.PullRequests) &&
+          !config.vulnerabilityAlert
+        ) {
+          logger.debug('Skipping PR - limit reached');
           return { prResult: PrResult.LimitReached };
         }
         pr = await platform.createPr({

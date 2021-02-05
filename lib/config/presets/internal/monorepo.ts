@@ -82,6 +82,7 @@ const repoGroups = {
   jasmine: 'https://github.com/jasmine/jasmine',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
+  junit5: 'https://github.com/junit-team/junit5',
   lerna: 'https://github.com/lerna/lerna',
   lingui: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',
@@ -112,6 +113,7 @@ const repoGroups = {
   react: 'https://github.com/facebook/react',
   reactrouter: 'https://github.com/ReactTraining/react-router',
   reakit: 'https://github.com/reakit/reakit',
+  redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
   sentry: 'https://github.com/getsentry/sentry-javascript',
@@ -146,12 +148,12 @@ export const presets: Record<string, Preset> = {};
 for (const [name, value] of Object.entries(repoGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    sourceUrlPrefixes: is.array(value) ? value : [value],
+    matchSourceUrlPrefixes: is.array(value) ? value : [value],
   };
 }
 for (const [name, value] of Object.entries(patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    packagePatterns: is.array(value) ? value : [value],
+    matchPackagePatterns: is.array(value) ? value : [value],
   };
 }
