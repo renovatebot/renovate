@@ -64,13 +64,13 @@ export interface RenovateSharedConfig {
 }
 
 export interface RepoAdminConfig {
+  allowPostUpgradeCommandTemplating?: boolean;
+  allowedPostUpgradeCommands?: string[];
   dockerImagePrefix?: string;
   dockerUser?: string;
 }
 
 export interface RenovateAdminConfig {
-  allowPostUpgradeCommandTemplating?: boolean;
-  allowedPostUpgradeCommands?: string[];
   autodiscover?: boolean;
   autodiscoverFilter?: string;
 
