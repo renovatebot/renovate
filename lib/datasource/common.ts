@@ -12,7 +12,6 @@ export interface DigestConfig extends Config {
 interface ReleasesConfigBase {
   npmrc?: string;
   registryUrls?: string[];
-  trustLevel?: 'low' | 'high';
 }
 
 export interface GetReleasesConfig extends ReleasesConfigBase {

@@ -14,8 +14,6 @@ export enum BinarySource {
 export interface ExecConfig {
   binarySource: Opt<BinarySource>;
   customEnvVariables: Opt<Record<string, string>>;
-  dockerImagePrefix: Opt<string>;
-  dockerUser: Opt<string>;
   localDir: Opt<string>;
   cacheDir: Opt<string>;
 }

@@ -138,7 +138,7 @@ export async function getReleases({
       res = await bitbucket.getReleases(source);
       break;
     }
-    /* istanbul ignore next */
+    /* istanbul ignore next: can never happen, makes lint happy */
     default: {
       return null;
     }
