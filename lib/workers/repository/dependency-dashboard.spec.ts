@@ -7,6 +7,7 @@ import {
   logger,
   platform,
 } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { Platform, Pr } from '../../platform';
 import { PrState } from '../../types';
@@ -38,7 +39,7 @@ async function dryRun(
   findPrCalls = 0
 ) {
   jest.clearAllMocks();
-  config.dryRun = true;
+  setAdminConfig({ dryRun: true });
   await dependencyDashboard.ensureMasterIssue(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
@@ -50,6 +51,9 @@ async function dryRun(
 
 describe('workers/repository/master-issue', () => {
   describe('ensureMasterIssue()', () => {
+    beforeEach(() => {
+      setAdminConfig();
+    });
     it('do nothing if masterissue is disable', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureMasterIssue(config, branches);

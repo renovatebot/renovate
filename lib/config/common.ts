@@ -86,6 +86,7 @@ export interface RepoAdminConfig {
   allowedPostUpgradeCommands?: string[];
   dockerImagePrefix?: string;
   dockerUser?: string;
+  dryRun?: boolean;
   privateKey?: string | Buffer;
   trustLevel?: 'low' | 'high';
 }
@@ -96,8 +97,6 @@ export interface RenovateAdminConfig {
   configWarningReuseIssue?: boolean;
 
   customEnvVariables?: Record<string, string>;
-
-  dryRun?: boolean;
 
   endpoint?: string;
 
