@@ -3,7 +3,7 @@
 
 ## Changes:
 
-<!-- Describe what this pull request changes. -->
+<!-- Describe what behavior is changed by this PR. -->
 
 ## Context:
 
@@ -21,7 +21,8 @@ I have verified these changes via:
 
 - [ ] Code inspection only, or
 - [ ] Newly added unit tests, or
-- [ ] Unit tests + ran on a real repository
+- [ ] No new tests but ran on a real repository, or
+- [ ] Both unit tests + ran on a real repository
 
 <!-- Do you have any suggestions about this PR template? Edit it here: https://github.com/renovatebot/renovate/edit/master/.github/pull_request_template.md -->
 

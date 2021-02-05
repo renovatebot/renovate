@@ -135,7 +135,6 @@ describe('.updateArtifacts()', () => {
     await setExecConfig({
       ...config,
       binarySource: BinarySource.Docker,
-      dockerUser: 'foobar',
     });
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
@@ -162,7 +161,6 @@ describe('.updateArtifacts()', () => {
     await setExecConfig({
       ...config,
       binarySource: BinarySource.Docker,
-      dockerUser: 'foobar',
     });
     fs.readFile.mockResolvedValueOnce(
       '[metadata]\npython-versions = "~2.7 || ^3.4"' as any

@@ -42,8 +42,8 @@ You could then use this `packageRules` array, to tell Renovate to use `semver` v
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["foo/bar"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["foo/bar"],
       "versioning": "semver"
     }
   ]
@@ -57,8 +57,8 @@ You can tell Renovate to use the `pep440` versioning scheme with this set of `pa
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["python"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
       "versioning": "pep440"
     }
   ]
@@ -179,7 +179,7 @@ module.exports = {
     {
       hostType: 'docker',
       username: '<your-username>',
-      password: 'process.env.DOCKER_HUB_PASSWORD',
+      password: process.env.DOCKER_HUB_PASSWORD,
     },
   ],
 };
@@ -200,7 +200,7 @@ module.exports = {
       hostType: 'docker',
       hostName: 'your.host.io',
       username: '<your-username>',
-      password: 'process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD',
+      password: process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD,
     },
   ],
 };
@@ -217,7 +217,7 @@ module.exports = {
     {
       hostName: 'your.host.io',
       username: '<your-username>',
-      password: 'process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD',
+      password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
     },
   ],
 };

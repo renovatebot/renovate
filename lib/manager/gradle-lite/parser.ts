@@ -458,12 +458,18 @@ function tryMatch({
   return null;
 }
 
+interface ParseGradleResult {
+  deps: PackageDependency<ManagerData>[];
+  urls: string[];
+  vars: PackageVariables;
+}
+
 export function parseGradle(
   input: string,
   initVars: PackageVariables = {},
   packageFile?: string
-): { deps: PackageDependency<ManagerData>[]; urls: string[] } {
-  const vars = { ...initVars };
+): ParseGradleResult {
+  const vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<ManagerData>[] = [];
   const urls = [];
 
@@ -493,7 +499,7 @@ export function parseGradle(
     prevTokensLength = tokens.length;
   }
 
-  return { deps, urls };
+  return { deps, urls, vars };
 }
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';

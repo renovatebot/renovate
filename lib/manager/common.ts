@@ -1,6 +1,5 @@
 import { ReleaseType } from 'semver';
 import {
-  GlobalConfig,
   MatchStringsStrategy,
   UpdateType,
   ValidationMessage,
@@ -12,7 +11,6 @@ export type Result<T> = T | Promise<T>;
 
 export interface ManagerConfig {
   binarySource?: string;
-  dockerUser?: string;
   localDir?: string;
   registryUrls?: string[];
 }
@@ -23,7 +21,6 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
-  global?: GlobalConfig;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;

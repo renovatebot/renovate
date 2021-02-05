@@ -30,7 +30,7 @@ When Renovate processes your project's repository it will look for the files lis
 
 ## Configuring Support Policy
 
-Renovate supports a [`supportPolicy`](/configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of Nov 2020):
+Renovate supports a [`supportPolicy`](/configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of Feb 2021):
 
 **Default:** `lts`
 
@@ -38,8 +38,8 @@ Renovate supports a [`supportPolicy`](/configuration-options/#supportpolicy) opt
 | ------------- | -------------- | -------------------------------------------------------- |
 | all           | 10, 12, 14, 15 | All releases that have not passed their end date         |
 | lts           | 10, 12, 14     | All releases classified as LTS, including in maintenance |
-| active        | 12, 14, 15     | All releases not in maintenance                          |
-| lts_active    | 12, 14         | All releases both LTS and active                         |
+| active        | 14, 15         | All releases not in maintenance                          |
+| lts_active    | 14             | All releases both LTS and active                         |
 | lts_latest    | 14             | The latest LTS release                                   |
 | current       | 15             | The latest release from "all"                            |
 
