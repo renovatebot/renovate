@@ -111,7 +111,7 @@ async function getTagCommit(
 // getDigest fetched the latest commit for repository main branch
 // however, if newValue is provided, then getTagCommit is called
 export async function getDigest(
-  { lookupName: repo, registryUrl }: Partial<DigestConfig>,
+  { lookupName: repo, registryUrl }: DigestConfig,
   newValue?: string
 ): Promise<string | null> {
   if (newValue?.length) {
