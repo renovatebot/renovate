@@ -291,7 +291,7 @@ const options: RenovateOptions[] = [
     name: 'redisUrl',
     description:
       'If defined, this Redis URL will be used for caching instead of the file system.',
-    admin: true,
+    stage: 'global',
     type: 'string',
   },
   {
@@ -371,7 +371,7 @@ const options: RenovateOptions[] = [
   {
     name: 'logContext',
     description: 'Add a global or per-repo log context to each log entry.',
-    stage: 'global',
+    admin: true,
     type: 'string',
     default: null,
   },

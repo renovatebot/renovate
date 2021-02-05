@@ -67,9 +67,12 @@ export interface RenovateSharedConfig {
 export interface GlobalAdminConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
+  forceCli?: boolean;
+  gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
   logLevel?: LogLevel;
+  prCommitsPerRunLimit?: number;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }
@@ -110,7 +113,6 @@ export interface RenovateAdminConfig {
   privateKey?: string | Buffer;
   privateKeyPath?: string;
   requireConfig?: boolean;
-  gitPrivateKey?: string;
 }
 
 export type PostUpgradeTasks = {
