@@ -5,8 +5,8 @@ let adminConfig: RepoAdminConfig = {};
 const derivedAdminOptions = ['localDir'];
 
 export function setAdminConfig(
-  config: RenovateConfig,
-  adminOptions: string[]
+  config: RenovateConfig = {},
+  adminOptions = Object.keys(config)
 ): void {
   adminConfig = {};
   const repoAdminOptions = adminOptions.concat(derivedAdminOptions);

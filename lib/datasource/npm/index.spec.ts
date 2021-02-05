@@ -18,7 +18,7 @@ describe(getName(__filename), () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    setAdminConfig({}, []);
+    setAdminConfig();
     resetCache();
     setNpmrc();
     npmResponse = {

@@ -38,11 +38,11 @@ const requirements7 = readFileSync(
 describe('lib/manager/pip_requirements/extract', () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    setAdminConfig({}, []);
+    setAdminConfig();
   });
   afterEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    setAdminConfig({}, []);
+    setAdminConfig();
   });
   describe('extractPackageFile()', () => {
     let config;

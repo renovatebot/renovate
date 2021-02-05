@@ -46,7 +46,7 @@ describe('.updateArtifacts()', () => {
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    setAdminConfig({}, []);
+    setAdminConfig();
   });
   it('returns if no composer.lock found', async () => {
     expect(

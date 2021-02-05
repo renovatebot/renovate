@@ -72,12 +72,12 @@ describe('datasource/crate', () => {
       });
       simpleGit.mockReset();
       memCache.init();
-      setAdminConfig({}, []);
+      setAdminConfig();
     });
     afterEach(() => {
       fs.rmdirSync(tmpDir.path, { recursive: true });
       tmpDir = null;
-      setAdminConfig({}, []);
+      setAdminConfig();
     });
     it('returns null for missing registry url', async () => {
       expect(

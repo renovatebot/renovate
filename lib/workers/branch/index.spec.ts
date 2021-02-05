@@ -65,14 +65,14 @@ describe('workers/branch', () => {
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('abc123');
-      setAdminConfig({}, []);
+      setAdminConfig();
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
       platform.ensureCommentRemoval.mockClear();
       commit.commitFilesToBranch.mockClear();
       jest.resetAllMocks();
-      setAdminConfig({}, []);
+      setAdminConfig();
     });
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -700,7 +700,7 @@ describe('workers/branch', () => {
         allowPostUpgradeCommandTemplating: true,
         trustLevel: 'high',
       };
-      setAdminConfig(adminConfig, Object.keys(adminConfig));
+      setAdminConfig(adminConfig);
 
       const result = await branchWorker.processBranch({
         ...config,
@@ -768,7 +768,7 @@ describe('workers/branch', () => {
         allowPostUpgradeCommandTemplating: false,
         trustLevel: 'high',
       };
-      setAdminConfig(adminConfig, Object.keys(adminConfig));
+      setAdminConfig(adminConfig);
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
@@ -846,7 +846,7 @@ describe('workers/branch', () => {
         allowPostUpgradeCommandTemplating: true,
         trustLevel: 'high',
       };
-      setAdminConfig(adminConfig, Object.keys(adminConfig));
+      setAdminConfig(adminConfig);
 
       const inconfig = {
         ...config,

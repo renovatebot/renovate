@@ -49,12 +49,12 @@ describe(`Child process execution wrapper`, () => {
     jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
-    setAdminConfig({}, []);
+    setAdminConfig();
   });
 
   afterEach(() => {
     process.env = processEnvOrig;
-    setAdminConfig({}, []);
+    setAdminConfig();
   });
 
   const image = 'renovate/image';
@@ -660,7 +660,7 @@ describe(`Child process execution wrapper`, () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      adminConfig = {},
+      adminConfig = {} as any,
     } = testOpts;
 
     process.env = procEnv;
@@ -680,7 +680,7 @@ describe(`Child process execution wrapper`, () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-    setAdminConfig(adminConfig as any, Object.keys(adminConfig));
+    setAdminConfig(adminConfig);
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);

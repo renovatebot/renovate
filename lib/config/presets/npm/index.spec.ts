@@ -9,7 +9,7 @@ describe('config/presets/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    setAdminConfig({}, []);
+    setAdminConfig();
     nock.cleanAll();
   });
   afterEach(() => {
