@@ -75,6 +75,11 @@ Object {
       "version": "1.8.6",
     },
     Object {
+      "changelogUrl": "https://www.ruby-lang.org/en/news/2008/08/11/ruby-1-8-7-p72-and-1-8-6-p287-released/",
+      "releaseTimestamp": "2008-08-11",
+      "version": "1.8.7-p72",
+    },
+    Object {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/04/18/ruby-1-8-7-p160-and-1-8-6-p368-released/",
       "releaseTimestamp": "2009-04-18",
       "version": "1.8.7-p160",
@@ -113,11 +118,6 @@ Object {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/06/27/ruby-1-8-7-p374-is-released/",
       "releaseTimestamp": "2013-06-27",
       "version": "1.8.7-p374",
-    },
-    Object {
-      "changelogUrl": "https://www.ruby-lang.org/en/news/2008/08/11/ruby-1-8-7-p72-and-1-8-6-p287-released/",
-      "releaseTimestamp": "2008-08-11",
-      "version": "1.8.7-p72",
     },
     Object {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2008/05/31/ruby-1-8-7-has-been-released/",

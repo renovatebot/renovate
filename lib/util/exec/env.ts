@@ -1,3 +1,5 @@
+import { getAdminConfig } from '../../config/admin';
+
 const basicEnvVars = [
   'HTTP_PROXY',
   'HTTPS_PROXY',
@@ -13,7 +15,7 @@ export function getChildProcessEnv(
   customEnvVars: string[] = []
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
-  if (global.trustLevel === 'high') {
+  if (getAdminConfig().trustLevel === 'high') {
     return Object.assign(env, process.env);
   }
   const envVars = [...basicEnvVars, ...customEnvVars];

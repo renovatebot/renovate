@@ -1,3 +1,4 @@
+import { setAdminConfig } from '../../config/admin';
 import { getChildProcessEnv } from './env';
 
 describe('getChildProcess environment when trustlevel set to low', () => {
@@ -57,9 +58,8 @@ describe('getChildProcess environment when trustlevel set to low', () => {
 
   describe('getChildProcessEnv when trustlevel set to high', () => {
     it('returns process.env if trustlevel set to high', () => {
-      global.trustLevel = 'high';
+      setAdminConfig({ trustLevel: 'high' });
       expect(getChildProcessEnv()).toMatchObject(process.env);
-      delete global.trustLevel;
     });
   });
 });

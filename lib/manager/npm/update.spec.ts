@@ -207,31 +207,47 @@ describe('workers/branch/package-json', () => {
       dependencies: { chalk: '2.4.2' },
     });
     it('mirrors', () => {
-      const res = npmUpdater.bumpPackageVersion(
+      const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
         '0.0.2',
         'mirror:chalk'
       );
-      expect(res).toMatchSnapshot();
-      expect(res).not.toEqual(content);
+      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).not.toEqual(content);
     });
     it('aborts mirror', () => {
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'mirror:a');
-      expect(res).toEqual(content);
+      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+        content,
+        '0.0.2',
+        'mirror:a'
+      );
+      expect(bumpedContent).toEqual(content);
     });
     it('increments', () => {
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'patch');
-      expect(res).toMatchSnapshot();
-      expect(res).not.toEqual(content);
+      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+        content,
+        '0.0.2',
+        'patch'
+      );
+      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).not.toEqual(content);
     });
     it('no ops', () => {
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.1', 'patch');
-      expect(res).toEqual(content);
+      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+        content,
+        '0.0.1',
+        'patch'
+      );
+      expect(bumpedContent).toEqual(content);
     });
     it('updates', () => {
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.1', 'minor');
-      expect(res).toMatchSnapshot();
-      expect(res).not.toEqual(content);
+      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+        content,
+        '0.0.1',
+        'minor'
+      );
+      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).not.toEqual(content);
     });
     it('returns content if bumping errors', async () => {
       jest.mock('semver', () => ({
@@ -240,8 +256,12 @@ describe('workers/branch/package-json', () => {
         },
       }));
       const npmUpdater1 = await import('./update');
-      const res = npmUpdater1.bumpPackageVersion(content, '0.0.2', true as any);
-      expect(res).toEqual(content);
+      const { bumpedContent } = npmUpdater1.bumpPackageVersion(
+        content,
+        '0.0.2',
+        true as any
+      );
+      expect(bumpedContent).toEqual(content);
     });
   });
 });

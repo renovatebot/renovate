@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import ini from 'ini';
+import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { add } from '../../util/sanitize';
 
@@ -53,12 +54,13 @@ export function setNpmrc(input?: string): void {
     npmrcRaw = input;
     logger.debug('Setting npmrc');
     npmrc = ini.parse(input.replace(/\\n/g, '\n'));
+    const { trustLevel } = getAdminConfig();
     for (const [key, val] of Object.entries(npmrc)) {
-      if (global.trustLevel !== 'high') {
+      if (trustLevel !== 'high') {
         sanitize(key, val);
       }
       if (
-        global.trustLevel !== 'high' &&
+        trustLevel !== 'high' &&
         key.endsWith('registry') &&
         val &&
         val.includes('localhost')
@@ -71,7 +73,7 @@ export function setNpmrc(input?: string): void {
         return;
       }
     }
-    if (global.trustLevel !== 'high') {
+    if (trustLevel !== 'high') {
       return;
     }
     for (const key of Object.keys(npmrc)) {

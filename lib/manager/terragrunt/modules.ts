@@ -30,24 +30,20 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
   /* eslint-disable no-param-reassign */
   if (githubRefMatch) {
-    const depNameShort = githubRefMatch.groups.project.replace(/\.git$/, '');
     dep.depType = 'github';
-    dep.depName = 'github.com/' + depNameShort;
-    dep.depNameShort = depNameShort;
+    dep.lookupName = githubRefMatch.groups.project.replace(/\.git$/, '');
+    dep.depName = 'github.com/' + dep.lookupName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = datasourceGithubTags.id;
-    dep.lookupName = depNameShort;
   } else if (gitTagsRefMatch) {
     dep.depType = 'gitTags';
     if (gitTagsRefMatch.groups.path.includes('//')) {
       logger.debug('Terragrunt module contains subdirectory');
       dep.depName = gitTagsRefMatch.groups.path.split('//')[0];
-      dep.depNameShort = dep.depName.split(/\/(.+)/)[1];
       const tempLookupName = gitTagsRefMatch.groups.url.split('//');
       dep.lookupName = tempLookupName[0] + '//' + tempLookupName[1];
     } else {
       dep.depName = gitTagsRefMatch.groups.path.replace('.git', '');
-      dep.depNameShort = gitTagsRefMatch.groups.project.replace('.git', '');
       dep.lookupName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
@@ -63,7 +59,6 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
       }
       dep.depType = 'terragrunt';
       dep.depName = moduleParts.join('/');
-      dep.depNameShort = dep.depName;
       dep.datasource = datasourceTerragruntModule.id;
     }
   } else {

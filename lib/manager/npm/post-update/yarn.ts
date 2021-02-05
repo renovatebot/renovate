@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
+import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
@@ -64,7 +65,6 @@ export async function generateLockFile(
     const extraEnv: ExecOptions['extraEnv'] = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      YARN_CACHE_FOLDER: env.YARN_CACHE_FOLDER,
       CI: 'true',
     };
 
@@ -85,7 +85,7 @@ export async function generateLockFile(
     } else {
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
     }
-    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+    if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
       } else {
@@ -104,7 +104,7 @@ export async function generateLockFile(
       },
     };
     // istanbul ignore if
-    if (global.trustLevel === 'high') {
+    if (getAdminConfig().trustLevel === 'high') {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
       execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;

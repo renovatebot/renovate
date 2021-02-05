@@ -7,15 +7,13 @@ import { promisify } from 'util';
 export type Opt<T> = T | null | undefined;
 
 export enum BinarySource {
-  Auto = 'auto',
   Docker = 'docker',
   Global = 'global',
 }
 
 export interface ExecConfig {
   binarySource: Opt<BinarySource>;
-  dockerImagePrefix: Opt<string>;
-  dockerUser: Opt<string>;
+  customEnvVariables: Opt<Record<string, string>>;
   localDir: Opt<string>;
   cacheDir: Opt<string>;
 }
