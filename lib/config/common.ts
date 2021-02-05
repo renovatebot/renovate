@@ -63,14 +63,14 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
 }
 
-export interface GlobalConfig {
-  prBanner?: string;
-  prFooter?: string;
+export interface RepoAdminConfig {
+  allowPostUpgradeCommandTemplating?: boolean;
+  allowedPostUpgradeCommands?: string[];
+  dockerImagePrefix?: string;
+  dockerUser?: string;
 }
 
 export interface RenovateAdminConfig {
-  allowPostUpgradeCommandTemplating?: boolean;
-  allowedPostUpgradeCommands?: string[];
   autodiscover?: boolean;
   autodiscoverFilter?: string;
 
@@ -79,14 +79,10 @@ export interface RenovateAdminConfig {
   configWarningReuseIssue?: boolean;
 
   customEnvVariables?: Record<string, string>;
-  dockerImagePrefix?: string;
-  dockerUser?: string;
 
   dryRun?: boolean;
 
   endpoint?: string;
-
-  global?: GlobalConfig;
 
   localDir?: string;
   logFile?: string;

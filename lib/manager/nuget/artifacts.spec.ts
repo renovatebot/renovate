@@ -37,7 +37,6 @@ const config = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
-  dockerUser: 'foobar',
 };
 
 describe('updateArtifacts', () => {

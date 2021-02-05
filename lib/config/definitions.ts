@@ -281,11 +281,11 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`.',
+      'Controls whether third party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
     admin: true,
     type: 'string',
-    allowedValues: ['auto', 'global', 'docker'],
-    default: 'auto',
+    allowedValues: ['global', 'docker'],
+    default: 'global',
   },
   {
     name: 'redisUrl',
@@ -1918,6 +1918,10 @@ const options: RenovateOptions[] = [
 
 export function getOptions(): RenovateOptions[] {
   return options;
+}
+
+export function getAdminOptionNames(): string[] {
+  return options.filter((option) => option.admin).map((option) => option.name);
 }
 
 function loadManagerOptions(): void {

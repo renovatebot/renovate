@@ -84,6 +84,7 @@ Object {
   "baseBranches": Array [
     "next",
   ],
+  "binarySource": "global",
   "branchName": "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}",
   "branchPrefix": "renovate/",
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",

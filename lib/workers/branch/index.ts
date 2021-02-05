@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../config';
+import { getAdminConfig } from '../../config/admin';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -325,20 +326,25 @@ export async function processBranch(
       logger.debug('No updated lock files in branch');
     }
 
+    const {
+      allowedPostUpgradeCommands,
+      allowPostUpgradeCommandTemplating,
+    } = getAdminConfig();
+
     if (
       /* Only run post-upgrade tasks if there are changes to package files... */
       (config.updatedPackageFiles?.length > 0 ||
         /* ... or changes to artifacts */
         config.updatedArtifacts?.length > 0) &&
       global.trustLevel === 'high' &&
-      is.nonEmptyArray(config.allowedPostUpgradeCommands)
+      is.nonEmptyArray(allowedPostUpgradeCommands)
     ) {
       for (const upgrade of config.upgrades) {
         addMeta({ dep: upgrade.depName });
         logger.trace(
           {
             tasks: upgrade.postUpgradeTasks,
-            allowedCommands: config.allowedPostUpgradeCommands,
+            allowedCommands: allowedPostUpgradeCommands,
           },
           'Checking for post-upgrade tasks'
         );
@@ -363,19 +369,19 @@ export async function processBranch(
 
           for (const cmd of commands) {
             if (
-              !config.allowedPostUpgradeCommands.some((pattern) =>
+              !allowedPostUpgradeCommands.some((pattern) =>
                 regEx(pattern).test(cmd)
               )
             ) {
               logger.warn(
                 {
                   cmd,
-                  allowedPostUpgradeCommands: config.allowedPostUpgradeCommands,
+                  allowedPostUpgradeCommands,
                 },
                 'Post-upgrade task did not match any on allowed list'
               );
             } else {
-              const compiledCmd = config.allowPostUpgradeCommandTemplating
+              const compiledCmd = allowPostUpgradeCommandTemplating
                 ? template.compile(cmd, upgrade)
                 : cmd;
 

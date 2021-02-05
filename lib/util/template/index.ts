@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import * as handlebars from 'handlebars';
+import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { clone } from '../clone';
 
@@ -144,7 +145,8 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const filteredInput = filterFields ? getFilteredObject(input) : input;
+  const data = { ...getAdminConfig(), ...input };
+  const filteredInput = filterFields ? getFilteredObject(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
     const matches = template.matchAll(templateRegex);

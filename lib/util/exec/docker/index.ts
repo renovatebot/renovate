@@ -1,3 +1,4 @@
+import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
@@ -186,8 +187,8 @@ export async function generateDockerCommand(
   const volumes = options.volumes || [];
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
-  const { localDir, cacheDir, dockerUser } = config;
-
+  const { localDir, cacheDir } = config;
+  const { dockerUser, dockerImagePrefix } = getAdminConfig();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image);
   result.push(`--name=${containerName}`);
@@ -210,10 +211,10 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  if (config.dockerImagePrefix) {
+  if (dockerImagePrefix) {
     image = image.replace(
       /^renovate\//,
-      ensureTrailingSlash(config.dockerImagePrefix)
+      ensureTrailingSlash(dockerImagePrefix)
     );
   }
 
