@@ -74,6 +74,7 @@ export interface GlobalAdminConfig {
   logFileLevel?: LogLevel;
   logLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
+  privateKeyPath?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }
@@ -113,7 +114,6 @@ export interface RenovateAdminConfig {
   platform?: string;
   postUpdateOptions?: string[];
   privateKey?: string | Buffer;
-  privateKeyPath?: string;
   requireConfig?: boolean;
 }
 
