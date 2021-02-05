@@ -537,7 +537,7 @@ const options: RenovateOptions[] = [
     name: 'trustLevel',
     description:
       'Set this to "high" if the bot should trust the repository owners/contents.',
-    stage: 'global',
+    admin: true,
     type: 'string',
     default: 'low',
   },

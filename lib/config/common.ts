@@ -72,7 +72,6 @@ export interface GlobalAdminConfig {
   logLevel?: LogLevel;
   redisUrl?: string;
   repositories?: RenovateRepository[];
-  trustLevel?: 'low' | 'high';
 }
 
 // Config options used within the repository worker, but non-user configurable
