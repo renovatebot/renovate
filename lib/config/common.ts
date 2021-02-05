@@ -63,6 +63,19 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
 }
 
+// Config options used only within the global worker
+export interface GlobalAdminConfig {
+  autodiscover?: boolean;
+  autodiscoverFilter?: string;
+  logFile?: string;
+  logFileLevel?: LogLevel;
+  logLevel?: LogLevel;
+  redisUrl?: string;
+  repositories?: RenovateRepository[];
+  trustLevel?: 'low' | 'high';
+}
+
+// Config options used within the repository worker, but non-user configurable
 export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
@@ -71,9 +84,6 @@ export interface RepoAdminConfig {
 }
 
 export interface RenovateAdminConfig {
-  autodiscover?: boolean;
-  autodiscoverFilter?: string;
-
   baseDir?: string;
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
@@ -85,9 +95,7 @@ export interface RenovateAdminConfig {
   endpoint?: string;
 
   localDir?: string;
-  logFile?: string;
-  logFileLevel?: LogLevel;
-  logLevel?: LogLevel;
+
   logContext?: string;
 
   onboarding?: boolean;
@@ -101,10 +109,7 @@ export interface RenovateAdminConfig {
   postUpdateOptions?: string[];
   privateKey?: string | Buffer;
   privateKeyPath?: string;
-  repositories?: RenovateRepository[];
   requireConfig?: boolean;
-  trustLevel?: 'low' | 'high';
-  redisUrl?: string;
   gitPrivateKey?: string;
 }
 
@@ -183,6 +188,8 @@ export interface RenovateConfig
 
   fetchReleaseNotes?: boolean;
 }
+
+export interface GlobalConfig extends RenovateConfig, GlobalAdminConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
