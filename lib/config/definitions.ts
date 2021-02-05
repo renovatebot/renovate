@@ -1524,7 +1524,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      commitMessageTopic: 'module {{depNameShort}}',
+      commitMessageTopic: 'module {{depName}}',
     },
     mergeable: true,
     cli: false,
