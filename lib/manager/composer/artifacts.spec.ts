@@ -2,6 +2,7 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
@@ -45,7 +46,7 @@ describe('.updateArtifacts()', () => {
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    delete global.trustLevel;
+    setAdminConfig();
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -62,7 +63,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
     git.getRepoStatus.mockResolvedValue(repoStatus);
-    global.trustLevel = 'high';
+    setAdminConfig({ trustLevel: 'high' });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',

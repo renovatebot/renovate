@@ -3,8 +3,7 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import upath from 'upath';
 import * as configParser from '../../config';
-import { setAdminConfig } from '../../config/admin';
-import { getAdminOptionNames } from '../../config/definitions';
+import { GlobalConfig } from '../../config';
 import { getProblems, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
@@ -46,7 +45,7 @@ function haveReachedLimits(): boolean {
 }
 
 export async function start(): Promise<number> {
-  let config: RenovateConfig;
+  let config: GlobalConfig;
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
@@ -60,7 +59,6 @@ export async function start(): Promise<number> {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
-      setAdminConfig(repoConfig, getAdminOptionNames());
       await setUtilConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();

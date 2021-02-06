@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { setAdminConfig } from '../../config/admin';
 import { extractPackageFile } from './extract';
 
 const requirements1 = readFileSync(
@@ -37,11 +38,11 @@ const requirements7 = readFileSync(
 describe('lib/manager/pip_requirements/extract', () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    global.trustLevel = 'low';
+    setAdminConfig();
   });
   afterEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    global.trustLevel = 'low';
+    setAdminConfig();
   });
   describe('extractPackageFile()', () => {
     let config;
@@ -127,7 +128,7 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('should replace env vars in high trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
-      global.trustLevel = 'high';
+      setAdminConfig({ trustLevel: 'high' });
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',

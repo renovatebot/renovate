@@ -6,7 +6,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
-import { RenovateConfig } from '../common';
+import { GlobalConfig, RenovateConfig } from '../common';
 import * as massage from '../massage';
 import * as migration from '../migration';
 import { mergeChildConfig } from '../utils';
@@ -185,11 +185,11 @@ export async function getPreset(
 }
 
 export async function resolveConfigPresets(
-  inputConfig: RenovateConfig,
+  inputConfig: GlobalConfig,
   baseConfig?: RenovateConfig,
   ignorePresets?: string[],
   existingPresets: string[] = []
-): Promise<RenovateConfig> {
+): Promise<GlobalConfig> {
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets || []; // eslint-disable-line
   }
@@ -197,7 +197,7 @@ export async function resolveConfigPresets(
     { config: inputConfig, existingPresets },
     'resolveConfigPresets'
   );
-  let config: RenovateConfig = {};
+  let config: GlobalConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {

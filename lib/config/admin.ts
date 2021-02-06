@@ -2,17 +2,22 @@ import { RenovateConfig, RepoAdminConfig } from './common';
 
 let adminConfig: RepoAdminConfig = {};
 
-const derivedAdminOptions = ['localDir'];
+// TODO: once admin config work is complete, add a test to make sure this list includes all options with admin=true
+export const repoAdminOptions = [
+  'allowPostUpgradeCommandTemplating',
+  'allowedPostUpgradeCommands',
+  'dockerImagePrefix',
+  'dockerUser',
+  'dryRun',
+  'privateKey',
+  'trustLevel',
+];
 
-export function setAdminConfig(
-  config: RenovateConfig,
-  adminOptions: string[]
-): void {
+export function setAdminConfig(config: RenovateConfig = {}): void {
   adminConfig = {};
-  const repoAdminOptions = adminOptions.concat(derivedAdminOptions);
   for (const option of repoAdminOptions) {
     adminConfig[option] = config[option];
-    // TODO: delete from config
+    delete config[option]; // eslint-disable-line no-param-reassign
   }
 }
 

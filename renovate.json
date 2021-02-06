@@ -1,5 +1,5 @@
 {
-  "extends": ["github>renovatebot/presets-internal:node"],
+  "extends": ["github>renovatebot/.github"],
   "assignees": ["rarkins", "viceice"],
   "semanticCommitScope": "deps",
   "automergeType": "pr",
