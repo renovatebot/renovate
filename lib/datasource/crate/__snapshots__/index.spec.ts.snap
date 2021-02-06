@@ -118,6 +118,235 @@ Array [
 ]
 `;
 
+exports[`datasource/crate getReleases processes real data: libc (with failing API call) 1`] = `
+Object {
+  "dependencyUrl": "https://crates.io/crates/libc",
+  "releases": Array [
+    Object {
+      "version": "0.1.0",
+    },
+    Object {
+      "version": "0.1.1",
+    },
+    Object {
+      "version": "0.1.2",
+    },
+    Object {
+      "version": "0.1.3",
+    },
+    Object {
+      "version": "0.1.4",
+    },
+    Object {
+      "version": "0.1.5",
+    },
+    Object {
+      "version": "0.1.6",
+    },
+    Object {
+      "version": "0.1.7",
+    },
+    Object {
+      "version": "0.1.8",
+    },
+    Object {
+      "isDeprecated": true,
+      "version": "0.1.9",
+    },
+    Object {
+      "version": "0.1.10",
+    },
+    Object {
+      "isDeprecated": true,
+      "version": "0.1.11",
+    },
+    Object {
+      "version": "0.1.12",
+    },
+    Object {
+      "version": "0.2.0",
+    },
+    Object {
+      "version": "0.2.1",
+    },
+    Object {
+      "version": "0.2.2",
+    },
+    Object {
+      "version": "0.2.3",
+    },
+    Object {
+      "version": "0.2.4",
+    },
+    Object {
+      "version": "0.2.5",
+    },
+    Object {
+      "version": "0.2.6",
+    },
+    Object {
+      "version": "0.2.7",
+    },
+    Object {
+      "version": "0.2.8",
+    },
+    Object {
+      "version": "0.2.9",
+    },
+    Object {
+      "version": "0.2.10",
+    },
+    Object {
+      "version": "0.2.11",
+    },
+    Object {
+      "version": "0.2.12",
+    },
+    Object {
+      "version": "0.2.13",
+    },
+    Object {
+      "version": "0.2.14",
+    },
+    Object {
+      "version": "0.2.15",
+    },
+    Object {
+      "version": "0.2.16",
+    },
+    Object {
+      "version": "0.2.17",
+    },
+    Object {
+      "version": "0.2.18",
+    },
+    Object {
+      "version": "0.2.19",
+    },
+    Object {
+      "version": "0.2.20",
+    },
+    Object {
+      "version": "0.2.21",
+    },
+    Object {
+      "version": "0.2.22",
+    },
+    Object {
+      "version": "0.2.23",
+    },
+    Object {
+      "version": "0.2.24",
+    },
+    Object {
+      "version": "0.2.25",
+    },
+    Object {
+      "version": "0.2.26",
+    },
+    Object {
+      "version": "0.2.27",
+    },
+    Object {
+      "version": "0.2.28",
+    },
+    Object {
+      "version": "0.2.29",
+    },
+    Object {
+      "version": "0.2.30",
+    },
+    Object {
+      "version": "0.2.31",
+    },
+    Object {
+      "version": "0.2.32",
+    },
+    Object {
+      "version": "0.2.33",
+    },
+    Object {
+      "version": "0.2.34",
+    },
+    Object {
+      "version": "0.2.35",
+    },
+    Object {
+      "version": "0.2.36",
+    },
+    Object {
+      "version": "0.2.37",
+    },
+    Object {
+      "version": "0.2.38",
+    },
+    Object {
+      "version": "0.2.39",
+    },
+    Object {
+      "version": "0.2.40",
+    },
+    Object {
+      "version": "0.2.41",
+    },
+    Object {
+      "version": "0.2.42",
+    },
+    Object {
+      "version": "0.2.43",
+    },
+    Object {
+      "version": "0.2.44",
+    },
+    Object {
+      "version": "0.2.45",
+    },
+    Object {
+      "version": "0.2.46",
+    },
+    Object {
+      "version": "0.2.47",
+    },
+    Object {
+      "version": "0.2.48",
+    },
+    Object {
+      "version": "0.2.49",
+    },
+    Object {
+      "version": "0.2.50",
+    },
+    Object {
+      "version": "0.2.51",
+    },
+  ],
+}
+`;
+
+exports[`datasource/crate getReleases processes real data: libc (with failing API call) 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "raw.githubusercontent.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/li/bc/libc",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "crates.io",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://crates.io/api/v1/crates/libc",
+  },
+]
+`;
+
 exports[`datasource/crate getReleases processes real data: libc 1`] = `
 Object {
   "dependencyUrl": "https://crates.io/crates/libc",

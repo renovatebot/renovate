@@ -209,6 +209,7 @@ describe('datasource/crate', () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data: libc', async () => {
       httpMock.scope(baseUrl).get('/li/bc/libc').reply(200, res1);
       httpMock
@@ -226,6 +227,25 @@ describe('datasource/crate', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('processes real data: libc (with failing API call)', async () => {
+      httpMock.scope(baseUrl).get('/li/bc/libc').reply(200, res1);
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/libc')
+        .reply(500, '');
+
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'libc',
+        registryUrls: ['https://crates.io'],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('processes real data: amethyst', async () => {
       httpMock.scope(baseUrl).get('/am/et/amethyst').reply(200, res2);
       httpMock
