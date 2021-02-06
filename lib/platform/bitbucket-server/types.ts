@@ -38,7 +38,7 @@ export interface BbsRestUserRef {
   user: BbsRestUser;
 }
 
-export interface BbbsRestPr {
+export interface BbsRestPr {
   createdDate: string;
   description: string;
   fromRef: BbsRestBranchRef;

@@ -41,7 +41,7 @@ import {
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import {
-  BbbsRestPr,
+  BbsRestPr,
   BbsConfig,
   BbsPr,
   BbsRestUserRef,
@@ -265,7 +265,7 @@ export async function getPr(
     return null;
   }
 
-  const res = await bitbucketServerHttp.getJson<BbbsRestPr>(
+  const res = await bitbucketServerHttp.getJson<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
     { useCache: !refreshCache }
   );
@@ -824,7 +824,7 @@ export async function createPr({
     }));
   }
 
-  const body: PartialDeep<BbbsRestPr> = {
+  const body: PartialDeep<BbsRestPr> = {
     title,
     description,
     fromRef: {
@@ -835,9 +835,9 @@ export async function createPr({
     },
     reviewers,
   };
-  let prInfoRes: HttpResponse<BbbsRestPr>;
+  let prInfoRes: HttpResponse<BbsRestPr>;
   try {
-    prInfoRes = await bitbucketServerHttp.postJson<BbbsRestPr>(
+    prInfoRes = await bitbucketServerHttp.postJson<BbsRestPr>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
       { body }
     );
