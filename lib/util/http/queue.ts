@@ -25,8 +25,9 @@ export function getQueue(url: string): PQueue | null {
     if (concurrency) {
       queue = new PQueue({ concurrency });
     }
+
+    hostQueues.set(host, queue);
   }
-  hostQueues.set(host, queue);
 
   return queue;
 }
