@@ -40,20 +40,15 @@ import {
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
-import { BbbsRestPr, BbsConfig, BbsPr, BbsRestUserRef } from './types';
+import {
+  BbbsRestPr,
+  BbsConfig,
+  BbsPr,
+  BbsRestUserRef,
+  BbsRestBranch,
+  BbsRestRepo,
+} from './types';
 import * as utils from './utils';
-
-interface RepoResponse {
-  project: { key: string };
-  parent: string;
-  links: {
-    clone: { href: string; name: string }[];
-  };
-}
-
-interface BranchResponse {
-  displayId: string;
-}
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -166,17 +161,17 @@ export async function initRepo({
     ignorePrAuthor,
   } as any;
 
-  let info: RepoResponse;
-  let branchRes: HttpResponse<BranchResponse>;
+  let info: BbsRestRepo;
+  let branchRes: HttpResponse<BbsRestBranch>;
   try {
     info = (
-      await bitbucketServerHttp.getJson<RepoResponse>(
+      await bitbucketServerHttp.getJson<BbsRestRepo>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
       )
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    branchRes = await bitbucketServerHttp.getJson<BranchResponse>(
+    branchRes = await bitbucketServerHttp.getJson<BbsRestBranch>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
     );
 

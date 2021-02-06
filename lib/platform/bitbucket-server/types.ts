@@ -49,3 +49,15 @@ export interface BbbsRestPr {
   toRef: BbsRestBranchRef;
   version?: number;
 }
+
+export interface BbsRestRepo {
+  project: { key: string };
+  parent: string;
+  links: {
+    clone: { href: string; name: string }[];
+  };
+}
+
+export interface BbsRestBranch {
+  displayId: string;
+}
