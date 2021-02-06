@@ -131,7 +131,7 @@
     "conventional-commits-detector": "1.0.3",
     "crypto-random-string": "3.3.0",
     "deepmerge": "4.2.2",
-    "delay": "4.4.0",
+    "delay": "4.4.1",
     "detect-indent": "6.0.0",
     "email-addresses": "3.1.0",
     "fast-deep-equal": "3.1.3",
