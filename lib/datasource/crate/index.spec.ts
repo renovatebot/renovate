@@ -62,7 +62,10 @@ describe('datasource/crate', () => {
     let tmpDir: DirectoryResult | null;
     let localDir: string | null;
     let cacheDir: string | null;
+
     beforeEach(async () => {
+      httpMock.setup();
+
       tmpDir = await dir();
       localDir = join(tmpDir.path, 'local');
       cacheDir = join(tmpDir.path, 'cache');
@@ -74,11 +77,15 @@ describe('datasource/crate', () => {
       memCache.init();
       setAdminConfig();
     });
+
     afterEach(() => {
       fs.rmdirSync(tmpDir.path, { recursive: true });
       tmpDir = null;
       setAdminConfig();
+
+      httpMock.reset();
     });
+
     it('returns null for missing registry url', async () => {
       expect(
         await getPkgReleases({
