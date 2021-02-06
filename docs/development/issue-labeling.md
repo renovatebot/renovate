@@ -41,12 +41,14 @@ All open issues should have some `status:*` label applied.
     type:docs
     type:feature
     type:refactor
+    type:help
 
 </details>
 
 Use these to label the type of issue.
 For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
 Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
+Use the `type:help` label for issues which should be converted to a discussion post.
 
 Add the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major version bump.
 
@@ -130,8 +132,9 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
 
     good first issue
     help wanted
-    reproduced
-    reproduction needed
+    reproduction:needed
+    reproduction:provided
+    reproduction:confirmed
     duplicate
 
 </details>
@@ -141,8 +144,9 @@ This label is sometimes picked up by tools or websites that try to encourage peo
 
 Add the label `help wanted` to indicate that we need the original poster or someone else to do some work or it is unlikely to get done.
 
-Add a label `reproduction needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
-Add the label `reproduced` once there is a public reproduction.
+Add a label `reproduction:needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
+Add the label `reproduction:provided` once there is a public reproduction.
+A developer will add the `reproduction:confirmed` once they have checked and confirmed the reproduction.
 
 Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 
