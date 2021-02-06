@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getDependency, resetMemCache } from './get';

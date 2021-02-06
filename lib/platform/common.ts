@@ -40,6 +40,8 @@ export interface RepoParams {
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;
+  cloneSubmodules?: boolean;
+  ignorePrAuthor?: boolean;
 }
 
 /**
@@ -63,6 +65,7 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  isDraft?: boolean;
 }
 
 /**
@@ -91,6 +94,7 @@ export interface CreatePRConfig {
 }
 export interface UpdatePrConfig {
   number: number;
+  platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
   state?: PrState.Open | PrState.Closed;

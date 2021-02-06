@@ -33,7 +33,7 @@ function padZeroes(input: string): string {
   return sections.join('.') + stability;
 }
 
-function convertStabilitiyModifier(input: string): string {
+function convertStabilityModifier(input: string): string {
   // Handle stability modifiers.
   const versionParts = input.split('@');
   if (versionParts.length === 1) {
@@ -54,7 +54,7 @@ function convertStabilitiyModifier(input: string): string {
 function normalizeVersion(input: string): string {
   let output = input;
   output = output.replace(/(^|>|>=|\^|~)v/i, '$1');
-  return convertStabilitiyModifier(output);
+  return convertStabilityModifier(output);
 }
 
 function composer2npm(input: string): string {
@@ -109,8 +109,8 @@ export const isVersion = (input: string): string | boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(composer2npm(version), composer2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
@@ -123,6 +123,17 @@ function getNewValue({
 }: NewValueConfig): string {
   if (rangeStrategy === 'pin') {
     return toVersion;
+  }
+  if (rangeStrategy === 'update-lockfile') {
+    if (matches(toVersion, currentValue)) {
+      return currentValue;
+    }
+    return getNewValue({
+      currentValue,
+      rangeStrategy: 'replace',
+      fromVersion,
+      toVersion,
+    });
   }
   const toMajor = getMajor(toVersion);
   const toMinor = getMinor(toVersion);
@@ -211,7 +222,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,

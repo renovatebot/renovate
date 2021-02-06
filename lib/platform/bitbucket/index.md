@@ -1,7 +1,5 @@
 # Bitbucket Cloud
 
-Bitbucket Cloud support is considered in "beta" release status. Mostly, it just needs more feedback/testing. If you have been using it and think it's reliable, please let us know.
-
 ## Unsupported platform features/concepts
 
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)

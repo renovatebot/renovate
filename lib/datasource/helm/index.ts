@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
@@ -11,10 +12,16 @@ export const id = 'helm';
 
 const http = new Http(id);
 
-export const defaultRegistryUrls = [
-  'https://kubernetes-charts.storage.googleapis.com/',
-];
+export const defaultRegistryUrls = ['https://charts.helm.sh/stable'];
 export const registryStrategy = 'first';
+
+export const defaultConfig = {
+  additionalBranchPrefix: 'helm-',
+  commitMessageTopic: 'Helm release {{depName}}',
+  group: {
+    commitMessageTopic: '{{{groupName}}} Helm releases',
+  },
+};
 
 export async function getRepositoryData(
   repository: string
@@ -49,7 +56,7 @@ export async function getRepositoryData(
   }
   try {
     const doc = yaml.safeLoad(res.body, { json: true });
-    if (!doc) {
+    if (!is.plainObject<Record<string, unknown>>(doc)) {
       logger.warn(`Failed to parse index.yaml from ${repository}`);
       return null;
     }

@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { mocked } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
@@ -184,7 +184,8 @@ describe('platform/github', () => {
   function forkInitRepoMock(
     scope: httpMock.Scope,
     repository: string,
-    forkedRepo?: string
+    forkExisted: boolean,
+    forkDefaulBranch = 'master'
   ): void {
     scope
       // repo info
@@ -209,10 +210,18 @@ describe('platform/github', () => {
       })
       // getRepos
       .get('/user/repos?per_page=100')
-      .reply(200, forkedRepo ? [{ full_name: forkedRepo }] : [])
+      .reply(
+        200,
+        forkExisted
+          ? [{ full_name: 'forked/repo', default_branch: forkDefaulBranch }]
+          : []
+      )
       // getBranchCommit
       .post(`/repos/${repository}/forks`)
-      .reply(200, forkedRepo ? { full_name: forkedRepo } : {});
+      .reply(200, {
+        full_name: 'forked/repo',
+        default_branch: forkDefaulBranch,
+      });
   }
 
   describe('initRepo', () => {
@@ -227,7 +236,7 @@ describe('platform/github', () => {
     });
     it('should fork when forkMode', async () => {
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, 'some/repo');
+      forkInitRepoMock(scope, 'some/repo', false);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
@@ -237,8 +246,21 @@ describe('platform/github', () => {
     });
     it('should update fork when forkMode', async () => {
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, 'some/repo', 'forked_repo');
-      scope.patch('/repos/forked_repo/git/refs/heads/master').reply(200);
+      forkInitRepoMock(scope, 'some/repo', true);
+      scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
+      const config = await github.initRepo({
+        repository: 'some/repo',
+        forkMode: true,
+      } as any);
+      expect(config).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('detects fork default branch mismatch', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', true, 'not_master');
+      scope.post('/repos/forked/repo/git/refs').reply(200);
+      scope.patch('/repos/forked/repo').reply(200);
+      scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
@@ -460,8 +482,10 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
-        .reply(200, {})
+        .twice() // getOpenPrs() and getClosedPrs()
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
@@ -497,11 +521,13 @@ describe('platform/github', () => {
     });
     it('should return the PR object in fork mode', async () => {
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, 'some/repo', 'forked/repo');
+      forkInitRepoMock(scope, 'some/repo', true);
       scope
         .post('/graphql')
-        .twice()
-        .reply(200, {})
+        .twice() // getOpenPrs() and getClosedPrs()
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
@@ -1359,7 +1385,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [])
         .post('/repos/some/repo/issues/42/comments')
@@ -1398,7 +1426,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .patch('/repos/some/repo/issues/comments/1234')
@@ -1418,7 +1448,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }]);
       await github.initRepo({
@@ -1436,7 +1468,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '!merge' }]);
       await github.initRepo({
@@ -1456,7 +1490,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/repos/some/repo/issues/comments/1234')
@@ -1470,7 +1506,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: 'some-content' }])
         .delete('/repos/some/repo/issues/comments/1234')

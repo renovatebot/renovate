@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
@@ -22,7 +22,6 @@ const env = mocked(_env);
 const config = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
-  dockerUser: 'foobar',
 };
 
 describe('.updateArtifacts()', () => {
@@ -35,6 +34,7 @@ describe('.updateArtifacts()', () => {
     docker.resetPrefetchedImages();
   });
   it('returns null if no Cargo.lock found', async () => {
+    fs.stat.mockRejectedValue(new Error('not found!'));
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts({
@@ -56,9 +56,11 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
+    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
+
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts({
@@ -71,6 +73,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Cargo.lock', async () => {
+    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
@@ -86,7 +89,28 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('returns updated workspace Cargo.lock', async () => {
+    fs.stat.mockRejectedValueOnce(new Error('crates/one/Cargo.lock not found'));
+    fs.stat.mockRejectedValueOnce(new Error('crates/Cargo.lock not found'));
+    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    const updatedDeps = ['dep1'];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'crates/one/Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('returns updated Cargo.lock for lockfile maintenance', async () => {
+    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
@@ -102,6 +126,7 @@ describe('.updateArtifacts()', () => {
   });
 
   it('returns updated Cargo.lock with docker', async () => {
+    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
@@ -119,6 +144,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
+    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');

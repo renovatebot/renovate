@@ -1,6 +1,5 @@
 import * as datasourceHelm from '../../datasource/helm';
 import { SkipReason } from '../../types';
-import { isValid } from '../../versioning/hashicorp';
 import { PackageDependency } from '../common';
 import { getDep } from '../dockerfile/extract';
 import {
@@ -100,13 +99,10 @@ export function analyseTerraformResource(
         dep.skipReason = SkipReason.InvalidName;
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
         dep.skipReason = SkipReason.LocalChart;
-      } else if (!isValid(dep.currentValue)) {
-        dep.skipReason = SkipReason.UnsupportedVersion;
       }
       dep.depType = 'helm';
       dep.registryUrls = [dep.managerData.repository];
       dep.depName = dep.managerData.chart;
-      dep.depNameShort = dep.managerData.chart;
       dep.datasource = datasourceHelm.id;
       break;
 

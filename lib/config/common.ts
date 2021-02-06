@@ -18,6 +18,7 @@ export interface GroupConfig extends Record<string, unknown> {
 
 // TODO: Proper typings
 export interface RenovateSharedConfig {
+  $schema?: string;
   automerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
@@ -27,6 +28,7 @@ export interface RenovateSharedConfig {
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
+  extends?: string[];
   fileMatch?: string[];
   group?: GroupConfig;
   groupName?: string;
@@ -35,8 +37,9 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   labels?: string[];
-  managers?: string | string[];
+  addLabels?: string[];
   dependencyDashboardApproval?: boolean;
+  hashedBranchLength?: number;
   npmrc?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
@@ -60,33 +63,44 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
 }
 
-export interface GlobalConfig {
-  prBanner?: string;
-  prFooter?: string;
-}
-
-export interface RenovateAdminConfig {
-  allowedPostUpgradeCommands?: string[];
+// Config options used only within the global worker
+// The below should contain config options where stage=global
+export interface GlobalAdminConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
-
   baseDir?: string;
-  cacheDir?: string;
-  configWarningReuseIssue?: boolean;
-
-  dockerImagePrefix?: string;
-  dockerUser?: string;
-
-  dryRun?: boolean;
-
-  endpoint?: string;
-
-  global?: GlobalConfig;
-
-  localDir?: string;
+  forceCli?: boolean;
+  gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
   logLevel?: LogLevel;
+  prCommitsPerRunLimit?: number;
+  privateKeyPath?: string;
+  redisUrl?: string;
+  repositories?: RenovateRepository[];
+}
+
+// Config options used within the repository worker, but not user configurable
+// The below should contain config options where admin=true
+export interface RepoAdminConfig {
+  allowPostUpgradeCommandTemplating?: boolean;
+  allowedPostUpgradeCommands?: string[];
+  dockerImagePrefix?: string;
+  dockerUser?: string;
+  dryRun?: boolean;
+  privateKey?: string | Buffer;
+  trustLevel?: 'low' | 'high';
+}
+
+export interface RenovateAdminConfig {
+  cacheDir?: string;
+
+  customEnvVariables?: Record<string, string>;
+
+  endpoint?: string;
+
+  localDir?: string;
+
   logContext?: string;
 
   onboarding?: boolean;
@@ -94,16 +108,10 @@ export interface RenovateAdminConfig {
   onboardingCommitMessage?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
+  onboardingConfigFileName?: string;
 
   platform?: string;
-  postUpdateOptions?: string[];
-  privateKey?: string | Buffer;
-  privateKeyPath?: string;
-  repositories?: RenovateRepository[];
   requireConfig?: boolean;
-  trustLevel?: 'low' | 'high';
-  redisUrl?: string;
-  gitPrivateKey?: string;
 }
 
 export type PostUpgradeTasks = {
@@ -124,6 +132,7 @@ export type RenovateRepository =
 export interface CustomManager {
   fileMatch: string[];
   matchStrings: string[];
+  matchStringsStrategy?: string;
   depNameTemplate?: string;
   datasourceTemplate?: string;
   lookupNameTemplate?: string;
@@ -145,7 +154,6 @@ export interface RenovateConfig
   description?: string | string[];
 
   errors?: ValidationMessage[];
-  extends?: string[];
 
   gitAuthor?: string;
 
@@ -156,7 +164,7 @@ export interface RenovateConfig
   isFork?: boolean;
 
   fileList?: string[];
-
+  configWarningReuseIssue?: boolean;
   dependencyDashboard?: boolean;
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
@@ -166,8 +174,12 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
+  postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+
+  registryUrls?: string[];
+
   repoIsOnboarded?: boolean;
 
   updateType?: UpdateType;
@@ -175,7 +187,11 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+
+  fetchReleaseNotes?: boolean;
 }
+
+export interface GlobalConfig extends RenovateConfig, GlobalAdminConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
@@ -198,24 +214,26 @@ export type UpdateType =
   | 'rollback'
   | 'bump';
 
+export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
+
 // TODO: Proper typings
 export interface PackageRule
   extends RenovateSharedConfig,
     UpdateConfig,
     Record<string, any> {
-  paths?: string[];
-  languages?: string[];
-  baseBranchList?: string[];
-  datasources?: string[];
-  depTypeList?: string[];
-  packageNames?: string[];
-  packagePatterns?: string[];
+  matchPaths?: string[];
+  matchLanguages?: string[];
+  matchBaseBranches?: string[];
+  matchManagers?: string | string[];
+  matchDatasources?: string[];
+  matchDepTypes?: string[];
+  matchPackageNames?: string[];
+  matchPackagePatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   matchCurrentVersion?: string | Range;
-  sourceUrlPrefixes?: string[];
-
-  updateTypes?: UpdateType[];
+  matchSourceUrlPrefixes?: string[];
+  matchUpdateTypes?: UpdateType[];
 }
 
 export interface ValidationMessage {

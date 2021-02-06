@@ -85,15 +85,13 @@ function updateJenkinsPluginVersionsCacheCallback(
   const plugins = response.plugins;
   for (const name of Object.keys(plugins || [])) {
     // eslint-disable-next-line no-param-reassign
-    cache.cache[name] = Object.keys(plugins[name]).map((version) => {
-      return {
-        version,
-        downloadUrl: plugins[name][version]?.url,
-        releaseTimestamp: plugins[name][version]?.buildDate
-          ? new Date(plugins[name][version].buildDate + ' UTC')
-          : null,
-      };
-    });
+    cache.cache[name] = Object.keys(plugins[name]).map((version) => ({
+      version,
+      downloadUrl: plugins[name][version]?.url,
+      releaseTimestamp: plugins[name][version]?.buildDate
+        ? new Date(plugins[name][version].buildDate + ' UTC')
+        : null,
+    }));
   }
 }
 
@@ -109,7 +107,7 @@ async function getJenkinsUpdateCenterResponse<T>(
   };
 
   try {
-    logger.debug(`jenkins-plugins: Fetching Jenkins plugns ${cache.name}`);
+    logger.debug(`jenkins-plugins: Fetching Jenkins plugins ${cache.name}`);
     const startTime = Date.now();
     response = (await http.getJson<T>(cache.dataUrl, options)).body;
     const durationMs = Math.round(Date.now() - startTime);

@@ -1294,8 +1294,19 @@ describe('platform/gitea', () => {
   });
 
   describe('addReviewers', () => {
-    it('should do nothing - unsupported by platform', async () => {
+    it('should assign reviewers', async () => {
+      expect.assertions(2);
       const mockPR = mockPRs[0];
+      await expect(
+        gitea.addReviewers(mockPR.number, ['me', 'you'])
+      ).resolves.not.toThrow();
+
+      expect(helper.requestPrReviewers).toHaveBeenCalledTimes(1);
+    });
+    it('catches errors', async () => {
+      expect.assertions(1);
+      const mockPR = mockPRs[0];
+      helper.requestPrReviewers.mockRejectedValueOnce(null);
       await expect(
         gitea.addReviewers(mockPR.number, ['me', 'you'])
       ).resolves.not.toThrow();

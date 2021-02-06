@@ -3,6 +3,7 @@ import { parse as _parse } from 'url';
 import parse from 'github-url-from-git';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGithubReleases from '../../datasource/github-releases';
+import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -11,6 +12,7 @@ import * as dockerVersioning from '../../versioning/docker';
 import { PackageDependency, PackageFile } from '../common';
 
 interface UrlParsedResult {
+  datasource: string;
   repo: string;
   currentValue: string;
 }
@@ -26,15 +28,26 @@ function parseUrl(urlString: string): UrlParsedResult | null {
   }
   const path = url.path.split('/').slice(1);
   const repo = path[0] + '/' + path[1];
+  let datasource: string;
   let currentValue: string = null;
   if (path[2] === 'releases' && path[3] === 'download') {
+    datasource = datasourceGithubReleases.id;
     currentValue = path[4];
   }
   if (path[2] === 'archive') {
-    currentValue = path[3].replace(/\.tar\.gz$/, '');
+    datasource = datasourceGithubTags.id;
+    currentValue = path[3];
+    // Strip archive extension to get hash or tag.
+    // Tolerates formats produced by Git(Hub|Lab) and allowed by http_archive
+    // Note: Order matters in suffix list to strip, e.g. .tar.gz.
+    for (const extension of ['.gz', '.bz2', '.xz', '.tar', '.tgz', '.zip']) {
+      if (currentValue.endsWith(extension)) {
+        currentValue = currentValue.slice(0, -extension.length);
+      }
+    }
   }
   if (currentValue) {
-    return { repo, currentValue };
+    return { datasource, repo, currentValue };
   }
   // istanbul ignore next
   return null;
@@ -49,7 +62,7 @@ function findBalancedParenIndex(longString: string): number {
    * if one opening parenthesis -> 1
    * if two opening parenthesis -> 2
    * if two opening and one closing parenthesis -> 1
-   * if ["""] finded then ignore all [)] until closing ["""] parsed.
+   * if ["""] found then ignore all [)] until closing ["""] parsed.
    * https://github.com/renovatebot/renovate/pull/3459#issuecomment-478249702
    */
   let intShouldNotBeOdd = 0; // openClosePythonMultiLineComment
@@ -232,7 +245,7 @@ export function extractPackageFile(
       } else {
         dep.currentValue = parsedUrl.currentValue;
       }
-      dep.datasource = datasourceGithubReleases.id;
+      dep.datasource = parsedUrl.datasource;
       dep.lookupName = dep.repo;
       deps.push(dep);
     } else if (

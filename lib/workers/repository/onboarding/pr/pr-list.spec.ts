@@ -9,7 +9,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       jest.resetAllMocks();
       config = getConfig();
     });
-    it('handles emptyu', () => {
+    it('handles empty', () => {
       const branches: BranchConfig[] = [];
       const res = getPrList(config, branches);
       expect(res).toMatchSnapshot();

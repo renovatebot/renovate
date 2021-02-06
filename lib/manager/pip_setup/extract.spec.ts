@@ -1,4 +1,4 @@
-import { envMock, exec, mockExecSequence } from '../../../test/execUtil';
+import { envMock, exec, mockExecSequence } from '../../../test/exec-util';
 import { env, getName } from '../../../test/util';
 import {
   getPythonAlias,
@@ -29,6 +29,7 @@ describe(getName(__filename), () => {
         { stdout: '', stderr: 'Python 2.7.17\\n' },
         new Error(),
         { stdout: 'Python 3.8.0\\n', stderr: '' },
+        new Error(),
       ]);
       const result = await getPythonAlias();
       expect(pythonVersions).toContain(result);

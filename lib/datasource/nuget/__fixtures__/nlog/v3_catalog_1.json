@@ -237,7 +237,7 @@
           "NLog"
         ],
         "title": "NLog",
-        "version": "3.0.0"
+        "version": "3.0.0+build-632"
       },
       "packageContent": "https://api.nuget.org/v3-flatcontainer/nlog/3.0.0/nlog.3.0.0.nupkg",
       "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/index.json"

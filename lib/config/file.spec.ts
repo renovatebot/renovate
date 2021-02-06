@@ -1,5 +1,5 @@
 import fs from 'fs';
-import path from 'path';
+import upath from 'upath';
 import customConfig from './config/__fixtures__/file';
 import * as file from './file';
 
@@ -11,7 +11,7 @@ describe('config/file', () => {
       );
     });
     it('parses custom config file', () => {
-      const configFile = path.resolve(
+      const configFile = upath.resolve(
         __dirname,
         './config/__fixtures__/file.js'
       );
@@ -20,7 +20,7 @@ describe('config/file', () => {
       );
     });
     it('migrates', () => {
-      const configFile = path.resolve(
+      const configFile = upath.resolve(
         __dirname,
         './config/__fixtures__/file2.js'
       );
@@ -29,7 +29,7 @@ describe('config/file', () => {
       expect(res.rangeStrategy).toEqual('bump');
     });
     it('informs user when error in parsing config.js', () => {
-      const configFile = path.resolve(
+      const configFile = upath.resolve(
         __dirname,
         './config/__fixtures__/file3.ts'
       );
@@ -37,7 +37,6 @@ describe('config/file', () => {
         "platform": "github",
         "token":"abcdef",
         "logFileLevel": "warn",
-        "logLevel": "info",
         "onboarding": false,
         "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
         "onboardingConfig": {
@@ -53,7 +52,7 @@ describe('config/file', () => {
     });
   });
   it('handles when invalid file location is provided', () => {
-    const configFile = path.resolve(
+    const configFile = upath.resolve(
       __dirname,
       './config/__fixtures__/file4.ts'
     );

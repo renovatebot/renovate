@@ -1,4 +1,4 @@
-import * as httpMock from '../../../../test/httpMock';
+import * as httpMock from '../../../../test/http-mock';
 import { getName, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';

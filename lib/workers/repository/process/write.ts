@@ -3,8 +3,8 @@ import { addMeta, logger, removeMeta } from '../../../logger';
 import { branchExists } from '../../../util/git';
 import { processBranch } from '../../branch';
 import { BranchConfig, ProcessBranchResult } from '../../common';
-import { Limit, isLimitReached } from '../../global/limits';
-import { getPrsRemaining } from './limits';
+import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
+import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
@@ -28,43 +28,33 @@ export async function writeUpdates(
     }
     return true;
   });
-  let prsRemaining = await getPrsRemaining(config, branches);
+
+  const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
+  setMaxLimit(Limit.PullRequests, prsRemaining);
+
+  const branchesRemaining = getBranchesRemaining(config, branches);
+  logger.debug(
+    { branchesRemaining },
+    'Calculated maximum branches remaining this run'
+  );
+  setMaxLimit(Limit.Branches, branchesRemaining);
+
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
-    const prLimitReached = prsRemaining <= 0;
-    const commitLimitReached = isLimitReached(Limit.Commits);
     const branchExisted = branchExists(branch.branchName);
-    const res = await processBranch(branch, prLimitReached, commitLimitReached);
+    const res = await processBranch(branch);
     branch.res = res;
     if (
       res === ProcessBranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
     ) {
-      // Stop procesing other branches because base branch has been changed
+      // Stop processing other branches because base branch has been changed
       return 'automerged';
     }
-    let deductPrRemainingCount = 0;
-    if (res === ProcessBranchResult.PrCreated) {
-      deductPrRemainingCount = 1;
+    if (!branchExisted && branchExists(branch.branchName)) {
+      incLimitedValue(Limit.Branches);
     }
-    // istanbul ignore if
-    if (
-      res === ProcessBranchResult.Automerged &&
-      branch.automergeType === 'pr-comment' &&
-      branch.requiredStatusChecks === null
-    ) {
-      deductPrRemainingCount = 1;
-    }
-    // istanbul ignore if
-    if (
-      res === ProcessBranchResult.Pending &&
-      !branchExisted &&
-      branchExists(branch.branchName)
-    ) {
-      deductPrRemainingCount = 1;
-    }
-    prsRemaining -= deductPrRemainingCount;
   }
   removeMeta(['branch']);
   return 'done';

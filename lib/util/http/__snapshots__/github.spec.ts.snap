@@ -1,0 +1,157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`util/http/github GraphQL shrinks items count on 50x 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "testName",
+            "owner": "testOwner",
+          },
+          "testItem": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "content-length": "408",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "testName",
+            "owner": "testOwner",
+          },
+          "testItem": Object {
+            "__args": Object {
+              "after": "cursor1",
+              "first": "100",
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "content-length": "428",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "testName",
+            "owner": "testOwner",
+          },
+          "testItem": Object {
+            "__args": Object {
+              "after": "cursor1",
+              "first": "50",
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "content-length": "427",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "testName",
+            "owner": "testOwner",
+          },
+          "testItem": Object {
+            "__args": Object {
+              "after": "cursor2",
+              "first": "50",
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "content-length": "427",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+]
+`;

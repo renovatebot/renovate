@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import { regEx } from '../util/regex';
+import { getManagerList } from '../manager';
+import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import { RenovateConfig, ValidationMessage } from './common';
@@ -14,6 +15,15 @@ let optionTypes: Record<string, RenovateOptions['type']>;
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+const managerList = getManagerList();
+
+function isManagerPath(parentPath: string): boolean {
+  return (
+    /^regexManagers\[[0-9]+]$/.test(parentPath) ||
+    managerList.includes(parentPath)
+  );
 }
 
 export async function validateConfig(
@@ -71,6 +81,27 @@ export async function validateConfig(
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
+    // istanbul ignore if
+    if (key === '__proto__') {
+      errors.push({
+        depName: 'Config security error',
+        message: '__proto__',
+      });
+      continue; // eslint-disable-line
+    }
+    if (key === 'fileMatch') {
+      if (parentPath === undefined) {
+        errors.push({
+          depName: 'Config error',
+          message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
+        });
+      } else if (!isManagerPath(parentPath)) {
+        warnings.push({
+          depName: 'Config warning',
+          message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,
+        });
+      }
+    }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys
       !(is as any).function(val) // Ignore all functions
@@ -90,9 +121,9 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = template.compile(val.toString(), config);
-          res = template.compile(res, config);
-          template.compile(res, config);
+          let res = template.compile(val.toString(), config, false);
+          res = template.compile(res, config, false);
+          template.compile(res, config, false);
         } catch (err) {
           errors.push({
             depName: 'Configuration Error',
@@ -114,30 +145,10 @@ export async function validateConfig(
           });
         }
       } else if (
-        key === 'allowedVersions' &&
-        is.string(val) &&
-        val.length > 1 &&
-        val.startsWith('/') &&
-        val.endsWith('/')
+        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        isConfigRegex(val)
       ) {
-        try {
-          regEx(val.slice(1, -1));
-        } catch (err) {
-          errors.push({
-            depName: 'Configuration Error',
-            message: `Invalid regExp for ${currentPath}: \`${val}\``,
-          });
-        }
-      } else if (
-        key === 'allowedVersions' &&
-        is.string(val) &&
-        val.length > 2 &&
-        val.startsWith('!/') &&
-        val.endsWith('/')
-      ) {
-        try {
-          regEx(val.slice(2, -1));
-        } catch (err) {
+        if (!configRegexPredicate(val)) {
           errors.push({
             depName: 'Configuration Error',
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
@@ -183,35 +194,42 @@ export async function validateConfig(
             if (key === 'extends') {
               const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
-                if (is.string(subval) && tzRe.test(subval)) {
-                  const [, timezone] = tzRe.exec(subval);
-                  const [validTimezone, errorMessage] = hasValidTimezone(
-                    timezone
-                  );
-                  if (!validTimezone) {
-                    errors.push({
-                      depName: 'Configuration Error',
-                      message: `${currentPath}: ${errorMessage}`,
-                    });
+                if (is.string(subval)) {
+                  if (tzRe.test(subval)) {
+                    const [, timezone] = tzRe.exec(subval);
+                    const [validTimezone, errorMessage] = hasValidTimezone(
+                      timezone
+                    );
+                    if (!validTimezone) {
+                      errors.push({
+                        depName: 'Configuration Error',
+                        message: `${currentPath}: ${errorMessage}`,
+                      });
+                    }
                   }
+                } else {
+                  errors.push({
+                    depName: 'Configuration Warning',
+                    message: `${currentPath}: preset value is not a string`,
+                  });
                 }
               }
             }
 
             const selectors = [
-              'paths',
-              'languages',
-              'baseBranchList',
-              'managers',
-              'datasources',
-              'depTypeList',
-              'packageNames',
-              'packagePatterns',
+              'matchPaths',
+              'matchLanguages',
+              'matchBaseBranches',
+              'matchManagers',
+              'matchDatasources',
+              'matchDepTypes',
+              'matchPackageNames',
+              'matchPackagePatterns',
               'excludePackageNames',
               'excludePackagePatterns',
-              'sourceUrlPrefixes',
-              'updateTypes',
               'matchCurrentVersion',
+              'matchSourceUrlPrefixes',
+              'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
               for (const packageRule of val) {
@@ -248,8 +266,10 @@ export async function validateConfig(
             }
             if (key === 'regexManagers') {
               const allowedKeys = [
+                'description',
                 'fileMatch',
                 'matchStrings',
+                'matchStringsStrategy',
                 'depNameTemplate',
                 'lookupNameTemplate',
                 'datasourceTemplate',
@@ -271,13 +291,10 @@ export async function validateConfig(
                       ', '
                     )}`,
                   });
-                } else if (
-                  !regexManager.matchStrings ||
-                  regexManager.matchStrings.length !== 1
-                ) {
+                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
                   errors.push({
                     depName: 'Configuration Error',
-                    message: `Regex Manager ${currentPath} must contain a matchStrings array of length one`,
+                    message: `Each Regex Manager must contain a fileMatch array`,
                   });
                 } else {
                   let validRegex = false;
@@ -317,7 +334,10 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
+            if (
+              key === 'matchPackagePatterns' ||
+              key === 'excludePackagePatterns'
+            ) {
               for (const pattern of val as string[]) {
                 if (pattern !== '*') {
                   try {
@@ -364,7 +384,8 @@ export async function validateConfig(
         } else if (
           type === 'object' &&
           currentPath !== 'compatibility' &&
-          currentPath !== 'constraints'
+          currentPath !== 'constraints' &&
+          currentPath !== 'force.constraints'
         ) {
           if (is.plainObject(val)) {
             if (key === 'aliases') {

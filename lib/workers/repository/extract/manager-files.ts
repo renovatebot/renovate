@@ -60,7 +60,6 @@ export async function getManagerPackageFiles(
         }
         packageFiles.push({
           packageFile,
-          manager,
           ...res,
         });
       }

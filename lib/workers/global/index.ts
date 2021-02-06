@@ -1,8 +1,9 @@
-import path from 'path';
 import is from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
+import upath from 'upath';
 import * as configParser from '../../config';
+import { GlobalConfig } from '../../config';
 import { getProblems, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
@@ -22,7 +23,7 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  repoConfig.localDir = path.join(
+  repoConfig.localDir = upath.join(
     repoConfig.baseDir,
     `./repos/${repoConfig.platform}/${repoConfig.repository}`
   );
@@ -43,8 +44,8 @@ function haveReachedLimits(): boolean {
   return false;
 }
 
-export async function start(): Promise<0 | 1> {
-  let config: RenovateConfig;
+export async function start(): Promise<number> {
+  let config: GlobalConfig;
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
@@ -72,6 +73,11 @@ export async function start(): Promise<0 | 1> {
       logger.fatal(err.message.substring(6));
     } else {
       logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
+    }
+    if (!config) {
+      // return early if we can't parse config options
+      logger.debug(`Missing config`);
+      return 2;
     }
   } finally {
     globalFinalize(config);

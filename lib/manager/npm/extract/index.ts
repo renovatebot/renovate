@@ -1,6 +1,7 @@
-import { dirname } from 'path';
 import is from '@sindresorhus/is';
+import { dirname } from 'upath';
 import validateNpmPackageName from 'validate-npm-package-name';
+import { getAdminConfig } from '../../../config/admin';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import * as datasourceNpm from '../../../datasource/npm';
@@ -19,7 +20,7 @@ import {
   PackageDependency,
   PackageFile,
 } from '../../common';
-import { NpmPackage, NpmPackageDependeny } from './common';
+import { NpmPackage, NpmPackageDependency } from './common';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -57,7 +58,7 @@ export async function extractPackageFile(
     const error = new Error(CONFIG_VALIDATION);
     error.configFile = fileName;
     error.validationError =
-      'Nested package.json must not contain renovate configuration. Please use `packageRules` with `paths` in your main config instead.';
+      'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
   }
   const packageJsonName = packageJson.name;
@@ -107,7 +108,7 @@ export async function extractPackageFile(
       npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
     }
     if (npmrc) {
-      if (npmrc.includes('=${') && !(global.trustLevel === 'high')) {
+      if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
         logger.debug('Discarding .npmrc file with variables');
         ignoreNpmrcFile = true;
         npmrc = undefined;
@@ -127,14 +128,18 @@ export async function extractPackageFile(
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
   let hasFileRefs = false;
-  let lernaJson: { packages: string[]; npmClient: string };
+  let lernaJson: {
+    packages: string[];
+    npmClient: string;
+    useWorkspaces?: boolean;
+  };
   try {
     const lernaJsonFileName = getSiblingFileName(fileName, 'lerna.json');
     lernaJson = JSON.parse(await readLocalFile(lernaJsonFileName, 'utf8'));
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');
   }
-  if (lernaJson) {
+  if (lernaJson && !lernaJson.useWorkspaces) {
     lernaDir = dirname(fileName);
     lernaPackages = lernaJson.packages;
     lernaClient =
@@ -186,6 +191,10 @@ export async function extractPackageFile(
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'pnpm';
         constraints.pnpm = dep.currentValue;
+      } else if (depName === 'vscode') {
+        dep.datasource = datasourceGithubTags.id;
+        dep.lookupName = 'microsoft/vscode';
+        constraints.vscode = dep.currentValue;
       } else {
         dep.skipReason = SkipReason.UnknownEngines;
       }
@@ -295,7 +304,7 @@ export async function extractPackageFile(
     if (packageJson[depType]) {
       try {
         for (const [key, val] of Object.entries(
-          packageJson[depType] as NpmPackageDependeny
+          packageJson[depType] as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
           const dep: PackageDependency = {

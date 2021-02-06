@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/onboarding/pr/pr-list getPrList() handles emptyu 1`] = `
+exports[`workers/repository/onboarding/pr/pr-list getPrList() handles empty 1`] = `
 "
 ### What to Expect
 

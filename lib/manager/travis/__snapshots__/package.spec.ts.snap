@@ -4,8 +4,8 @@ exports[`lib/manager/travis/package getPackageUpdates detects pinning 1`] = `
 Array [
   Object {
     "isRange": true,
-    "newMajor": 12,
-    "newValue": "10.0.1,12.3.0",
+    "newMajor": 14,
+    "newValue": "10.0.1,12.3.0,null",
     "sourceUrl": "https://github.com/nodejs/node",
   },
 ]
@@ -15,8 +15,8 @@ exports[`lib/manager/travis/package getPackageUpdates returns result if needing 
 Array [
   Object {
     "isRange": true,
-    "newMajor": 12,
-    "newValue": "10,12",
+    "newMajor": 14,
+    "newValue": "10,12,14",
     "sourceUrl": "https://github.com/nodejs/node",
   },
 ]

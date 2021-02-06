@@ -1,5 +1,5 @@
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { dirname, join } from 'path';
+import { dirname, join } from 'upath';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import {
@@ -20,8 +20,7 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
-  dockerImagePrefix: null,
-  dockerUser: null,
+  customEnvVariables: null,
   localDir: null,
   cacheDir: null,
 };
@@ -61,14 +60,11 @@ function createChildEnv(
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
 
-  const childEnv =
-    env || extraEnv
-      ? {
-          ...extraEnv,
-          ...getChildProcessEnv(extraEnvKeys),
-          ...env,
-        }
-      : getChildProcessEnv();
+  const childEnv = {
+    ...extraEnv,
+    ...getChildProcessEnv(extraEnvKeys),
+    ...env,
+  };
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {
@@ -97,7 +93,8 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker, cwdFile } = opts;
+  const { env, docker, cwdFile } = opts;
+  const extraEnv = { ...opts.extraEnv, ...execConfig.customEnvVariables };
   let cwd;
   // istanbul ignore if
   if (cwdFile) {

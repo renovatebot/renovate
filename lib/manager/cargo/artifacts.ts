@@ -2,7 +2,7 @@ import { quote } from 'shlex';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
-  getSiblingFileName,
+  findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
@@ -27,7 +27,7 @@ async function cargoUpdate(
   } catch (err) /* istanbul ignore next */ {
     // Two different versions of one dependency can be present in the same
     // crate, and when that happens an attempt to update it with --package ${dep}
-    // key results in cargo exiting with error code `101` and an error mssage:
+    // key results in cargo exiting with error code `101` and an error message:
     // "error: There are multiple `${dep}` packages in your project".
     //
     // If exception `err` was caused by this, we execute `updateAll` function
@@ -64,8 +64,16 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(packageFileName, 'Cargo.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName);
+  // For standalone package crates, the `Cargo.lock` will be in the same
+  // directory as `Cargo.toml` (ie. a sibling). For cargo workspaces, it
+  // will be further up.
+  const lockFileName = await findLocalSiblingOrParent(
+    packageFileName,
+    'Cargo.lock'
+  );
+  const existingLockFileContent = lockFileName
+    ? await readLocalFile(lockFileName)
+    : null;
   if (!existingLockFileContent) {
     logger.debug('No Cargo.lock found');
     return null;

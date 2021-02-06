@@ -13,13 +13,13 @@ describe('lib/versioning/hex', () => {
   });
   it('handles tilde greater than', () => {
     expect(
-      hexScheme.maxSatisfyingVersion(
+      hexScheme.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~> 4.0'
       )
     ).toBe('4.2.0');
     expect(
-      hexScheme.maxSatisfyingVersion(
+      hexScheme.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~> 4.0.0'
       )
@@ -128,7 +128,15 @@ describe('lib/versioning/hex', () => {
           fromVersion: '1.2.3',
           toVersion: '2.0.7',
         })
-      ).toEqual('~> 2');
+      ).toEqual('~> 2.0');
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '~> 1.2',
+          rangeStrategy: 'bump',
+          fromVersion: '1.2.3',
+          toVersion: '1.3.1',
+        })
+      ).toEqual('~> 1.3');
       expect(
         hexScheme.getNewValue({
           currentValue: '~> 1.2.0',

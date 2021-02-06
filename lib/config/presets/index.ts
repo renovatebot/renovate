@@ -6,11 +6,12 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
-import { RenovateConfig } from '../common';
+import { GlobalConfig, RenovateConfig } from '../common';
 import * as massage from '../massage';
 import * as migration from '../migration';
 import { mergeChildConfig } from '../utils';
 import { PresetApi } from './common';
+import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import * as internal from './internal';
@@ -21,6 +22,7 @@ const presetSources: Record<string, PresetApi> = {
   github,
   npm,
   gitlab,
+  gitea,
   local,
   internal,
 };
@@ -66,6 +68,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitlab>')) {
     presetSource = 'gitlab';
     str = str.substring('gitlab>'.length);
+  } else if (str.startsWith('gitea>')) {
+    presetSource = 'gitea';
+    str = str.substring('gitea>'.length);
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
@@ -92,9 +97,12 @@ export function parsePreset(input: string): ParsedPreset {
     'group',
     'helpers',
     'monorepo',
+    'npm',
     'packages',
     'preview',
+    'regexManagers',
     'schedule',
+    'workarounds',
   ];
   if (
     presetsPackages.some((presetPackage) => str.startsWith(`${presetPackage}:`))
@@ -164,9 +172,9 @@ export async function getPreset(
   }
   const packageListKeys = [
     'description',
-    'packageNames',
+    'matchPackageNames',
     'excludePackageNames',
-    'packagePatterns',
+    'matchPackagePatterns',
     'excludePackagePatterns',
   ];
   if (presetKeys.every((key) => packageListKeys.includes(key))) {
@@ -177,11 +185,11 @@ export async function getPreset(
 }
 
 export async function resolveConfigPresets(
-  inputConfig: RenovateConfig,
+  inputConfig: GlobalConfig,
   baseConfig?: RenovateConfig,
   ignorePresets?: string[],
   existingPresets: string[] = []
-): Promise<RenovateConfig> {
+): Promise<GlobalConfig> {
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets || []; // eslint-disable-line
   }
@@ -189,7 +197,7 @@ export async function resolveConfigPresets(
     { config: inputConfig, existingPresets },
     'resolveConfigPresets'
   );
-  let config: RenovateConfig = {};
+  let config: GlobalConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
@@ -207,7 +215,7 @@ export async function resolveConfigPresets(
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
         try {
-          fetchedPreset = await getPreset(preset, baseConfig);
+          fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if

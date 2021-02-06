@@ -31,7 +31,7 @@ exports[`lib/manager/bazel/extract extractPackageFile() extracts dependencies fr
 Array [
   Object {
     "currentDigest": "0356bef3fbbabec5f0e196ecfacdeb6db62d48c0",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "subpar",
     "depType": "http_archive",
     "lookupName": "google/subpar",
@@ -48,7 +48,7 @@ Array [
   },
   Object {
     "currentValue": "0.6.0",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "bazel_skylib",
     "depType": "http_archive",
     "lookupName": "bazelbuild/bazel-skylib",
@@ -61,6 +61,75 @@ Array [
         )",
     },
     "repo": "bazelbuild/bazel-skylib",
+  },
+]
+`;
+
+exports[`lib/manager/bazel/extract extractPackageFile() extracts github tags 1`] = `
+Array [
+  Object {
+    "currentValue": "6.3.0",
+    "datasource": "github-tags",
+    "depName": "GBDeviceInfo",
+    "depType": "http_archive",
+    "lookupName": "lmirosevic/GBDeviceInfo",
+    "managerData": Object {
+      "def": "http_archive(
+    name = \\"GBDeviceInfo\\",
+    url = \\"https://github.com/lmirosevic/GBDeviceInfo/archive/6.3.0.tar.gz\\",
+    sha256 = \\"d7666275dff039407ea467c3083b83e24934101777c8b55b6b1b3b7e9a9e220b\\",
+    strip_prefix = \\"GBDeviceInfo-6.3.0/GBDeviceInfo\\"
+)",
+    },
+    "repo": "lmirosevic/GBDeviceInfo",
+  },
+  Object {
+    "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
+    "datasource": "github-tags",
+    "depName": "com_github_nelhage_rules_boost",
+    "depType": "http_archive",
+    "lookupName": "nelhage/rules_boost",
+    "managerData": Object {
+      "def": "http_archive(
+    name = \\"com_github_nelhage_rules_boost\\",
+    url = \\"https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.tar.gz\\",
+    sha256 = \\"3651f5dda0f7296e4cecafacc7f9d1f274be0fd64e30bebd74e28ffba28fe77f\\",
+    strip_prefix = \\"rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3\\",
+)",
+    },
+    "repo": "nelhage/rules_boost",
+  },
+  Object {
+    "currentValue": "6.3.0",
+    "datasource": "github-tags",
+    "depName": "GBDeviceInfo-zip",
+    "depType": "http_archive",
+    "lookupName": "lmirosevic/GBDeviceInfo",
+    "managerData": Object {
+      "def": "http_archive(
+    name = \\"GBDeviceInfo-zip\\",
+    url = \\"https://github.com/lmirosevic/GBDeviceInfo/archive/6.3.0.zip\\",
+    sha256 = \\"4ef4320c4880fd64cfb7f42132f4b02fa626bccf1ba3e1a71dfbfcb50735f141\\",
+    strip_prefix = \\"GBDeviceInfo-6.3.0/GBDeviceInfo\\"
+)",
+    },
+    "repo": "lmirosevic/GBDeviceInfo",
+  },
+  Object {
+    "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
+    "datasource": "github-tags",
+    "depName": "com_github_nelhage_rules_boost-zip",
+    "depType": "http_archive",
+    "lookupName": "nelhage/rules_boost",
+    "managerData": Object {
+      "def": "http_archive(
+    name = \\"com_github_nelhage_rules_boost-zip\\",
+    url = \\"https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.zip\\",
+    sha256 = \\"de8aac034cabe4a9ba5f7a33b9523862bf76c245a6c554c0e737f591bb7c7aeb\\",
+    strip_prefix = \\"rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3\\",
+)",
+    },
+    "repo": "nelhage/rules_boost",
   },
 ]
 `;
@@ -90,7 +159,7 @@ Array [
   },
   Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_archive",
     "lookupName": "GoogleContainerTools/distroless",
@@ -106,7 +175,7 @@ Array [
   },
   Object {
     "currentDigest": "d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "bazel_toolchains",
     "depType": "http_archive",
     "lookupName": "bazelbuild/bazel-toolchains",
@@ -140,7 +209,7 @@ Array [
   },
   Object {
     "currentValue": "0.5.0",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "bazel_skylib",
     "depType": "http_archive",
     "lookupName": "bazelbuild/bazel-skylib",
@@ -159,7 +228,7 @@ Array [
   },
   Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_archive",
     "lookupName": "GoogleContainerTools/distroless",
@@ -175,7 +244,7 @@ Array [
   },
   Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_file",
     "lookupName": "GoogleContainerTools/distroless",

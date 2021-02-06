@@ -119,7 +119,7 @@ export async function getRepos(): Promise<string[]> {
   try {
     const res = await githubApi.getJson<{ full_name: string }[]>(
       'user/repos?per_page=100',
-      { paginate: true }
+      { paginate: 'all' }
     );
     return res.body.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
@@ -168,10 +168,12 @@ export async function initRepo({
   forkToken,
   localDir,
   renovateUsername,
+  cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository } as any;
+  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -246,7 +248,8 @@ export async function initRepo({
     logger.debug('Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
-      err.message === REPOSITORY_RENAMED
+      err.message === REPOSITORY_RENAMED ||
+      err.message === REPOSITORY_NOT_FOUND
     ) {
       throw err;
     }
@@ -297,14 +300,48 @@ export async function initRepo({
         )
       ).body.map((r) => r.full_name);
     try {
-      config.repository = (
-        await githubApi.postJson<{ full_name: string }>(
-          `repos/${repository}/forks`,
+      const forkedRepo = await githubApi.postJson<{
+        full_name: string;
+        default_branch: string;
+      }>(`repos/${repository}/forks`, {
+        token: forkToken || opts.token,
+      });
+      config.repository = forkedRepo.body.full_name;
+      const forkDefaultBranch = forkedRepo.body.default_branch;
+      if (forkDefaultBranch !== config.defaultBranch) {
+        const body = {
+          ref: `refs/heads/${config.defaultBranch}`,
+          sha: repo.defaultBranchRef.target.oid,
+        };
+        logger.debug(
           {
+            defaultBranch: config.defaultBranch,
+            forkDefaultBranch,
+            body,
+          },
+          'Fork has different default branch to parent, attempting to create branch'
+        );
+        try {
+          await githubApi.postJson(`repos/${config.repository}/git/refs`, {
+            body,
             token: forkToken || opts.token,
-          }
-        )
-      ).body.full_name;
+          });
+          logger.debug('Created new default branch in fork');
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ err }, 'Could not create parent defaultBranch in fork');
+        }
+        logger.debug(
+          `Setting ${config.defaultBranch} as default branch for ${config.repository}`
+        );
+        try {
+          await githubApi.patchJson(`repos/${config.repository}`, {
+            body: { default_branch: config.defaultBranch },
+          });
+          logger.debug('Successfully changed default branch for fork');
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ err }, 'Could not set default branch');
+        }
+      }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
@@ -314,7 +351,7 @@ export async function initRepo({
         { repository_fork: config.repository },
         'Found existing fork'
       );
-      // This is a lovely "hack" by GitHub that lets us force update our fork's master
+      // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
       // with the base commit from the parent repository
       try {
         logger.debug(
@@ -430,7 +467,11 @@ async function getClosedPrs(): Promise<PrList> {
       query = `
       query {
         repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(states: [CLOSED, MERGED], orderBy: {field: UPDATED_AT, direction: DESC}) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
             nodes {
               number
               state
@@ -449,10 +490,7 @@ async function getClosedPrs(): Promise<PrList> {
       `;
       const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
         query,
-        'pullRequests',
-        {
-          paginate: false,
-        }
+        'pullRequests'
       );
       const prNumbers: number[] = [];
       // istanbul ignore if
@@ -484,13 +522,7 @@ async function getClosedPrs(): Promise<PrList> {
 }
 
 async function getOpenPrs(): Promise<PrList> {
-  // istanbul ignore if
-  if (config.isGhe) {
-    logger.debug(
-      'Skipping unsupported graphql PullRequests.mergeStateStatus query on GHE'
-    );
-    return {};
-  }
+  // The graphql query is supported in the current oldest GHE version 2.19
   if (!config.openPrList) {
     config.openPrList = {};
     let query;
@@ -499,7 +531,11 @@ async function getOpenPrs(): Promise<PrList> {
       query = `
       query {
         repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(states: [OPEN], orderBy: {field: UPDATED_AT, direction: DESC}) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
             nodes {
               number
               headRefName
@@ -553,7 +589,6 @@ async function getOpenPrs(): Promise<PrList> {
         query,
         'pullRequests',
         {
-          paginate: false,
           acceptHeader: 'application/vnd.github.merge-info-preview+json',
         }
       );
@@ -572,7 +607,7 @@ async function getOpenPrs(): Promise<PrList> {
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN'];
+        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS'];
         const hasNegativeReview = pr.reviews?.nodes?.length > 0;
         // istanbul ignore if
         if (hasNegativeReview) {
@@ -689,14 +724,14 @@ export async function getPrList(): Promise<Pr[]> {
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = prList
-      .filter((pr) => {
-        return (
+      .filter(
+        (pr) =>
           config.forkMode ||
+          config.ignorePrAuthor ||
           (pr?.user?.login && config?.renovateUsername
             ? pr.user.login === config.renovateUsername
             : true)
-        );
-      })
+      )
       .map(
         (pr) =>
           ({
@@ -795,44 +830,43 @@ export async function getBranchStatus(
     'branch status check result'
   );
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
-  if (!config.isGhe) {
-    try {
-      const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
-        branchName
-      )}/check-runs`;
-      const opts = {
-        headers: {
-          accept: 'application/vnd.github.antiope-preview+json',
-        },
-      };
-      const checkRunsRaw = (
-        await githubApi.getJson<{
-          check_runs: { name: string; status: string; conclusion: string }[];
-        }>(checkRunsUrl, opts)
-      ).body;
-      if (checkRunsRaw.check_runs?.length) {
-        checkRuns = checkRunsRaw.check_runs.map((run) => ({
-          name: run.name,
-          status: run.status,
-          conclusion: run.conclusion,
-        }));
-        logger.debug({ checkRuns }, 'check runs result');
-      } else {
-        // istanbul ignore next
-        logger.debug({ result: checkRunsRaw }, 'No check runs found');
-      }
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
-      if (
-        err.statusCode === 403 ||
-        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
-      ) {
-        logger.debug('No permission to view check runs');
-      } else {
-        logger.warn({ err }, 'Error retrieving check runs');
-      }
+  // API is supported in oldest available GHE version 2.19
+  try {
+    const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
+      branchName
+    )}/check-runs`;
+    const opts = {
+      headers: {
+        accept: 'application/vnd.github.antiope-preview+json',
+      },
+    };
+    const checkRunsRaw = (
+      await githubApi.getJson<{
+        check_runs: { name: string; status: string; conclusion: string }[];
+      }>(checkRunsUrl, opts)
+    ).body;
+    if (checkRunsRaw.check_runs?.length) {
+      checkRuns = checkRunsRaw.check_runs.map((run) => ({
+        name: run.name,
+        status: run.status,
+        conclusion: run.conclusion,
+      }));
+      logger.debug({ checkRuns }, 'check runs result');
+    } else {
+      // istanbul ignore next
+      logger.debug({ result: checkRunsRaw }, 'No check runs found');
+    }
+  } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    if (
+      err.statusCode === 403 ||
+      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
+    ) {
+      logger.debug('No permission to view check runs');
+    } else {
+      logger.warn({ err }, 'Error retrieving check runs');
     }
   }
   if (checkRuns.length === 0) {
@@ -1111,7 +1145,7 @@ export async function ensureIssue({
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
+  logger.trace(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1243,7 +1277,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     return comments;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      logger.debug('404 respose when retrieving comments');
+      logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;

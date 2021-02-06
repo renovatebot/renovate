@@ -1,5 +1,6 @@
 import hasha from 'hasha';
 import { git, mocked } from '../../../../test/util';
+import { PackageFile } from '../../../manager/common';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
 import { extract, lookup, update } from './extract-update';
@@ -46,7 +47,7 @@ describe('workers/repository/process/extract-update', () => {
       expect(packageFiles).toMatchSnapshot();
     });
     it('uses repository cache', async () => {
-      const packageFiles = [];
+      const packageFiles: Record<string, PackageFile[]> = {};
       const config = {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],

@@ -145,7 +145,7 @@ Array [
 ]
 `;
 
-exports[`manager/bazel/update updateDependency updates container_pull deptype and prserves comment 1`] = `
+exports[`manager/bazel/update updateDependency updates container_pull deptype and preserves comment 1`] = `
 "container_pull(
           name=\\"hasura\\",
           registry=\\"index.docker.io\\",

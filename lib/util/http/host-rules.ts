@@ -14,13 +14,13 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
     }) || /* istanbul ignore next: can only happen in tests */ {};
   const { username, password, token, enabled } = foundRules;
   if (options.headers?.authorization || options.password || options.token) {
-    logger.trace(`Authorization already set for host:  ${options.hostname}`);
-  } else if (password) {
-    logger.trace(`Applying Basic authentication for host ${options.hostname}`);
+    logger.trace({ url }, `Authorization already set`);
+  } else if (password !== undefined) {
+    logger.trace({ url }, `Applying Basic authentication`);
     options.username = username;
     options.password = password;
   } else if (token) {
-    logger.trace(`Applying Bearer authentication for host ${options.hostname}`);
+    logger.trace({ url }, `Applying Bearer authentication`);
     options.token = token;
   } else if (enabled === false) {
     options.enabled = false;
@@ -36,4 +36,12 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
     options.http2 = true;
   }
   return options;
+}
+
+export function getRequestLimit(url: string): number | null {
+  const hostRule = hostRules.find({
+    url,
+  });
+  const limit = hostRule.concurrentRequestLimit;
+  return typeof limit === 'number' && limit > 0 ? limit : null;
 }

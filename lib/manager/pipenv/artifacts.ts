@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -41,6 +42,33 @@ function getPythonConstraint(
   return undefined;
 }
 
+function getPipenvConstraint(
+  existingLockFileContent: string,
+  config: UpdateArtifactsConfig
+): string | null {
+  const { constraints = {} } = config;
+  const { pipenv } = constraints;
+
+  if (pipenv) {
+    logger.debug('Using pipenv constraint from config');
+    return pipenv;
+  }
+  try {
+    const pipfileLock = JSON.parse(existingLockFileContent);
+    if (pipfileLock?.default?.pipenv?.version) {
+      const pipenvVersion: string = pipfileLock.default.pipenv.version;
+      return pipenvVersion;
+    }
+    if (pipfileLock?.develop?.pipenv?.version) {
+      const pipenvVersion: string = pipfileLock.develop.pipenv.version;
+      return pipenvVersion;
+    }
+  } catch (err) {
+    // Do nothing
+  }
+  return '';
+}
+
 export async function updateArtifacts({
   packageFileName: pipfileName,
   newPackageFileContent: newPipfileContent,
@@ -64,7 +92,12 @@ export async function updateArtifacts({
     }
     const cmd = 'pipenv lock';
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
+    const pipenvConstraint = getPipenvConstraint(
+      existingLockFileContent,
+      config
+    );
     const execOptions: ExecOptions = {
+      cwdFile: pipfileName,
       extraEnv: {
         PIPENV_CACHE_DIR: cacheDir,
       },
@@ -72,7 +105,9 @@ export async function updateArtifacts({
         image: 'renovate/python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: ['pip install --user pipenv'],
+        preCommands: [
+          `pip install --user ${quote(`pipenv${pipenvConstraint}`)}`,
+        ],
         volumes: [cacheDir],
       },
     };

@@ -26,6 +26,7 @@ function generateBranchUpgradeCache(
     toVersion,
     currentDigest,
     newDigest,
+    sourceUrl,
   } = upgrade;
   return {
     datasource,
@@ -36,6 +37,7 @@ function generateBranchUpgradeCache(
     toVersion,
     currentDigest,
     newDigest,
+    sourceUrl,
   };
 }
 
@@ -53,7 +55,14 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
       }
     }
     const automerge = !!branch.automerge;
-    const isModified = sha ? await isBranchModified(branchName) : false;
+    let isModified = false;
+    if (sha) {
+      try {
+        isModified = await isBranchModified(branchName);
+      } catch (err) /* istanbul ignore next */ {
+        // Do nothing
+      }
+    }
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];

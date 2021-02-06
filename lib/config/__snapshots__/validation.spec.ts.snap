@@ -13,6 +13,19 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) catches invalid matchCurrentVersion regex 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[1].matchCurrentVersion: \`/***$}{]][/\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].matchCurrentVersion: \`!/***$}{]][/\`",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) catches invalid templates 1`] = `
 Array [
   Object {
@@ -38,7 +51,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`packageRules[3].packagePatterns\` should be a list (Array)",
+    "message": "Configuration option \`packageRules[3].matchPackagePatterns\` should be a list (Array)",
   },
   Object {
     "depName": "Configuration Error",
@@ -66,7 +79,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageRules: Each packageRule must contain at least one selector (paths, languages, baseBranchList, managers, datasources, depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns, sourceUrlPrefixes, updateTypes, matchCurrentVersion). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "packageRules: Each packageRule must contain at least one selector (matchPaths, matchLanguages, matchBaseBranches, matchManagers, matchDatasources, matchDepTypes, matchPackageNames, matchPackagePatterns, excludePackageNames, excludePackagePatterns, matchCurrentVersion, matchSourceUrlPrefixes, matchUpdateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
   },
   Object {
     "depName": "Configuration Error",
@@ -79,7 +92,7 @@ exports[`config/validation validateConfig(config) errors for unsafe fileMatches 
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid regExp for docker.fileMatch: \`x?+\`",
+    "message": "Invalid regExp for dockerfile.fileMatch: \`x?+\`",
   },
   Object {
     "depName": "Configuration Error",
@@ -106,6 +119,24 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 1`] = `
+Array [
+  Object {
+    "depName": "Config error",
+    "message": "\\"fileMatch\\" may not be defined at the top level of a config and must instead be within a manager block",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 2`] = `
+Array [
+  Object {
+    "depName": "Config warning",
+    "message": "\\"fileMatch\\" must be configured in a manager block and not here: npm.gradle",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) errors if regexManager fields are missing 1`] = `
 Array [
   Object {
@@ -121,7 +152,7 @@ exports[`config/validation validateConfig(config) included managers of the wrong
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`packageRules[0].managers\` should be a list (Array)",
+    "message": "Configuration option \`packageRules[0].matchManagers\` should be a list (Array)",
   },
   Object {
     "depName": "Configuration Error",
@@ -160,11 +191,20 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "docker.minor.packageNames: packageNames should be inside a \`packageRule\` only",
+    "message": "docker.minor.matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageNames: packageNames should be inside a \`packageRule\` only",
+    "message": "matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) validates regEx for each fileMatch 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for regexManagers[0].fileMatch: \`***$}{]][\`",
   },
 ]
 `;

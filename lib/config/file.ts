@@ -1,15 +1,15 @@
-import path from 'path';
+import upath from 'upath';
 import { logger } from '../logger';
-import { RenovateConfig } from './common';
+import { GlobalConfig } from './common';
 import { migrateConfig } from './migration';
 
-export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
+export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config';
-  if (!path.isAbsolute(configFile)) {
+  if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
     logger.debug('Checking for config file in ' + configFile);
   }
-  let config: RenovateConfig = {};
+  let config: GlobalConfig = {};
   try {
     // eslint-disable-next-line global-require,import/no-dynamic-require
     config = require(configFile);

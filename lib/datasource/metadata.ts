@@ -50,9 +50,10 @@ const manualChangelogUrls = {
   },
   docker: {
     'gitlab/gitlab-ce':
-      'https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/CHANGELOG.md',
+      'https://gitlab.com/gitlab-org/gitlab-foss/-/blob/master/CHANGELOG.md',
     'gitlab/gitlab-runner':
       'https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md',
+    neo4j: 'https://neo4j.com/release-notes/',
   },
 };
 
@@ -65,10 +66,18 @@ const manualSourceUrls = {
       'https://github.com/hyper-expanse/library-release-workflows',
   },
   docker: {
+    'amd64/traefik': 'https://github.com/containous/traefik',
     'docker/compose': 'https://github.com/docker/compose',
+    'drone/drone': 'https://github.com/drone/drone',
+    'drone/drone-runner-docker':
+      'https://github.com/drone-runners/drone-runner-docker',
+    'drone/drone-runner-kube':
+      'https://github.com/drone-runners/drone-runner-kube',
+    'drone/drone-runner-ssh':
+      'https://github.com/drone-runners/drone-runner-ssh',
     'gcr.io/kaniko-project/executor':
       'https://github.com/GoogleContainerTools/kaniko',
-    'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',
+    'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/gitlab-foss',
     'gitlab/gitlab-runner': 'https://gitlab.com/gitlab-org/gitlab-runner',
     'hashicorp/terraform': 'https://github.com/hashicorp/terraform',
     node: 'https://github.com/nodejs/node',

@@ -1,13 +1,16 @@
-import { join } from 'path';
 import URL from 'url';
 import fs from 'fs-extra';
+import GitUrlParse from 'git-url-parse';
 import Git, {
   DiffResult as DiffResult_,
   ResetMode,
   SimpleGit,
   StatusResult as StatusResult_,
 } from 'simple-git';
+import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import {
+  CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
@@ -18,7 +21,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { writePrivateKey } from './private-key';
+import { configSigningKey, writePrivateKey } from './private-key';
 
 export * from './private-key';
 
@@ -39,6 +42,7 @@ interface StorageConfig {
   extraCloneOpts?: GitOptions;
   gitAuthorName?: string;
   gitAuthorEmail?: string;
+  cloneSubmodules?: boolean;
 }
 
 interface LocalConfig extends StorageConfig {
@@ -55,7 +59,7 @@ function checkForPlatformFailure(err: Error): void {
   if (process.env.NODE_ENV === 'test') {
     return;
   }
-  const platformFailureStrings = [
+  const externalHostFailureStrings = [
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
@@ -64,11 +68,34 @@ function checkForPlatformFailure(err: Error): void {
     'Could not write new index file',
     'Failed to connect to',
     'Connection timed out',
+    'malformed object name',
+    'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
+    'Could not resolve host',
   ];
-  for (const errorStr of platformFailureStrings) {
+  for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
       logger.debug({ err }, 'Converting git error to ExternalHostError');
       throw new ExternalHostError(err, 'git');
+    }
+  }
+
+  const configErrorStrings = [
+    [
+      'GitLab: Branch name does not follow the pattern',
+      "Cannot push because branch name does not follow project's push rules",
+    ],
+    [
+      'GitLab: Commit message does not follow the pattern',
+      "Cannot push because commit message does not follow project's push rules",
+    ],
+  ];
+  for (const [errorStr, validationError] of configErrorStrings) {
+    if (err.message.includes(errorStr)) {
+      logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationError = validationError;
+      error.validationMessage = err.message;
+      throw error;
     }
   }
 }
@@ -139,7 +166,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.additionalBranches = [];
   config.branchIsModified = {};
-  git = Git(config.localDir).silent(true);
+  git = Git(config.localDir);
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -188,18 +215,23 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
 }
 
 export async function getSubmodules(): Promise<string[]> {
-  return (
-    (await git.raw([
-      'config',
-      '--file',
-      '.gitmodules',
-      '--get-regexp',
-      'path',
-    ])) || ''
-  )
-    .trim()
-    .split(/[\n\s]/)
-    .filter((_e: string, i: number) => i % 2);
+  try {
+    return (
+      (await git.raw([
+        'config',
+        '--file',
+        '.gitmodules',
+        '--get-regexp',
+        'path',
+      ])) || ''
+    )
+      .trim()
+      .split(/[\n\s]/)
+      .filter((_e: string, i: number) => i % 2);
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error getting submodules');
+    return [];
+  }
 }
 
 export async function syncGit(): Promise<void> {
@@ -257,13 +289,15 @@ export async function syncGit(): Promise<void> {
     logger.debug({ durationMs }, 'git clone completed');
   }
   config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
-  const submodules = await getSubmodules();
-  for (const submodule of submodules) {
-    try {
-      logger.debug(`Cloning git submodule at ${submodule}`);
-      await git.submoduleUpdate(['--init', '--', submodule]);
-    } catch (err) {
-      logger.warn(`Unable to initialise git submodule at ${submodule}`);
+  if (config.cloneSubmodules) {
+    const submodules = await getSubmodules();
+    for (const submodule of submodules) {
+      try {
+        logger.debug(`Cloning git submodule at ${submodule}`);
+        await git.submoduleUpdate(['--init', submodule]);
+      } catch (err) {
+        logger.warn(`Unable to initialise git submodule at ${submodule}`);
+      }
     }
   }
   try {
@@ -362,7 +396,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'origin/' + branchName])
     ).trim();
-    await git.checkout([branchName, '-f']);
+    await git.checkout(['-f', branchName, '--']);
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
@@ -400,13 +434,18 @@ export function getBranchList(): string[] {
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
   await syncBranch(branchName);
-  const branches = await git.branch([
-    '--remotes',
-    '--verbose',
-    '--contains',
-    config.currentBranchSha,
-  ]);
-  return !branches.all.map(localName).includes(branchName);
+  try {
+    const branches = await git.branch([
+      '--remotes',
+      '--verbose',
+      '--contains',
+      config.currentBranchSha,
+    ]);
+    return !branches.all.map(localName).includes(branchName);
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    throw err;
+  }
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
@@ -495,9 +534,13 @@ export async function getBranchLastCommitTime(
 export async function getBranchFiles(branchName: string): Promise<string[]> {
   await syncBranch(branchName);
   try {
-    const diff = await git.diffSummary([branchName, config.currentBranch]);
+    const diff = await git.diffSummary([
+      `origin/${branchName}`,
+      `origin/${branchName}^`,
+    ]);
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'getBranchFiles error');
     checkForPlatformFailure(err);
     return null;
   }
@@ -559,9 +602,10 @@ export async function commitFiles({
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
-    await writePrivateKey(config.localDir);
+    await writePrivateKey();
     privateKeySet = true;
   }
+  await configSigningKey(config.localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
@@ -588,7 +632,7 @@ export async function commitFiles({
       }
     }
     // istanbul ignore if
-    if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
+    if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
       fileNames.unshift('-f');
     }
     if (fileNames.length) {
@@ -637,11 +681,15 @@ export async function commitFiles({
       )
     ) {
       logger.warn(
-        'App has not been granted permissios to update Workflows - aborting branch.'
+        'App has not been granted permissions to update Workflows - aborting branch.'
       );
       return null;
     }
-    logger.debug({ err }, 'Error commiting files');
+    if (err.message.includes('remote: error: cannot lock ref')) {
+      logger.error({ err }, 'Error committing files.');
+      return null;
+    }
+    logger.debug({ err }, 'Error committing files');
     throw new Error(REPOSITORY_CHANGED);
   }
 }
@@ -669,4 +717,10 @@ export function getUrl({
     host,
     pathname: repository + '.git',
   });
+}
+
+export function getHttpUrl(url: string, token?: string): string {
+  const parsedUrl = GitUrlParse(url);
+  parsedUrl.token = token;
+  return parsedUrl.toString('https');
 }

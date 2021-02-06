@@ -2,6 +2,7 @@ import url from 'url';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
+import { getAdminConfig } from '../../config/admin';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
 import {
   PLATFORM_TYPE_GITHUB,
@@ -16,12 +17,14 @@ import {
   ensureDir,
   ensureLocalDir,
   getSiblingFileName,
+  localPathExists,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { composerVersioningId, getConstraint } from './utils';
 
 interface UserPass {
   username: string;
@@ -110,7 +113,10 @@ export async function updateArtifacts({
     logger.debug('No composer.lock found');
     return null;
   }
-  await ensureLocalDir(getSiblingFileName(packageFileName, 'vendor'));
+
+  const vendorDir = getSiblingFileName(packageFileName, 'vendor');
+  const commitVendorFiles = await localPathExists(vendorDir);
+  await ensureLocalDir(vendorDir);
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     if (config.isLockFileMaintenance) {
@@ -125,6 +131,8 @@ export async function updateArtifacts({
       },
       docker: {
         image: 'renovate/composer',
+        tagConstraint: getConstraint(config),
+        tagScheme: composerVersioningId,
       },
     };
     const cmd = 'composer';
@@ -140,7 +148,7 @@ export async function updateArtifacts({
       args += ' --ignore-platform-reqs';
     }
     args += ' --no-ansi --no-interaction';
-    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+    if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');
@@ -150,7 +158,7 @@ export async function updateArtifacts({
       return null;
     }
     logger.debug('Returning updated composer.lock');
-    return [
+    const res: UpdateArtifactsResult[] = [
       {
         file: {
           name: lockFileName,
@@ -158,6 +166,32 @@ export async function updateArtifacts({
         },
       },
     ];
+
+    if (!commitVendorFiles) {
+      return res;
+    }
+
+    logger.debug(`Commiting vendor files in ${vendorDir}`);
+    for (const f of [...status.modified, ...status.not_added]) {
+      if (f.startsWith(vendorDir)) {
+        res.push({
+          file: {
+            name: f,
+            contents: await readLocalFile(f),
+          },
+        });
+      }
+    }
+    for (const f of status.deleted) {
+      res.push({
+        file: {
+          name: '|delete|',
+          contents: f,
+        },
+      });
+    }
+
+    return res;
   } catch (err) {
     if (
       err.message?.includes(

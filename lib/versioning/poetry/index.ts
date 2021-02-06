@@ -24,7 +24,7 @@ function poetry2npm(input: string): string {
   return versions.join(' ');
 }
 
-// NOTE: This function is copied from cargo versionsing code.
+// NOTE: This function is copied from cargo versioning code.
 // Poetry uses commas (like in cargo) instead of spaces (like in npm)
 // for AND operation.
 function npm2poetry(input: string): string {
@@ -53,8 +53,8 @@ const isVersion = (input: string): string | boolean => npm.isVersion(input);
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, poetry2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions, poetry2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions, poetry2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions, poetry2npm(range));
@@ -125,7 +125,7 @@ export const api: VersioningApi = {
   isSingleVersion,
   isValid,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
 };
 export default api;

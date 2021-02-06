@@ -32,7 +32,7 @@ describe('workers/branch/parent', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);
     });
-    it('returns branchName if does not need rebaseing', async () => {
+    it('returns branchName if does not need rebasing', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,

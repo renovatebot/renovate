@@ -26,12 +26,14 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -61,12 +63,14 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -208,6 +212,7 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
+      "groupName": "versionExample for org.example",
       "lookupName": "org.example:grault",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -231,9 +236,25 @@ Object {
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+      ],
+    },
+    Object {
+      "currentValue": "(,8.4.0]",
+      "datasource": "sbt-package",
+      "depName": "org.example:fred",
+      "lookupName": "org.example:fred",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
       ],
     },
   ],
+  "packageFileVersion": "1.0",
 }
 `;
 
@@ -345,6 +366,7 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
+      "groupName": "versionExample for org.example",
       "lookupName": "org.example:grault",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -368,9 +390,11 @@ Object {
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
     },
   ],
+  "packageFileVersion": "3.2.1",
 }
 `;
 
@@ -387,6 +411,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -413,6 +438,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -433,11 +459,14 @@ Object {
       "datasource": "sbt-plugin",
       "depName": "com.github.gseitz:sbt-release",
       "depType": "plugin",
+      "groupName": "sbtReleaseVersion for com.github.gseitz",
       "lookupName": "com.github.gseitz:sbt-release",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
     },
   ],
+  "packageFileVersion": "1.0.1",
 }
 `;

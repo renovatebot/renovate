@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
-import * as httpMock from '../../../../test/httpMock';
+import { DateTime } from 'luxon';
+import * as httpMock from '../../../../test/http-mock';
 import { getName } from '../../../../test/util';
 import { ChangeLogNotes } from './common';
 import {
@@ -7,10 +8,11 @@ import {
   getReleaseList,
   getReleaseNotes,
   getReleaseNotesMd,
+  releaseNotesCacheMinutes,
 } from './release-notes';
 
 const angularJsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/angular.js.md',
+  'lib/workers/pr/__fixtures__/angular-js.md',
   'utf8'
 );
 const jestChangelogMd = fs.readFileSync(
@@ -59,6 +61,24 @@ describe(getName(__filename), () => {
 
   afterEach(() => {
     httpMock.reset();
+  });
+
+  describe('releaseNotesCacheMinutes', () => {
+    const now = DateTime.local();
+    it.each([
+      [now, 55],
+      [now.minus({ week: 2 }), 1435],
+      [now.minus({ year: 1 }), 14495],
+    ])('works with string date (%s, %i)', (date, minutes) => {
+      expect(releaseNotesCacheMinutes(date?.toISO())).toEqual(minutes);
+    });
+
+    it('handles date object', () => {
+      expect(releaseNotesCacheMinutes(new Date())).toEqual(55);
+    });
+    it.each([null, undefined, 'fake', 123])('handles invalid: %s', (date) => {
+      expect(releaseNotesCacheMinutes(date as never)).toEqual(55);
+    });
   });
 
   describe('addReleaseNotes()', () => {
@@ -146,7 +166,7 @@ describe(getName(__filename), () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it.each([[''], ['v'], ['other-']])(
+    it.each([[''], ['v'], ['other-'], ['other_v'], ['other@']])(
       'gets release notes with body',
       async (prefix) => {
         httpMock

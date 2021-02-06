@@ -122,7 +122,115 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python:latest bash -l -c \\"pip install --user pipenv && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python:latest bash -l -c \\"pip install --user pipenv && pipenv lock\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() uses pipenv version from Pipfile 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/python",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_python -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.8.13 && pipenv lock\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() uses pipenv version from Pipfile dev packages 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/python",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_python -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.8.13 && pipenv lock\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() uses pipenv version from config 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/python",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_python -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.1.1 && pipenv lock\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

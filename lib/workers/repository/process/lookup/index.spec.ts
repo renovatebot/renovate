@@ -12,6 +12,7 @@ import * as datasourceDocker from '../../../../datasource/docker';
 import { id as datasourceDockerId } from '../../../../datasource/docker';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { id as datasourceGitSubmodulesId } from '../../../../datasource/git-submodules';
+import * as datasourceGithubReleases from '../../../../datasource/github-releases';
 import { id as datasourceGithubTagsId } from '../../../../datasource/github-tags';
 import { id as datasourceNpmId } from '../../../../datasource/npm';
 import { id as datasourcePackagistId } from '../../../../datasource/packagist';
@@ -25,12 +26,16 @@ import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
+jest.mock('../../../../datasource/github-releases');
 
 qJson.latestVersion = '1.4.1';
 
 const docker = mocked(datasourceDocker) as any;
 docker.defaultRegistryUrls = ['https://index.docker.io'];
 const gitSubmodules = mocked(datasourceGitSubmodules);
+const githubReleases = mocked(datasourceGithubReleases);
+
+Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
 
 let config: lookup.LookupUpdateConfig;
 
@@ -158,7 +163,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
-    it('enforces allowedVersions with negativee regex', async () => {
+    it('enforces allowedVersions with negative regex', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '!/^1/';
       config.depName = 'q';
@@ -638,6 +643,26 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/vue').reply(200, vueJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
+    });
+    it('should ignore unstable versions from datasource', async () => {
+      config.currentValue = '1.4.4';
+      config.depName = 'some/action';
+      config.datasource = datasourceGithubReleases.id;
+      githubReleases.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.4.4',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '2.1.0',
+            isStable: false,
+          },
+        ],
+      });
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('should allow unstable versions if the ignoreUnstable=false', async () => {
       config.currentValue = '2.5.16';
@@ -1137,6 +1162,20 @@ describe('workers/repository/process/lookup', () => {
           },
         ],
       });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles sourceUrl packageRules with version restrictions', async () => {
+      config.currentValue = '0.9.99';
+      config.depName = 'q';
+      config.datasource = datasourceNpmId;
+      config.packageRules = [
+        {
+          matchSourceUrlPrefixes: ['https://github.com/kriskowal/q'],
+          allowedVersions: '< 1.4.0',
+        },
+      ];
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });

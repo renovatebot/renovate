@@ -7,10 +7,12 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
+import * as composerVersioning from '../../versioning/composer';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'packagist';
 export const defaultRegistryUrls = ['https://packagist.org'];
+export const defaultVersioning = composerVersioning.id;
 export const registryStrategy = 'hunt';
 
 const http = new Http(id);
@@ -204,10 +206,10 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult = memCache.get<Promise<AllPackages | null>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult as Promise<AllPackages | null>;
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
   const promisedRes = getAllPackages(regUrl);
   memCache.set(cacheKey, promisedRes);

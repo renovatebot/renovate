@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../config';
+import { getAdminConfig } from '../../../config/admin';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
@@ -10,9 +11,13 @@ import {
 } from '../../../util/git';
 
 async function cleanUpBranches(
-  { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
+  { pruneStaleBranches: enabled }: RenovateConfig,
   remainingBranches: string[]
 ): Promise<void> {
+  if (enabled === false) {
+    logger.debug('Branch/PR pruning is disabled - skipping');
+    return;
+  }
   for (const branchName of remainingBranches) {
     try {
       const pr = await platform.findPr({
@@ -20,34 +25,13 @@ async function cleanUpBranches(
         state: PrState.Open,
       });
       const branchIsModified = await isBranchModified(branchName);
-      if (pr && !branchIsModified) {
-        if (!pr.title.endsWith('- autoclosed')) {
-          if (dryRun) {
-            logger.info(
-              `DRY-RUN: Would update pr ${pr.number} to ${pr.title} - autoclosed`
-            );
-          } else if (enabled === false) {
-            logger.info(
-              `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
-            );
-          } else {
-            await platform.updatePr({
-              number: pr.number,
-              prTitle: `${pr.title} - autoclosed`,
-              state: PrState.Closed,
-            });
-          }
-        }
-      }
-
-      logger.debug({ branch: branchName }, `Deleting orphan branch`);
-      if (branchIsModified) {
-        if (pr) {
+      if (pr) {
+        if (branchIsModified) {
           logger.debug(
-            { prNo: pr?.number, prTitle: pr?.title },
-            'Skip PR autoclosing'
+            { prNo: pr.number, prTitle: pr.title },
+            'Branch is modified - skipping PR autoclosing'
           );
-          if (dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {
             await platform.ensureComment({
@@ -57,21 +41,40 @@ async function cleanUpBranches(
                 'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
           }
+        } else if (getAdminConfig().dryRun) {
+          logger.info(
+            { prNo: pr.number, prTitle: pr.title },
+            `DRY-RUN: Would autoclose PR`
+          );
+        } else {
+          logger.info(
+            { branchName, prNo: pr.number, prTitle: pr.title },
+            'Autoclosing PR'
+          );
+          let newPrTitle = pr.title;
+          if (!pr.title.endsWith('- autoclosed')) {
+            newPrTitle += ' - autoclosed';
+          }
+          await platform.updatePr({
+            number: pr.number,
+            prTitle: newPrTitle,
+            state: PrState.Closed,
+          });
+          await deleteBranch(branchName);
         }
-      } else if (dryRun) {
-        logger.info(`DRY-RUN: Would deleting orphan branch ${branchName}`);
-      } else if (enabled === false) {
-        logger.info(
-          `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
-        );
+      } else if (getAdminConfig().dryRun) {
+        logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
+        logger.info({ branch: branchName }, `Deleting orphan branch`);
         await deleteBranch(branchName);
       }
-      if (pr && !branchIsModified) {
-        logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
-      }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message !== REPOSITORY_CHANGED) {
+      if (err.message?.includes("bad revision 'origin/")) {
+        logger.debug(
+          { branchName },
+          'Branch not found on origin when attempting to prune'
+        );
+      } else if (err.message !== REPOSITORY_CHANGED) {
         logger.warn({ err, branch: branchName }, 'Error pruning branch');
       }
     }

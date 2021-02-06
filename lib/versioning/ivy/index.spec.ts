@@ -6,7 +6,7 @@ import {
 } from './parse';
 import ivy from '.';
 
-const { isVersion, matches } = ivy;
+const { getNewValue, isValid, isVersion, matches } = ivy;
 
 describe('versioning/ivy/match', () => {
   it('parses dynamic revisions', () => {
@@ -61,7 +61,32 @@ describe('versioning/ivy/match', () => {
 });
 
 describe('versioning/ivy/index', () => {
-  it('validates version string', () => {
+  it('isValid', () => {
+    expect(isValid('')).toBe(false);
+    expect(isValid('1.0.0')).toBe(true);
+    expect(isValid('0')).toBe(true);
+    expect(isValid('0.1-2-sp')).toBe(true);
+    expect(isValid('1-final')).toBe(true);
+    expect(isValid('v1.0.0')).toBe(true);
+    expect(isValid('x1.0.0')).toBe(true);
+    expect(isValid('2.1.1.RELEASE')).toBe(true);
+    expect(isValid('Greenwich.SR1')).toBe(true);
+    expect(isValid('.1')).toBe(false);
+    expect(isValid('1.')).toBe(false);
+    expect(isValid('-1')).toBe(false);
+    expect(isValid('1-')).toBe(false);
+
+    expect(isValid('latest')).toBe(true);
+    expect(isValid('latest.release')).toBe(true);
+    expect(isValid('latest.milestone')).toBe(true);
+    expect(isValid('latest.integration')).toBe(true);
+    expect(isValid('1.0.+')).toBe(true);
+    expect(isValid('1.0+')).toBe(false);
+    expect(isValid(']0,1[')).toBe(true);
+    expect(isValid('[0,1]')).toBe(true);
+    expect(isValid('[0,1),(1,2]')).toBe(false);
+  });
+  it('isVersion', () => {
     expect(isVersion('')).toBe(false);
     expect(isVersion('1.0.0')).toBe(true);
     expect(isVersion('0')).toBe(true);
@@ -76,17 +101,17 @@ describe('versioning/ivy/index', () => {
     expect(isVersion('-1')).toBe(false);
     expect(isVersion('1-')).toBe(false);
 
-    expect(isVersion('latest')).toBe(true);
-    expect(isVersion('latest.release')).toBe(true);
-    expect(isVersion('latest.milestone')).toBe(true);
-    expect(isVersion('latest.integration')).toBe(true);
-    expect(isVersion('1.0.+')).toBe(true);
+    expect(isVersion('latest')).toBe(false);
+    expect(isVersion('latest.release')).toBe(false);
+    expect(isVersion('latest.milestone')).toBe(false);
+    expect(isVersion('latest.integration')).toBe(false);
+    expect(isVersion('1.0.+')).toBe(false);
     expect(isVersion('1.0+')).toBe(false);
-    expect(isVersion(']0,1[')).toBe(true);
-    expect(isVersion('[0,1]')).toBe(true);
+    expect(isVersion(']0,1[')).toBe(false);
+    expect(isVersion('[0,1]')).toBe(false);
     expect(isVersion('[0,1),(1,2]')).toBe(false);
   });
-  it('matches against dynamic revisions', () => {
+  it('matches', () => {
     expect(matches('', 'latest')).toBe(false);
     expect(matches('0', '')).toBe(false);
     expect(matches('0', 'latest')).toBe(true);
@@ -125,5 +150,52 @@ describe('versioning/ivy/index', () => {
     expect(matches('1', '(,1)')).toBe(false);
     expect(matches('1', '[1,)')).toBe(true);
     expect(matches('1', '(1,)')).toBe(false);
+  });
+  it('api', () => {
+    expect(ivy.isGreaterThan('1.1', '1')).toBe(true);
+    expect(ivy.getSatisfyingVersion(['0', '1', '2'], '(,2)')).toBe('1');
+    expect(
+      ivy.getNewValue({
+        currentValue: '1',
+        rangeStrategy: 'auto',
+        fromVersion: '1',
+        toVersion: '1.1',
+      })
+    ).toBe('1.1');
+    expect(
+      ivy.getNewValue({
+        currentValue: '[1.2.3,]',
+        rangeStrategy: 'auto',
+        fromVersion: '1.2.3',
+        toVersion: '1.2.4',
+      })
+    ).toBe('[1.2.3,]');
+  });
+  it('pin', () => {
+    const sample = [
+      ['[1.2.3]', '1.2.3', '1.2.4'],
+      ['[1.0.0,1.2.3]', '1.0.0', '1.2.4'],
+      ['[1.0.0,1.2.23]', '1.0.0', '1.2.23'],
+      ['(,1.0]', '0.0.1', '2.0'],
+      ['],1.0]', '0.0.1', '2.0'],
+      ['(,1.0)', '0.1', '2.0'],
+      ['],1.0[', '2.0', '],2.0['],
+      ['[1.0,1.2],[1.3,1.5)', '1.0', '1.2.4'],
+      ['[1.0,1.2],[1.3,1.5[', '1.0', '1.2.4'],
+      ['[1.2.3,)', '1.2.3', '1.2.4'],
+      ['[1.2.3,[', '1.2.3', '1.2.4'],
+      ['latest.integration', '1.0', '2.0'],
+      ['latest', '1.0', '2.0'],
+    ];
+    sample.forEach(([currentValue, fromVersion, toVersion]) => {
+      expect(
+        getNewValue({
+          currentValue,
+          rangeStrategy: 'pin',
+          fromVersion,
+          toVersion,
+        })
+      ).toEqual(toVersion);
+    });
   });
 });

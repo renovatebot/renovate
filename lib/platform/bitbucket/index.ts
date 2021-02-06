@@ -116,6 +116,8 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
+  cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -125,6 +127,7 @@ export async function initRepo({
   config = {
     repository,
     username: opts.username,
+    ignorePrAuthor,
   } as utils.Config;
   let info: utils.RepoInfo;
   try {
@@ -172,6 +175,7 @@ export async function initRepo({
     url,
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
   const repoConfig: RepoResult = {
     defaultBranch: info.mainbranch,
@@ -182,7 +186,7 @@ export async function initRepo({
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
 export function getRepoForceRebase(): Promise<boolean> {
-  // BB doesnt have an option to flag staled branches
+  // BB doesn't have an option to flag staled branches
   return Promise.resolve(false);
 }
 
@@ -207,7 +211,7 @@ export async function getPrList(): Promise<Pr[]> {
     config.prList = prs
       .filter((pr) => {
         const prAuthorId = pr?.author?.uuid;
-        return renovateUserUuid && prAuthorId
+        return renovateUserUuid && prAuthorId && !config.ignorePrAuthor
           ? renovateUserUuid === prAuthorId
           : true;
       })

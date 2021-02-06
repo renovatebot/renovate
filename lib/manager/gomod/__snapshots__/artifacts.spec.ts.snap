@@ -84,7 +84,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -123,7 +123,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./... && go mod tidy && go mod tidy\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./... && go mod tidy && go mod tidy\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -162,7 +162,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./...\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./...\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

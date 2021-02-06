@@ -1,5 +1,5 @@
-import { basename, dirname, join, normalize } from 'path';
 import is from '@sindresorhus/is';
+import { basename, dirname, join, normalize } from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
@@ -59,13 +59,20 @@ function depFromNode(node: XmlElement): PackageDependency | null {
     const fileReplacePosition = versionNode.position;
     const datasource = datasourceMaven.id;
     const registryUrls = [MAVEN_REPO];
-    return {
+    const result: PackageDependency = {
       datasource,
       depName,
       currentValue,
       fileReplacePosition,
       registryUrls,
     };
+
+    const depType = node.valueWithPath('scope');
+    if (depType) {
+      result.depType = depType;
+    }
+
+    return result;
   }
   return null;
 }

@@ -94,6 +94,7 @@ export enum ProcessBranchResult {
   PrEdited = 'pr-edited',
   PrLimitReached = 'pr-limit-reached',
   CommitLimitReached = 'commit-limit-reached',
+  BranchLimitReached = 'branch-limit-reached',
   Rebase = 'rebase',
 }
 
@@ -104,7 +105,6 @@ export interface BranchConfig
   automergeComment?: string;
   automergeType?: string;
   baseBranch?: string;
-  canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;

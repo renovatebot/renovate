@@ -1,8 +1,8 @@
-import * as httpMock from '../../test/httpMock';
+import * as httpMock from '../../test/http-mock';
 import { partial } from '../../test/util';
 import * as hostRules from '../util/host-rules';
 import { Http } from '../util/http';
-import configSerializer from './err-serializer';
+import errSerializer from './err-serializer';
 import { sanitizeValue } from './utils';
 
 describe('logger/err-serializer', () => {
@@ -21,7 +21,7 @@ describe('logger/err-serializer', () => {
         },
       },
     });
-    expect(configSerializer(err)).toMatchSnapshot();
+    expect(errSerializer(err)).toMatchSnapshot();
   });
   it('handles missing fields', () => {
     const err = partial<Error & Record<string, unknown>>({
@@ -29,7 +29,7 @@ describe('logger/err-serializer', () => {
       stack: 'foo',
       body: 'some body',
     });
-    expect(configSerializer(err)).toMatchSnapshot();
+    expect(errSerializer(err)).toMatchSnapshot();
   });
 
   describe('got', () => {
@@ -58,14 +58,29 @@ describe('logger/err-serializer', () => {
       try {
         await new Http('any').postJson('https://:token@github.com/api');
       } catch (error) {
-        err = configSerializer(error);
+        err = errSerializer(error);
       }
 
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(err).toBeDefined();
-
       expect(err.response.body).toBeDefined();
       expect(err.options).toBeDefined();
+    });
+
+    it('sanitize http error', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post('/api')
+        .reply(412, { err: { message: 'failed' } });
+      let err: any;
+      try {
+        await new Http('any').postJson('https://:token@github.com/api');
+      } catch (error) {
+        err = error;
+      }
+
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(err).toBeDefined();
 
       // remove platform related props
       delete err.timings;

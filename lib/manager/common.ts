@@ -1,5 +1,9 @@
 import { ReleaseType } from 'semver';
-import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
+import {
+  MatchStringsStrategy,
+  UpdateType,
+  ValidationMessage,
+} from '../config/common';
 import { RangeStrategy, SkipReason } from '../types';
 import { File } from '../util/git';
 
@@ -7,7 +11,6 @@ export type Result<T> = T | Promise<T>;
 
 export interface ManagerConfig {
   binarySource?: string;
-  dockerUser?: string;
   localDir?: string;
   registryUrls?: string[];
 }
@@ -18,7 +21,6 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
-  global?: GlobalConfig;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
@@ -29,6 +31,7 @@ export interface ExtractConfig extends ManagerConfig {
 
 export interface CustomExtractConfig extends ExtractConfig {
   matchStrings: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
   depNameTemplate?: string;
   lookupNameTemplate?: string;
   datasourceTemplate?: string;
@@ -84,7 +87,6 @@ export interface PackageFile<T = Record<string, any>>
   ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
-  manager?: string;
   mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string;
@@ -96,6 +98,7 @@ export interface PackageFile<T = Record<string, any>>
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -173,6 +176,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   depIndex?: number;
   editFile?: string;
   separateMinorPatch?: boolean;
+  extractVersion?: string;
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -215,15 +219,25 @@ export interface UpdateArtifact {
   config: UpdateArtifactsConfig;
 }
 
-export interface UpdateDependencyConfig {
+export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
-  upgrade: Upgrade;
+  upgrade: Upgrade<T>;
+}
+
+export interface BumpPackageVersionResult {
+  bumpedContent: string | null;
 }
 
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
   language?: string;
   supportsLockFileMaintenance?: boolean;
+
+  bumpPackageVersion?(
+    content: string,
+    currentValue: string,
+    bumpVersion: ReleaseType | string
+  ): Result<BumpPackageVersionResult>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,

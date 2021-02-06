@@ -1,6 +1,7 @@
 import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
+import { getAdminConfig } from '../../../config/admin';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { PackageFile, PostUpdateConfig } from '../../common';
@@ -59,7 +60,7 @@ export async function generateLockFiles(
       const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
         installNpm += `@${quote(npmCompatibility)}`;
-        preCommands.push(installNpm);
+        preCommands.push(installNpm, 'hash -d npm');
       }
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
@@ -70,7 +71,10 @@ export async function generateLockFiles(
       return { error: false };
     }
     let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
-    if (global.trustLevel === 'high' && config.ignoreScripts !== false) {
+    if (
+      getAdminConfig().trustLevel === 'high' &&
+      config.ignoreScripts !== false
+    ) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
@@ -90,7 +94,7 @@ export async function generateLockFiles(
       },
     };
     // istanbul ignore if
-    if (global.trustLevel === 'high') {
+    if (getAdminConfig().trustLevel === 'high') {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
       execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;

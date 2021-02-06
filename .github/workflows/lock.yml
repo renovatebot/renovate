@@ -1,0 +1,20 @@
+name: lock-threads
+
+on:
+  # run daily
+  schedule:
+    - cron: '0 0 * * *'
+
+  # allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/lock-threads@v2.0.3
+        if: github.repository == 'renovatebot/renovate'
+        with:
+          github-token: ${{ github.token }}
+          issue-lock-inactive-days: 30
+          pr-lock-inactive-days: 30

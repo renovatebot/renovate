@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { safeLoad } from 'js-yaml';
 
 import { logger } from '../../logger';
@@ -46,7 +47,8 @@ export function extractPackageFile(
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
   try {
-    config = safeLoad(content, { json: true });
+    // TODO: fix me
+    config = safeLoad(content, { json: true }) as unknown;
     if (!config) {
       logger.debug(
         { fileName },
@@ -77,7 +79,7 @@ export function extractPackageFile(
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
     const deps = Object.values(services || {})
-      .filter((service) => service?.image && !service?.build)
+      .filter((service) => is.string(service?.image) && !service?.build)
       .map((service) => {
         const dep = getDep(service.image);
         const lineNumber = lineMapper.pluckLineNumber(service.image);

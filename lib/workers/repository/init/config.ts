@@ -1,13 +1,17 @@
-import path from 'path';
+import is from '@sindresorhus/is';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
+import upath from 'upath';
 
 import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import * as presets from '../../../config/presets';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  REPOSITORY_CHANGED,
+} from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -53,11 +57,16 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
+    if (!rawFileContents) {
+      logger.warn({ configFileName }, 'Null contents when reading config file');
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    // istanbul ignore if
     if (!rawFileContents.length) {
       rawFileContents = '{}';
     }
 
-    const fileType = path.extname(configFileName);
+    const fileType = upath.extname(configFileName);
 
     if (fileType === '.json5') {
       try {
@@ -141,11 +150,16 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   const repoConfig = await detectRepoFileConfig();
+  const configFileParsed = repoConfig?.configFileParsed || {};
+  if (is.nonEmptyArray(returnConfig.extends)) {
+    configFileParsed.extends = [
+      ...returnConfig.extends,
+      ...(configFileParsed.extends || []),
+    ];
+    delete returnConfig.extends;
+  }
   checkForRepoConfigError(repoConfig);
-  const migratedConfig = await migrateAndValidate(
-    config,
-    repoConfig?.configFileParsed || {}
-  );
+  const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.configFile = repoConfig.configFileName;
@@ -165,7 +179,7 @@ export async function mergeRenovateConfig(
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
   // Decrypt before resolving in case we need npm authentication for any presets
-  const decryptedConfig = decryptConfig(migratedConfig, config.privateKey);
+  const decryptedConfig = decryptConfig(migratedConfig);
   // istanbul ignore if
   if (decryptedConfig.npmrc) {
     logger.debug('Found npmrc in decrypted config - setting');
@@ -173,10 +187,8 @@ export async function mergeRenovateConfig(
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
   const resolvedConfig = decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig, config),
-    config.privateKey
+    await presets.resolveConfigPresets(decryptedConfig, config)
   );
-  delete resolvedConfig.privateKey;
   logger.trace({ config: resolvedConfig }, 'resolved config');
   // istanbul ignore if
   if (resolvedConfig.npmrc) {

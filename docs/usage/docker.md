@@ -8,90 +8,122 @@ description: Docker Package Manager Support in Renovate
 Renovate supports upgrading dependencies in various types of Docker definition files:
 
 - Docker's `Dockerfile` files
-- Docker Compose files
+- Docker Compose `docker-compose.yml` files
 - CircleCI config files
-- Kubernetes manifests
+- Kubernetes manifest files
 - Ansible configuration files
 
 ## How It Works
 
-1.  Renovate will search each repository for any files matching each manager's configured `fileMatch` pattern(s)
-2.  Files that match the pattern(s) are parsed and checked to see if they contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
-3.  If the image tag in use "looks" like a version (e.g. `node:12`, `node:12.1`, `node:12.1.0`, `node:12-onbuild`) then Renovate will look up the Docker registry to determine if any upgrades are available (e.g. `node:12.2.0`).
+1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
+1. Matching files are parsed, Renovate checks if the file(s) contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
+1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
 ## Preservation of Version Precision
 
-Renovate by default will preserve the precision of Docker images. For example if the existing image is `node:12.1` then Renovate would only propose upgrades to `node:12.2` or `node:12.3` and not to more specified versions like `node:12.2.0` or `node:12.3.0`. Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `node:12.2` to `node:12.2.0`, however it's a feature we'd like to implement one day.
+By default, Renovate preserves the precision level specified in the Docker images.
+For example, if the existing image is pinned at `myimage:1.1` then Renovate only proposes upgrades to `myimage:1.2` or `myimage:1.3`.
+This means that you will not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
+Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, however it's a feature we'd like to implement one day.
 
 ## Version compatibility
 
-Although suffixes in semver indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `12.2.0-alpine`. Renovate defaults to assuming suffixes indicate compatibility so will never _change_ it. e.g. `12.1.0-alpine` might get updated to `12.1.1-alpine` but never `12.1.1` or `12.1.1-stretch`.
+Although suffixes in SemVer indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `1.2.0-alpine`.
+By default Renovate assumes suffixes indicate compatibility, for this reason Renovate will not _change_ any suffixes.
+Renovate will update `1.2.0-alpine` to `1.2.1-alpine` but never updates to `1.2.1` or `1.2.1-stretch` as that would change the suffix.
 
-If this behaviour does not suit a particular package you have, Renovate allows you to customize the `versioning` in use. For example, if you have a Docker image `foo/bar` that sticks to semver versioning and you need Renovate to understand that suffixes indicate pre-releases versions and not compatibility, then you could configure this package rule:
+If this behavior does not suit a particular package you have, Renovate allows you to customize the `versioning` scheme it uses.
+For example, you have a Docker image `foo/bar` that sticks to SemVer versioning.
+This means that you need to tell Renovate that suffixes indicate pre-release versions, and not compatibility.
+
+You could then use this `packageRules` array, to tell Renovate to use `semver` versioning for the `foo/bar` package:
 
 ```json
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["foo/bar"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["foo/bar"],
       "versioning": "semver"
     }
   ]
 }
 ```
 
-Another example is the official `python` image, which follows `pep440` versioning. You can configure that with another package rule:
+Another example is the official `python` image, which follows `pep440` versioning.
+You can tell Renovate to use the `pep440` versioning scheme with this set of `packageRules`:
 
 ```json
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["python"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
       "versioning": "pep440"
     }
   ]
 }
 ```
 
-If traditional versioning doesn't work, consider using Renovate's built-in `loose` `versioning`. It essentially just does a best effort sort of versions, regardless of whether they contain letters or digits.
+If traditional versioning doesn't work, try Renovate's built-in `loose` `versioning`.
+Renovate will perform a best-effort sort of the versions, regardless of whether they contain letters or digits.
 
-Finally, if you use a Docker image that follows a versioning approach not captured by one of our existing versionings, and which `loose` sorts incorrectly, you could see if the `regex` `versioning` can work. It uses regex capture group syntax to let you specify which part of the version string is major, minor, patch, pre-release, or compatibility. See the docs for `versioning` for documentation/examples of `regex` versioning in action.
+If both the traditional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
+This approach uses regex capture group syntax to specify which part of the version string is major, minor, patch, pre-release, or compatibility.
+See the docs for `versioning` for documentation and examples of `regex` versioning in action.
 
 ## Digest Pinning
 
-Pinning your docker images to an exact digest is recommended for reasons of **immutability**. In short: pin to digests so every time you `pull`, you get the same content.
+We recommend that you pin your Docker images to an exact digest.
+By pinning to a digest you ensure your Docker builds are **immutable**: every time you do a `pull` you get the same content.
 
-If your experience with dependency versioning comes from a place like javascript/npm, you might be used to exact versions being immutable, e.g. if you specify a version like `2.0.1` then you and your colleagues will always get the exact same "code". What you may not expect is that Docker's tags are not immutable versions even if they look like a version. e.g. you probably expect that `node:8` and `node:8.9` will change over time, but you might incorrectly assume that `node:8.9.0` would never change. Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
+If you have experience with the way dependency versioning is handled in the JavaScript/npm ecosystem, you might be used to exact versions being immutable.
+e.g. if you specify a version like `2.0.1`, you and your colleagues always get the exact same "code".
 
-Using a docker digest as the image's primary identifier instead of docker tag will achieve immutability but as a human it's quite inconvenient to deal with strings like `FROM node@sha256:552348163f074034ae75643c01e0ba301af936a898d778bb4fc16062917d0430`. The good news is that, as a human you no longer need to manually update such digests once you have Renovate on the job.
+What you may not know is that Docker's tags are not immutable versions, even if they look like a version.
+e.g. you probably expect `myimage:1` and `myimage:1.2` to change over time, but you might incorrectly assume that `myimage:1.2.0` never changes.
+Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
-Also, to retain some human-friendliness, Renovate will actually retain the tag in the `FROM` line too, e.g. `FROM node:8@sha256:552348163f074034ae75643c01e0ba301af936a898d778bb4fc16062917d0430`. Read on to see how Renovate keeps it up-to-date.
+Using a Docker digest as the image's primary identifier instead of using a Docker tag will achieve immutability.
+It's not easy to work with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+Luckily Renovate can update the digests for you, so you don't have to.
+
+To keep things simple, Renovate retains the Docker tag in the `FROM` line, e.g. `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+Read on to see how Renovate updates Docker digests.
 
 ## Digest Updating
 
-If you have followed our advice to go from tags like `node:8` to `node:8@sha256:552348163f074034ae75643c01e0ba301af936a898d778bb4fc16062917d0430`, then you are likely to receive Renovate PRs whenever the `node:8` image is updated on Docker Hub.
+If you follow our advice to go from a simple tag like `node:14` to using a pinned digest `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will receive Renovate PRs whenever the `node:14` image is updated on Docker Hub.
 
-Previously this would have been "invisible" to you - one day you pull code that represents `node:8.9.0` and the next day you get `node:8.9.1`. But you can never be sure, especially as Docker caches. Perhaps some of your colleagues or worst still your build machine are stuck on an older version with a security vulnerability.
+Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.15.0` and the next day you get code that represents `node:14.15.1`.
+But you can never be sure, especially as Docker caches.
+Perhaps some of your colleagues or worse still your build machine are stuck on an older version with a security vulnerability.
 
-Instead, you will now receive these updates via Pull Requests, or perhaps committed directly to your repository if you enable branch automerge for convenience. This ensures everyone on the team gets the latest versions and is in sync.
+By pinning to a digest instead, you will receive these updates via Pull Requests, or even committed directly to your repository if you enable branch automerge for convenience.
+This ensures everyone on the team uses the latest versions and is in sync.
 
 ## Version Upgrading
 
-Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:8.9.0` to `node:8.9.1` or `node:8.9` to `node:8.10`. If your tags looks like a version, Renovate will upgrade it like a version.
+Renovate also supports _upgrading_ versions in Docker tags, e.g. from `myimage:1.2.0` to `myimage:1.2.1` or `myimage:1.2` to `myimage:1.3`.
+If a tag looks like a version, Renovate will upgrade it like a version.
 
-Thanks to this, you may wish to change the way you tag your image dependencies to be more specific, e.g. change from `node:8` to `node:8.9.1` so that every Renovate PR will be more human friendly, e.g. you can know that you are getting a PR because `node` upgraded from `8.9.1` to `8.9.2` and not because `8.9.1` somehow changed.
+We recommend you use the major.minor.patch tagging scheme e.g. change from `myimage:1` to `myimage:1.1.1`.
+This way it's easy to see what the Renovate PR is going to change.
+You can see the difference between a PR that upgrades `myimage` from `1.1.1` to `1.1.2`. and a PR that changes the contents of the version you already use (`1.1.1`).
 
-Currently, Renovate will upgrade minor/patch versions (e.g. from `8.9.0` to `8.9.1`) by default, but not upgrade major versions. If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
+Currently, Renovate will upgrade minor/patch versions (e.g. from `1.2.0` to `1.2.1`) by default, but not upgrade major versions.
+If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
 
-Renovate has a some docker-specific intelligence when it comes to versions. For example:
+Renovate has some Docker-specific intelligence when it comes to versions.
+For example:
 
 ## Configuring/Disabling
 
-If you wish to make changes that apply to all Docker managers, then add them to the `docker` config object. Note though that this is not foolproof, because some managers like `circleci` and `ansible` support multiple datasources so do not inherit from the `docker` config object.
+If you wish to make changes that apply to all Docker managers, then add them to the `docker` config object.
+This is not foolproof, because some managers like `circleci` and `ansible` support multiple datasources that do not inherit from the `docker` config object.
 
-If you wish to override Docker settings for one particular type of manager, use that manager's config object instead. For example. to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would add this:
+If you wish to override Docker settings for one particular type of manager, use that manager's config object instead.
+For example, to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would use this:
 
 ```json
   "docker-compose": {
@@ -103,11 +135,11 @@ If you wish to override Docker settings for one particular type of manager, use 
 
 The following configuration options are applicable to Docker:
 
-##### Disable all Docker Renovation
+### Disable all Docker Renovation
 
 Add `"docker:disable"` to your `extends` array.
 
-##### Disable Renovate for only certain Dockerfiles
+### Disable Renovate for only certain Dockerfiles
 
 Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 
@@ -118,21 +150,28 @@ Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 }
 ```
 
-##### Enable Docker major updates
+### Enable Docker major updates
 
 Add `"docker:enableMajor"` to your `extends` array.
 
-##### Disable digest pinning
+### Disable digest pinning
 
 Add `"default:pinDigestsDisabled"` to your `extends` array.
 
-##### Automerge digest updates
+### Automerge digest updates
 
-Add `"default:automergeDigest"` to your `extends` array. Also add `"default:automergeBranchPush"` if you wish for these to be committed directly to your base branch without raising a PR first.
+Add `"default:automergeDigest"` to your `extends` array.
+If you want Renovate to commit directly to your base branch without opening a PR first, add `"default:automergeBranchPush"` to the `extends` array.
 
-##### Registry authentication
+### Registry authentication
 
-Here is an example of configuring a default Docker username/password in `config.js`:
+There are many different registries, and many ways to authenticate to those registries.
+We will explain how to authenticate for the most common registries.
+
+#### DockerHub
+
+Here is an example of configuring a default Docker username/password in `config.js`.
+The Docker Hub password is stored in a process environment variable.
 
 ```js
 module.exports = {
@@ -140,13 +179,19 @@ module.exports = {
     {
       hostType: 'docker',
       username: '<your-username>',
-      password: '<your-password>',
+      password: process.env.DOCKER_HUB_PASSWORD,
     },
   ],
 };
 ```
 
-It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules). For example if you have some images you host yourself that are password protected and also some images you pull from docker hub without authentication then you can configure for a specific Docker host like this:
+You can add additional host rules, read the [hostrules documentation](https://docs.renovatebot.com/configuration-options/#hostrules) for more information.
+
+#### Self-hosted Docker registry
+
+Say you host some Docker images yourself, and use a password to access your self-hosted Docker images.
+In addition to self-hosting, you also pull images from Docker Hub, without a password.
+In this example you would configure a specific Docker host like this:
 
 ```js
 module.exports = {
@@ -155,10 +200,27 @@ module.exports = {
       hostType: 'docker',
       hostName: 'your.host.io',
       username: '<your-username>',
-      password: '<your-password>',
+      password: process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD,
     },
   ],
 };
 ```
 
-If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`);
+#### ChartMuseum
+
+Maybe you're running your own ChartMuseum server to host your private Helm Charts.
+This is how you connect to a private Helm repository:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      hostName: 'your.host.io',
+      username: '<your-username>',
+      password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
+    },
+  ],
+};
+```
+
+If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`).

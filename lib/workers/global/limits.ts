@@ -2,6 +2,8 @@ import { logger } from '../../logger';
 
 export enum Limit {
   Commits = 'Commits',
+  PullRequests = 'PullRequests',
+  Branches = 'Branches',
 }
 
 interface LimitValue {
@@ -15,15 +17,10 @@ export function resetAllLimits(): void {
   limits.clear();
 }
 
-export function setMaxLimit(key: Limit, max: unknown): void {
-  const maxVal = typeof max === 'number' && max > 0 ? max : null;
-  logger.debug(`${key} limit = ${maxVal}`);
-  const limit = limits.get(key);
-  limits.set(key, {
-    current: 0,
-    ...limit,
-    max: maxVal,
-  });
+export function setMaxLimit(key: Limit, val: unknown): void {
+  const max = typeof val === 'number' ? Math.max(0, val) : null;
+  limits.set(key, { current: 0, max });
+  logger.debug(`${key} limit = ${max}`);
 }
 
 export function incLimitedValue(key: Limit, incBy = 1): void {

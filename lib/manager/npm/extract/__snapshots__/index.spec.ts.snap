@@ -34,6 +34,7 @@ Object {
     "node": ">= 8.9.2",
     "npm": "^8.0.0",
     "pnpm": "^1.2.0",
+    "vscode": ">=1.49.3",
     "yarn": "disabled",
   },
   "deps": Array [
@@ -125,6 +126,14 @@ Object {
       "depType": "engines",
       "prettyDepType": "engine",
       "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": ">=1.49.3",
+      "datasource": "github-tags",
+      "depName": "vscode",
+      "depType": "engines",
+      "lookupName": "microsoft/vscode",
+      "prettyDepType": "engine",
     },
   ],
   "ignoreNpmrcFile": undefined,
@@ -1048,6 +1057,29 @@ Object {
   "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaDir": ".",
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageFileVersion": "0.0.8",
+  "packageJsonName": "@a/b",
+  "packageJsonType": "app",
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": Array [
+    "packages/*",
+  ],
+  "yarnrc": undefined,
+}
+`;
+
+exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
+Object {
+  "constraints": Object {},
+  "deps": Array [],
+  "ignoreNpmrcFile": undefined,
+  "lernaClient": undefined,
+  "lernaDir": undefined,
   "lernaPackages": undefined,
   "npmLock": undefined,
   "npmrc": undefined,

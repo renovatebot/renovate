@@ -23,20 +23,45 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            packageNames: ['foo'],
+            matchPackageNames: ['foo'],
             allowedVersions: '/^2/',
           },
           {
-            packageNames: ['bar'],
+            matchPackageNames: ['bar'],
             allowedVersions: '/***$}{]][/',
           },
           {
-            packageNames: ['baz'],
+            matchPackageNames: ['baz'],
             allowedVersions: '!/^2/',
           },
           {
-            packageNames: ['quack'],
+            matchPackageNames: ['quack'],
             allowedVersions: '!/***$}{]][/',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(2);
+      expect(errors).toMatchSnapshot();
+    });
+    it('catches invalid matchCurrentVersion regex', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            matchCurrentVersion: '/^2/',
+          },
+          {
+            matchPackageNames: ['bar'],
+            matchCurrentVersion: '/***$}{]][/',
+          },
+          {
+            matchPackageNames: ['baz'],
+            matchCurrentVersion: '!/^2/',
+          },
+          {
+            matchPackageNames: ['quack'],
+            matchCurrentVersion: '!/***$}{]][/',
           },
         ],
       };
@@ -51,7 +76,7 @@ describe('config/validation', () => {
         timezone: 'Asia/Singapore',
         packageRules: [
           {
-            packagePatterns: ['*'],
+            matchPackagePatterns: ['*'],
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
           },
         ],
@@ -71,7 +96,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            managers: ['foo'],
+            matchManagers: ['foo'],
           },
         ],
       };
@@ -86,7 +111,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            managers: 'string not an array',
+            matchManagers: 'string not an array',
           },
         ],
       };
@@ -117,7 +142,7 @@ describe('config/validation', () => {
           },
           'what?' as any,
           {
-            packagePatterns: 'abc ([a-z]+) ([a-z]+))',
+            matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
@@ -133,17 +158,17 @@ describe('config/validation', () => {
     });
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
-        packageNames: ['angular'],
+        matchPackageNames: ['angular'],
         meteor: {
           packageRules: [
             {
-              packageNames: ['meteor'],
+              matchPackageNames: ['meteor'],
             },
           ],
         },
         docker: {
           minor: {
-            packageNames: ['testPackage'],
+            matchPackageNames: ['testPackage'],
           },
         },
       };
@@ -157,7 +182,7 @@ describe('config/validation', () => {
     it('ignore packageRule nesting validation for presets', async () => {
       const config = {
         description: ['All angular.js packages'],
-        packageNames: [
+        matchPackageNames: [
           'angular',
           'angular-animate',
           'angular-scroll',
@@ -178,7 +203,7 @@ describe('config/validation', () => {
         npm: {
           fileMatch: ['abc ([a-z]+) ([a-z]+))'],
         },
-        docker: {
+        dockerfile: {
           fileMatch: ['x?+'],
         },
       };
@@ -192,7 +217,14 @@ describe('config/validation', () => {
 
     it('validates regEx for each fileMatch', async () => {
       const config = {
-        fileMatch: ['js', '***$}{]]['],
+        regexManagers: [
+          {
+            fileMatch: ['js', '***$}{]]['],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
@@ -200,6 +232,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
     });
     it('errors if no regexManager matchStrings', async () => {
       const config = {
@@ -212,6 +245,23 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('errors if no regexManager fileMatch', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
         true
       );
       expect(warnings).toHaveLength(0);
@@ -381,6 +431,45 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
+    });
+
+    it('errors if fileMatch has wrong parent', async () => {
+      const config = {
+        fileMatch: ['foo'],
+        npm: {
+          fileMatch: ['package\\.json'],
+          gradle: {
+            fileMatch: ['bar'],
+          },
+        },
+        regexManagers: [
+          {
+            fileMatch: ['build.gradle'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
+      expect(warnings).toMatchSnapshot();
+    });
+
+    it('validates preset values', async () => {
+      const config = {
+        extends: ['foo', 'bar', 42] as never,
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
     });
   });
 });

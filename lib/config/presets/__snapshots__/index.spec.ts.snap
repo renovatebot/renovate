@@ -11,7 +11,7 @@ Object {
     "packages:stylelint",
     "packages:tslint",
   ],
-  "packageNames": Array [
+  "matchPackageNames": Array [
     "remark-lint",
   ],
 }
@@ -79,6 +79,15 @@ Object {
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
   "rangeStrategy": "pin",
+}
+`;
+
+exports[`config/presets parsePreset parses gitea 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "default",
+  "presetSource": "gitea",
 }
 `;
 
@@ -315,10 +324,10 @@ Object {
 
 exports[`config/presets resolvePreset combines two package alls 1`] = `
 Object {
-  "packageNames": Array [
+  "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "packagePatterns": Array [
+  "matchPackagePatterns": Array [
     "^@typescript-eslint/",
     "^eslint",
     "^stylelint",
@@ -357,31 +366,31 @@ Object {
   },
   "packageRules": Array [
     Object {
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "*",
       ],
       "semanticCommitType": "chore",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "dependencies",
       ],
       "semanticCommitType": "fix",
     },
     Object {
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "*",
       ],
       "rangeStrategy": "replace",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "devDependencies",
       ],
       "rangeStrategy": "pin",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "peerDependencies",
       ],
       "rangeStrategy": "widen",
@@ -398,16 +407,15 @@ Object {
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "timezone": "Asia/Taipei",
-  "unpublishSafe": false,
 }
 `;
 
 exports[`config/presets resolvePreset resolves eslint 1`] = `
 Object {
-  "packageNames": Array [
+  "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "packagePatterns": Array [
+  "matchPackagePatterns": Array [
     "^@typescript-eslint/",
     "^eslint",
   ],
@@ -419,12 +427,12 @@ Object {
   "description": Array [
     "All lint-related packages",
   ],
-  "packageNames": Array [
+  "matchPackageNames": Array [
     "babel-eslint",
     "codelyzer",
     "remark-lint",
   ],
-  "packagePatterns": Array [
+  "matchPackagePatterns": Array [
     "^ember-template-lint",
     "^@typescript-eslint/",
     "^eslint",
@@ -445,12 +453,12 @@ Object {
       "description": Array [
         "All lint-related packages",
       ],
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "babel-eslint",
         "codelyzer",
         "remark-lint",
       ],
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "^ember-template-lint",
         "^@typescript-eslint/",
         "^eslint",
@@ -467,14 +475,22 @@ Object {
   "packageRules": Array [
     Object {
       "groupName": "eslint",
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "babel-eslint",
       ],
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "^@typescript-eslint/",
         "^eslint",
       ],
     },
+  ],
+}
+`;
+
+exports[`config/presets resolvePreset resolves self-hosted presets without baseConfig 1`] = `
+Object {
+  "labels": Array [
+    "self-hosted resolved",
   ],
 }
 `;

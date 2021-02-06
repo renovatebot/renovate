@@ -4,6 +4,8 @@ import upath from 'upath';
 
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
+import { getHttpUrl } from '../../util/git';
+import * as hostRules from '../../util/host-rules';
 import { ManagerConfig, PackageFile } from '../common';
 
 type GitModule = {
@@ -106,16 +108,22 @@ export default async function extractPackageFile(
         try {
           const [currentValue] = (await git.subModule(['status', path]))
             .trim()
-            .split(/[+\s]/);
+            .replace(/^[-+]/, '')
+            .split(/\s/);
           const subModuleUrl = await getUrl(git, gitModulesPath, name);
+          // hostRules only understands HTTP URLs
+          // Find HTTP URL, then apply token
+          let httpSubModuleUrl = getHttpUrl(subModuleUrl);
+          const hostRule = hostRules.find({ url: httpSubModuleUrl });
+          httpSubModuleUrl = getHttpUrl(subModuleUrl, hostRule?.token);
           const submoduleBranch = await getBranch(
             gitModulesPath,
             name,
-            subModuleUrl
+            httpSubModuleUrl
           );
           return {
             depName: path,
-            registryUrls: [subModuleUrl, submoduleBranch],
+            registryUrls: [httpSubModuleUrl, submoduleBranch],
             currentValue,
             currentDigest: currentValue,
           };

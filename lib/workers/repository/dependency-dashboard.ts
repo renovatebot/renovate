@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
 import { RenovateConfig } from '../../config';
+import { getAdminConfig } from '../../config/admin';
 import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
@@ -66,12 +67,17 @@ export async function ensureMasterIssue(
   ) {
     return;
   }
+  // istanbul ignore if
+  if (config.repoIsOnboarded === false) {
+    logger.debug('Repo is onboarding - skipping dependency dashboard');
+    return;
+  }
   logger.debug('Ensuring Dependency Dashboard');
   const hasBranches =
     is.nonEmptyArray(branches) &&
     branches.some((branch) => branch.res !== ProcessBranchResult.Automerged);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
-    if (config.dryRun) {
+    if (getAdminConfig().dryRun) {
       logger.info(
         'DRY-RUN: Would close Dependency Dashboard ' +
           config.dependencyDashboardTitle
@@ -114,6 +120,7 @@ export async function ensureMasterIssue(
   }
   const rateLimited = branches.filter(
     (branch) =>
+      branch.res === ProcessBranchResult.BranchLimitReached ||
       branch.res === ProcessBranchResult.PrLimitReached ||
       branch.res === ProcessBranchResult.CommitLimitReached
   );
@@ -180,6 +187,7 @@ export async function ensureMasterIssue(
     ProcessBranchResult.NotScheduled,
     ProcessBranchResult.PrLimitReached,
     ProcessBranchResult.CommitLimitReached,
+    ProcessBranchResult.BranchLimitReached,
     ProcessBranchResult.AlreadyExisted,
     ProcessBranchResult.Error,
     ProcessBranchResult.Automerged,
@@ -209,9 +217,9 @@ export async function ensureMasterIssue(
     (branch) => branch.res === ProcessBranchResult.AlreadyExisted
   );
   if (alreadyExisted.length) {
-    issueBody += '## Closed/Ignored\n\n';
+    issueBody += '## Ignored or Blocked\n\n';
     issueBody +=
-      'These updates were closed unmerged and will not be recreated unless you click a checkbox below.\n\n';
+      'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
       const pr = await platform.findPr({
         branchName: branch.branchName,
@@ -232,7 +240,7 @@ export async function ensureMasterIssue(
     issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 
-  if (config.dryRun) {
+  if (getAdminConfig().dryRun) {
     logger.info(
       'DRY-RUN: Would ensure Dependency Dashboard ' +
         config.dependencyDashboardTitle

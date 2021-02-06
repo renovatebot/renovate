@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../../config';
+import { getAdminConfig } from '../../../../config/admin';
 import { configFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';
@@ -7,12 +8,16 @@ import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
 
-export function createOnboardingBranch(
+export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
-  const contents = getOnboardingConfig(config);
+  const contents = await getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
+
+  const configFile = configFileNames.includes(config.onboardingConfigFileName)
+    ? config.onboardingConfigFileName
+    : defaultConfigFile;
 
   let commitMessagePrefix = '';
   if (config.commitMessagePrefix) {
@@ -33,13 +38,13 @@ export function createOnboardingBranch(
   } else {
     onboardingCommitMessage = `${
       commitMessagePrefix ? 'add' : 'Add'
-    } ${defaultConfigFile}`;
+    } ${configFile}`;
   }
 
   const commitMessage = `${commitMessagePrefix} ${onboardingCommitMessage}`.trim();
 
   // istanbul ignore if
-  if (config.dryRun) {
+  if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }
@@ -47,7 +52,7 @@ export function createOnboardingBranch(
     branchName: config.onboardingBranch,
     files: [
       {
-        name: defaultConfigFile,
+        name: configFile,
         contents,
       },
     ],

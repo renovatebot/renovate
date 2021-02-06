@@ -5,8 +5,9 @@ import {
   exec,
   mockExecAll,
   mockExecSequence,
-} from '../../../test/execUtil';
+} from '../../../test/exec-util';
 import { env, getName } from '../../../test/util';
+import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
 import * as extract from './extract';
@@ -20,6 +21,7 @@ const jsonContent = readFileSync(packageFileJson, 'utf8');
 
 const config = {
   localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
 };
 
 jest.mock('child_process');
@@ -28,7 +30,6 @@ jest.mock('../../util/exec/env');
 const pythonVersionCallResults = [
   { stdout: '', stderr: 'Python 2.7.17\\n' },
   { stdout: 'Python 3.7.5\\n', stderr: '' },
-  new Error(),
 ];
 
 // TODO: figure out snapshot similarity for each CI platform
@@ -40,11 +41,12 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.resetAllMocks();
       jest.resetModules();
       extract.resetModule();
 
+      await setUtilConfig(config);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py
@@ -64,7 +66,7 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(exec).toHaveBeenCalledTimes(3);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
 
@@ -93,7 +95,7 @@ describe(getName(__filename), () => {
       ]);
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce('{}');
       expect(await extractPackageFile(content, packageFile, config)).toBeNull();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(exec).toHaveBeenCalledTimes(3);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
 
@@ -105,11 +107,11 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(
           'raise Exception()',
-          '/tmp/folders/foobar.py',
+          'folders/foobar.py',
           config
         )
       ).toBeNull();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(exec).toHaveBeenCalledTimes(3);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
     it('catches error', async () => {
@@ -117,7 +119,7 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(
           'raise Exception()',
-          '/tmp/folders/foobar.py',
+          'folders/foobar.py',
           config
         )
       ).toBeNull();

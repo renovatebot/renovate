@@ -1,14 +1,15 @@
 import crypto from 'crypto';
-import URL from 'url';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
+import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
-import { GotOptions } from './types';
+import { getQueue } from './queue';
+import { GotOptions, RequestStats } from './types';
 
 // TODO: refactor code to remove this
 import './legacy';
@@ -43,6 +44,7 @@ export interface HttpResponse<T = string> {
   statusCode: number;
   body: T;
   headers: any;
+  authorization?: boolean;
 }
 
 function cloneResponse<T>(response: any): HttpResponse<T> {
@@ -51,6 +53,7 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
     statusCode: response.statusCode,
     body: clone<T>(response.body),
     headers: clone(response.headers),
+    authorization: !!response.authorization,
   };
 }
 
@@ -69,20 +72,17 @@ function applyDefaultHeaders(options: Options): void {
 async function gotRoutine<T>(
   url: string,
   options: GotOptions,
-  startTime: number
+  requestStats: Partial<RequestStats>
 ): Promise<Response<T>> {
-  const requestTime = Date.now();
   logger.trace({ url, options }, 'got request');
+
   const resp = await got<T>(url, options);
-  const responseTime = Date.now();
+  const duration = resp.timings.phases.total || 0;
+
   const httpRequests = memCache.get('http-requests') || [];
-  httpRequests.push({
-    method: options.method,
-    url,
-    duration: responseTime - requestTime,
-    queueDuration: requestTime - startTime,
-  });
+  httpRequests.push({ ...requestStats, duration });
   memCache.set('http-requests', httpRequests);
+
   return resp;
 }
 
@@ -95,7 +95,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   ): Promise<HttpResponse<T> | null> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
-      url = URL.resolve(httpOptions.baseUrl, url);
+      url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
     let options: GotOptions = {
@@ -133,7 +133,16 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     if (!resPromise) {
       const startTime = Date.now();
-      resPromise = gotRoutine<T>(url, options, startTime);
+      const queueTask = (): Promise<Response<T>> => {
+        const queueDuration = Date.now() - startTime;
+        return gotRoutine(url, options, {
+          method: options.method,
+          url,
+          queueDuration,
+        });
+      };
+      const queue = getQueue(url);
+      resPromise = queue?.add(queueTask) ?? queueTask();
       if (options.method === 'get') {
         memCache.set(cacheKey, resPromise); // always set if it's a get
       }
@@ -141,6 +150,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     try {
       const res = await resPromise;
+      res.authorization = !!options?.headers?.authorization;
       return cloneResponse(res);
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
@@ -227,7 +237,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // istanbul ignore else: needs test
     if (options?.baseUrl) {
       // eslint-disable-next-line no-param-reassign
-      url = URL.resolve(options.baseUrl, url);
+      url = resolveBaseUrl(options.baseUrl, url);
     }
 
     applyDefaultHeaders(combinedOptions);

@@ -17,7 +17,7 @@ export async function fetchJSONFile(
 ): Promise<Preset> {
   const [projectKey, repositorySlug] = repo.split('/');
   setBaseUrl(endpoint);
-  const url = `/rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
+  const url = `rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
   let res: { body: FileData };
   try {
     res = await http.getJson(url);
@@ -27,7 +27,7 @@ export async function fetchJSONFile(
       throw err;
     }
     logger.debug(
-      { statusCode: err.statusCode },
+      { statusCode: err.statusCode, url: `${endpoint}${url}` },
       `Failed to retrieve ${fileName} from repo`
     );
     throw new Error(PRESET_DEP_NOT_FOUND);
