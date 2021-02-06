@@ -41,12 +41,12 @@ import {
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import {
-  BbsRestPr,
   BbsConfig,
   BbsPr,
-  BbsRestUserRef,
   BbsRestBranch,
+  BbsRestPr,
   BbsRestRepo,
+  BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
 
