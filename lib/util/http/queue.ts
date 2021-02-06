@@ -1,6 +1,6 @@
 import URL from 'url';
 import PQueue from 'p-queue';
-import { getRequestLimit } from './host-rules';
+import { getQueueOptions } from './host-rules';
 
 const hostQueues = new Map<string | null, PQueue | null>();
 
@@ -21,9 +21,10 @@ export function getQueue(url: string): PQueue | null {
   let queue = hostQueues.get(host);
   if (queue === undefined) {
     queue = null; // null represents "no queue", as opposed to undefined
-    const concurrency = getRequestLimit(url);
-    if (concurrency) {
-      queue = new PQueue({ concurrency });
+
+    const options = getQueueOptions(url);
+    if (Object.keys(options).length !== 0) {
+      queue = new PQueue(options);
     }
 
     hostQueues.set(host, queue);
