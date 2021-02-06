@@ -68,12 +68,14 @@ export interface RenovateSharedConfig {
 export interface GlobalAdminConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
+  baseDir?: string;
   forceCli?: boolean;
   gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
   logLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
+  privateKeyPath?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }
@@ -85,17 +87,15 @@ export interface RepoAdminConfig {
   allowedPostUpgradeCommands?: string[];
   dockerImagePrefix?: string;
   dockerUser?: string;
+  dryRun?: boolean;
+  privateKey?: string | Buffer;
   trustLevel?: 'low' | 'high';
 }
 
 export interface RenovateAdminConfig {
-  baseDir?: string;
   cacheDir?: string;
-  configWarningReuseIssue?: boolean;
 
   customEnvVariables?: Record<string, string>;
-
-  dryRun?: boolean;
 
   endpoint?: string;
 
@@ -111,9 +111,6 @@ export interface RenovateAdminConfig {
   onboardingConfigFileName?: string;
 
   platform?: string;
-  postUpdateOptions?: string[];
-  privateKey?: string | Buffer;
-  privateKeyPath?: string;
   requireConfig?: boolean;
 }
 
@@ -167,7 +164,7 @@ export interface RenovateConfig
   isFork?: boolean;
 
   fileList?: string[];
-
+  configWarningReuseIssue?: boolean;
   dependencyDashboard?: boolean;
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
@@ -177,6 +174,7 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
+  postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 

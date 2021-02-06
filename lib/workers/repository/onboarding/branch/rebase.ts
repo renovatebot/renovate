@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../../config';
+import { getAdminConfig } from '../../../../config/admin';
 import { configFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import {
@@ -54,7 +55,7 @@ export async function rebaseOnboardingBranch(
   const commitMessage = getCommitMessage(config);
 
   // istanbul ignore if
-  if (config.dryRun) {
+  if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }

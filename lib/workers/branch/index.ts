@@ -116,7 +116,7 @@ export async function processBranch(
         content +=
           '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
         if (!config.suppressNotifications.includes('prIgnoreNotification')) {
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(
               `DRY-RUN: Would ensure closed PR comment in PR #${existingPr.number}`
             );
@@ -129,7 +129,7 @@ export async function processBranch(
           }
         }
         if (branchExists) {
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info('DRY-RUN: Would delete branch ' + config.branchName);
           } else {
             await deleteBranch(config.branchName);
@@ -644,7 +644,7 @@ export async function processBranch(
             config.suppressNotifications.includes('lockFileErrors')
           )
         ) {
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );
@@ -666,7 +666,7 @@ export async function processBranch(
         // Check if state needs setting
         if (existingState !== state) {
           logger.debug(`Updating status check state to failed`);
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(
               'DRY-RUN: Would set branch status in ' + config.branchName
             );
@@ -682,7 +682,7 @@ export async function processBranch(
       } else {
         if (config.updatedArtifacts?.length) {
           // istanbul ignore if
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(
               `DRY-RUN: Would ensure comment removal in PR #${pr.number}`
             );

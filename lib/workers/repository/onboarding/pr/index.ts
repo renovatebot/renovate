@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../../config';
+import { getAdminConfig } from '../../../../config/admin';
 import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
 import { platform } from '../../../../platform';
@@ -65,7 +66,7 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';
-  if (config.dryRun) {
+  if (getAdminConfig().dryRun) {
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch}`);
   } else if (await isBranchModified(config.onboardingBranch)) {
     configDesc = emojify(
@@ -113,7 +114,7 @@ If you need any further assistance then you can also [request help here](${confi
       return;
     }
     // PR must need updating
-    if (config.dryRun) {
+    if (getAdminConfig().dryRun) {
       logger.info('DRY-RUN: Would update onboarding PR');
     } else {
       await platform.updatePr({
@@ -128,7 +129,7 @@ If you need any further assistance then you can also [request help here](${confi
   logger.debug('Creating onboarding PR');
   const labels: string[] = [];
   try {
-    if (config.dryRun) {
+    if (getAdminConfig().dryRun) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
       const pr = await platform.createPr({

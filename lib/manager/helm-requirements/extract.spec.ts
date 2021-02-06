@@ -10,7 +10,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       jest.resetAllMocks();
       fs.readLocalFile = jest.fn();
     });
-    it('skips invalid registry urls', async () => {
+    it('skips invalid registry urls', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -30,7 +30,7 @@ describe('lib/manager/helm-requirements/extract', () => {
           version: 0.8.1
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
@@ -39,7 +39,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).toMatchSnapshot();
       expect(result.deps.every((dep) => dep.skipReason)).toEqual(true);
     });
-    it('parses simple requirements.yaml correctly', async () => {
+    it('parses simple requirements.yaml correctly', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -57,7 +57,7 @@ describe('lib/manager/helm-requirements/extract', () => {
           repository: https://charts.helm.sh/stable/
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
@@ -65,7 +65,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
     });
-    it('parses simple requirements.yaml but skips if necessary fields missing', async () => {
+    it('parses simple requirements.yaml but skips if necessary fields missing', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -73,14 +73,14 @@ describe('lib/manager/helm-requirements/extract', () => {
       name: example
       `);
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile('', fileName, {
+      const result = extractPackageFile('', fileName, {
         aliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
       expect(result).toBeNull();
     });
-    it('resolves aliased registry urls', async () => {
+    it('resolves aliased registry urls', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -95,7 +95,7 @@ describe('lib/manager/helm-requirements/extract', () => {
           repository: '@placeholder'
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           placeholder: 'https://my-registry.gcr.io/',
         },
@@ -104,30 +104,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).toMatchSnapshot();
       expect(result.deps.every((dep) => dep.skipReason)).toEqual(false);
     });
-    it("doesn't fail if Chart.yaml is invalid", async () => {
-      fs.readLocalFile.mockResolvedValueOnce(`
-      Invalid Chart.yaml content.
-      arr:
-      [
-      `);
-      const content = `
-      dependencies:
-        - name: redis
-          version: 0.9.0
-          repository: https://charts.helm.sh/stable/
-        - name: postgresql
-          version: 0.8.1
-          repository: https://charts.helm.sh/stable/
-      `;
-      const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {
-        aliases: {
-          stable: 'https://charts.helm.sh/stable/',
-        },
-      });
-      expect(result).toBeNull();
-    });
-    it('skips local dependencies', async () => {
+    it('skips local dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -145,7 +122,7 @@ describe('lib/manager/helm-requirements/extract', () => {
           repository: file:///some/local/path/
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
@@ -153,7 +130,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
     });
-    it('returns null if no dependencies', async () => {
+    it('returns null if no dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -165,14 +142,14 @@ describe('lib/manager/helm-requirements/extract', () => {
       hello: world
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
       expect(result).toBeNull();
     });
-    it('returns null if requirements.yaml is invalid', async () => {
+    it('returns null if requirements.yaml is invalid', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -186,17 +163,17 @@ describe('lib/manager/helm-requirements/extract', () => {
       [
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
       expect(result).toBeNull();
     });
-    it('returns null if Chart.yaml is empty', async () => {
+    it('returns null if Chart.yaml is empty', () => {
       const content = '';
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
@@ -258,7 +235,7 @@ describe('lib/manager/helm-requirements/extract', () => {
         },
       },
     ])('validates required fields', (params) => {
-      it(`validates ${params.fieldName} is required`, async () => {
+      it(`validates ${params.fieldName} is required`, () => {
         fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -267,11 +244,11 @@ describe('lib/manager/helm-requirements/extract', () => {
       version: 0.1.0
       `);
         const fileName = 'requirements.yaml';
-        const result = await extractPackageFile(params.content, fileName, {});
+        const result = extractPackageFile(params.content, fileName, {});
         expect(result).toEqual(params.want);
       });
     });
-    it('skips only invalid dependences', async () => {
+    it('skips only invalid dependences', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
@@ -292,7 +269,7 @@ describe('lib/manager/helm-requirements/extract', () => {
           repository: https://charts.helm.sh/stable/
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = extractPackageFile(content, fileName, {});
       expect(result).toEqual({
         datasource: 'helm',
         deps: [
