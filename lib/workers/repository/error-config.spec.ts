@@ -1,5 +1,6 @@
 import { mock } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, platform } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';
@@ -15,6 +16,9 @@ beforeEach(() => {
 
 describe('workers/repository/error-config', () => {
   describe('raiseConfigWarningIssue()', () => {
+    beforeEach(() => {
+      setAdminConfig();
+    });
     it('creates issues', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.configFile = 'package.json';
@@ -28,10 +32,8 @@ describe('workers/repository/error-config', () => {
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
-      const res = await raiseConfigWarningIssue(
-        { ...config, dryRun: true },
-        error
-      );
+      setAdminConfig({ dryRun: true });
+      const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
     it('handles onboarding', async () => {
@@ -55,10 +57,8 @@ describe('workers/repository/error-config', () => {
         number: 1,
         state: PrState.Open,
       });
-      const res = await raiseConfigWarningIssue(
-        { ...config, dryRun: true },
-        error
-      );
+      setAdminConfig({ dryRun: true });
+      const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
   });

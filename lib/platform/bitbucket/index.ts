@@ -186,7 +186,7 @@ export async function initRepo({
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
 export function getRepoForceRebase(): Promise<boolean> {
-  // BB doesnt have an option to flag staled branches
+  // BB doesn't have an option to flag staled branches
   return Promise.resolve(false);
 }
 

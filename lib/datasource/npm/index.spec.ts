@@ -3,6 +3,7 @@ import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
 import { getName } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as datasource, getNpmrc, resetCache, setNpmrc } from '.';
@@ -17,7 +18,7 @@ describe(getName(__filename), () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    global.trustLevel = 'low';
+    setAdminConfig();
     resetCache();
     setNpmrc();
     npmResponse = {
@@ -283,14 +284,14 @@ describe(getName(__filename), () => {
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
     process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
-    global.trustLevel = 'high';
+    setAdminConfig({ trustLevel: 'high' });
     // eslint-disable-next-line no-template-curly-in-string
     const npmrc = 'registry=${REGISTRY}';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should throw error if necessary env var is not present', () => {
-    global.trustLevel = 'high';
+    setAdminConfig({ trustLevel: 'high' });
     // eslint-disable-next-line no-template-curly-in-string
     expect(() => setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
       Error('env-replace')

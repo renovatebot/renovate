@@ -55,11 +55,11 @@ type PackageJson = {
       const rawContent = readFileSync(file, 'utf8');
       logger.info(`Validating ${file}`);
       try {
-        let jsonContent;
+        let jsonContent: RenovateConfig;
         if (file.endsWith('.json5')) {
-          jsonContent = JSON5.parse(rawContent) as PackageJson;
+          jsonContent = JSON5.parse(rawContent);
         } else {
-          jsonContent = JSON.parse(rawContent) as PackageJson;
+          jsonContent = JSON.parse(rawContent);
         }
         await validate(file, jsonContent);
       } catch (err) {

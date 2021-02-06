@@ -1,6 +1,7 @@
 import hasha from 'hasha';
 import Git from 'simple-git';
 import { join } from 'upath';
+import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
@@ -161,7 +162,7 @@ async function fetchRegistryInfo(
   };
 
   if (flavor !== RegistryFlavor.CratesIo) {
-    if (config.trustLevel !== 'high') {
+    if (getAdminConfig().trustLevel !== 'high') {
       logger.warn(
         'crate datasource: trustLevel=high is required for registries other than crates.io, bailing out'
       );

@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../../config/common';
+import { GlobalConfig } from '../../../config/common';
 import * as memCache from '../memory';
 import { PackageCache } from './common';
 import * as fileCache from './file';
@@ -35,7 +35,7 @@ export function set(
   return cacheProxy.set(namespace, key, value, minutes);
 }
 
-export function init(config: RenovateConfig): void {
+export function init(config: GlobalConfig): void {
   if (config.redisUrl) {
     redisCache.init(config.redisUrl);
     cacheProxy = {
@@ -51,7 +51,7 @@ export function init(config: RenovateConfig): void {
   }
 }
 
-export function cleanup(config: RenovateConfig): void {
+export function cleanup(config: GlobalConfig): void {
   if (config.redisUrl) {
     redisCache.end();
   }

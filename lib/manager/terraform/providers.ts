@@ -45,7 +45,6 @@ export function analyzeTerraformProvider(dep: PackageDependency): void {
   /* eslint-disable no-param-reassign */
   dep.depType = 'terraform';
   dep.depName = dep.managerData.moduleName;
-  dep.depNameShort = dep.managerData.moduleName;
   dep.datasource = datasourceTerraformProvider.id;
 
   if (is.nonEmptyString(dep.managerData.source)) {

@@ -1,6 +1,6 @@
 import { OutgoingHttpHeaders } from 'http';
 import URL from 'url';
-import AWS from 'aws-sdk';
+import { ECR } from '@aws-sdk/client-ecr';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
@@ -105,7 +105,7 @@ export function getRegistryRepository(
   };
 }
 
-function getECRAuthToken(
+async function getECRAuthToken(
   region: string,
   opts: HostRule
 ): Promise<string | null> {
@@ -114,27 +114,21 @@ function getECRAuthToken(
     config.accessKeyId = opts.username;
     config.secretAccessKey = opts.password;
   }
-  const ecr = new AWS.ECR(config);
-  return new Promise<string>((resolve) => {
-    ecr.getAuthorizationToken({}, (err, data) => {
-      if (err) {
-        logger.trace({ err }, 'err');
-        logger.debug('ECR getAuthorizationToken error');
-        resolve(null);
-      } else {
-        const authorizationToken =
-          data?.authorizationData?.[0]?.authorizationToken;
-        if (authorizationToken) {
-          resolve(authorizationToken);
-        } else {
-          logger.warn(
-            'Could not extract authorizationToken from ECR getAuthorizationToken response'
-          );
-          resolve(null);
-        }
-      }
-    });
-  });
+  const ecr = new ECR(config);
+  try {
+    const data = await ecr.getAuthorizationToken({});
+    const authorizationToken = data?.authorizationData?.[0]?.authorizationToken;
+    if (authorizationToken) {
+      return authorizationToken;
+    }
+    logger.warn(
+      'Could not extract authorizationToken from ECR getAuthorizationToken response'
+    );
+  } catch (err) {
+    logger.trace({ err }, 'err');
+    logger.debug('ECR getAuthorizationToken error');
+  }
+  return null;
 }
 
 async function getAuthHeaders(
