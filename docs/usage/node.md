@@ -58,12 +58,10 @@ For additional language support see the [`supportPolicy` documentation](/configu
 
 ## Configuring which version of npm Renovate uses
 
-There is no configuration option to tell Renovate to use the npm version that comes pre-installed with Node.
+When `binarySource=docker`, such as in the hosted WhiteSource Renovate App, Renovate will choose and install an `npm` version dynamically.
 
-You must use the `engines.npm` property in your `package.json` file to specify which major version of npm your project supports.
-Renovate bot will then use that version of npm when it creates a pull request.
-
-In your `package.json` file create a `engines` key-value pair and specify which major version of npm your project works with.
+To control which version or constraint is installed, you should use the `engines.npm` property in your `package.json` file.
+Renovate bot will then use that version constraint for npm when it creates a pull request.
 
 For example, if you want to use at least npm `6.14.11` and also allow newer versions of npm in the `6.x` range, you would put this in your `package.json` file:
 
