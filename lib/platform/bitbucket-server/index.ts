@@ -161,17 +161,15 @@ export async function initRepo({
     ignorePrAuthor,
   } as any;
 
-  let info: BbsRestRepo;
-  let branchRes: HttpResponse<BbsRestBranch>;
   try {
-    info = (
+    const info = (
       await bitbucketServerHttp.getJson<BbsRestRepo>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
       )
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    branchRes = await bitbucketServerHttp.getJson<BbsRestBranch>(
+    const branchRes = await bitbucketServerHttp.getJson<BbsRestBranch>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
     );
 
@@ -216,6 +214,14 @@ export async function initRepo({
       gitAuthorEmail: global.gitAuthor?.email,
       cloneSubmodules,
     });
+
+    config.mergeMethod = 'merge';
+    const repoConfig: RepoResult = {
+      defaultBranch: branchRes.body.displayId,
+      isFork: !!info.parent,
+    };
+
+    return repoConfig;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
@@ -227,14 +233,6 @@ export async function initRepo({
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
-
-  config.mergeMethod = 'merge';
-  const repoConfig: RepoResult = {
-    defaultBranch: branchRes.body.displayId,
-    isFork: !!info.parent,
-  };
-
-  return repoConfig;
 }
 
 export async function getRepoForceRebase(): Promise<boolean> {
