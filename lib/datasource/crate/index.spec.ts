@@ -24,6 +24,10 @@ jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
 const res1 = fs.readFileSync('lib/datasource/crate/__fixtures__/libc', 'utf8');
+const libcApiRes = fs.readFileSync(
+  'lib/datasource/crate/__fixtures__/libc.api',
+  'utf8'
+);
 const res2 = fs.readFileSync(
   'lib/datasource/crate/__fixtures__/amethyst',
   'utf8'
@@ -118,6 +122,11 @@ describe('datasource/crate', () => {
     });
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, {});
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/non_existent_crate')
+        .reply(200, undefined);
+
       expect(
         await getPkgReleases({
           datasource,
@@ -132,6 +141,11 @@ describe('datasource/crate', () => {
         .scope(baseUrl)
         .get('/no/n_/non_existent_crate')
         .reply(200, undefined);
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/non_existent_crate')
+        .reply(200, undefined);
+
       expect(
         await getPkgReleases({
           datasource,
@@ -143,6 +157,11 @@ describe('datasource/crate', () => {
     });
     it('returns null for empty list', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, '\n');
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/non_existent_crate')
+        .reply(200, undefined);
+
       expect(
         await getPkgReleases({
           datasource,
@@ -192,6 +211,11 @@ describe('datasource/crate', () => {
     });
     it('processes real data: libc', async () => {
       httpMock.scope(baseUrl).get('/li/bc/libc').reply(200, res1);
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/libc')
+        .reply(200, libcApiRes);
+
       const res = await getPkgReleases({
         datasource,
         depName: 'libc',
@@ -204,6 +228,11 @@ describe('datasource/crate', () => {
     });
     it('processes real data: amethyst', async () => {
       httpMock.scope(baseUrl).get('/am/et/amethyst').reply(200, res2);
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/amethyst')
+        .reply(200, undefined);
+
       const res = await getPkgReleases({
         datasource,
         depName: 'amethyst',

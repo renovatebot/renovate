@@ -114,6 +114,36 @@ function getDependencyUrl(info: RegistryInfo, lookupName: string): string {
   }
 }
 
+interface CrateResponse {
+  crate: { repository?: string };
+}
+
+/**
+ * Queries the crates.io API and returns the repository URL of the crate.
+ */
+async function getSourceUrl(
+  info: RegistryInfo,
+  lookupName: string
+): Promise<string | null> {
+  if (info.flavor !== RegistryFlavor.CratesIo) {
+    return null;
+  }
+
+  try {
+    const url = `https://crates.io/api/v1/crates/${lookupName}`;
+    const response = await http.getJson<CrateResponse>(url);
+
+    return response.body?.crate?.repository ?? null;
+  } catch (err) {
+    logger.warn(
+      { lookupName },
+      'crate datasource: failed to download crate metadata from crates.io'
+    );
+
+    return null;
+  }
+}
+
 /**
  * Given a Git URL, computes a semi-human-readable name for a folder in which to
  * clone the repository.
@@ -239,10 +269,15 @@ export async function getReleases(
     .map((line) => line.trim()) // remove whitespace
     .filter((line) => line.length !== 0) // remove empty lines
     .map((line) => JSON.parse(line) as CrateRecord); // parse
+
+  const sourceUrl = await getSourceUrl(registryInfo, lookupName);
+
   const result: ReleaseResult = {
     dependencyUrl,
+    sourceUrl,
     releases: [],
   };
+
   result.releases = lines
     .map((version) => {
       const release: Release = {
