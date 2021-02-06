@@ -40,6 +40,8 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
 
 export interface QueueOptions {
   concurrency?: number;
+  interval?: number;
+  intervalCap?: number;
 }
 
 export function getQueueOptions(url: string): QueueOptions {
@@ -49,6 +51,12 @@ export function getQueueOptions(url: string): QueueOptions {
   const limit = hostRule.concurrentRequestLimit;
   if (typeof limit === 'number' && limit > 0) {
     options.concurrency = limit;
+  }
+
+  if (url.startsWith('https://crates.io/')) {
+    // see https://crates.io/policies#crawlers
+    options.interval = 1000;
+    options.intervalCap = 1;
   }
 
   return options;

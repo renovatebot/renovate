@@ -4,9 +4,11 @@ import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import * as memCache from '../../util/cache/memory';
 import { setFsConfig } from '../../util/fs';
+import * as _hostRules from '../../util/http/host-rules';
 import {
   RegistryFlavor,
   RegistryInfo,
@@ -14,6 +16,9 @@ import {
   fetchCrateRecordsPayload,
   getIndexSuffix,
 } from '.';
+
+jest.mock('../../util/http/host-rules');
+const hostRules = mocked(_hostRules);
 
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
@@ -76,6 +81,13 @@ describe('datasource/crate', () => {
       simpleGit.mockReset();
       memCache.init();
       setAdminConfig();
+
+      // run tests without rate limit
+      const { applyHostRules } = jest.requireActual(
+        '../../util/http/host-rules'
+      );
+      hostRules.applyHostRules.mockImplementation(applyHostRules);
+      hostRules.getQueueOptions.mockReturnValue({});
     });
 
     afterEach(() => {
