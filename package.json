@@ -113,7 +113,7 @@
     "yarn": "^1.17.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ecr": "3.2.0",
+    "@aws-sdk/client-ecr": "3.4.1",
     "@breejs/later": "4.0.2",
     "@iarna/toml": "2.2.5",
     "@renovate/pep440": "0.4.1",
