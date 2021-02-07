@@ -65,7 +65,7 @@ export interface RenovateSharedConfig {
 
 // Config options used only within the global worker
 // The below should contain config options where stage=global
-export interface GlobalAdminConfig {
+export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
   baseDir?: string;
@@ -190,7 +190,7 @@ export interface RenovateConfig
   fetchReleaseNotes?: boolean;
 }
 
-export interface GlobalConfig extends RenovateConfig, GlobalAdminConfig {}
+export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
