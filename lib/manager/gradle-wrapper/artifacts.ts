@@ -92,7 +92,6 @@ export async function updateArtifacts({
     try {
       await exec(cmd, execOptions);
     } catch (err) {
-      // TODO: Is this an artifact error?
       logger.warn(
         { err },
         'Error executing gradle wrapper update command. It can be not a critical one though.'

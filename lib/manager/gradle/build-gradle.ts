@@ -8,7 +8,6 @@ import { BuildDependency } from './gradle-updates-report';
 
 let variables: Record<string, string> = {};
 
-// TODO: Unify with BuildDependency ?
 export interface GradleDependency {
   group: string;
   name: string;

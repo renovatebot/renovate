@@ -72,7 +72,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
     }
   }
 
-  return null; // TODO: gitlab or gitTags datasources?
+  return null;
 }
 
 export function extractPackageFile(content: string): PackageFile | null {
