@@ -85,6 +85,7 @@ export interface GlobalAdminConfig {
 export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
+  customEnvVariables?: Record<string, string>;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
@@ -94,8 +95,6 @@ export interface RepoAdminConfig {
 
 export interface RenovateAdminConfig {
   cacheDir?: string;
-
-  customEnvVariables?: Record<string, string>;
 
   endpoint?: string;
 

@@ -6,6 +6,7 @@ let adminConfig: RepoAdminConfig = {};
 export const repoAdminOptions = [
   'allowPostUpgradeCommandTemplating',
   'allowedPostUpgradeCommands',
+  'customEnvVariables',
   'dockerImagePrefix',
   'dockerUser',
   'dryRun',
