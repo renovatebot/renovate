@@ -93,7 +93,7 @@ export interface RepoAdminConfig {
   trustLevel?: 'low' | 'high';
 }
 
-export interface RenovateAdminConfig {
+export interface LegacyAdminConfig {
   cacheDir?: string;
 
   endpoint?: string;
@@ -140,7 +140,7 @@ export interface CustomManager {
 
 // TODO: Proper typings
 export interface RenovateConfig
-  extends RenovateAdminConfig,
+  extends LegacyAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
