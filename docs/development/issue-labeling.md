@@ -30,7 +30,7 @@ Most issues should have a label relating to either a platform, manager, datasour
 
 Use these to label the status of an issue.
 For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
-All open issues should have some `status:*` label applied.
+All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked) can identify any which are missing a status label.
 
 ### Type of issue
 
@@ -49,6 +49,8 @@ Use these to label the type of issue.
 For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
 Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
 Use the `type:help` label for issues which should be converted to a discussion post.
+
+Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can identify any which are missing one.
 
 Add the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major version bump.
 
