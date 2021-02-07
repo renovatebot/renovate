@@ -190,7 +190,6 @@ describe('.updateArtifacts()', () => {
     await setExecConfig({
       ...config,
       binarySource: 'docker',
-      dockerUser: 'ubuntu',
     });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
@@ -215,7 +214,6 @@ describe('.updateArtifacts()', () => {
     await setExecConfig({
       ...config,
       binarySource: 'docker',
-      dockerUser: 'ubuntu',
     });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);

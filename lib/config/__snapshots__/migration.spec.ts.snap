@@ -6,6 +6,51 @@ Object {
 }
 `;
 
+exports[`config/migration migrateConfig(config, parentConfig) it migrates packageRules 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "excludePackageNames": Array [
+        "baz",
+      ],
+      "excludePackagePatterns": Array [
+        "^baz",
+      ],
+      "matchBaseBranches": Array [
+        "master",
+      ],
+      "matchDatasources": Array [
+        "orb",
+      ],
+      "matchDepTypes": Array [
+        "peerDependencies",
+      ],
+      "matchLanguages": Array [
+        "python",
+      ],
+      "matchManagers": Array [
+        "dockerfile",
+      ],
+      "matchPackageNames": Array [
+        "foo",
+      ],
+      "matchPackagePatterns": Array [
+        "^bar",
+      ],
+      "matchPaths": Array [
+        "package.json",
+      ],
+      "matchSourceUrlPrefixes": Array [
+        "https://github.com/vuejs/vue",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
 Object {
   "major": Object {
@@ -39,6 +84,8 @@ Object {
   "baseBranches": Array [
     "next",
   ],
+  "binarySource": "global",
+  "branchName": "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}",
   "branchPrefix": "renovate/",
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
   "commitMessageExtra": "{{currentValue}} something",
@@ -271,51 +318,6 @@ Object {
         "other/package.json",
       ],
       "rangeStrategy": "pin",
-    },
-  ],
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) it migrates packageRules 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "excludePackageNames": Array [
-        "baz",
-      ],
-      "excludePackagePatterns": Array [
-        "^baz",
-      ],
-      "matchBaseBranches": Array [
-        "master",
-      ],
-      "matchDatasources": Array [
-        "orb",
-      ],
-      "matchDepTypes": Array [
-        "peerDependencies",
-      ],
-      "matchLanguages": Array [
-        "python",
-      ],
-      "matchManagers": Array [
-        "dockerfile",
-      ],
-      "matchPackageNames": Array [
-        "foo",
-      ],
-      "matchPackagePatterns": Array [
-        "^bar",
-      ],
-      "matchPaths": Array [
-        "package.json",
-      ],
-      "matchSourceUrlPrefixes": Array [
-        "https://github.com/vuejs/vue",
-      ],
-      "matchUpdateTypes": Array [
-        "major",
-      ],
     },
   ],
 }

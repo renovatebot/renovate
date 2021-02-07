@@ -191,6 +191,15 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.trustLevel = 'low';
         }
+      } else if (
+        key === 'branchName' &&
+        is.string(val) &&
+        val?.includes('{{managerBranchPrefix}}')
+      ) {
+        migratedConfig.branchName = val.replace(
+          '{{managerBranchPrefix}}',
+          '{{additionalBranchPrefix}}'
+        );
       } else if (key === 'managerBranchPrefix') {
         delete migratedConfig.managerBranchPrefix;
         migratedConfig.additionalBranchPrefix = val;
@@ -483,15 +492,16 @@ export function migrateConfig(
           migratedConfig[key] = subMigrate.migratedConfig;
         }
       } else if (
-        key.startsWith('commitMessage') &&
-        is.string(val) &&
-        (val.includes('currentVersion') || val.includes('newVersion'))
+        (key.startsWith('commitMessage') || key.startsWith('prTitle')) &&
+        is.string(val)
       ) {
         migratedConfig[key] = val
           .replace(/currentVersion/g, 'currentValue')
           .replace(/newVersion/g, 'newValue')
           .replace(/newValueMajor/g, 'newMajor')
-          .replace(/newValueMinor/g, 'newMinor');
+          .replace(/newValueMinor/g, 'newMinor')
+          .replace(/newVersionMajor/g, 'newMajor')
+          .replace(/newVersionMinor/g, 'newMinor');
       } else if (key === 'raiseDeprecationWarnings') {
         delete migratedConfig.raiseDeprecationWarnings;
         if (val === false) {
@@ -499,6 +509,8 @@ export function migrateConfig(
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
         }
+      } else if (key === 'binarySource' && val === 'auto') {
+        migratedConfig.binarySource = 'global';
       }
     }
     if (migratedConfig.endpoints) {

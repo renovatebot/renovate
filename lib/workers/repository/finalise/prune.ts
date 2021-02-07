@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../config';
+import { getAdminConfig } from '../../../config/admin';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
@@ -10,7 +11,7 @@ import {
 } from '../../../util/git';
 
 async function cleanUpBranches(
-  { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
+  { pruneStaleBranches: enabled }: RenovateConfig,
   remainingBranches: string[]
 ): Promise<void> {
   if (enabled === false) {
@@ -30,7 +31,7 @@ async function cleanUpBranches(
             { prNo: pr.number, prTitle: pr.title },
             'Branch is modified - skipping PR autoclosing'
           );
-          if (dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {
             await platform.ensureComment({
@@ -40,7 +41,7 @@ async function cleanUpBranches(
                 'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
           }
-        } else if (dryRun) {
+        } else if (getAdminConfig().dryRun) {
           logger.info(
             { prNo: pr.number, prTitle: pr.title },
             `DRY-RUN: Would autoclose PR`
@@ -61,7 +62,7 @@ async function cleanUpBranches(
           });
           await deleteBranch(branchName);
         }
-      } else if (dryRun) {
+      } else if (getAdminConfig().dryRun) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
         logger.info({ branch: branchName }, `Deleting orphan branch`);

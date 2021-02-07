@@ -39,6 +39,7 @@ describe('config/migration', () => {
         suppressNotifications: ['lockFileErrors', 'prEditNotification'],
         automerge: 'none' as never,
         automergeMajor: false,
+        binarySource: 'auto',
         automergeMinor: true,
         automergePatch: true,
         masterIssue: 'true',
@@ -46,6 +47,8 @@ describe('config/migration', () => {
         gomodTidy: true,
         upgradeInRange: true,
         automergeType: 'branch-push',
+        branchName:
+          '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}',
         baseBranch: 'next',
         managerBranchPrefix: 'foo',
         branchPrefix: 'renovate/{{parentDir}}-',

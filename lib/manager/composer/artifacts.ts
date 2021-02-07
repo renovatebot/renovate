@@ -2,6 +2,7 @@ import url from 'url';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
+import { getAdminConfig } from '../../config/admin';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
 import {
   PLATFORM_TYPE_GITHUB,
@@ -147,7 +148,7 @@ export async function updateArtifacts({
       args += ' --ignore-platform-reqs';
     }
     args += ' --no-ansi --no-interaction';
-    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+    if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');

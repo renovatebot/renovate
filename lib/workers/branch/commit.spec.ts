@@ -1,4 +1,5 @@
 import { defaultConfig, git, partial } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { BranchConfig } from '../common';
 import { commitFilesToBranch } from './commit';
 
@@ -20,6 +21,7 @@ describe('workers/branch/automerge', () => {
       });
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('abc123');
+      setAdminConfig();
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
@@ -35,7 +37,7 @@ describe('workers/branch/automerge', () => {
       expect(git.commitFiles.mock.calls).toMatchSnapshot();
     });
     it('dry runs', async () => {
-      config.dryRun = true;
+      setAdminConfig({ dryRun: true });
       config.updatedPackageFiles.push({
         name: 'package.json',
         contents: 'some contents',

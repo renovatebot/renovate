@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../../config';
+import { getAdminConfig } from '../../../../config/admin';
 import {
   MANAGER_NO_PACKAGE_FILES,
   REPOSITORY_FORKED,
@@ -54,7 +55,7 @@ export async function checkOnboardingBranch(
       );
     }
   }
-  if (!config.dryRun) {
+  if (!getAdminConfig().dryRun) {
     await checkoutBranch(config.onboardingBranch);
   }
   const branchList = [config.onboardingBranch];

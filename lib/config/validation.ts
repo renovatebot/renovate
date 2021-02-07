@@ -121,9 +121,9 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = template.compile(val.toString(), config);
-          res = template.compile(res, config);
-          template.compile(res, config);
+          let res = template.compile(val.toString(), config, false);
+          res = template.compile(res, config, false);
+          template.compile(res, config, false);
         } catch (err) {
           errors.push({
             depName: 'Configuration Error',
@@ -266,6 +266,7 @@ export async function validateConfig(
             }
             if (key === 'regexManagers') {
               const allowedKeys = [
+                'description',
                 'fileMatch',
                 'matchStrings',
                 'matchStringsStrategy',

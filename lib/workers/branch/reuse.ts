@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../config';
+import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
@@ -34,7 +35,7 @@ export async function shouldReuseExistingBranch(
     if (pr.labels?.includes(config.rebaseLabel)) {
       logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
       // istanbul ignore if
-      if (config.dryRun) {
+      if (getAdminConfig().dryRun) {
         logger.info(
           `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
         );

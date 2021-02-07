@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/go getDigest gitlab digest is not supported at the moment 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/golang/text?go-get=1",
+  },
+]
+`;
+
 exports[`datasource/go getDigest returns digest 1`] = `
 Array [
   Object {
@@ -48,6 +62,33 @@ Array [
     },
     "method": "GET",
     "url": "https://golang.org/y/text?go-get=1",
+  },
+]
+`;
+
+exports[`datasource/go getDigest support bitbucket digest 1`] = `"123"`;
+
+exports[`datasource/go getDigest support bitbucket digest 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/golang/text",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/golang/text/commits/master",
   },
 ]
 `;
@@ -236,6 +277,37 @@ Array [
 ]
 `;
 
+exports[`datasource/go getReleases support bitbucket tags 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v2.0.0",
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": "https://bitbucket.org/golang/text",
+}
+`;
+
+exports[`datasource/go getReleases support bitbucket tags 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/golang/text/refs/tags",
+  },
+]
+`;
+
 exports[`datasource/go getReleases support ghe 1`] = `
 Object {
   "releases": Array [
@@ -322,6 +394,22 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/golang%2Ftext/repository/tags?per_page=100",
+  },
+]
+`;
+
+exports[`datasource/go getReleases unknown datasource returns null 1`] = `null`;
+
+exports[`datasource/go getReleases unknown datasource returns null 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "some.unknown.website",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://some.unknown.website/example/module?go-get=1",
   },
 ]
 `;

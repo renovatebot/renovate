@@ -1,8 +1,7 @@
-import AWS from 'aws-sdk';
-import AWSMock from 'aws-sdk-mock';
+import * as _AWS from '@aws-sdk/client-ecr';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, mocked } from '../../../test/util';
+import { getName, mocked, partial } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import { MediaType } from './types';
@@ -10,11 +9,37 @@ import * as docker from '.';
 
 const hostRules = mocked(_hostRules);
 
+jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
+
+type ECR = _AWS.ECR;
+type GetAuthorizationTokenCommandOutput = _AWS.GetAuthorizationTokenCommandOutput;
+const AWS = mocked(_AWS);
 
 const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
 const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
+
+function mockEcrAuthResolve(
+  res: Partial<GetAuthorizationTokenCommandOutput> = {}
+) {
+  AWS.ECR.mockImplementationOnce(() =>
+    partial<ECR>({
+      getAuthorizationToken: () =>
+        Promise.resolve<GetAuthorizationTokenCommandOutput>(
+          partial<GetAuthorizationTokenCommandOutput>(res)
+        ),
+    })
+  );
+}
+
+function mockEcrAuthReject(msg: string) {
+  AWS.ECR.mockImplementationOnce(() =>
+    partial<ECR>({
+      getAuthorizationToken: jest.fn().mockRejectedValue(new Error(msg)),
+    })
+  );
+}
 
 describe(getName(__filename), () => {
   beforeEach(() => {
@@ -227,16 +252,11 @@ describe(getName(__filename), () => {
         .reply(200)
         .get('/node/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
-      AWSMock.setSDKInstance(AWS);
-      AWSMock.mock(
-        'ECR',
-        'getAuthorizationToken',
-        (params: unknown, callback: (...unknown) => void) => {
-          callback(null, {
-            authorizationData: [{ authorizationToken: 'abcdef' }],
-          });
-        }
-      );
+
+      mockEcrAuthResolve({
+        authorizationData: [{ authorizationToken: 'abcdef' }],
+      });
+
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -248,7 +268,6 @@ describe(getName(__filename), () => {
       expect(res).toBe('some-digest');
       expect(trace[1].headers.authorization).toBe('Basic abcdef');
       expect(trace).toMatchSnapshot();
-      AWSMock.restore('ECR');
     });
     it('continues without token if ECR authentication could not be extracted', async () => {
       httpMock
@@ -259,14 +278,8 @@ describe(getName(__filename), () => {
         })
         .get('/')
         .reply(403);
-      AWSMock.setSDKInstance(AWS);
-      AWSMock.mock(
-        'ECR',
-        'getAuthorizationToken',
-        (params: unknown, callback: (...unknown) => void) => {
-          callback(null, {});
-        }
-      );
+      mockEcrAuthResolve();
+
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -276,7 +289,6 @@ describe(getName(__filename), () => {
       );
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
-      AWSMock.restore('ECR');
     });
     it('continues without token if ECR authentication fails', async () => {
       hostRules.find.mockReturnValue({});
@@ -288,14 +300,7 @@ describe(getName(__filename), () => {
         })
         .get('/')
         .reply(403);
-      AWSMock.setSDKInstance(AWS);
-      AWSMock.mock(
-        'ECR',
-        'getAuthorizationToken',
-        (params: unknown, callback: (...unknown) => void) => {
-          callback(Error('some error'), null);
-        }
-      );
+      mockEcrAuthReject('some error');
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -305,7 +310,6 @@ describe(getName(__filename), () => {
       );
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
-      AWSMock.restore('ECR');
     });
     it('continues without token, when no header is present', async () => {
       httpMock
@@ -366,7 +370,7 @@ describe(getName(__filename), () => {
         .get('/')
         .reply(200, '', {})
         .get('/library/node/tags/list?n=10000')
-        .reply(401);
+        .reply(403);
       const res = await getPkgReleases({
         datasource: docker.id,
         depName: 'node',
@@ -570,6 +574,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -594,7 +599,7 @@ describe(getName(__filename), () => {
       httpMock
         .scope('https://registry.company.com/v2')
         .get('/')
-        .times(3)
+        .times(4)
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['latest'] })
@@ -602,7 +607,13 @@ describe(getName(__filename), () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestListV2,
-          manifests: [{ digest: 'some-config-digest' }],
+          manifests: [{ digest: 'some-image-digest' }],
+        })
+        .get('/node/manifests/some-image-digest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
@@ -613,6 +624,47 @@ describe(getName(__filename), () => {
             },
           },
         });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
+    it('ignores unsupported manifest', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV1,
+        });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
+    it('ignores unsupported schema version', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {});
       const res = await getPkgReleases({
         datasource: docker.id,
         depName: 'registry.company.com/node',
@@ -633,6 +685,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')

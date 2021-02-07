@@ -39,6 +39,7 @@ export interface RenovateSharedConfig {
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
+  hashedBranchLength?: number;
   npmrc?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
@@ -62,35 +63,44 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
 }
 
-export interface GlobalConfig {
-  prBanner?: string;
-  prFooter?: string;
-}
-
-export interface RenovateAdminConfig {
-  allowPostUpgradeCommandTemplating?: boolean;
-  allowedPostUpgradeCommands?: string[];
+// Config options used only within the global worker
+// The below should contain config options where stage=global
+export interface GlobalAdminConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
-
   baseDir?: string;
-  cacheDir?: string;
-  configWarningReuseIssue?: boolean;
-
-  customEnvVariables?: Record<string, string>;
-  dockerImagePrefix?: string;
-  dockerUser?: string;
-
-  dryRun?: boolean;
-
-  endpoint?: string;
-
-  global?: GlobalConfig;
-
-  localDir?: string;
+  forceCli?: boolean;
+  gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
   logLevel?: LogLevel;
+  prCommitsPerRunLimit?: number;
+  privateKeyPath?: string;
+  redisUrl?: string;
+  repositories?: RenovateRepository[];
+}
+
+// Config options used within the repository worker, but not user configurable
+// The below should contain config options where admin=true
+export interface RepoAdminConfig {
+  allowPostUpgradeCommandTemplating?: boolean;
+  allowedPostUpgradeCommands?: string[];
+  dockerImagePrefix?: string;
+  dockerUser?: string;
+  dryRun?: boolean;
+  privateKey?: string | Buffer;
+  trustLevel?: 'low' | 'high';
+}
+
+export interface RenovateAdminConfig {
+  cacheDir?: string;
+
+  customEnvVariables?: Record<string, string>;
+
+  endpoint?: string;
+
+  localDir?: string;
+
   logContext?: string;
 
   onboarding?: boolean;
@@ -101,14 +111,7 @@ export interface RenovateAdminConfig {
   onboardingConfigFileName?: string;
 
   platform?: string;
-  postUpdateOptions?: string[];
-  privateKey?: string | Buffer;
-  privateKeyPath?: string;
-  repositories?: RenovateRepository[];
   requireConfig?: boolean;
-  trustLevel?: 'low' | 'high';
-  redisUrl?: string;
-  gitPrivateKey?: string;
 }
 
 export type PostUpgradeTasks = {
@@ -161,7 +164,7 @@ export interface RenovateConfig
   isFork?: boolean;
 
   fileList?: string[];
-
+  configWarningReuseIssue?: boolean;
   dependencyDashboard?: boolean;
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
@@ -171,6 +174,7 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
+  postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
@@ -186,6 +190,8 @@ export interface RenovateConfig
 
   fetchReleaseNotes?: boolean;
 }
+
+export interface GlobalConfig extends RenovateConfig, GlobalAdminConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
