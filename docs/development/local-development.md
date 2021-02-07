@@ -57,7 +57,7 @@ If you already installed a component, skip the corresponding step.
   PS C:\Windows\system32> yarn --version
   1.22.5
   PS C:\Windows\system32> python --version
-  Python 3.8.6
+  Python 3.8.7
   PS C:\Windows\system32> python -c "from unittest import mock; print(mock.__version__)"
   1.0
   PS C:\Windows\system32> java -version
