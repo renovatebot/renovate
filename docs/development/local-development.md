@@ -49,7 +49,7 @@ If you already installed a component, skip the corresponding step.
 
   Verify you're using the appropriate versions:
 
-  ```
+  ```powershell
   PS C:\Windows\system32> git --version
   git version 2.30.0.windows.2
   PS C:\Windows\system32> node --version
