@@ -11,8 +11,8 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git
-- Node.js `^12.13.0 || >=14.15.0`
-- Yarn `^1.17.0`
+- Node.js `^12.13.0 || >=14.15.4`
+- Yarn `^1.22.5`
 - C++ compiler
 - Python `^3.8`
 - Java between `8` and `12`
@@ -51,13 +51,13 @@ If you already installed a component, skip the corresponding step.
 
   ```
   PS C:\Windows\system32> git --version
-  git version 2.29.0.windows.1
+  git version 2.30.0.windows.2
   PS C:\Windows\system32> node --version
-  v14.15.0
+  v14.15.4
   PS C:\Windows\system32> yarn --version
-  1.22.4
+  1.22.5
   PS C:\Windows\system32> python --version
-  Python 3.8.1
+  Python 3.8.6
   PS C:\Windows\system32> python -c "from unittest import mock; print(mock.__version__)"
   1.0
   PS C:\Windows\system32> java -version
