@@ -118,7 +118,7 @@ Failing branches will never get a Pull Request created until they eventually pas
 
 ### Wait until tests have passed before creating a PR, but create the PR even if they fail
 
-Set configuration option `prCreation` to `"not-pending"`
+Set the configuration option `prCreation` to `"not-pending"`.
 
 ### Assign PRs to specific user(s)
 
