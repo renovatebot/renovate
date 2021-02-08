@@ -42,7 +42,7 @@ See the dedicated [Private npm module support](/private-modules/) page.
 Renovate itself will run as often as its administrator has configured it (e.g. hourly, daily, etc).
 But you may wish to update certain repositories less often, or even specific packages at a different schedule.
 
-If you want to control the days of the week or times of day that renovate updates packages, use the `timezone` and `schedule` configuration options.
+If you want to control the days of the week or times of day that Renovate updates packages, use the `timezone` and `schedule` configuration options.
 
 By default, Renovate schedules will use the UTC timezone.
 This can be overridden in global config.
@@ -55,7 +55,7 @@ Finally, it can be overridden on a per-repository basis too, e.g.:
 The timezone must be one of the valid
 [IANA time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
-Now that your timezone is set, you can define days of week or hours of the day in which renovate will make changes.
+Now that your timezone is set, you can define days of week or hours of the day in which Renovate will make changes.
 For this we rely on text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) and its concepts of "days", "time_before", and "time_after".
 
 Example scheduling:
