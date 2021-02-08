@@ -119,40 +119,6 @@ Or if you think your preset would be valuable for others, please contribute a PR
 If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
 That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
 
-Let's say that your username on npm and elsewhere is "fastcore".
-In that case, you can choose between publishing your preset config package as `@fastcore/renovate-config` or `renovate-config-fastcore`.
-Let's assume you choose `renovate-config-fastcore` as the package name:
-
-You then need to publish the `renovate-config-fastcore` package where the `package.json` contains the field `renovate-config` and then put your config under the field `default`.
-For example:
-
-```json
-{
-  "name": "renovate-config-fastcore",
-  "version": "0.0.1",
-  ...
-  "renovate-config": {
-    "default": {
-      "extends": ["config:base", "schedule:nonOfficeHours"]
-    }
-  }
-}
-```
-
-Then in each of your repositories you can add your renovate config like:
-
-```json
-  "extends": ["fastcore"]
-```
-
-Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
-
-Note: if you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
-
-```json
-  "extends": ["@fastcore"]
-```
-
 ## GitHub-hosted Presets
 
 It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs.
