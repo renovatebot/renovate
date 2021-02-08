@@ -126,7 +126,7 @@ Set the configuration option `assignees` to an array of usernames.
 
 ### Add labels to PRs
 
-Set the configuration option `labels` to an array of labels to use
+Set the configuration option `labels` to an array of labels to use.
 
 ### Apply a rule, but only to package `abc`?
 
