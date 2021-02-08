@@ -20,6 +20,7 @@ describe(getName(__filename), () => {
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
       };
+      jest.resetAllMocks();
     });
     it('returns false if branch does not exist', async () => {
       git.branchExists.mockReturnValueOnce(false);
@@ -108,6 +109,7 @@ describe(getName(__filename), () => {
       expect(res.reuseExistingBranch).toBe(true);
     });
     it('returns false if automerge branch and stale', async () => {
+      config.rebaseWhen = 'auto';
       config.automerge = true;
       config.automergeType = 'branch';
       git.branchExists.mockReturnValueOnce(true);
@@ -129,6 +131,7 @@ describe(getName(__filename), () => {
     });
 
     it('returns false if automerge pr and stale', async () => {
+      config.rebaseWhen = 'auto';
       config.automerge = true;
       config.automergeType = 'pr';
       git.branchExists.mockReturnValueOnce(true);
@@ -137,12 +140,33 @@ describe(getName(__filename), () => {
       expect(res.reuseExistingBranch).toBe(false);
     });
 
-    it('returns true if autmerge, rebaseWhen=never and stale', async () => {
-      config.automerge = true;
+    it('returns false if getRepoForceRebase and stale', async () => {
+      config.rebaseWhen = 'auto';
+      platform.getRepoForceRebase.mockResolvedValueOnce(true);
       git.branchExists.mockReturnValueOnce(true);
       git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(false);
+    });
+
+    it('returns true if automerge, rebaseWhen=never and stale', async () => {
+      config.rebaseWhen = 'never';
+      config.automerge = true;
+      git.branchExists.mockReturnValueOnce(true);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(true);
+      expect(git.isBranchStale).not.toHaveBeenCalled();
+      expect(git.isBranchModified).not.toHaveBeenCalled();
+    });
+
+    it('returns true if automerge, rebaseWhen=conflicted and stale', async () => {
+      config.rebaseWhen = 'conflicted';
+      config.automerge = true;
+      git.branchExists.mockReturnValueOnce(true);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(true);
+      expect(git.isBranchStale).not.toHaveBeenCalled();
+      expect(git.isBranchModified).not.toHaveBeenCalled();
     });
   });
 });
