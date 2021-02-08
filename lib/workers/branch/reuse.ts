@@ -48,8 +48,8 @@ export async function shouldReuseExistingBranch(
 
   if (
     config.rebaseWhen === 'behind-base-branch' ||
-    (config.rebaseWhen === 'auto' && (await platform.getRepoForceRebase())) ||
-    (config.automerge && config.automergeType === 'branch')
+    (config.rebaseWhen === 'auto' &&
+      (config.automerge === true || (await platform.getRepoForceRebase())))
   ) {
     if (await isBranchStale(branchName)) {
       logger.debug(`Branch is stale and needs rebasing`);
