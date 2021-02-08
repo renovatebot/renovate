@@ -56,8 +56,7 @@ Finally, it can be overridden on a per-repository basis too, e.g.:
 }
 ```
 
-The timezone must be one of the valid
-[IANA time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+The timezone must be one of the valid [IANA time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
 Now that your timezone is set, you can define days of week or hours of the day in which Renovate will make changes.
 For this we rely on text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) and its concepts of "days", "time_before", and "time_after".
