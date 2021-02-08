@@ -27,7 +27,7 @@ You can configure the PR target branch via the `baseBranches` option.
 
 Add this line to the `renovate.json` file that's in the _default_ branch (`master` in this example).
 
-```
+```json
 {
   "baseBranches": ["next"]
 }
@@ -50,8 +50,10 @@ By default, Renovate schedules will use the UTC timezone.
 This can be overridden in global config.
 Finally, it can be overridden on a per-repository basis too, e.g.:
 
-```
-  "timezone": "America/Los_Angeles",
+```json
+{
+  "timezone": "America/Los_Angeles"
+}
 ```
 
 The timezone must be one of the valid
@@ -74,7 +76,7 @@ This scheduling feature can be particularly useful for "noisy" packages that are
 
 To restrict `aws-sdk` to only weekly updates, you could add this package rule:
 
-```
+```json
   "packageRules": [
     {
       "matchPackageNames": ["aws-sdk"],
@@ -133,7 +135,7 @@ Set the configuration option `labels` to an array of labels to use
 
 e.g.
 
-```
+```json
 "packageRules": [
   {
     "matchPackageNames": ["abc"],
@@ -146,7 +148,7 @@ e.g.
 
 Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns` and a regex. e.g.
 
-```
+```json
 "packageRules": [
   {
     "matchPackagePatterns": "^abc",
@@ -159,7 +161,7 @@ Do the same as above, but instead of using `matchPackageNames`, use `matchPackag
 
 As above, but apply a `groupName`, e.g.
 
-```
+```json
 "packageRules": [
   {
     "matchPackagePatterns": "^abc",
@@ -172,7 +174,7 @@ As above, but apply a `groupName`, e.g.
 
 Set the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration options:
 
-```
+```json
 "branchName": "vroom/{{depName}}-{{newMajor}}.x",
 "commitMessage": "Vroom vroom dependency {{depName}} to version {{newValue}}",
 "prTitle": "Vroom {{depName}},
