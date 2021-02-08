@@ -20,7 +20,7 @@ Renovate will:
 
 ## What if I need to .. ?
 
-### Use an alternative branch for Pull Request target
+### Use an alternative branch as my Pull Request target
 
 If for example your repository default branch is `master` but your Pull Requests should target branch `next`, then you can configure this via the `baseBranches` configuration option.
 To do this, add this line to the `renovate.json` in the _default_ branch (i.e. `master` in this example).
