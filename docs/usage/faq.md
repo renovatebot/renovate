@@ -182,6 +182,8 @@ Set the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration optio
 "prTitle": "Vroom {{depName}},
 ```
 
+<!-- The example looks vague to me as well, should we use a proper JSON example? -->
+
 ### Automatically merge passing Pull Requests
 
 Set configuration option `autoMerge` to `true`.
