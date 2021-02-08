@@ -5,7 +5,7 @@ description: Frequently Asked Questions for Renovate Configuration
 
 # Frequently Asked Questions (FAQ)
 
-## What Is The Default Behavior?
+## What is the default behavior?
 
 Renovate will:
 
@@ -18,7 +18,7 @@ Renovate will:
 - Update `yarn.lock` and/or `package-lock.json` files if found
 - Create Pull Requests immediately after branch creation
 
-## What If I Need To .. ?
+## What if I need to .. ?
 
 ### Use an alternative branch for Pull Request target
 
@@ -37,7 +37,7 @@ You may configure more than one in the above.
 
 See the dedicated [Private npm module support](/private-modules/) page.
 
-### Control renovate's schedule
+### Control Renovate's schedule
 
 Renovate itself will run as often as its administrator has configured it (e.g. hourly, daily, etc).
 But you may wish to update certain repositories less often, or even specific packages at a different schedule.
@@ -84,7 +84,7 @@ To restrict `aws-sdk` to only weekly updates, you could add this package rule:
 Note that schedule must be in the form of an array, even if only one schedule is present.
 Multiple entries in the array means "or".
 
-### Disable renovate for certain dependency types
+### Disable Renovate for certain dependency types
 
 Define a packageRules entry which has the dependency type(s) in `matchDepTypes` and `"enabled": false`.
 
@@ -96,7 +96,7 @@ Add a configuration for configuration option `groupName` set to value `"all"`, a
 
 Set configuration option `separateMajorMinor` to `false`.
 
-### Keep using semver ranges, instead of pinning dependencies
+### Keep using SemVer ranges, instead of pinning dependencies
 
 Set configuration option `rangeStrategy` to `"replace"`.
 
