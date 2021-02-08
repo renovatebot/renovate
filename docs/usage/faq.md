@@ -148,7 +148,7 @@ e.g.
 
 ### Apply a rule, but only for packages starting with `abc`
 
-Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns` and a regex. e.g.
+Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns` and a regex:
 
 ```json
 "packageRules": [
@@ -161,7 +161,7 @@ Do the same as above, but instead of using `matchPackageNames`, use `matchPackag
 
 ### Group all packages starting with `abc` together in one PR
 
-As above, but apply a `groupName`, e.g.
+As above, but apply a `groupName`:
 
 ```json
 "packageRules": [
