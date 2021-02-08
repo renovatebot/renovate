@@ -42,13 +42,13 @@ See the dedicated [Private npm module support](/private-modules/) page.
 ### Control Renovate's schedule
 
 Renovate itself will run as often as its administrator has configured it (e.g. hourly, daily, etc).
-But you may wish to update certain repositories less often, or even specific packages at a different schedule.
+You may want to update certain repositories less often.
+Or you may even want to use different schedules for specific packages.
 
-If you want to control the days of the week or times of day that Renovate updates packages, use the `timezone` and `schedule` configuration options.
+To control the days of the week or times of day that Renovate updates packages, use the `timezone` and `schedule` configuration options.
+By default, Renovate schedules use the UTC timezone, but you can override this in the global config.
 
-By default, Renovate schedules will use the UTC timezone.
-This can be overridden in global config.
-Finally, it can be overridden on a per-repository basis too, e.g.:
+You can set a specific time zone in your local config file as well:
 
 ```json
 {
@@ -56,12 +56,13 @@ Finally, it can be overridden on a per-repository basis too, e.g.:
 }
 ```
 
-The timezone must be one of the valid [IANA time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+The timezone must be a valid [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
-Now that your timezone is set, you can define days of week or hours of the day in which Renovate will make changes.
-For this we rely on text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) and its concepts of "days", "time_before", and "time_after".
+With the timezone set, you can define days of week or hours of the day in which Renovate will make changes.
+Renovate uses the [later](https://bunkat.github.io/later/parsers.html#text) library to parse the text.
+The _later_ library also handles the concepts of "days", time_before", and "time_after".
 
-Example scheduling:
+Examples of the kind of schedules you can create:
 
 ```
 every weekend
@@ -71,9 +72,9 @@ before 5:00am
 on friday and saturday
 ```
 
-This scheduling feature can be particularly useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
+The scheduling feature can be very useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
 
-To restrict `aws-sdk` to only weekly updates, you could add this package rule:
+To restrict `aws-sdk` to weekly updates, you could add this package rule:
 
 ```json
   "packageRules": [
@@ -84,7 +85,7 @@ To restrict `aws-sdk` to only weekly updates, you could add this package rule:
   ]
 ```
 
-Note that schedule must be in the form of an array, even if only one schedule is present.
+The "schedule" propery must always be defined in an array, even if you only set a single schedule.
 Multiple entries in the array means "or".
 
 ### Disable Renovate for certain dependency types
