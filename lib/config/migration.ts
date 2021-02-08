@@ -164,6 +164,8 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.rangeStrategy = 'replace';
         }
+      } else if (is.string(val) && val.includes('{{baseDir}}')) {
+        migratedConfig[key] = val.replace(/{{baseDir}}/g, '{{packageFileDir}}');
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
       } else if (key === 'rebaseStalePrs') {
