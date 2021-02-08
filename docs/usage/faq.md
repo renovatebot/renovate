@@ -186,12 +186,12 @@ Set the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration optio
 
 ### Automatically merge passing Pull Requests
 
-Set configuration option `autoMerge` to `true`.
+Set the configuration option `autoMerge` to `true`.
 Nest it inside config objects `patch` or `minor` if you want it to apply to certain types only.
 
 ### Separate patch releases from minor releases
 
-Renovate's default behavior is to separate major and minor releases, while patch releases are also consider "minor".
+Renovate's default behavior is to separate major and minor releases, while patch releases are also considered "minor".
 For example if you were running `q@0.8.7` you would receive one branch for the minor update to `q@0.9.7` and a second for the major update to `q@1.4.1`.
 
 If you set the configuration option `separateMinorPatch` to `true`, or you configure `automerge` to have value `"patch"`, then Renovate will then separate patch releases as well.
