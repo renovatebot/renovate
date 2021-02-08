@@ -22,8 +22,10 @@ Renovate will:
 
 ### Use an alternative branch as my Pull Request target
 
-If for example your repository default branch is `master` but your Pull Requests should target branch `next`, then you can configure this via the `baseBranches` configuration option.
-To do this, add this line to the `renovate.json` in the _default_ branch (i.e. `master` in this example).
+Say your repository's default branch is `master` but you want Renovate to use the `next` branch as its PR target.
+You can configure the PR target branch via the `baseBranches` option.
+
+Add this line to the `renovate.json` file that's in the _default_ branch (`master` in this example).
 
 ```
 {
@@ -31,7 +33,7 @@ To do this, add this line to the `renovate.json` in the _default_ branch (i.e. `
 }
 ```
 
-You may configure more than one in the above.
+You can set more than one PR target branch in the `baseBranches` array.
 
 ### Support private npm modules
 
