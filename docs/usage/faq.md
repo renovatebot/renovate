@@ -191,16 +191,48 @@ Nest it inside config objects `patch` or `minor` if you want it to apply to cert
 
 ### Separate patch releases from minor releases
 
-Renovate's default behavior is to separate major and minor releases, while patch releases are also considered "minor".
-For example if you were running `q@0.8.7` you would receive one branch for the minor update to `q@0.9.7` and a second for the major update to `q@1.4.1`.
+#### Renovate's default behavior for major/minor releases
 
-If you set the configuration option `separateMinorPatch` to `true`, or you configure `automerge` to have value `"patch"`, Renovate will separate patch releases as well.
-For example, if you did this when running `q@0.8.7` then you'd receive three PRs - for `q@0.8.13`, `q@0.9.7` and `q@1.4.1`.
+Renovate's default behavior is to separate major and minor releases, patch releases are also considered "minor".
+Let's explain the default behavior with an example:
 
-Of course, most people don't want _more_ PRs, so you would probably want to utilise this feature to make less work for yourself instead.
-As an example, you might:
+Say you are using a package `snorgleborf`, it's the `0.8.0` version.
+The `snorgleborf` maintainers then release the following versions:
 
-- Update patch updates daily and automerge if they pass tests
-- Update minor and major updates weekly
+- `0.8.1` (patch)
+- `0.9.0` (minor)
+- `1.0.0` (major)
 
-The result of this would hopefully be that you barely notice Renovate during the week, while still getting the benefits of patch updates.
+Renovate would then open the following PRs:
+
+- Update dependency `snorgleborf` to `0.9.0` (minor)
+- Update dependency `snorgleborf` to `1.0.0` (major)
+
+Note how Renovate groups the patch and minor versions together into one PR.
+This means you only get a PR for the minor version, `0.9.0`.
+
+You can override the default behavior.
+To learn more read the section below.
+
+#### Overriding the default behavior for major/minor releases
+
+You can see in the example above that Renovate won't normally open a PR for the `snorgleborf` patch release.
+
+There are 2 ways to tell renovate to open a separate PR for the patch release:
+
+- Set `separateMinorPatch` to `true`
+- Set `automerge` to the value: `"patch"`
+
+In both cases, Renovate will open 3 PRs:
+
+- Update dependency `snorgleborf` to `0.8.1` (patch)
+- Update dependency `snorgleborf` to `0.9.0` (minor)
+- Update dependency `snorgleborf` to `1.0.0` (major)
+
+Most people don't want more PRs though.
+But it can still be handy to get PRs for patches when using automerge:
+
+- Get daily patch updates which are automerged once tests pass
+- Get weekly updates for minor and major updates.
+
+The end result would be that you barely notice Renovate during the week, while you still get the benefits of patch level updates.
