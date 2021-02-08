@@ -90,7 +90,7 @@ Multiple entries in the array means "or".
 
 ### Disable Renovate for certain dependency types
 
-Define a packageRules entry which has the dependency type(s) in `matchDepTypes` and `"enabled": false`.
+Define a `packageRules` entry which has the dependency type(s) in `matchDepTypes` and `"enabled": false`.
 
 ### Use a single branch/PR for all dependency upgrades
 
