@@ -112,9 +112,7 @@ If you want to update the lock file more often, update the `schedule` field insi
 ### Wait until tests have passed before creating the PR
 
 Set the configuration option `prCreation` to `"status-success"`.
-Failing branches will never get a Pull Request created until they eventually pass.
-
-<!-- The above is really, really vague, please help me reword this. -->
+Branches with failing tests will remain in Git and continue to get updated if necessary, but no PR will be created until their tests pass.
 
 ### Wait until tests have passed before creating a PR, but create the PR even if they fail
 
