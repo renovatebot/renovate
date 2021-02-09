@@ -100,7 +100,7 @@ This configuration will be applied after all other environment variables so that
 
 ## dockerChildPrefix
 
-Adds a custom prefix to the default renovate sidecar Docker containers name and label.
+Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
 If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_renovate_node` instead of currently used `renovate_node` and be labeled `myprefix_renovate_child` instead of `renovate_child`.
 
