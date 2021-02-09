@@ -172,15 +172,7 @@ As above, but apply a `groupName`:
 
 ### Change the default branch name, commit message, PR title or PR description
 
-Set the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration options:
-
-```json
-"branchName": "vroom/{{depName}}-{{newMajor}}.x",
-"commitMessage": "Vroom vroom dependency {{depName}} to version {{newValue}}",
-"prTitle": "Vroom {{depName}},
-```
-
-<!-- The example looks vague to me as well, should we use a proper JSON example? -->
+You can use the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration options to change the defaults for those settings.
 
 ### Automatically merge passing Pull Requests
 
