@@ -1,7 +1,7 @@
 import type { Merge } from 'type-fest';
 import {
   GroupConfig,
-  RenovateAdminConfig,
+  LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -100,7 +100,7 @@ export enum ProcessBranchResult {
 
 export interface BranchConfig
   extends BranchUpgradeConfig,
-    RenovateAdminConfig,
+    LegacyAdminConfig,
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;

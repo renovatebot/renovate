@@ -19,7 +19,6 @@ interface GradleDependency {
 
 type GradleDependencyWithRepos = GradleDependency & { repos: string[] };
 
-// TODO: Unify with GradleDependency ?
 export interface BuildDependency {
   name: string;
   depGroup: string;
