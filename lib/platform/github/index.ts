@@ -1557,7 +1557,7 @@ export async function mergePr(
   return true;
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   if (config.isGhe) {
     return smartTruncate(input, 60000);
   }

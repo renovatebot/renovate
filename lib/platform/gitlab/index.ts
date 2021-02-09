@@ -596,7 +596,7 @@ export async function mergePr(iid: number): Promise<boolean> {
   }
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   return smartTruncate(
     input
       .replace(/Pull Request/g, 'Merge Request')
@@ -761,7 +761,7 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(sanitize(body));
+  const description = massageMarkdown(sanitize(body));
   try {
     const issueList = await getIssueList();
     let issue = issueList.find((i) => i.title === title);

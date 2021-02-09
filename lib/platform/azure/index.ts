@@ -632,7 +632,7 @@ export async function mergePr(
   }
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 4000)
     .replace(

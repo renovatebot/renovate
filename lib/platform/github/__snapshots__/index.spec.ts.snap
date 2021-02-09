@@ -4199,7 +4199,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getPrBody(input) returns not-updated pr body for GHE 1`] = `
+exports[`platform/github massageMarkdown(input) returns not-updated pr body for GHE 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4261,7 +4261,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getPrBody(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://togithub.com/foo/bar/issues/5)"`;
+exports[`platform/github massageMarkdown(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://togithub.com/foo/bar/issues/5)"`;
 
 exports[`platform/github getRepoForceRebase should detect repoForceRebase 1`] = `
 Array [

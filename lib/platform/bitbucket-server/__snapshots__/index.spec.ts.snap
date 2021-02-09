@@ -2310,9 +2310,9 @@ Array [
 
 exports[`platform/bitbucket-server/index endpoint with no path getPr() returns null for no prNo 1`] = `Array []`;
 
-exports[`platform/bitbucket-server/index endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket-server/index endpoint with no path getPrBody() sanitizes HTML comments in the body 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown() sanitizes HTML comments in the body 1`] = `
 "---
 
 - [ ] If you want to rebase/retry this PR, check this box
@@ -6328,9 +6328,9 @@ Array [
 
 exports[`platform/bitbucket-server/index endpoint with path getPr() returns null for no prNo 1`] = `Array []`;
 
-exports[`platform/bitbucket-server/index endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket-server/index endpoint with path getPrBody() sanitizes HTML comments in the body 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() sanitizes HTML comments in the body 1`] = `
 "---
 
 - [ ] If you want to rebase/retry this PR, check this box
