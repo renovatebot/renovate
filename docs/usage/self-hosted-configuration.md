@@ -59,7 +59,8 @@ e.g.
 
 ```json
 {
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"],
+  "trustLevel": "high"
 }
 ```
 
