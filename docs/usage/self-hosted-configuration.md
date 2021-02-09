@@ -98,6 +98,14 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer pack
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
+## dockerChildPrefix
+
+Adds a custom prefix to the default renovate sidecar Docker containers name and label.
+
+If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_renovate_node` instead of currently used `renovate_node` and be labeled `myprefix_renovate_child` instead of `renovate_child`.
+
+Note that dangling containers will not be removed until Renovate is run with the same prefix again.
+
 ## dockerImagePrefix
 
 Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.

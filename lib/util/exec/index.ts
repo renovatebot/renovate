@@ -33,7 +33,7 @@ export async function setExecConfig(
     execConfig[key] = value || null;
   }
   if (execConfig.binarySource === 'docker') {
-    await removeDanglingContainers();
+    await removeDanglingContainers(getAdminConfig().dockerChildPrefix);
   }
 }
 
@@ -95,6 +95,7 @@ export async function exec(
 ): Promise<ExecResult> {
   const { env, docker, cwdFile } = opts;
   const extraEnv = { ...opts.extraEnv, ...getAdminConfig().customEnvVariables };
+  const dockerChildPrefix = getAdminConfig().dockerChildPrefix;
   let cwd;
   // istanbul ignore if
   if (cwdFile) {
@@ -143,10 +144,10 @@ export async function exec(
     let timer;
     const { timeout } = rawExecOptions;
     if (useDocker) {
-      await removeDockerContainer(docker.image);
+      await removeDockerContainer(docker.image, dockerChildPrefix);
       // istanbul ignore next
       timer = setTimeout(() => {
-        removeDockerContainer(docker.image); // eslint-disable-line
+        removeDockerContainer(docker.image, dockerChildPrefix); // eslint-disable-line
         logger.info({ timeout, rawExecCommand }, 'Docker run timed out');
       }, timeout);
     }
@@ -158,12 +159,14 @@ export async function exec(
       logger.trace({ err }, 'rawExec err');
       clearTimeout(timer);
       if (useDocker) {
-        await removeDockerContainer(docker.image).catch((removeErr: Error) => {
-          const message: string = err.message;
-          throw new Error(
-            `Error: "${removeErr.message}" - Original Error: "${message}"`
-          );
-        });
+        await removeDockerContainer(docker.image, dockerChildPrefix).catch(
+          (removeErr: Error) => {
+            const message: string = err.message;
+            throw new Error(
+              `Error: "${removeErr.message}" - Original Error: "${message}"`
+            );
+          }
+        );
       }
       throw err;
     }

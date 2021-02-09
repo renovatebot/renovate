@@ -7,6 +7,7 @@ export const repoAdminOptions = [
   'allowPostUpgradeCommandTemplating',
   'allowedPostUpgradeCommands',
   'customEnvVariables',
+  'dockerChildPrefix',
   'dockerImagePrefix',
   'dockerUser',
   'dryRun',
