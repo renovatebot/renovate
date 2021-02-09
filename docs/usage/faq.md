@@ -10,7 +10,7 @@ description: Frequently Asked Questions for Renovate Configuration
 Renovate will:
 
 - Look for configuration options in a configuration file (e.g. `renovate.json`) and in each `package.json` file
-- Find and process all package files (e.g. `package.json`, `can-we-change-this-item?`, `Dockerfile`, etc) in each repository
+- Find and process all package files (e.g. `package.json`, `composer.json`, `Dockerfile`, etc) in each repository
 - Use separate branches/PR for each dependency
 - Use separate branches for each _major_ version of each dependency
 - Pin devDependencies to a single version, rather than use ranges
