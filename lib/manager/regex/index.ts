@@ -43,15 +43,27 @@ function createDependency(
 ): PackageDependency {
   const dependency = dep || {};
   const { groups } = matchResult;
+
+  function updateDependency(field: string, value: string): void {
+    switch (field) {
+      case 'registryUrl':
+        // check if URL is valid and pack inside an array
+        if (url.parse(value)) {
+          dependency.registryUrls = [value];
+        }
+        break;
+      default:
+        dependency[field] = value;
+        break;
+    }
+  }
+
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template`;
     if (config[fieldTemplate]) {
       try {
-        dependency[field] = template.compile(
-          config[fieldTemplate],
-          groups,
-          false
-        );
+        const compiled = template.compile(config[fieldTemplate], groups, false);
+        updateDependency(field, compiled);
       } catch (err) {
         logger.warn(
           { template: config[fieldTemplate] },
@@ -60,17 +72,7 @@ function createDependency(
         return null;
       }
     } else if (groups[field]) {
-      switch (field) {
-        case 'registryUrl':
-          // check if URL is valid and pack inside an array
-          if (url.parse(groups[field])) {
-            dependency.registryUrls = [groups[field]];
-          }
-          break;
-        default:
-          dependency[field] = groups[field];
-          break;
-      }
+      updateDependency(field, groups[field]);
     }
   }
   dependency.replaceString = String(matchResult[0]);

@@ -115,6 +115,24 @@ describe(getName(__filename), () => {
     );
     expect(res).toMatchSnapshot();
   });
+  it('extracts and applies a registryUrlTemplate', async () => {
+    const config = {
+      matchStrings: [
+        'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+      ],
+      registryUrlTemplate: 'http://registry.{{depName}}.com',
+    };
+    const res = await extractPackageFile(
+      dockerfileContent,
+      'Dockerfile',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+    expect(
+      res.deps.find((dep) => dep.depName === 'gradle').registryUrls
+    ).toEqual(['http://registry.gradle.com']);
+  });
   it('extracts multiple dependencies with multiple matchStrings', async () => {
     const config = {
       matchStrings: [

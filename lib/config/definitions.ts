@@ -1893,6 +1893,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'registryUrlTemplate',
+    description:
+      'Optional registry url for extracted dependencies. Valid only within `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'fetchReleaseNotes',
     description: 'Allow to disable release notes fetching.',
     type: 'boolean',
