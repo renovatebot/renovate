@@ -51,19 +51,11 @@ If you already installed a component, skip the corresponding step.
 
   ```powershell
   PS C:\Windows\system32> git --version
-  git version 2.30.0.windows.2
   PS C:\Windows\system32> node --version
-  v14.15.4
   PS C:\Windows\system32> yarn --version
-  1.22.5
   PS C:\Windows\system32> python --version
-  Python 3.8.7
   PS C:\Windows\system32> python -c "from unittest import mock; print(mock.__version__)"
-  1.0
   PS C:\Windows\system32> java -version
-  openjdk version "11.0.6" 2020-01-14
-  OpenJDK Runtime Environment 18.9 (build 11.0.6+10)
-  OpenJDK 64-Bit Server VM 18.9 (build 11.0.6+10, mixed mode)
   ```
 
 _VS Code Remote Development_
