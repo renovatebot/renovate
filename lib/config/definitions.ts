@@ -102,7 +102,7 @@ const options: RenovateOptions[] = [
   {
     name: 'allowedPostUpgradeCommands',
     description:
-      'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run.',
+      'A list of regular expressions that determine which post-upgrade tasks are allowed.',
     type: 'array',
     subType: 'string',
     default: [],

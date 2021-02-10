@@ -542,9 +542,6 @@ describe(`Child process execution wrapper`, () => {
       {
         execConfig: {
           ...execConfig,
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_VALUE',
-          },
         },
         processEnv: envMock.basic,
         inCmd,
@@ -559,6 +556,11 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_VALUE',
+          },
+        },
       },
     ],
 
@@ -567,9 +569,6 @@ describe(`Child process execution wrapper`, () => {
       {
         execConfig: {
           ...execConfig,
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-          },
         },
         processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
         inCmd,
@@ -584,6 +583,11 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+        },
       },
     ],
 
@@ -593,9 +597,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_VALUE',
-          },
         },
         processEnv,
         inCmd,
@@ -616,6 +617,11 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_VALUE',
+          },
+        },
       },
     ],
 
@@ -625,9 +631,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-          },
         },
         processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
         inCmd,
@@ -648,6 +651,11 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+        },
       },
     ],
   ];
