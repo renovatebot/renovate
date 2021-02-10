@@ -12,6 +12,7 @@ const repoGroups = {
     'https://github.com/arcus-azure/arcus.backgroundjobs',
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
+  'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',
   'apollo-server': 'https://github.com/apollographql/apollo-server',
   'aspnet AspNetWebStack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet Extensions': 'https://github.com/aspnet/Extensions',
@@ -59,6 +60,12 @@ const repoGroups = {
   clarity: 'https://github.com/vmware/clarity',
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   docusaurus: 'https://github.com/facebook/docusaurus',
+  dotnet: [
+    'https://github.com/dotnet/aspnetcore',
+    'https://github.com/dotnet/efcore',
+    'https://github.com/dotnet/extensions',
+    'https://github.com/dotnet/runtime',
+  ],
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
