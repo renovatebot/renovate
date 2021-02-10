@@ -36,10 +36,10 @@ export async function flattenUpdates(
       }
       if (packagePath.length > 0) {
         packageFileConfig.parentDir = packagePath[packagePath.length - 1];
-        packageFileConfig.baseDir = packagePath.join('/');
+        packageFileConfig.packageFileDir = packagePath.join('/');
       } else {
         packageFileConfig.parentDir = '';
-        packageFileConfig.baseDir = '';
+        packageFileConfig.packageFileDir = '';
       }
       for (const dep of packageFile.deps) {
         if (dep.updates.length) {
