@@ -318,7 +318,7 @@ describe('workers/repository/updates/generate', () => {
           packageFileDir: 'foo/bar',
           semanticCommits: 'enabled',
           semanticCommitType: 'chore',
-          semanticCommitScope: '{{baseDir}}',
+          semanticCommitScope: '{{packageFileDir}}',
           newValue: '1.2.0',
           isSingleVersion: true,
           toVersion: '1.2.0',
