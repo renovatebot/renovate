@@ -315,7 +315,7 @@ describe('workers/repository/updates/generate', () => {
           ...defaultConfig,
           depName: 'some-dep',
           packageFile: 'foo/bar/package.json',
-          baseDir: 'foo/bar',
+          packageFileDir: 'foo/bar',
           semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: '{{baseDir}}',
