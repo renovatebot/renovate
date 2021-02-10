@@ -83,6 +83,7 @@ const repoGroups = {
   'graphql-toolkit': 'https://github.com/ardatan/graphql-toolkit',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
   hamcrest: 'https://github.com/hamcrest/JavaHamcrest',
+  Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
   infrastructure: 'https://github.com/instructure/instructure-ui',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
