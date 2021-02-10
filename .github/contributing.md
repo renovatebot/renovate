@@ -32,6 +32,7 @@ PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
 
 Force pushing a PR is OK when:
+
 - you need to make large changes on a PR which require a full review anyway
 - you need to bring the branch up-to-date with the default branch and incorporating the changes is more work than to create a new PR
 
