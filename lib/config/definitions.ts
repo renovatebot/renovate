@@ -1839,7 +1839,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchStrings',
     description:
-      'Regex capture rule to use. Valid only within `regexManagers` object.',
+      'Regex capture rule to use. Valid only within a `regexManagers` object.',
     type: 'array',
     subType: 'string',
     format: 'regex',
@@ -1859,7 +1859,7 @@ const options: RenovateOptions[] = [
   {
     name: 'depNameTemplate',
     description:
-      'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional depName for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1868,7 +1868,7 @@ const options: RenovateOptions[] = [
   {
     name: 'lookupNameTemplate',
     description:
-      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within `regexManagers` object.',
+      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1877,7 +1877,7 @@ const options: RenovateOptions[] = [
   {
     name: 'datasourceTemplate',
     description:
-      'Optional datasource for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional datasource for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1886,7 +1886,7 @@ const options: RenovateOptions[] = [
   {
     name: 'versioningTemplate',
     description:
-      'Optional versioning for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional versioning for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1895,7 +1895,7 @@ const options: RenovateOptions[] = [
   {
     name: 'registryUrlTemplate',
     description:
-      'Optional registry url for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional registry URL for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
