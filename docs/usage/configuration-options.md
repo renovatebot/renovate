@@ -1280,7 +1280,7 @@ Use the syntax `!/ /` like the following:
   "packageRules": [
     {
       "matchPackagePatterns": ["io.github.resilience4j"],
-      "allowedVersions": "!/^0\\./"
+      "matchCurrentVersion": "!/^0\\./"
     }
   ]
 }
