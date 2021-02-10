@@ -71,6 +71,7 @@ function checkForPlatformFailure(err: Error): void {
     'malformed object name',
     'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
     'Could not resolve host',
+    ' is not a member of team',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
