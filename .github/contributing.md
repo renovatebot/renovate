@@ -26,9 +26,14 @@ Pull Requests can only be merged once all status checks are green, which means `
 
 ## Do not force push to your pull request branch
 
-Please do not force push to your PR's branch after you have created your PR, as doing so makes it harder for us to review your work.
+Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again.
+This makes it harder for us to review your work because we don't know what has changed.
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
+
+Force pushing a PR is OK when:
+* you need to make large changes on a PR which require a full review anyway.
+* you need to bring the branch up to date with the default branch and incorporating the changes is more work than to create a new PR.
 
 ## Re-requesting a review
 
