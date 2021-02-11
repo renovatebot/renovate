@@ -66,7 +66,7 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 - Open the repository folder in VS Code
 - Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
-VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
+The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
 
 ## Fork and Clone
 
