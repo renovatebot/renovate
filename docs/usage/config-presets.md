@@ -119,10 +119,6 @@ Or if you think your preset would be valuable for others, please contribute a PR
 If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
 That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
 
-## File based presets example
-
-<!-- TODO: Explain how to use a file based preset here. -->
-
 ## GitHub-hosted Presets
 
 It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs.
