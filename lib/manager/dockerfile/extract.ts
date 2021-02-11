@@ -94,7 +94,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   const copyFromMatches = content.matchAll(
-    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|[ \t]--[a-z]+=\w+?)+--from=(?<image>\S+)/gim
+    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|[ \t]--[a-z]+=\w+?)*[ \t]--from=(?<image>\S+)/gim
   );
 
   for (const copyFromMatch of copyFromMatches) {
