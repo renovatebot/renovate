@@ -67,7 +67,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const stageNames: string[] = [];
 
   const fromMatches = content.matchAll(
-    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*\r?\n|-\S+)+(?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim
+    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*\r?\n|-\S+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim
   );
 
   for (const fromMatch of fromMatches) {
@@ -94,7 +94,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   const copyFromMatches = content.matchAll(
-    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|-\S+)+--from=(?<image>\S+)/gim
+    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|-\S+?)+--from=(?<image>\S+)/gim
   );
 
   for (const copyFromMatch of copyFromMatches) {

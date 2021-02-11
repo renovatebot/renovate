@@ -58,9 +58,9 @@ Array [
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
-    "depName": "platform=linux",
+    "depName": "image4",
     "depType": "stage",
-    "replaceString": "platform=linux",
+    "replaceString": "image4",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
