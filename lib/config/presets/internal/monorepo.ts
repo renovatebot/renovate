@@ -117,6 +117,7 @@ const repoGroups = {
   openfeign: 'https://github.com/OpenFeign/feign',
   opentelemetry: 'https://github.com/open-telemetry/opentelemetry-js',
   picasso: 'https://github.com/qlik-oss/picasso.js',
+  playwright: 'https://github.com/Microsoft/playwright',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
