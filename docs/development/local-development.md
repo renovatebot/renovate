@@ -114,7 +114,7 @@ You are better off to instead export the Environment Variable `RENOVATE_TOKEN` f
 To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`.
 Now, add a file called `.nvmrc` with the content `8.13.0`.
 Now run against the test repo you created, e.g. `yarn start r4harry/testrepo1`.
-If your token is set up correctly, you should find that it added a "Configure Renovate" PR inside the repo.
+If your token is set up correctly, you should find that Renovate created a "Configure Renovate" PR in the `testrepo1`.
 
 If this is working then in future you can create other test repos to verify your code changes against.
 
