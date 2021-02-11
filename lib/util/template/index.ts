@@ -38,7 +38,6 @@ export const exposedConfigOptions = [
 
 export const allowedFields = {
   baseBranch: 'The baseBranch for this branch/PR',
-  baseDir: 'The full directory with path that the dependency has been found in',
   body: 'The body of the release notes',
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion: 'The current version that is being updated',
@@ -76,6 +75,8 @@ export const allowedFields = {
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade.',
   packageFile: 'The filename that the dependency was found in',
+  packageFileDir:
+    'The directory with full path where the packageFile was found',
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',

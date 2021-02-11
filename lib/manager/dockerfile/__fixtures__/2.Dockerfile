@@ -21,22 +21,12 @@ FROM\
 COPY --from=image6 /path/1 /path/2
 
  COPY \
+	# comment1
 	--from=image7:1.0.0@sha256:abcdef \
 	/path/1 \
 	/path/2
 
 # COPY --from=image8
-
-COPY   --from=image9
-
-COPY\
-    --chown=root \
-	# comment1
-#
- #comment2
- --from=image10
-	# comment2
-    path1 path2
 
 COPY --chown=root --from=image11 / ./
 
