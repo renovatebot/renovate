@@ -114,11 +114,6 @@ Parameters must be strings, non-quoted, and separated by commas if there are mor
 If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
 Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
 
-## How to Publish Preset Configs
-
-If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
-That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
-
 ## GitHub-hosted Presets
 
 It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs.
@@ -198,3 +193,8 @@ For example the result may be:
   "extends": ["local>myorgname/.github:renovate-config"]
 }
 ```
+
+## npm-hosted presets
+
+If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
+That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
