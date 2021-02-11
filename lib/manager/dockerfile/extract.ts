@@ -67,7 +67,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const stageNames: string[] = [];
 
   const fromMatches = content.matchAll(
-    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*\r?\n|-\S+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim
+    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\w+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim
   );
 
   for (const fromMatch of fromMatches) {
