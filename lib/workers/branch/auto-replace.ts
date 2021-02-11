@@ -31,7 +31,7 @@ export async function confirmIfDepUpdated(
     );
     newUpgrade = newExtract.deps[depIndex];
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ manager, packageFile }, 'Failed to parse newContent');
+    logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
   if (!newUpgrade) {
     logger.debug({ manager, packageFile }, 'No newUpgrade');

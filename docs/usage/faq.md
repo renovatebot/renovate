@@ -223,6 +223,6 @@ Most people don't want more PRs though.
 But it can still be handy to get PRs for patches when using automerge:
 
 - Get daily patch updates which are automerged once tests pass
-- Get weekly updates for minor and major updates.
+- Get weekly updates for minor and major updates
 
 The end result would be that you barely notice Renovate during the week, while you still get the benefits of patch level updates.
