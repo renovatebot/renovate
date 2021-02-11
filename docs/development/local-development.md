@@ -149,9 +149,9 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 ## Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) for code formatting.
+We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again.
-You usually shouldn't need to fix any Prettier errors manually.
+You usually don't need to fix any Prettier errors by hand.
 
 ## Keeping your Renovate fork up to date
 
