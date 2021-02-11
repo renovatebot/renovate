@@ -14,6 +14,7 @@ const repoGroups = {
     'https://github.com/algolia/react-instantsearch',
   'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',
   'apollo-server': 'https://github.com/apollographql/apollo-server',
+  'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
   'aspnet AspNetWebStack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet Extensions': 'https://github.com/aspnet/Extensions',
   'aws-cdk': 'https://github.com/aws/aws-cdk',
