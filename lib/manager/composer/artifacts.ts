@@ -31,13 +31,9 @@ interface UserPass {
   password: string;
 }
 
-interface GitlabToken {
-  [key: string]: string | string[];
-}
-
 interface AuthJson {
   'github-oauth'?: Record<string, string>;
-  'gitlab-token'?: GitlabToken;
+  'gitlab-token'?: Record<string, string | string[]>;
   'http-basic'?: Record<string, UserPass>;
 }
 
@@ -78,7 +74,7 @@ function getAuthJson(): string | null {
   });
   if (gitlabCredentials?.token) {
     const host = gitlabCredentials.hostName || 'gitlab.com';
-    const gitlabToken: GitlabToken = {
+    const gitlabToken = {
       'gitlab-domains': [host],
     };
     gitlabToken[host] = gitlabCredentials.token;
