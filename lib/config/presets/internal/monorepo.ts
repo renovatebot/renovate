@@ -97,6 +97,7 @@ const repoGroups = {
   lodash: 'https://github.com/lodash/',
   loopback: 'https://github.com/strongloop/loopback-next',
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
+  MassTransit: 'https://github.com/MassTransit/MassTransit',
   material: 'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   mui: 'https://github.com/mui-org/material-ui',
