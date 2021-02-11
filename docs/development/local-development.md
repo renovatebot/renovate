@@ -172,8 +172,10 @@ Quite often, the quickest way for you to test or fix something is to fork an exi
 However, by default Renovate skips over repositories that are forked.
 To override this default, you need to specify the setting `includeForks` as `true`.
 
-Option 1: Add `"includeForks": true` to the `renovate.json` of the repository
-Option 2: Run Renovate with the CLI flag `--renovate-fork=true`
+Tell Renovate to run on your forked repository by doing one of the following:
+
+1. Add `"includeForks": true` to the `renovate.json` file in your forked repository
+1. Run Renovate with the CLI flag `--renovate-fork=true`
 
 ### Log files
 
