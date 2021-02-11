@@ -50,6 +50,8 @@ function createDependency(
         // check if URL is valid and pack inside an array
         if (url.parse(value)) {
           dependency.registryUrls = [value];
+        } else {
+          logger.warn({ value }, 'Invalid regex manager registryUrl');
         }
         break;
       default:
