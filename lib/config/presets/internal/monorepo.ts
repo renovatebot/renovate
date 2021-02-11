@@ -127,6 +127,7 @@ const repoGroups = {
   sentry: 'https://github.com/getsentry/sentry-javascript',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
+  Steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
   strapi: 'https://github.com/strapi/strapi',
   stryker: 'https://github.com/stryker-mutator/stryker',
