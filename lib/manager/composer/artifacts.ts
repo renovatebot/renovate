@@ -73,7 +73,7 @@ function getAuthJson(): string | null {
     };
   }
 
-  const gitlabCredentials = hostRules.find({
+  const [gitlabCredentials] = hostRules.findAll({
     hostType: PLATFORM_TYPE_GITLAB,
   });
   if (gitlabCredentials?.token) {

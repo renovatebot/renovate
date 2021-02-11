@@ -210,7 +210,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "COMPOSER_AUTH": "{\\"github-oauth\\":{\\"github.com\\":\\"github-token\\"},\\"gitlab-token\\":{\\"gitlab.com\\":\\"gitlab-token\\"},\\"http-basic\\":{\\"packagist.renovatebot.com\\":{\\"username\\":\\"some-username\\",\\"password\\":\\"some-password\\"},\\"artifactory.yyyyyyy.com\\":{\\"username\\":\\"some-other-username\\",\\"password\\":\\"some-other-password\\"}}}",
+        "COMPOSER_AUTH": "{\\"github-oauth\\":{\\"github.com\\":\\"github-token\\"},\\"gitlab-token\\":{\\"gitlab-domains\\":[\\"gitlab.com\\"],\\"gitlab.com\\":\\"gitlab-token\\"},\\"http-basic\\":{\\"packagist.renovatebot.com\\":{\\"username\\":\\"some-username\\",\\"password\\":\\"some-password\\"},\\"artifactory.yyyyyyy.com\\":{\\"username\\":\\"some-other-username\\",\\"password\\":\\"some-other-password\\"}}}",
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
