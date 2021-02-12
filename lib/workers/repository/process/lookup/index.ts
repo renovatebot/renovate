@@ -341,6 +341,20 @@ export async function lookupUpdates(
       update.newMinor = version.getMinor(toVersion);
       update.updateType =
         update.updateType || getType(config, update.fromVersion, toVersion);
+
+      const bucket = getBucket(config, update);
+      if (buckets[bucket]) {
+        buckets[bucket].push(update);
+      } else {
+        buckets[bucket] = [update];
+      }
+    }
+    for (const updates of Object.values(buckets)) {
+      const sortedUpdates = updates.sort((u1, u2) =>
+        version.sortVersions(u1.toVersion, u2.toVersion)
+      );
+      const update = sortedUpdates.pop();
+      const { toVersion } = update;
       update.isSingleVersion =
         update.isSingleVersion || !!version.isSingleVersion(update.newValue);
       if (!version.isVersion(update.newValue)) {
@@ -359,19 +373,6 @@ export async function lookupUpdates(
           update[field] = updateRelease[field] as never;
         }
       });
-
-      const bucket = getBucket(config, update);
-      if (buckets[bucket]) {
-        buckets[bucket].push(update);
-      } else {
-        buckets[bucket] = [update];
-      }
-    }
-    for (const updates of Object.values(buckets)) {
-      const sortedUpdates = updates.sort((u1, u2) =>
-        version.sortVersions(u1.toVersion, u2.toVersion)
-      );
-      const update = sortedUpdates.pop();
       if (sortedUpdates.length) {
         update.skippedOverVersions = sortedUpdates.map((u) => u.toVersion);
       }
