@@ -61,11 +61,8 @@ function getType(
   fromVersion: string,
   toVersion: string
 ): UpdateType {
-  const { versioning, rangeStrategy, currentValue } = config;
+  const { versioning } = config;
   const version = allVersioning.get(versioning);
-  if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
-    return 'bump';
-  }
   if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
     return 'major';
   }
@@ -118,9 +115,6 @@ function getFromVersion(
 function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
   const { separateMajorMinor, separateMultipleMajor } = config;
   const { updateType, newMajor } = update;
-  if (updateType === 'lockfileUpdate') {
-    return updateType;
-  }
   if (
     !separateMajorMinor ||
     config.major.automerge === true ||
@@ -331,7 +325,6 @@ export async function lookupUpdates(
           );
           continue; // eslint-disable-line no-continue
         }
-        update.updateType = 'lockfileUpdate';
         update.fromVersion = lockedVersion;
         update.displayFrom = lockedVersion;
         update.displayTo = toVersion;
@@ -375,6 +368,18 @@ export async function lookupUpdates(
       });
       if (sortedUpdates.length) {
         update.skippedOverVersions = sortedUpdates.map((u) => u.toVersion);
+      }
+      if (
+        rangeStrategy === 'update-lockfile' &&
+        currentValue === update.newValue
+      ) {
+        update.isLockfileUpdate = true;
+      }
+      if (
+        rangeStrategy === 'bump' &&
+        version.matches(toVersion, currentValue)
+      ) {
+        update.isBump = true;
       }
       res.updates.push(update);
     }
@@ -438,22 +443,6 @@ export async function lookupUpdates(
         } else {
           logger.debug({ newValue: update.newValue }, 'Could not getDigest');
         }
-      }
-    }
-  }
-  for (const update of res.updates) {
-    const { updateType, fromVersion, toVersion } = update;
-    if (['bump', 'lockfileUpdate'].includes(updateType)) {
-      update[updateType === 'bump' ? 'isBump' : 'isLockfileUpdate'] = true;
-      if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
-        update.updateType = 'major';
-      } else if (
-        config.separateMinorPatch &&
-        version.getMinor(toVersion) === version.getMinor(fromVersion)
-      ) {
-        update.updateType = 'patch';
-      } else {
-        update.updateType = 'minor';
       }
     }
   }

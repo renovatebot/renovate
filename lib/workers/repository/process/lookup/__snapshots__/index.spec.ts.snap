@@ -1683,7 +1683,7 @@ Array [
     "newValue": "~1.0.1",
     "releaseTimestamp": "2014-03-11T18:47:17.560Z",
     "toVersion": "1.0.1",
-    "updateType": "minor",
+    "updateType": "patch",
   },
   Object {
     "fromVersion": "1.0.0",
@@ -1726,7 +1726,7 @@ Array [
       "0.4.2",
     ],
     "toVersion": "0.4.4",
-    "updateType": "minor",
+    "updateType": "patch",
   },
   Object {
     "fromVersion": "0.4.4",

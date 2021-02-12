@@ -134,6 +134,7 @@ export interface LookupUpdate {
   commitMessageAction?: string;
   displayFrom?: string;
   displayTo?: string;
+  isBump?: boolean;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
   isRange?: boolean;

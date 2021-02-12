@@ -79,6 +79,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'update-lockfile';
       config.depName = 'q';
       config.datasource = datasourceNpmId;
+      config.separateMinorPatch = true;
       config.lockedVersion = '0.4.0';
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
@@ -840,6 +841,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '~1.0.0';
       config.depName = 'q';
+      config.separateMinorPatch = true;
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
@@ -866,6 +868,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>=0.9.0';
       config.depName = 'q';
       config.datasource = datasourceNpmId;
+      config.separateMajorMinor = false;
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
