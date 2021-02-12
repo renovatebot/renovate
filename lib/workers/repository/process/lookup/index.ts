@@ -141,19 +141,19 @@ export async function lookupUpdates(
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   // Use the datasource's default versioning if none is configured
-  const version = allVersioning.get(
+  const versioning = allVersioning.get(
     config.versioning || getDefaultVersioning(config.datasource)
   );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
-  const isValid = currentValue && version.isValid(currentValue);
+  const isValid = currentValue && versioning.isValid(currentValue);
   if (!isValid) {
     res.skipReason = SkipReason.InvalidValue;
   }
   // Record if the dep is fixed to a version
   if (lockedVersion) {
     res.fixedVersion = lockedVersion;
-  } else if (currentValue && version.isSingleVersion(currentValue)) {
+  } else if (currentValue && versioning.isSingleVersion(currentValue)) {
     res.fixedVersion = currentValue.replace(/^=+/, '');
   }
   // istanbul ignore if
@@ -198,7 +198,7 @@ export async function lookupUpdates(
     const { latestVersion, releases } = dependency;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases.filter((release) =>
-      version.isVersion(release.version)
+      versioning.isVersion(release.version)
     );
     // istanbul ignore if
     if (allVersions.length === 0) {
@@ -223,12 +223,12 @@ export async function lookupUpdates(
         (v) =>
           v.version === taggedVersion ||
           (v.version === currentValue &&
-            version.isGreaterThan(taggedVersion, currentValue))
+            versioning.isGreaterThan(taggedVersion, currentValue))
       );
     }
     // Check that existing constraint can be satisfied
     const allSatisfyingVersions = allVersions.filter((v) =>
-      version.matches(v.version, currentValue)
+      versioning.matches(v.version, currentValue)
     );
     if (config.rollbackPrs && !allSatisfyingVersions.length) {
       const rollback = getRollbackUpdate(config, allVersions);
@@ -270,18 +270,18 @@ export async function lookupUpdates(
     if (
       fromVersion &&
       rangeStrategy === 'pin' &&
-      !version.isSingleVersion(currentValue)
+      !versioning.isSingleVersion(currentValue)
     ) {
       res.updates.push({
         updateType: 'pin',
         isPin: true,
-        newValue: version.getNewValue({
+        newValue: versioning.getNewValue({
           currentValue,
           rangeStrategy,
           fromVersion,
           toVersion: fromVersion,
         }),
-        newMajor: version.getMajor(fromVersion),
+        newMajor: versioning.getMajor(fromVersion),
       });
     }
     let filterStart = fromVersion;
@@ -297,7 +297,7 @@ export async function lookupUpdates(
       allVersions
     ).filter((v) =>
       // Leave only compatible versions
-      version.isCompatible(v.version, currentValue)
+      versioning.isCompatible(v.version, currentValue)
     );
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
@@ -306,7 +306,7 @@ export async function lookupUpdates(
     for (const toVersion of filteredVersions.map((v) => v.version)) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
-        update.newValue = version.getNewValue({
+        update.newValue = versioning.getNewValue({
           currentValue,
           rangeStrategy,
           fromVersion,
@@ -336,8 +336,8 @@ export async function lookupUpdates(
         update.displayTo = toVersion;
         update.isSingleVersion = true;
       }
-      update.newMajor = version.getMajor(toVersion);
-      update.newMinor = version.getMinor(toVersion);
+      update.newMajor = versioning.getMajor(toVersion);
+      update.newMinor = versioning.getMinor(toVersion);
       update.updateType =
         update.updateType || getType(config, fromVersion, toVersion);
 
@@ -350,18 +350,18 @@ export async function lookupUpdates(
     }
     for (const [bucket, updates] of Object.entries(buckets)) {
       const sortedUpdates = updates.sort((u1, u2) =>
-        version.sortVersions(u1.toVersion, u2.toVersion)
+        versioning.sortVersions(u1.toVersion, u2.toVersion)
       );
       const update = sortedUpdates.pop();
       update.bucket = bucket;
       const { toVersion } = update;
       update.isSingleVersion =
-        update.isSingleVersion || !!version.isSingleVersion(update.newValue);
-      if (!version.isVersion(update.newValue)) {
+        update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
+      if (!versioning.isVersion(update.newValue)) {
         update.isRange = true;
       }
       const updateRelease = releases.find((release) =>
-        version.equals(release.version, toVersion)
+        versioning.equals(release.version, toVersion)
       );
       // TODO: think more about whether to just Object.assign this
       const releaseFields: (keyof Pick<
@@ -384,7 +384,7 @@ export async function lookupUpdates(
       }
       if (
         rangeStrategy === 'bump' &&
-        version.matches(toVersion, currentValue)
+        versioning.matches(toVersion, currentValue)
       ) {
         update.isBump = true;
       }
@@ -431,11 +431,11 @@ export async function lookupUpdates(
         });
       }
     }
-    if (version.valueToVersion) {
+    if (versioning.valueToVersion) {
       for (const update of res.updates || []) {
-        update.newVersion = version.valueToVersion(update.newValue);
-        update.fromVersion = version.valueToVersion(update.fromVersion);
-        update.toVersion = version.valueToVersion(update.toVersion);
+        update.newVersion = versioning.valueToVersion(update.newValue);
+        update.fromVersion = versioning.valueToVersion(update.fromVersion);
+        update.toVersion = versioning.valueToVersion(update.toVersion);
       }
     }
     // update digest for all
