@@ -371,13 +371,11 @@ export async function lookupUpdates(
       const sortedUpdates = updates.sort((u1, u2) =>
         version.sortVersions(u1.toVersion, u2.toVersion)
       );
-      const highestUpdate = sortedUpdates.pop();
+      const update = sortedUpdates.pop();
       if (sortedUpdates.length) {
-        highestUpdate.skippedOverVersions = sortedUpdates.map(
-          (u) => u.toVersion
-        );
+        update.skippedOverVersions = sortedUpdates.map((u) => u.toVersion);
       }
-      res.updates.push(highestUpdate);
+      res.updates.push(update);
     }
   } else if (!currentValue) {
     res.skipReason = SkipReason.UnsupportedValue;
