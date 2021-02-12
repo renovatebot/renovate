@@ -115,15 +115,11 @@ function getFromVersion(
 function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
   const { separateMajorMinor, separateMultipleMajor } = config;
   const { updateType, newMajor } = update;
-  if (
-    !separateMajorMinor ||
-    config.major.automerge === true ||
-    (config.automerge && config.major.automerge !== false)
-  ) {
-    return 'latest';
-  }
   if (separateMultipleMajor && updateType === 'major') {
     return `major-${newMajor}`;
+  }
+  if (!separateMajorMinor) {
+    return 'latest';
   }
   return updateType;
 }
@@ -333,7 +329,7 @@ export async function lookupUpdates(
       update.newMajor = version.getMajor(toVersion);
       update.newMinor = version.getMinor(toVersion);
       update.updateType =
-        update.updateType || getType(config, update.fromVersion, toVersion);
+        update.updateType || getType(config, fromVersion, toVersion);
 
       const bucket = getBucket(config, update);
       if (buckets[bucket]) {

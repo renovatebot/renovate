@@ -119,26 +119,6 @@ describe('workers/repository/process/lookup', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
     });
-    it('returns only one update if automerging', async () => {
-      config.automerge = true;
-      config.currentValue = '0.4.0';
-      config.rangeStrategy = 'pin';
-      config.depName = 'q';
-      config.datasource = datasourceNpmId;
-      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot();
-      expect(res.updates).toHaveLength(1);
-    });
-    it('returns only one update if automerging major', async () => {
-      config.major = { automerge: true };
-      config.currentValue = '^0.4.0';
-      config.rangeStrategy = 'pin';
-      config.depName = 'q';
-      config.datasource = datasourceNpmId;
-      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
-    });
     it('returns both updates if automerging minor', async () => {
       config.minor = { automerge: true };
       config.currentValue = '^0.4.0';
