@@ -303,6 +303,7 @@ export async function lookupUpdates(
       filteredVersions = filteredVersions.slice(0, 1);
     }
     const buckets: Record<string, LookupUpdate> = {};
+    const allBucketUpdates: Record<string, [LookupUpdate]> = {};
     for (const toVersion of filteredVersions.map((v) => v.version)) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
@@ -369,6 +370,20 @@ export async function lookupUpdates(
         }
       } else {
         buckets[bucket] = update;
+      }
+      if (allBucketUpdates[bucket]) {
+        allBucketUpdates[bucket].push(update);
+      } else {
+        allBucketUpdates[bucket] = [update];
+      }
+    }
+    for (const [bucket, update] of Object.entries(buckets)) {
+      update.skippedOverVersions = allBucketUpdates[bucket]
+        .map((u) => u.toVersion)
+        .filter((u) => u !== update.toVersion)
+        .sort((v1, v2) => version.sortVersions(v1, v2));
+      if (update.skippedOverVersions.length === 0) {
+        delete update.skippedOverVersions;
       }
     }
     res.updates = res.updates.concat(Object.values(buckets));
