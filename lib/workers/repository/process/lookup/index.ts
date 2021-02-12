@@ -112,24 +112,33 @@ function getFromVersion(
   return version.getSatisfyingVersion(useVersions, currentValue);
 }
 
-function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
+function getBucket(
+  config: LookupUpdateConfig,
+  fromVersion: string,
+  toVersion: string,
+  versioning: allVersioning.VersioningApi
+): string {
   const {
     separateMajorMinor,
     separateMultipleMajor,
     separateMinorPatch,
   } = config;
-  const { updateType, newMajor } = update;
   if (!separateMajorMinor) {
     return 'latest';
   }
-  if (updateType === 'major') {
+  const fromMajor = versioning.getMajor(fromVersion);
+  const toMajor = versioning.getMajor(toVersion);
+  if (fromMajor !== toMajor) {
     if (separateMultipleMajor) {
-      return `major-${newMajor}`;
+      return `major-${toMajor}`;
     }
     return 'major';
   }
   if (separateMinorPatch) {
-    return updateType;
+    if (versioning.getMinor(fromVersion) === versioning.getMinor(toVersion)) {
+      return 'patch';
+    }
+    return 'minor';
   }
   return 'non-major';
 }
@@ -341,7 +350,7 @@ export async function lookupUpdates(
       update.updateType =
         update.updateType || getType(config, fromVersion, toVersion);
 
-      const bucket = getBucket(config, update);
+      const bucket = getBucket(config, fromVersion, toVersion, versioning);
       if (buckets[bucket]) {
         buckets[bucket].push(update);
       } else {
