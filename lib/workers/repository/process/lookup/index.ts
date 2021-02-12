@@ -302,8 +302,7 @@ export async function lookupUpdates(
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
-    const buckets: Record<string, LookupUpdate> = {};
-    const allBucketUpdates: Record<string, [LookupUpdate]> = {};
+    const buckets: Record<string, [LookupUpdate]> = {};
     for (const toVersion of filteredVersions.map((v) => v.version)) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
@@ -363,30 +362,23 @@ export async function lookupUpdates(
 
       const bucket = getBucket(config, update);
       if (buckets[bucket]) {
-        if (
-          version.isGreaterThan(update.toVersion, buckets[bucket].toVersion)
-        ) {
-          buckets[bucket] = update;
-        }
+        buckets[bucket].push(update);
       } else {
-        buckets[bucket] = update;
-      }
-      if (allBucketUpdates[bucket]) {
-        allBucketUpdates[bucket].push(update);
-      } else {
-        allBucketUpdates[bucket] = [update];
+        buckets[bucket] = [update];
       }
     }
-    for (const [bucket, update] of Object.entries(buckets)) {
-      update.skippedOverVersions = allBucketUpdates[bucket]
-        .map((u) => u.toVersion)
-        .filter((u) => u !== update.toVersion)
-        .sort((v1, v2) => version.sortVersions(v1, v2));
-      if (update.skippedOverVersions.length === 0) {
-        delete update.skippedOverVersions;
+    for (const updates of Object.values(buckets)) {
+      const sortedUpdates = updates.sort((u1, u2) =>
+        version.sortVersions(u1.toVersion, u2.toVersion)
+      );
+      const highestUpdate = sortedUpdates.pop();
+      if (sortedUpdates.length) {
+        highestUpdate.skippedOverVersions = sortedUpdates.map(
+          (u) => u.toVersion
+        );
       }
+      res.updates.push(highestUpdate);
     }
-    res.updates = res.updates.concat(Object.values(buckets));
   } else if (!currentValue) {
     res.skipReason = SkipReason.UnsupportedValue;
   } else {
