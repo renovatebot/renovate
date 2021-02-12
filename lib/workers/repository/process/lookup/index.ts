@@ -311,23 +311,22 @@ export async function lookupUpdates(
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
-    const buckets: Record<string, [LookupUpdate]> = {};
+    const buckets: Record<string, [string]> = {};
     for (const toVersion of filteredVersions.map((v) => v.version)) {
-      const update: LookupUpdate = { fromVersion, toVersion } as any;
       const bucket = getBucket(config, fromVersion, toVersion, versioning);
       if (buckets[bucket]) {
-        buckets[bucket].push(update);
+        buckets[bucket].push(toVersion);
       } else {
-        buckets[bucket] = [update];
+        buckets[bucket] = [toVersion];
       }
     }
-    for (const [bucket, updates] of Object.entries(buckets)) {
-      const sortedUpdates = updates.sort((u1, u2) =>
-        versioning.sortVersions(u1.toVersion, u2.toVersion)
+    for (const [bucket, versions] of Object.entries(buckets)) {
+      const bucketVersions = versions.sort((v1, v2) =>
+        versioning.sortVersions(v1, v2)
       );
-      const update = sortedUpdates.pop();
+      const toVersion = bucketVersions.pop();
+      const update: LookupUpdate = { fromVersion, toVersion, newValue: null };
       update.bucket = bucket;
-      const { toVersion } = update;
       try {
         update.newValue = versioning.getNewValue({
           currentValue,
@@ -381,8 +380,8 @@ export async function lookupUpdates(
           update[field] = updateRelease[field] as never;
         }
       });
-      if (sortedUpdates.length) {
-        update.skippedOverVersions = sortedUpdates.map((u) => u.toVersion);
+      if (bucketVersions.length) {
+        update.skippedOverVersions = bucketVersions;
       }
       if (
         rangeStrategy === 'update-lockfile' &&
