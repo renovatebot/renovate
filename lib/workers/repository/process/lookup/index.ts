@@ -113,15 +113,25 @@ function getFromVersion(
 }
 
 function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
-  const { separateMajorMinor, separateMultipleMajor } = config;
+  const {
+    separateMajorMinor,
+    separateMultipleMajor,
+    separateMinorPatch,
+  } = config;
   const { updateType, newMajor } = update;
-  if (separateMultipleMajor && updateType === 'major') {
-    return `major-${newMajor}`;
-  }
   if (!separateMajorMinor) {
     return 'latest';
   }
-  return updateType;
+  if (updateType === 'major') {
+    if (separateMultipleMajor) {
+      return `major-${newMajor}`;
+    }
+    return 'major';
+  }
+  if (separateMinorPatch) {
+    return updateType;
+  }
+  return 'non-major';
 }
 
 export async function lookupUpdates(
@@ -338,11 +348,12 @@ export async function lookupUpdates(
         buckets[bucket] = [update];
       }
     }
-    for (const updates of Object.values(buckets)) {
+    for (const [bucket, updates] of Object.entries(buckets)) {
       const sortedUpdates = updates.sort((u1, u2) =>
         version.sortVersions(u1.toVersion, u2.toVersion)
       );
       const update = sortedUpdates.pop();
+      update.bucket = bucket;
       const { toVersion } = update;
       update.isSingleVersion =
         update.isSingleVersion || !!version.isSingleVersion(update.newValue);
