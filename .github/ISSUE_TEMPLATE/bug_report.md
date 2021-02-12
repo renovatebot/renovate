@@ -28,7 +28,7 @@ Paste the *relevant* logs here, not the entire thing and not just a link to the 
 
 **Have you created a minimal reproduction repository?**
 
-Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
+Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
 
 - [ ] This is a really small bug, it does not need a reproduction (think small typo)
 - [ ] I have provided a minimal reproduction repository

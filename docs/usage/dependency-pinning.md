@@ -223,6 +223,6 @@ If/when this starts bothering you, add Renovate rules to reduce the volume, such
 ## References
 
 This is a "living" document and we plan to update it whenever we think of something new or someone makes a valid point we've missed or misunderstood.
-[GitHub Location](https://github.com/renovatebot/renovate/blob/master/website/docs/dependency-pinning.md)
+[GitHub Location](https://github.com/renovatebot/renovate/blob/main/website/docs/dependency-pinning.md)
 
 Updated 2018-01-19 after [excellent feedback on lockfiles](https://github.com/commitizen/cz-conventional-changelog-default-export/pull/4#issuecomment-358038966) by [@LinusU](https://github.com/LinusU)

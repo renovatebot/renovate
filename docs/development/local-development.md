@@ -163,9 +163,9 @@ You usually shouldn't need to fix any Prettier errors manually.
 
 ## Keeping your Renovate fork up to date
 
-First of all, never commit to `master` of your fork - always use a branch like `feat/1234-add-yarn-parsing`.
+First of all, never commit to `main` of your fork - always use a branch like `feat/1234-add-yarn-parsing`.
 
-Then, make sure your fork is up to date with `master` each time before creating a new branch. To do this, see these GitHub guides:
+Then, make sure your fork is up to date with `main` each time before creating a new branch. To do this, see these GitHub guides:
 
 [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
 
