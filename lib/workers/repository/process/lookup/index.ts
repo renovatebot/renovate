@@ -314,6 +314,20 @@ export async function lookupUpdates(
     const buckets: Record<string, [LookupUpdate]> = {};
     for (const toVersion of filteredVersions.map((v) => v.version)) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
+      const bucket = getBucket(config, fromVersion, toVersion, versioning);
+      if (buckets[bucket]) {
+        buckets[bucket].push(update);
+      } else {
+        buckets[bucket] = [update];
+      }
+    }
+    for (const [bucket, updates] of Object.entries(buckets)) {
+      const sortedUpdates = updates.sort((u1, u2) =>
+        versioning.sortVersions(u1.toVersion, u2.toVersion)
+      );
+      const update = sortedUpdates.pop();
+      update.bucket = bucket;
+      const { toVersion } = update;
       try {
         update.newValue = versioning.getNewValue({
           currentValue,
@@ -349,21 +363,6 @@ export async function lookupUpdates(
       update.newMinor = versioning.getMinor(toVersion);
       update.updateType =
         update.updateType || getType(config, fromVersion, toVersion);
-
-      const bucket = getBucket(config, fromVersion, toVersion, versioning);
-      if (buckets[bucket]) {
-        buckets[bucket].push(update);
-      } else {
-        buckets[bucket] = [update];
-      }
-    }
-    for (const [bucket, updates] of Object.entries(buckets)) {
-      const sortedUpdates = updates.sort((u1, u2) =>
-        versioning.sortVersions(u1.toVersion, u2.toVersion)
-      );
-      const update = sortedUpdates.pop();
-      update.bucket = bucket;
-      const { toVersion } = update;
       update.isSingleVersion =
         update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
       if (!versioning.isVersion(update.newValue)) {
