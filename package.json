@@ -149,7 +149,7 @@
     "ini": "1.3.8",
     "js-yaml": "3.14.1",
     "jsdom": "16.4.0",
-    "json-dup-key-validator": "1.0.2",
+    "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "2.0.0",
     "json5": "2.2.0",
     "linkify-markdown": "1.0.0",

@@ -6755,10 +6755,10 @@ json-buffer@3.0.1:
   resolved "https://registry.yarnpkg.com/json-buffer/-/json-buffer-3.0.1.tgz#9338802a30d3b6605fbe0613e094008ca8c05a13"
   integrity sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==
 
-json-dup-key-validator@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/json-dup-key-validator/-/json-dup-key-validator-1.0.2.tgz#4e5e1c32c93ede16a8424d28162e5e183b5d8ee5"
-  integrity sha1-Tl4cMsk+3haoQk0oFi5eGDtdjuU=
+json-dup-key-validator@1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/json-dup-key-validator/-/json-dup-key-validator-1.0.3.tgz#ec147e457ef600bd2a794121e88f4ec9f3edef85"
+  integrity sha512-JvJcV01JSiO7LRz7DY1Fpzn4wX2rJ3dfNTiAfnlvLNdhhnm0Pgdvhi2SGpENrZn7eSg26Ps3TPhOcuD/a4STXQ==
   dependencies:
     backslash "^0.2.0"
 
