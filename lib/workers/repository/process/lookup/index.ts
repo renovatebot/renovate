@@ -329,8 +329,8 @@ export async function lookupUpdates(
       const sortedReleases = bucketReleases.sort((r1, r2) =>
         versioning.sortVersions(r1.version, r2.version)
       );
-      const release = sortedReleases.pop();
-      const toVersion = release.version;
+      const bucketRelease = sortedReleases.pop();
+      const toVersion = bucketRelease.version;
       const update: LookupUpdate = { fromVersion, toVersion, newValue: null };
       update.bucket = bucket;
       try {
@@ -380,8 +380,8 @@ export async function lookupUpdates(
         'releaseTimestamp',
       ];
       releaseFields.forEach((field) => {
-        if (release[field] !== undefined) {
-          update[field] = release[field];
+        if (bucketRelease[field] !== undefined) {
+          update[field] = bucketRelease[field];
         }
       });
       if (sortedReleases.length) {
