@@ -108,24 +108,24 @@ async function generateData(): Promise<void> {
     await generateData();
 
     // datasources
-    await generate({ path: 'datasource', types: ['DatasourceApi'] });
+    // await generate({ path: 'datasource', types: ['DatasourceApi'] });
 
     // managers
     await generate({ path: 'manager', types: ['ManagerApi'] });
 
-    // platform
-    await generate({
-      path: 'platform',
-      types: ['Platform'],
-      excludes: ['utils', 'git'],
-    });
+    // // platform
+    // await generate({
+    //   path: 'platform',
+    //   types: ['Platform'],
+    //   excludes: ['utils', 'git'],
+    // });
 
-    // versioning
-    await generate({
-      path: 'versioning',
-      types: ['VersioningApi', 'VersioningApiConstructor'],
-      map: '.api',
-    });
+    // // versioning
+    // await generate({
+    //   path: 'versioning',
+    //   types: ['VersioningApi', 'VersioningApiConstructor'],
+    //   map: '.api',
+    // });
 
     await Promise.all(
       shell

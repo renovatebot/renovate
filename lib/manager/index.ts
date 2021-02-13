@@ -12,7 +12,7 @@ import {
   LANGUAGE_RUST,
 } from '../constants/languages';
 import { RangeStrategy } from '../types';
-import managers from './api.generated';
+import managers from './api';
 import {
   ExtractConfig,
   LookupUpdate,
