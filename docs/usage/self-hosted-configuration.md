@@ -16,7 +16,7 @@ Let's look at an example of configuring packages with existing Angular migration
 Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`
 
 ```javascript
-module.export = {
+module.exports = {
   allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
@@ -30,7 +30,7 @@ The command to install dependencies is necessary because, by default, the instal
 {
   "packageRules": [
     {
-      "packageNames": ["@angular/core"],
+      "matchPackageNames": ["@angular/core"],
       "postUpgradeTasks": {
         "commands": [
           "npm ci --ignore-scripts",
@@ -54,12 +54,14 @@ npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty 
 
 A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed.
 If this list is empty then no tasks will be executed.
+Also you need to have `"trustLevel": "high"`, otherwise these tasks will be ignored.
 
 e.g.
 
 ```json
 {
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"],
+  "trustLevel": "high"
 }
 ```
 

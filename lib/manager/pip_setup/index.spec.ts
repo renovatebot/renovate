@@ -30,7 +30,6 @@ jest.mock('../../util/exec/env');
 const pythonVersionCallResults = [
   { stdout: '', stderr: 'Python 2.7.17\\n' },
   { stdout: 'Python 3.7.5\\n', stderr: '' },
-  new Error(),
 ];
 
 // TODO: figure out snapshot similarity for each CI platform
@@ -67,7 +66,7 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(exec).toHaveBeenCalledTimes(3);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
 
@@ -96,7 +95,7 @@ describe(getName(__filename), () => {
       ]);
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce('{}');
       expect(await extractPackageFile(content, packageFile, config)).toBeNull();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(exec).toHaveBeenCalledTimes(3);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
 
@@ -112,7 +111,7 @@ describe(getName(__filename), () => {
           config
         )
       ).toBeNull();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(exec).toHaveBeenCalledTimes(3);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
     it('catches error', async () => {

@@ -36,10 +36,10 @@ export async function flattenUpdates(
       }
       if (packagePath.length > 0) {
         packageFileConfig.parentDir = packagePath[packagePath.length - 1];
-        packageFileConfig.baseDir = packagePath.join('/');
+        packageFileConfig.packageFileDir = packagePath.join('/');
       } else {
         packageFileConfig.parentDir = '';
-        packageFileConfig.baseDir = '';
+        packageFileConfig.packageFileDir = '';
       }
       for (const dep of packageFile.deps) {
         if (dep.updates.length) {
@@ -77,12 +77,15 @@ export async function flattenUpdates(
             // Apply again in case any were added by the updateType config
             updateConfig = applyPackageRules(updateConfig);
             delete updateConfig.packageRules;
+            // TODO: Remove next line once #8075 is complete
+            updateConfig.depNameShort ||= updateConfig.depName;
             updateConfig.depNameSanitized = updateConfig.depName
               ? updateConfig.depName
                   .replace('@types/', '')
                   .replace('@', '')
                   .replace(/\//g, '-')
                   .replace(/\s+/g, '-')
+                  .replace(/-+/, '-')
                   .toLowerCase()
               : undefined;
             if (

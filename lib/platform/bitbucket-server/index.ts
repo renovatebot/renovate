@@ -40,7 +40,14 @@ import {
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
-import { BbbsRestPr, BbsConfig, BbsPr, BbsRestUserRef } from './types';
+import {
+  BbsConfig,
+  BbsPr,
+  BbsRestBranch,
+  BbsRestPr,
+  BbsRestRepo,
+  BbsRestUserRef,
+} from './types';
 import * as utils from './utils';
 
 /*
@@ -132,37 +139,15 @@ export async function initRepo({
     ignorePrAuthor,
   } as any;
 
-  const { host, pathname } = url.parse(defaults.endpoint);
-  const gitUrl = git.getUrl({
-    protocol: defaults.endpoint.split(':')[0] as GitProtocol,
-    auth: `${opts.username}:${opts.password}`,
-    host: `${host}${pathname}${
-      pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
-    }scm`,
-    repository,
-  });
-
-  await git.initRepo({
-    ...config,
-    localDir,
-    url: gitUrl,
-    gitAuthorName: global.gitAuthor?.name,
-    gitAuthorEmail: global.gitAuthor?.email,
-    cloneSubmodules,
-  });
-
   try {
     const info = (
-      await bitbucketServerHttp.getJson<{
-        project: { key: string };
-        parent: string;
-      }>(
+      await bitbucketServerHttp.getJson<BbsRestRepo>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
       )
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    const branchRes = await bitbucketServerHttp.getJson<{ displayId: string }>(
+    const branchRes = await bitbucketServerHttp.getJson<BbsRestBranch>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
     );
 
@@ -171,11 +156,49 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
 
+    let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
+    if (!cloneUrl) {
+      // Http access might be disabled, try to find ssh url in this case
+      cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+    }
+
+    let gitUrl: string;
+    if (!cloneUrl) {
+      // Fallback to generating the url if the API didn't give us an URL
+      const { host, pathname } = url.parse(defaults.endpoint);
+      gitUrl = git.getUrl({
+        protocol: defaults.endpoint.split(':')[0] as GitProtocol,
+        auth: `${opts.username}:${opts.password}`,
+        host: `${host}${pathname}${
+          pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+        }scm`,
+        repository,
+      });
+    } else if (cloneUrl.name === 'http') {
+      // Inject auth into the API provided URL
+      const repoUrl = url.parse(cloneUrl.href);
+      repoUrl.auth = `${opts.username}:${opts.password}`;
+      gitUrl = url.format(repoUrl);
+    } else {
+      // SSH urls can be used directly
+      gitUrl = cloneUrl.href;
+    }
+
+    await git.initRepo({
+      ...config,
+      localDir,
+      url: gitUrl,
+      gitAuthorName: global.gitAuthor?.name,
+      gitAuthorEmail: global.gitAuthor?.email,
+      cloneSubmodules,
+    });
+
     config.mergeMethod = 'merge';
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
       isFork: !!info.parent,
     };
+
     return repoConfig;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
@@ -218,7 +241,7 @@ export async function getPr(
     return null;
   }
 
-  const res = await bitbucketServerHttp.getJson<BbbsRestPr>(
+  const res = await bitbucketServerHttp.getJson<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
     { useCache: !refreshCache }
   );
@@ -777,7 +800,7 @@ export async function createPr({
     }));
   }
 
-  const body: PartialDeep<BbbsRestPr> = {
+  const body: PartialDeep<BbsRestPr> = {
     title,
     description,
     fromRef: {
@@ -788,9 +811,9 @@ export async function createPr({
     },
     reviewers,
   };
-  let prInfoRes: HttpResponse<BbbsRestPr>;
+  let prInfoRes: HttpResponse<BbsRestPr>;
   try {
-    prInfoRes = await bitbucketServerHttp.postJson<BbbsRestPr>(
+    prInfoRes = await bitbucketServerHttp.postJson<BbsRestPr>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
       { body }
     );

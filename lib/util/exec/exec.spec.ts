@@ -4,6 +4,8 @@ import {
   exec as _cpExec,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
+import { setAdminConfig } from '../../config/admin';
+import { RepoAdminConfig } from '../../config/common';
 import {
   BinarySource,
   ExecConfig,
@@ -24,12 +26,11 @@ interface TestInput {
   inOpts: ExecOptions;
   outCmd: string[];
   outOpts: RawExecOptions[];
-  trustLevel?: 'high' | 'low';
+  adminConfig?: RepoAdminConfig;
 }
 
 describe(`Child process execution wrapper`, () => {
   let processEnvOrig;
-  let trustLevelOrig;
 
   const cacheDir = '/tmp/renovate/cache/';
   const cwd = '/tmp/renovate/github/some/repo/';
@@ -48,12 +49,12 @@ describe(`Child process execution wrapper`, () => {
     jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
-    trustLevelOrig = global.trustLevel;
+    setAdminConfig();
   });
 
   afterEach(() => {
     process.env = processEnvOrig;
-    global.trustLevel = trustLevelOrig;
+    setAdminConfig();
   });
 
   const image = 'renovate/image';
@@ -190,7 +191,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
-        trustLevel: 'high',
+        adminConfig: { trustLevel: 'high' },
       },
     ],
 
@@ -390,7 +391,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          dockerUser: 'foobar',
         },
         processEnv,
         inCmd,
@@ -411,6 +411,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { dockerUser: 'foobar' },
       },
     ],
 
@@ -420,7 +421,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          dockerImagePrefix: 'ghcr.io/renovatebot',
         },
         processEnv,
         inCmd,
@@ -441,6 +441,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { dockerImagePrefix: 'ghcr.io/renovatebot' },
       },
     ],
 
@@ -541,9 +542,6 @@ describe(`Child process execution wrapper`, () => {
       {
         execConfig: {
           ...execConfig,
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_VALUE',
-          },
         },
         processEnv: envMock.basic,
         inCmd,
@@ -558,6 +556,11 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_VALUE',
+          },
+        },
       },
     ],
 
@@ -566,9 +569,6 @@ describe(`Child process execution wrapper`, () => {
       {
         execConfig: {
           ...execConfig,
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-          },
         },
         processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
         inCmd,
@@ -583,6 +583,11 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+        },
       },
     ],
 
@@ -592,9 +597,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_VALUE',
-          },
         },
         processEnv,
         inCmd,
@@ -615,6 +617,11 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_VALUE',
+          },
+        },
       },
     ],
 
@@ -624,9 +631,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-          },
         },
         processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
         inCmd,
@@ -647,6 +651,11 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+        },
       },
     ],
   ];
@@ -659,13 +668,10 @@ describe(`Child process execution wrapper`, () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      trustLevel,
+      adminConfig = {} as any,
     } = testOpts;
 
     process.env = procEnv;
-    if (trustLevel) {
-      global.trustLevel = trustLevel;
-    }
 
     if (config) {
       jest
@@ -682,7 +688,7 @@ describe(`Child process execution wrapper`, () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-
+    setAdminConfig(adminConfig);
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);

@@ -38,7 +38,6 @@ describe('bundler.updateArtifacts()', () => {
       // `join` fixes Windows CI
       localDir: join('/tmp/github/some/repo'),
       cacheDir: join('/tmp/cache'),
-      dockerUser: 'foobar',
     };
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
@@ -173,7 +172,6 @@ describe('bundler.updateArtifacts()', () => {
           config: {
             ...config,
             binarySource: BinarySource.Docker,
-            dockerUser: 'foobar',
             constraints: {
               ruby: '1.2.5',
               bundler: '3.2.1',
@@ -206,7 +204,6 @@ describe('bundler.updateArtifacts()', () => {
           config: {
             ...config,
             binarySource: BinarySource.Docker,
-            dockerUser: 'foobar',
             constraints: {
               ruby: 'foo',
               bundler: 'bar',

@@ -31,7 +31,7 @@ export async function migrateAndValidate(
     } = await configValidation.validateConfig(massagedConfig);
     // istanbul ignore if
     if (is.nonEmptyArray(warnings)) {
-      logger.info({ warnings }, 'Found renovate config warnings');
+      logger.warn({ warnings }, 'Found renovate config warnings');
     }
     if (is.nonEmptyArray(errors)) {
       logger.info({ errors }, 'Found renovate config errors');

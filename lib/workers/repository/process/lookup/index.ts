@@ -61,11 +61,8 @@ function getType(
   fromVersion: string,
   toVersion: string
 ): UpdateType {
-  const { versioning, rangeStrategy, currentValue } = config;
+  const { versioning } = config;
   const version = allVersioning.get(versioning);
-  if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
-    return 'bump';
-  }
   if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
     return 'major';
   }
@@ -115,23 +112,35 @@ function getFromVersion(
   return version.getSatisfyingVersion(useVersions, currentValue);
 }
 
-function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
-  const { separateMajorMinor, separateMultipleMajor } = config;
-  const { updateType, newMajor } = update;
-  if (updateType === 'lockfileUpdate') {
-    return updateType;
-  }
-  if (
-    !separateMajorMinor ||
-    config.major.automerge === true ||
-    (config.automerge && config.major.automerge !== false)
-  ) {
+function getBucket(
+  config: LookupUpdateConfig,
+  fromVersion: string,
+  toVersion: string,
+  versioning: allVersioning.VersioningApi
+): string {
+  const {
+    separateMajorMinor,
+    separateMultipleMajor,
+    separateMinorPatch,
+  } = config;
+  if (!separateMajorMinor) {
     return 'latest';
   }
-  if (separateMultipleMajor && updateType === 'major') {
-    return `major-${newMajor}`;
+  const fromMajor = versioning.getMajor(fromVersion);
+  const toMajor = versioning.getMajor(toVersion);
+  if (fromMajor !== toMajor) {
+    if (separateMultipleMajor) {
+      return `major-${toMajor}`;
+    }
+    return 'major';
   }
-  return updateType;
+  if (separateMinorPatch) {
+    if (versioning.getMinor(fromVersion) === versioning.getMinor(toVersion)) {
+      return 'patch';
+    }
+    return 'minor';
+  }
+  return 'non-major';
 }
 
 export async function lookupUpdates(
@@ -141,19 +150,19 @@ export async function lookupUpdates(
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   // Use the datasource's default versioning if none is configured
-  const version = allVersioning.get(
+  const versioning = allVersioning.get(
     config.versioning || getDefaultVersioning(config.datasource)
   );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
-  const isValid = currentValue && version.isValid(currentValue);
+  const isValid = currentValue && versioning.isValid(currentValue);
   if (!isValid) {
     res.skipReason = SkipReason.InvalidValue;
   }
   // Record if the dep is fixed to a version
   if (lockedVersion) {
     res.fixedVersion = lockedVersion;
-  } else if (currentValue && version.isSingleVersion(currentValue)) {
+  } else if (currentValue && versioning.isSingleVersion(currentValue)) {
     res.fixedVersion = currentValue.replace(/^=+/, '');
   }
   // istanbul ignore if
@@ -198,7 +207,7 @@ export async function lookupUpdates(
     const { latestVersion, releases } = dependency;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases.filter((release) =>
-      version.isVersion(release.version)
+      versioning.isVersion(release.version)
     );
     // istanbul ignore if
     if (allVersions.length === 0) {
@@ -223,12 +232,12 @@ export async function lookupUpdates(
         (v) =>
           v.version === taggedVersion ||
           (v.version === currentValue &&
-            version.isGreaterThan(taggedVersion, currentValue))
+            versioning.isGreaterThan(taggedVersion, currentValue))
       );
     }
     // Check that existing constraint can be satisfied
     const allSatisfyingVersions = allVersions.filter((v) =>
-      version.matches(v.version, currentValue)
+      versioning.matches(v.version, currentValue)
     );
     if (config.rollbackPrs && !allSatisfyingVersions.length) {
       const rollback = getRollbackUpdate(config, allVersions);
@@ -270,18 +279,18 @@ export async function lookupUpdates(
     if (
       fromVersion &&
       rangeStrategy === 'pin' &&
-      !version.isSingleVersion(currentValue)
+      !versioning.isSingleVersion(currentValue)
     ) {
       res.updates.push({
         updateType: 'pin',
         isPin: true,
-        newValue: version.getNewValue({
+        newValue: versioning.getNewValue({
           currentValue,
           rangeStrategy,
           fromVersion,
           toVersion: fromVersion,
         }),
-        newMajor: version.getMajor(fromVersion),
+        newMajor: versioning.getMajor(fromVersion),
       });
     }
     let filterStart = fromVersion;
@@ -297,16 +306,35 @@ export async function lookupUpdates(
       allVersions
     ).filter((v) =>
       // Leave only compatible versions
-      version.isCompatible(v.version, currentValue)
+      versioning.isCompatible(v.version, currentValue)
     );
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
-    const buckets: Record<string, LookupUpdate> = {};
-    for (const toVersion of filteredVersions.map((v) => v.version)) {
-      const update: LookupUpdate = { fromVersion, toVersion } as any;
+    const buckets: Record<string, [Release]> = {};
+    for (const release of filteredVersions) {
+      const bucket = getBucket(
+        config,
+        fromVersion,
+        release.version,
+        versioning
+      );
+      if (buckets[bucket]) {
+        buckets[bucket].push(release);
+      } else {
+        buckets[bucket] = [release];
+      }
+    }
+    for (const [bucket, bucketReleases] of Object.entries(buckets)) {
+      const sortedReleases = bucketReleases.sort((r1, r2) =>
+        versioning.sortVersions(r1.version, r2.version)
+      );
+      const bucketRelease = sortedReleases.pop();
+      const toVersion = bucketRelease.version;
+      const update: LookupUpdate = { fromVersion, toVersion, newValue: null };
+      update.bucket = bucket;
       try {
-        update.newValue = version.getNewValue({
+        update.newValue = versioning.getNewValue({
           currentValue,
           rangeStrategy,
           fromVersion,
@@ -331,47 +359,48 @@ export async function lookupUpdates(
           );
           continue; // eslint-disable-line no-continue
         }
-        update.updateType = 'lockfileUpdate';
         update.fromVersion = lockedVersion;
         update.displayFrom = lockedVersion;
         update.displayTo = toVersion;
         update.isSingleVersion = true;
       }
-      update.newMajor = version.getMajor(toVersion);
-      update.newMinor = version.getMinor(toVersion);
+      update.newMajor = versioning.getMajor(toVersion);
+      update.newMinor = versioning.getMinor(toVersion);
       update.updateType =
-        update.updateType || getType(config, update.fromVersion, toVersion);
+        update.updateType || getType(config, fromVersion, toVersion);
       update.isSingleVersion =
-        update.isSingleVersion || !!version.isSingleVersion(update.newValue);
-      if (!version.isVersion(update.newValue)) {
+        update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
+      if (!versioning.isVersion(update.newValue)) {
         update.isRange = true;
       }
-      const updateRelease = releases.find((release) =>
-        version.equals(release.version, toVersion)
-      );
-      // TODO: think more about whether to just Object.assign this
-      const releaseFields: (keyof Pick<
-        Release,
-        'releaseTimestamp' | 'downloadUrl' | 'checksumUrl' | 'newDigest'
-      >)[] = ['releaseTimestamp', 'newDigest'];
+      const releaseFields = [
+        'checksumUrl',
+        'downloadUrl',
+        'newDigest',
+        'releaseTimestamp',
+      ];
       releaseFields.forEach((field) => {
-        if (updateRelease[field] !== undefined) {
-          update[field] = updateRelease[field] as never;
+        if (bucketRelease[field] !== undefined) {
+          update[field] = bucketRelease[field];
         }
       });
-
-      const bucket = getBucket(config, update);
-      if (buckets[bucket]) {
-        if (
-          version.isGreaterThan(update.toVersion, buckets[bucket].toVersion)
-        ) {
-          buckets[bucket] = update;
-        }
-      } else {
-        buckets[bucket] = update;
+      if (sortedReleases.length) {
+        update.skippedOverVersions = sortedReleases.map((r) => r.version);
       }
+      if (
+        rangeStrategy === 'update-lockfile' &&
+        currentValue === update.newValue
+      ) {
+        update.isLockfileUpdate = true;
+      }
+      if (
+        rangeStrategy === 'bump' &&
+        versioning.matches(toVersion, currentValue)
+      ) {
+        update.isBump = true;
+      }
+      res.updates.push(update);
     }
-    res.updates = res.updates.concat(Object.values(buckets));
   } else if (!currentValue) {
     res.skipReason = SkipReason.UnsupportedValue;
   } else {
@@ -413,11 +442,11 @@ export async function lookupUpdates(
         });
       }
     }
-    if (version.valueToVersion) {
+    if (versioning.valueToVersion) {
       for (const update of res.updates || []) {
-        update.newVersion = version.valueToVersion(update.newValue);
-        update.fromVersion = version.valueToVersion(update.fromVersion);
-        update.toVersion = version.valueToVersion(update.toVersion);
+        update.newVersion = versioning.valueToVersion(update.newValue);
+        update.fromVersion = versioning.valueToVersion(update.fromVersion);
+        update.toVersion = versioning.valueToVersion(update.toVersion);
       }
     }
     // update digest for all
@@ -432,22 +461,6 @@ export async function lookupUpdates(
         } else {
           logger.debug({ newValue: update.newValue }, 'Could not getDigest');
         }
-      }
-    }
-  }
-  for (const update of res.updates) {
-    const { updateType, fromVersion, toVersion } = update;
-    if (['bump', 'lockfileUpdate'].includes(updateType)) {
-      update[updateType === 'bump' ? 'isBump' : 'isLockfileUpdate'] = true;
-      if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
-        update.updateType = 'major';
-      } else if (
-        config.separateMinorPatch &&
-        version.getMinor(toVersion) === version.getMinor(fromVersion)
-      ) {
-        update.updateType = 'patch';
-      } else {
-        update.updateType = 'minor';
       }
     }
   }

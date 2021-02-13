@@ -14,7 +14,7 @@ Here is an example of using `regex` versioning to correct behavior of the `guava
 {
   "packageRules": [
     {
-      "packageNames": ["com.google.guava:guava"],
+      "matchPackageNames": ["com.google.guava:guava"],
       "versioning": "regex:^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(-(?<compatibility>.*))?$"
     }
   ]
@@ -27,8 +27,8 @@ Here is another example, this time for handling `python` Docker images, which us
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["python"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$"
     }
   ]

@@ -4,6 +4,7 @@ import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import * as memCache from '../util/cache/memory';
+import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
 import * as allVersioning from '../versioning';
@@ -52,7 +53,25 @@ async function getRegistryReleases(
   config: GetReleasesConfig,
   registryUrl: string
 ): Promise<ReleaseResult> {
+  const cacheKey = `${datasource.id} ${registryUrl} ${config.lookupName}`;
+  if (datasource.caching) {
+    const cachedResult = await packageCache.get<ReleaseResult>(
+      cacheNamespace,
+      cacheKey
+    );
+    // istanbul ignore if
+    if (cachedResult) {
+      logger.debug({ cacheKey }, 'Returning cached datasource response');
+      return cachedResult;
+    }
+  }
   const res = await datasource.getReleases({ ...config, registryUrl });
+  // cache non-null responses unless marked as private
+  if (datasource.caching && res && !res.isPrivate) {
+    logger.trace({ cacheKey }, 'Caching datasource response');
+    const cacheMinutes = 15;
+    await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+  }
   return res;
 }
 
@@ -298,6 +317,31 @@ export async function getPkgReleases(
         (findRelease) => findRelease.version === filterRelease.version
       ) === filterIndex
   );
+  // Filter releases for compatibility
+  for (const [constraintName, constraintValue] of Object.entries(
+    config.constraints || {}
+  )) {
+    // Currently we only support if the constraint is a plain version
+    // TODO: Support range/range compatibility filtering #8476
+    if (version.isVersion(constraintValue)) {
+      res.releases = res.releases.filter((release) => {
+        if (!is.nonEmptyArray(release.constraints?.[constraintName])) {
+          // A release with no constraints is OK
+          return true;
+        }
+        return release.constraints[constraintName].some(
+          // If any of the release's constraints match, then it's OK
+          (releaseConstraint) =>
+            !releaseConstraint ||
+            version.matches(constraintValue, releaseConstraint)
+        );
+      });
+    }
+  }
+  // Strip constraints from releases result
+  res.releases.forEach((release) => {
+    delete release.constraints; // eslint-disable-line no-param-reassign
+  });
   return res;
 }
 

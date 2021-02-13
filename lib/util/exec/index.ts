@@ -1,5 +1,6 @@
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
+import { getAdminConfig } from '../../config/admin';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import {
@@ -20,9 +21,6 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
-  customEnvVariables: null,
-  dockerImagePrefix: null,
-  dockerUser: null,
   localDir: null,
   cacheDir: null,
 };
@@ -96,7 +94,7 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { env, docker, cwdFile } = opts;
-  const extraEnv = { ...opts.extraEnv, ...execConfig.customEnvVariables };
+  const extraEnv = { ...opts.extraEnv, ...getAdminConfig().customEnvVariables };
   let cwd;
   // istanbul ignore if
   if (cwdFile) {

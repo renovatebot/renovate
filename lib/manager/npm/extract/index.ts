@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { dirname } from 'upath';
 import validateNpmPackageName from 'validate-npm-package-name';
+import { getAdminConfig } from '../../../config/admin';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import * as datasourceNpm from '../../../datasource/npm';
@@ -57,7 +58,7 @@ export async function extractPackageFile(
     const error = new Error(CONFIG_VALIDATION);
     error.configFile = fileName;
     error.validationError =
-      'Nested package.json must not contain renovate configuration. Please use `packageRules` with `paths` in your main config instead.';
+      'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
   }
   const packageJsonName = packageJson.name;
@@ -107,7 +108,7 @@ export async function extractPackageFile(
       npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
     }
     if (npmrc) {
-      if (npmrc.includes('=${') && !(global.trustLevel === 'high')) {
+      if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
         logger.debug('Discarding .npmrc file with variables');
         ignoreNpmrcFile = true;
         npmrc = undefined;

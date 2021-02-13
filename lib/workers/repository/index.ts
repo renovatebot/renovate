@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import { RenovateConfig } from '../../config';
+import { setAdminConfig } from '../../config/admin';
 import { logger, setMeta } from '../../logger';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
@@ -28,6 +29,7 @@ export async function renovateRepository(
 ): Promise<ProcessResult> {
   splitInit();
   let config = { ...repoConfig };
+  setAdminConfig(config);
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
