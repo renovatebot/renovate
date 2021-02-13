@@ -21,7 +21,6 @@ import * as swift from './swift';
 import * as ubuntu from './ubuntu';
 
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
-
 export default api;
 
 api.set('cargo', cargo.api);

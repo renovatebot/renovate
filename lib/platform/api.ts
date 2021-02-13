@@ -7,7 +7,6 @@ import * as github from './github';
 import * as gitlab from './gitlab';
 
 const api = new Map<string, Platform>();
-
 export default api;
 
 api.set('azure', azure);
