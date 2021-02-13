@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import {
   RenovateConfig,
   UpdateType,
@@ -53,6 +54,7 @@ export interface LookupUpdateConfig
   vulnerabilityAlert?: boolean;
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
+  stabilityDays?: number;
   datasource: string;
   depName: string;
 }
@@ -337,17 +339,18 @@ export async function lookupUpdates(
         // If some releases satisfy checks and some don't, then suppress the non-satisfying
         const pendingChecks: string[] = [];
         if (config.stabilityDays) {
-          const ONE_DAY = 24 * 60 * 60 * 1000;
           // Check each release for stabilityDays
           for (const release of sortedReleases) {
             // stabilityDays is only valid if a releaseTimestamp is present
             if (release.releaseTimestamp) {
-              const daysElapsed = Math.floor(
-                (new Date().getTime() -
-                  new Date(release.releaseTimestamp).getTime()) /
-                  ONE_DAY
+              const releaseTimestamp = DateTime.fromISO(
+                release.releaseTimestamp
               );
-              if (daysElapsed < config.stabilityDays) {
+              if (
+                releaseTimestamp.plus({
+                  days: config.stabilityDays,
+                }) > DateTime.local()
+              ) {
                 pendingChecks.push(release.version);
               }
             }

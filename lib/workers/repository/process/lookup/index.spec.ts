@@ -23,6 +23,7 @@ import { id as npmVersioningId } from '../../../../versioning/npm';
 import { id as pep440VersioningId } from '../../../../versioning/pep440';
 import { id as poetryVersioningId } from '../../../../versioning/poetry';
 import * as lookup from '.';
+import { DateTime } from 'luxon';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
@@ -1171,11 +1172,11 @@ describe('workers/repository/process/lookup', () => {
       githubReleases.getReleases.mockResolvedValueOnce({
         releases: [
           {
-            releaseTimestamp: '2020-01-01',
+            releaseTimestamp: DateTime.local().minus({ years: 1 }).toISO(),
             version: '1.0.1',
           },
           {
-            releaseTimestamp: '2020-01-02',
+            releaseTimestamp: DateTime.local().minus({ years: 1 }).toISO(),
             version: '1.1.0',
           },
         ],
@@ -1193,11 +1194,11 @@ describe('workers/repository/process/lookup', () => {
       githubReleases.getReleases.mockResolvedValueOnce({
         releases: [
           {
-            releaseTimestamp: '3000-01-01',
+            releaseTimestamp: DateTime.local().toISO(),
             version: '1.0.1',
           },
           {
-            releaseTimestamp: '3000-01-02',
+            releaseTimestamp: DateTime.local().toISO(),
             version: '1.1.0',
           },
         ],
@@ -1235,11 +1236,11 @@ describe('workers/repository/process/lookup', () => {
       githubReleases.getReleases.mockResolvedValueOnce({
         releases: [
           {
-            releaseTimestamp: '2020-01-01',
+            releaseTimestamp: DateTime.local().minus({ years: 1 }).toISO(),
             version: '1.0.1',
           },
           {
-            releaseTimestamp: '3000-01-01',
+            releaseTimestamp: DateTime.local().toISO(),
             version: '1.1.0',
           },
         ],
