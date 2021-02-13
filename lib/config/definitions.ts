@@ -1165,6 +1165,12 @@ const options: RenovateOptions[] = [
     default: 0,
   },
   {
+    name: 'eagerStatusChecks',
+    description:
+      'If enabled, Renovate status checks will be used as part of release filtering.',
+    type: 'boolean',
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',

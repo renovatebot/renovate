@@ -149,6 +149,7 @@ export interface LookupUpdate {
   newValue: string;
   newVersion?: string;
   semanticCommitType?: string;
+  pendingVersions?: string[];
   skippedOverVersions?: string[];
   toVersion?: string;
   updateType?: UpdateType;

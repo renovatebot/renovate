@@ -429,6 +429,22 @@ This option is evaluated at PR/MR creation time and is only supported on the fol
 Note that GitLab implements draft status by checking whether the PR's title starts with certain strings.
 Therefore, draftPR on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
+## eagerStatusChecks
+
+When using the `stabilityDays` status check, evaluation can either be lazy (default) or eager.
+When it's lazy (`false`), it means Renovate will always propose the highest matching release in a PR, even if it doesn't satisfy stabilityDays while earlier release upgrades do.
+When it's eager (`true`), it means Renovate will propose the highest matching release which satisfies the status checks, if both satisfying and non-satisfying are present.
+
+A simple example:
+
+- Both `1.0.1` and `1.0.2` are available as upgrades
+- `1.0.1` is one week old while `1.0.2` is a day old
+- User has configured `stabilityDays=3`
+
+With `eagerStatusChecks=false`, Renovate will create an update PR for `1.0.2` with a pending status check.
+
+With `eagerStatusChecks=true`, Renovate will create an update PR for `1.0.1` with a passing status check, but update it to `1.0.2` approximately two days later if the PR is still open and `1.0.2` now passes the `stabilityDays` status check.
+
 ## enabled
 
 The most common use of `enabled` is if you want to turn Renovate's functionality off, for some reason.

@@ -1162,5 +1162,91 @@ describe('workers/repository/process/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
+    it('returns regular result if all versions satisfy stabilityDays', async () => {
+      config.currentValue = '1.0.0';
+      config.depName = 'some/repo';
+      config.datasource = datasourceGithubReleases.id;
+      config.eagerStatusChecks = true;
+      config.stabilityDays = 1;
+      githubReleases.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            releaseTimestamp: '2020-01-01',
+            version: '1.0.1',
+          },
+          {
+            releaseTimestamp: '2020-01-02',
+            version: '1.1.0',
+          },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates[0].newValue).toEqual('1.1.0');
+      expect(res.updates[0].skippedOverVersions).toEqual(['1.0.1']);
+    });
+    it('returns regular result if no versions satisfy stabilityDays', async () => {
+      config.currentValue = '1.0.0';
+      config.depName = 'some/repo';
+      config.datasource = datasourceGithubReleases.id;
+      config.eagerStatusChecks = true;
+      config.stabilityDays = 1;
+      githubReleases.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            releaseTimestamp: '3000-01-01',
+            version: '1.0.1',
+          },
+          {
+            releaseTimestamp: '3000-01-02',
+            version: '1.1.0',
+          },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates[0].newValue).toEqual('1.1.0');
+      expect(res.updates[0].skippedOverVersions).toEqual(['1.0.1']);
+    });
+    it('returns regular result if all versions are missing release timestamps to stabilityDays', async () => {
+      config.currentValue = '1.0.0';
+      config.depName = 'some/repo';
+      config.datasource = datasourceGithubReleases.id;
+      config.eagerStatusChecks = true;
+      config.stabilityDays = 1;
+      githubReleases.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.0.1',
+          },
+          {
+            version: '1.1.0',
+          },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates[0].newValue).toEqual('1.1.0');
+      expect(res.updates[0].skippedOverVersions).toEqual(['1.0.1']);
+    });
+    it('returns filters highest if not satisfying stabilityDays', async () => {
+      config.currentValue = '1.0.0';
+      config.depName = 'some/repo';
+      config.datasource = datasourceGithubReleases.id;
+      config.eagerStatusChecks = true;
+      config.stabilityDays = 1;
+      githubReleases.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            releaseTimestamp: '2020-01-01',
+            version: '1.0.1',
+          },
+          {
+            releaseTimestamp: '3000-01-01',
+            version: '1.1.0',
+          },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates[0].newValue).toEqual('1.0.1');
+      expect(res.updates[0].pendingVersions).toEqual(['1.1.0']);
+    });
   });
 });

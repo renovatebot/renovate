@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   RenovateConfig,
   UpdateType,
@@ -329,7 +330,47 @@ export async function lookupUpdates(
       const sortedReleases = bucketReleases.sort((r1, r2) =>
         versioning.sortVersions(r1.version, r2.version)
       );
-      const bucketRelease = sortedReleases.pop();
+      let bucketRelease: Release;
+      let skippedOverVersions: string[];
+      let pendingVersions: string[];
+      // TODO: add this to config definitions
+      if (config.eagerStatusChecks) {
+        // If some releases satisfy checks and some don't, then suppress the non-satisfying
+        const pendingChecks: string[] = [];
+        if (config.stabilityDays) {
+          const ONE_DAY = 24 * 60 * 60 * 1000;
+          // Check each release for stabilityDays
+          for (const release of sortedReleases) {
+            // stabilityDays is only valid if a releaseTimestamp is present
+            if (release.releaseTimestamp) {
+              const daysElapsed = Math.floor(
+                (new Date().getTime() -
+                  new Date(release.releaseTimestamp).getTime()) /
+                  ONE_DAY
+              );
+              if (daysElapsed < config.stabilityDays) {
+                pendingChecks.push(release.version);
+              }
+            }
+          }
+        }
+        const pendingReleases = sortedReleases.filter((release) =>
+          pendingChecks.includes(release.version)
+        );
+        const nonPendingReleases = sortedReleases.filter(
+          (release) => !pendingChecks.includes(release.version)
+        );
+        if (nonPendingReleases.length) {
+          // if any releases satisfy checks then use them and set others as pending
+          bucketRelease = nonPendingReleases.pop();
+          skippedOverVersions = nonPendingReleases.map((r) => r.version);
+          pendingVersions = pendingReleases.map((r) => r.version);
+        } else {
+          // is all are pending them treat them like usual
+          bucketRelease = pendingReleases.pop();
+          skippedOverVersions = pendingReleases.map((r) => r.version);
+        }
+      }
       const toVersion = bucketRelease.version;
       const update: LookupUpdate = { fromVersion, toVersion, newValue: null };
       update.bucket = bucket;
@@ -384,8 +425,11 @@ export async function lookupUpdates(
           update[field] = bucketRelease[field];
         }
       });
-      if (sortedReleases.length) {
-        update.skippedOverVersions = sortedReleases.map((r) => r.version);
+      if (is.nonEmptyArray(skippedOverVersions)) {
+        update.skippedOverVersions = skippedOverVersions;
+      }
+      if (is.nonEmptyArray(pendingVersions)) {
+        update.pendingVersions = pendingVersions;
       }
       if (
         rangeStrategy === 'update-lockfile' &&
