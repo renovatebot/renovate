@@ -311,20 +311,26 @@ export async function lookupUpdates(
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
-    const buckets: Record<string, [string]> = {};
-    for (const toVersion of filteredVersions.map((v) => v.version)) {
-      const bucket = getBucket(config, fromVersion, toVersion, versioning);
+    const buckets: Record<string, [Release]> = {};
+    for (const release of filteredVersions) {
+      const bucket = getBucket(
+        config,
+        fromVersion,
+        release.version,
+        versioning
+      );
       if (buckets[bucket]) {
-        buckets[bucket].push(toVersion);
+        buckets[bucket].push(release);
       } else {
-        buckets[bucket] = [toVersion];
+        buckets[bucket] = [release];
       }
     }
-    for (const [bucket, versions] of Object.entries(buckets)) {
-      const bucketVersions = versions.sort((v1, v2) =>
-        versioning.sortVersions(v1, v2)
+    for (const [bucket, bucketReleases] of Object.entries(buckets)) {
+      const sortedReleases = bucketReleases.sort((r1, r2) =>
+        versioning.sortVersions(r1.version, r2.version)
       );
-      const toVersion = bucketVersions.pop();
+      const bucketRelease = sortedReleases.pop();
+      const toVersion = bucketRelease.version;
       const update: LookupUpdate = { fromVersion, toVersion, newValue: null };
       update.bucket = bucket;
       try {
@@ -367,21 +373,19 @@ export async function lookupUpdates(
       if (!versioning.isVersion(update.newValue)) {
         update.isRange = true;
       }
-      const updateRelease = releases.find((release) =>
-        versioning.equals(release.version, toVersion)
-      );
-      // TODO: think more about whether to just Object.assign this
-      const releaseFields: (keyof Pick<
-        Release,
-        'releaseTimestamp' | 'downloadUrl' | 'checksumUrl' | 'newDigest'
-      >)[] = ['releaseTimestamp', 'newDigest'];
+      const releaseFields = [
+        'checksumUrl',
+        'downloadUrl',
+        'newDigest',
+        'releaseTimestamp',
+      ];
       releaseFields.forEach((field) => {
-        if (updateRelease[field] !== undefined) {
-          update[field] = updateRelease[field] as never;
+        if (bucketRelease[field] !== undefined) {
+          update[field] = bucketRelease[field];
         }
       });
-      if (bucketVersions.length) {
-        update.skippedOverVersions = bucketVersions;
+      if (sortedReleases.length) {
+        update.skippedOverVersions = sortedReleases.map((r) => r.version);
       }
       if (
         rangeStrategy === 'update-lockfile' &&
