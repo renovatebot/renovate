@@ -38,6 +38,15 @@ describe('pep440.isStable(version)', () => {
   });
 });
 
+describe('pep440.equals(version1, version2)', () => {
+  it('returns correct true', () => {
+    expect(pep440.equals('1.0', '1.0.0')).toBeTruthy();
+  });
+  it('returns false when version invalid', () => {
+    expect(pep440.equals('1.0.0', '1.0..foo')).toBeFalsy();
+  });
+});
+
 describe('pep440.isSingleVersion()', () => {
   it('returns true if naked version', () => {
     expect(pep440.isSingleVersion('1.2.3')).toBeTruthy();
