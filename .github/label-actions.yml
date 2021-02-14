@@ -1,12 +1,13 @@
+test:
+  comment: >
+    Test comment
 'reproduction:required':
-  issues:
-    comment: >
-      This issue has been labeled as requiring a reproduction, usually because implementation won't be possible without it.
+  comment: >
+    This issue has been labeled as requiring a reproduction, usually because implementation won't be possible without it.
 
-      Please consult our guide on [minimal reproductions](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to understand what is needed.
+    Please consult our guide on [minimal reproductions](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to understand what is needed.
 'reproduction:provided':
-  issues:
-    comment: >
-      Thank you for providing a reproduction.
+  comment: >
+    Thank you for providing a reproduction.
 
-      The label will be updated to `reproduction:verified` once someone else has confirmed they can reproduce the problem with it.
+    The label will be updated to `reproduction:confirmed` once someone else has confirmed they can reproduce the problem with it.
