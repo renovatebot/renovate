@@ -1,5 +1,5 @@
+import { dirname, join } from 'path';
 import { parse } from '@iarna/toml';
-import { join, dirname } from 'path';
 import is from '@sindresorhus/is';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
@@ -14,7 +14,6 @@ import {
   PoetryLockSection,
   PoetrySection,
 } from './types';
-import { file } from 'tmp-promise';
 
 function extractFromSection(
   parsedFile: PoetryFile,
