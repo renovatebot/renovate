@@ -11,3 +11,11 @@
     Thank you for providing a reproduction.
 
     The label will be updated to `reproduction:confirmed` once someone else has confirmed they can reproduce the problem with it.
+
+'status:requirements':
+  comment: >
+    This issue has been labeled with `status:requirements`. This indicates that the issue is not ready to start and further requirements or reproduction are needed first.
+
+    This label should be removed and replaced with `status:ready` once all requirements and reproductions necessary to start have been met.
+
+    If it's *unclear* as to what is missing to move this issue forward, or you think it has already been provided, feel free to nudge a maintainer to take a look and clarify.
