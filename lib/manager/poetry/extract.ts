@@ -3,20 +3,28 @@ import is from '@sindresorhus/is';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { readLocalFile } from '../../util/fs';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import { PackageDependency, PackageFile } from '../common';
-import { PoetryFile, PoetrySection } from './types';
+import {
+  PoetryFile,
+  PoetryLock,
+  PoetryLockSection,
+  PoetrySection,
+} from './types';
 
 function extractFromSection(
   parsedFile: PoetryFile,
-  section: keyof PoetrySection
+  section: keyof PoetrySection,
+  poetryLockfile: Record<string, PoetryLockSection> = {}
 ): PackageDependency[] {
   const deps = [];
   const sectionContent = parsedFile.tool.poetry[section];
   if (!sectionContent) {
     return [];
   }
+
   Object.keys(sectionContent).forEach((depName) => {
     if (depName === 'python') {
       return;
@@ -55,6 +63,9 @@ function extractFromSection(
       managerData: { nestedVersion },
       datasource: datasourcePypi.id,
     };
+    if (dep.depName in poetryLockfile) {
+      dep.lockedVersion = poetryLockfile[dep.depName].version;
+    }
     if (skipReason) {
       dep.skipReason = skipReason;
     } else if (pep440Versioning.isValid(dep.currentValue)) {
@@ -87,10 +98,10 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
   return Array.from(registryUrls);
 }
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   fileName: string
-): PackageFile | null {
+): Promise<PackageFile | null> {
   logger.trace(`poetry.extractPackageFile(${fileName})`);
   let pyprojectfile: PoetryFile;
   try {
@@ -103,10 +114,29 @@ export function extractPackageFile(
     logger.debug(`${fileName} contains no poetry section`);
     return null;
   }
+
+  // handle the lockfile
+  const lockContents = await readLocalFile('poetry.lock', 'utf8');
+
+  let poetryLockfile: PoetryLock;
+  try {
+    poetryLockfile = parse(lockContents);
+  } catch (err) {
+    logger.debug({ err }, 'Error parsing pyproject.toml file');
+  }
+
+  const lockfileMapping: Record<string, PoetryLockSection> = {};
+  if (poetryLockfile?.package) {
+    // Create a package->PoetryLockSection mapping
+    for (const poetryPackage of poetryLockfile.package) {
+      lockfileMapping[poetryPackage.name] = poetryPackage;
+    }
+  }
+
   const deps = [
-    ...extractFromSection(pyprojectfile, 'dependencies'),
-    ...extractFromSection(pyprojectfile, 'dev-dependencies'),
-    ...extractFromSection(pyprojectfile, 'extras'),
+    ...extractFromSection(pyprojectfile, 'dependencies', lockfileMapping),
+    ...extractFromSection(pyprojectfile, 'dev-dependencies', lockfileMapping),
+    ...extractFromSection(pyprojectfile, 'extras', lockfileMapping),
   ];
   if (!deps.length) {
     return null;
