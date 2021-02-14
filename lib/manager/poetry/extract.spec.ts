@@ -122,7 +122,7 @@ describe('lib/manager/poetry/extract', () => {
       expect(res).toMatchSnapshot();
     });
     it('resolves lockedVersions from the lockfile', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(pyproject10tomlLock);
+      fs.readLocalFile.mockResolvedValue(pyproject10tomlLock);
       const res = await extractPackageFile(pyproject10toml, filename);
       expect(res).toMatchSnapshot();
     });
