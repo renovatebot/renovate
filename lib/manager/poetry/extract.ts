@@ -1,4 +1,5 @@
 import { parse } from '@iarna/toml';
+import { join, dirname } from 'path';
 import is from '@sindresorhus/is';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
@@ -13,6 +14,7 @@ import {
   PoetryLockSection,
   PoetrySection,
 } from './types';
+import { file } from 'tmp-promise';
 
 function extractFromSection(
   parsedFile: PoetryFile,
@@ -116,7 +118,8 @@ export async function extractPackageFile(
   }
 
   // handle the lockfile
-  const lockContents = await readLocalFile('poetry.lock', 'utf8');
+  const lockfileName = join(dirname(fileName), 'poetry.lock');
+  const lockContents = await readLocalFile(lockfileName, 'utf8');
 
   let poetryLockfile: PoetryLock;
   try {
