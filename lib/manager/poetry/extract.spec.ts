@@ -1,5 +1,8 @@
 import { readFileSync } from 'fs';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
+
+jest.mock('../../util/fs');
 
 const pyproject1toml = readFileSync(
   'lib/manager/poetry/__fixtures__/pyproject.1.toml',
@@ -46,8 +49,18 @@ const pyproject9toml = readFileSync(
   'utf8'
 );
 
+const pyproject10toml = readFileSync(
+  'lib/manager/poetry/__fixtures__/pyproject.10.toml',
+  'utf8'
+);
+
+const pyproject10tomlLock = readFileSync(
+  'lib/manager/poetry/__fixtures__/pyproject.10.toml.lock',
+  'utf8'
+);
+
 describe('lib/manager/poetry/extract', () => {
-  describe('await extractPackageFile()', () => {
+  describe('extractPackageFile()', () => {
     let filename: string;
     const OLD_ENV = process.env;
     beforeEach(() => {
@@ -55,7 +68,7 @@ describe('lib/manager/poetry/extract', () => {
       process.env = { ...OLD_ENV };
       delete process.env.PIP_INDEX_URL;
     });
-    afterEach(async () => {
+    afterEach(() => {
       process.env = OLD_ENV;
     });
     it('returns null for empty', async () => {
@@ -106,6 +119,11 @@ describe('lib/manager/poetry/extract', () => {
     });
     it('extracts mixed versioning types', async () => {
       const res = await extractPackageFile(pyproject9toml, filename);
+      expect(res).toMatchSnapshot();
+    });
+    it('resolves lockedVersions from the lockfile', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(pyproject10tomlLock);
+      const res = await extractPackageFile(pyproject10toml, filename);
       expect(res).toMatchSnapshot();
     });
     it('skips git dependencies', async () => {

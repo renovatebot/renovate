@@ -1,17 +1,3 @@
-[[tool.poetry.source]]
-name = "one"
-url = "some.url"
-
-[[tool.poetry.source]]
-name = "two"
-url = "another.url"
-
-[[tool.poetry.source]]
-url = "missingname.url"
-
-[[tool.poetry.source]]
-name = "four"
-url = "last.url"
-
-[[tool.poetry.source]]
-name = "five"
+[tool.poetry.dependencies]
+python = "^3.9"
+boto3 = "*"
