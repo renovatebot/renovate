@@ -146,6 +146,24 @@ function getBucket(
   return 'non-major';
 }
 
+function hasPendingChecks(
+  config: LookupUpdateConfig,
+  release: Release
+): boolean {
+  if (!config.stabilityDays) {
+    return false;
+  }
+  if (!release?.releaseTimestamp) {
+    return false;
+  }
+  const releaseTimestamp = DateTime.fromISO(release.releaseTimestamp);
+  return (
+    releaseTimestamp.plus({
+      days: config.stabilityDays,
+    }) > DateTime.local()
+  );
+}
+
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig
 ): Promise<UpdateResult> {
@@ -335,37 +353,18 @@ export async function lookupUpdates(
       let bucketRelease: Release;
       let skippedOverVersions: string[];
       let pendingVersions: string[];
+      const pendingReleases: Release[] = [];
       if (config.preferNonPending) {
-        // If some releases satisfy checks and some don't, then suppress the non-satisfying
-        const pendingChecks: string[] = [];
-        if (config.stabilityDays) {
-          // Check each release for stabilityDays
-          for (const release of sortedReleases) {
-            // stabilityDays is only valid if a releaseTimestamp is present
-            if (release.releaseTimestamp) {
-              const releaseTimestamp = DateTime.fromISO(
-                release.releaseTimestamp
-              );
-              if (
-                releaseTimestamp.plus({
-                  days: config.stabilityDays,
-                }) > DateTime.local()
-              ) {
-                pendingChecks.push(release.version);
-              }
-            }
-          }
+        // Move highest releases to pending
+        while (
+          hasPendingChecks(config, sortedReleases[sortedReleases.length - 1])
+        ) {
+          pendingReleases.unshift(sortedReleases.pop());
         }
-        const pendingReleases = sortedReleases.filter((release) =>
-          pendingChecks.includes(release.version)
-        );
-        const nonPendingReleases = sortedReleases.filter(
-          (release) => !pendingChecks.includes(release.version)
-        );
-        if (nonPendingReleases.length) {
+        if (sortedReleases.length) {
           // if any releases satisfy checks then use them and set others as pending
-          bucketRelease = nonPendingReleases.pop();
-          skippedOverVersions = nonPendingReleases.map((r) => r.version);
+          bucketRelease = sortedReleases.pop();
+          skippedOverVersions = sortedReleases.map((r) => r.version);
           pendingVersions = pendingReleases.map((r) => r.version);
         } else {
           // is all are pending them treat them like usual

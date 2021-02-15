@@ -1524,23 +1524,6 @@ If you configure to immediate, it means you will usually get GitHub notification
 With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately.
 Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
 
-## preferNonPending
-
-If enabled, Renovate will prefer releases with passing internal checks over non-passing, even if the non-passing has a higher release version.
-
-It is easiest to demonstrate by example:
-
-- Current version is `1.0.0`
-- Both `1.0.1` and `1.0.2` are available as upgrades
-- `1.0.1` is one week old while `1.0.2` is a day old
-- User has configured `stabilityDays=3`
-
-With `preferNonPending=false` (default), Renovate will create an update PR for `1.0.2` with a pending status check.
-
-With `preferNonPending=true`, Renovate will create an update PR for `1.0.1` with a passing status check. If the PR is still open two days later, it would be updated to `1.0.2` once it's also passing the `stabilityDays` check.
-
-This feature currently applies to the `stabilityDays` check only.
-
 ## prFooter
 
 ## prHeader
@@ -1597,6 +1580,23 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## preferNonPending
+
+If enabled, Renovate will prefer releases with passing internal checks over non-passing, even if the non-passing has a higher release version.
+
+It is easiest to demonstrate by example:
+
+- Current version is `1.0.0`
+- Both `1.0.1` and `1.0.2` are available as upgrades
+- `1.0.1` is one week old while `1.0.2` is a day old
+- User has configured `stabilityDays=3`
+
+With `preferNonPending=false` (default), Renovate will create an update PR for `1.0.2` with a pending status check.
+
+With `preferNonPending=true`, Renovate will create an update PR for `1.0.1` with a passing status check. If the PR is still open two days later, it would be updated to `1.0.2` once it's also passing the `stabilityDays` check.
+
+This feature currently applies to the `stabilityDays` check only.
 
 ## pruneStaleBranches
 

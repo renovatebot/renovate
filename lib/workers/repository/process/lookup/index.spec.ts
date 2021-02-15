@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import nock from 'nock';
 import { getConfig, mocked, partial } from '../../../../../test/util';
 import qJson from '../../../../config/npm/__fixtures__/01.json';
@@ -23,7 +24,6 @@ import { id as npmVersioningId } from '../../../../versioning/npm';
 import { id as pep440VersioningId } from '../../../../versioning/pep440';
 import { id as poetryVersioningId } from '../../../../versioning/poetry';
 import * as lookup from '.';
-import { DateTime } from 'luxon';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
