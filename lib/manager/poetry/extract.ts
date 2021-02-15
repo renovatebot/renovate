@@ -1,5 +1,6 @@
 import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
+import { dirname, join } from 'upath';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
