@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
+jest.mock('../../util/fs');
 
 const pyproject1toml = readFileSync(
   'lib/manager/poetry/__fixtures__/pyproject.1.toml',
@@ -48,13 +49,15 @@ const pyproject9toml = readFileSync(
   'utf8'
 );
 
+// pyproject.10.toml use by artifacts
+
 const pyproject10toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.10.toml',
+  'lib/manager/poetry/__fixtures__/pyproject.11.toml',
   'utf8'
 );
 
 const pyproject10tomlLock = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.10.toml.lock',
+  'lib/manager/poetry/__fixtures__/pyproject.11.toml.lock',
   'utf8'
 );
 
