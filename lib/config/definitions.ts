@@ -1167,7 +1167,7 @@ const options: RenovateOptions[] = [
   {
     name: 'preferNonPending',
     description:
-      'Prefer releases with non-pending status checks if both are available.',
+      'Prefer releases with non-pending stabilityDays if both are available.',
     type: 'boolean',
   },
   {
