@@ -51,12 +51,12 @@ const pyproject9toml = readFileSync(
 
 // pyproject.10.toml use by artifacts
 
-const pyproject10toml = readFileSync(
+const pyproject11toml = readFileSync(
   'lib/manager/poetry/__fixtures__/pyproject.11.toml',
   'utf8'
 );
 
-const pyproject10tomlLock = readFileSync(
+const pyproject11tomlLock = readFileSync(
   'lib/manager/poetry/__fixtures__/pyproject.11.toml.lock',
   'utf8'
 );
@@ -124,8 +124,8 @@ describe('lib/manager/poetry/extract', () => {
       expect(res).toMatchSnapshot();
     });
     it('resolves lockedVersions from the lockfile', async () => {
-      fs.readLocalFile.mockResolvedValue(pyproject10tomlLock);
-      const res = await extractPackageFile(pyproject10toml, filename);
+      fs.readLocalFile.mockResolvedValue(pyproject11tomlLock);
+      const res = await extractPackageFile(pyproject11toml, filename);
       expect(res).toMatchSnapshot();
     });
     it('skips git dependencies', async () => {
