@@ -1165,9 +1165,9 @@ const options: RenovateOptions[] = [
     default: 0,
   },
   {
-    name: 'eagerStatusChecks',
+    name: 'preferNonPending',
     description:
-      'If enabled, Renovate status checks will be used as part of release filtering.',
+      'Prefer releases with non-pending status checks if both are available.',
     type: 'boolean',
   },
   {

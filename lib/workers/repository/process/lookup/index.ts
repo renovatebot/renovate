@@ -335,7 +335,7 @@ export async function lookupUpdates(
       let bucketRelease: Release;
       let skippedOverVersions: string[];
       let pendingVersions: string[];
-      if (config.eagerStatusChecks) {
+      if (config.preferNonPending) {
         // If some releases satisfy checks and some don't, then suppress the non-satisfying
         const pendingChecks: string[] = [];
         if (config.stabilityDays) {

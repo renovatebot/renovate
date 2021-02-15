@@ -1167,7 +1167,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.0.0';
       config.depName = 'some/repo';
       config.datasource = datasourceGithubReleases.id;
-      config.eagerStatusChecks = true;
+      config.preferNonPending = true;
       config.stabilityDays = 1;
       githubReleases.getReleases.mockResolvedValueOnce({
         releases: [
@@ -1189,7 +1189,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.0.0';
       config.depName = 'some/repo';
       config.datasource = datasourceGithubReleases.id;
-      config.eagerStatusChecks = true;
+      config.preferNonPending = true;
       config.stabilityDays = 1;
       githubReleases.getReleases.mockResolvedValueOnce({
         releases: [
@@ -1211,7 +1211,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.0.0';
       config.depName = 'some/repo';
       config.datasource = datasourceGithubReleases.id;
-      config.eagerStatusChecks = true;
+      config.preferNonPending = true;
       config.stabilityDays = 1;
       githubReleases.getReleases.mockResolvedValueOnce({
         releases: [
@@ -1231,7 +1231,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.0.0';
       config.depName = 'some/repo';
       config.datasource = datasourceGithubReleases.id;
-      config.eagerStatusChecks = true;
+      config.preferNonPending = true;
       config.stabilityDays = 1;
       githubReleases.getReleases.mockResolvedValueOnce({
         releases: [

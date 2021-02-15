@@ -429,22 +429,6 @@ This option is evaluated at PR/MR creation time and is only supported on the fol
 Note that GitLab implements draft status by checking whether the PR's title starts with certain strings.
 Therefore, draftPR on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
-## eagerStatusChecks
-
-When using the `stabilityDays` status check, evaluation can either be lazy (default) or eager.
-When it's lazy (`false`), it means Renovate will always propose the highest matching release in a PR, even if it doesn't satisfy stabilityDays while earlier release upgrades do.
-When it's eager (`true`), it means Renovate will propose the highest matching release which satisfies the status checks, if both satisfying and non-satisfying are present.
-
-A simple example:
-
-- Both `1.0.1` and `1.0.2` are available as upgrades
-- `1.0.1` is one week old while `1.0.2` is a day old
-- User has configured `stabilityDays=3`
-
-With `eagerStatusChecks=false`, Renovate will create an update PR for `1.0.2` with a pending status check.
-
-With `eagerStatusChecks=true`, Renovate will create an update PR for `1.0.1` with a passing status check, but update it to `1.0.2` approximately two days later if the PR is still open and `1.0.2` now passes the `stabilityDays` status check.
-
 ## enabled
 
 The most common use of `enabled` is if you want to turn Renovate's functionality off, for some reason.
@@ -1539,6 +1523,23 @@ Renovate defaults to `immediate` but some like to change to `not-pending`.
 If you configure to immediate, it means you will usually get GitHub notifications that a new PR is available but if you view it immediately then it will still have "pending" tests so you can't take any action.
 With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately.
 Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
+
+## preferNonPending
+
+If enabled, Renovate will prefer releases with passing internal checks over non-passing, even if the non-passing has a higher release version.
+
+It is easiest to demonstrate by example:
+
+- Current version is `1.0.0`
+- Both `1.0.1` and `1.0.2` are available as upgrades
+- `1.0.1` is one week old while `1.0.2` is a day old
+- User has configured `stabilityDays=3`
+
+With `preferNonPending=false` (default), Renovate will create an update PR for `1.0.2` with a pending status check.
+
+With `preferNonPending=true`, Renovate will create an update PR for `1.0.1` with a passing status check. If the PR is still open two days later, it would be updated to `1.0.2` once it's also passing the `stabilityDays` check.
+
+This feature currently applies to the `stabilityDays` check only.
 
 ## prFooter
 
