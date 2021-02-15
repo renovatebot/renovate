@@ -120,8 +120,7 @@ export function generateBranchConfig(
     }
     if (!upgrade.displayFrom) {
       if (upgrade.currentValue === upgrade.newValue) {
-        upgrade.displayFrom =
-          upgrade.currentDigestShort || upgrade.currentVersion || '';
+        upgrade.displayFrom = upgrade.currentDigestShort || '';
         upgrade.displayTo =
           upgrade.displayTo ||
           upgrade.newDigestShort ||
@@ -129,10 +128,7 @@ export function generateBranchConfig(
           '';
       } else {
         upgrade.displayFrom =
-          upgrade.currentValue ||
-          upgrade.currentVersion ||
-          upgrade.currentDigestShort ||
-          '';
+          upgrade.currentValue || upgrade.currentDigestShort || '';
         upgrade.displayTo =
           upgrade.displayTo ||
           upgrade.newValue ||
