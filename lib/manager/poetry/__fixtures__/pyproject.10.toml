@@ -1,5 +1,4 @@
 [[tool.poetry.source]]
-This conversation was marked as resolved by viceice
 name = "one"
 url = "some.url"
 
