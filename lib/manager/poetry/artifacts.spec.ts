@@ -19,7 +19,6 @@ const pyproject10toml = readFileSync(
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../util/fs');
 jest.mock('../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../util/host-rules');

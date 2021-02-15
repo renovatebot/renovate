@@ -2,7 +2,6 @@ import { readFileSync } from 'fs';
 import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../util/fs');
 
 const pyproject1toml = readFileSync(
   'lib/manager/poetry/__fixtures__/pyproject.1.toml',
