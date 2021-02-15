@@ -13,6 +13,9 @@ describe('semver.isValid(input)', () => {
   it('should reject semver without dash', () => {
     expect(semver.isValid('1.2.3foo')).toBeFalsy();
   });
+  it('should work with wildcards', () => {
+    expect(semver.isValid('*')).toBeTruthy();
+  });
   it('should support ranges', () => {
     expect(semver.isValid('~1.2.3')).toBeTruthy();
     expect(semver.isValid('^1.2.3')).toBeTruthy();
@@ -47,6 +50,9 @@ describe('semver.matches()', () => {
     expect(semver.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(true);
     expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
     expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
+  });
+  it('handles wildcards', () => {
+    expect(semver.matches('4.2.0', '*')).toBe(true);
   });
 });
 describe('semver.isLessThanRange()', () => {

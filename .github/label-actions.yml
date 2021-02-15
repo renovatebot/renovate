@@ -1,0 +1,21 @@
+'reproduction:needed':
+  comment: >
+    This issue needs to be reproduced in order to continue.
+
+    Please consult our guide on [minimal reproductions](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to understand what is needed.
+
+    Issues requiring reproductions may be closed if no reproduction can be provided within two weeks.
+
+'reproduction:provided':
+  comment: >
+    Thank you for providing a reproduction.
+
+    The label will be updated to `reproduction:confirmed` once someone else has confirmed they can reproduce the problem with it.
+
+'status:requirements':
+  comment: >
+    This issue has been labeled with `status:requirements`. This indicates that the issue is not ready to start and further requirements or reproduction are needed first.
+
+    This label should be removed and replaced with `status:ready` once all requirements and reproductions necessary to start have been met.
+
+    If it's *unclear* as to what is missing to move this issue forward, or you think it has already been provided, feel free to nudge a maintainer to take a look and clarify.
