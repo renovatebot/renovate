@@ -347,13 +347,10 @@ export async function lookupUpdates(
       }
     }
     for (const [bucket, bucketReleases] of Object.entries(buckets)) {
-      const sortedReleases = bucketReleases.sort((r1, r2) =>
+      let sortedReleases: Release[] = bucketReleases.sort((r1, r2) =>
         versioning.sortVersions(r1.version, r2.version)
       );
-      let bucketRelease: Release;
-      let skippedOverVersions: string[];
-      let pendingVersions: string[];
-      const pendingReleases: Release[] = [];
+      let pendingReleases: Release[] = [];
       if (config.preferNonPending) {
         // Move highest releases to pending
         while (
@@ -361,17 +358,15 @@ export async function lookupUpdates(
         ) {
           pendingReleases.unshift(sortedReleases.pop());
         }
-        if (sortedReleases.length) {
-          // if any releases satisfy checks then use them and set others as pending
-          bucketRelease = sortedReleases.pop();
-          skippedOverVersions = sortedReleases.map((r) => r.version);
-          pendingVersions = pendingReleases.map((r) => r.version);
-        } else {
-          // is all are pending them treat them like usual
-          bucketRelease = pendingReleases.pop();
-          skippedOverVersions = pendingReleases.map((r) => r.version);
-        }
       }
+      // if all releases are pending, then revert to normal behavior
+      if (!sortedReleases.length) {
+        sortedReleases = pendingReleases;
+        pendingReleases = [];
+      }
+      const bucketRelease = sortedReleases.pop();
+      const skippedOverVersions = sortedReleases.map((r) => r.version);
+      const pendingVersions = pendingReleases.map((r) => r.version);
       const toVersion = bucketRelease.version;
       const update: LookupUpdate = { fromVersion, toVersion, newValue: null };
       update.bucket = bucket;
