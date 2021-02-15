@@ -1,10 +1,9 @@
-import { dirname, join } from 'path';
 import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../util/fs';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import { PackageDependency, PackageFile } from '../common';
@@ -117,7 +116,7 @@ export async function extractPackageFile(
   }
 
   // handle the lockfile
-  const lockfileName = join(dirname(fileName), 'poetry.lock');
+  const lockfileName = getSiblingFileName(fileName, 'poetry.lock');
   const lockContents = await readLocalFile(lockfileName, 'utf8');
 
   let poetryLockfile: PoetryLock;
