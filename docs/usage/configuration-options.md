@@ -1594,7 +1594,8 @@ It is easiest to demonstrate by example:
 
 With `preferNonPending=false` (default), Renovate will create an update PR for `1.0.2` with a pending status check.
 
-With `preferNonPending=true`, Renovate will create an update PR for `1.0.1` with a passing status check. If the PR is still open two days later, it would be updated to `1.0.2` once it's also passing the `stabilityDays` check.
+With `preferNonPending=true`, Renovate will create an update PR for `1.0.1` with a passing status check.
+If the PR is still open two days later, it would be updated to `1.0.2` once it's also passing the `stabilityDays` check.
 
 This feature currently applies to the `stabilityDays` check only.
 
