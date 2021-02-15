@@ -18,7 +18,7 @@ import {
 function extractFromSection(
   parsedFile: PoetryFile,
   section: keyof PoetrySection,
-  poetryLockfile: Record<string, PoetryLockSection> = {}
+  poetryLockfile: Record<string, PoetryLockSection>
 ): PackageDependency[] {
   const deps = [];
   const sectionContent = parsedFile.tool.poetry[section];
