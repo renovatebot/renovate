@@ -140,6 +140,22 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('should query custom paths', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/path/custom.json`)
+        .reply(200, {
+          content: Buffer.from('{"foo":"bar"}').toString('base64'),
+        });
+      const content = await github.getPreset({
+        packageName: 'some/repo',
+        presetName: 'custom',
+        presetPath: 'path',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('should throws not-found', async () => {
       httpMock
         .scope(githubApiHost)

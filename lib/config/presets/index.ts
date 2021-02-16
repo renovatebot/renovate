@@ -60,6 +60,7 @@ export function replaceArgs(
 export function parsePreset(input: string): ParsedPreset {
   let str = input;
   let presetSource: string;
+  let presetPath: string;
   let packageName: string;
   let presetName: string;
   let params: string[];
@@ -127,6 +128,9 @@ export function parsePreset(input: string): ParsedPreset {
     } else {
       presetName = str.slice(1);
     }
+  } else if (str.includes('//')) {
+    // non-scoped namespace with a subdirectory preset
+    [, packageName, presetPath, presetName] = /(.*?)\/\/(.*)\/(.*)$/.exec(str);
   } else {
     // non-scoped namespace
     [, packageName] = /(.*?)(:|$)/.exec(str);
@@ -138,7 +142,7 @@ export function parsePreset(input: string): ParsedPreset {
       presetName = 'default';
     }
   }
-  return { presetSource, packageName, presetName, params };
+  return { presetSource, presetPath, packageName, presetName, params };
 }
 
 export async function getPreset(
@@ -146,9 +150,16 @@ export async function getPreset(
   baseConfig?: RenovateConfig
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
-  const { presetSource, packageName, presetName, params } = parsePreset(preset);
+  const {
+    presetSource,
+    packageName,
+    presetPath,
+    presetName,
+    params,
+  } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
     packageName,
+    presetPath,
     presetName,
     baseConfig,
   });
@@ -307,6 +318,7 @@ export async function resolveConfigPresets(
 export interface ParsedPreset {
   presetSource: string;
   packageName: string;
+  presetPath?: string;
   presetName: string;
   params?: string[];
 }

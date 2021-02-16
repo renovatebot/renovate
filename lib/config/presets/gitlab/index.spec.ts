@@ -65,6 +65,31 @@ describe(getName(__filename), () => {
       expect(content).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('should query custom paths', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(`${basePath}/branches`)
+        .reply(200, [
+          {
+            name: 'devel',
+          },
+          {
+            name: 'master',
+            default: true,
+          },
+        ])
+        .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
+        .reply(200, { foo: 'bar' }, {});
+
+      const content = await gitlab.getPreset({
+        packageName: 'some/repo',
+        presetPath: 'path',
+        presetName: 'custom',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
 
   describe('getPresetFromEndpoint()', () => {
