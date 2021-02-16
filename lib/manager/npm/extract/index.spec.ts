@@ -8,6 +8,7 @@ const fs: any = _fs;
 
 // TODO: fix types
 const defaultConfig = getConfig();
+defaultConfig.localDir = upath.resolve('lib/manager/npm/__fixtures__');
 
 function readFixture(fixture: string) {
   return readFileSync(
@@ -327,7 +328,9 @@ describe('manager/npm/extract', () => {
   });
   describe('.postExtract()', () => {
     it('runs', async () => {
-      await expect(npmExtract.postExtract([])).resolves.not.toThrow();
+      await expect(
+        npmExtract.postExtract(defaultConfig, [])
+      ).resolves.not.toThrow();
     });
   });
 });

@@ -1,8 +1,14 @@
+import upath from 'upath';
+import { getConfig } from '../../../config/defaults';
 import { detectMonorepos } from './monorepo';
+
+// TODO: fix types
+const defaultConfig = getConfig();
+defaultConfig.localDir = upath.resolve('lib/manager/npm/__fixtures__');
 
 describe('manager/npm/extract', () => {
   describe('.extractPackageFile()', () => {
-    it('uses lerna package settings', () => {
+    it('uses lerna package settings', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -44,11 +50,11 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      detectMonorepos(packageFiles);
+      await detectMonorepos(defaultConfig, packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
     });
-    it('uses yarn workspaces package settings with lerna', () => {
+    it('uses yarn workspaces package settings with lerna', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -66,11 +72,11 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      detectMonorepos(packageFiles);
+      await detectMonorepos(defaultConfig, packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
     });
-    it('uses yarn workspaces package settings without lerna', () => {
+    it('uses yarn workspaces package settings without lerna', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -86,7 +92,7 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      detectMonorepos(packageFiles);
+      await detectMonorepos(defaultConfig, packageFiles);
       expect(packageFiles).toMatchSnapshot();
     });
   });
