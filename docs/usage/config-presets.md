@@ -44,6 +44,7 @@ An additional benefit of using source code hosting is that the same token/authen
 | Gitea default           | `gitea>abc/foo`            | `default` | `https://gitea.com/abc/foo`          | `default.json` or `renovate.json` |
 | Gitea with preset name  | `gitea>abc/foo:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`                        |
 | Local default           | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |
+| Local with preset path  | `local>abc/foo//path/xyz`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json`                   |
 
 ## Example configs
 

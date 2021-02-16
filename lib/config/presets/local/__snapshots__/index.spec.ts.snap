@@ -17,6 +17,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     "https://api.gitea.example.com",
   ],
 ]
@@ -29,6 +30,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     "https://api.github.example.com",
   ],
 ]
@@ -45,6 +47,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     "https://gitlab.example.com/api/v4",
   ],
 ]
@@ -62,6 +65,7 @@ Array [
     "some/repo",
     "default",
     undefined,
+    undefined,
   ],
 ]
 `;
@@ -73,6 +77,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     undefined,
   ],
 ]
@@ -89,6 +94,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     undefined,
   ],
 ]
