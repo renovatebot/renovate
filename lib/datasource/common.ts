@@ -51,22 +51,22 @@ export interface Release {
 }
 
 export interface ReleaseResult {
-  sourceDirectory?: string;
   latestVersion?: string;
-  changelogUrl?: string;
-  dependencyUrl?: string;
   deprecationMessage?: string;
   display?: string;
   group?: string;
-  homepage?: string;
   name?: string;
   pkgName?: string;
   releases: Release[];
-  sourceUrl?: string;
   tags?: Record<string, string>;
   versions?: any;
-  registryUrl?: string;
   isPrivate?: boolean;
+  // URL metadata
+  changelogUrl?: string;
+  dependencyUrl?: string;
+  homepage?: string;
+  sourceUrl?: string;
+  sourceDirectory?: string;
 }
 
 export interface DatasourceApi {
