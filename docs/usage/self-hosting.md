@@ -421,3 +421,18 @@ spec:
 
 It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system.
 Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.
+
+### About the log level numbers
+
+When you use `LOG_LEVEL=debug` and `LOG_FORMAT=json`, Renovate uses numbers in the `level` field.
+
+The logging level output is controlled by the Bunyan logging library.
+
+| Level | Meaning |
+| ----: | ------- |
+|    10 | trace   |
+|    20 | debug   |
+|    30 | info    |
+|    40 | warn    |
+|    50 | error   |
+|    60 | fatal   |
