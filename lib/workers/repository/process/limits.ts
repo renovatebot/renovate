@@ -12,7 +12,7 @@ export async function getPrHourlyRemaining(
 ): Promise<number> {
   if (config.prHourlyLimit) {
     try {
-      logger.debug('Calculating hourly PRs remaining');
+      logger.debug('Calculating hourly PRs remaining (${config.prHourlyLimit})');
       const prList = await platform.getPrList();
       const currentHourStart = DateTime.local().startOf('hour');
       logger.debug(`currentHourStart=${String(currentHourStart)}`);
