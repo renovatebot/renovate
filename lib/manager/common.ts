@@ -47,7 +47,8 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
   updateType?: UpdateType;
-  toVersion?: string;
+  newValue?: string;
+  newVersion?: string;
 }
 
 export interface PackageUpdateConfig {
@@ -129,25 +130,27 @@ export interface Package<T> extends ManagerData<T> {
 }
 
 export interface LookupUpdate {
+  bucket?: string;
   blockedByPin?: boolean;
   branchName?: string;
   commitMessageAction?: string;
   displayFrom?: string;
   displayTo?: string;
+  isBump?: boolean;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
   isSingleVersion?: boolean;
-  fromVersion?: string;
+  currentVersion?: string;
   newDigest?: string;
   newDigestShort?: string;
   newMajor?: number;
   newMinor?: number;
   newValue: string;
-  newVersion?: string;
   semanticCommitType?: string;
-  toVersion?: string;
+  skippedOverVersions?: string[];
+  newVersion?: string;
   updateType?: UpdateType;
   sourceUrl?: string;
 }
@@ -162,14 +165,14 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   displayFrom?: string;
   displayTo?: string;
   fixedVersion?: string;
-  fromVersion?: string;
+  currentVersion?: string;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
   sourceLine?: number;
-  toVersion?: string;
+  newVersion?: string;
   updates?: LookupUpdate[];
   replaceString?: string;
   autoReplaceStringTemplate?: string;
@@ -184,7 +187,6 @@ export interface Upgrade<T = Record<string, any>>
     NpmLockFiles {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
-  currentVersion?: string;
   depGroup?: string;
   dockerRepository?: string;
   localDir?: string;
@@ -193,10 +195,9 @@ export interface Upgrade<T = Record<string, any>>
   newFrom?: string;
   newMajor?: number;
   newValue?: string;
-  newVersion?: string;
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
-  toVersion?: string;
+  newVersion?: string;
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;

@@ -38,7 +38,7 @@ export interface BbsRestUserRef {
   user: BbsRestUser;
 }
 
-export interface BbbsRestPr {
+export interface BbsRestPr {
   createdDate: string;
   description: string;
   fromRef: BbsRestBranchRef;
@@ -48,4 +48,16 @@ export interface BbbsRestPr {
   title: string;
   toRef: BbsRestBranchRef;
   version?: number;
+}
+
+export interface BbsRestRepo {
+  project: { key: string };
+  parent: string;
+  links: {
+    clone: { href: string; name: string }[];
+  };
+}
+
+export interface BbsRestBranch {
+  displayId: string;
 }

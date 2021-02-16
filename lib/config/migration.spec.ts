@@ -48,7 +48,7 @@ describe('config/migration', () => {
         upgradeInRange: true,
         automergeType: 'branch-push',
         branchName:
-          '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}',
+          '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
         baseBranch: 'next',
         managerBranchPrefix: 'foo',
         branchPrefix: 'renovate/{{parentDir}}-',
@@ -76,7 +76,6 @@ describe('config/migration', () => {
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
-        commitMessageExtra: '{{currentVersion}} something',
         pathRules: [
           {
             paths: ['examples/**'],
@@ -314,7 +313,7 @@ describe('config/migration', () => {
           packageNames: ['typescript'],
           updateTypes: ['major'],
           commitMessage:
-            'fix(package): update peerDependency to accept typescript ^{{newVersion}}',
+            'fix(package): update peerDependency to accept typescript ^{{newValueMajor}} {{newValueMajor}}',
         },
       } as any;
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -322,6 +321,7 @@ describe('config/migration', () => {
         defaultConfig
       );
       expect(isMigrated).toBe(true);
+      expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.packageRules).toHaveLength(1);
     });
     it('migrates node to travis', () => {

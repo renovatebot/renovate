@@ -121,7 +121,7 @@ interface ExtractionResult {
   referencedConfigFiles: string[];
 }
 
-function extractPackageFile(
+export function extractPackageFile(
   content: string,
   fileName: string
 ): ExtractionResult | null {

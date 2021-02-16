@@ -92,7 +92,7 @@ export async function generateLockFile(
       const updateCmd =
         `npm install ${cmdOptions}` +
         lockUpdates
-          .map((update) => ` ${update.depName}@${update.toVersion}`)
+          .map((update) => ` ${update.depName}@${update.newVersion}`)
           .join('');
       commands.push(updateCmd);
     }

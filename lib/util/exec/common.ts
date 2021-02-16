@@ -13,7 +13,6 @@ export enum BinarySource {
 
 export interface ExecConfig {
   binarySource: Opt<BinarySource>;
-  customEnvVariables: Opt<Record<string, string>>;
   localDir: Opt<string>;
   cacheDir: Opt<string>;
 }

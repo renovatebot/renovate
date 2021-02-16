@@ -102,7 +102,7 @@ const options: RenovateOptions[] = [
   {
     name: 'allowedPostUpgradeCommands',
     description:
-      'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run.',
+      'A list of regular expressions that determine which post-upgrade tasks are allowed.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -1333,7 +1333,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
     cli: false,
   },
   {

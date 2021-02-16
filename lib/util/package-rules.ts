@@ -12,7 +12,7 @@ export interface Config extends Record<string, any> {
   depTypes?: string[];
   depName?: string;
   currentValue?: string;
-  fromVersion?: string;
+  currentVersion?: string;
   lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
@@ -32,7 +32,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     depTypes,
     depName,
     currentValue,
-    fromVersion,
+    currentVersion,
     lockedVersion,
     updateType,
     isBump,
@@ -198,7 +198,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
       const compareVersion =
         currentValue && version.isVersion(currentValue)
           ? currentValue // it's a version so we can match against it
-          : lockedVersion || fromVersion; // need to match against this fromVersion, if available
+          : lockedVersion || currentVersion; // need to match against this currentVersion, if available
       if (compareVersion) {
         // istanbul ignore next
         if (version.isVersion(compareVersion)) {
