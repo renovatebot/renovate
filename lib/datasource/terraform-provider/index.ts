@@ -49,7 +49,6 @@ async function queryRegistry(
   const res = (await http.getJson<TerraformProvider>(backendURL)).body;
   const dep: ReleaseResult = {
     name: repository,
-    versions: {},
     releases: null,
   };
   if (res.source) {
@@ -88,7 +87,6 @@ async function queryReleaseBackend(
 
   const dep: ReleaseResult = {
     name: repository,
-    versions: {},
     releases: null,
     sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
   };

@@ -59,7 +59,6 @@ export interface ReleaseResult {
   pkgName?: string;
   releases: Release[];
   tags?: Record<string, string>;
-  versions?: any;
   isPrivate?: boolean;
   // URL metadata
   changelogUrl?: string;

@@ -51,7 +51,6 @@ export async function getReleases({
   // Simplify response before caching and returning
   const dep: ReleaseResult = {
     name: lookupName,
-    versions: {},
     releases: null,
   };
   if (res.homeUrl?.length) {
