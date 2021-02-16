@@ -13,7 +13,7 @@ jest.mock('../../util/git');
 const fixtures = resolve(__dirname, './__fixtures__');
 const config = {
   localDir: resolve(fixtures, './testFiles'),
-  toVersion: '5.6.4',
+  newVersion: '5.6.4',
 };
 
 function readString(...paths: string[]): Promise<string> {
@@ -61,7 +61,7 @@ describe(getName(__filename), () => {
         newPackageFileContent: await readString(
           `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
-        config: { ...config, toVersion: '6.3' },
+        config: { ...config, newVersion: '6.3' },
       });
 
       expect(res).toEqual(
@@ -99,7 +99,7 @@ describe(getName(__filename), () => {
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: ``,
-        config: { ...config, toVersion: '6.3' },
+        config: { ...config, newVersion: '6.3' },
       });
 
       expect(result).toHaveLength(1);
@@ -221,7 +221,7 @@ describe(getName(__filename), () => {
         ),
         config: {
           ...config,
-          toVersion: '6.3',
+          newVersion: '6.3',
           currentValue: '5.6.4',
         },
       });

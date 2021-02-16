@@ -40,13 +40,13 @@ function getTableValues(
     lookupName,
     depName,
     currentVersion,
-    toVersion,
+    newVersion,
     displayFrom,
     displayTo,
   } = upgrade;
   const name = lookupName || depName;
   const from = currentVersion || displayFrom;
-  const to = toVersion || displayTo;
+  const to = newVersion || displayTo;
   if (datasource && name && from && to) {
     return [datasource, name, from, to];
   }
@@ -56,7 +56,7 @@ function getTableValues(
       lookupName,
       depName,
       currentVersion,
-      toVersion,
+      newVersion,
       displayFrom,
       displayTo,
     },
@@ -82,8 +82,8 @@ export function generateBranchConfig(
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);
     }
-    if (!toVersions.includes(upg.toVersion)) {
-      toVersions.push(upg.toVersion);
+    if (!toVersions.includes(upg.newVersion)) {
+      toVersions.push(upg.newVersion);
     }
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
@@ -124,7 +124,7 @@ export function generateBranchConfig(
         upgrade.displayTo =
           upgrade.displayTo ||
           upgrade.newDigestShort ||
-          upgrade.toVersion ||
+          upgrade.newVersion ||
           '';
       } else {
         upgrade.displayFrom =
@@ -132,7 +132,7 @@ export function generateBranchConfig(
         upgrade.displayTo =
           upgrade.displayTo ||
           upgrade.newValue ||
-          upgrade.toVersion ||
+          upgrade.newVersion ||
           upgrade.newDigestShort ||
           '';
       }

@@ -72,6 +72,7 @@ export const allowedFields = {
     'The minor version of the new version. e.g. "1" if the new version if "3.1.0"',
   newValue:
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
+  newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   packageFile: 'The filename that the dependency was found in',
   packageFileDir:
     'The directory with full path where the packageFile was found',
@@ -87,7 +88,6 @@ export const allowedFields = {
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
   sourceUrl: 'The source URL for the package',
-  toVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   updateType: 'One of digest, pin, rollback, patch, minor, major',
   upgrades: 'An array of upgrade objects in the branch',
   url: 'The url of the release notes',

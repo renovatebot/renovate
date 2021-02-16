@@ -12,13 +12,13 @@ function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string {
   const res = npm.getNewValue({
     currentValue,
     rangeStrategy,
     currentVersion,
-    toVersion,
+    newVersion,
   });
   if (isVersion(res)) {
     // normalize out any 'v' prefix

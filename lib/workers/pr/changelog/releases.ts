@@ -23,7 +23,13 @@ function matchesUnstable(
 export async function getInRangeReleases(
   config: BranchUpgradeConfig
 ): Promise<Release[] | null> {
-  const { versioning, currentVersion, toVersion, depName, datasource } = config;
+  const {
+    versioning,
+    currentVersion,
+    newVersion,
+    depName,
+    datasource,
+  } = config;
   // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
     return null;
@@ -41,12 +47,12 @@ export async function getInRangeReleases(
           version.equals(release.version, currentVersion) ||
           version.isGreaterThan(release.version, currentVersion)
       )
-      .filter((release) => !version.isGreaterThan(release.version, toVersion))
+      .filter((release) => !version.isGreaterThan(release.version, newVersion))
       .filter(
         (release) =>
           version.isStable(release.version) ||
           matchesUnstable(version, currentVersion, release.version) ||
-          matchesUnstable(version, toVersion, release.version)
+          matchesUnstable(version, newVersion, release.version)
       );
     if (version.valueToVersion) {
       for (const release of releases || []) {

@@ -1333,7 +1333,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
     cli: false,
   },
   {

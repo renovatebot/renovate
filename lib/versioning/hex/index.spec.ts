@@ -80,7 +80,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '== 1.2.3',
           rangeStrategy: 'pin',
           currentVersion: '1.2.3',
-          toVersion: '2.0.7',
+          newVersion: '2.0.7',
         })
       ).toEqual('== 2.0.7');
     });
@@ -90,7 +90,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '== 3.6.1',
           rangeStrategy: 'bump',
           currentVersion: '3.6.1',
-          toVersion: '3.6.2',
+          newVersion: '3.6.2',
         })
       ).toEqual('== 3.6.2');
     });
@@ -100,7 +100,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '== 3.6.1',
           rangeStrategy: 'replace',
           currentVersion: '3.6.1',
-          toVersion: '3.6.2',
+          newVersion: '3.6.2',
         })
       ).toEqual('== 3.6.2');
     });
@@ -110,7 +110,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '~> 1.2',
           rangeStrategy: 'replace',
           currentVersion: '1.2.3',
-          toVersion: '2.0.7',
+          newVersion: '2.0.7',
         })
       ).toEqual('~> 2.0');
       expect(
@@ -118,7 +118,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '~> 1.2',
           rangeStrategy: 'pin',
           currentVersion: '1.2.3',
-          toVersion: '2.0.7',
+          newVersion: '2.0.7',
         })
       ).toEqual('== 2.0.7');
       expect(
@@ -126,7 +126,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '~> 1.2',
           rangeStrategy: 'bump',
           currentVersion: '1.2.3',
-          toVersion: '2.0.7',
+          newVersion: '2.0.7',
         })
       ).toEqual('~> 2.0');
       expect(
@@ -134,7 +134,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '~> 1.2',
           rangeStrategy: 'bump',
           currentVersion: '1.2.3',
-          toVersion: '1.3.1',
+          newVersion: '1.3.1',
         })
       ).toEqual('~> 1.3');
       expect(
@@ -142,7 +142,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '~> 1.2.0',
           rangeStrategy: 'replace',
           currentVersion: '1.2.3',
-          toVersion: '2.0.7',
+          newVersion: '2.0.7',
         })
       ).toEqual('~> 2.0.0');
       expect(
@@ -150,7 +150,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '~> 1.2.0',
           rangeStrategy: 'pin',
           currentVersion: '1.2.3',
-          toVersion: '2.0.7',
+          newVersion: '2.0.7',
         })
       ).toEqual('== 2.0.7');
       expect(
@@ -158,7 +158,7 @@ describe('lib/versioning/hex', () => {
           currentValue: '~> 1.2.0',
           rangeStrategy: 'bump',
           currentVersion: '1.2.3',
-          toVersion: '2.0.7',
+          newVersion: '2.0.7',
         })
       ).toEqual('~> 2.0.7');
     });
@@ -169,7 +169,7 @@ describe('lib/versioning/hex', () => {
         currentValue: '>= 1.0.0 and <= 2.0.0',
         rangeStrategy: 'widen',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('>= 1.0.0 and <= 2.0.7');
     expect(
@@ -177,7 +177,7 @@ describe('lib/versioning/hex', () => {
         currentValue: '>= 1.0.0 and <= 2.0.0',
         rangeStrategy: 'replace',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('<= 2.0.7');
     expect(
@@ -185,7 +185,7 @@ describe('lib/versioning/hex', () => {
         currentValue: '>= 1.0.0 and <= 2.0.0',
         rangeStrategy: 'pin',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('== 2.0.7');
   });
@@ -195,7 +195,7 @@ describe('lib/versioning/hex', () => {
         currentValue: '>= 1.0.0 or <= 2.0.0',
         rangeStrategy: 'widen',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('>= 1.0.0 or <= 2.0.7');
     expect(
@@ -203,7 +203,7 @@ describe('lib/versioning/hex', () => {
         currentValue: '>= 1.0.0 or <= 2.0.0',
         rangeStrategy: 'replace',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('<= 2.0.7');
     expect(
@@ -211,7 +211,7 @@ describe('lib/versioning/hex', () => {
         currentValue: '>= 1.0.0 or <= 2.0.0',
         rangeStrategy: 'pin',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('== 2.0.7');
   });

@@ -507,9 +507,9 @@ export function migrateConfig(
         fromVersion: 'currentVersion',
         newValueMajor: 'newMajor',
         newValueMinor: 'newMinor',
-        newVersion: 'toVersion',
         newVersionMajor: 'newMajor',
         newVersionMinor: 'newMinor',
+        toVersion: 'newVersion',
       };
       if (is.string(migratedConfig[key])) {
         for (const [from, to] of Object.entries(migratedTemplates)) {

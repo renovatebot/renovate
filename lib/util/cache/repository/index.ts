@@ -21,7 +21,7 @@ export interface BranchUpgradeCache {
   lookupName?: string;
   newDigest?: string;
   newValue?: string;
-  toVersion?: string;
+  newVersion?: string;
   sourceUrl?: string;
 }
 
@@ -93,6 +93,10 @@ export function getCache(): Cache {
       if (upgrade.fromVersion) {
         upgrade.currentVersion = upgrade.fromVersion;
         delete upgrade.fromVersion;
+      }
+      if (upgrade.toVersion) {
+        upgrade.newVersion = upgrade.toVersion;
+        delete upgrade.toVersion;
       }
     }
   }

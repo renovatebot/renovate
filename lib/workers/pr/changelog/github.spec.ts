@@ -13,7 +13,7 @@ const upgrade: BranchUpgradeConfig = {
   endpoint: 'https://api.github.com/',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
-  toVersion: '3.0.0',
+  newVersion: '3.0.0',
   sourceUrl: 'https://github.com/chalk/chalk',
   releases: [
     { version: '0.9.0' },
@@ -55,12 +55,12 @@ describe(getName(__filename), () => {
         })
       ).toBeNull();
     });
-    it('returns null if currentVersion equals toVersion', async () => {
+    it('returns null if currentVersion equals newVersion', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
           currentVersion: '1.0.0',
-          toVersion: '1.0.0',
+          newVersion: '1.0.0',
         })
       ).toBeNull();
     });

@@ -47,7 +47,7 @@ describe(getName(__filename), () => {
         depName: 'some-depname',
         versioning: npmVersioning.id,
         currentVersion: '1.0.0',
-        toVersion: '1.1.0',
+        newVersion: '1.1.0',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
@@ -59,31 +59,31 @@ describe(getName(__filename), () => {
         depName: 'some-depname',
         versioning: npmVersioning.id,
         currentVersion: '1.0.1-rc0',
-        toVersion: '1.1.0',
+        newVersion: '1.1.0',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
-    it('should contain toVersion unstable', async () => {
+    it('should contain newVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
         depName: 'some-depname',
         versioning: npmVersioning.id,
         currentVersion: '1.0.1',
-        toVersion: '1.2.0-rc1',
+        newVersion: '1.2.0-rc1',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
-    it('should contain both currentVersion toVersion unstable', async () => {
+    it('should contain both currentVersion newVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
         depName: 'some-depname',
         versioning: npmVersioning.id,
         currentVersion: '1.0.1-rc0',
-        toVersion: '1.2.0-rc1',
+        newVersion: '1.2.0-rc1',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
@@ -95,7 +95,7 @@ describe(getName(__filename), () => {
         depName: 'some-depname',
         versioning: dockerVersioning.id,
         currentVersion: '1.0.1-rc0',
-        toVersion: '1.2.0-rc0',
+        newVersion: '1.2.0-rc0',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();

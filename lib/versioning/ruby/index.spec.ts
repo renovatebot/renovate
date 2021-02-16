@@ -389,14 +389,14 @@ describe('semverRuby', () => {
           currentValue,
           rangeStrategy,
           currentVersion,
-          toVersion,
+          newVersion,
         ]) => {
           expect(
             semverRuby.getNewValue({
               currentValue,
               rangeStrategy: rangeStrategy as RangeStrategy,
               currentVersion,
-              toVersion,
+              newVersion,
             })
           ).toEqual(expected);
         }
@@ -422,12 +422,12 @@ describe('semverRuby', () => {
         ['~> 1.2.0', '~> 1.0.3', 'bump', '1.0.3', '1.2.3'],
         ['~> 1.0.0', '~> 1.0.3', 'bump', '1.0.3', '1.0.4'],
         ['~> 4.7.0, >= 4.7.9', '~> 4.7, >= 4.7.4', 'bump', '4.7.5', '4.7.9'],
-      ].forEach(([expected, currentValue, rangeStrategy, from, toVersion]) => {
+      ].forEach(([expected, currentValue, rangeStrategy, from, newVersion]) => {
         expect(
           semverRuby.getNewValue({
             currentValue,
             rangeStrategy: rangeStrategy as RangeStrategy,
-            toVersion,
+            newVersion,
           })
         ).toEqual(expected);
       });
@@ -439,7 +439,7 @@ describe('semverRuby', () => {
           currentValue: '>= 3.2, < 5.0',
           rangeStrategy: 'replace',
           currentVersion: '4.0.2',
-          toVersion: '6.0.1',
+          newVersion: '6.0.1',
         })
       ).toMatchSnapshot();
     });
@@ -449,7 +449,7 @@ describe('semverRuby', () => {
           currentValue: '~> 5.2, >= 5.2.5',
           rangeStrategy: 'replace',
           currentVersion: '5.3.0',
-          toVersion: '6.0.1',
+          newVersion: '6.0.1',
         })
       ).toEqual('~> 6.0, >= 6.0.1');
     });
@@ -459,7 +459,7 @@ describe('semverRuby', () => {
           currentValue: '~> 5.2.0, >= 5.2.5',
           rangeStrategy: 'replace',
           currentVersion: '5.2.5',
-          toVersion: '5.3.1',
+          newVersion: '5.3.1',
         })
       ).toEqual('~> 5.3.0, >= 5.3.1');
     });
@@ -469,7 +469,7 @@ describe('semverRuby', () => {
           currentValue: '4.2.0',
           rangeStrategy: 'replace',
           currentVersion: '4.2.0',
-          toVersion: '4.2.5.1',
+          newVersion: '4.2.5.1',
         })
       ).toEqual('4.2.5.1');
       expect(
@@ -477,7 +477,7 @@ describe('semverRuby', () => {
           currentValue: '4.2.5.1',
           rangeStrategy: 'replace',
           currentVersion: '4.2.5.1',
-          toVersion: '4.3.0',
+          newVersion: '4.3.0',
         })
       ).toEqual('4.3.0');
     });
@@ -487,7 +487,7 @@ describe('semverRuby', () => {
           currentValue: '~> 1',
           rangeStrategy: 'replace',
           currentVersion: '1.2.0',
-          toVersion: '2.0.3',
+          newVersion: '2.0.3',
         })
       ).toEqual('~> 2');
     });
@@ -497,7 +497,7 @@ describe('semverRuby', () => {
           currentValue: '= 5.2.2',
           rangeStrategy: 'replace',
           currentVersion: '5.2.2',
-          toVersion: '5.2.2.1',
+          newVersion: '5.2.2.1',
         })
       ).toEqual('= 5.2.2.1');
     });
@@ -537,14 +537,14 @@ describe('semverRuby', () => {
           currentValue,
           rangeStrategy,
           currentVersion,
-          toVersion,
+          newVersion,
         ]) => {
           expect(
             semverRuby.getNewValue({
               currentValue,
               rangeStrategy: rangeStrategy as RangeStrategy,
               currentVersion,
-              toVersion,
+              newVersion,
             })
           ).toEqual(expected);
         }
@@ -560,14 +560,14 @@ describe('semverRuby', () => {
           currentValue,
           rangeStrategy,
           currentVersion,
-          toVersion,
+          newVersion,
         ]) => {
           expect(
             semverRuby.getNewValue({
               currentValue,
               rangeStrategy: rangeStrategy as RangeStrategy,
               currentVersion,
-              toVersion,
+              newVersion,
             })
           ).toEqual(expected);
         }

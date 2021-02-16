@@ -56,7 +56,7 @@ describe('semver.getNewValue()', () => {
         currentValue: '~> 1.2',
         rangeStrategy: 'replace',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('~> 2.0');
     expect(
@@ -64,7 +64,7 @@ describe('semver.getNewValue()', () => {
         currentValue: '~> 1.2.0',
         rangeStrategy: 'replace',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('~> 2.0.0');
   });
@@ -74,7 +74,7 @@ describe('semver.getNewValue()', () => {
         currentValue: '>= 1.0.0, <= 2.0.0',
         rangeStrategy: 'widen',
         currentVersion: '1.2.3',
-        toVersion: '2.0.7',
+        newVersion: '2.0.7',
       })
     ).toEqual('>= 1.0.0, <= 2.0.7');
   });

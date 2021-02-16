@@ -27,7 +27,7 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const fixtures = resolve(__dirname, './__fixtures__');
 const config = {
   localDir: resolve(fixtures, './testFiles'),
-  toVersion: '5.6.4',
+  newValue: '5.6.4',
 };
 const dockerConfig = { ...config, binarySource: BinarySource.Docker };
 
@@ -76,7 +76,7 @@ describe(getName(__filename), () => {
       newPackageFileContent: await readString(
         `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
       ),
-      config: { ...config, toVersion: '6.3' },
+      config: { ...config, newValue: '6.3' },
     });
 
     expect(res).toEqual(

@@ -953,7 +953,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q2').reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.updates[0].toVersion).toEqual('1.4.0');
+      expect(res.updates[0].newVersion).toEqual('1.4.0');
     });
     it('is deprecated', async () => {
       config.currentValue = '1.3.0';
@@ -969,7 +969,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q3').reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.updates[0].toVersion).toEqual('1.4.1');
+      expect(res.updates[0].newVersion).toEqual('1.4.1');
     });
     it('skips unsupported values', async () => {
       config.currentValue = 'alpine';

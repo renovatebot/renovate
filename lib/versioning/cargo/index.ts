@@ -76,7 +76,7 @@ function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
     return currentValue;
@@ -86,14 +86,14 @@ function getNewValue({
     if (currentValue.startsWith('= ')) {
       res += ' ';
     }
-    res += toVersion;
+    res += newVersion;
     return res;
   }
   const newSemver = npm.getNewValue({
     currentValue: cargo2npm(currentValue),
     rangeStrategy,
     currentVersion,
-    toVersion,
+    newVersion,
   });
   let newCargo = npm2cargo(newSemver);
   // istanbul ignore if

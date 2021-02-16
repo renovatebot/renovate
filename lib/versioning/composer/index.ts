@@ -119,27 +119,27 @@ function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'pin') {
-    return toVersion;
+    return newVersion;
   }
   if (rangeStrategy === 'update-lockfile') {
-    if (matches(toVersion, currentValue)) {
+    if (matches(newVersion, currentValue)) {
       return currentValue;
     }
     return getNewValue({
       currentValue,
       rangeStrategy: 'replace',
       currentVersion,
-      toVersion,
+      newVersion,
     });
   }
-  const toMajor = getMajor(toVersion);
-  const toMinor = getMinor(toVersion);
+  const toMajor = getMajor(newVersion);
+  const toMinor = getMinor(newVersion);
   let newValue: string;
   if (isVersion(currentValue)) {
-    newValue = toVersion;
+    newValue = newVersion;
   } else if (/^[~^](0\.[1-9][0-9]*)$/.test(currentValue)) {
     const operator = currentValue.substr(0, 1);
     // handle ~0.4 case first
@@ -161,7 +161,7 @@ function getNewValue({
       newValue = `${operator}${toMajor}.${toMinor}`;
     }
   } else if (
-    npm.isVersion(padZeroes(normalizeVersion(toVersion))) &&
+    npm.isVersion(padZeroes(normalizeVersion(newVersion))) &&
     npm.isValid(normalizeVersion(currentValue)) &&
     composer2npm(currentValue) === normalizeVersion(currentValue)
   ) {
@@ -169,7 +169,7 @@ function getNewValue({
       currentValue: normalizeVersion(currentValue),
       rangeStrategy,
       currentVersion: normalizeVersion(currentVersion),
-      toVersion: padZeroes(normalizeVersion(toVersion)),
+      newVersion: padZeroes(normalizeVersion(newVersion)),
     });
   }
   if (currentValue.includes(' || ')) {
@@ -178,7 +178,7 @@ function getNewValue({
       currentValue: lastValue,
       rangeStrategy,
       currentVersion,
-      toVersion,
+      newVersion,
     });
     if (rangeStrategy === 'replace') {
       newValue = replacementValue;
@@ -188,10 +188,10 @@ function getNewValue({
   }
   if (!newValue) {
     logger.warn(
-      { currentValue, rangeStrategy, currentVersion, toVersion },
+      { currentValue, rangeStrategy, currentVersion, newVersion },
       'Unsupported composer value'
     );
-    newValue = toVersion;
+    newValue = newVersion;
   }
   if (currentValue.split('.')[0].includes('v')) {
     newValue = newValue.replace(/([0-9])/, 'v$1');
