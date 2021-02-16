@@ -124,7 +124,7 @@ Object {
       "datasource": "npm",
       "depName": "@types/some-dep",
       "displayFrom": "0.5.7",
-      "displayTo": "",
+      "displayTo": "0.5.8",
       "isRange": false,
       "prTitle": "some-title",
       "prettyDepType": "dependency",

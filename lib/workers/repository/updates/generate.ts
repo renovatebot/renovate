@@ -124,7 +124,7 @@ export function generateBranchConfig(
         upgrade.displayTo =
           upgrade.displayTo ||
           upgrade.newDigestShort ||
-          upgrade.newVersion ||
+          upgrade.toVersion ||
           '';
       } else {
         upgrade.displayFrom =
@@ -132,7 +132,7 @@ export function generateBranchConfig(
         upgrade.displayTo =
           upgrade.displayTo ||
           upgrade.newValue ||
-          upgrade.newVersion ||
+          upgrade.toVersion ||
           upgrade.newDigestShort ||
           '';
       }

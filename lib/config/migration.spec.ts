@@ -313,7 +313,7 @@ describe('config/migration', () => {
           packageNames: ['typescript'],
           updateTypes: ['major'],
           commitMessage:
-            'fix(package): update peerDependency to accept typescript ^{{newVersion}} {{newVersion}}',
+            'fix(package): update peerDependency to accept typescript ^{{newValueMajor}} {{newValueMajor}}',
         },
       } as any;
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
