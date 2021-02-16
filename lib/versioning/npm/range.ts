@@ -14,7 +14,7 @@ import { NewValueConfig } from '../common';
 export function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
@@ -27,7 +27,7 @@ export function getNewValue({
     return getNewValue({
       currentValue,
       rangeStrategy: 'replace',
-      fromVersion,
+      currentVersion,
       toVersion,
     });
   }
@@ -37,7 +37,7 @@ export function getNewValue({
     const newValue = getNewValue({
       currentValue,
       rangeStrategy: 'replace',
-      fromVersion,
+      currentVersion,
       toVersion,
     });
     if (element.operator?.startsWith('<')) {
@@ -71,7 +71,7 @@ export function getNewValue({
         return getNewValue({
           currentValue,
           rangeStrategy: 'replace',
-          fromVersion,
+          currentVersion,
           toVersion,
         });
       }
@@ -123,7 +123,7 @@ export function getNewValue({
         const bumpedSubRange = getNewValue({
           currentValue: subRange,
           rangeStrategy: 'bump',
-          fromVersion,
+          currentVersion,
           toVersion,
         });
         if (satisfies(toVersion, bumpedSubRange)) {
@@ -132,7 +132,7 @@ export function getNewValue({
         return getNewValue({
           currentValue: subRange,
           rangeStrategy: 'replace',
-          fromVersion,
+          currentVersion,
           toVersion,
         });
       });
@@ -147,10 +147,10 @@ export function getNewValue({
     return `~> ${toVersionMajor}.${toVersionMinor}.0`;
   }
   if (element.operator === '^') {
-    if (suffix.length || !fromVersion) {
+    if (suffix.length || !currentVersion) {
       return `^${toVersionMajor}.${toVersionMinor}.${toVersionPatch}${suffix}`;
     }
-    if (toVersionMajor === major(fromVersion)) {
+    if (toVersionMajor === major(currentVersion)) {
       if (toVersionMajor === 0) {
         if (toVersionMinor === 0) {
           return `^${toVersion}`;

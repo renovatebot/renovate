@@ -58,15 +58,15 @@ export interface LookupUpdateConfig
 
 function getType(
   config: LookupUpdateConfig,
-  fromVersion: string,
+  currentVersion: string,
   toVersion: string
 ): UpdateType {
   const { versioning } = config;
   const version = allVersioning.get(versioning);
-  if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
+  if (version.getMajor(toVersion) > version.getMajor(currentVersion)) {
     return 'major';
   }
-  if (version.getMinor(toVersion) > version.getMinor(fromVersion)) {
+  if (version.getMinor(toVersion) > version.getMinor(currentVersion)) {
     return 'minor';
   }
   if (config.separateMinorPatch) {
@@ -114,7 +114,7 @@ function getFromVersion(
 
 function getBucket(
   config: LookupUpdateConfig,
-  fromVersion: string,
+  currentVersion: string,
   toVersion: string,
   versioning: allVersioning.VersioningApi
 ): string {
@@ -126,7 +126,7 @@ function getBucket(
   if (!separateMajorMinor) {
     return 'latest';
   }
-  const fromMajor = versioning.getMajor(fromVersion);
+  const fromMajor = versioning.getMajor(currentVersion);
   const toMajor = versioning.getMajor(toVersion);
   if (fromMajor !== toMajor) {
     if (separateMultipleMajor) {
@@ -135,7 +135,9 @@ function getBucket(
     return 'major';
   }
   if (separateMinorPatch) {
-    if (versioning.getMinor(fromVersion) === versioning.getMinor(toVersion)) {
+    if (
+      versioning.getMinor(currentVersion) === versioning.getMinor(toVersion)
+    ) {
       return 'patch';
     }
     return 'minor';
@@ -263,7 +265,7 @@ export async function lookupUpdates(
     const nonDeprecatedVersions = releases
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
-    const fromVersion =
+    const currentVersion =
       getFromVersion(
         config,
         rangeStrategy,
@@ -277,7 +279,7 @@ export async function lookupUpdates(
         allVersions.map((v) => v.version)
       );
     if (
-      fromVersion &&
+      currentVersion &&
       rangeStrategy === 'pin' &&
       !versioning.isSingleVersion(currentValue)
     ) {
@@ -287,13 +289,13 @@ export async function lookupUpdates(
         newValue: versioning.getNewValue({
           currentValue,
           rangeStrategy,
-          fromVersion,
-          toVersion: fromVersion,
+          currentVersion,
+          toVersion: currentVersion,
         }),
-        newMajor: versioning.getMajor(fromVersion),
+        newMajor: versioning.getMajor(currentVersion),
       });
     }
-    let filterStart = fromVersion;
+    let filterStart = currentVersion;
     if (lockedVersion && rangeStrategy === 'update-lockfile') {
       // Look for versions greater than the current locked version that still satisfy the package.json range
       filterStart = lockedVersion;
@@ -315,7 +317,7 @@ export async function lookupUpdates(
     for (const release of filteredVersions) {
       const bucket = getBucket(
         config,
-        fromVersion,
+        currentVersion,
         release.version,
         versioning
       );
@@ -331,18 +333,22 @@ export async function lookupUpdates(
       );
       const bucketRelease = sortedReleases.pop();
       const toVersion = bucketRelease.version;
-      const update: LookupUpdate = { fromVersion, toVersion, newValue: null };
+      const update: LookupUpdate = {
+        currentVersion,
+        toVersion,
+        newValue: null,
+      };
       update.bucket = bucket;
       try {
         update.newValue = versioning.getNewValue({
           currentValue,
           rangeStrategy,
-          fromVersion,
+          currentVersion,
           toVersion,
         });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
-          { err, currentValue, rangeStrategy, fromVersion, toVersion },
+          { err, currentValue, rangeStrategy, currentVersion, toVersion },
           'getNewValue error'
         );
         update.newValue = currentValue;
@@ -359,7 +365,7 @@ export async function lookupUpdates(
           );
           continue; // eslint-disable-line no-continue
         }
-        update.fromVersion = lockedVersion;
+        update.currentVersion = lockedVersion;
         update.displayFrom = lockedVersion;
         update.displayTo = toVersion;
         update.isSingleVersion = true;
@@ -367,7 +373,7 @@ export async function lookupUpdates(
       update.newMajor = versioning.getMajor(toVersion);
       update.newMinor = versioning.getMinor(toVersion);
       update.updateType =
-        update.updateType || getType(config, fromVersion, toVersion);
+        update.updateType || getType(config, currentVersion, toVersion);
       update.isSingleVersion =
         update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
       if (!versioning.isVersion(update.newValue)) {
@@ -445,7 +451,9 @@ export async function lookupUpdates(
     if (versioning.valueToVersion) {
       for (const update of res.updates || []) {
         update.newVersion = versioning.valueToVersion(update.newValue);
-        update.fromVersion = versioning.valueToVersion(update.fromVersion);
+        update.currentVersion = versioning.valueToVersion(
+          update.currentVersion
+        );
         update.toVersion = versioning.valueToVersion(update.toVersion);
       }
     }

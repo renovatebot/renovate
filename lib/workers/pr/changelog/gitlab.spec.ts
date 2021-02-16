@@ -13,7 +13,7 @@ const upgrade: BranchUpgradeConfig = {
   endpoint: 'https://gitlab.com/api/v4/ ',
   depName: 'renovate',
   versioning: semverVersioning.id,
-  fromVersion: '5.2.0',
+  currentVersion: '5.2.0',
   toVersion: '5.7.0',
   sourceUrl: 'https://gitlab.com/meno/dropzone/',
   releases: [
@@ -50,17 +50,17 @@ describe(getName(__filename), () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          fromVersion: null,
+          currentVersion: null,
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toBeEmpty();
     });
-    it('returns null if fromVersion equals toVersion', async () => {
+    it('returns null if currentVersion equals toVersion', async () => {
       httpMock.scope(baseUrl);
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          fromVersion: '1.0.0',
+          currentVersion: '1.0.0',
           toVersion: '1.0.0',
         })
       ).toBeNull();

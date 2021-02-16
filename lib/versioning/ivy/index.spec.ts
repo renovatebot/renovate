@@ -158,7 +158,7 @@ describe('versioning/ivy/index', () => {
       ivy.getNewValue({
         currentValue: '1',
         rangeStrategy: 'auto',
-        fromVersion: '1',
+        currentVersion: '1',
         toVersion: '1.1',
       })
     ).toBe('1.1');
@@ -166,7 +166,7 @@ describe('versioning/ivy/index', () => {
       ivy.getNewValue({
         currentValue: '[1.2.3,]',
         rangeStrategy: 'auto',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '1.2.4',
       })
     ).toBe('[1.2.3,]');
@@ -187,12 +187,12 @@ describe('versioning/ivy/index', () => {
       ['latest.integration', '1.0', '2.0'],
       ['latest', '1.0', '2.0'],
     ];
-    sample.forEach(([currentValue, fromVersion, toVersion]) => {
+    sample.forEach(([currentValue, currentVersion, toVersion]) => {
       expect(
         getNewValue({
           currentValue,
           rangeStrategy: 'pin',
-          fromVersion,
+          currentVersion,
           toVersion,
         })
       ).toEqual(toVersion);

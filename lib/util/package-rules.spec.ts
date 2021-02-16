@@ -467,7 +467,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '^1.0.0',
-        fromVersion: '1.0.3',
+        currentVersion: '1.0.3',
       },
     });
     expect(res1.x).toBeDefined();
@@ -495,7 +495,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '2.4.6',
-        fromVersion: '2.4.6',
+        currentVersion: '2.4.6',
       },
     });
     expect(res1.x).toBeDefined();
@@ -542,7 +542,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     expect(res1.x).toBeDefined();
@@ -562,7 +562,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     const res2 = applyPackageRules({
@@ -570,7 +570,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '5.6.0',
-        fromVersion: '5.6.0',
+        currentVersion: '5.6.0',
       },
     });
     expect(res1.x).toBeDefined();
@@ -591,7 +591,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     const res2 = applyPackageRules({
@@ -599,7 +599,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '5.6.0',
-        fromVersion: '5.6.0',
+        currentVersion: '5.6.0',
       },
     });
     expect(res1.x).toBeUndefined();

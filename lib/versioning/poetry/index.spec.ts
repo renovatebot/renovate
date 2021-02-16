@@ -118,7 +118,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('1.1.0');
@@ -126,7 +126,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '   1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('1.1.0');
@@ -134,7 +134,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('1.1.0');
@@ -144,7 +144,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '=1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('=1.1.0');
@@ -152,7 +152,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '=  1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('=1.1.0');
@@ -162,7 +162,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '= 1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('=1.1.0');
@@ -170,7 +170,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '  = 1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('=1.1.0');
@@ -178,7 +178,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '  =   1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('=1.1.0');
@@ -186,7 +186,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '=    1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('=1.1.0');
@@ -196,7 +196,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.0.7',
       })
     ).toEqual('^1.0');
@@ -206,7 +206,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '2.0.7',
       })
     ).toEqual('^2.0.0');
@@ -216,7 +216,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '1.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '2.0.7',
       })
     ).toEqual('2.0.7');
@@ -226,7 +226,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '1.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '^2.0.7',
       })
     ).toEqual('^2.0.7');
@@ -236,7 +236,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '2.1.7',
       })
     ).toEqual('^2');
@@ -246,7 +246,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~1',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.7',
       })
     ).toEqual('~1');
@@ -256,7 +256,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '5',
         rangeStrategy: 'bump',
-        fromVersion: '5.0.0',
+        currentVersion: '5.0.0',
         toVersion: '5.1.7',
       })
     ).toEqual('5');
@@ -264,7 +264,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '5',
         rangeStrategy: 'bump',
-        fromVersion: '5.0.0',
+        currentVersion: '5.0.0',
         toVersion: '6.1.7',
       })
     ).toEqual('6');
@@ -274,7 +274,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '5.0',
         rangeStrategy: 'bump',
-        fromVersion: '5.0.0',
+        currentVersion: '5.0.0',
         toVersion: '5.0.7',
       })
     ).toEqual('5.0');
@@ -282,7 +282,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '5.0',
         rangeStrategy: 'bump',
-        fromVersion: '5.0.0',
+        currentVersion: '5.0.0',
         toVersion: '5.1.7',
       })
     ).toEqual('5.1');
@@ -290,7 +290,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '5.0',
         rangeStrategy: 'bump',
-        fromVersion: '5.0.0',
+        currentVersion: '5.0.0',
         toVersion: '6.1.7',
       })
     ).toEqual('6.1');
@@ -300,7 +300,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '5.0',
         rangeStrategy: 'replace',
-        fromVersion: '5.0.0',
+        currentVersion: '5.0.0',
         toVersion: '6.1.7',
       })
     ).toEqual('6.1');
@@ -310,7 +310,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '=1.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('=1.1.0');
@@ -320,7 +320,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.0.7-prerelease.1',
       })
     ).toEqual('^1.0.7-prerelease.1');
@@ -330,7 +330,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.0.7',
       })
     ).toEqual('^1.0.7');
@@ -340,7 +340,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~1.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.7',
       })
     ).toEqual('~1.1');
@@ -350,7 +350,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '1.0.*',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('1.1.*');
@@ -360,7 +360,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '1.*',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '2.1.0',
       })
     ).toEqual('2.*');
@@ -370,7 +370,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~0.6.1',
         rangeStrategy: 'replace',
-        fromVersion: '0.6.8',
+        currentVersion: '0.6.8',
         toVersion: '0.7.0-rc.2',
       })
     ).toEqual('~0.7.0-rc');
@@ -380,7 +380,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '<1.3.4',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '1.5.0',
       })
     ).toEqual('<1.5.1');
@@ -388,7 +388,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '< 1.3.4',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '1.5.0',
       })
     ).toEqual('< 1.5.1');
@@ -396,7 +396,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '<   1.3.4',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '1.5.0',
       })
     ).toEqual('< 1.5.1');
@@ -406,7 +406,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '<=1.3.4',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '1.5.0',
       })
     ).toEqual('<=1.5.0');
@@ -414,7 +414,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '<= 1.3.4',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '1.5.0',
       })
     ).toEqual('<= 1.5.0');
@@ -422,7 +422,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '<=   1.3.4',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '1.5.0',
       })
     ).toEqual('<= 1.5.0');
@@ -432,7 +432,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1.2',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.0',
       })
     ).toEqual('^2.0');
@@ -440,7 +440,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.0',
       })
     ).toEqual('^2');
@@ -450,7 +450,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~1.2',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.0',
       })
     ).toEqual('~2.0');
@@ -458,7 +458,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~1',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.0',
       })
     ).toEqual('~2');
@@ -468,7 +468,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^2.2',
         rangeStrategy: 'widen',
-        fromVersion: '2.2.0',
+        currentVersion: '2.2.0',
         toVersion: '3.0.0',
       })
     ).toEqual('^2.2 || ^3.0.0');

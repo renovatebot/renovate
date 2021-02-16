@@ -40,6 +40,8 @@ export const allowedFields = {
   baseBranch: 'The baseBranch for this branch/PR',
   body: 'The body of the release notes',
   currentValue: 'The extracted current value of the dependency being updated',
+  currentVersion:
+    'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
   datasource: 'The datasource used to look up the upgrade',
   depName: 'The name of the dependency being updated',
   depNameLinked:
@@ -50,8 +52,6 @@ export const allowedFields = {
   depType: 'The dependency type (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
   displayTo: 'The to value, formatted for display',
-  fromVersion:
-    'The version that would be currently installed. For example, if currentValue is ^3.0.0 then fromVersion might be 3.1.0.',
   hasReleaseNotes: 'true if the upgrade has release notes',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',

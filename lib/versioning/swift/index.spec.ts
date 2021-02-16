@@ -99,11 +99,11 @@ describe('getNewValue()', () => {
       ['"1.2.3"..<"1.2.4"', 'auto', '1.2.3', '1.2.5', '"1.2.3"..<"1.2.5"'],
       ['..."1.2.4"', 'auto', '1.2.3', '1.2.5', '..."1.2.5"'],
       ['..<"1.2.4"', 'auto', '1.2.3', '1.2.5', '..<"1.2.5"'],
-    ].forEach(([range, rangeStrategy, fromVersion, toVersion, result]) => {
+    ].forEach(([range, rangeStrategy, currentVersion, toVersion, result]) => {
       const newValue = getNewValue({
         currentValue: range,
         rangeStrategy: rangeStrategy as RangeStrategy,
-        fromVersion,
+        currentVersion,
         toVersion,
       });
       expect(newValue).toEqual(result);

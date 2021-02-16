@@ -47,6 +47,19 @@ describe('lib/util/cache/repository', () => {
     expect(fs.readFile.mock.calls).toHaveLength(1);
     expect(fs.outputFile.mock.calls).toHaveLength(1);
   });
+  it('migrates', async () => {
+    fs.readFile.mockResolvedValueOnce(
+      '{"repository":"abc/def","branches":[{"upgrades":[{"fromVersion":"1.0.0"}]}]}' as any
+    );
+    await repositoryCache.initialize({
+      ...config,
+      repositoryCache: 'enabled',
+    });
+    expect(repositoryCache.getCache().branches[0].upgrades[0]).toEqual({
+      currentVersion: '1.0.0',
+    });
+    await repositoryCache.finalize();
+  });
   it('gets', () => {
     expect(repositoryCache.getCache()).toEqual({ scan: {} });
   });

@@ -141,7 +141,7 @@ export interface LookupUpdate {
   isRange?: boolean;
   isRollback?: boolean;
   isSingleVersion?: boolean;
-  fromVersion?: string;
+  currentVersion?: string;
   newDigest?: string;
   newDigestShort?: string;
   newMajor?: number;
@@ -165,7 +165,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   displayFrom?: string;
   displayTo?: string;
   fixedVersion?: string;
-  fromVersion?: string;
+  currentVersion?: string;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[];

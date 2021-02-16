@@ -75,7 +75,7 @@ const isSingleVersion = (constraint: string): string | boolean =>
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
@@ -92,7 +92,7 @@ function getNewValue({
   const newSemver = npm.getNewValue({
     currentValue: cargo2npm(currentValue),
     rangeStrategy,
-    fromVersion,
+    currentVersion,
     toVersion,
   });
   let newCargo = npm2cargo(newSemver);

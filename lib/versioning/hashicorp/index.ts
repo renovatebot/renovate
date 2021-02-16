@@ -32,7 +32,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string {
   // handle specia. ~> 1.2 case
@@ -45,7 +45,7 @@ function getNewValue({
   return npm.getNewValue({
     currentValue,
     rangeStrategy,
-    fromVersion,
+    currentVersion,
     toVersion,
   });
 }

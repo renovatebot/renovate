@@ -81,14 +81,14 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 const getNewValue = ({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string => {
   let newValue = null;
   if (isVersion(currentValue)) {
     newValue = currentValue.startsWith('v') ? 'v' + toVersion : toVersion;
-  } else if (currentValue.replace(/^=\s*/, '') === fromVersion) {
-    newValue = currentValue.replace(fromVersion, toVersion);
+  } else if (currentValue.replace(/^=\s*/, '') === currentVersion) {
+    newValue = currentValue.replace(currentVersion, toVersion);
   } else {
     switch (rangeStrategy) {
       case 'update-lockfile':
@@ -98,7 +98,7 @@ const getNewValue = ({
           newValue = getNewValue({
             currentValue,
             rangeStrategy: 'replace',
-            fromVersion,
+            currentVersion,
             toVersion,
           });
         }

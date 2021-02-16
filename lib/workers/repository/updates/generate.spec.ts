@@ -370,7 +370,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           currentValue: '0.5.7',
-          fromVersion: '0.5.7',
+          currentVersion: '0.5.7',
           toVersion: '0.5.8',
           group: {},
         },

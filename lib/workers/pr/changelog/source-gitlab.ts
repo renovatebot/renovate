@@ -30,7 +30,7 @@ function getCachedTags(
 
 export async function getChangeLogJSON({
   versioning,
-  fromVersion,
+  currentVersion,
   toVersion,
   sourceUrl,
   releases,
@@ -91,7 +91,7 @@ export async function getChangeLogJSON({
   const changelogReleases: ChangeLogRelease[] = [];
   // compare versions
   const include = (v: string): boolean =>
-    version.isGreaterThan(v, fromVersion) &&
+    version.isGreaterThan(v, currentVersion) &&
     !version.isGreaterThan(v, toVersion);
   for (let i = 1; i < validReleases.length; i += 1) {
     const prev = validReleases[i - 1];
