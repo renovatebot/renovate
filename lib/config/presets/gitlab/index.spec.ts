@@ -127,6 +127,7 @@ describe(getName(__filename), () => {
         gitlab.getPresetFromEndpoint(
           'some/repo',
           'some/preset/file',
+          undefined,
           'https://gitlab.example.org/api/v4'
         )
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);

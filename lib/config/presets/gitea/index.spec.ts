@@ -201,6 +201,7 @@ describe(getName(__filename), () => {
           .getPresetFromEndpoint(
             'some/repo',
             'default',
+            undefined,
             'https://api.gitea.example.org'
           )
           .catch(() => ({ from: 'api' }))

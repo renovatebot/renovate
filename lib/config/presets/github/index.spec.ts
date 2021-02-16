@@ -199,6 +199,7 @@ describe(getName(__filename), () => {
           .getPresetFromEndpoint(
             'some/repo',
             'default',
+            undefined,
             'https://api.github.example.org'
           )
           .catch(() => ({ from: 'api' }))
