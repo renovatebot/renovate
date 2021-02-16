@@ -34,6 +34,7 @@ describe('workers/repository/onboarding/branch', () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
     it('has default onboarding config', async () => {
+      config.localDir = '/localDir';
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
