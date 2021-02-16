@@ -179,10 +179,10 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 function getNewValue({
   currentValue,
   rangeStrategy,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string | null {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
-    return toVersion;
+    return newVersion;
   }
   return null;
 }

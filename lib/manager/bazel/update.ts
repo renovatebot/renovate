@@ -12,12 +12,12 @@ function updateWithNewVersion(
   currentValue: string,
   newValue: string
 ): string {
-  const currentVersion = currentValue.replace(/^v/, '');
-  const newVersion = newValue.replace(/^v/, '');
+  const replaceFrom = currentValue.replace(/^v/, '');
+  const replaceTo = newValue.replace(/^v/, '');
   let newContent = content;
   do {
-    newContent = newContent.replace(currentVersion, newVersion);
-  } while (newContent.includes(currentVersion));
+    newContent = newContent.replace(replaceFrom, replaceTo);
+  } while (newContent.includes(replaceFrom));
   return newContent;
 }
 

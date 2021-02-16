@@ -11,14 +11,14 @@ export const supportsRanges = false;
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string {
   const res = npm.getNewValue({
     currentValue,
     rangeStrategy,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
   });
   if (isVersion(res)) {
     // normalize out any 'v' prefix
