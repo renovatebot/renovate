@@ -51,10 +51,9 @@ export interface Release {
 }
 
 export interface ReleaseResult {
-  latestVersion?: string;
   deprecationMessage?: string;
   releases: Release[];
-  tags?: Record<string, string>;
+  releaseTags?: Record<string, string>;
   isPrivate?: boolean;
   // URL metadata
   changelogUrl?: string;

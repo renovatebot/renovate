@@ -75,7 +75,7 @@ export async function lookupUpdates(
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
     res.dependencyUrl = dependency?.dependencyUrl;
-    const { latestVersion, releases } = dependency;
+    const { releases } = dependency;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases.filter((release) =>
       versioning.isVersion(release.version)
@@ -91,7 +91,7 @@ export async function lookupUpdates(
     // Reapply package rules in case we missed something from sourceUrl
     config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
     if (followTag) {
-      const taggedVersion = dependency.tags[followTag];
+      const taggedVersion = dependency.releaseTags[followTag];
       if (!taggedVersion) {
         res.warnings.push({
           depName,
@@ -134,6 +134,7 @@ export async function lookupUpdates(
     const nonDeprecatedVersions = releases
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
+    const latestVersion = dependency.releaseTags?.latest;
     const currentVersion =
       getCurrentVersion(
         config,
@@ -175,7 +176,7 @@ export async function lookupUpdates(
     let filteredVersions = filterVersions(
       config,
       filterStart,
-      dependency.latestVersion,
+      latestVersion,
       allVersions
     ).filter((v) =>
       // Leave only compatible versions

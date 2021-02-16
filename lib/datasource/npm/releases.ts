@@ -11,7 +11,7 @@ export async function getReleases({
   }
   const res = await getDependency(lookupName);
   if (res) {
-    res.tags = res['dist-tags'];
+    res.releaseTags = res['dist-tags'];
     delete res['dist-tags'];
     delete res['renovate-config'];
   }
