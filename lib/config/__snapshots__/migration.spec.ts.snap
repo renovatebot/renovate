@@ -326,7 +326,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates packageRu
 Object {
   "packageRules": Array [
     Object {
-      "commitMessage": "fix(package): update peerDependency to accept typescript ^{{newValue}} {{newValue}}",
+      "commitMessage": "fix(package): update peerDependency to accept typescript ^{{newMajor}} {{newMajor}}",
       "matchPackageNames": Array [
         "typescript",
       ],

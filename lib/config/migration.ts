@@ -505,9 +505,9 @@ export function migrateConfig(
       }
       const migratedTemplates = {
         fromVersion: 'currentVersion',
-        newVersion: 'newValue',
         newValueMajor: 'newMajor',
         newValueMinor: 'newMinor',
+        newVersion: 'toVersion',
         newVersionMajor: 'newMajor',
         newVersionMinor: 'newMinor',
       };

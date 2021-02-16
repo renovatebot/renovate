@@ -147,7 +147,6 @@ export interface LookupUpdate {
   newMajor?: number;
   newMinor?: number;
   newValue: string;
-  newVersion?: string;
   semanticCommitType?: string;
   skippedOverVersions?: string[];
   toVersion?: string;
@@ -195,7 +194,6 @@ export interface Upgrade<T = Record<string, any>>
   newFrom?: string;
   newMajor?: number;
   newValue?: string;
-  newVersion?: string;
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
   toVersion?: string;

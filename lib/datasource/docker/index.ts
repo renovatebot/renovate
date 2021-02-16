@@ -28,7 +28,7 @@ export const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
   major: { enabled: false },
   commitMessageExtra:
-    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
+    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{toVersion}}}{{/if}}',
   digest: {
     branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
     commitMessageExtra: 'to {{newDigestShort}}',

@@ -48,8 +48,8 @@ export async function flattenUpdates(
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
-            updateConfig.newVersion =
-              updateConfig.newVersion || updateConfig.newValue;
+            updateConfig.toVersion =
+              updateConfig.toVersion || updateConfig.newValue;
             if (updateConfig.updateType) {
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
