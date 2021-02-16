@@ -7,16 +7,7 @@ import * as allVersioning from '../../../../versioning';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440 from '../../../../versioning/pep440';
 import * as poetryVersioning from '../../../../versioning/poetry';
-
-export interface FilterConfig {
-  allowedVersions?: string;
-  depName?: string;
-  followTag?: string;
-  ignoreDeprecated?: boolean;
-  ignoreUnstable?: boolean;
-  respectLatest?: boolean;
-  versioning: string;
-}
+import { FilterConfig } from './common';
 
 export function filterVersions(
   config: FilterConfig,

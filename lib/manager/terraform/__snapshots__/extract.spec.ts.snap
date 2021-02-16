@@ -345,7 +345,7 @@ Object {
       "skipReason": "invalid-dependency-specification",
     },
     Object {
-      "skipReason": "unsupported-value",
+      "skipReason": "invalid-value",
     },
   ],
 }
