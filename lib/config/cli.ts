@@ -73,6 +73,7 @@ export function getConfig(input: string[]): GlobalConfig {
 
   let program = new Command()
     .storeOptionsAsProperties(false)
+    .passCommandToAction(false)
     .arguments('[repositories...]');
 
   options.forEach((option) => {
