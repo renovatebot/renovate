@@ -57,8 +57,6 @@ export interface ReleaseResult {
   dependencyUrl?: string;
   deprecationMessage?: string;
   display?: string;
-  dockerRegistry?: string;
-  dockerRepository?: string;
   group?: string;
   homepage?: string;
   name?: string;

@@ -22,8 +22,6 @@ export interface RollbackConfig {
 
 export interface UpdateResult {
   sourceDirectory?: string;
-  dockerRepository?: string;
-  dockerRegistry?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;

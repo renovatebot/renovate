@@ -623,8 +623,6 @@ export async function getReleases({
   }
   const releases = tags.map((version) => ({ version }));
   const ret: ReleaseResult = {
-    dockerRegistry: registry,
-    dockerRepository: repository,
     releases,
   };
 
