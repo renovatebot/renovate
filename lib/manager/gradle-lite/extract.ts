@@ -1,5 +1,5 @@
 import * as upath from 'upath';
-import * as datasourceMaven from '../../datasource/maven';
+import { id as datasource, defaultRegistryUrls } from '../../datasource/maven';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
@@ -39,7 +39,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of reorderFiles(packageFiles)) {
     packageFilesByName[packageFile] = {
       packageFile,
-      datasource: datasourceMaven.id,
+      datasource,
       deps: [],
     };
 
@@ -90,7 +90,11 @@ export async function extractAllPackageFiles(
     const { deps } = pkgFile;
     deps.push({
       ...dep,
-      registryUrls: [...(dep.registryUrls || []), ...registryUrls],
+      registryUrls: [
+        ...defaultRegistryUrls,
+        ...(dep.registryUrls || []),
+        ...registryUrls,
+      ],
     });
     packageFilesByName[key] = pkgFile;
   });
