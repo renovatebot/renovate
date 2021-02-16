@@ -118,6 +118,7 @@ export function generateBranchConfig(
         upgrade.newDigestShort ||
         upgrade.newDigest.replace('sha256:', '').substring(0, 7);
     }
+    // istanbul ignore next
     if (!upgrade.displayFrom) {
       if (upgrade.currentValue === upgrade.newValue) {
         upgrade.displayFrom = upgrade.currentDigestShort || '';
