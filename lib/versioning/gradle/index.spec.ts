@@ -233,7 +233,7 @@ describe('versioning/gradle', () => {
         currentValue: '1',
         rangeStrategy: null,
         currentVersion: null,
-        toVersion: '1.1',
+        newVersion: '1.1',
       })
     ).toBe('1.1');
     expect(
@@ -241,7 +241,7 @@ describe('versioning/gradle', () => {
         currentValue: '[1.2.3,]',
         rangeStrategy: null,
         currentVersion: null,
-        toVersion: '1.2.4',
+        newVersion: '1.2.4',
       })
     ).toBeNull();
   });
@@ -259,15 +259,15 @@ describe('versioning/gradle', () => {
       ['[1.2.3,)', '1.2.3', '1.2.4'],
       ['[1.2.3,[', '1.2.3', '1.2.4'],
     ];
-    sample.forEach(([currentValue, currentVersion, toVersion]) => {
+    sample.forEach(([currentValue, currentVersion, newVersion]) => {
       expect(
         api.getNewValue({
           currentValue,
           rangeStrategy: 'pin',
           currentVersion,
-          toVersion,
+          newVersion,
         })
-      ).toEqual(toVersion);
+      ).toEqual(newVersion);
     });
   });
 });

@@ -150,13 +150,13 @@ describe('docker.', () => {
     });
   });
   describe('getNewValue(', () => {
-    it('returns toVersion', () => {
+    it('returns newVersion', () => {
       expect(
         docker.getNewValue({
           currentValue: null,
           rangeStrategy: null,
           currentVersion: null,
-          toVersion: '1.2.3',
+          newVersion: '1.2.3',
         })
       ).toBe('1.2.3');
     });

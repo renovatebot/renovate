@@ -126,9 +126,9 @@ Object {
       "displayFrom": "0.5.7",
       "displayTo": "0.5.8",
       "isRange": false,
+      "newVersion": "0.5.8",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
-      "toVersion": "0.5.8",
     },
   ],
 }

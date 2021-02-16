@@ -60,13 +60,13 @@ const getNewValue = ({
   currentValue,
   rangeStrategy,
   currentVersion,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string => {
   let newSemver = npm.getNewValue({
     currentValue: hex2npm(currentValue),
     rangeStrategy,
     currentVersion,
-    toVersion,
+    newVersion,
   });
   newSemver = npm2hex(newSemver);
   if (/~>\s*(\d+\.\d+\.\d+)$/.test(currentValue)) {

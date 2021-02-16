@@ -10,7 +10,7 @@ export interface NewValueConfig {
   currentValue: string;
   rangeStrategy: RangeStrategy;
   currentVersion?: string;
-  toVersion: string;
+  newVersion: string;
 }
 export interface VersioningApi {
   // validation

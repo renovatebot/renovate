@@ -67,10 +67,10 @@ const isSingleVersion = (constraint: string): string | boolean =>
 function handleShort(
   operator: string,
   currentValue: string,
-  toVersion: string
+  newVersion: string
 ): string {
-  const toVersionMajor = major(toVersion);
-  const toVersionMinor = minor(toVersion);
+  const toVersionMajor = major(newVersion);
+  const toVersionMinor = minor(newVersion);
   const split = currentValue.split('.');
   if (split.length === 1) {
     // [^,~]4
@@ -87,7 +87,7 @@ function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
@@ -95,13 +95,13 @@ function getNewValue({
     const element = parsedRange[parsedRange.length - 1];
     if (parsedRange.length === 1 && element.operator) {
       if (element.operator === '^') {
-        const version = handleShort('^', npmCurrentValue, toVersion);
+        const version = handleShort('^', npmCurrentValue, newVersion);
         if (version) {
           return npm2poetry(version);
         }
       }
       if (element.operator === '~') {
-        const version = handleShort('~', npmCurrentValue, toVersion);
+        const version = handleShort('~', npmCurrentValue, newVersion);
         if (version) {
           return npm2poetry(version);
         }
@@ -112,7 +112,7 @@ function getNewValue({
     currentValue: poetry2npm(currentValue),
     rangeStrategy,
     currentVersion,
-    toVersion,
+    newVersion,
   });
   const newPoetry = npm2poetry(newSemver);
   return newPoetry;

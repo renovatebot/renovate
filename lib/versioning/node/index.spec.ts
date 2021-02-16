@@ -9,13 +9,13 @@ describe('semver.getNewValue()', () => {
   afterEach(() => {
     DateTime.local = dtLocal;
   });
-  it('returns normalized toVersion', () => {
+  it('returns normalized newVersion', () => {
     expect(
       nodever.getNewValue({
         currentValue: '1.0.0',
         rangeStrategy: 'replace',
         currentVersion: '1.0.0',
-        toVersion: 'v1.1.0',
+        newVersion: 'v1.1.0',
       })
     ).toEqual('1.1.0');
   });
@@ -25,7 +25,7 @@ describe('semver.getNewValue()', () => {
         currentValue: '~8.0.0',
         rangeStrategy: 'replace',
         currentVersion: '8.0.2',
-        toVersion: 'v8.2.0',
+        newVersion: 'v8.2.0',
       })
     ).toEqual('~8.2.0');
   });

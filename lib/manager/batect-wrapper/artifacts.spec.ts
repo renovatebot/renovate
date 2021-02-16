@@ -9,14 +9,14 @@ const newWindowsWrapperContent = `Windows wrapper script for ${defaultTo}`;
 
 function artifactForPath(
   path: string,
-  toVersion: string = defaultTo
+  newVersion: string = defaultTo
 ): UpdateArtifact {
   return {
     packageFileName: path,
     updatedDeps: ['batect/batect'],
     newPackageFileContent: 'not used',
     config: {
-      toVersion,
+      newVersion,
     },
   };
 }

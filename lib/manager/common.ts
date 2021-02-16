@@ -47,7 +47,8 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
   updateType?: UpdateType;
-  toVersion?: string;
+  newValue?: string;
+  newVersion?: string;
 }
 
 export interface PackageUpdateConfig {
@@ -149,7 +150,7 @@ export interface LookupUpdate {
   newValue: string;
   semanticCommitType?: string;
   skippedOverVersions?: string[];
-  toVersion?: string;
+  newVersion?: string;
   updateType?: UpdateType;
   sourceUrl?: string;
 }
@@ -171,7 +172,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
   sourceLine?: number;
-  toVersion?: string;
+  newVersion?: string;
   updates?: LookupUpdate[];
   replaceString?: string;
   autoReplaceStringTemplate?: string;
@@ -196,7 +197,7 @@ export interface Upgrade<T = Record<string, any>>
   newValue?: string;
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
-  toVersion?: string;
+  newVersion?: string;
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;

@@ -33,20 +33,20 @@ function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string {
   // handle specia. ~> 1.2 case
   if (/(~>\s*)\d+\.\d+$/.test(currentValue)) {
     return currentValue.replace(
       /(~>\s*)\d+\.\d+$/,
-      `$1${npm.getMajor(toVersion)}.0`
+      `$1${npm.getMajor(newVersion)}.0`
     );
   }
   return npm.getNewValue({
     currentValue,
     rangeStrategy,
     currentVersion,
-    toVersion,
+    newVersion,
   });
 }
 

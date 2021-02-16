@@ -54,12 +54,12 @@ function massageUpdateMetadata(config: BranchConfig): void {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
-    const { currentVersion, toVersion, updateType, versioning } = upgrade;
+    const { currentVersion, newVersion, updateType, versioning } = upgrade;
     // istanbul ignore if
     if (updateType === 'minor') {
       try {
         const version = get(versioning);
-        if (version.getMinor(currentVersion) === version.getMinor(toVersion)) {
+        if (version.getMinor(currentVersion) === version.getMinor(newVersion)) {
           upgrade.updateType = 'patch';
         }
       } catch (err) {

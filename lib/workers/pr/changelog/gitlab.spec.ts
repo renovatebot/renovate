@@ -14,7 +14,7 @@ const upgrade: BranchUpgradeConfig = {
   depName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
-  toVersion: '5.7.0',
+  newVersion: '5.7.0',
   sourceUrl: 'https://gitlab.com/meno/dropzone/',
   releases: [
     // TODO: test gitRef
@@ -55,13 +55,13 @@ describe(getName(__filename), () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toBeEmpty();
     });
-    it('returns null if currentVersion equals toVersion', async () => {
+    it('returns null if currentVersion equals newVersion', async () => {
       httpMock.scope(baseUrl);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           currentVersion: '1.0.0',
-          toVersion: '1.0.0',
+          newVersion: '1.0.0',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toBeEmpty();

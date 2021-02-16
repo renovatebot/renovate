@@ -46,7 +46,7 @@ export function getPrList(
           text += upgrade.depName.replace(prTitleRe, '@&#8203;$1');
         }
         text += upgrade.isLockfileUpdate
-          ? ` to \`${upgrade.toVersion}\``
+          ? ` to \`${upgrade.newVersion}\``
           : ` to \`${upgrade.newDigest || upgrade.newValue}\``;
         text += '\n';
       }

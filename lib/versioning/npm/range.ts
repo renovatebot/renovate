@@ -15,20 +15,20 @@ export function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
-    return toVersion;
+    return newVersion;
   }
   if (rangeStrategy === 'update-lockfile') {
-    if (satisfies(toVersion, currentValue)) {
+    if (satisfies(newVersion, currentValue)) {
       return currentValue;
     }
     return getNewValue({
       currentValue,
       rangeStrategy: 'replace',
       currentVersion,
-      toVersion,
+      newVersion,
     });
   }
   const parsedRange = parseRange(currentValue);
@@ -38,7 +38,7 @@ export function getNewValue({
       currentValue,
       rangeStrategy: 'replace',
       currentVersion,
-      toVersion,
+      newVersion,
     });
     if (element.operator?.startsWith('<')) {
       // TODO fix this
@@ -60,10 +60,10 @@ export function getNewValue({
     }
     return `${currentValue} || ${newValue}`;
   }
-  const toVersionMajor = major(toVersion);
-  const toVersionMinor = minor(toVersion);
-  const toVersionPatch = patch(toVersion);
-  const suffix = prerelease(toVersion) ? '-' + prerelease(toVersion)[0] : '';
+  const toVersionMajor = major(newVersion);
+  const toVersionMinor = minor(newVersion);
+  const toVersionPatch = patch(newVersion);
+  const suffix = prerelease(newVersion) ? '-' + prerelease(newVersion)[0] : '';
   // Simple range
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
@@ -72,13 +72,13 @@ export function getNewValue({
           currentValue,
           rangeStrategy: 'replace',
           currentVersion,
-          toVersion,
+          newVersion,
         });
       }
       if (element.operator === '^') {
         const split = currentValue.split('.');
         if (suffix.length) {
-          return `^${toVersion}`;
+          return `^${newVersion}`;
         }
         if (split.length === 1) {
           // ^4
@@ -88,12 +88,12 @@ export function getNewValue({
           // ^4.1
           return `^${toVersionMajor}.${toVersionMinor}`;
         }
-        return `^${toVersion}`;
+        return `^${newVersion}`;
       }
       if (element.operator === '~') {
         const split = currentValue.split('.');
         if (suffix.length) {
-          return `~${toVersion}`;
+          return `~${newVersion}`;
         }
         if (split.length === 1) {
           // ~4
@@ -103,15 +103,15 @@ export function getNewValue({
           // ~4.1
           return `~${toVersionMajor}.${toVersionMinor}`;
         }
-        return `~${toVersion}`;
+        return `~${newVersion}`;
       }
       if (element.operator === '=') {
-        return `=${toVersion}`;
+        return `=${newVersion}`;
       }
       if (element.operator === '>=') {
         return currentValue.includes('>= ')
-          ? `>= ${toVersion}`
-          : `>=${toVersion}`;
+          ? `>= ${newVersion}`
+          : `>=${newVersion}`;
       }
       if (element.operator.startsWith('<')) {
         return currentValue;
@@ -124,16 +124,16 @@ export function getNewValue({
           currentValue: subRange,
           rangeStrategy: 'bump',
           currentVersion,
-          toVersion,
+          newVersion,
         });
-        if (satisfies(toVersion, bumpedSubRange)) {
+        if (satisfies(newVersion, bumpedSubRange)) {
           return bumpedSubRange;
         }
         return getNewValue({
           currentValue: subRange,
           rangeStrategy: 'replace',
           currentVersion,
-          toVersion,
+          newVersion,
         });
       });
       return versions.filter((x) => x !== null && x !== '').join(' ');
@@ -153,16 +153,16 @@ export function getNewValue({
     if (toVersionMajor === major(currentVersion)) {
       if (toVersionMajor === 0) {
         if (toVersionMinor === 0) {
-          return `^${toVersion}`;
+          return `^${newVersion}`;
         }
         return `^${toVersionMajor}.${toVersionMinor}.0`;
       }
-      return `^${toVersion}`;
+      return `^${newVersion}`;
     }
     return `^${toVersionMajor}.0.0`;
   }
   if (element.operator === '=') {
-    return `=${toVersion}`;
+    return `=${newVersion}`;
   }
   if (element.operator === '~') {
     if (suffix.length) {
@@ -173,7 +173,7 @@ export function getNewValue({
   if (element.operator === '<=') {
     let res;
     if (element.patch || suffix.length) {
-      res = `<=${toVersion}`;
+      res = `<=${newVersion}`;
     } else if (element.minor) {
       res = `<=${toVersionMajor}.${toVersionMinor}`;
     } else {
@@ -190,7 +190,7 @@ export function getNewValue({
       const newMajor = toVersionMajor + 1;
       res = `<${newMajor}.0.0`;
     } else if (element.patch) {
-      res = `<${increment(toVersion, 'patch')}`;
+      res = `<${increment(newVersion, 'patch')}`;
     } else if (element.minor) {
       res = `<${toVersionMajor}.${toVersionMinor + 1}`;
     } else {
@@ -219,5 +219,5 @@ export function getNewValue({
     }
     return `${toVersionMajor}`;
   }
-  return toVersion;
+  return newVersion;
 }

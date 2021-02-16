@@ -59,14 +59,14 @@ export interface LookupUpdateConfig
 function getType(
   config: LookupUpdateConfig,
   currentVersion: string,
-  toVersion: string
+  newVersion: string
 ): UpdateType {
   const { versioning } = config;
   const version = allVersioning.get(versioning);
-  if (version.getMajor(toVersion) > version.getMajor(currentVersion)) {
+  if (version.getMajor(newVersion) > version.getMajor(currentVersion)) {
     return 'major';
   }
-  if (version.getMinor(toVersion) > version.getMinor(currentVersion)) {
+  if (version.getMinor(newVersion) > version.getMinor(currentVersion)) {
     return 'minor';
   }
   if (config.separateMinorPatch) {
@@ -115,7 +115,7 @@ function getFromVersion(
 function getBucket(
   config: LookupUpdateConfig,
   currentVersion: string,
-  toVersion: string,
+  newVersion: string,
   versioning: allVersioning.VersioningApi
 ): string {
   const {
@@ -127,7 +127,7 @@ function getBucket(
     return 'latest';
   }
   const fromMajor = versioning.getMajor(currentVersion);
-  const toMajor = versioning.getMajor(toVersion);
+  const toMajor = versioning.getMajor(newVersion);
   if (fromMajor !== toMajor) {
     if (separateMultipleMajor) {
       return `major-${toMajor}`;
@@ -136,7 +136,7 @@ function getBucket(
   }
   if (separateMinorPatch) {
     if (
-      versioning.getMinor(currentVersion) === versioning.getMinor(toVersion)
+      versioning.getMinor(currentVersion) === versioning.getMinor(newVersion)
     ) {
       return 'patch';
     }
@@ -290,7 +290,7 @@ export async function lookupUpdates(
           currentValue,
           rangeStrategy,
           currentVersion,
-          toVersion: currentVersion,
+          newVersion: currentVersion,
         }),
         newMajor: versioning.getMajor(currentVersion),
       });
@@ -332,10 +332,10 @@ export async function lookupUpdates(
         versioning.sortVersions(r1.version, r2.version)
       );
       const bucketRelease = sortedReleases.pop();
-      const toVersion = bucketRelease.version;
+      const newVersion = bucketRelease.version;
       const update: LookupUpdate = {
         currentVersion,
-        toVersion,
+        newVersion,
         newValue: null,
       };
       update.bucket = bucket;
@@ -344,11 +344,11 @@ export async function lookupUpdates(
           currentValue,
           rangeStrategy,
           currentVersion,
-          toVersion,
+          newVersion,
         });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
-          { err, currentValue, rangeStrategy, currentVersion, toVersion },
+          { err, currentValue, rangeStrategy, currentVersion, newVersion },
           'getNewValue error'
         );
         update.newValue = currentValue;
@@ -360,20 +360,20 @@ export async function lookupUpdates(
         // istanbul ignore if
         if (rangeStrategy === 'bump') {
           logger.trace(
-            { depName, currentValue, lockedVersion, toVersion },
+            { depName, currentValue, lockedVersion, newVersion },
             'Skipping bump because newValue is the same'
           );
           continue; // eslint-disable-line no-continue
         }
         update.currentVersion = lockedVersion;
         update.displayFrom = lockedVersion;
-        update.displayTo = toVersion;
+        update.displayTo = newVersion;
         update.isSingleVersion = true;
       }
-      update.newMajor = versioning.getMajor(toVersion);
-      update.newMinor = versioning.getMinor(toVersion);
+      update.newMajor = versioning.getMajor(newVersion);
+      update.newMinor = versioning.getMinor(newVersion);
       update.updateType =
-        update.updateType || getType(config, currentVersion, toVersion);
+        update.updateType || getType(config, currentVersion, newVersion);
       update.isSingleVersion =
         update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
       if (!versioning.isVersion(update.newValue)) {
@@ -401,7 +401,7 @@ export async function lookupUpdates(
       }
       if (
         rangeStrategy === 'bump' &&
-        versioning.matches(toVersion, currentValue)
+        versioning.matches(newVersion, currentValue)
       ) {
         update.isBump = true;
       }
@@ -450,11 +450,11 @@ export async function lookupUpdates(
     }
     if (versioning.valueToVersion) {
       for (const update of res.updates || []) {
-        update.toVersion = versioning.valueToVersion(update.newValue);
+        update.newVersion = versioning.valueToVersion(update.newValue);
         update.currentVersion = versioning.valueToVersion(
           update.currentVersion
         );
-        update.toVersion = versioning.valueToVersion(update.toVersion);
+        update.newVersion = versioning.valueToVersion(update.newVersion);
       }
     }
     // update digest for all

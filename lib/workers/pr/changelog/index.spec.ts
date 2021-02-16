@@ -15,7 +15,7 @@ const upgrade: BranchConfig = partial<BranchConfig>({
   depName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
-  toVersion: '3.0.0',
+  newVersion: '3.0.0',
   sourceUrl: 'https://github.com/chalk/chalk',
   releases: [
     { version: '0.9.0' },
@@ -67,13 +67,13 @@ describe(getName(__filename), () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toHaveLength(0);
     });
-    it('returns null if currentVersion equals toVersion', async () => {
+    it('returns null if currentVersion equals newVersion', async () => {
       httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           currentVersion: '1.0.0',
-          toVersion: '1.0.0',
+          newVersion: '1.0.0',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toHaveLength(0);
