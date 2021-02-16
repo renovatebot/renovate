@@ -504,12 +504,12 @@ export function migrateConfig(
         migratedConfig.binarySource = 'global';
       }
       const migratedTemplates = {
+        currentVersion: 'toVersion',
         newVersion: 'newValue',
         newValueMajor: 'newMajor',
         newValueMinor: 'newMinor',
         newVersionMajor: 'newMajor',
         newVersionMinor: 'newMinor',
-        fromVersion: 'currentVersion',
       };
       if (is.string(migratedConfig[key])) {
         for (const [from, to] of Object.entries(migratedTemplates)) {
