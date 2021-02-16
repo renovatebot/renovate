@@ -58,6 +58,7 @@ describe('lib/util/cache/repository', () => {
     expect(repositoryCache.getCache().branches[0].upgrades[0]).toEqual({
       currentVersion: '1.0.0',
     });
+    await repositoryCache.finalize();
   });
   it('gets', () => {
     expect(repositoryCache.getCache()).toEqual({ scan: {} });
