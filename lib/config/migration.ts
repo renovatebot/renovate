@@ -504,7 +504,7 @@ export function migrateConfig(
         migratedConfig.binarySource = 'global';
       }
       const migratedTemplates = {
-        currentVersion: 'currentValue',
+        currentVersion: 'toVersion',
         newVersion: 'newValue',
         newValueMajor: 'newMajor',
         newValueMinor: 'newMinor',

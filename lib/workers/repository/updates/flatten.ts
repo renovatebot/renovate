@@ -48,8 +48,6 @@ export async function flattenUpdates(
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
-            // Massage legacy vars just in case
-            updateConfig.currentVersion = updateConfig.currentValue;
             updateConfig.newVersion =
               updateConfig.newVersion || updateConfig.newValue;
             if (updateConfig.updateType) {

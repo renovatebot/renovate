@@ -187,7 +187,6 @@ export interface Upgrade<T = Record<string, any>>
     NpmLockFiles {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
-  currentVersion?: string;
   depGroup?: string;
   dockerRepository?: string;
   localDir?: string;

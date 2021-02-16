@@ -59,12 +59,12 @@ async function queryRegistry(
     version,
   }));
   // set published date for latest release
-  const currentVersion = dep.releases.find(
+  const latestVersion = dep.releases.find(
     (release) => res.version === release.version
   );
   // istanbul ignore else
-  if (currentVersion) {
-    currentVersion.releaseTimestamp = res.published_at;
+  if (latestVersion) {
+    latestVersion.releaseTimestamp = res.published_at;
   }
   dep.homepage = `${registryURL}/providers/${repository}`;
   logger.trace({ dep }, 'dep');
