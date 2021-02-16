@@ -79,7 +79,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '== 1.2.3',
           rangeStrategy: 'pin',
-          fromVersion: '1.2.3',
+          currentVersion: '1.2.3',
           toVersion: '2.0.7',
         })
       ).toEqual('== 2.0.7');
@@ -89,7 +89,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '== 3.6.1',
           rangeStrategy: 'bump',
-          fromVersion: '3.6.1',
+          currentVersion: '3.6.1',
           toVersion: '3.6.2',
         })
       ).toEqual('== 3.6.2');
@@ -99,7 +99,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '== 3.6.1',
           rangeStrategy: 'replace',
-          fromVersion: '3.6.1',
+          currentVersion: '3.6.1',
           toVersion: '3.6.2',
         })
       ).toEqual('== 3.6.2');
@@ -109,7 +109,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '~> 1.2',
           rangeStrategy: 'replace',
-          fromVersion: '1.2.3',
+          currentVersion: '1.2.3',
           toVersion: '2.0.7',
         })
       ).toEqual('~> 2.0');
@@ -117,7 +117,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '~> 1.2',
           rangeStrategy: 'pin',
-          fromVersion: '1.2.3',
+          currentVersion: '1.2.3',
           toVersion: '2.0.7',
         })
       ).toEqual('== 2.0.7');
@@ -125,7 +125,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '~> 1.2',
           rangeStrategy: 'bump',
-          fromVersion: '1.2.3',
+          currentVersion: '1.2.3',
           toVersion: '2.0.7',
         })
       ).toEqual('~> 2.0');
@@ -133,7 +133,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '~> 1.2',
           rangeStrategy: 'bump',
-          fromVersion: '1.2.3',
+          currentVersion: '1.2.3',
           toVersion: '1.3.1',
         })
       ).toEqual('~> 1.3');
@@ -141,7 +141,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '~> 1.2.0',
           rangeStrategy: 'replace',
-          fromVersion: '1.2.3',
+          currentVersion: '1.2.3',
           toVersion: '2.0.7',
         })
       ).toEqual('~> 2.0.0');
@@ -149,7 +149,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '~> 1.2.0',
           rangeStrategy: 'pin',
-          fromVersion: '1.2.3',
+          currentVersion: '1.2.3',
           toVersion: '2.0.7',
         })
       ).toEqual('== 2.0.7');
@@ -157,7 +157,7 @@ describe('lib/versioning/hex', () => {
         hexScheme.getNewValue({
           currentValue: '~> 1.2.0',
           rangeStrategy: 'bump',
-          fromVersion: '1.2.3',
+          currentVersion: '1.2.3',
           toVersion: '2.0.7',
         })
       ).toEqual('~> 2.0.7');
@@ -168,7 +168,7 @@ describe('lib/versioning/hex', () => {
       hexScheme.getNewValue({
         currentValue: '>= 1.0.0 and <= 2.0.0',
         rangeStrategy: 'widen',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.7',
       })
     ).toEqual('>= 1.0.0 and <= 2.0.7');
@@ -176,7 +176,7 @@ describe('lib/versioning/hex', () => {
       hexScheme.getNewValue({
         currentValue: '>= 1.0.0 and <= 2.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.7',
       })
     ).toEqual('<= 2.0.7');
@@ -184,7 +184,7 @@ describe('lib/versioning/hex', () => {
       hexScheme.getNewValue({
         currentValue: '>= 1.0.0 and <= 2.0.0',
         rangeStrategy: 'pin',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.7',
       })
     ).toEqual('== 2.0.7');
@@ -194,7 +194,7 @@ describe('lib/versioning/hex', () => {
       hexScheme.getNewValue({
         currentValue: '>= 1.0.0 or <= 2.0.0',
         rangeStrategy: 'widen',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.7',
       })
     ).toEqual('>= 1.0.0 or <= 2.0.7');
@@ -202,7 +202,7 @@ describe('lib/versioning/hex', () => {
       hexScheme.getNewValue({
         currentValue: '>= 1.0.0 or <= 2.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.7',
       })
     ).toEqual('<= 2.0.7');
@@ -210,7 +210,7 @@ describe('lib/versioning/hex', () => {
       hexScheme.getNewValue({
         currentValue: '>= 1.0.0 or <= 2.0.0',
         rangeStrategy: 'pin',
-        fromVersion: '1.2.3',
+        currentVersion: '1.2.3',
         toVersion: '2.0.7',
       })
     ).toEqual('== 2.0.7');

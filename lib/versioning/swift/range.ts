@@ -19,11 +19,11 @@ function toSemverRange(range: string): string {
       return `>=${version}`;
     }
   } else if (binaryRange.test(range)) {
-    const [, fromVersion, op, toVersion] = binaryRange.exec(range);
-    if (semver.valid(fromVersion) && semver.valid(toVersion)) {
+    const [, currentVersion, op, toVersion] = binaryRange.exec(range);
+    if (semver.valid(currentVersion) && semver.valid(toVersion)) {
       return op === '..<'
-        ? `>=${fromVersion} <${toVersion}`
-        : `>=${fromVersion} <=${toVersion}`;
+        ? `>=${currentVersion} <${toVersion}`
+        : `>=${currentVersion} <=${toVersion}`;
     }
   } else if (toRange.test(range)) {
     const [, op, toVersion] = toRange.exec(range);
@@ -36,7 +36,7 @@ function toSemverRange(range: string): string {
 
 function getNewValue({
   currentValue,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string {
   if (fromParam.test(currentValue)) {

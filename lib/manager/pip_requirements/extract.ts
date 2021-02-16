@@ -71,7 +71,7 @@ export function extractPackageFile(
         datasource: datasourcePypi.id,
       };
       if (currentValue?.startsWith('==')) {
-        dep.fromVersion = currentValue.replace(/^==/, '');
+        dep.currentVersion = currentValue.replace(/^==/, '');
       }
       return dep;
     })

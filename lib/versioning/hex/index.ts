@@ -59,13 +59,13 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 const getNewValue = ({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string => {
   let newSemver = npm.getNewValue({
     currentValue: hex2npm(currentValue),
     rangeStrategy,
-    fromVersion,
+    currentVersion,
     toVersion,
   });
   newSemver = npm2hex(newSemver);

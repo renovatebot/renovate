@@ -118,7 +118,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'pin') {
@@ -131,7 +131,7 @@ function getNewValue({
     return getNewValue({
       currentValue,
       rangeStrategy: 'replace',
-      fromVersion,
+      currentVersion,
       toVersion,
     });
   }
@@ -155,7 +155,7 @@ function getNewValue({
   } else if (/^[~^]([0-9]*(?:\.[0-9]*)?)$/.test(currentValue)) {
     const operator = currentValue.substr(0, 1);
     // handle ~4.1 case
-    if (fromVersion && toMajor > getMajor(fromVersion)) {
+    if (currentVersion && toMajor > getMajor(currentVersion)) {
       newValue = `${operator}${toMajor}.0`;
     } else {
       newValue = `${operator}${toMajor}.${toMinor}`;
@@ -168,7 +168,7 @@ function getNewValue({
     newValue = npm.getNewValue({
       currentValue: normalizeVersion(currentValue),
       rangeStrategy,
-      fromVersion: normalizeVersion(fromVersion),
+      currentVersion: normalizeVersion(currentVersion),
       toVersion: padZeroes(normalizeVersion(toVersion)),
     });
   }
@@ -177,7 +177,7 @@ function getNewValue({
     const replacementValue = getNewValue({
       currentValue: lastValue,
       rangeStrategy,
-      fromVersion,
+      currentVersion,
       toVersion,
     });
     if (rangeStrategy === 'replace') {
@@ -188,7 +188,7 @@ function getNewValue({
   }
   if (!newValue) {
     logger.warn(
-      { currentValue, rangeStrategy, fromVersion, toVersion },
+      { currentValue, rangeStrategy, currentVersion, toVersion },
       'Unsupported composer value'
     );
     newValue = toVersion;

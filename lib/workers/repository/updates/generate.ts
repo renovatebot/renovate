@@ -39,13 +39,13 @@ function getTableValues(
     datasource,
     lookupName,
     depName,
-    fromVersion,
+    currentVersion,
     toVersion,
     displayFrom,
     displayTo,
   } = upgrade;
   const name = lookupName || depName;
-  const from = fromVersion || displayFrom;
+  const from = currentVersion || displayFrom;
   const to = toVersion || displayTo;
   if (datasource && name && from && to) {
     return [datasource, name, from, to];
@@ -55,7 +55,7 @@ function getTableValues(
       datasource,
       lookupName,
       depName,
-      fromVersion,
+      currentVersion,
       toVersion,
       displayFrom,
       displayTo,

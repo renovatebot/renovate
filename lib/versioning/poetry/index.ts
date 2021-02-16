@@ -86,7 +86,7 @@ function handleShort(
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'replace') {
@@ -111,7 +111,7 @@ function getNewValue({
   const newSemver = npm.getNewValue({
     currentValue: poetry2npm(currentValue),
     rangeStrategy,
-    fromVersion,
+    currentVersion,
     toVersion,
   });
   const newPoetry = npm2poetry(newSemver);

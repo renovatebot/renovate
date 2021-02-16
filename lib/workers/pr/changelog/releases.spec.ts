@@ -46,19 +46,19 @@ describe(getName(__filename), () => {
         datasource: 'some-datasource',
         depName: 'some-depname',
         versioning: npmVersioning.id,
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });
-    it('should contain fromVersion unstable', async () => {
+    it('should contain currentVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
         depName: 'some-depname',
         versioning: npmVersioning.id,
-        fromVersion: '1.0.1-rc0',
+        currentVersion: '1.0.1-rc0',
         toVersion: '1.1.0',
       });
       const res = await releases.getInRangeReleases(config);
@@ -70,19 +70,19 @@ describe(getName(__filename), () => {
         datasource: 'some-datasource',
         depName: 'some-depname',
         versioning: npmVersioning.id,
-        fromVersion: '1.0.1',
+        currentVersion: '1.0.1',
         toVersion: '1.2.0-rc1',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
-    it('should contain both fromVersion toVersion unstable', async () => {
+    it('should contain both currentVersion toVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
         depName: 'some-depname',
         versioning: npmVersioning.id,
-        fromVersion: '1.0.1-rc0',
+        currentVersion: '1.0.1-rc0',
         toVersion: '1.2.0-rc1',
       });
       const res = await releases.getInRangeReleases(config);
@@ -94,7 +94,7 @@ describe(getName(__filename), () => {
         datasource: 'some-datasource',
         depName: 'some-depname',
         versioning: dockerVersioning.id,
-        fromVersion: '1.0.1-rc0',
+        currentVersion: '1.0.1-rc0',
         toVersion: '1.2.0-rc0',
       });
       const res = await releases.getInRangeReleases(config);

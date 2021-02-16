@@ -155,7 +155,7 @@ describe('docker.', () => {
         docker.getNewValue({
           currentValue: null,
           rangeStrategy: null,
-          fromVersion: null,
+          currentVersion: null,
           toVersion: '1.2.3',
         })
       ).toBe('1.2.3');

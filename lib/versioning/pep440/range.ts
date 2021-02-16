@@ -38,14 +38,14 @@ interface Range {
 export function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string {
   // easy pin
   if (rangeStrategy === 'pin') {
     return '==' + toVersion;
   }
-  if (currentValue === fromVersion) {
+  if (currentValue === currentVersion) {
     return toVersion;
   }
   const ranges: Range[] = parseRange(currentValue);
@@ -73,7 +73,7 @@ export function getNewValue({
     return getNewValue({
       currentValue,
       rangeStrategy: 'replace',
-      fromVersion,
+      currentVersion,
       toVersion,
     });
   }

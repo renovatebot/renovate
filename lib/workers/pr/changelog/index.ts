@@ -11,17 +11,17 @@ export * from './common';
 export async function getChangeLogJSON(
   args: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
-  const { sourceUrl, versioning, fromVersion, toVersion } = args;
+  const { sourceUrl, versioning, currentVersion, toVersion } = args;
   try {
-    if (!(sourceUrl && fromVersion && toVersion)) {
+    if (!(sourceUrl && currentVersion && toVersion)) {
       return null;
     }
     const version = allVersioning.get(versioning);
-    if (version.equals(fromVersion, toVersion)) {
+    if (version.equals(currentVersion, toVersion)) {
       return null;
     }
     logger.debug(
-      `Fetching changelog: ${sourceUrl} (${fromVersion} -> ${toVersion})`
+      `Fetching changelog: ${sourceUrl} (${currentVersion} -> ${toVersion})`
     );
     const releases = args.releases || (await getInRangeReleases(args));
 

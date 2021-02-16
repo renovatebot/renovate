@@ -11,13 +11,13 @@ export const supportsRanges = false;
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
+  currentVersion,
   toVersion,
 }: NewValueConfig): string {
   const res = npm.getNewValue({
     currentValue,
     rangeStrategy,
-    fromVersion,
+    currentVersion,
     toVersion,
   });
   if (isVersion(res)) {

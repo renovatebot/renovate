@@ -17,7 +17,7 @@ export interface BranchUpgradeCache {
   datasource?: string;
   depName?: string;
   fixedVersion?: string;
-  fromVersion?: string;
+  currentVersion?: string;
   lookupName?: string;
   newDigest?: string;
   newValue?: string;
@@ -87,6 +87,15 @@ export function getCache(): Cache {
   cache = cache || Object.create({});
   delete cache.init;
   cache.scan = cache.scan || Object.create({});
+  for (const branch of cache.branches || []) {
+    for (const upgrade of (branch.upgrades || []) as any) {
+      // migrate fromVersion to currentVersion
+      if (upgrade.fromVersion) {
+        upgrade.currentVersion = upgrade.fromVersion;
+        delete upgrade.fromVersion;
+      }
+    }
+  }
   return cache;
 }
 

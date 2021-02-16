@@ -45,7 +45,7 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '=1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
+        currentVersion: '1.0.0',
         toVersion: '1.1.0',
       })
     ).toEqual('1.1.0');
