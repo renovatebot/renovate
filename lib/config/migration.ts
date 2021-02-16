@@ -493,17 +493,6 @@ export function migrateConfig(
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (
-        (key.startsWith('commitMessage') || key.startsWith('prTitle')) &&
-        is.string(val)
-      ) {
-        migratedConfig[key] = val
-          .replace(/currentVersion/g, 'currentValue')
-          .replace(/newVersion/g, 'newValue')
-          .replace(/newValueMajor/g, 'newMajor')
-          .replace(/newValueMinor/g, 'newMinor')
-          .replace(/newVersionMajor/g, 'newMajor')
-          .replace(/newVersionMinor/g, 'newMinor');
       } else if (key === 'raiseDeprecationWarnings') {
         delete migratedConfig.raiseDeprecationWarnings;
         if (val === false) {
@@ -513,6 +502,22 @@ export function migrateConfig(
         }
       } else if (key === 'binarySource' && val === 'auto') {
         migratedConfig.binarySource = 'global';
+      }
+      const migratedTemplates = {
+        currentVersion: 'currentValue',
+        newVersion: 'newValue',
+        newValueMajor: 'newMajor',
+        newValueMinor: 'newMinor',
+        newVersionMajor: 'newMajor',
+        newVersionMinor: 'newMinor',
+      };
+      if (is.string(migratedConfig[key])) {
+        for (const [from, to] of Object.entries(migratedTemplates)) {
+          migratedConfig[key] = (migratedConfig[key] as string).replace(
+            new RegExp(from, 'g'),
+            to
+          );
+        }
       }
     }
     if (migratedConfig.endpoints) {
