@@ -123,7 +123,6 @@ export async function getReleases({
     }
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
-      name: repository,
       releases: null,
     };
     if (res.source) {

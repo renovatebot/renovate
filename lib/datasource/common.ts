@@ -53,10 +53,6 @@ export interface Release {
 export interface ReleaseResult {
   latestVersion?: string;
   deprecationMessage?: string;
-  display?: string;
-  group?: string;
-  name?: string;
-  pkgName?: string;
   releases: Release[];
   tags?: Record<string, string>;
   isPrivate?: boolean;
