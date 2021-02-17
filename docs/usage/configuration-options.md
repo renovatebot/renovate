@@ -1491,12 +1491,13 @@ e.g.
 {
   "postUpgradeTasks": {
     "commands": ["tslint --fix"],
-    "fileFilters": ["yarn.lock", "**/*.js"]
+    "fileFilters": ["yarn.lock", "**/*.js"],
+    "executionMode": "dependency"
   }
 }
 ```
 
-The `postUpgradeTasks` configuration consists of two fields:
+The `postUpgradeTasks` configuration consists of three fields:
 
 ### commands
 
@@ -1505,6 +1506,11 @@ A list of commands that are executed after Renovate has updated a dependency but
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
+
+### executionMode
+
+Defaults to `dependency`, but can also be set to `branch`. This sets the level the postUpgradeTask runs on, if set to `dependency` the postUpgradeTask
+will be executed for every dependency on the branch. If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 ## prBodyColumns
 

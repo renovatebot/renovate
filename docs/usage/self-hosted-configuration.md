@@ -9,7 +9,7 @@ The below configuration options are applicable only if you are running your own 
 
 ## allowPostUpgradeCommandTemplating
 
-If true allow templating for post-upgrade commands.
+If true allow templating for post-upgrade commands on dependency level pust upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
