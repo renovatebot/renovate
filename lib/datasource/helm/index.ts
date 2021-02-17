@@ -23,12 +23,14 @@ export const defaultConfig = {
   },
 };
 
+export type RepositoryData = Record<string, ReleaseResult>;
+
 export async function getRepositoryData(
   repository: string
-): Promise<Record<string, ReleaseResult>> {
+): Promise<RepositoryData> {
   const cacheNamespace = 'datasource-helm';
   const cacheKey = repository;
-  const cachedIndex = await packageCache.get<Record<string, ReleaseResult>>(
+  const cachedIndex = await packageCache.get<RepositoryData>(
     cacheNamespace,
     cacheKey
   );
@@ -73,7 +75,7 @@ export async function getRepositoryData(
       logger.warn(`Failed to parse index.yaml from ${repository}`);
       return null;
     }
-    const result: Record<string, ReleaseResult> = {};
+    const result: RepositoryData = {};
     for (const [name, releases] of Object.entries(doc.entries)) {
       result[name] = {
         name,
