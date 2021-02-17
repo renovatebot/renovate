@@ -20,7 +20,7 @@ export interface FilterConfig {
 
 export function filterVersions(
   config: FilterConfig,
-  fromVersion: string,
+  currentVersion: string,
   latestVersion: string,
   releases: Release[]
 ): Release[] {
@@ -43,18 +43,18 @@ export function filterVersions(
     return true;
   }
   versioning = allVersioning.get(config.versioning);
-  if (!fromVersion) {
+  if (!currentVersion) {
     return [];
   }
 
   // Leave only versions greater than current
   let filteredVersions = releases.filter((v) =>
-    versioning.isGreaterThan(v.version, fromVersion)
+    versioning.isGreaterThan(v.version, currentVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
   const fromRelease = releases.find(
-    (release) => release.version === fromVersion
+    (release) => release.version === currentVersion
   );
   if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
     filteredVersions = filteredVersions.filter((v) => {
@@ -120,14 +120,17 @@ export function filterVersions(
   }
 
   // if current is unstable then allow unstable in the current major only
-  if (!isVersionStable(fromVersion)) {
+  if (!isVersionStable(currentVersion)) {
     // Allow unstable only in current major
     return filteredVersions.filter(
       (v) =>
         isVersionStable(v.version) ||
-        (versioning.getMajor(v.version) === versioning.getMajor(fromVersion) &&
-          versioning.getMinor(v.version) === versioning.getMinor(fromVersion) &&
-          versioning.getPatch(v.version) === versioning.getPatch(fromVersion))
+        (versioning.getMajor(v.version) ===
+          versioning.getMajor(currentVersion) &&
+          versioning.getMinor(v.version) ===
+            versioning.getMinor(currentVersion) &&
+          versioning.getPatch(v.version) ===
+            versioning.getPatch(currentVersion))
     );
   }
 
@@ -145,8 +148,8 @@ export function filterVersions(
   if (respectLatest === false) {
     return filteredVersions;
   }
-  // No filtering if fromVersion is already past latest
-  if (versioning.isGreaterThan(fromVersion, latestVersion)) {
+  // No filtering if currentVersion is already past latest
+  if (versioning.isGreaterThan(currentVersion, latestVersion)) {
     return filteredVersions;
   }
   return filteredVersions.filter(

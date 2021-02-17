@@ -14,25 +14,30 @@ export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 export const CONFIG_VALIDATION = 'config-validation';
 export const CONFIG_SECRETS_EXPOSED = 'config-secrets-exposed';
 
-// Repository Error
+// Repository Errors - causes repo to be considered as disabled
 export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';
 export const REPOSITORY_ARCHIVED = 'archived';
 export const REPOSITORY_BLOCKED = 'blocked';
 export const REPOSITORY_CANNOT_FORK = 'cannot-fork';
-export const REPOSITORY_CHANGED = 'repository-changed';
 export const REPOSITORY_DISABLED = 'disabled';
+export const REPOSITORY_CLOSED_ONBOARDING = 'disabled-closed-onboarding';
+export const REPOSITORY_DISABLED_BY_CONFIG = 'disabled-by-config';
+export const REPOSITORY_NO_CONFIG = 'disabled-no-config';
 export const REPOSITORY_EMPTY = 'empty';
 export const REPOSITORY_FORKED = 'fork';
 export const REPOSITORY_MIRRORED = 'mirror';
 export const REPOSITORY_NOT_FOUND = 'not-found';
-export const REPOSITORY_NO_VULNERABILITY = 'no-vulnerability-alerts';
+export const REPOSITORY_NO_PACKAGE_FILES = 'no-package-files';
 export const REPOSITORY_RENAMED = 'renamed';
-export const REPOSITORY_TEMPORARY_ERROR = 'temporary-error';
 export const REPOSITORY_UNINITIATED = 'uninitiated';
+
+// Temporary Error
+export const REPOSITORY_CHANGED = 'repository-changed';
+export const TEMPORARY_ERROR = 'temporary-error';
+export const NO_VULNERABILITY_ALERTS = 'no-vulnerability-alerts';
 
 // Manager Error
 export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';
-export const MANAGER_NO_PACKAGE_FILES = 'no-package-files';
 
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';

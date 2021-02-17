@@ -31,7 +31,6 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
-  currentVersion?: string;
   endpoint?: string;
   excludeCommitPaths?: string[];
   githubName?: string;

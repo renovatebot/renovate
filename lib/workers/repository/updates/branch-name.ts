@@ -57,13 +57,15 @@ export function generateBranchName(update: RenovateConfig): void {
       hashLength = MIN_HASH_LENGTH;
     }
 
-    const additionalBranchPrefix = update.additionalBranchPrefix
-      ? template.compile(String(update.additionalBranchPrefix), update)
-      : '';
+    const additionalBranchPrefix = template.compile(
+      String(update.additionalBranchPrefix || ''),
+      update
+    );
 
-    const branchTopic = update.branchTopic
-      ? template.compile(String(update.branchTopic), update)
-      : '';
+    const branchTopic = template.compile(
+      String(update.branchTopic || ''),
+      update
+    );
 
     let hashInput = additionalBranchPrefix + branchTopic;
 

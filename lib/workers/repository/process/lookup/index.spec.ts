@@ -79,6 +79,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'update-lockfile';
       config.depName = 'q';
       config.datasource = datasourceNpmId;
+      config.separateMinorPatch = true;
       config.lockedVersion = '0.4.0';
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
@@ -117,26 +118,6 @@ describe('workers/repository/process/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-    });
-    it('returns only one update if automerging', async () => {
-      config.automerge = true;
-      config.currentValue = '0.4.0';
-      config.rangeStrategy = 'pin';
-      config.depName = 'q';
-      config.datasource = datasourceNpmId;
-      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot();
-      expect(res.updates).toHaveLength(1);
-    });
-    it('returns only one update if automerging major', async () => {
-      config.major = { automerge: true };
-      config.currentValue = '^0.4.0';
-      config.rangeStrategy = 'pin';
-      config.depName = 'q';
-      config.datasource = datasourceNpmId;
-      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('returns both updates if automerging minor', async () => {
       config.minor = { automerge: true };
@@ -840,6 +821,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '~1.0.0';
       config.depName = 'q';
+      config.separateMinorPatch = true;
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
@@ -866,6 +848,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>=0.9.0';
       config.depName = 'q';
       config.datasource = datasourceNpmId;
+      config.separateMajorMinor = false;
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
@@ -970,7 +953,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q2').reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.updates[0].toVersion).toEqual('1.4.0');
+      expect(res.updates[0].newVersion).toEqual('1.4.0');
     });
     it('is deprecated', async () => {
       config.currentValue = '1.3.0';
@@ -986,7 +969,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q3').reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.updates[0].toVersion).toEqual('1.4.1');
+      expect(res.updates[0].newVersion).toEqual('1.4.1');
     });
     it('skips unsupported values', async () => {
       config.currentValue = 'alpine';
