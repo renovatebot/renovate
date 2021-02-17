@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
 import { getName } from '../../../test/util';
+import { logger } from '../../logger';
 import { CustomExtractConfig } from '../common';
 import { defaultConfig, extractPackageFile } from '.';
 
@@ -120,7 +121,7 @@ describe(getName(__filename), () => {
       matchStrings: [
         'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
       ],
-      registryUrlTemplate: 'http://registry.{{depName}}.com',
+      registryUrlTemplate: 'http://registry.{{depName}}.com/',
     };
     const res = await extractPackageFile(
       dockerfileContent,
@@ -131,7 +132,26 @@ describe(getName(__filename), () => {
     expect(res.deps).toHaveLength(1);
     expect(
       res.deps.find((dep) => dep.depName === 'gradle').registryUrls
-    ).toEqual(['http://registry.gradle.com']);
+    ).toEqual(['http://registry.gradle.com/']);
+  });
+  it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
+    jest.mock('../../logger');
+    const config = {
+      matchStrings: [
+        'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+      ],
+      registryUrlTemplate: 'this-is-not-a-valid-url-{{depName}}',
+    };
+    const res = await extractPackageFile(
+      dockerfileContent,
+      'Dockerfile',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(logger.warn).toHaveBeenCalledWith(
+      { value: 'this-is-not-a-valid-url-gradle' },
+      'Invalid regex manager registryUrl'
+    );
   });
   it('extracts multiple dependencies with multiple matchStrings', async () => {
     const config = {

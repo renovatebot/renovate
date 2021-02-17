@@ -1,4 +1,4 @@
-import url from 'url';
+import { URL } from 'url';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
@@ -48,9 +48,10 @@ function createDependency(
     switch (field) {
       case 'registryUrl':
         // check if URL is valid and pack inside an array
-        if (url.parse(value)) {
-          dependency.registryUrls = [value];
-        } else {
+        try {
+          const url = new URL(value).toString();
+          dependency.registryUrls = [url];
+        } catch (err) {
           logger.warn({ value }, 'Invalid regex manager registryUrl');
         }
         break;
