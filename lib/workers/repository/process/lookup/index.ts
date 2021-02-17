@@ -91,7 +91,7 @@ export async function lookupUpdates(
     // Reapply package rules in case we missed something from sourceUrl
     config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
     if (followTag) {
-      const taggedVersion = dependency.releaseTags[followTag];
+      const taggedVersion = dependency.tags[followTag];
       if (!taggedVersion) {
         res.warnings.push({
           depName,
@@ -134,7 +134,7 @@ export async function lookupUpdates(
     const nonDeprecatedVersions = releases
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
-    const latestVersion = dependency.releaseTags?.latest;
+    const latestVersion = dependency.tags?.latest;
     const currentVersion =
       getCurrentVersion(
         config,

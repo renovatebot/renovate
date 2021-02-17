@@ -53,7 +53,7 @@ export interface Release {
 export interface ReleaseResult {
   deprecationMessage?: string;
   releases: Release[];
-  releaseTags?: Record<string, string>;
+  tags?: Record<string, string>;
   isPrivate?: boolean;
   // URL metadata
   changelogUrl?: string;
