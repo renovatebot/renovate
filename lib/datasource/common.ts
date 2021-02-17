@@ -56,18 +56,10 @@ export interface ReleaseResult {
   changelogUrl?: string;
   dependencyUrl?: string;
   deprecationMessage?: string;
-  display?: string;
-  dockerRegistry?: string;
-  dockerRepository?: string;
-  group?: string;
   homepage?: string;
-  name?: string;
-  pkgName?: string;
   releases: Release[];
   sourceUrl?: string;
   tags?: Record<string, string>;
-  versions?: any;
-  registryUrl?: string;
   isPrivate?: boolean;
 }
 
