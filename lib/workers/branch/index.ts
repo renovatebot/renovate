@@ -362,7 +362,112 @@ export async function processBranch(
       getAdminConfig().trustLevel === 'high' &&
       is.nonEmptyArray(allowedPostUpgradeCommands)
     ) {
-      for (const upgrade of config.upgrades) {
+      const executionMode = config.postUpgradeTasks.executionMode || 'dependency';
+
+      if (executionMode === 'branch') {
+        logger.trace(
+          {
+            tasks: config.postUpgradeTasks,
+            allowedCommands: allowedPostUpgradeCommands,
+          },
+          'Checking for post-upgrade tasks'
+        );
+        const commands = config.postUpgradeTasks.commands || [];
+        const fileFilters = config.postUpgradeTasks.fileFilters || [];
+
+        if (is.nonEmptyArray(commands)) {
+          // Persist updated files in file system so any executed commands can see them
+          for (const file of config.updatedPackageFiles.concat(
+            config.updatedArtifacts
+          )) {
+            if (file.name !== '|delete|') {
+              let contents;
+              if (typeof file.contents === 'string') {
+                contents = Buffer.from(file.contents);
+              } else {
+                contents = file.contents;
+              }
+              await writeLocalFile(file.name, contents);
+            }
+          }
+
+          for (const cmd of commands) {
+            if (
+              !allowedPostUpgradeCommands.some((pattern) =>
+                regEx(pattern).test(cmd)
+              )
+            ) {
+              logger.warn(
+                {
+                  cmd,
+                  allowedPostUpgradeCommands,
+                },
+                'Post-upgrade task did not match any on allowed list'
+              );
+            } else {
+              const execResult = await exec(cmd, {
+                cwd: config.localDir,
+              });
+
+              logger.debug(
+                { cmd, ...execResult },
+                'Executed branch level post-upgrade task'
+              );
+            }
+          }
+
+          const status = await getRepoStatus();
+
+          for (const relativePath of status.modified.concat(status.not_added)) {
+            for (const pattern of fileFilters) {
+              if (minimatch(relativePath, pattern)) {
+                logger.debug(
+                  { file: relativePath, pattern },
+                  'Post-upgrade file saved'
+                );
+                const existingContent = await readLocalFile(relativePath);
+                const existingUpdatedArtifacts = config.updatedArtifacts.find(
+                  (ua) => ua.name === relativePath
+                );
+                if (existingUpdatedArtifacts) {
+                  existingUpdatedArtifacts.contents = existingContent;
+                } else {
+                  config.updatedArtifacts.push({
+                    name: relativePath,
+                    contents: existingContent,
+                  });
+                }
+                // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
+                config.updatedArtifacts = config.updatedArtifacts.filter(
+                  (ua) => ua.name !== '|delete|' || ua.contents !== relativePath
+                );
+              }
+            }
+          }
+
+          for (const relativePath of status.deleted || []) {
+            for (const pattern of fileFilters) {
+              if (minimatch(relativePath, pattern)) {
+                logger.debug(
+                  { file: relativePath, pattern },
+                  'Post-upgrade file removed'
+                );
+                config.updatedArtifacts.push({
+                  name: '|delete|',
+                  contents: relativePath,
+                });
+                // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
+                config.updatedArtifacts = config.updatedArtifacts.filter(
+                  (ua) => ua.name !== relativePath
+                );
+              }
+            }
+          }
+        }
+      }
+
+
+      config.upgrades.filter(({ postUpgradeTasks }) => !postUpgradeTasks || !postUpgradeTasks.executionMode || postUpgradeTasks.executionMode !== 'branch').forEach(upgrade => {
         addMeta({ dep: upgrade.depName });
         logger.trace(
           {
@@ -373,7 +478,7 @@ export async function processBranch(
         );
         const commands = upgrade.postUpgradeTasks.commands || [];
         const fileFilters = upgrade.postUpgradeTasks.fileFilters || [];
-
+        
         if (is.nonEmptyArray(commands)) {
           // Persist updated files in file system so any executed commands can see them
           for (const file of config.updatedPackageFiles.concat(
@@ -469,7 +574,7 @@ export async function processBranch(
             }
           }
         }
-      }
+      });
     }
     removeMeta(['dep']);
 

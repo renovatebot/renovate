@@ -116,6 +116,7 @@ export interface LegacyAdminConfig {
 export type PostUpgradeTasks = {
   commands?: string[];
   fileFilters?: string[];
+  executionMode: string;
 };
 
 type UpdateConfig<
