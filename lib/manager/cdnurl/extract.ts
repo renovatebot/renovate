@@ -1,4 +1,4 @@
-import * as datasourceCdnjs from '../../datasource/cdnjs';
+import { CdnJsDatasource } from '../../datasource/cdnjs';
 import type { PackageDependency, PackageFile } from '../types';
 
 export const cloudflareUrlRegex =
@@ -18,7 +18,7 @@ export function extractPackageFile(content: string): PackageFile {
     match = cloudflareUrlRegex.exec(rest);
 
     deps.push({
-      datasource: datasourceCdnjs.id,
+      datasource: CdnJsDatasource.id,
       depName,
       lookupName: `${depName}/${asset}`,
       currentValue,
