@@ -67,7 +67,6 @@ Array [
 
 exports[`datasource/nuget getReleases handles paginated results (v2) 1`] = `
 Object {
-  "pkgName": "nunit",
   "releases": Array [
     Object {
       "version": "1.0.0",
@@ -104,7 +103,6 @@ Array [
 
 exports[`datasource/nuget getReleases processes real data (v2) 1`] = `
 Object {
-  "pkgName": "nunit",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:55.387+00:00",
@@ -308,7 +306,6 @@ Array [
 exports[`datasource/nuget getReleases processes real data (v3) feed is a nuget.org 1`] = `
 Object {
   "homepage": "https://nunit.org/",
-  "pkgName": "nunit",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:55.387+00:00",
@@ -543,7 +540,6 @@ Array [
 exports[`datasource/nuget getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 Object {
   "homepage": "https://nunit.org/",
-  "pkgName": "nunit",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:55.387+00:00",
@@ -777,7 +773,6 @@ Array [
 exports[`datasource/nuget getReleases processes real data (v3) for several catalog pages 1`] = `
 Object {
   "homepage": "https://nlog-project.org/",
-  "pkgName": "nlog",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:35.043+00:00",
@@ -1586,7 +1581,6 @@ Array [
 
 exports[`datasource/nuget getReleases processes real data with no github project url (v2) 1`] = `
 Object {
-  "pkgName": "nunit",
   "releases": Array [
     Object {
       "version": "3.11.0",
@@ -1612,7 +1606,6 @@ Array [
 
 exports[`datasource/nuget getReleases processes real data without project url (v2) 1`] = `
 Object {
-  "pkgName": "nunit",
   "releases": Array [
     Object {
       "version": "2.5.7.10213",
@@ -1764,7 +1757,6 @@ Array [
 exports[`datasource/nuget getReleases returns deduplicated results 1`] = `
 Object {
   "homepage": "https://nunit.org/",
-  "pkgName": "nunit",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:55.387+00:00",

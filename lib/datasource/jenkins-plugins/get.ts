@@ -71,7 +71,6 @@ function updateJenkinsPluginInfoCacheCallback(
   for (const name of Object.keys(response.plugins || [])) {
     // eslint-disable-next-line no-param-reassign
     cache.cache[name] = {
-      name,
       releases: [], // releases are stored in another cache
       sourceUrl: response.plugins[name]?.scm,
     };

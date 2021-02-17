@@ -180,9 +180,6 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest',
-        group: 'org.scalatest',
-        name: 'scalatest',
         releases: [{ version: '1.2.0' }, { version: '1.2.3' }],
       });
       expect(
@@ -194,9 +191,6 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest_2.12',
-        group: 'org.scalatest',
-        name: 'scalatest_2.12',
         releases: [{ version: '1.2.3' }],
       });
     });
@@ -211,9 +205,6 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest-app_2.12',
-        group: 'org.scalatest',
-        name: 'scalatest-app_2.12',
         releases: [{ version: '6.5.4' }],
         homepage: 'http://www.scalatest.org',
         sourceUrl: 'https://github.com/scalatest/scalatest',
@@ -227,9 +218,6 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest-flatspec_2.12',
-        group: 'org.scalatest',
-        name: 'scalatest-flatspec_2.12',
         releases: [{ version: '6.5.4' }],
         sourceUrl: 'https://github.com/scalatest/scalatest',
       });
@@ -242,9 +230,6 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest-matchers-core_2.12',
-        group: 'org.scalatest',
-        name: 'scalatest-matchers-core_2.12',
         releases: [{ version: '6.5.4' }],
         homepage: 'http://www.scalatest.org',
       });

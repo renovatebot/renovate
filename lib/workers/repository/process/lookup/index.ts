@@ -24,8 +24,6 @@ import { RollbackConfig, getRollbackUpdate } from './rollback';
 
 export interface UpdateResult {
   sourceDirectory?: string;
-  dockerRepository?: string;
-  dockerRegistry?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;
@@ -200,12 +198,6 @@ export async function lookupUpdates(
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
     res.dependencyUrl = dependency?.dependencyUrl;
-    // TODO: improve this
-    // istanbul ignore if
-    if (dependency.dockerRegistry) {
-      res.dockerRegistry = dependency.dockerRegistry;
-      res.dockerRepository = dependency.dockerRepository;
-    }
     const { latestVersion, releases } = dependency;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases.filter((release) =>
