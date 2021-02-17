@@ -55,19 +55,32 @@ export async function getRepositoryData(
     throw err;
   }
   try {
-    const doc = yaml.safeLoad(res.body, { json: true });
+    interface HelmRepository {
+      entries: Record<
+        string,
+        {
+          home?: string;
+          sources?: string[];
+          version: string;
+          created: string;
+        }[]
+      >;
+    }
+    const doc: HelmRepository = yaml.safeLoad(res.body, {
+      json: true,
+    }) as any;
     if (!is.plainObject<Record<string, unknown>>(doc)) {
       logger.warn(`Failed to parse index.yaml from ${repository}`);
       return null;
     }
     const result: ReleaseResult[] = Object.entries(doc.entries).map(
-      ([k, v]: [string, any]): ReleaseResult => ({
-        name: k,
-        homepage: v[0].home,
-        sourceUrl: v[0].sources ? v[0].sources[0] : undefined,
-        releases: v.map((x: any) => ({
-          version: x.version,
-          releaseTimestamp: x.created ? x.created : null,
+      ([name, releases]): ReleaseResult => ({
+        name,
+        homepage: releases[0].home,
+        sourceUrl: releases[0].sources ? releases[0].sources[0] : undefined,
+        releases: releases.map((release) => ({
+          version: release.version,
+          releaseTimestamp: release.created ? release.created : null,
         })),
       })
     );
