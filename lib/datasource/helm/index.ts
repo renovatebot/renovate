@@ -23,12 +23,14 @@ export const defaultConfig = {
   },
 };
 
+export type RepositoryData = Record<string, ReleaseResult>;
+
 export async function getRepositoryData(
   repository: string
-): Promise<ReleaseResult[]> {
+): Promise<RepositoryData> {
   const cacheNamespace = 'datasource-helm';
   const cacheKey = repository;
-  const cachedIndex = await packageCache.get<ReleaseResult[]>(
+  const cachedIndex = await packageCache.get<RepositoryData>(
     cacheNamespace,
     cacheKey
   );
@@ -73,8 +75,9 @@ export async function getRepositoryData(
       logger.warn(`Failed to parse index.yaml from ${repository}`);
       return null;
     }
-    const result: ReleaseResult[] = Object.entries(doc.entries).map(
-      ([name, releases]): ReleaseResult => ({
+    const result: RepositoryData = {};
+    for (const [name, releases] of Object.entries(doc.entries)) {
+      result[name] = {
         name,
         homepage: releases[0].home,
         sourceUrl: releases[0].sources ? releases[0].sources[0] : undefined,
@@ -82,8 +85,8 @@ export async function getRepositoryData(
           version: release.version,
           releaseTimestamp: release.created ? release.created : null,
         })),
-      })
-    );
+      };
+    }
     const cacheMinutes = 20;
     await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
@@ -103,7 +106,7 @@ export async function getReleases({
     logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
     return null;
   }
-  const releases = repositoryData.find((chart) => chart.name === lookupName);
+  const releases = repositoryData[lookupName];
   if (!releases) {
     logger.debug(
       { dependency: lookupName },
