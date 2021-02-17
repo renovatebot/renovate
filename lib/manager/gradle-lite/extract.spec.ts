@@ -54,7 +54,10 @@ describe('manager/gradle-lite/extract', () => {
           {
             depName: 'foo:bar',
             currentValue: '1.2.3',
-            registryUrls: ['https://example.com'],
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://example.com',
+            ],
           },
         ],
       },
