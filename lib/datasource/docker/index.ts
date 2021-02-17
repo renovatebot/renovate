@@ -66,13 +66,11 @@ export function getRegistryRepository(
   registryUrl: string
 ): RegistryRepository {
   if (registryUrl !== defaultRegistryUrls[0]) {
-    const dockerRegistry = registryUrl
-      .replace('https://', '')
-      .replace(/\/?$/, '/');
-    if (lookupName.startsWith(dockerRegistry)) {
+    const registry = registryUrl.replace('https://', '').replace(/\/?$/, '/');
+    if (lookupName.startsWith(registry)) {
       return {
-        registry: dockerRegistry,
-        repository: lookupName.replace(dockerRegistry, ''),
+        registry,
+        repository: lookupName.replace(registry, ''),
       };
     }
   }
@@ -623,8 +621,6 @@ export async function getReleases({
   }
   const releases = tags.map((version) => ({ version }));
   const ret: ReleaseResult = {
-    dockerRegistry: registry,
-    dockerRepository: repository,
     releases,
   };
 

@@ -78,7 +78,6 @@ export async function getRepositoryData(
     const result: RepositoryData = {};
     for (const [name, releases] of Object.entries(doc.entries)) {
       result[name] = {
-        name,
         homepage: releases[0].home,
         sourceUrl: releases[0].sources ? releases[0].sources[0] : undefined,
         releases: releases.map((release) => ({

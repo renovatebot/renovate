@@ -567,8 +567,6 @@ Array [
 
 exports[`datasource/docker/index getReleases ignores unsupported manifest 1`] = `
 Object {
-  "dockerRegistry": "https://registry.company.com",
-  "dockerRepository": "node",
   "releases": Array [],
 }
 `;
@@ -622,8 +620,6 @@ Array [
 
 exports[`datasource/docker/index getReleases ignores unsupported schema version 1`] = `
 Object {
-  "dockerRegistry": "https://registry.company.com",
-  "dockerRepository": "node",
   "releases": Array [],
 }
 `;
@@ -752,8 +748,6 @@ Array [
 
 exports[`datasource/docker/index getReleases supports labels 1`] = `
 Object {
-  "dockerRegistry": "https://registry.company.com",
-  "dockerRepository": "node",
   "releases": Array [],
   "sourceUrl": "https://github.com/renovatebot/renovate",
 }
@@ -828,8 +822,6 @@ Array [
 
 exports[`datasource/docker/index getReleases supports manifest lists 1`] = `
 Object {
-  "dockerRegistry": "https://registry.company.com",
-  "dockerRepository": "node",
   "releases": Array [],
   "sourceUrl": "https://github.com/renovatebot/renovate",
 }
@@ -925,8 +917,6 @@ Array [
 
 exports[`datasource/docker/index getReleases supports redirect 1`] = `
 Object {
-  "dockerRegistry": "https://registry.company.com",
-  "dockerRepository": "node",
   "releases": Array [],
 }
 `;

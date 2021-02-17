@@ -115,7 +115,6 @@ export async function getRubygemsOrgDependency(
     return null;
   }
   const dep: ReleaseResult = {
-    name: lookupName,
     releases: packageReleases[lookupName].map((version) => ({ version })),
   };
   return dep;
