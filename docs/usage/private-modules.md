@@ -33,6 +33,8 @@ The recommended approaches in order of preference are:
 
 **If you are running your own Renovate bot**: copy an `.npmrc` file to the home dir of the bot and it will work for all repositories
 
+**NOTE:** This is considered deprecated and doesn't work out of the box with `binarySource=docker`.
+
 **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
 
 **Renovate App with a private registry**: Add an unencrypted `npmrc` plus an encrypted `npmToken` in config
