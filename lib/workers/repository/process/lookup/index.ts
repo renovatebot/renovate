@@ -1,4 +1,4 @@
-import { UpdateType, ValidationMessage } from '../../../../config';
+import { ValidationMessage } from '../../../../config';
 import {
   Release,
   getDefaultVersioning,
@@ -15,98 +15,12 @@ import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
+import { getBucket } from './bucket';
 import { LookupUpdateConfig, UpdateResult } from './common';
+import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { getRollbackUpdate } from './rollback';
-
-function getUpdateType(
-  config: LookupUpdateConfig,
-  currentVersion: string,
-  newVersion: string
-): UpdateType {
-  const { versioning } = config;
-  const version = allVersioning.get(versioning);
-  if (version.getMajor(newVersion) > version.getMajor(currentVersion)) {
-    return 'major';
-  }
-  if (version.getMinor(newVersion) > version.getMinor(currentVersion)) {
-    return 'minor';
-  }
-  if (config.separateMinorPatch) {
-    return 'patch';
-  }
-  if (config.patch.automerge && !config.minor.automerge) {
-    return 'patch';
-  }
-  return 'minor';
-}
-
-function getCurrentVersion(
-  config: LookupUpdateConfig,
-  rangeStrategy: string,
-  latestVersion: string,
-  allVersions: string[]
-): string | null {
-  const { currentValue, lockedVersion, versioning } = config;
-  const version = allVersioning.get(versioning);
-  if (version.isVersion(currentValue)) {
-    return currentValue;
-  }
-  if (version.isSingleVersion(currentValue)) {
-    return currentValue.replace(/=/g, '').trim();
-  }
-  logger.trace(`currentValue ${currentValue} is range`);
-  let useVersions = allVersions.filter((v) => version.matches(v, currentValue));
-  if (latestVersion && version.matches(latestVersion, currentValue)) {
-    useVersions = useVersions.filter(
-      (v) => !version.isGreaterThan(v, latestVersion)
-    );
-  }
-  if (rangeStrategy === 'pin') {
-    return (
-      lockedVersion || version.getSatisfyingVersion(useVersions, currentValue)
-    );
-  }
-  if (rangeStrategy === 'bump') {
-    // Use the lowest version in the current range
-    return version.minSatisfyingVersion(useVersions, currentValue);
-  }
-  // Use the highest version in the current range
-  return version.getSatisfyingVersion(useVersions, currentValue);
-}
-
-function getBucket(
-  config: LookupUpdateConfig,
-  currentVersion: string,
-  newVersion: string,
-  versioning: allVersioning.VersioningApi
-): string {
-  const {
-    separateMajorMinor,
-    separateMultipleMajor,
-    separateMinorPatch,
-  } = config;
-  if (!separateMajorMinor) {
-    return 'latest';
-  }
-  const fromMajor = versioning.getMajor(currentVersion);
-  const toMajor = versioning.getMajor(newVersion);
-  if (fromMajor !== toMajor) {
-    if (separateMultipleMajor) {
-      return `major-${toMajor}`;
-    }
-    return 'major';
-  }
-  if (separateMinorPatch) {
-    if (
-      versioning.getMinor(currentVersion) === versioning.getMinor(newVersion)
-    ) {
-      return 'patch';
-    }
-    return 'minor';
-  }
-  return 'non-major';
-}
+import { getUpdateType } from './update-type';
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig
