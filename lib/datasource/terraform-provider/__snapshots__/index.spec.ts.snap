@@ -249,7 +249,7 @@ Object {
       "version": "1.36.1",
     },
     Object {
-      "releaseTimestamp": "2019-11-26T08:22:56Z",
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
       "version": "1.37.0",
     },
   ],
@@ -479,7 +479,7 @@ Object {
       "version": "1.36.1",
     },
     Object {
-      "releaseTimestamp": "2019-11-26T08:22:56Z",
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
       "version": "1.37.0",
     },
   ],
