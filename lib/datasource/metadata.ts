@@ -129,6 +129,18 @@ function normalizeDate(input: any): string | null {
   }
 
   if (typeof input === 'string') {
+    // `Date.parse()` is more permissive, but it assumes local time zone
+    // for inputs like `2021-01-01`.
+    //
+    // Here we try to parse with default UTC with fallback to `Date.parse()`.
+    //
+    // It allows us not to care about machine timezones so much, though
+    // some misinterpretation is still possible, but only if both:
+    //
+    //   1. Renovate machine is configured for non-UTC zone
+    //   2. Format of `input` is very exotic
+    //      (from `DateTime.fromISO()` perspective)
+    //
     const luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
     if (luxonDate.isValid) {
       return luxonDate.toISO();
