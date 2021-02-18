@@ -256,7 +256,8 @@ export async function lookupUpdates(
       update.newMajor = versioning.getMajor(newVersion);
       update.newMinor = versioning.getMinor(newVersion);
       update.updateType =
-        update.updateType || getUpdateType(config, currentVersion, newVersion);
+        update.updateType ||
+        getUpdateType(config, versioning, currentVersion, newVersion);
       update.isSingleVersion =
         update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
       if (!versioning.isVersion(update.newValue)) {

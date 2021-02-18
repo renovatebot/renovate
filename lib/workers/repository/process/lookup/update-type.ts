@@ -4,15 +4,14 @@ import { LookupUpdateConfig } from './common';
 
 export function getUpdateType(
   config: LookupUpdateConfig,
+  versioning: allVersioning.VersioningApi,
   currentVersion: string,
   newVersion: string
 ): UpdateType {
-  const { versioning } = config;
-  const version = allVersioning.get(versioning);
-  if (version.getMajor(newVersion) > version.getMajor(currentVersion)) {
+  if (versioning.getMajor(newVersion) > versioning.getMajor(currentVersion)) {
     return 'major';
   }
-  if (version.getMinor(newVersion) > version.getMinor(currentVersion)) {
+  if (versioning.getMinor(newVersion) > versioning.getMinor(currentVersion)) {
     return 'minor';
   }
   if (config.separateMinorPatch) {
