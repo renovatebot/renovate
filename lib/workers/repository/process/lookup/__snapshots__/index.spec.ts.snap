@@ -1354,7 +1354,7 @@ Object {
 
 exports[`workers/repository/process/lookup .lookupUpdates() skips undefined values 1`] = `
 Object {
-  "skipReason": "unsupported-value",
+  "skipReason": "invalid-value",
   "updates": Array [],
   "warnings": Array [],
 }
@@ -1362,7 +1362,7 @@ Object {
 
 exports[`workers/repository/process/lookup .lookupUpdates() skips unsupported values 1`] = `
 Object {
-  "skipReason": "unsupported-value",
+  "skipReason": "invalid-value",
   "updates": Array [],
   "warnings": Array [],
 }

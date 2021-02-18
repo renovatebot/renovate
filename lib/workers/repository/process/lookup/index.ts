@@ -401,11 +401,11 @@ export async function lookupUpdates(
       res.updates.push(update);
     }
   } else if (!currentValue) {
-    res.skipReason = SkipReason.UnsupportedValue;
+    res.skipReason = SkipReason.InvalidValue;
   } else {
     logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
     if (!config.pinDigests && !config.currentDigest) {
-      res.skipReason = SkipReason.UnsupportedValue;
+      res.skipReason = SkipReason.InvalidValue;
     } else {
       delete res.skipReason;
     }

@@ -36,7 +36,6 @@ export enum SkipReason {
   UnsupportedChartType = 'unsupported-chart-type',
   UnsupportedRemote = 'unsupported-remote',
   UnsupportedUrl = 'unsupported-url',
-  UnsupportedValue = 'unsupported-value',
   UnsupportedVersion = 'unsupported-version',
   Unsupported = 'unsupported',
   UnversionedReference = 'unversioned-reference',
