@@ -2,7 +2,6 @@
 
 exports[`datasource/packagist getReleases adds packagist source implicitly 1`] = `
 Object {
-  "name": "drewm/mailchimp-api",
   "releases": Array [
     Object {
       "gitRef": "v1.0",
@@ -236,7 +235,6 @@ Array [
 
 exports[`datasource/packagist getReleases processes real versioned data 1`] = `
 Object {
-  "name": "drewm/mailchimp-api",
   "releases": Array [
     Object {
       "gitRef": "v1.0",
@@ -336,7 +334,6 @@ Array [
 exports[`datasource/packagist getReleases supports includes packages 1`] = `
 Object {
   "homepage": "http://guzzlephp.org/",
-  "name": "guzzlehttp/guzzle",
   "releases": Array [
     Object {
       "gitRef": "v3.0.0",
@@ -507,7 +504,6 @@ Array [
 
 exports[`datasource/packagist getReleases supports lazy repositories 1`] = `
 Object {
-  "name": "guzzlehttp/guzzle",
   "releases": Array [
     Object {
       "gitRef": "5.3.4",
@@ -548,7 +544,6 @@ Array [
 
 exports[`datasource/packagist getReleases supports plain packages 1`] = `
 Object {
-  "name": "vendor/package-name",
   "releases": Array [
     Object {
       "gitRef": "0.0.1",
@@ -584,7 +579,6 @@ Array [
 exports[`datasource/packagist getReleases supports provider-includes 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
-  "name": "wpackagist-plugin/1beyt",
   "releases": Array [
     Object {
       "gitRef": "1.0",
@@ -649,7 +643,6 @@ Array [
 exports[`datasource/packagist getReleases supports providers 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
-  "name": "wpackagist-plugin/1beyt",
   "releases": Array [
     Object {
       "gitRef": "1.0",
