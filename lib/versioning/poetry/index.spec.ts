@@ -2,6 +2,89 @@ import { getName } from '../../../test/util';
 import { api as versionig } from '.';
 
 describe(getName(__filename), () => {
+  describe('equals', () => {
+    it.each([
+      ['1', '1'],
+      ['1.0', '1'],
+      ['1.0.0', '1'],
+      ['1.9.0', '1.9'],
+    ])('%s == %s', (a, b) => {
+      expect(versionig.equals(a, b)).toBe(true);
+    });
+
+    it.each([
+      ['1', '2'],
+      ['1.9.1', '1.9'],
+      ['1.9-beta', '1.9'],
+    ])('%s != %s', (a, b) => {
+      expect(versionig.equals(a, b)).toBe(false);
+    });
+  });
+
+  describe('getMajor', () => {
+    it.each([
+      ['1', 1],
+      ['1.9', 1],
+      ['1.9.0', 1],
+    ])('%s -> %i', (version, expected) => {
+      expect(versionig.getMajor(version)).toEqual(expected);
+    });
+  });
+
+  describe('getMinor', () => {
+    it.each([
+      ['1', 0],
+      ['1.9', 9],
+      ['1.9.0', 9],
+    ])('%s -> %i', (version, expected) => {
+      expect(versionig.getMinor(version)).toEqual(expected);
+    });
+  });
+
+  describe('getPatch', () => {
+    it.each([
+      ['1', 0],
+      ['1.9', 0],
+      ['1.9.0', 0],
+      ['1.9.4', 4],
+    ])('%s -> %i', (version, expected) => {
+      expect(versionig.getPatch(version)).toEqual(expected);
+    });
+  });
+
+  describe('isGreaterThan', () => {
+    it.each([
+      ['2', '1'],
+      ['2.0', '1'],
+      ['2.0.0', '1'],
+      ['1.10.0', '1.9'],
+      ['1.9', '1.9-beta'],
+    ])('%s > %s', (a, b) => {
+      expect(versionig.isGreaterThan(a, b)).toBe(true);
+    });
+
+    it.each([
+      ['1', '1'],
+      ['1.0', '1'],
+      ['1.0.0', '1'],
+      ['1.9.0', '1.9'],
+    ])('%s <= %s', (a, b) => {
+      expect(versionig.isGreaterThan(a, b)).toBe(false);
+    });
+  });
+
+  describe('isStable', () => {
+    it.each([
+      ['1', true],
+      ['1.9', true],
+      ['1.9.0', true],
+      ['1.9.4', true],
+      ['1.9.4-beta', false],
+    ])('%s -> %i', (version, expected) => {
+      expect(versionig.isStable(version)).toEqual(expected);
+    });
+  });
+
   describe('isValid(input)', () => {
     it('should return null for irregular versions', () => {
       expect(versionig.isValid('17.04.0')).toBeFalsy();
@@ -481,13 +564,24 @@ describe(getName(__filename), () => {
     });
   });
 
-  describe('getMajor', () => {
+  describe('sortVersions()', () => {
     it.each([
-      ['1', 1],
-      ['1.9', 1],
-      ['1.9.0', 1],
-    ])('works', (version, expected) => {
-      expect(versionig.getMajor(version)).toEqual(expected);
+      ['2', '1'],
+      ['2.0', '1'],
+      ['2.0.0', '1'],
+      ['1.10.0', '1.9'],
+      ['1.9', '1.9-beta'],
+    ])('%s > %s', (a, b) => {
+      expect(versionig.sortVersions(a, b)).toBe(1);
+    });
+
+    it.each([
+      ['1', '1'],
+      ['1.0', '1'],
+      ['1.0.0', '1'],
+      ['1.9.0', '1.9'],
+    ])('%s == %s', (a, b) => {
+      expect(versionig.sortVersions(a, b)).toBe(0);
     });
   });
 });
