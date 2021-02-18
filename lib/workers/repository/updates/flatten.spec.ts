@@ -71,13 +71,40 @@ describe('workers/repository/updates/flatten', () => {
             ],
           },
         ],
+        gomod: [
+          {
+            packageFile: 'go.mod',
+            deps: [
+              {
+                depName: 'github.com/Parallels/docker-machine-parallels',
+                updates: [{ newValue: '1.3.0' }],
+              },
+              {
+                depName: 'gopkg.in/yaml.v2',
+                updates: [{ newValue: '2.2.8', updateType: 'minor' }],
+              },
+              {
+                depName: 'gopkg.in/warnings.v0',
+                updates: [{ newValue: '0.1.3' }],
+              },
+              {
+                depName: 'github.com/blang/semver',
+                updates: [],
+              },
+            ],
+          },
+        ],
       };
       const res = await flattenUpdates(config, packageFiles);
-      expect(res).toHaveLength(9);
+      expect(res).toHaveLength(12);
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
-      expect(res.filter((r) => r.depNameShort)).toHaveLength(6); // lockFileMaintenance has no depName
+      const deps = res.filter((r) => r.depNameShort);
+      expect(deps).toHaveLength(9); // lockFileMaintenance has no depName
+      expect(
+        deps.map(({ depName, depNameShort }) => ({ depName, depNameShort }))
+      ).toMatchSnapshot();
     });
   });
 });

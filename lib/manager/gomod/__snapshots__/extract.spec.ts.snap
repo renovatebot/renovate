@@ -20,7 +20,7 @@ Object {
     Object {
       "currentValue": "v1.3.0",
       "datasource": "go",
-      "depName": "Parallels/docker-machine-parallels",
+      "depName": "github.com/Parallels/docker-machine-parallels",
       "depType": "require",
       "lookupName": "github.com/Parallels/docker-machine-parallels",
       "managerData": Object {
@@ -31,7 +31,7 @@ Object {
     Object {
       "currentValue": "v3.5.0+incompatible",
       "datasource": "go",
-      "depName": "blang/semver",
+      "depName": "github.com/blang/semver",
       "depType": "require",
       "lookupName": "github.com/blang/semver",
       "managerData": Object {
@@ -42,7 +42,7 @@ Object {
     Object {
       "currentValue": "v2.2.1+incompatible",
       "datasource": "go",
-      "depName": "cenkalti/backoff",
+      "depName": "github.com/cenkalti/backoff",
       "depType": "require",
       "lookupName": "github.com/cenkalti/backoff",
       "managerData": Object {
@@ -53,7 +53,7 @@ Object {
     Object {
       "currentValue": "v3.0.1",
       "datasource": "go",
-      "depName": "cheggaaa/pb/v3",
+      "depName": "github.com/cheggaaa/pb/v3",
       "depType": "require",
       "lookupName": "github.com/cheggaaa/pb/v3",
       "managerData": Object {
@@ -65,7 +65,7 @@ Object {
       "currentDigest": "bcc4c8345a21",
       "currentValue": "v0.0.0-20151120183258-bcc4c8345a21",
       "datasource": "go",
-      "depName": "cloudfoundry-attic/jibber_jabber",
+      "depName": "github.com/cloudfoundry-attic/jibber_jabber",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/cloudfoundry-attic/jibber_jabber",
@@ -77,7 +77,7 @@ Object {
     Object {
       "currentValue": "v1.13.1",
       "datasource": "go",
-      "depName": "docker/docker",
+      "depName": "github.com/docker/docker",
       "depType": "require",
       "lookupName": "github.com/docker/docker",
       "managerData": Object {
@@ -88,7 +88,7 @@ Object {
     Object {
       "currentValue": "v0.4.0",
       "datasource": "go",
-      "depName": "docker/go-units",
+      "depName": "github.com/docker/go-units",
       "depType": "require",
       "lookupName": "github.com/docker/go-units",
       "managerData": Object {
@@ -99,7 +99,7 @@ Object {
     Object {
       "currentValue": "v0.7.1-0.20190902101342-b170508bf44c",
       "datasource": "go",
-      "depName": "docker/machine",
+      "depName": "github.com/docker/machine",
       "depType": "require",
       "lookupName": "github.com/docker/machine",
       "managerData": Object {
@@ -111,7 +111,7 @@ Object {
       "currentDigest": "9d40249d3c2f",
       "currentValue": "v0.0.0-20190421051319-9d40249d3c2f",
       "datasource": "go",
-      "depName": "elazarl/goproxy",
+      "depName": "github.com/elazarl/goproxy",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/elazarl/goproxy",
@@ -124,7 +124,7 @@ Object {
       "currentDigest": "604e922904d3",
       "currentValue": "v0.0.0-20130729185459-604e922904d3",
       "datasource": "go",
-      "depName": "golang-collections/collections",
+      "depName": "github.com/golang-collections/collections",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/golang-collections/collections",
@@ -137,7 +137,7 @@ Object {
       "currentDigest": "23def4e6c14b",
       "currentValue": "v0.0.0-20160126235308-23def4e6c14b",
       "datasource": "go",
-      "depName": "golang/glog",
+      "depName": "github.com/golang/glog",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/golang/glog",
@@ -149,7 +149,7 @@ Object {
     Object {
       "currentValue": "v0.3.2-0.20191028172631-481baca67f93",
       "datasource": "go",
-      "depName": "google/go-cmp",
+      "depName": "github.com/google/go-cmp",
       "depType": "require",
       "lookupName": "github.com/google/go-cmp",
       "managerData": Object {
@@ -161,7 +161,7 @@ Object {
       "currentDigest": "aec8da010de2",
       "currentValue": "v0.0.0-20200131185320-aec8da010de2",
       "datasource": "go",
-      "depName": "google/go-containerregistry",
+      "depName": "github.com/google/go-containerregistry",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/google/go-containerregistry",
@@ -173,7 +173,7 @@ Object {
     Object {
       "currentValue": "v17.0.0+incompatible",
       "datasource": "go",
-      "depName": "google/go-github",
+      "depName": "github.com/google/go-github",
       "depType": "require",
       "lookupName": "github.com/google/go-github",
       "managerData": Object {
@@ -184,7 +184,7 @@ Object {
     Object {
       "currentValue": "v1.4.0",
       "datasource": "go",
-      "depName": "hashicorp/go-getter",
+      "depName": "github.com/hashicorp/go-getter",
       "depType": "require",
       "lookupName": "github.com/hashicorp/go-getter",
       "managerData": Object {
@@ -195,7 +195,7 @@ Object {
     Object {
       "currentValue": "v0.5.4",
       "datasource": "go",
-      "depName": "hashicorp/go-retryablehttp",
+      "depName": "github.com/hashicorp/go-retryablehttp",
       "depType": "require",
       "lookupName": "github.com/hashicorp/go-retryablehttp",
       "managerData": Object {
@@ -207,7 +207,7 @@ Object {
       "currentDigest": "1cf07e5970d8",
       "currentValue": "v0.0.0-20170318115843-1cf07e5970d8",
       "datasource": "go",
-      "depName": "hooklift/iso9660",
+      "depName": "github.com/hooklift/iso9660",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/hooklift/iso9660",
@@ -220,7 +220,7 @@ Object {
       "currentDigest": "c48c3734757f",
       "currentValue": "v0.0.0-20200318065542-c48c3734757f",
       "datasource": "go",
-      "depName": "johanneswuerbach/nfsexports",
+      "depName": "github.com/johanneswuerbach/nfsexports",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/johanneswuerbach/nfsexports",
@@ -233,7 +233,7 @@ Object {
       "currentDigest": "9c5c9712527c",
       "currentValue": "v0.0.0-20190205081909-9c5c9712527c",
       "datasource": "go",
-      "depName": "juju/clock",
+      "depName": "github.com/juju/clock",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/juju/clock",
@@ -246,7 +246,7 @@ Object {
       "currentDigest": "d21b13acf4bf",
       "currentValue": "v0.0.0-20180619145857-d21b13acf4bf",
       "datasource": "go",
-      "depName": "juju/mutex",
+      "depName": "github.com/juju/mutex",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/juju/mutex",
@@ -259,7 +259,7 @@ Object {
       "currentDigest": "95032a82bc51",
       "currentValue": "v0.0.0-20180428030007-95032a82bc51",
       "datasource": "go",
-      "depName": "kballard/go-shellquote",
+      "depName": "github.com/kballard/go-shellquote",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/kballard/go-shellquote",
@@ -271,7 +271,7 @@ Object {
     Object {
       "currentValue": "v3.4.0+incompatible",
       "datasource": "go",
-      "depName": "libvirt/libvirt-go",
+      "depName": "github.com/libvirt/libvirt-go",
       "depType": "require",
       "lookupName": "github.com/libvirt/libvirt-go",
       "managerData": Object {
@@ -282,7 +282,7 @@ Object {
     Object {
       "currentValue": "v0.1.1",
       "datasource": "go",
-      "depName": "machine-drivers/docker-machine-driver-vmware",
+      "depName": "github.com/machine-drivers/docker-machine-driver-vmware",
       "depType": "require",
       "lookupName": "github.com/machine-drivers/docker-machine-driver-vmware",
       "managerData": Object {
@@ -293,7 +293,7 @@ Object {
     Object {
       "currentValue": "v0.0.11",
       "datasource": "go",
-      "depName": "mattn/go-isatty",
+      "depName": "github.com/mattn/go-isatty",
       "depType": "require",
       "lookupName": "github.com/mattn/go-isatty",
       "managerData": Object {
@@ -305,7 +305,7 @@ Object {
       "currentDigest": "4fdf99ab2936",
       "currentValue": "v0.0.0-20170309133038-4fdf99ab2936",
       "datasource": "go",
-      "depName": "mitchellh/go-ps",
+      "depName": "github.com/mitchellh/go-ps",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/mitchellh/go-ps",
@@ -318,7 +318,7 @@ Object {
       "currentDigest": "a12cd7250bcd",
       "currentValue": "v0.0.0-20171020124204-a12cd7250bcd",
       "datasource": "go",
-      "depName": "moby/hyperkit",
+      "depName": "github.com/moby/hyperkit",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/moby/hyperkit",
@@ -330,7 +330,7 @@ Object {
     Object {
       "currentValue": "v0.0.4",
       "datasource": "go",
-      "depName": "olekukonko/tablewriter",
+      "depName": "github.com/olekukonko/tablewriter",
       "depType": "require",
       "lookupName": "github.com/olekukonko/tablewriter",
       "managerData": Object {
@@ -341,7 +341,7 @@ Object {
     Object {
       "currentValue": "v1.0.0-rc1",
       "datasource": "go",
-      "depName": "opencontainers/go-digest",
+      "depName": "github.com/opencontainers/go-digest",
       "depType": "require",
       "lookupName": "github.com/opencontainers/go-digest",
       "managerData": Object {
@@ -352,7 +352,7 @@ Object {
     Object {
       "currentValue": "v1.0.2",
       "datasource": "go",
-      "depName": "otiai10/copy",
+      "depName": "github.com/otiai10/copy",
       "depType": "require",
       "lookupName": "github.com/otiai10/copy",
       "managerData": Object {
@@ -363,7 +363,7 @@ Object {
     Object {
       "currentValue": "v1.2.0",
       "datasource": "go",
-      "depName": "pborman/uuid",
+      "depName": "github.com/pborman/uuid",
       "depType": "require",
       "lookupName": "github.com/pborman/uuid",
       "managerData": Object {
@@ -375,7 +375,7 @@ Object {
       "currentDigest": "95f893ade6f2",
       "currentValue": "v0.0.0-20180830031419-95f893ade6f2",
       "datasource": "go",
-      "depName": "phayes/freeport",
+      "depName": "github.com/phayes/freeport",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/phayes/freeport",
@@ -388,7 +388,7 @@ Object {
       "currentDigest": "9302be274faa",
       "currentValue": "v0.0.0-20160118053552-9302be274faa",
       "datasource": "go",
-      "depName": "pkg/browser",
+      "depName": "github.com/pkg/browser",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/pkg/browser",
@@ -400,7 +400,7 @@ Object {
     Object {
       "currentValue": "v0.9.1",
       "datasource": "go",
-      "depName": "pkg/errors",
+      "depName": "github.com/pkg/errors",
       "depType": "require",
       "lookupName": "github.com/pkg/errors",
       "managerData": Object {
@@ -412,7 +412,7 @@ Object {
       "currentDigest": "3a8809bd8a80",
       "currentValue": "v0.0.0-20161223203901-3a8809bd8a80",
       "datasource": "go",
-      "depName": "pkg/profile",
+      "depName": "github.com/pkg/profile",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/pkg/profile",
@@ -424,7 +424,7 @@ Object {
     Object {
       "currentValue": "v1.0.0",
       "datasource": "go",
-      "depName": "pmezard/go-difflib",
+      "depName": "github.com/pmezard/go-difflib",
       "depType": "require",
       "lookupName": "github.com/pmezard/go-difflib",
       "managerData": Object {
@@ -435,7 +435,7 @@ Object {
     Object {
       "currentValue": "v2.18.12+incompatible",
       "datasource": "go",
-      "depName": "shirou/gopsutil",
+      "depName": "github.com/shirou/gopsutil",
       "depType": "require",
       "lookupName": "github.com/shirou/gopsutil",
       "managerData": Object {
@@ -446,7 +446,7 @@ Object {
     Object {
       "currentValue": "v1.0.0",
       "datasource": "go",
-      "depName": "spf13/cobra",
+      "depName": "github.com/spf13/cobra",
       "depType": "require",
       "lookupName": "github.com/spf13/cobra",
       "managerData": Object {
@@ -457,7 +457,7 @@ Object {
     Object {
       "currentValue": "v1.0.5",
       "datasource": "go",
-      "depName": "spf13/pflag",
+      "depName": "github.com/spf13/pflag",
       "depType": "require",
       "lookupName": "github.com/spf13/pflag",
       "managerData": Object {
@@ -468,7 +468,7 @@ Object {
     Object {
       "currentValue": "v1.6.1",
       "datasource": "go",
-      "depName": "spf13/viper",
+      "depName": "github.com/spf13/viper",
       "depType": "require",
       "lookupName": "github.com/spf13/viper",
       "managerData": Object {
@@ -480,7 +480,7 @@ Object {
       "currentDigest": "1d523034197f",
       "currentValue": "v0.0.0-20180618132009-1d523034197f",
       "datasource": "go",
-      "depName": "xeipuuv/gojsonschema",
+      "depName": "github.com/xeipuuv/gojsonschema",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/xeipuuv/gojsonschema",
@@ -493,7 +493,7 @@ Object {
       "currentDigest": "97ebf9174097",
       "currentValue": "v0.0.0-20161021174912-97ebf9174097",
       "datasource": "go",
-      "depName": "zchee/go-vmnet",
+      "depName": "github.com/zchee/go-vmnet",
       "depType": "require",
       "digestOneAndOnly": true,
       "lookupName": "github.com/zchee/go-vmnet",
@@ -579,7 +579,7 @@ Object {
     Object {
       "currentValue": "v2.2.8",
       "datasource": "go",
-      "depName": "yaml",
+      "depName": "gopkg.in/yaml.v2",
       "depType": "require",
       "lookupName": "gopkg.in/yaml.v2",
       "managerData": Object {
@@ -662,7 +662,7 @@ Array [
   Object {
     "currentValue": "v1.15.21",
     "datasource": "go",
-    "depName": "aws/aws-sdk-go",
+    "depName": "github.com/aws/aws-sdk-go",
     "depType": "require",
     "lookupName": "github.com/aws/aws-sdk-go",
     "managerData": Object {
@@ -674,7 +674,7 @@ Array [
     "currentDigest": "9fd32a8b3d3d",
     "currentValue": "v0.0.0-20140422174119-9fd32a8b3d3d",
     "datasource": "go",
-    "depName": "bgentry/go-netrc",
+    "depName": "github.com/bgentry/go-netrc",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/bgentry/go-netrc",
@@ -687,7 +687,7 @@ Array [
     "currentDigest": "bcc4c8345a21",
     "currentValue": "v0.0.0-20151120183258-bcc4c8345a21",
     "datasource": "go",
-    "depName": "cloudfoundry/jibber_jabber",
+    "depName": "github.com/cloudfoundry/jibber_jabber",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/cloudfoundry/jibber_jabber",
@@ -699,7 +699,7 @@ Array [
   Object {
     "currentValue": "v1.1.0",
     "datasource": "go",
-    "depName": "davecgh/go-spew",
+    "depName": "github.com/davecgh/go-spew",
     "depType": "require",
     "lookupName": "github.com/davecgh/go-spew",
     "managerData": Object {
@@ -710,7 +710,7 @@ Array [
   Object {
     "currentValue": "v1.9.0",
     "datasource": "go",
-    "depName": "emirpasic/gods",
+    "depName": "github.com/emirpasic/gods",
     "depType": "require",
     "lookupName": "github.com/emirpasic/gods",
     "managerData": Object {
@@ -721,7 +721,7 @@ Array [
   Object {
     "currentValue": "v1.7.0",
     "datasource": "go",
-    "depName": "fatih/color",
+    "depName": "github.com/fatih/color",
     "depType": "require",
     "lookupName": "github.com/fatih/color",
     "managerData": Object {
@@ -732,7 +732,7 @@ Array [
   Object {
     "currentValue": "v1.4.7",
     "datasource": "go",
-    "depName": "fsnotify/fsnotify",
+    "depName": "github.com/fsnotify/fsnotify",
     "depType": "require",
     "lookupName": "github.com/fsnotify/fsnotify",
     "managerData": Object {
@@ -743,7 +743,7 @@ Array [
   Object {
     "currentValue": "v1.38.2",
     "datasource": "go",
-    "depName": "go-ini/ini",
+    "depName": "github.com/go-ini/ini",
     "depType": "require",
     "lookupName": "github.com/go-ini/ini",
     "managerData": Object {
@@ -755,7 +755,7 @@ Array [
     "currentDigest": "604e922904d3",
     "currentValue": "v0.0.0-20130729185459-604e922904d3",
     "datasource": "go",
-    "depName": "golang-collections/collections",
+    "depName": "github.com/golang-collections/collections",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/golang-collections/collections",
@@ -768,7 +768,7 @@ Array [
     "currentDigest": "d5fe4b57a186",
     "currentValue": "v0.0.0-20171218145408-d5fe4b57a186",
     "datasource": "go",
-    "depName": "hashicorp/go-cleanhttp",
+    "depName": "github.com/hashicorp/go-cleanhttp",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/hashicorp/go-cleanhttp",
@@ -781,7 +781,7 @@ Array [
     "currentDigest": "4bda8fa99001",
     "currentValue": "v0.0.0-20180809191950-4bda8fa99001",
     "datasource": "go",
-    "depName": "hashicorp/go-getter",
+    "depName": "github.com/hashicorp/go-getter",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/hashicorp/go-getter",
@@ -794,7 +794,7 @@ Array [
     "currentDigest": "b1a1dbde6fdc",
     "currentValue": "v0.0.0-20180326211150-b1a1dbde6fdc",
     "datasource": "go",
-    "depName": "hashicorp/go-safetemp",
+    "depName": "github.com/hashicorp/go-safetemp",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/hashicorp/go-safetemp",
@@ -806,7 +806,7 @@ Array [
   Object {
     "currentValue": "v1.0.0",
     "datasource": "go",
-    "depName": "hashicorp/go-version",
+    "depName": "github.com/hashicorp/go-version",
     "depType": "require",
     "lookupName": "github.com/hashicorp/go-version",
     "managerData": Object {
@@ -818,7 +818,7 @@ Array [
     "currentDigest": "ef8a98b0bbce",
     "currentValue": "v0.0.0-20180404174102-ef8a98b0bbce",
     "datasource": "go",
-    "depName": "hashicorp/hcl",
+    "depName": "github.com/hashicorp/hcl",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/hashicorp/hcl",
@@ -831,7 +831,7 @@ Array [
     "currentDigest": "fc0cef2ff331",
     "currentValue": "v0.0.0-20180515183152-fc0cef2ff331",
     "datasource": "go",
-    "depName": "heroku/rollrus",
+    "depName": "github.com/heroku/rollrus",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/heroku/rollrus",
@@ -844,7 +844,7 @@ Array [
     "currentDigest": "d14ea06fba99",
     "currentValue": "v0.0.0-20150711004518-d14ea06fba99",
     "datasource": "go",
-    "depName": "jbenet/go-context",
+    "depName": "github.com/jbenet/go-context",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/jbenet/go-context",
@@ -857,7 +857,7 @@ Array [
     "currentDigest": "906e15686e63",
     "currentValue": "v0.0.0-20180822080847-906e15686e63",
     "datasource": "go",
-    "depName": "jesseduffield/go-getter",
+    "depName": "github.com/jesseduffield/go-getter",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/jesseduffield/go-getter",
@@ -870,7 +870,7 @@ Array [
     "currentDigest": "03e26ff3f1de",
     "currentValue": "v0.0.0-20180921065632-03e26ff3f1de",
     "datasource": "go",
-    "depName": "jesseduffield/gocui",
+    "depName": "github.com/jesseduffield/gocui",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/jesseduffield/gocui",
@@ -883,7 +883,7 @@ Array [
     "currentDigest": "1e272ff78dcb",
     "currentValue": "v0.0.0-20180919093808-1e272ff78dcb",
     "datasource": "go",
-    "depName": "jesseduffield/termbox-go",
+    "depName": "github.com/jesseduffield/termbox-go",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/jesseduffield/termbox-go",
@@ -896,7 +896,7 @@ Array [
     "currentDigest": "0b12d6b521d8",
     "currentValue": "v0.0.0-20160202185014-0b12d6b521d8",
     "datasource": "go",
-    "depName": "jmespath/go-jmespath",
+    "depName": "github.com/jmespath/go-jmespath",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/jmespath/go-jmespath",
@@ -909,7 +909,7 @@ Array [
     "currentDigest": "ae77be60afb1",
     "currentValue": "v0.0.0-20170510131534-ae77be60afb1",
     "datasource": "go",
-    "depName": "kardianos/osext",
+    "depName": "github.com/kardianos/osext",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/kardianos/osext",
@@ -922,7 +922,7 @@ Array [
     "currentDigest": "9fc7bb800b55",
     "currentValue": "v0.0.0-20180317175531-9fc7bb800b55",
     "datasource": "go",
-    "depName": "kevinburke/ssh_config",
+    "depName": "github.com/kevinburke/ssh_config",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/kevinburke/ssh_config",
@@ -934,7 +934,7 @@ Array [
   Object {
     "currentValue": "v1.8.0",
     "datasource": "go",
-    "depName": "magiconair/properties",
+    "depName": "github.com/magiconair/properties",
     "depType": "require",
     "lookupName": "github.com/magiconair/properties",
     "managerData": Object {
@@ -945,7 +945,7 @@ Array [
   Object {
     "currentValue": "v0.0.9",
     "datasource": "go",
-    "depName": "mattn/go-colorable",
+    "depName": "github.com/mattn/go-colorable",
     "depType": "require",
     "lookupName": "github.com/mattn/go-colorable",
     "managerData": Object {
@@ -956,7 +956,7 @@ Array [
   Object {
     "currentValue": "v0.0.3",
     "datasource": "go",
-    "depName": "mattn/go-isatty",
+    "depName": "github.com/mattn/go-isatty",
     "depType": "require",
     "lookupName": "github.com/mattn/go-isatty",
     "managerData": Object {
@@ -967,7 +967,7 @@ Array [
   Object {
     "currentValue": "v0.0.2",
     "datasource": "go",
-    "depName": "mattn/go-runewidth",
+    "depName": "github.com/mattn/go-runewidth",
     "depType": "require",
     "lookupName": "github.com/mattn/go-runewidth",
     "managerData": Object {
@@ -978,7 +978,7 @@ Array [
   Object {
     "currentValue": "v1.2.0",
     "datasource": "go",
-    "depName": "mgutz/str",
+    "depName": "github.com/mgutz/str",
     "depType": "require",
     "lookupName": "github.com/mgutz/str",
     "managerData": Object {
@@ -990,7 +990,7 @@ Array [
     "currentDigest": "58046073cbff",
     "currentValue": "v0.0.0-20180801233206-58046073cbff",
     "datasource": "go",
-    "depName": "mitchellh/go-homedir",
+    "depName": "github.com/mitchellh/go-homedir",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/mitchellh/go-homedir",
@@ -1003,7 +1003,7 @@ Array [
     "currentDigest": "a61a99592b77",
     "currentValue": "v0.0.0-20171004221916-a61a99592b77",
     "datasource": "go",
-    "depName": "mitchellh/go-testing-interface",
+    "depName": "github.com/mitchellh/go-testing-interface",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/mitchellh/go-testing-interface",
@@ -1016,7 +1016,7 @@ Array [
     "currentDigest": "f15292f7a699",
     "currentValue": "v0.0.0-20180715050151-f15292f7a699",
     "datasource": "go",
-    "depName": "mitchellh/mapstructure",
+    "depName": "github.com/mitchellh/mapstructure",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/mitchellh/mapstructure",
@@ -1029,7 +1029,7 @@ Array [
     "currentDigest": "a16b91a3ba80",
     "currentValue": "v0.0.0-20180803040939-a16b91a3ba80",
     "datasource": "go",
-    "depName": "nicksnyder/go-i18n",
+    "depName": "github.com/nicksnyder/go-i18n",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/nicksnyder/go-i18n",
@@ -1041,7 +1041,7 @@ Array [
   Object {
     "currentValue": "v0.2.0",
     "datasource": "go",
-    "depName": "pelletier/go-buffruneio",
+    "depName": "github.com/pelletier/go-buffruneio",
     "depType": "require",
     "lookupName": "github.com/pelletier/go-buffruneio",
     "managerData": Object {
@@ -1052,7 +1052,7 @@ Array [
   Object {
     "currentValue": "v1.2.0",
     "datasource": "go",
-    "depName": "pelletier/go-toml",
+    "depName": "github.com/pelletier/go-toml",
     "depType": "require",
     "lookupName": "github.com/pelletier/go-toml",
     "managerData": Object {
@@ -1063,7 +1063,7 @@ Array [
   Object {
     "currentValue": "v0.8.0",
     "datasource": "go",
-    "depName": "pkg/errors",
+    "depName": "github.com/pkg/errors",
     "depType": "require",
     "lookupName": "github.com/pkg/errors",
     "managerData": Object {
@@ -1074,7 +1074,7 @@ Array [
   Object {
     "currentValue": "v1.0.0",
     "datasource": "go",
-    "depName": "pmezard/go-difflib",
+    "depName": "github.com/pmezard/go-difflib",
     "depType": "require",
     "lookupName": "github.com/pmezard/go-difflib",
     "managerData": Object {
@@ -1085,7 +1085,7 @@ Array [
   Object {
     "currentValue": "v1.0.0",
     "datasource": "go",
-    "depName": "sergi/go-diff",
+    "depName": "github.com/sergi/go-diff",
     "depType": "require",
     "lookupName": "github.com/sergi/go-diff",
     "managerData": Object {
@@ -1097,7 +1097,7 @@ Array [
     "currentDigest": "e180dbdc8da0",
     "currentValue": "v0.0.0-20170330084843-e180dbdc8da0",
     "datasource": "go",
-    "depName": "shibukawa/configdir",
+    "depName": "github.com/shibukawa/configdir",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/shibukawa/configdir",
@@ -1109,7 +1109,7 @@ Array [
   Object {
     "currentValue": "v1.0.6",
     "datasource": "go",
-    "depName": "sirupsen/logrus",
+    "depName": "github.com/sirupsen/logrus",
     "depType": "require",
     "lookupName": "github.com/sirupsen/logrus",
     "managerData": Object {
@@ -1120,7 +1120,7 @@ Array [
   Object {
     "currentValue": "v1.1.1",
     "datasource": "go",
-    "depName": "spf13/afero",
+    "depName": "github.com/spf13/afero",
     "depType": "require",
     "lookupName": "github.com/spf13/afero",
     "managerData": Object {
@@ -1131,7 +1131,7 @@ Array [
   Object {
     "currentValue": "v1.2.0",
     "datasource": "go",
-    "depName": "spf13/cast",
+    "depName": "github.com/spf13/cast",
     "depType": "require",
     "lookupName": "github.com/spf13/cast",
     "managerData": Object {
@@ -1143,7 +1143,7 @@ Array [
     "currentDigest": "14d3d4c51834",
     "currentValue": "v0.0.0-20180814060501-14d3d4c51834",
     "datasource": "go",
-    "depName": "spf13/jwalterweatherman",
+    "depName": "github.com/spf13/jwalterweatherman",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/spf13/jwalterweatherman",
@@ -1155,7 +1155,7 @@ Array [
   Object {
     "currentValue": "v1.0.2",
     "datasource": "go",
-    "depName": "spf13/pflag",
+    "depName": "github.com/spf13/pflag",
     "depType": "require",
     "lookupName": "github.com/spf13/pflag",
     "managerData": Object {
@@ -1166,7 +1166,7 @@ Array [
   Object {
     "currentValue": "v1.1.0",
     "datasource": "go",
-    "depName": "spf13/viper",
+    "depName": "github.com/spf13/viper",
     "depType": "require",
     "lookupName": "github.com/spf13/viper",
     "managerData": Object {
@@ -1178,7 +1178,7 @@ Array [
     "currentDigest": "59b7046e48ad",
     "currentValue": "v0.0.0-20160624110644-59b7046e48ad",
     "datasource": "go",
-    "depName": "spkg/bom",
+    "depName": "github.com/spkg/bom",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/spkg/bom",
@@ -1190,7 +1190,7 @@ Array [
   Object {
     "currentValue": "v2.3.0",
     "datasource": "go",
-    "depName": "src-d/gcfg/v2",
+    "depName": "github.com/src-d/gcfg/v2",
     "depType": "require",
     "lookupName": "github.com/src-d/gcfg/v2",
     "managerData": Object {
@@ -1201,7 +1201,7 @@ Array [
   Object {
     "currentValue": "v1.2.2",
     "datasource": "go",
-    "depName": "stretchr/testify",
+    "depName": "github.com/stretchr/testify",
     "depType": "require",
     "lookupName": "github.com/stretchr/testify",
     "managerData": Object {
@@ -1213,7 +1213,7 @@ Array [
     "currentDigest": "3627a5cbeaea",
     "currentValue": "v0.0.0-20170522205222-3627a5cbeaea",
     "datasource": "go",
-    "depName": "stvp/roll",
+    "depName": "github.com/stvp/roll",
     "depType": "require",
     "digestOneAndOnly": true,
     "lookupName": "github.com/stvp/roll",
@@ -1225,7 +1225,7 @@ Array [
   Object {
     "currentValue": "v0.1.2",
     "datasource": "go",
-    "depName": "tcnksm/go-gitconfig",
+    "depName": "github.com/tcnksm/go-gitconfig",
     "depType": "require",
     "lookupName": "github.com/tcnksm/go-gitconfig",
     "managerData": Object {
@@ -1236,7 +1236,7 @@ Array [
   Object {
     "currentValue": "v0.5.4",
     "datasource": "go",
-    "depName": "ulikunitz/xz",
+    "depName": "github.com/ulikunitz/xz",
     "depType": "require",
     "lookupName": "github.com/ulikunitz/xz",
     "managerData": Object {
@@ -1247,7 +1247,7 @@ Array [
   Object {
     "currentValue": "v0.2.0",
     "datasource": "go",
-    "depName": "xanzy/ssh-agent",
+    "depName": "github.com/xanzy/ssh-agent",
     "depType": "require",
     "lookupName": "github.com/xanzy/ssh-agent",
     "managerData": Object {
@@ -1308,7 +1308,7 @@ Array [
   Object {
     "currentValue": "v4.2.0",
     "datasource": "go",
-    "depName": "src-d/go-billy",
+    "depName": "gopkg.in/src-d/go-billy.v4",
     "depType": "require",
     "lookupName": "gopkg.in/src-d/go-billy.v4",
     "managerData": Object {
@@ -1319,7 +1319,7 @@ Array [
   Object {
     "currentValue": "v4.0.0-20180807092216-43d17e14b714",
     "datasource": "go",
-    "depName": "src-d/go-git",
+    "depName": "gopkg.in/src-d/go-git.v4",
     "depType": "require",
     "lookupName": "gopkg.in/src-d/go-git.v4",
     "managerData": Object {
@@ -1330,7 +1330,7 @@ Array [
   Object {
     "currentValue": "v0.1.2",
     "datasource": "go",
-    "depName": "warnings",
+    "depName": "gopkg.in/warnings.v0",
     "depType": "require",
     "lookupName": "gopkg.in/warnings.v0",
     "managerData": Object {
@@ -1341,7 +1341,7 @@ Array [
   Object {
     "currentValue": "v2.2.1",
     "datasource": "go",
-    "depName": "yaml",
+    "depName": "gopkg.in/yaml.v2",
     "depType": "require",
     "lookupName": "gopkg.in/yaml.v2",
     "managerData": Object {
@@ -1357,7 +1357,7 @@ Array [
   Object {
     "currentValue": "v0.7.0",
     "datasource": "go",
-    "depName": "pkg/errors",
+    "depName": "github.com/pkg/errors",
     "depType": "require",
     "lookupName": "github.com/pkg/errors",
     "managerData": Object {
@@ -1367,7 +1367,7 @@ Array [
   Object {
     "currentValue": "v1.15.21",
     "datasource": "go",
-    "depName": "aws/aws-sdk-go",
+    "depName": "github.com/aws/aws-sdk-go",
     "depType": "require",
     "lookupName": "github.com/aws/aws-sdk-go",
     "managerData": Object {
@@ -1397,7 +1397,7 @@ Array [
   Object {
     "currentValue": "v1.0.0",
     "datasource": "go",
-    "depName": "russross/blackfriday",
+    "depName": "gopkg.in/russross/blackfriday.v1",
     "depType": "require",
     "lookupName": "gopkg.in/russross/blackfriday.v1",
     "managerData": Object {
@@ -1407,7 +1407,7 @@ Array [
   Object {
     "currentValue": "v25.1.0+incompatible",
     "datasource": "go",
-    "depName": "Azure/azure-sdk-for-go",
+    "depName": "github.com/Azure/azure-sdk-for-go",
     "depType": "require",
     "lookupName": "github.com/Azure/azure-sdk-for-go",
     "managerData": Object {
@@ -1417,7 +1417,7 @@ Array [
   Object {
     "currentValue": "v0.0.0",
     "datasource": "go",
-    "depName": "pravesht/gocql",
+    "depName": "github.com/pravesht/gocql",
     "depType": "replace",
     "lookupName": "github.com/pravesht/gocql",
     "managerData": Object {
@@ -1427,7 +1427,7 @@ Array [
   Object {
     "currentValue": "v3.5.0+incompatible",
     "datasource": "go",
-    "depName": "caarlos0/env",
+    "depName": "github.com/caarlos0/env",
     "depType": "require",
     "lookupName": "github.com/caarlos0/env",
     "managerData": Object {
