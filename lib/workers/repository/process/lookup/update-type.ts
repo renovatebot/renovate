@@ -1,4 +1,4 @@
-import { UpdateType } from '../../../../config/common';
+import { UpdateType } from '../../../../config';
 import * as allVersioning from '../../../../versioning';
 
 export interface UpdateTypeConfig {
