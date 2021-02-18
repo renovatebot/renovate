@@ -31,7 +31,9 @@ It's therefore better to provide Renovate with all the credentials it needs to l
 
 The recommended approaches in order of preference are:
 
-**If you are running your own Renovate bot**: copy an `.npmrc` file to the home dir of the bot and it will work for all repositories
+**Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `hostName` and `token` specified
+
+**Self-hosted .npmrc**: copy an `.npmrc` file to the home dir of the bot.
 
 **NOTE:** This is considered deprecated and doesn't work out of the box with `binarySource=docker`.
 
@@ -43,11 +45,29 @@ All the various approaches are described below:
 
 ### Commit .npmrc file into repository
 
+Define `hostRules` like this:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      hostType: 'npm',
+      hostName: 'registry.npmjs.org',
+      token: 'abc123',
+    },
+  ],
+};
+```
+
+### Commit .npmrc file into repository
+
 One approach that many projects use for private repositories is to simply check in an authenticated `.npmrc` into the repository that is then shared between all developers.
 Therefore anyone running `npm install` or `yarn install` from the project root will be automatically authenticated with npm without having to distribute npm logins to every developer and make sure they've run `npm login` first before installing.
 
 The good news is that this works for Renovate too.
 If Renovate detects a `.npmrc` or `.yarnrc` file then it will use it for its install.
+
+Does not work if using binarySource=docker.
 
 ### Add npmrc string to Renovate config
 
