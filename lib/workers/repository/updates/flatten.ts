@@ -13,26 +13,6 @@ import { generateBranchName } from './branch-name';
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substr(1);
 
-/**
- * Build depNameShort
- * #8075, #8691
- */
-function shortenDepName(depName: string): string | undefined {
-  if (!depName) {
-    return undefined;
-  }
-
-  if (depName.startsWith('gopkg.in/')) {
-    const [pkg] = depName.replace('gopkg.in/', '').split('.');
-    return pkg;
-  }
-  if (depName.startsWith('github.com/')) {
-    return depName.replace('github.com/', '');
-  }
-
-  return depName;
-}
-
 export async function flattenUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
@@ -97,7 +77,7 @@ export async function flattenUpdates(
             updateConfig = applyPackageRules(updateConfig);
             delete updateConfig.packageRules;
             // TODO: Remove next line once #8075 is complete
-            updateConfig.depNameShort ||= shortenDepName(updateConfig.depName);
+            updateConfig.depNameShort ||= updateConfig.depName;
             updateConfig.depNameSanitized = updateConfig.depName
               ? updateConfig.depName
                   .replace('@types/', '')

@@ -100,11 +100,7 @@ describe('workers/repository/updates/flatten', () => {
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
-      const deps = res.filter((r) => r.depNameShort);
-      expect(deps).toHaveLength(9); // lockFileMaintenance has no depName
-      expect(
-        deps.map(({ depName, depNameShort }) => ({ depName, depNameShort }))
-      ).toMatchSnapshot();
+      expect(res.filter((r) => r.depNameShort)).toHaveLength(9); // lockFileMaintenance has no depName
     });
   });
 });
