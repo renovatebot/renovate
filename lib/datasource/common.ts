@@ -51,16 +51,16 @@ export interface Release {
 }
 
 export interface ReleaseResult {
-  sourceDirectory?: string;
-  latestVersion?: string;
+  deprecationMessage?: string;
+  isPrivate?: boolean;
+  releases: Release[];
+  tags?: Record<string, string>;
+  // URL metadata
   changelogUrl?: string;
   dependencyUrl?: string;
-  deprecationMessage?: string;
   homepage?: string;
-  releases: Release[];
   sourceUrl?: string;
-  tags?: Record<string, string>;
-  isPrivate?: boolean;
+  sourceDirectory?: string;
 }
 
 export interface DatasourceApi {

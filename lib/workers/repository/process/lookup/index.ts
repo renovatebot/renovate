@@ -1,8 +1,4 @@
-import {
-  RenovateConfig,
-  UpdateType,
-  ValidationMessage,
-} from '../../../../config';
+import { UpdateType, ValidationMessage } from '../../../../config';
 import {
   Release,
   getDefaultVersioning,
@@ -14,47 +10,16 @@ import {
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
-import { LookupUpdate, RangeConfig } from '../../../../manager/common';
+import { LookupUpdate } from '../../../../manager/common';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
-import { FilterConfig, filterVersions } from './filter';
-import { RollbackConfig, getRollbackUpdate } from './rollback';
+import { LookupUpdateConfig, UpdateResult } from './common';
+import { filterVersions } from './filter';
+import { getRollbackUpdate } from './rollback';
 
-export interface UpdateResult {
-  sourceDirectory?: string;
-  changelogUrl?: string;
-  dependencyUrl?: string;
-  homepage?: string;
-  deprecationMessage?: string;
-  sourceUrl?: string;
-  skipReason: SkipReason;
-  releases: Release[];
-  fixedVersion?: string;
-  updates: LookupUpdate[];
-  warnings: ValidationMessage[];
-}
-
-export interface LookupUpdateConfig
-  extends RollbackConfig,
-    FilterConfig,
-    RangeConfig,
-    RenovateConfig {
-  separateMinorPatch?: boolean;
-  digestOneAndOnly?: boolean;
-  pinDigests?: boolean;
-  rollbackPrs?: boolean;
-  currentDigest?: string;
-  lockedVersion?: string;
-  vulnerabilityAlert?: boolean;
-  separateMajorMinor?: boolean;
-  separateMultipleMajor?: boolean;
-  datasource: string;
-  depName: string;
-}
-
-function getType(
+function getUpdateType(
   config: LookupUpdateConfig,
   currentVersion: string,
   newVersion: string
@@ -76,7 +41,7 @@ function getType(
   return 'minor';
 }
 
-function getFromVersion(
+function getCurrentVersion(
   config: LookupUpdateConfig,
   rangeStrategy: string,
   latestVersion: string,
@@ -167,7 +132,7 @@ export async function lookupUpdates(
   }
   // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
-    res.skipReason = SkipReason.Unknown;
+    res.skipReason = SkipReason.InvalidConfig;
     return res;
   }
 
@@ -198,7 +163,8 @@ export async function lookupUpdates(
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
     res.dependencyUrl = dependency?.dependencyUrl;
-    const { latestVersion, releases } = dependency;
+    const { releases } = dependency;
+    const latestVersion = dependency.tags?.latest;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases.filter((release) =>
       versioning.isVersion(release.version)
@@ -258,13 +224,13 @@ export async function lookupUpdates(
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
     const currentVersion =
-      getFromVersion(
+      getCurrentVersion(
         config,
         rangeStrategy,
         latestVersion,
         nonDeprecatedVersions
       ) ||
-      getFromVersion(
+      getCurrentVersion(
         config,
         rangeStrategy,
         latestVersion,
@@ -296,7 +262,7 @@ export async function lookupUpdates(
     let filteredVersions = filterVersions(
       config,
       filterStart,
-      dependency.latestVersion,
+      latestVersion,
       allVersions
     ).filter((v) =>
       // Leave only compatible versions
@@ -365,7 +331,7 @@ export async function lookupUpdates(
       update.newMajor = versioning.getMajor(newVersion);
       update.newMinor = versioning.getMinor(newVersion);
       update.updateType =
-        update.updateType || getType(config, currentVersion, newVersion);
+        update.updateType || getUpdateType(config, currentVersion, newVersion);
       update.isSingleVersion =
         update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
       if (!versioning.isVersion(update.newValue)) {
@@ -400,11 +366,11 @@ export async function lookupUpdates(
       res.updates.push(update);
     }
   } else if (!currentValue) {
-    res.skipReason = SkipReason.UnsupportedValue;
+    res.skipReason = SkipReason.InvalidValue;
   } else {
     logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
     if (!config.pinDigests && !config.currentDigest) {
-      res.skipReason = SkipReason.UnsupportedValue;
+      res.skipReason = SkipReason.InvalidValue;
     } else {
       delete res.skipReason;
     }

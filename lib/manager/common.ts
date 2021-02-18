@@ -188,7 +188,6 @@ export interface Upgrade<T = Record<string, any>>
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
-  dockerRepository?: string;
   localDir?: string;
   name?: string;
   newDigest?: string;
