@@ -76,6 +76,7 @@ export async function lookupUpdates(
     res.changelogUrl = dependency.changelogUrl;
     res.dependencyUrl = dependency?.dependencyUrl;
     const { releases } = dependency;
+    const latestVersion = dependency.tags?.latest;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases.filter((release) =>
       versioning.isVersion(release.version)
@@ -134,7 +135,6 @@ export async function lookupUpdates(
     const nonDeprecatedVersions = releases
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
-    const latestVersion = dependency.tags?.latest;
     const currentVersion =
       getCurrentVersion(
         config,
