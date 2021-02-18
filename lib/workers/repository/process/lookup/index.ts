@@ -45,19 +45,11 @@ export async function lookupUpdates(
     config.versioning || getDefaultVersioning(datasource)
   );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
-
-  // Record if the dep is fixed to a version
-  if (lockedVersion) {
-    res.fixedVersion = lockedVersion;
-  } else if (currentValue && versioning.isSingleVersion(currentValue)) {
-    res.fixedVersion = currentValue.replace(/^=+/, '');
-  }
   // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
     res.skipReason = SkipReason.InvalidConfig;
     return res;
   }
-
   const isValid = currentValue && versioning.isValid(currentValue);
   if (isValid) {
     const dependency = clone(await getPkgReleases(config));
@@ -297,6 +289,13 @@ export async function lookupUpdates(
     } else {
       delete res.skipReason;
     }
+  }
+
+  // Record if the dep is fixed to a version
+  if (lockedVersion) {
+    res.fixedVersion = lockedVersion;
+  } else if (currentValue && versioning.isSingleVersion(currentValue)) {
+    res.fixedVersion = currentValue.replace(/^=+/, '');
   }
   // Add digests if necessary
   if (supportsDigests(config)) {
