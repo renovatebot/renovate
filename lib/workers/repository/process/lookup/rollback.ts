@@ -2,13 +2,7 @@ import { Release } from '../../../../datasource/common';
 import { logger } from '../../../../logger';
 import { LookupUpdate } from '../../../../manager/common';
 import * as allVersioning from '../../../../versioning';
-
-export interface RollbackConfig {
-  currentValue?: string;
-  depName?: string;
-  packageFile?: string;
-  versioning: string;
-}
+import { RollbackConfig } from './common';
 
 export function getRollbackUpdate(
   config: RollbackConfig,

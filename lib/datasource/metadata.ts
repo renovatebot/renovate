@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
+import { DateTime } from 'luxon';
 import * as hostRules from '../util/host-rules';
 import { ReleaseResult } from './common';
 
@@ -117,6 +118,55 @@ function massageGitlabUrl(url: string): string {
     .replace('.git', '');
 }
 
+function normalizeDate(input: any): string | null {
+  if (
+    typeof input === 'number' &&
+    !Number.isNaN(input) &&
+    input > 0 &&
+    input <= Date.now() + 24 * 60 * 60 * 1000
+  ) {
+    return new Date(input).toISOString();
+  }
+
+  if (typeof input === 'string') {
+    // `Date.parse()` is more permissive, but it assumes local time zone
+    // for inputs like `2021-01-01`.
+    //
+    // Here we try to parse with default UTC with fallback to `Date.parse()`.
+    //
+    // It allows us not to care about machine timezones so much, though
+    // some misinterpretation is still possible, but only if both:
+    //
+    //   1. Renovate machine is configured for non-UTC zone
+    //   2. Format of `input` is very exotic
+    //      (from `DateTime.fromISO()` perspective)
+    //
+    const luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+    if (luxonDate.isValid) {
+      return luxonDate.toISO();
+    }
+
+    return normalizeDate(Date.parse(input));
+  }
+
+  if (input instanceof Date) {
+    return input.toISOString();
+  }
+
+  return null;
+}
+
+function massageTimestamps(dep: ReleaseResult): void {
+  for (const release of dep.releases || []) {
+    let { releaseTimestamp } = release;
+    delete release.releaseTimestamp;
+    releaseTimestamp = normalizeDate(releaseTimestamp);
+    if (releaseTimestamp) {
+      release.releaseTimestamp = releaseTimestamp;
+    }
+  }
+}
+
 /* eslint-disable no-param-reassign */
 export function addMetaData(
   dep?: ReleaseResult,
@@ -126,6 +176,9 @@ export function addMetaData(
   if (!dep) {
     return;
   }
+
+  massageTimestamps(dep);
+
   const lookupNameLowercase = lookupName ? lookupName.toLowerCase() : null;
   if (manualChangelogUrls[datasource]?.[lookupNameLowercase]) {
     dep.changelogUrl = manualChangelogUrls[datasource][lookupNameLowercase];

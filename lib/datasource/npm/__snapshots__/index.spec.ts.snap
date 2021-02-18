@@ -2,15 +2,14 @@
 
 exports[`datasource/npm/index should fetch package info from custom registry 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -25,15 +24,14 @@ Object {
 
 exports[`datasource/npm/index should fetch package info from npm 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -48,15 +46,14 @@ Object {
 
 exports[`datasource/npm/index should handle foobar 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -71,11 +68,10 @@ Object {
 
 exports[`datasource/npm/index should handle no time 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
@@ -93,11 +89,10 @@ Object {
 
 exports[`datasource/npm/index should parse repo url (string) 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
   ],
@@ -111,11 +106,10 @@ Object {
 
 exports[`datasource/npm/index should parse repo url 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
   ],
@@ -129,15 +123,14 @@ Object {
 
 exports[`datasource/npm/index should replace any environment variable in npmrc 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -152,22 +145,21 @@ Object {
 
 exports[`datasource/npm/index should return deprecated 1`] = `
 Object {
-  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v0.0.2) of dependency \`foobar\` has the following deprecation notice:
+  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`foobar\` has the following deprecation notice:
 
 \`This is deprecated\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "deprecationSource": "npm",
-  "latestVersion": "0.0.2",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
       "isDeprecated": true,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -180,7 +172,7 @@ Marking the latest version of an npm package as deprecated results in the entire
 `;
 
 exports[`datasource/npm/index should return deprecated 2`] = `
-"On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v0.0.2) of dependency \`foobar\` has the following deprecation notice:
+"On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`foobar\` has the following deprecation notice:
 
 \`This is deprecated\`
 
@@ -189,15 +181,14 @@ Marking the latest version of an npm package as deprecated results in the entire
 
 exports[`datasource/npm/index should send an authorization header if provided 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -212,15 +203,14 @@ Object {
 
 exports[`datasource/npm/index should use NPM_TOKEN if provided 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -235,15 +225,14 @@ Object {
 
 exports[`datasource/npm/index should use default registry if missing from npmrc 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -258,15 +247,14 @@ Object {
 
 exports[`datasource/npm/index should use host rules by baseUrl if provided 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -281,15 +269,14 @@ Object {
 
 exports[`datasource/npm/index should use host rules by hostName if provided 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],

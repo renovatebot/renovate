@@ -134,7 +134,7 @@ describe('datasource/pypi', () => {
       });
       expect(res.releases.pop()).toMatchObject({
         version: '0.2.15',
-        releaseTimestamp: '2019-06-18T13:58:55',
+        releaseTimestamp: '2019-06-18T13:58:55.000Z',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

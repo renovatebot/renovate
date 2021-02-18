@@ -22,6 +22,7 @@ import { id as gitVersioningId } from '../../../../versioning/git';
 import { id as npmVersioningId } from '../../../../versioning/npm';
 import { id as pep440VersioningId } from '../../../../versioning/pep440';
 import { id as poetryVersioningId } from '../../../../versioning/poetry';
+import { LookupUpdateConfig } from './common';
 import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
@@ -37,12 +38,12 @@ const githubReleases = mocked(datasourceGithubReleases);
 
 Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
 
-let config: lookup.LookupUpdateConfig;
+let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
     // TODO: fix types
-    config = partial<lookup.LookupUpdateConfig>(getConfig());
+    config = partial<LookupUpdateConfig>(getConfig());
     config.manager = 'npm';
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';
@@ -191,19 +192,6 @@ describe('workers/repository/process/lookup', () => {
       expect(res.updates).toHaveLength(2);
       expect(res.updates[0].updateType).not.toEqual('patch');
       expect(res.updates[1].updateType).not.toEqual('patch');
-    });
-    it('returns patch update if automerging patch', async () => {
-      config.patch = {
-        automerge: true,
-      };
-      config.currentValue = '0.9.0';
-      config.rangeStrategy = 'pin';
-      config.depName = 'q';
-      config.datasource = datasourceNpmId;
-      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].updateType).toEqual('patch');
     });
     it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
