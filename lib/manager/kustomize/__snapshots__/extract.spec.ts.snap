@@ -37,98 +37,40 @@ Object {
   "deps": Array [
     Object {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "postgres",
-      "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: hasura
-
-commonLabels:
-  app.kubernetes.io/name: hasura
-
-bases:
-  - ../base/
-
-patchesStrategicMerge:
-  - patches/deployment.yaml
-
-images:
-  - name: postgres
-    newTag: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
-
-  - name: mariadb
-    digest: sha256:3f18ce9e12e3ece07029895336f5497eeb2d9cb8fe148cc54d4905f77cbc062d
-
-  - name: alpine
-    newTag: 3.12.2
-    digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
-",
-      "versioning": "docker",
+      "replaceString": "postgres",
     },
     Object {
       "currentDigest": "sha256:3f18ce9e12e3ece07029895336f5497eeb2d9cb8fe148cc54d4905f77cbc062d",
       "currentValue": undefined,
       "datasource": "docker",
       "depName": "mariadb",
-      "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: hasura
-
-commonLabels:
-  app.kubernetes.io/name: hasura
-
-bases:
-  - ../base/
-
-patchesStrategicMerge:
-  - patches/deployment.yaml
-
-images:
-  - name: postgres
-    newTag: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
-
-  - name: mariadb
-    digest: sha256:3f18ce9e12e3ece07029895336f5497eeb2d9cb8fe148cc54d4905f77cbc062d
-
-  - name: alpine
-    newTag: 3.12.2
-    digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
-",
-      "versioning": "docker",
+      "replaceString": "mariadb",
     },
     Object {
       "currentDigest": "sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438",
       "currentValue": "3.12.2",
       "datasource": "docker",
       "depName": "alpine",
-      "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: hasura
-
-commonLabels:
-  app.kubernetes.io/name: hasura
-
-bases:
-  - ../base/
-
-patchesStrategicMerge:
-  - patches/deployment.yaml
-
-images:
-  - name: postgres
-    newTag: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
-
-  - name: mariadb
-    digest: sha256:3f18ce9e12e3ece07029895336f5497eeb2d9cb8fe148cc54d4905f77cbc062d
-
-  - name: alpine
-    newTag: 3.12.2
-    digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
-",
-      "versioning": "docker",
+      "replaceString": "newTag: 3.12.2
+    digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438",
+    },
+    Object {
+      "currentDigest": "sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438",
+      "currentValue": "1",
+      "datasource": "docker",
+      "depName": "1234567890.dkr.ecr.eu-central-1.amazonaws.com/test",
+      "replaceString": "digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
+    newTag: '1'",
+    },
+    Object {
+      "currentDigest": "sha256:e1488cb900233d035575f0a7787448cb1fa93bed0ccc0d4efc1963d7d72a8f17",
+      "currentValue": "1.32.1",
+      "datasource": "docker",
+      "depName": "busybox",
+      "replaceString": "busybox:1.32.1",
     },
   ],
 }
@@ -172,139 +114,40 @@ Array [
 exports[`manager/kustomize/extract extractPackageFile() should extract out image versions 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
+    "currentDigest": undefined,
     "currentValue": "v0.1.0",
     "datasource": "docker",
     "depName": "node",
-    "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: testing-namespace
-
-resources:
-- deployment.yaml
-
-images:
-- name: node
-  newTag: v0.1.0
-- newTag: v0.0.1
-  name: group/instance
-- name: quay.io/test/repo
-  newTag: v0.0.2
-- name: gitlab.com/org/suborg/image
-  newTag: v0.0.3
-- name: this-lives/on-docker-hub
-  newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
-  newTag: v0.0.4
-",
-    "versioning": "docker",
+    "replaceString": "node",
   },
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.0.1",
     "datasource": "docker",
     "depName": "group/instance",
-    "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: testing-namespace
-
-resources:
-- deployment.yaml
-
-images:
-- name: node
-  newTag: v0.1.0
-- newTag: v0.0.1
-  name: group/instance
-- name: quay.io/test/repo
-  newTag: v0.0.2
-- name: gitlab.com/org/suborg/image
-  newTag: v0.0.3
-- name: this-lives/on-docker-hub
-  newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
-  newTag: v0.0.4
-",
-    "versioning": "docker",
+    "replaceString": "group/instance",
   },
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.0.2",
     "datasource": "docker",
     "depName": "quay.io/test/repo",
-    "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: testing-namespace
-
-resources:
-- deployment.yaml
-
-images:
-- name: node
-  newTag: v0.1.0
-- newTag: v0.0.1
-  name: group/instance
-- name: quay.io/test/repo
-  newTag: v0.0.2
-- name: gitlab.com/org/suborg/image
-  newTag: v0.0.3
-- name: this-lives/on-docker-hub
-  newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
-  newTag: v0.0.4
-",
-    "versioning": "docker",
+    "replaceString": "quay.io/test/repo",
   },
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.0.3",
     "datasource": "docker",
     "depName": "gitlab.com/org/suborg/image",
-    "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: testing-namespace
-
-resources:
-- deployment.yaml
-
-images:
-- name: node
-  newTag: v0.1.0
-- newTag: v0.0.1
-  name: group/instance
-- name: quay.io/test/repo
-  newTag: v0.0.2
-- name: gitlab.com/org/suborg/image
-  newTag: v0.0.3
-- name: this-lives/on-docker-hub
-  newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
-  newTag: v0.0.4
-",
-    "versioning": "docker",
+    "replaceString": "gitlab.com/org/suborg/image",
   },
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.0.4",
     "datasource": "docker",
     "depName": "but.this.lives.on.local/private-registry",
-    "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: testing-namespace
-
-resources:
-- deployment.yaml
-
-images:
-- name: node
-  newTag: v0.1.0
-- newTag: v0.0.1
-  name: group/instance
-- name: quay.io/test/repo
-  newTag: v0.0.2
-- name: gitlab.com/org/suborg/image
-  newTag: v0.0.3
-- name: this-lives/on-docker-hub
-  newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
-  newTag: v0.0.4
-",
-    "versioning": "docker",
+    "replaceString": "but.this.lives.on.local/private-registry",
   },
 ]
 `;

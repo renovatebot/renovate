@@ -22,3 +22,11 @@ images:
   - name: alpine
     newTag: 3.12.2
     digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
+
+  - name: test
+    newName: 1234567890.dkr.ecr.eu-central-1.amazonaws.com/test
+    digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
+    newTag: '1'
+
+  - name: busybox:1.32.1
+    digest: sha256:e1488cb900233d035575f0a7787448cb1fa93bed0ccc0d4efc1963d7d72a8f17
