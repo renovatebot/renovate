@@ -198,7 +198,8 @@ export async function lookupUpdates(
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
     res.dependencyUrl = dependency?.dependencyUrl;
-    const { latestVersion, releases } = dependency;
+    const { releases } = dependency;
+    const latestVersion = dependency.tags?.latest;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases.filter((release) =>
       versioning.isVersion(release.version)
@@ -296,7 +297,7 @@ export async function lookupUpdates(
     let filteredVersions = filterVersions(
       config,
       filterStart,
-      dependency.latestVersion,
+      latestVersion,
       allVersions
     ).filter((v) =>
       // Leave only compatible versions

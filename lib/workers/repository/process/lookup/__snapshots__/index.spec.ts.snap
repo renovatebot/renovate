@@ -310,7 +310,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() ignores deprecated 1
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
-  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v1.4.1) of dependency \`q2\` has the following deprecation notice:
+  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`q2\` has the following deprecation notice:
 
 \`true\`
 
