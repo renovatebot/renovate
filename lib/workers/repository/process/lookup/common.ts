@@ -1,5 +1,5 @@
 import { RenovateConfig, ValidationMessage } from '../../../../config/common';
-import { Release } from '../../../../datasource/common';
+import { Release } from '../../../../datasource';
 import { LookupUpdate, RangeConfig } from '../../../../manager/common';
 import { SkipReason } from '../../../../types';
 
@@ -20,20 +20,6 @@ export interface RollbackConfig {
   versioning: string;
 }
 
-export interface UpdateResult {
-  sourceDirectory?: string;
-  changelogUrl?: string;
-  dependencyUrl?: string;
-  homepage?: string;
-  deprecationMessage?: string;
-  sourceUrl?: string;
-  skipReason: SkipReason;
-  releases: Release[];
-  fixedVersion?: string;
-  updates: LookupUpdate[];
-  warnings: ValidationMessage[];
-}
-
 export interface LookupUpdateConfig
   extends RollbackConfig,
     FilterConfig,
@@ -50,4 +36,18 @@ export interface LookupUpdateConfig
   separateMultipleMajor?: boolean;
   datasource: string;
   depName: string;
+}
+
+export interface UpdateResult {
+  sourceDirectory?: string;
+  changelogUrl?: string;
+  dependencyUrl?: string;
+  homepage?: string;
+  deprecationMessage?: string;
+  sourceUrl?: string;
+  skipReason: SkipReason;
+  releases: Release[];
+  fixedVersion?: string;
+  updates: LookupUpdate[];
+  warnings: ValidationMessage[];
 }
