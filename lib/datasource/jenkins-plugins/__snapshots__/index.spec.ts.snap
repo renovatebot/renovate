@@ -12,7 +12,6 @@ Object {
   "releases": Array [
     Object {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.10/email-ext.hpi",
-      "releaseTimestamp": null,
       "version": "2.10",
     },
     Object {
