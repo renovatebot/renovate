@@ -52,9 +52,9 @@ export interface Release {
 
 export interface ReleaseResult {
   deprecationMessage?: string;
+  isPrivate?: boolean;
   releases: Release[];
   tags?: Record<string, string>;
-  isPrivate?: boolean;
   // URL metadata
   changelogUrl?: string;
   dependencyUrl?: string;
