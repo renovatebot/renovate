@@ -8,30 +8,33 @@ export function getCurrentVersion(
   latestVersion: string,
   allVersions: string[]
 ): string | null {
-  const { currentValue, lockedVersion, versioning } = config;
-  const version = allVersioning.get(versioning);
-  if (version.isVersion(currentValue)) {
+  const { currentValue, lockedVersion } = config;
+  const versioning = allVersioning.get(config.versioning);
+  if (versioning.isVersion(currentValue)) {
     return currentValue;
   }
-  if (version.isSingleVersion(currentValue)) {
+  if (versioning.isSingleVersion(currentValue)) {
     return currentValue.replace(/=/g, '').trim();
   }
   logger.trace(`currentValue ${currentValue} is range`);
-  let useVersions = allVersions.filter((v) => version.matches(v, currentValue));
-  if (latestVersion && version.matches(latestVersion, currentValue)) {
+  let useVersions = allVersions.filter((v) =>
+    versioning.matches(v, currentValue)
+  );
+  if (latestVersion && versioning.matches(latestVersion, currentValue)) {
     useVersions = useVersions.filter(
-      (v) => !version.isGreaterThan(v, latestVersion)
+      (v) => !versioning.isGreaterThan(v, latestVersion)
     );
   }
   if (rangeStrategy === 'pin') {
     return (
-      lockedVersion || version.getSatisfyingVersion(useVersions, currentValue)
+      lockedVersion ||
+      versioning.getSatisfyingVersion(useVersions, currentValue)
     );
   }
   if (rangeStrategy === 'bump') {
     // Use the lowest version in the current range
-    return version.minSatisfyingVersion(useVersions, currentValue);
+    return versioning.minSatisfyingVersion(useVersions, currentValue);
   }
   // Use the highest version in the current range
-  return version.getSatisfyingVersion(useVersions, currentValue);
+  return versioning.getSatisfyingVersion(useVersions, currentValue);
 }
