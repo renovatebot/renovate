@@ -4,12 +4,12 @@ import { LookupUpdateConfig } from './common';
 
 export function getCurrentVersion(
   config: LookupUpdateConfig,
+  versioning: allVersioning.VersioningApi,
   rangeStrategy: string,
   latestVersion: string,
   allVersions: string[]
 ): string | null {
   const { currentValue, lockedVersion } = config;
-  const versioning = allVersioning.get(config.versioning);
   if (versioning.isVersion(currentValue)) {
     return currentValue;
   }

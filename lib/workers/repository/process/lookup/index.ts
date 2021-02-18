@@ -149,12 +149,14 @@ export async function lookupUpdates(
     const currentVersion =
       getCurrentVersion(
         config,
+        versioning,
         rangeStrategy,
         latestVersion,
         nonDeprecatedVersions
       ) ||
       getCurrentVersion(
         config,
+        versioning,
         rangeStrategy,
         latestVersion,
         allVersions.map((v) => v.version)
