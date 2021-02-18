@@ -17,11 +17,11 @@ describe('workers/repository/updates/flatten', () => {
       config.lockFileMaintenance.enabled = true;
       config.packageRules = [
         {
-          updateTypes: ['minor'],
+          matchUpdateTypes: ['minor'],
           automerge: true,
         },
         {
-          paths: ['frontend/package.json'],
+          matchPaths: ['frontend/package.json'],
           lockFileMaintenance: {
             enabled: false,
           },
@@ -77,6 +77,7 @@ describe('workers/repository/updates/flatten', () => {
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
+      expect(res.filter((r) => r.depNameShort)).toHaveLength(6); // lockFileMaintenance has no depName
     });
   });
 });

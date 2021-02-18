@@ -1,6 +1,6 @@
 import URL from 'url';
 import addrs from 'email-addresses';
-import { RenovateConfig } from '../config/common';
+import { GlobalConfig } from '../config/common';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
 import { setPrivateKey } from '../util/git';
@@ -81,8 +81,8 @@ export function parseGitAuthor(input: string): GitAuthor | null {
 }
 
 export async function initPlatform(
-  config: RenovateConfig
-): Promise<RenovateConfig> {
+  config: GlobalConfig
+): Promise<GlobalConfig> {
   setPrivateKey(config.gitPrivateKey);
   setPlatformApi(config.platform);
   // TODO: types

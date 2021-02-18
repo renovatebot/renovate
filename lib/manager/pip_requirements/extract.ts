@@ -1,5 +1,6 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
+import { getAdminConfig } from '../../config/admin';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -44,7 +45,7 @@ export function extractPackageFile(
     registryUrls = registryUrls.concat(config.registryUrls);
   } else if (extraUrls.length) {
     // Use default registry first if extra URLs are present and index URL is not
-    registryUrls.push('https://pypi.org/pypi/');
+    registryUrls.push(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
   }
   registryUrls = registryUrls.concat(extraUrls);
 
@@ -70,7 +71,7 @@ export function extractPackageFile(
         datasource: datasourcePypi.id,
       };
       if (currentValue?.startsWith('==')) {
-        dep.fromVersion = currentValue.replace(/^==/, '');
+        dep.currentVersion = currentValue.replace(/^==/, '');
       }
       return dep;
     })
@@ -83,7 +84,7 @@ export function extractPackageFile(
     res.registryUrls = registryUrls.map((url) => {
       // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
       const cleaned = url.replace(/^"/, '').replace(/"$/, '');
-      if (global.trustLevel !== 'high') {
+      if (getAdminConfig().trustLevel !== 'high') {
         return cleaned;
       }
       // interpolate any environment variables

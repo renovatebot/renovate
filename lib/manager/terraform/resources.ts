@@ -103,12 +103,11 @@ export function analyseTerraformResource(
       dep.depType = 'helm';
       dep.registryUrls = [dep.managerData.repository];
       dep.depName = dep.managerData.chart;
-      dep.depNameShort = dep.managerData.chart;
       dep.datasource = datasourceHelm.id;
       break;
 
     default:
-      dep.skipReason = SkipReason.UnsupportedValue;
+      dep.skipReason = SkipReason.InvalidValue;
       break;
   }
   /* eslint-enable no-param-reassign */

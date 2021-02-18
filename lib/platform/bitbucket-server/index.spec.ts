@@ -10,13 +10,57 @@ import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { Platform } from '../common';
 
+function sshLink(projectKey: string, repositorySlug: string): string {
+  return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
+}
+
+function httpLink(
+  endpointStr: string,
+  projectKey: string,
+  repositorySlug: string
+): string {
+  return `${endpointStr}scm/${projectKey.toLowerCase()}/${repositorySlug}.git`;
+}
+
 function repoMock(
   endpoint: URL | string,
   projectKey: string,
-  repositorySlug: string
+  repositorySlug: string,
+  options: { cloneUrl: { https: boolean; ssh: boolean } } = {
+    cloneUrl: { https: true, ssh: true },
+  }
 ) {
   const endpointStr = endpoint.toString();
-  const projectKeyLower = projectKey.toLowerCase();
+  const links: {
+    self: { href: string }[];
+    clone?: { href: string; name: string }[];
+  } = {
+    self: [
+      {
+        href: `${endpointStr}projects/${projectKey}/repos/${repositorySlug}/browse`,
+      },
+    ],
+  };
+
+  if (options.cloneUrl.https || options.cloneUrl.ssh) {
+    // This mimics the behavior of bb-server which does not include the clone property at all
+    // if ssh and https are both turned off
+    links.clone = [
+      options.cloneUrl.https
+        ? {
+            href: httpLink(endpointStr, projectKey, repositorySlug),
+            name: 'http',
+          }
+        : null,
+      options.cloneUrl.ssh
+        ? {
+            href: sshLink(projectKey, repositorySlug),
+            name: 'ssh',
+          }
+        : null,
+    ].filter(Boolean);
+  }
+
   return {
     slug: repositorySlug,
     id: 13076,
@@ -38,23 +82,7 @@ function repoMock(
       },
     },
     public: false,
-    links: {
-      clone: [
-        {
-          href: `${endpointStr}/scm/${projectKeyLower}/${repositorySlug}.git`,
-          name: 'http',
-        },
-        {
-          href: `ssh://git@stash.renovatebot.com:7999/${projectKeyLower}/${repositorySlug}.git`,
-          name: 'ssh',
-        },
-      ],
-      self: [
-        {
-          href: `${endpointStr}/projects/${projectKey}/repos/${repositorySlug}/browse`,
-        },
-      ],
-    },
+    links,
   };
 }
 
@@ -150,6 +178,8 @@ describe(getName(__filename), () => {
       let bitbucket: Platform;
       let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
       let git: jest.Mocked<typeof _git>;
+      const username = 'abc';
+      const password = '123';
 
       async function initRepo(config = {}): Promise<nock.Scope> {
         const scope = httpMock
@@ -192,13 +222,13 @@ describe(getName(__filename), () => {
             ? 'https://stash.renovatebot.com/vcs/'
             : 'https://stash.renovatebot.com';
         hostRules.find.mockReturnValue({
-          username: 'abc',
-          password: '123',
+          username,
+          password,
         });
         await bitbucket.initPlatform({
           endpoint,
-          username: 'abc',
-          password: '123',
+          username,
+          password,
         });
       });
 
@@ -266,12 +296,16 @@ describe(getName(__filename), () => {
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
-        it('does not throw', async () => {
-          expect.assertions(2);
+
+        it('uses ssh url from API if http not in API response', async () => {
+          expect.assertions(3);
+          const responseMock = repoMock(url, 'SOME', 'repo', {
+            cloneUrl: { https: false, ssh: true },
+          });
           httpMock
             .scope(urlHost)
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
-            .reply(200, repoMock(url, 'SOME', 'repo'))
+            .reply(200, responseMock)
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
             )
@@ -283,11 +317,77 @@ describe(getName(__filename), () => {
             repository: 'SOME/repo',
             localDir: '',
           });
+          expect(git.initRepo).toHaveBeenCalledWith(
+            expect.objectContaining({ url: sshLink('SOME', 'repo') })
+          );
           expect(res).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
-        it('throws empty', async () => {
+        it('uses http url from API with injected auth if http url in API response', async () => {
+          expect.assertions(3);
+          const responseMock = repoMock(url, 'SOME', 'repo', {
+            cloneUrl: { https: true, ssh: true },
+          });
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+            .reply(200, responseMock)
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+            )
+            .reply(200, {
+              displayId: 'master',
+            });
+          const res = await bitbucket.initRepo({
+            endpoint: 'https://stash.renovatebot.com/vcs/',
+            repository: 'SOME/repo',
+            localDir: '',
+          });
+          expect(git.initRepo).toHaveBeenCalledWith(
+            expect.objectContaining({
+              url: httpLink(url.toString(), 'SOME', 'repo').replace(
+                'https://',
+                `https://${username}:${password}@`
+              ),
+            })
+          );
+          expect(res).toMatchSnapshot();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('generates URL if API does not contain clone links', async () => {
+          expect.assertions(3);
+          const link = httpLink(url.toString(), 'SOME', 'repo');
+          const responseMock = repoMock(url, 'SOME', 'repo', {
+            cloneUrl: { https: false, ssh: false },
+          });
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+            .reply(200, responseMock)
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+            )
+            .reply(200, {
+              displayId: 'master',
+            });
+          git.getUrl.mockReturnValueOnce(link);
+          const res = await bitbucket.initRepo({
+            endpoint: 'https://stash.renovatebot.com/vcs/',
+            repository: 'SOME/repo',
+            localDir: '',
+          });
+          expect(git.initRepo).toHaveBeenCalledWith(
+            expect.objectContaining({
+              url: link,
+            })
+          );
+          expect(res).toMatchSnapshot();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('throws REPOSITORY_EMPTY if there is no default branch', async () => {
           expect.assertions(2);
           httpMock
             .scope(urlHost)

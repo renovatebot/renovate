@@ -5,7 +5,7 @@ import {
   CONFIG_VALIDATION,
   EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
-  MANAGER_NO_PACKAGE_FILES,
+  NO_VULNERABILITY_ALERTS,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -15,17 +15,20 @@ import {
   REPOSITORY_BLOCKED,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_CHANGED,
+  REPOSITORY_CLOSED_ONBOARDING,
   REPOSITORY_DISABLED,
+  REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
-  REPOSITORY_NO_VULNERABILITY,
+  REPOSITORY_NO_CONFIG,
+  REPOSITORY_NO_PACKAGE_FILES,
   REPOSITORY_RENAMED,
-  REPOSITORY_TEMPORARY_ERROR,
   REPOSITORY_UNINITIATED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   SYSTEM_INSUFFICIENT_MEMORY,
+  TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -46,7 +49,13 @@ export default async function handleError(
     delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
   }
-  if (err.message === REPOSITORY_DISABLED) {
+  const disabledMessages = [
+    REPOSITORY_CLOSED_ONBOARDING,
+    REPOSITORY_DISABLED,
+    REPOSITORY_DISABLED_BY_CONFIG,
+    REPOSITORY_NO_CONFIG,
+  ];
+  if (disabledMessages.includes(err.message)) {
     logger.info('Repository is disabled - skipping');
     return err.message;
   }
@@ -88,11 +97,11 @@ export default async function handleError(
     logger.info('Cannot fork repository - skipping');
     return err.message;
   }
-  if (err.message === MANAGER_NO_PACKAGE_FILES) {
+  if (err.message === REPOSITORY_NO_PACKAGE_FILES) {
     logger.info('Repository has no package files - skipping');
     return err.message;
   }
-  if (err.message === REPOSITORY_NO_VULNERABILITY) {
+  if (err.message === NO_VULNERABILITY_ALERTS) {
     logger.info('Repository has no vulnerability alerts - skipping');
     return err.message;
   }
@@ -157,7 +166,7 @@ export default async function handleError(
     delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
   }
-  if (err.message === REPOSITORY_TEMPORARY_ERROR) {
+  if (err.message === TEMPORARY_ERROR) {
     logger.info('Temporary error - aborting');
     delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
@@ -185,7 +194,7 @@ export default async function handleError(
   }
   if (err.message.includes('fatal: not a git repository')) {
     delete config.branchList; // eslint-disable-line no-param-reassign
-    return REPOSITORY_TEMPORARY_ERROR;
+    return TEMPORARY_ERROR;
   }
   // Swallow this error so that other repositories can be processed
   logger.error({ err }, `Repository has unknown error`);

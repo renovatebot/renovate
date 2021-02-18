@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { Pr, platform } from '../../../platform';
 import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { branchExists } from '../../../util/git';
 import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
@@ -83,4 +84,47 @@ export async function getPrsRemaining(
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
   return Math.min(hourlyRemaining, concurrentRemaining);
+}
+
+export function getConcurrentBranchesRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): number {
+  const { branchConcurrentLimit, prConcurrentLimit } = config;
+  const limit =
+    typeof branchConcurrentLimit === 'number'
+      ? branchConcurrentLimit
+      : prConcurrentLimit;
+  if (typeof limit === 'number' && limit) {
+    logger.debug(`Calculating branchConcurrentLimit (${limit})`);
+    try {
+      const existingBranches: string[] = [];
+      for (const branch of branches) {
+        if (branchExists(branch.branchName)) {
+          existingBranches.push(branch.branchName);
+        }
+      }
+
+      const existingCount = existingBranches.length;
+      logger.debug(
+        `${existingCount} already existing branches found: ${existingBranches.join()}`
+      );
+
+      const concurrentRemaining = Math.max(0, limit - existingCount);
+      logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
+
+      return concurrentRemaining;
+    } catch (err) {
+      logger.error({ err }, 'Error checking concurrent branches');
+      return limit;
+    }
+  }
+  return 99;
+}
+
+export function getBranchesRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): number {
+  return getConcurrentBranchesRemaining(config, branches);
 }

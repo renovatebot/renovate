@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { downloadHttpProtocol } from '../maven/util';
@@ -11,8 +12,8 @@ import {
 import { SBT_PLUGINS_REPO, parseIndexDir } from './util';
 
 export const id = 'sbt-plugin';
-
 export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
+export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
@@ -106,9 +107,6 @@ export async function getReleases({
     if (versions) {
       return {
         ...urls,
-        display: lookupName,
-        group: groupId,
-        name: artifactId,
         dependencyUrl,
         releases: versions.map((v) => ({ version: v })),
       };

@@ -1,5 +1,6 @@
 import * as _fs from 'fs-extra';
 import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -64,12 +65,14 @@ describe('workers/branch', () => {
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('abc123');
+      setAdminConfig();
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
       platform.ensureCommentRemoval.mockClear();
       commit.commitFilesToBranch.mockClear();
       jest.resetAllMocks();
+      setAdminConfig();
     });
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -210,7 +213,13 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.PrEdited);
     });
-    it('returns if pr creation limit exceeded', async () => {
+    it('skips branch if branch edited and no PR found', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual(ProcessBranchResult.PrEdited);
+    });
+    it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
       });
@@ -221,7 +230,7 @@ describe('workers/branch', () => {
       limits.isLimitReached.mockReturnValueOnce(true);
       limits.isLimitReached.mockReturnValueOnce(false);
       expect(await branchWorker.processBranch(config)).toEqual(
-        ProcessBranchResult.PrLimitReached
+        ProcessBranchResult.BranchLimitReached
       );
     });
     it('returns if pr creation limit exceeded and branch exists', async () => {
@@ -315,7 +324,8 @@ describe('workers/branch', () => {
       git.branchExists.mockReturnValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      await branchWorker.processBranch({ ...config, dryRun: true });
+      setAdminConfig({ dryRun: true });
+      await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -544,9 +554,10 @@ describe('workers/branch', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
       } as never);
-      expect(
-        await branchWorker.processBranch({ ...config, dryRun: true })
-      ).toEqual(ProcessBranchResult.AlreadyExisted);
+      setAdminConfig({ dryRun: true });
+      expect(await branchWorker.processBranch(config)).toEqual(
+        ProcessBranchResult.AlreadyExisted
+      );
     });
 
     it('branch pr no rebase (dry run)', async () => {
@@ -555,9 +566,10 @@ describe('workers/branch', () => {
         state: PrState.Open,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
-      expect(
-        await branchWorker.processBranch({ ...config, dryRun: true })
-      ).toEqual(ProcessBranchResult.PrEdited);
+      setAdminConfig({ dryRun: true });
+      expect(await branchWorker.processBranch(config)).toEqual(
+        ProcessBranchResult.PrEdited
+      );
     });
 
     it('branch pr no schedule lockfile (dry run)', async () => {
@@ -578,11 +590,10 @@ describe('workers/branch', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-
+      setAdminConfig({ dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
-          dryRun: true,
           updateType: 'lockFileMaintenance',
           reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
@@ -612,10 +623,10 @@ describe('workers/branch', () => {
         pr: {},
       } as never);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      setAdminConfig({ dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
-          dryRun: true,
           artifactErrors: [{}],
         })
       ).toEqual(ProcessBranchResult.Done);
@@ -679,13 +690,19 @@ describe('workers/branch', () => {
         not_added: [],
         deleted: ['deleted_file'],
       } as StatusResult);
-      global.trustLevel = 'high';
 
       fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: true,
+        trustLevel: 'high',
+      };
+      setAdminConfig(adminConfig);
 
       const result = await branchWorker.processBranch({
         ...config,
@@ -694,8 +711,6 @@ describe('workers/branch', () => {
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: true,
         upgrades: [
           {
             ...defaultConfig,
@@ -744,14 +759,18 @@ describe('workers/branch', () => {
         not_added: [],
         deleted: ['deleted_file'],
       } as StatusResult);
-      global.trustLevel = 'high';
 
       fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: false,
+        trustLevel: 'high',
+      };
+      setAdminConfig(adminConfig);
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
@@ -759,8 +778,6 @@ describe('workers/branch', () => {
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: false,
         upgrades: [
           {
             ...defaultConfig,
@@ -815,7 +832,6 @@ describe('workers/branch', () => {
           not_added: [],
           deleted: ['deleted_file', 'modified_then_deleted_file'],
         } as StatusResult);
-      global.trustLevel = 'high';
 
       fs.outputFile.mockReturnValue();
       fs.readFile
@@ -826,6 +842,13 @@ describe('workers/branch', () => {
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
+        allowPostUpgradeCommandTemplating: true,
+        trustLevel: 'high',
+      };
+      setAdminConfig(adminConfig);
 
       const inconfig = {
         ...config,
@@ -839,8 +862,6 @@ describe('workers/branch', () => {
           ],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
-        allowPostUpgradeCommandTemplating: true,
         upgrades: [
           {
             ...defaultConfig,

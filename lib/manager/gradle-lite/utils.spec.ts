@@ -42,6 +42,7 @@ describe('manager/gradle-lite/utils', () => {
     expect(isDependencyString("foo:bar:1.2.3'")).toBe(false);
     expect(isDependencyString('foo:bar:1.2.3"')).toBe(false);
     expect(isDependencyString('-Xep:ParameterName:OFF')).toBe(false);
+    expect(isDependencyString('foo$bar:baz:1.2.+')).toBe(false);
   });
 
   it('parseDependencyString', () => {

@@ -59,20 +59,26 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 const getNewValue = ({
   currentValue,
   rangeStrategy,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string => {
   let newSemver = npm.getNewValue({
     currentValue: hex2npm(currentValue),
     rangeStrategy,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
   });
   newSemver = npm2hex(newSemver);
-  if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
+  if (/~>\s*(\d+\.\d+\.\d+)$/.test(currentValue)) {
     newSemver = newSemver.replace(
-      /\^\s*(\d+\.\d+(\.\d)?)/,
-      (_str, p1: string) => `~> ${p1.slice(0, -2)}`
+      /[\^~]\s*(\d+\.\d+\.\d+)/,
+      (_str, p1: string) => `~> ${p1}`
+    );
+  } else if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
+    newSemver = newSemver.replace(
+      /\^\s*(\d+\.\d+)/,
+      (_str, p1: string) =>
+        `~> ${rangeStrategy !== 'bump' ? p1.slice(0, -2) : p1}`
     );
   } else {
     newSemver = newSemver.replace(/~\s*(\d+\.\d+\.\d)/, '~> $1');

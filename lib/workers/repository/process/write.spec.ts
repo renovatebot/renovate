@@ -13,6 +13,7 @@ const limits = mocked(_limits);
 branchWorker.processBranch = jest.fn();
 
 limits.getPrsRemaining = jest.fn().mockResolvedValue(99);
+limits.getBranchesRemaining = jest.fn().mockReturnValue(99);
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -61,14 +62,14 @@ describe('workers/repository/write', () => {
     it('increments branch counter', async () => {
       const branches: BranchConfig[] = [{}] as never;
       branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.Pending
+        ProcessBranchResult.PrCreated
       );
       git.branchExists.mockReturnValueOnce(false);
       git.branchExists.mockReturnValueOnce(true);
-      limits.getPrsRemaining.mockResolvedValueOnce(1);
-      expect(isLimitReached(Limit.PullRequests)).toBeFalse();
+      limits.getBranchesRemaining.mockReturnValueOnce(1);
+      expect(isLimitReached(Limit.Branches)).toBeFalse();
       await writeUpdates({ config }, branches);
-      expect(isLimitReached(Limit.PullRequests)).toBeTrue();
+      expect(isLimitReached(Limit.Branches)).toBeTrue();
     });
   });
 });

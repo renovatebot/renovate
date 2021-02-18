@@ -39,11 +39,12 @@ export async function getLockedVersions(
         logger.trace('Retrieving/parsing ' + npmLock);
         lockFileCache[npmLock] = await getNpmLock(npmLock);
       }
-      if (!packageFile.constraints.npm) {
-        // do not override if already set
-        const { lockfileVersion } = lockFileCache[npmLock];
-        if (lockfileVersion >= 2) {
-          packageFile.constraints.npm = '>= 7.0.0';
+      const { lockfileVersion } = lockFileCache[npmLock];
+      if (lockfileVersion === 1) {
+        if (packageFile.constraints.npm) {
+          packageFile.constraints.npm += ' <7';
+        } else {
+          packageFile.constraints.npm = '<7';
         }
       }
       for (const dep of packageFile.deps) {

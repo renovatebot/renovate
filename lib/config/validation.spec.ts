@@ -23,19 +23,19 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            packageNames: ['foo'],
+            matchPackageNames: ['foo'],
             allowedVersions: '/^2/',
           },
           {
-            packageNames: ['bar'],
+            matchPackageNames: ['bar'],
             allowedVersions: '/***$}{]][/',
           },
           {
-            packageNames: ['baz'],
+            matchPackageNames: ['baz'],
             allowedVersions: '!/^2/',
           },
           {
-            packageNames: ['quack'],
+            matchPackageNames: ['quack'],
             allowedVersions: '!/***$}{]][/',
           },
         ],
@@ -48,19 +48,19 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            packageNames: ['foo'],
+            matchPackageNames: ['foo'],
             matchCurrentVersion: '/^2/',
           },
           {
-            packageNames: ['bar'],
+            matchPackageNames: ['bar'],
             matchCurrentVersion: '/***$}{]][/',
           },
           {
-            packageNames: ['baz'],
+            matchPackageNames: ['baz'],
             matchCurrentVersion: '!/^2/',
           },
           {
-            packageNames: ['quack'],
+            matchPackageNames: ['quack'],
             matchCurrentVersion: '!/***$}{]][/',
           },
         ],
@@ -76,7 +76,7 @@ describe('config/validation', () => {
         timezone: 'Asia/Singapore',
         packageRules: [
           {
-            packagePatterns: ['*'],
+            matchPackagePatterns: ['*'],
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
           },
         ],
@@ -96,7 +96,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            managers: ['foo'],
+            matchManagers: ['foo'],
           },
         ],
       };
@@ -111,7 +111,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            managers: 'string not an array',
+            matchManagers: 'string not an array',
           },
         ],
       };
@@ -142,7 +142,7 @@ describe('config/validation', () => {
           },
           'what?' as any,
           {
-            packagePatterns: 'abc ([a-z]+) ([a-z]+))',
+            matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
@@ -158,17 +158,17 @@ describe('config/validation', () => {
     });
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
-        packageNames: ['angular'],
+        matchPackageNames: ['angular'],
         meteor: {
           packageRules: [
             {
-              packageNames: ['meteor'],
+              matchPackageNames: ['meteor'],
             },
           ],
         },
         docker: {
           minor: {
-            packageNames: ['testPackage'],
+            matchPackageNames: ['testPackage'],
           },
         },
       };
@@ -182,7 +182,7 @@ describe('config/validation', () => {
     it('ignore packageRule nesting validation for presets', async () => {
       const config = {
         description: ['All angular.js packages'],
-        packageNames: [
+        matchPackageNames: [
           'angular',
           'angular-animate',
           'angular-scroll',

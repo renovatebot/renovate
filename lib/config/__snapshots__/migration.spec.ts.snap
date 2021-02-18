@@ -6,6 +6,51 @@ Object {
 }
 `;
 
+exports[`config/migration migrateConfig(config, parentConfig) it migrates packageRules 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "excludePackageNames": Array [
+        "baz",
+      ],
+      "excludePackagePatterns": Array [
+        "^baz",
+      ],
+      "matchBaseBranches": Array [
+        "master",
+      ],
+      "matchDatasources": Array [
+        "orb",
+      ],
+      "matchDepTypes": Array [
+        "peerDependencies",
+      ],
+      "matchLanguages": Array [
+        "python",
+      ],
+      "matchManagers": Array [
+        "dockerfile",
+      ],
+      "matchPackageNames": Array [
+        "foo",
+      ],
+      "matchPackagePatterns": Array [
+        "^bar",
+      ],
+      "matchPaths": Array [
+        "package.json",
+      ],
+      "matchSourceUrlPrefixes": Array [
+        "https://github.com/vuejs/vue",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
 Object {
   "major": Object {
@@ -39,9 +84,10 @@ Object {
   "baseBranches": Array [
     "next",
   ],
+  "binarySource": "global",
+  "branchName": "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}{{{packageFileDir}}}",
   "branchPrefix": "renovate/",
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
-  "commitMessageExtra": "{{currentValue}} something",
   "constraints": Object {
     "python": "3.7",
   },
@@ -80,7 +126,7 @@ Object {
         "extends": Array [
           "node",
         ],
-        "paths": Array [
+        "matchPaths": Array [
           "node/**",
         ],
       },
@@ -92,61 +138,61 @@ Object {
       "extends": Array [
         "foo",
       ],
-      "paths": Array [
+      "matchPaths": Array [
         "examples/**",
       ],
     },
     Object {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
-      "packagePatterns": "^(@angular|typescript)",
+      "matchPackagePatterns": "^(@angular|typescript)",
     },
     Object {
       "groupName": "foo",
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "^foo",
       ],
     },
     Object {
       "enabled": false,
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "angular",
       ],
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "ang",
       ],
     },
     Object {
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "guava",
       ],
       "versioning": "maven",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "peerDependencies",
       ],
       "rangeStrategy": "widen",
     },
     Object {
-      "depTypeList": Array [
-        "devDependencies",
-      ],
       "major": Object {
         "automerge": false,
       },
+      "matchDepTypes": Array [
+        "devDependencies",
+      ],
       "minor": Object {
         "automerge": true,
       },
       "schedule": null,
     },
     Object {
-      "depTypeList": Array [
-        "optionalDependencies",
-      ],
       "major": Object {
         "automerge": false,
       },
+      "matchDepTypes": Array [
+        "optionalDependencies",
+      ],
       "minor": Object {
         "automerge": true,
       },
@@ -198,19 +244,19 @@ Object {
   ],
   "packageRules": Array [
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "devDependencies",
       ],
-      "paths": Array [
+      "matchPaths": Array [
         "package.json",
       ],
       "rangeStrategy": "pin",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "dependencies",
       ],
-      "paths": Array [
+      "matchPaths": Array [
         "package.json",
       ],
       "rangeStrategy": "pin",
@@ -243,34 +289,50 @@ Object {
   ],
   "packageRules": Array [
     Object {
-      "paths": Array [
+      "matchPaths": Array [
         "backend/package.json",
       ],
       "rangeStrategy": "replace",
     },
     Object {
-      "paths": Array [
+      "matchPaths": Array [
         "frontend/package.json",
       ],
       "rangeStrategy": "pin",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "devDependencies",
       ],
-      "paths": Array [
+      "matchPaths": Array [
         "other/package.json",
       ],
       "rangeStrategy": "pin",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "dependencies",
       ],
-      "paths": Array [
+      "matchPaths": Array [
         "other/package.json",
       ],
       "rangeStrategy": "pin",
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates packageRules objects 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "commitMessage": "fix(package): update peerDependency to accept typescript ^{{newMajor}} {{newMajor}}",
+      "matchPackageNames": Array [
+        "typescript",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
     },
   ],
 }
@@ -281,7 +343,7 @@ Object {
   "packageRules": Array [
     Object {
       "groupName": "angular packages",
-      "packagePatterns": "^(@angular|typescript)",
+      "matchPackagePatterns": "^(@angular|typescript)",
     },
   ],
 }
@@ -292,7 +354,7 @@ Object {
   "lockFileMaintenance": Object {
     "packageRules": Array [
       Object {
-        "depTypeList": Array [
+        "matchDepTypes": Array [
           "optionalDependencies",
         ],
         "respectLatest": false,
@@ -315,10 +377,10 @@ Object {
       "major": Object {
         "automerge": false,
       },
+      "matchPackagePatterns": "^(@angular|typescript)",
       "minor": Object {
         "automerge": false,
       },
-      "packagePatterns": "^(@angular|typescript)",
       "patch": Object {
         "automerge": true,
       },

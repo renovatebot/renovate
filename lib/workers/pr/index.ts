@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../config';
+import { getAdminConfig } from '../../config/admin';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -14,8 +15,9 @@ import {
   getBranchLastCommitTime,
   isBranchModified,
 } from '../../util/git';
+import * as template from '../../util/template';
 import { BranchConfig, PrResult } from '../common';
-import { Limit, isLimitReached } from '../global/limits';
+import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
 import { codeOwnersForPr } from './code-owners';
@@ -51,7 +53,7 @@ export async function addAssigneesReviewers(
       }
       if (assignees.length > 0) {
         // istanbul ignore if
-        if (config.dryRun) {
+        if (getAdminConfig().dryRun) {
           logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
         } else {
           await platform.addAssignees(pr.number, assignees);
@@ -69,21 +71,18 @@ export async function addAssigneesReviewers(
   if (config.reviewersFromCodeOwners) {
     reviewers = await addCodeOwners(reviewers, pr);
   }
+  if (config.additionalReviewers.length > 0) {
+    reviewers = reviewers.concat(config.additionalReviewers);
+  }
   if (reviewers.length > 0) {
     try {
-      reviewers = reviewers.map(noLeadingAtSymbol);
-      if (config.additionalReviewers.length > 0) {
-        const additionalReviewers = config.additionalReviewers.map(
-          noLeadingAtSymbol
-        );
-        reviewers = [...new Set(reviewers.concat(additionalReviewers))];
-      }
+      reviewers = [...new Set(reviewers.map(noLeadingAtSymbol))];
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
       if (reviewers.length > 0) {
         // istanbul ignore if
-        if (config.dryRun) {
+        if (getAdminConfig().dryRun) {
           logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
         } else {
           await platform.addReviewers(pr.number, reviewers);
@@ -240,7 +239,7 @@ export async function ensurePr(
   for (const upgrade of upgrades) {
     const upgradeKey = `${upgrade.depType}-${upgrade.depName}-${
       upgrade.manager
-    }-${upgrade.fromVersion || upgrade.currentValue}-${upgrade.toVersion}`;
+    }-${upgrade.currentVersion || upgrade.currentValue}-${upgrade.newVersion}`;
     if (processedUpgrades.includes(upgradeKey)) {
       continue; // eslint-disable-line no-continue
     }
@@ -356,7 +355,7 @@ export async function ensurePr(
         );
       }
       // istanbul ignore if
-      if (config.dryRun) {
+      if (getAdminConfig().dryRun) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
         await platform.updatePr({
@@ -377,11 +376,16 @@ export async function ensurePr(
     let pr: Pr;
     try {
       // istanbul ignore if
-      if (config.dryRun) {
+      if (getAdminConfig().dryRun) {
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        if (!dependencyDashboardCheck && isLimitReached(Limit.PullRequests)) {
+        if (
+          !dependencyDashboardCheck &&
+          isLimitReached(Limit.PullRequests) &&
+          !config.vulnerabilityAlert
+        ) {
+          logger.debug('Skipping PR - limit reached');
           return { prResult: PrResult.LimitReached };
         }
         pr = await platform.createPr({
@@ -389,10 +393,13 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: [...new Set([...config.labels, ...config.addLabels])],
+          labels: [
+            ...new Set([...config.labels, ...config.addLabels]),
+          ].map((label) => template.compile(label, config)),
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
+        incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr.number, prTitle }, 'PR created');
       }
     } catch (err) /* istanbul ignore next */ {
@@ -412,7 +419,7 @@ export async function ensurePr(
           { branch: branchName },
           'Deleting branch due to server error'
         );
-        if (config.dryRun) {
+        if (getAdminConfig().dryRun) {
           logger.info('DRY-RUN: Would delete branch: ' + config.branchName);
         } else {
           await deleteBranch(branchName);
@@ -433,7 +440,7 @@ export async function ensurePr(
       content = platform.getPrBody(content);
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
-      if (config.dryRun) {
+      if (getAdminConfig().dryRun) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
         await platform.ensureComment({
@@ -523,7 +530,7 @@ export async function checkAutoMerge(
     if (automergeType === 'pr-comment') {
       logger.debug(`Applying automerge comment: ${automergeComment}`);
       // istanbul ignore if
-      if (config.dryRun) {
+      if (getAdminConfig().dryRun) {
         logger.info(
           `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
         );
@@ -544,7 +551,7 @@ export async function checkAutoMerge(
     // Let's merge this
     logger.debug(`Automerging #${pr.number}`);
     // istanbul ignore if
-    if (config.dryRun) {
+    if (getAdminConfig().dryRun) {
       logger.info(`DRY-RUN: Would merge PR #${pr.number}`);
       return false;
     }

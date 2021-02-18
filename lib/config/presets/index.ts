@@ -6,7 +6,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
-import { RenovateConfig } from '../common';
+import { GlobalConfig, RenovateConfig } from '../common';
 import * as massage from '../massage';
 import * as migration from '../migration';
 import { mergeChildConfig } from '../utils';
@@ -17,6 +17,7 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
+import { PRESET_DEP_NOT_FOUND } from './util';
 
 const presetSources: Record<string, PresetApi> = {
   github,
@@ -100,6 +101,7 @@ export function parsePreset(input: string): ParsedPreset {
     'npm',
     'packages',
     'preview',
+    'regexManagers',
     'schedule',
     'workarounds',
   ];
@@ -150,6 +152,9 @@ export async function getPreset(
     presetName,
     baseConfig,
   });
+  if (!presetConfig) {
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
     const argMapping = {};
@@ -171,9 +176,9 @@ export async function getPreset(
   }
   const packageListKeys = [
     'description',
-    'packageNames',
+    'matchPackageNames',
     'excludePackageNames',
-    'packagePatterns',
+    'matchPackagePatterns',
     'excludePackagePatterns',
   ];
   if (presetKeys.every((key) => packageListKeys.includes(key))) {
@@ -184,11 +189,11 @@ export async function getPreset(
 }
 
 export async function resolveConfigPresets(
-  inputConfig: RenovateConfig,
+  inputConfig: GlobalConfig,
   baseConfig?: RenovateConfig,
   ignorePresets?: string[],
   existingPresets: string[] = []
-): Promise<RenovateConfig> {
+): Promise<GlobalConfig> {
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets || []; // eslint-disable-line
   }
@@ -196,7 +201,7 @@ export async function resolveConfigPresets(
     { config: inputConfig, existingPresets },
     'resolveConfigPresets'
   );
-  let config: RenovateConfig = {};
+  let config: GlobalConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
@@ -214,7 +219,7 @@ export async function resolveConfigPresets(
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
         try {
-          fetchedPreset = await getPreset(preset, baseConfig);
+          fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
@@ -226,7 +231,7 @@ export async function resolveConfigPresets(
             throw err;
           }
           const error = new Error(CONFIG_VALIDATION);
-          if (err.message === 'dep not found') {
+          if (err.message === PRESET_DEP_NOT_FOUND) {
             error.validationError = `Cannot find preset's package (${preset})`;
           } else if (err.message === 'preset renovate-config not found') {
             error.validationError = `Preset package is missing a renovate-config entry (${preset})`;

@@ -1,7 +1,7 @@
 import type { Merge } from 'type-fest';
 import {
   GroupConfig,
-  RenovateAdminConfig,
+  LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -31,7 +31,6 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
-  currentVersion?: string;
   endpoint?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
@@ -94,12 +93,13 @@ export enum ProcessBranchResult {
   PrEdited = 'pr-edited',
   PrLimitReached = 'pr-limit-reached',
   CommitLimitReached = 'commit-limit-reached',
+  BranchLimitReached = 'branch-limit-reached',
   Rebase = 'rebase',
 }
 
 export interface BranchConfig
   extends BranchUpgradeConfig,
-    RenovateAdminConfig,
+    LegacyAdminConfig,
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;

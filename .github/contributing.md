@@ -3,7 +3,7 @@
 ## Security
 
 If you think you've found a **security issue**, please do not mention it in this repository.
-Instead, email security@renovatebot.com with as much details as possible so that it can be handled confidentially.
+Instead, email renovate-disclosure@whitesourcesoftware.com with as much details as possible so that it can be handled confidentially.
 
 ## Support
 
@@ -26,9 +26,15 @@ Pull Requests can only be merged once all status checks are green, which means `
 
 ## Do not force push to your pull request branch
 
-Please do not force push to your PR's branch after you have created your PR, as doing so makes it harder for us to review your work.
+Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again.
+This makes it harder for us to review your work because we don't know what has changed.
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
+
+Force pushing a PR is OK when:
+
+- you need to make large changes on a PR which require a full review anyway
+- you need to bring the branch up-to-date with the default branch and incorporating the changes is more work than to create a new PR
 
 ## Re-requesting a review
 
@@ -41,8 +47,8 @@ Read more about this in the [GitHub docs, Re-requesting a review](https://docs.g
 Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor.
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
-For that reason, we have a Slack channel dedicated to helping anyone who's working on Pull Requests for Renovate.
-Please email rhys@renovatebot.com and simply mention that you need an invitation to the channel.
+For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
+Please email rhys@arkins.net and simply mention that you need an invitation to the channel and you'll be added ASAP.
 
 ## Legal
 

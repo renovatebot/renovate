@@ -119,7 +119,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config\\"",
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

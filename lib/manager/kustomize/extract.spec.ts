@@ -86,7 +86,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.2.3',
         datasource: datasourceGitTags.id,
         depName: 'bitbucket.com/user/test-repo',
-        depNameShort: 'user/test-repo',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
@@ -98,7 +97,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.2.3',
         datasource: datasourceGitTags.id,
         depName: 'bitbucket.com/user/test-repo',
-        depNameShort: 'user/test-repo',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
