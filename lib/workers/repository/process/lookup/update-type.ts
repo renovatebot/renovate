@@ -1,9 +1,14 @@
 import { UpdateType } from '../../../../config';
 import * as allVersioning from '../../../../versioning';
-import { LookupUpdateConfig } from './common';
+
+export interface UpdateTypeConfig {
+  separateMajorMinor?: boolean;
+  separateMultipleMajor?: boolean;
+  separateMinorPatch?: boolean;
+}
 
 export function getUpdateType(
-  config: LookupUpdateConfig,
+  config: UpdateTypeConfig,
   versioning: allVersioning.VersioningApi,
   currentVersion: string,
   newVersion: string
