@@ -18,8 +18,5 @@ export function getUpdateType(
   if (config.separateMinorPatch) {
     return 'patch';
   }
-  if (config.patch.automerge && !config.minor.automerge) {
-    return 'patch';
-  }
   return 'minor';
 }
