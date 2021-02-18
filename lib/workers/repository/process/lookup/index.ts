@@ -46,10 +46,6 @@ export async function lookupUpdates(
   );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
-  const isValid = currentValue && versioning.isValid(currentValue);
-  if (!isValid) {
-    res.skipReason = SkipReason.InvalidValue;
-  }
   // Record if the dep is fixed to a version
   if (lockedVersion) {
     res.fixedVersion = lockedVersion;
@@ -62,6 +58,7 @@ export async function lookupUpdates(
     return res;
   }
 
+  const isValid = currentValue && versioning.isValid(currentValue);
   if (isValid) {
     const dependency = clone(await getPkgReleases(config));
     if (!dependency) {
