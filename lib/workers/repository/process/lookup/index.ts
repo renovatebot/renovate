@@ -290,6 +290,7 @@ export async function lookupUpdates(
       delete res.skipReason;
     }
   }
+
   // Record if the dep is fixed to a version
   if (lockedVersion) {
     res.fixedVersion = lockedVersion;
