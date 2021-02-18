@@ -22,6 +22,7 @@ import { id as gitVersioningId } from '../../../../versioning/git';
 import { id as npmVersioningId } from '../../../../versioning/npm';
 import { id as pep440VersioningId } from '../../../../versioning/pep440';
 import { id as poetryVersioningId } from '../../../../versioning/poetry';
+import { LookupUpdateConfig } from './common';
 import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
@@ -37,12 +38,12 @@ const githubReleases = mocked(datasourceGithubReleases);
 
 Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
 
-let config: lookup.LookupUpdateConfig;
+let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
     // TODO: fix types
-    config = partial<lookup.LookupUpdateConfig>(getConfig());
+    config = partial<LookupUpdateConfig>(getConfig());
     config.manager = 'npm';
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';

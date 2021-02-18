@@ -12,7 +12,8 @@ import { PackageDependency, PackageFile } from '../../../manager/common';
 import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
-import { LookupUpdateConfig, lookupUpdates } from './lookup';
+import { lookupUpdates } from './lookup';
+import { LookupUpdateConfig } from './lookup/common';
 
 async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,

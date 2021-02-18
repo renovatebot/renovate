@@ -1,8 +1,4 @@
-import {
-  RenovateConfig,
-  UpdateType,
-  ValidationMessage,
-} from '../../../../config';
+import { UpdateType, ValidationMessage } from '../../../../config';
 import {
   Release,
   getDefaultVersioning,
@@ -14,45 +10,14 @@ import {
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
-import { LookupUpdate, RangeConfig } from '../../../../manager/common';
+import { LookupUpdate } from '../../../../manager/common';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
-import { FilterConfig, filterVersions } from './filter';
-import { RollbackConfig, getRollbackUpdate } from './rollback';
-
-export interface UpdateResult {
-  sourceDirectory?: string;
-  changelogUrl?: string;
-  dependencyUrl?: string;
-  homepage?: string;
-  deprecationMessage?: string;
-  sourceUrl?: string;
-  skipReason: SkipReason;
-  releases: Release[];
-  fixedVersion?: string;
-  updates: LookupUpdate[];
-  warnings: ValidationMessage[];
-}
-
-export interface LookupUpdateConfig
-  extends RollbackConfig,
-    FilterConfig,
-    RangeConfig,
-    RenovateConfig {
-  separateMinorPatch?: boolean;
-  digestOneAndOnly?: boolean;
-  pinDigests?: boolean;
-  rollbackPrs?: boolean;
-  currentDigest?: string;
-  lockedVersion?: string;
-  vulnerabilityAlert?: boolean;
-  separateMajorMinor?: boolean;
-  separateMultipleMajor?: boolean;
-  datasource: string;
-  depName: string;
-}
+import { LookupUpdateConfig, UpdateResult } from './common';
+import { filterVersions } from './filter';
+import { getRollbackUpdate } from './rollback';
 
 function getUpdateType(
   config: LookupUpdateConfig,
