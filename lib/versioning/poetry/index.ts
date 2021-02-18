@@ -39,22 +39,12 @@ function padZeroes(input: string): string {
 // This function works like cargo2npm, but it doesn't
 // add a '^', because poetry treats versions without operators as
 // exact versions.
-function poetry2npm(input: string, pad = true): string {
-  const cleanInput = input
+function poetry2npm(input: string): string {
+  return input
     .split(',')
     .map((str) => str.trim())
     .filter(notEmpty)
     .join(' ');
-
-  if (
-    pad &&
-    !npm.isVersion(cleanInput) &&
-    npm.isVersion(padZeroes(cleanInput))
-  ) {
-    return padZeroes(cleanInput);
-  }
-
-  return cleanInput;
 }
 
 // NOTE: This function is copied from cargo versioning code.
@@ -77,16 +67,16 @@ function npm2poetry(input: string): string {
 }
 
 const equals = (a: string, b: string): boolean =>
-  npm.equals(poetry2npm(a), poetry2npm(b));
+  npm.equals(padZeroes(a), padZeroes(b));
 
-const getMajor = (version: string): number => npm.getMajor(poetry2npm(version));
+const getMajor = (version: string): number => npm.getMajor(padZeroes(version));
 
-const getMinor = (version: string): number => npm.getMinor(poetry2npm(version));
+const getMinor = (version: string): number => npm.getMinor(padZeroes(version));
 
-const getPatch = (version: string): number => npm.getPatch(poetry2npm(version));
+const getPatch = (version: string): number => npm.getPatch(padZeroes(version));
 
 const isGreaterThan = (a: string, b: string): boolean =>
-  npm.isGreaterThan(poetry2npm(a), poetry2npm(b));
+  npm.isGreaterThan(padZeroes(a), padZeroes(b));
 
 const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(version, poetry2npm(range));
@@ -95,9 +85,10 @@ export const isValid = (input: string): string | boolean =>
   npm.isValid(poetry2npm(input));
 
 const isStable = (version: string): boolean =>
-  version && npm.isStable(poetry2npm(version));
+  version && npm.isStable(padZeroes(version));
 
-const isVersion = (input: string): string | boolean => npm.isVersion(input);
+const isVersion = (input: string): string | boolean =>
+  npm.isVersion(padZeroes(input));
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, poetry2npm(range));
 
@@ -138,7 +129,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'replace') {
-    const npmCurrentValue = poetry2npm(currentValue, false);
+    const npmCurrentValue = poetry2npm(currentValue);
     const parsedRange = parseRange(npmCurrentValue);
     const element = parsedRange[parsedRange.length - 1];
     if (parsedRange.length === 1 && element.operator) {
@@ -157,7 +148,7 @@ function getNewValue({
     }
   }
   const newSemver = npm.getNewValue({
-    currentValue: poetry2npm(currentValue, false),
+    currentValue: poetry2npm(currentValue),
     rangeStrategy,
     currentVersion,
     newVersion,
@@ -167,7 +158,7 @@ function getNewValue({
 }
 
 function sortVersions(a: string, b: string): number {
-  return npm.sortVersions(poetry2npm(a), poetry2npm(b));
+  return npm.sortVersions(padZeroes(a), padZeroes(b));
 }
 
 export const api: VersioningApi = {
