@@ -31,7 +31,7 @@ It's therefore better to provide Renovate with all the credentials it needs to l
 
 The recommended approaches in order of preference are:
 
-**If you are running your own Renovate bot**: copy an `.npmrc` file to the home dir of the bot and it will work for all repositories
+**If you are running your own Renovate bot**: copy an `.npmrc` file to the home dir of the bot and it will work for all repositories. Note that this will only work when using `binarySource=global`.
 
 **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
 
