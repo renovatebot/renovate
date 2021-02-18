@@ -199,7 +199,7 @@
     "@ls-lint/ls-lint": "1.9.2",
     "@semantic-release/exec": "5.0.0",
     "@types/bunyan": "1.8.6",
-    "@types/cacache": "12.0.1",
+    "@types/cacache": "15.0.0",
     "@types/changelog-filename-regex": "2.0.0",
     "@types/clean-git-ref": "2.0.0",
     "@types/conventional-commits-detector": "1.0.0",
