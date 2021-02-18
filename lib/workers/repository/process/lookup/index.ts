@@ -54,7 +54,7 @@ export interface LookupUpdateConfig
   depName: string;
 }
 
-function getType(
+function getUpdateType(
   config: LookupUpdateConfig,
   currentVersion: string,
   newVersion: string
@@ -76,7 +76,7 @@ function getType(
   return 'minor';
 }
 
-function getFromVersion(
+function getCurrentVersion(
   config: LookupUpdateConfig,
   rangeStrategy: string,
   latestVersion: string,
@@ -259,13 +259,13 @@ export async function lookupUpdates(
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
     const currentVersion =
-      getFromVersion(
+      getCurrentVersion(
         config,
         rangeStrategy,
         latestVersion,
         nonDeprecatedVersions
       ) ||
-      getFromVersion(
+      getCurrentVersion(
         config,
         rangeStrategy,
         latestVersion,
@@ -366,7 +366,7 @@ export async function lookupUpdates(
       update.newMajor = versioning.getMajor(newVersion);
       update.newMinor = versioning.getMinor(newVersion);
       update.updateType =
-        update.updateType || getType(config, currentVersion, newVersion);
+        update.updateType || getUpdateType(config, currentVersion, newVersion);
       update.isSingleVersion =
         update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
       if (!versioning.isVersion(update.newValue)) {
