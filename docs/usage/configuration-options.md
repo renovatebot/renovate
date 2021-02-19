@@ -1286,6 +1286,18 @@ Use the syntax `!/ /` like the following:
 }
 ```
 
+### matchFiles
+
+Renovate will compare `matchFiles` for an exact match against the dependency's package file.
+
+For example the following would match `package.json` but not `package/frontend/package.json`:
+
+```
+  "matchFiles": ["package.json"],
+```
+
+Use `matchPaths` instead if you need more flexible matching.
+
 ### matchPackageNames
 
 Use this field if you want to have one or more exact name matches in your package rule.
