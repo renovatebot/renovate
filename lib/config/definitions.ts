@@ -943,6 +943,17 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchFiles',
+    description:
+      'List of strings to do an exact match against package files with full path. Applicable inside packageRules only.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchPaths',
     description:
       'List of strings or glob patterns to match against package files. Applicable inside packageRules only.',
