@@ -43,7 +43,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     datasource,
   } = inputConfig;
   // Setting empty arrays simplifies our logic later
-  const matchPackageFiles = packageRule.matchPackageFiles || [];
+  const matchFiles = packageRule.matchFiles || [];
   const matchPaths = packageRule.matchPaths || [];
   const matchLanguages = packageRule.matchLanguages || [];
   const matchBaseBranches = packageRule.matchBaseBranches || [];
@@ -65,10 +65,8 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   ) {
     matchPackagePatterns = ['.*'];
   }
-  if (matchPackageFiles.length) {
-    const isMatch = matchPackageFiles.some(
-      (fileName) => packageFile === fileName
-    );
+  if (matchFiles.length) {
+    const isMatch = matchFiles.some((fileName) => packageFile === fileName);
     if (!isMatch) {
       return false;
     }

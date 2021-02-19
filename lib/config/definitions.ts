@@ -943,7 +943,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchPackageFiles',
+    name: 'matchFiles',
     description:
       'List of strings to do an exact match against package files with full path. Applicable inside packageRules only.',
     type: 'array',

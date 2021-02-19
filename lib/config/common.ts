@@ -220,7 +220,7 @@ export interface PackageRule
   extends RenovateSharedConfig,
     UpdateConfig,
     Record<string, any> {
-  matchPackageFiles?: string[];
+  matchFiles?: string[];
   matchPaths?: string[];
   matchLanguages?: string[];
   matchBaseBranches?: string[];

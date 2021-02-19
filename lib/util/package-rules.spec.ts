@@ -610,7 +610,7 @@ describe('applyPackageRules()', () => {
       packageFile: 'examples/foo/package.json',
       packageRules: [
         {
-          matchPackageFiles: ['package.json'],
+          matchFiles: ['package.json'],
           x: 1,
         },
       ],

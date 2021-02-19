@@ -1286,14 +1286,14 @@ Use the syntax `!/ /` like the following:
 }
 ```
 
-### matchPackageFiles
+### matchFiles
 
-Renovate will match `matchPackageFiles` as an exact match against package files.
+Renovate will compare `matchFiles` for an exact match against the dependency's package file.
 
 For example the following would match `package.json` but not `package/frontend/package.json`:
 
 ```
-  "matchPackageFiles": ["package.json"],
+  "matchFiles": ["package.json"],
 ```
 
 Use `matchPaths` instead if you need more flexible matching.
