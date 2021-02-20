@@ -141,11 +141,9 @@ export async function extractPackageFile(
       deps.push(dep);
     }
   }
-  if (!deps.length) {
-    return null;
-  }
   const res: PackageFile = { deps };
   const lockFile = getSiblingFileName(fileName, 'Podfile.lock');
+  // istanbul ignore if
   if (await localPathExists(lockFile)) {
     res.lockFiles = [lockFile];
   }
