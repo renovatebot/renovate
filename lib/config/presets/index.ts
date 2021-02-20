@@ -130,10 +130,12 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
-    [, packageName, presetPath, presetName] = /(.*?)\/\/(.*)\/(.*)$/.exec(str);
+    [, packageName, presetPath, presetName] = /(.*?)\/\/(?:(.*)\/)?(.*)$/.exec(
+      str
+    );
 
     // Validation
-    if (presetPath.includes(':') || presetName.includes(':')) {
+    if (presetPath?.includes(':') || presetName.includes(':')) {
       throw new Error('prohibited sub-preset');
     }
   } else {

@@ -268,6 +268,11 @@ describe('config/presets', () => {
         presets.parsePreset('github>some/repo//somepath/somesubpath/somefile')
       ).toMatchSnapshot();
     });
+    it('parses github toplevel file using subdirectory syntax', () => {
+      expect(
+        presets.parsePreset('github>some/repo//somefile')
+      ).toMatchSnapshot();
+    });
     it('parses gitlab', () => {
       expect(presets.parsePreset('gitlab>some/repo')).toMatchSnapshot();
     });

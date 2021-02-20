@@ -142,6 +142,16 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset parses github toplevel file using subdirectory syntax 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "somefile",
+  "presetPath": undefined,
+  "presetSource": "github",
+}
+`;
+
 exports[`config/presets parsePreset parses gitlab 1`] = `
 Object {
   "packageName": "some/repo",
