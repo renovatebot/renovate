@@ -131,6 +131,11 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
     [, packageName, presetPath, presetName] = /(.*?)\/\/(.*)\/(.*)$/.exec(str);
+
+    // Validation
+    if (presetPath.includes(':') || presetName.includes(':')) {
+      throw new Error('prohibited sub-preset');
+    }
   } else {
     // non-scoped namespace
     [, packageName] = /(.*?)(:|$)/.exec(str);
@@ -248,6 +253,8 @@ export async function resolveConfigPresets(
             error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
           } else if (err.message === 'preset not found') {
             error.validationError = `Preset name not found within published preset config (${preset})`;
+          } else if (err.message === 'prohibited sub-preset') {
+            error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
           }
           // istanbul ignore if
           if (existingPresets.length) {
