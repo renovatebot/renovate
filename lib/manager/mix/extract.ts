@@ -1,12 +1,16 @@
 import * as datasourceHex from '../../datasource/hex';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { PackageDependency, PackageFile } from '../common';
 
 const depSectionRegExp = /defp\s+deps.*do/g;
 const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
 
-export function extractPackageFile(content: string): PackageFile {
+export async function extractPackageFile(
+  content: string,
+  fileName: string
+): Promise<PackageFile | null> {
   logger.trace('mix.extractPackageFile()');
   const deps: PackageDependency[] = [];
   const contentArr = content.split('\n');
@@ -61,5 +65,10 @@ export function extractPackageFile(content: string): PackageFile {
       } while (depMatch);
     }
   }
-  return { deps };
+  const res: PackageFile = { deps };
+  const lockFileName = getSiblingFileName(fileName, 'mix.lock');
+  if (await localPathExists(lockFileName)) {
+    res.lockFiles = [lockFileName];
+  }
+  return res;
 }
