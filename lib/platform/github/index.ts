@@ -391,7 +391,10 @@ export async function initRepo({
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken;
   } else {
-    logger.debug('Using personal access token for git init');
+    const tokenType = opts.token?.startsWith('x-access-token:')
+      ? 'app'
+      : 'personal access';
+    logger.debug(`Using ${tokenType} token for git init`);
     parsedEndpoint.auth = opts.token;
   }
   parsedEndpoint.host = parsedEndpoint.host.replace(

@@ -38,7 +38,9 @@ describe('lib/util/cache/repository', () => {
     });
   });
   it('reads from cache and finalizes', async () => {
-    fs.readFile.mockResolvedValueOnce('{"repository":"abc/def"}' as any);
+    fs.readFile.mockResolvedValueOnce(
+      `{"repository":"abc/def","revision":${repositoryCache.CACHE_REVISION}}` as any
+    );
     await repositoryCache.initialize({
       ...config,
       repositoryCache: 'enabled',

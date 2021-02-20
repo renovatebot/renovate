@@ -68,7 +68,6 @@ describe(getName(__filename), () => {
       expect(res.sourceUrl).toBe(
         'https://github.com/jenkinsci/email-ext-plugin'
       );
-      expect(res.name).toBe('email-ext');
 
       expect(
         res.releases.find((release) => release.version === '2.69')
@@ -100,7 +99,6 @@ describe(getName(__filename), () => {
       expect(res.sourceUrl).toBe(
         'https://github.com/jenkinsci/email-ext-plugin'
       );
-      expect(res.name).toBe('email-ext');
     });
 
     it('returns null empty response', async () => {

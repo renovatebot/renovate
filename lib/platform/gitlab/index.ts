@@ -11,7 +11,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
-  REPOSITORY_TEMPORARY_ERROR,
+  TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -202,7 +202,7 @@ export async function initRepo({
     // istanbul ignore if
     if (!config.defaultBranch) {
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
-      throw new Error(REPOSITORY_TEMPORARY_ERROR);
+      throw new Error(TEMPORARY_ERROR);
     }
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
@@ -684,6 +684,9 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
   try {
+    // give gitlab some time to create pipelines for the sha
+    await delay(1000);
+
     await gitlabApi.postJson(url, { body: options });
 
     // update status cache

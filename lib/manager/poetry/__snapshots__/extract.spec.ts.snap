@@ -548,3 +548,25 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/poetry/extract extractPackageFile() resolves lockedVersions from the lockfile 1`] = `
+Object {
+  "constraints": Object {
+    "python": "^3.9",
+  },
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "datasource": "pypi",
+      "depName": "boto3",
+      "depType": "dependencies",
+      "lockedVersion": "1.17.5",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "versioning": "poetry",
+    },
+  ],
+  "registryUrls": null,
+}
+`;

@@ -1,8 +1,8 @@
 import { RenovateConfig } from '../../../../config';
 import { getAdminConfig } from '../../../../config/admin';
 import {
-  MANAGER_NO_PACKAGE_FILES,
   REPOSITORY_FORKED,
+  REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
@@ -43,7 +43,7 @@ export async function checkOnboardingBranch(
   } else {
     logger.debug('Onboarding PR does not exist');
     if (Object.entries(await extractAllDependencies(config)).length === 0) {
-      throw new Error(MANAGER_NO_PACKAGE_FILES);
+      throw new Error(REPOSITORY_NO_PACKAGE_FILES);
     }
     logger.debug('Need to create onboarding PR');
     const commit = await createOnboardingBranch(config);

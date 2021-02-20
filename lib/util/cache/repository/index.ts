@@ -5,6 +5,9 @@ import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { RepoInitConfig } from '../../../workers/repository/init/common';
 
+// Increment this whenever there could be incompatibilities between old and new cache structure
+export const CACHE_REVISION = 2;
+
 export interface BaseBranchCache {
   sha: string; // branch commit sha
   configHash: string; // object hash of config
@@ -17,11 +20,11 @@ export interface BranchUpgradeCache {
   datasource?: string;
   depName?: string;
   fixedVersion?: string;
-  fromVersion?: string;
+  currentVersion?: string;
   lookupName?: string;
   newDigest?: string;
   newValue?: string;
-  toVersion?: string;
+  newVersion?: string;
   sourceUrl?: string;
 }
 
@@ -38,6 +41,7 @@ export interface BranchCache {
 export interface Cache {
   branches?: BranchCache[];
   repository?: string;
+  revision?: number;
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
 }
@@ -56,7 +60,11 @@ export function getCacheFileName(config: RenovateConfig): string {
 }
 
 function validate(config: RenovateConfig, input: any): Cache | null {
-  if (input?.repository === config.repository) {
+  if (
+    input &&
+    input.repository === config.repository &&
+    input.revision === CACHE_REVISION
+  ) {
     logger.debug('Repository cache is valid');
     return input as Cache;
   }
@@ -79,12 +87,12 @@ export async function initialize(config: RenovateConfig): Promise<void> {
   } catch (err) {
     logger.debug({ cacheFileName }, 'Repository cache not found');
   }
-  cache = cache || Object.create({});
+  cache = cache || Object.create({ revision: CACHE_REVISION });
   cache.repository = config.repository;
 }
 
 export function getCache(): Cache {
-  cache = cache || Object.create({});
+  cache = cache || Object.create({ revision: CACHE_REVISION });
   delete cache.init;
   cache.scan = cache.scan || Object.create({});
   return cache;

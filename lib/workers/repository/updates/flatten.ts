@@ -31,15 +31,16 @@ export async function flattenUpdates(
     for (const packageFile of files) {
       const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
       const packagePath = packageFile.packageFile?.split('/');
+      // istanbul ignore else: can never happen and would throw
       if (packagePath.length > 0) {
         packagePath.splice(-1, 1);
       }
       if (packagePath.length > 0) {
         packageFileConfig.parentDir = packagePath[packagePath.length - 1];
-        packageFileConfig.baseDir = packagePath.join('/');
+        packageFileConfig.packageFileDir = packagePath.join('/');
       } else {
         packageFileConfig.parentDir = '';
-        packageFileConfig.baseDir = '';
+        packageFileConfig.packageFileDir = '';
       }
       for (const dep of packageFile.deps) {
         if (dep.updates.length) {
@@ -48,8 +49,6 @@ export async function flattenUpdates(
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
-            // Massage legacy vars just in case
-            updateConfig.currentVersion = updateConfig.currentValue;
             updateConfig.newVersion =
               updateConfig.newVersion || updateConfig.newValue;
             if (updateConfig.updateType) {
