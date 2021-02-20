@@ -627,6 +627,20 @@ describe('applyPackageRules()', () => {
     });
     expect(res2.x).toBeDefined();
   });
+  it('matches lock files', () => {
+    const config: TestConfig = {
+      packageFile: 'examples/foo/package.json',
+      lockFiles: ['yarn.lock'],
+      packageRules: [
+        {
+          matchFiles: ['yarn.lock'],
+          x: 1,
+        },
+      ],
+    };
+    const res = applyPackageRules(config);
+    expect(res.x).toBeDefined();
+  });
   it('matches paths', () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',
