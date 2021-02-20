@@ -684,6 +684,9 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
   try {
+    // give gitlab some time to create pipelines for the sha
+    await delay(1000);
+
     await gitlabApi.postJson(url, { body: options });
 
     // update status cache
