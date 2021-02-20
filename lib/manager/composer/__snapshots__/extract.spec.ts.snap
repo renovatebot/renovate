@@ -208,6 +208,9 @@ Object {
       "depType": "require-dev",
     },
   ],
+  "lockFiles": Array [
+    "composer.lock",
+  ],
 }
 `;
 
@@ -556,6 +559,9 @@ Object {
       "lockedVersion": "1.2.0",
       "lookupName": "git@my-git.example:my-git-repo",
     },
+  ],
+  "lockFiles": Array [
+    "composer.lock",
   ],
   "registryUrls": Array [
     "https://wpackagist.org",

@@ -1288,7 +1288,7 @@ Use the syntax `!/ /` like the following:
 
 ### matchFiles
 
-Renovate will compare `matchFiles` for an exact match against the dependency's package file.
+Renovate will compare `matchFiles` for an exact match against the dependency's package file or lock file.
 
 For example the following would match `package.json` but not `package/frontend/package.json`:
 

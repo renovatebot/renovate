@@ -28,6 +28,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const {
     versioning,
     packageFile,
+    lockFiles,
     depType,
     depTypes,
     depName,
@@ -66,7 +67,9 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     matchPackagePatterns = ['.*'];
   }
   if (matchFiles.length) {
-    const isMatch = matchFiles.some((fileName) => packageFile === fileName);
+    const isMatch = matchFiles.some(
+      (fileName) => packageFile === fileName || lockFiles?.includes(fileName)
+    );
     if (!isMatch) {
       return false;
     }
