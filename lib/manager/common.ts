@@ -74,6 +74,7 @@ export interface NpmLockFiles {
   pnpmShrinkwrap?: string;
   npmLock?: string;
   lernaDir?: string;
+  lockFiles?: string[];
 }
 
 export interface PackageFile<T = Record<string, any>>

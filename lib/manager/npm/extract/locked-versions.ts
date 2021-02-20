@@ -12,8 +12,10 @@ export async function getLockedVersions(
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
     const { yarnLock, npmLock, pnpmShrinkwrap } = packageFile;
+    const lockFiles = [];
     if (yarnLock) {
       logger.trace('Found yarnLock');
+      lockFiles.push(yarnLock);
       if (!lockFileCache[yarnLock]) {
         logger.trace('Retrieving/parsing ' + yarnLock);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
@@ -35,6 +37,7 @@ export async function getLockedVersions(
       }
     } else if (npmLock) {
       logger.debug('Found ' + npmLock + ' for ' + packageFile.packageFile);
+      lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
         logger.trace('Retrieving/parsing ' + npmLock);
         lockFileCache[npmLock] = await getNpmLock(npmLock);
@@ -54,6 +57,10 @@ export async function getLockedVersions(
       }
     } else if (pnpmShrinkwrap) {
       logger.debug('TODO: implement pnpm-lock.yaml parsing of lockVersion');
+      lockFiles.push(pnpmShrinkwrap);
+    }
+    if (lockFiles.length) {
+      packageFile.lockFiles = lockFiles;
     }
   }
 }
