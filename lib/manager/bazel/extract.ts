@@ -1,14 +1,13 @@
 /* eslint no-plusplus: 0  */
-import moo from 'moo';
 import { parse as _parse } from 'url';
 import parse from 'github-url-from-git';
+import moo from 'moo';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGithubReleases from '../../datasource/github-releases';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import { PackageDependency, PackageFile } from '../common';
 
@@ -98,27 +97,26 @@ function parseContent(content: string): string[] {
   let def: null | string = null;
   const result: string[] = [];
 
-  const finishDef = () => {
+  const finishDef = (): void => {
     if (def !== null) {
       result.push(def);
     }
     def = null;
   };
 
-  const startDef = () => {
+  const startDef = (): void => {
     finishDef();
     def = '';
   };
 
-  const updateDef = (chunk: string) => {
+  const updateDef = (chunk: string): void => {
     if (def !== null) {
       def += chunk;
     }
   };
 
-  while (true) {
-    const token = lexer.next();
-
+  let token = lexer.next();
+  while (token) {
     if (!token) {
       break;
     }
@@ -141,6 +139,8 @@ function parseContent(content: string): string[] {
         finishDef();
       }
     }
+
+    token = lexer.next();
   }
 
   return result;
