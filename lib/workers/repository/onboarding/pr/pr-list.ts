@@ -1,6 +1,7 @@
 import { RenovateConfig } from '../../../../config';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
+import { sanitizeMarkdown } from '../../../../util/markdown';
 import { BranchConfig } from '../../../common';
 
 export function getPrList(
@@ -17,10 +18,8 @@ export function getPrList(
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
 
   for (const branch of branches) {
-    const prTitleRe = /@([a-z]+\/[a-z]+)/;
-    prDesc += `<details>\n<summary>${branch.prTitle.replace(
-      prTitleRe,
-      '@&#8203;$1'
+    prDesc += `<details>\n<summary>${sanitizeMarkdown(
+      branch.prTitle
     )}</summary>\n\n`;
     if (branch.schedule?.length) {
       prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
@@ -43,7 +42,7 @@ export function getPrList(
         if (upgrade.sourceUrl) {
           text += `[${upgrade.depName}](${upgrade.sourceUrl})`;
         } else {
-          text += upgrade.depName.replace(prTitleRe, '@&#8203;$1');
+          text += sanitizeMarkdown(upgrade.depName);
         }
         text += upgrade.isLockfileUpdate
           ? ` to \`${upgrade.newVersion}\``

@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { sanitizeMarkdown } from '../../../util/markdown';
 import * as template from '../../../util/template';
 import { BranchConfig } from '../../common';
 
@@ -62,7 +63,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     let val = '|';
     for (const column of tableColumns) {
       const content = row[column]
-        ? row[column].replace(/^@/, '@&#8203;').replace(/\|/g, '\\|')
+        ? sanitizeMarkdown(row[column]).replace(/\|/g, '\\|')
         : '';
       val += ` ${content} |`;
     }
