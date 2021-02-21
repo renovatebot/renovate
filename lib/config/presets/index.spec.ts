@@ -75,6 +75,21 @@ describe('config/presets', () => {
       expect(e.validationMessage).toMatchSnapshot();
     });
 
+    it('throws if path + sub-preset', async () => {
+      config.foo = 1;
+      config.extends = ['github>user/repo//path:subpreset'];
+      let e: Error;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
+    });
+
     it('throws noconfig', async () => {
       config.foo = 1;
       config.extends = ['noconfig:base'];
