@@ -159,14 +159,15 @@ describe(getName(__filename), () => {
       expect(git.isBranchModified).not.toHaveBeenCalled();
     });
 
-    it('returns true if automerge, rebaseWhen=conflicted and stale', async () => {
+    it('returns false if automerge, rebaseWhen=conflicted and stale', async () => {
       config.rebaseWhen = 'conflicted';
       config.automerge = true;
       git.branchExists.mockReturnValueOnce(true);
+      git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
-      expect(git.isBranchStale).not.toHaveBeenCalled();
-      expect(git.isBranchModified).not.toHaveBeenCalled();
+      expect(res.reuseExistingBranch).toBe(false);
+      expect(git.isBranchStale).toHaveBeenCalled();
+      expect(git.isBranchModified).toHaveBeenCalled();
     });
   });
 });
