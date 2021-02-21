@@ -4,14 +4,14 @@ import { getConfig } from '../../../config/defaults';
 
 import { getPrBody } from '.';
 
-describe('workers/pr/body for platform %s', () => {
+describe('workers/pr/body', () => {
   let config: RenovateConfig;
   beforeEach(() => {
     jest.resetAllMocks();
     config = getConfig();
     platform.getPrBody = jest.fn((input) => input);
   });
-  it('generate the markdown body', async () => {
+  it('generate the message markdown', async () => {
     const branchName = 'test/markdown';
     const prBody = await getPrBody({
       ...config,

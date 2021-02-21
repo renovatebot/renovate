@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr/body for platform %s generate the markdown body 1`] = `
+exports[`workers/pr/body generate the message markdown 1`] = `
 "This PR contains the following updates:
 
 | Package | Type | Update | Change |
