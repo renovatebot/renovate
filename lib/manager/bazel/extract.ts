@@ -66,6 +66,14 @@ const dummyLexer = {
       match: '"',
       push: 'doubleQuoted',
     },
+    longSingleQuoted: {
+      match: "'''",
+      push: 'longSingleQuoted',
+    },
+    singleQuoted: {
+      match: "'",
+      push: 'singleQuoted',
+    },
     def: {
       match: new RegExp(
         [
@@ -85,6 +93,14 @@ const dummyLexer = {
   },
   doubleQuoted: {
     stringFinish: { match: '"', pop: 1 },
+    char: { match: /[^]/, lineBreaks: true },
+  },
+  longSingleQuoted: {
+    stringFinish: { match: "'''", pop: 1 },
+    char: { match: /[^]/, lineBreaks: true },
+  },
+  singleQuoted: {
+    stringFinish: { match: "'", pop: 1 },
     char: { match: /[^]/, lineBreaks: true },
   },
 };
