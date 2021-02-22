@@ -1,5 +1,61 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/npm/extract .extractPackageFile() updates internal packges 1`] = `
+Array [
+  Object {
+    "deps": Array [
+      Object {
+        "depName": "@org/a",
+      },
+      Object {
+        "depName": "@org/b",
+      },
+      Object {
+        "depName": "@org/c",
+      },
+      Object {
+        "depName": "foo",
+      },
+    ],
+    "lernaDir": ".",
+    "lernaPackages": Array [
+      "packages/*",
+    ],
+    "packageFile": "package.json",
+    "packages": Array [
+      "packages/*",
+    ],
+  },
+  Object {
+    "deps": Array [
+      Object {
+        "depName": "@org/b",
+      },
+      Object {
+        "depName": "@org/c",
+      },
+      Object {
+        "depName": "bar",
+      },
+    ],
+    "lernaClient": undefined,
+    "lernaDir": ".",
+    "npmLock": undefined,
+    "packageFile": "packages/a/package.json",
+    "packageJsonName": "@org/a",
+    "yarnLock": undefined,
+  },
+  Object {
+    "lernaClient": undefined,
+    "lernaDir": ".",
+    "npmLock": undefined,
+    "packageFile": "packages/b/package.json",
+    "packageJsonName": "@org/b",
+    "yarnLock": undefined,
+  },
+]
+`;
+
 exports[`manager/npm/extract .extractPackageFile() uses lerna package settings 1`] = `
 Array [
   Object {

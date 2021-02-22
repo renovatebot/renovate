@@ -27,6 +27,7 @@ export interface ExtractConfig extends ManagerConfig {
   yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
+  updateInternalDeps?: boolean;
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
@@ -81,7 +82,6 @@ export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
-  internalPackages?: string[]; // TODO: remove
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
