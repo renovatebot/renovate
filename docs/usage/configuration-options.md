@@ -1864,6 +1864,11 @@ It will be compiled using `handlebars` and the regex `groups` result.
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using `handlebars` and the regex `groups` result.
 
+### registryUrlTemplate
+
+If the `registryUrl` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using `handlebars` and the regex `groups` result.
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
