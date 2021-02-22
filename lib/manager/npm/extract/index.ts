@@ -318,7 +318,6 @@ export async function extractPackageFile(
           if (depName === 'node') {
             // This is a special case for Node.js to group it together with other managers
             dep.commitMessageTopic = 'Node.js';
-            dep.major = { enabled: false };
           }
           dep.prettyDepType = depTypes[depType];
           deps.push(dep);
