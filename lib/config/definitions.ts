@@ -1592,9 +1592,6 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       commitMessageTopic: 'Node.js',
-      major: {
-        enabled: false,
-      },
     },
     mergeable: true,
     cli: false,
