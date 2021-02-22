@@ -587,10 +587,7 @@ export async function mergePr(
   logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
   const azureApiGit = await azureApi.gitApi();
 
-  const pr = await azureApiGit.getPullRequestById(
-    pullRequestId,
-    config.project
-  );
+  let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
   const mergeMethod =
     config.mergeMethods[pr.targetRefName] ??
@@ -620,11 +617,46 @@ export async function mergePr(
   );
 
   try {
-    await azureApiGit.updatePullRequest(
+    const response = await azureApiGit.updatePullRequest(
       objToUpdate,
       config.repoId,
       pullRequestId
     );
+
+    let retries = 0;
+    let hasClosed = response.status === PullRequestStatus.Completed;
+    while (!hasClosed && retries < 5) {
+      retries += 1;
+      const sleepMs = retries * 1000;
+      logger.trace(
+        `Updated PR ${pullRequestId} to closed status but change has not taken effect yet. Sleeping for ${sleepMs} before fetching PR again to check status.`
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, sleepMs));
+      pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
+      hasClosed = pr.status === PullRequestStatus.Completed;
+      logger.trace(
+        `PR ${pullRequestId} status is now: ${pr.status} (${
+          PullRequestStatus[pr.status]
+        })`
+      );
+    }
+
+    // coverage ignored so tests don't wait ~15 seconds to loop 5 times
+    // istanbul ignore next
+    if (!hasClosed) {
+      logger.warn(
+        `PR ${pullRequestId} has been set to status ${
+          PullRequestStatus.Completed
+        } (${
+          PullRequestStatus[PullRequestStatus.Completed]
+        }), however it seems like Azure has not yet updated the PR with that status. (pr status currently shows as ${
+          pr.status
+        } (${
+          PullRequestStatus[pr.status]
+        })). This is probably fine, but can result in renovatebot deleting the source branch before the PR has finished completing.`
+      );
+    }
     return true;
   } catch (err) {
     logger.debug({ err }, 'Failed to set the PR as completed.');
