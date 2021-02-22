@@ -768,6 +768,13 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'updateInternalDeps',
+    description:
+      'Whether to update internal dep versions in a monorepo (Lerna or Yarn Workspaces).',
+    type: 'boolean',
+    stage: 'package',
+  },
+  {
     name: 'packageRules',
     description: 'Rules for matching package names.',
     type: 'array',
