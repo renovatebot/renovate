@@ -1,0 +1,5 @@
+test:
+  stage: test
+  image: node:12
+  script:
+    - echo test
