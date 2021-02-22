@@ -1264,7 +1264,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
-      rangeStrategy: 'update-lockfile',
+      rangeStrategy: 'bump',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
       prCreation: 'immediate',
