@@ -2062,6 +2062,13 @@ Please see the above link for valid timezone names.
 
 If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
 
+## updateInternalDeps
+
+Renovate defaults to skipping any internal package dependencies within monorepos.
+In such case dependency versions won't be updated by Renovate.
+
+To opt in to letting Renovate update internal package versions normally, set this configuration option to true.
+
 ## updateLockFiles
 
 ## updateNotScheduled
