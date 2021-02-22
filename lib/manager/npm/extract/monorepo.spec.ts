@@ -53,7 +53,7 @@ describe('manager/npm/extract', () => {
         )
       ).toBe(true);
     });
-    it('updates internal packges', () => {
+    it('updates internal packages', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',

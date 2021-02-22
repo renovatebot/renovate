@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/extract .extractPackageFile() updates internal packges 1`] = `
+exports[`manager/npm/extract .extractPackageFile() updates internal packages 1`] = `
 Array [
   Object {
     "deps": Array [
