@@ -1266,6 +1266,8 @@ const options: RenovateOptions[] = [
       dependencyDashboardApproval: false,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
+      branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
+      prCreation: 'immediate',
     },
     mergeable: true,
     cli: false,
