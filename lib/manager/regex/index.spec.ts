@@ -115,6 +115,32 @@ describe(getName(__filename), () => {
     );
     expect(res).toMatchSnapshot();
   });
+  it('supports registryUrlTemplate', async () => {
+    const config = {
+      matchStrings: [
+        'chart:\n *name: (?<depName>.*?)\n *version: (?<currentValue>.*)\n',
+      ],
+      datasourceTemplate: 'helm',
+      registryUrlTemplate: 'https://charts.helm.sh/stable',
+    };
+    const res = await extractPackageFile(
+      `
+      apiVersion: helm.fluxcd.io/v1
+      kind: HelmRelease
+      metadata:
+        name: prometheus-operator
+        namespace: monitoring
+      spec:
+        releaseName: prometheus-operator
+        chart:
+          name: prometheus-operator
+          version: 8.12.13
+      `,
+      'Dockerfile',
+      config
+    );
+    expect(res).toMatchSnapshot();
+  });
   it('extracts multiple dependencies with multiple matchStrings', async () => {
     const config = {
       matchStrings: [

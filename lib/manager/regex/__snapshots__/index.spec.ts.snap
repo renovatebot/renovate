@@ -260,3 +260,28 @@ Object {
   "matchStringsStrategy": "recursive",
 }
 `;
+
+exports[`manager/regex/index supports registryUrlTemplate 1`] = `
+Object {
+  "datasourceTemplate": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "8.12.13",
+      "datasource": "helm",
+      "depName": "prometheus-operator",
+      "registryUrl": "https://charts.helm.sh/stable",
+      "replaceString": "chart:
+          name: prometheus-operator
+          version: 8.12.13
+",
+    },
+  ],
+  "matchStrings": Array [
+    "chart:
+ *name: (?<depName>.*?)
+ *version: (?<currentValue>.*)
+",
+  ],
+  "registryUrlTemplate": "https://charts.helm.sh/stable",
+}
+`;
