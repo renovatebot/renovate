@@ -24,7 +24,7 @@ Configuration-wise, it works like this:
 - You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver` will be used as the default
 - You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
 - You can optionally have a `currentDigest` capture group.
-- You can optionally have a `registryUrl` capture group. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array.
+- You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array.
 
 ### Regular Expression Capture Groups
 

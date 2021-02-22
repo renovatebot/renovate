@@ -37,6 +37,7 @@ export interface CustomExtractConfig extends ExtractConfig {
   lookupNameTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
+  registryUrlTemplate?: string;
 }
 
 export interface UpdateArtifactsConfig extends ManagerConfig {

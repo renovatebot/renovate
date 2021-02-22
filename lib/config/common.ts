@@ -136,6 +136,7 @@ export interface CustomManager {
   datasourceTemplate?: string;
   lookupNameTemplate?: string;
   versioningTemplate?: string;
+  registryUrlTemplate?: string;
 }
 
 // TODO: Proper typings
