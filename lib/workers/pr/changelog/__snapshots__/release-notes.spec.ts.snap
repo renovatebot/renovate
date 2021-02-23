@@ -38,6 +38,25 @@ Object {
 }
 `;
 
+exports[`workers/pr/changelog/release-notes addReleaseNotes() returns ChangeLogResult without release notes from self-hosted gitlab instance 1`] = `
+Object {
+  "a": 1,
+  "hasReleaseNotes": false,
+  "project": Object {
+    "gitlab": "https://git.test.com/group/project/",
+  },
+  "versions": Array [
+    Object {
+      "compare": Object {
+        "url": "",
+      },
+      "releaseNotes": null,
+      "version": "20.26.0",
+    },
+  ],
+}
+`;
+
 exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for github repo 1`] = `
 Array [
   Object {
@@ -100,6 +119,38 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases?per_page=100",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for self-hosted gitlab project 1`] = `
+Array [
+  Object {
+    "body": undefined,
+    "name": undefined,
+    "tag": "v1.0.0",
+    "url": "https://git.test.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0",
+  },
+  Object {
+    "body": undefined,
+    "name": undefined,
+    "tag": "v1.0.1",
+    "url": "https://git.test.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for self-hosted gitlab project 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "git.test.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.test.com/api/v4/projects/some%2fyet-other-repository/releases?per_page=100",
   },
 ]
 `;
@@ -234,7 +285,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  2`] = `
 Array [
@@ -251,7 +309,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "other-1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/other-1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 2`] = `
 Array [
@@ -268,7 +333,14 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "v1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/v1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 2`] = `
 Array [
@@ -281,6 +353,78 @@ Array [
     },
     "method": "GET",
     "url": "https://api.gitlab.com/projects/some%2fother-repository/releases?per_page=100",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo  1`] = `
+Object {
+  "body": "some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "1.0.1",
+  "url": "https://git.test.com/some/other-repository/tags/1.0.1",
+}
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo  2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "git.test.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.test.com/api/v4/projects/some%2fother-repository/releases?per_page=100",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo other- 1`] = `
+Object {
+  "body": "some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "other-1.0.1",
+  "url": "https://git.test.com/some/other-repository/tags/other-1.0.1",
+}
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo other- 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "git.test.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.test.com/api/v4/projects/some%2fother-repository/releases?per_page=100",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo v 1`] = `
+Object {
+  "body": "some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "v1.0.1",
+  "url": "https://git.test.com/some/other-repository/tags/v1.0.1",
+}
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from self-hosted gitlab repo v 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "git.test.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.test.com/api/v4/projects/some%2fother-repository/releases?per_page=100",
   },
 ]
 `;
@@ -921,5 +1065,45 @@ Object {
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
   "url": "https://github.com/nodeca/js-yaml/blob/master/CHANGELOG.md#3100--2017-09-10",
+}
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses self-hosted gitlab git.test.com/group/project 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "git.test.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.test.com/api/v4/projects/group%2fproject/repository/tree?per_page=100",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "git.test.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.test.com/api/v4/projects/group%2fproject/repository/blobs/abcd/raw",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses self-hosted gitlab git.test.com/group/project 2`] = `
+Object {
+  "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
+-   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
+    -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
+-   Fix \`/channel\` slash command name regex to accept hyphenated names, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1881>
+    -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
+-   Add GitLab branding to the left-menu, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1865>
+-   Fix left-menu search state showing all rooms, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1883>
+-   Update Polish translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1882>
+    -   Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution
+",
+  "url": "https://git.test.com/group/project/blob/master/CHANGELOG.md#20260---2020-05-18",
 }
 `;

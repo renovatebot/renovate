@@ -102,6 +102,14 @@ describe(getName(__filename), () => {
       };
       expect(await addReleaseNotes(input as never)).toMatchSnapshot();
     });
+    it('returns ChangeLogResult without release notes from self-hosted gitlab instance', async () => {
+      const input = {
+        a: 1,
+        project: { gitlab: 'https://git.test.com/group/project/' },
+        versions: [{ version: '20.26.0', compare: { url: '' } }],
+      };
+      expect(await addReleaseNotes(input as never)).toMatchSnapshot();
+    });
   });
   describe('getReleaseList()', () => {
     it('should return empty array if no apiBaseUrl', async () => {
@@ -144,7 +152,30 @@ describe(getName(__filename), () => {
         ]);
       const res = await getReleaseList(
         'https://gitlab.com/api/v4/',
-        'some/yet-other-repository'
+        'some/yet-other-repository',
+        'gitlab'
+      );
+      expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should return release list for self-hosted gitlab project', async () => {
+      httpMock
+        .scope('https://git.test.com/')
+        .get(
+          '/api/v4/projects/some%2fyet-other-repository/releases?per_page=100'
+        )
+        .reply(200, [
+          { tag_name: `v1.0.0` },
+          {
+            tag_name: `v1.0.1`,
+            body:
+              'some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+      const res = await getReleaseList(
+        'https://git.test.com/api/v4/',
+        'some/yet-other-repository',
+        'gitlab'
       );
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -201,7 +232,7 @@ describe(getName(__filename), () => {
             { tag_name: `${prefix}1.0.0` },
             {
               tag_name: `${prefix}1.0.1`,
-              body:
+              description:
                 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
             },
           ]);
@@ -211,7 +242,35 @@ describe(getName(__filename), () => {
           '1.0.1',
           'other',
           'https://gitlab.com/',
-          'https://api.gitlab.com/'
+          'https://api.gitlab.com/',
+          'gitlab'
+        );
+        expect(res).toMatchSnapshot();
+        expect(httpMock.getTrace()).toMatchSnapshot();
+      }
+    );
+    it.each([[''], ['v'], ['other-']])(
+      'gets release notes with body from self-hosted gitlab repo %s',
+      async (prefix) => {
+        httpMock
+          .scope('https://git.test.com/api/v4/')
+          .get('/projects/some%2fother-repository/releases?per_page=100')
+          .reply(200, [
+            { tag_name: `${prefix}1.0.0` },
+            {
+              tag_name: `${prefix}1.0.1`,
+              description:
+                'some body #123, [#124](https://git.test.com/some/yet-other-repository/issues/124)',
+            },
+          ]);
+
+        const res = await getReleaseNotes(
+          'some/other-repository',
+          '1.0.1',
+          'other',
+          'https://git.test.com/',
+          'https://git.test.com/api/v4/',
+          'gitlab'
         );
         expect(res).toMatchSnapshot();
         expect(httpMock.getTrace()).toMatchSnapshot();
@@ -337,7 +396,27 @@ describe(getName(__filename), () => {
         'gitlab-org/gitter/webapp',
         '20.26.0',
         'https://gitlab.com/',
-        'https://api.gitlab.com/'
+        'https://api.gitlab.com/',
+        'gitlab'
+      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
+    it('parses self-hosted gitlab git.test.com/group/project', async () => {
+      jest.setTimeout(0);
+      httpMock
+        .scope('https://git.test.com/api/v4/')
+        .get('/projects/group%2fproject/repository/tree?per_page=100')
+        .reply(200, gitlabTreeResponse)
+        .get('/projects/group%2fproject/repository/blobs/abcd/raw')
+        .reply(200, gitterWebappChangelogMd);
+      const res = await getReleaseNotesMd(
+        'group/project',
+        '20.26.0',
+        'https://git.test.com/',
+        'https://git.test.com/api/v4/',
+        'gitlab'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -447,7 +526,8 @@ describe(getName(__filename), () => {
           'itentialopensource/adapter-utils',
           '4.33.0',
           'https://gitlab.com/',
-          'https://gitlab.com/api/v4/'
+          'https://gitlab.com/api/v4/',
+          'gitlab'
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
