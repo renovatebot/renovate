@@ -1,13 +1,13 @@
 /* eslint no-plusplus: 0  */
 import { parse as _parse } from 'url';
 import parse from 'github-url-from-git';
-import moo from 'moo';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGithubReleases from '../../datasource/github-releases';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import { PackageDependency, PackageFile } from '../common';
 
@@ -53,113 +53,61 @@ function parseUrl(urlString: string): UrlParsedResult | null {
   return null;
 }
 
-const dummyLexer = {
-  main: {
-    lineComment: { match: /#.*?$/ },
-    leftParen: { match: '(' },
-    rightParen: { match: ')' },
-    longDoubleQuoted: {
-      match: '"""',
-      push: 'longDoubleQuoted',
-    },
-    doubleQuoted: {
-      match: '"',
-      push: 'doubleQuoted',
-    },
-    longSingleQuoted: {
-      match: "'''",
-      push: 'longSingleQuoted',
-    },
-    singleQuoted: {
-      match: "'",
-      push: 'singleQuoted',
-    },
-    def: {
-      match: new RegExp(
-        [
-          'container_pull',
-          'http_archive',
-          'http_file',
-          'go_repository',
-          'git_repository',
-        ].join('|')
-      ),
-    },
-    unknown: { match: /[^]/, lineBreaks: true },
-  },
-  longDoubleQuoted: {
-    stringFinish: { match: '"""', pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
-  },
-  doubleQuoted: {
-    stringFinish: { match: '"', pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
-  },
-  longSingleQuoted: {
-    stringFinish: { match: "'''", pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
-  },
-  singleQuoted: {
-    stringFinish: { match: "'", pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
-  },
-};
+function findBalancedParenIndex(longString: string): number {
+  /**
+   * Minimalistic string parser with single task -> find last char in def.
+   * It treats [)] as the last char.
+   * To find needed closing parenthesis we need to increment
+   * nesting depth when parser feeds opening parenthesis
+   * if one opening parenthesis -> 1
+   * if two opening parenthesis -> 2
+   * if two opening and one closing parenthesis -> 1
+   * if ["""] found then ignore all [)] until closing ["""] parsed.
+   * https://github.com/renovatebot/renovate/pull/3459#issuecomment-478249702
+   */
+  let intShouldNotBeOdd = 0; // openClosePythonMultiLineComment
+  let parenNestingDepth = 1;
+  return [...longString].findIndex((char, i, arr) => {
+    switch (char) {
+      case '(':
+        parenNestingDepth++;
+        break;
+      case ')':
+        parenNestingDepth--;
+        break;
+      case '"':
+        if (i > 1 && arr.slice(i - 2, i).every((prev) => char === prev)) {
+          intShouldNotBeOdd++;
+        }
+        break;
+      default:
+        break;
+    }
+    return !parenNestingDepth && !(intShouldNotBeOdd % 2) && char === ')';
+  });
+}
 
 function parseContent(content: string): string[] {
-  const lexer = moo.states(dummyLexer);
-  lexer.reset(content);
-  let balance = 0;
-
-  let def: null | string = null;
-  const result: string[] = [];
-
-  const finishDef = (): void => {
-    if (def !== null) {
-      result.push(def);
-    }
-    def = null;
-  };
-
-  const startDef = (): void => {
-    finishDef();
-    def = '';
-  };
-
-  const updateDef = (chunk: string): void => {
-    if (def !== null) {
-      def += chunk;
-    }
-  };
-
-  let token = lexer.next();
-  while (token) {
-    if (!token) {
-      break;
-    }
-
-    const { type, value } = token;
-
-    if (type === 'def') {
-      startDef();
-    }
-
-    updateDef(value);
-
-    if (type === 'leftParen') {
-      balance += 1;
-    }
-
-    if (type === 'rightParen') {
-      balance -= 1;
-      if (balance <= 0) {
-        finishDef();
-      }
-    }
-
-    token = lexer.next();
-  }
-
-  return result;
+  return [
+    'container_pull',
+    'http_archive',
+    'http_file',
+    'go_repository',
+    'git_repository',
+  ].reduce(
+    (acc, prefix) => [
+      ...acc,
+      ...content
+        .split(regEx(prefix + '\\s*\\(', 'g'))
+        .slice(1)
+        .map((base) => {
+          const ind = findBalancedParenIndex(base);
+          return ind >= 0 && `${prefix}(${base.slice(0, ind)})`;
+        })
+        .filter(Boolean),
+    ],
+    [] as string[]
+  );
 }
 
 export function extractPackageFile(
