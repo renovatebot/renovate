@@ -93,7 +93,7 @@ export function extractPackageFile(
     });
   }
 
-  if (deps.length == 0) {
+  if (!deps.length) {
     logger.debug({ fileName }, 'helmfile.yaml has no releases');
     return null;
   }
