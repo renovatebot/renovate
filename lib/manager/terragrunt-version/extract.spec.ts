@@ -1,6 +1,6 @@
 import { extractPackageFile } from './extract';
 
-describe('lib/manager/terragrunt-version/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns a result', () => {
       const res = extractPackageFile('12.0.0\n');
