@@ -269,7 +269,9 @@ Object {
       "currentValue": "8.12.13",
       "datasource": "helm",
       "depName": "prometheus-operator",
-      "registryUrl": "https://charts.helm.sh/stable",
+      "registryUrls": Array [
+        "https://charts.helm.sh/stable",
+      ],
       "replaceString": "chart:
           name: prometheus-operator
           version: 8.12.13

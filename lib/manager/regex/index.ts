@@ -36,6 +36,18 @@ function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
   return matches;
 }
 
+function setField(dep: PackageDependency, field: string, value: any): void {
+  if (field === 'registryUrl') {
+    if (url.parse(value)) {
+      // eslint-disable-next-line no-param-reassign
+      dep.registryUrls = [value];
+    }
+  } else {
+    // eslint-disable-next-line no-param-reassign
+    dep[field] = value;
+  }
+}
+
 function createDependency(
   matchResult: RegExpMatchArray,
   config: CustomExtractConfig,
@@ -47,11 +59,8 @@ function createDependency(
     const fieldTemplate = `${field}Template`;
     if (config[fieldTemplate]) {
       try {
-        dependency[field] = template.compile(
-          config[fieldTemplate],
-          groups,
-          false
-        );
+        const value = template.compile(config[fieldTemplate], groups, false);
+        setField(dependency, field, value);
       } catch (err) {
         logger.warn(
           { template: config[fieldTemplate] },
@@ -60,17 +69,7 @@ function createDependency(
         return null;
       }
     } else if (groups[field]) {
-      switch (field) {
-        case 'registryUrl':
-          // check if URL is valid and pack inside an array
-          if (url.parse(groups[field])) {
-            dependency.registryUrls = [groups[field]];
-          }
-          break;
-        default:
-          dependency[field] = groups[field];
-          break;
-      }
+      setField(dependency, field, groups[field]);
     }
   }
   dependency.replaceString = String(matchResult[0]);
