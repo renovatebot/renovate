@@ -13,9 +13,9 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue; // eslint-disable-line no-continue
     }
 
-    const dockerMatch = /^\s+image: ([^"]+)\s*$/.exec(line);
-    if (dockerMatch) {
-      const [, currentFrom] = dockerMatch;
+    const containerImageMatch = /^\s+image: ([^"]+)\s*$/.exec(line);
+    if (containerImageMatch) {
+      const [, currentFrom] = containerImageMatch;
       const dep = getDep(currentFrom);
       dep.depType = 'docker';
       dep.versioning = dockerVersioning.id;
