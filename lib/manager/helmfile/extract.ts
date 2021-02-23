@@ -35,8 +35,7 @@ export function extractPackageFile(
   }
   for (const doc of docs) {
     if (!(doc && is.array(doc.releases))) {
-      logger.debug({ fileName }, 'helmfile.yaml has no releases');
-      return null;
+      continue;
     }
 
     if (doc.repositories) {
@@ -92,6 +91,11 @@ export function extractPackageFile(
 
       return res;
     });
+  }
+
+  if (deps.length == 0) {
+    logger.debug({ fileName }, 'helmfile.yaml has no releases');
+    return null;
   }
 
   return { deps, datasource: datasourceHelm.id } as PackageFile;
