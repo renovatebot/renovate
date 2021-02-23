@@ -1,3 +1,4 @@
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 describe(getName(__filename), () => {
