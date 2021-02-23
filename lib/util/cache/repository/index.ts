@@ -73,6 +73,13 @@ function validate(config: RenovateConfig, input: any): Cache | null {
   return null;
 }
 
+function createCache(repository?: string): Cache {
+  const res: Cache = Object.create({});
+  res.repository = repository;
+  res.revision = CACHE_REVISION;
+  return res;
+}
+
 export async function initialize(config: RenovateConfig): Promise<void> {
   cache = null;
   try {
@@ -87,15 +94,11 @@ export async function initialize(config: RenovateConfig): Promise<void> {
   } catch (err) {
     logger.debug({ cacheFileName }, 'Repository cache not found');
   }
-  cache = cache || Object.create({ revision: CACHE_REVISION });
-  cache.repository = config.repository;
+  cache ||= createCache(config.repository);
 }
 
 export function getCache(): Cache {
-  cache = cache || Object.create({ revision: CACHE_REVISION });
-  delete cache.init;
-  cache.scan = cache.scan || Object.create({});
-  return cache;
+  return cache || createCache();
 }
 
 export async function finalize(): Promise<void> {
