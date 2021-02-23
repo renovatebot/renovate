@@ -4,6 +4,7 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
@@ -15,6 +16,7 @@ describe('platform/azure', () => {
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
   let git: jest.Mocked<typeof _git>;
+  let logger: jest.Mocked<typeof _logger>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -22,11 +24,13 @@ describe('platform/azure', () => {
     jest.mock('./azure-helper');
     jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
+    jest.mock('../../logger');
     hostRules = require('../../util/host-rules');
     require('../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
+    logger = (await import('../../logger')).logger as any;
     git = require('../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
@@ -1009,6 +1013,7 @@ describe('platform/azure', () => {
   describe('mergePr', () => {
     it('should complete the PR', async () => {
       await initRepo({ repository: 'some/repo' });
+      jest.mock('delay');
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
@@ -1048,6 +1053,7 @@ describe('platform/azure', () => {
     });
     it('should return false if the PR does not update successfully', async () => {
       await initRepo({ repository: 'some/repo' });
+      jest.mock('delay');
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
@@ -1073,6 +1079,7 @@ describe('platform/azure', () => {
 
     it('should cache the mergeMethod for subsequent merges', async () => {
       await initRepo({ repository: 'some/repo' });
+      jest.mock('delay');
       azureApi.gitApi.mockImplementation(
         () =>
           ({
@@ -1095,6 +1102,7 @@ describe('platform/azure', () => {
 
     it('should refetch the PR if the update response has not yet been set to completed', async () => {
       await initRepo({ repository: 'some/repo' });
+      jest.mock('delay');
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
@@ -1119,6 +1127,40 @@ describe('platform/azure', () => {
       const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
+      expect(res).toBe(true);
+    });
+
+    it('should log a warning after retrying if the PR has still not yet been set to completed', async () => {
+      await initRepo({ repository: 'some/repo' });
+      jest.mock('delay');
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      const expectedNumRetries = 5;
+      const getPullRequestByIdMock = jest.fn(() => ({
+        lastMergeSourceCommit: lastMergeSourceCommitMock,
+        targetRefName: 'refs/heads/ding',
+        status: 1,
+      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestById: getPullRequestByIdMock,
+            updatePullRequest: jest.fn(() => ({
+              status: 1,
+            })),
+          } as any)
+      );
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
+      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+
+      expect(getPullRequestByIdMock).toHaveBeenCalledTimes(
+        expectedNumRetries + 1
+      );
+      expect(logger.warn).toHaveBeenCalled();
       expect(res).toBe(true);
     });
   });

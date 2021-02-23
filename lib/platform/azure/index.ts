@@ -7,6 +7,7 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import delay from 'delay';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -629,28 +630,25 @@ export async function mergePr(
       retries += 1;
       const sleepMs = retries * 1000;
       logger.trace(
-        `Updated PR ${pullRequestId} to closed status but change has not taken effect yet. Sleeping for ${sleepMs} before fetching PR again to check status (retry "${retries}")`
+        { pullRequestId, status: pr.status, retries },
+        `Updated PR to closed status but change has not taken effect yet. Retrying...`
       );
 
-      await new Promise((resolve) => setTimeout(resolve, sleepMs));
+      await delay(sleepMs);
       pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
       isClosed = pr.status === PullRequestStatus.Completed;
       logger.trace(
-        `PR ${pullRequestId} status is now: ${pr.status} (${
-          PullRequestStatus[pr.status]
-        })`
+        { pullRequestId, status: pr.status },
+        `PR status is now: ${PullRequestStatus[pr.status]}`
       );
     }
 
-    // coverage ignored so tests don't wait ~15 seconds to loop 5 times
-    // istanbul ignore next
     if (!isClosed) {
       logger.warn(
-        `Expected PR ${pullRequestId} to have status ${
-          PullRequestStatus.Completed
-        } (${PullRequestStatus[PullRequestStatus.Completed]}), however it is ${
-          pr.status
-        } (${PullRequestStatus[pr.status]})).`
+        { pullRequestId, status: pr.status },
+        `Expected PR to have status ${
+          PullRequestStatus[PullRequestStatus.Completed]
+        }, however it is ${PullRequestStatus[pr.status]}.`
       );
     }
     return true;
