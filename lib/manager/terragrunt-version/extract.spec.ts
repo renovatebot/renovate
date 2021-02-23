@@ -7,9 +7,5 @@ describe(getName(__filename), () => {
       const res = extractPackageFile('12.0.0\n');
       expect(res.deps).toMatchSnapshot();
     });
-    it('skips non ranges', () => {
-      const res = extractPackageFile('latest');
-      expect(res.deps).toMatchSnapshot();
-    });
   });
 });
