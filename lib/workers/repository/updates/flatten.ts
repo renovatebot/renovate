@@ -134,6 +134,28 @@ export async function flattenUpdates(
         generateBranchName(lockFileConfig);
         updates.push(lockFileConfig);
       }
+      if (get(manager, 'remediateLockFile')) {
+        for (const lockFile of packageFileConfig.lockFiles || []) {
+          const remediations = config.remediations[lockFile];
+          if (remediations) {
+            for (const remediation of remediations) {
+              let updateConfig = mergeChildConfig(
+                packageFileConfig,
+                remediation
+              );
+              updateConfig = mergeChildConfig(
+                updateConfig,
+                config.vulnerabilityAlerts
+              );
+              updateConfig.isVulnerabilityAlert = true;
+              updateConfig.isRemediation = true;
+              updateConfig.lockFile = lockFile;
+              updateConfig = applyUpdateConfig(updateConfig);
+              updates.push(updateConfig);
+            }
+          }
+        }
+      }
     }
   }
   return updates

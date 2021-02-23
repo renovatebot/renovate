@@ -229,6 +229,16 @@ export interface BumpPackageVersionResult {
   bumpedContent: string | null;
 }
 
+export interface RemediationConfig {
+  packageFile?: string;
+  packageFileContent?: string;
+  lockFile?: string;
+  lockFileContent?: string;
+  depName?: string;
+  currentValue?: string;
+  newValue?: string;
+}
+
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
   language?: string;
@@ -262,6 +272,10 @@ export interface ManagerApi {
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
+
+  remediateLockFile?(
+    config: RemediationConfig
+  ): Result<Record<string, string | null>>;
 }
 
 // TODO: name and properties used by npm manager
