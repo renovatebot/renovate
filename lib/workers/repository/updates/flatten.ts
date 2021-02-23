@@ -150,6 +150,8 @@ export async function flattenUpdates(
               updateConfig.isVulnerabilityAlert = true;
               updateConfig.isRemediation = true;
               updateConfig.lockFile = lockFile;
+              updateConfig.currentValue = updateConfig.currentVersion;
+              updateConfig.newValue = updateConfig.newVersion;
               updateConfig = applyUpdateConfig(updateConfig);
               updates.push(updateConfig);
             }

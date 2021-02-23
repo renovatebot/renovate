@@ -235,8 +235,8 @@ export interface RemediationConfig {
   lockFile?: string;
   lockFileContent?: string;
   depName?: string;
-  currentValue?: string;
-  newValue?: string;
+  currentVersion?: string;
+  newVersion?: string;
 }
 
 export interface ManagerApi {
