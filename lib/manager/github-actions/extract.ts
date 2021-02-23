@@ -22,7 +22,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       deps.push(dep);
       continue; // eslint-disable-line no-continue
     }
-    
+
     const dockerMatch = /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
