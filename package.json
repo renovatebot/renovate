@@ -228,6 +228,7 @@
     "@types/semver-utils": "1.1.0",
     "@types/shelljs": "0.8.8",
     "@types/traverse": "0.6.32",
+    "@types/url-join": "4.0.0",
     "@types/xmldoc": "1.1.5",
     "@typescript-eslint/eslint-plugin": "4.6.0",
     "@typescript-eslint/parser": "4.6.0",
