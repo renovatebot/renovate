@@ -35,7 +35,7 @@ export function extractPackageFile(
   }
   for (const doc of docs) {
     if (!(doc && is.array(doc.releases))) {
-      continue;
+      continue; // eslint-disable-line no-continue
     }
 
     if (doc.repositories) {
