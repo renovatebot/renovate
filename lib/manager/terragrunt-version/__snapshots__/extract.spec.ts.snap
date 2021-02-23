@@ -1,19 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/terragrunt-version/extract extractPackageFile() returns a result 1`] = `
+exports[`manager/terragrunt-version/extract extractPackageFile() returns a result 1`] = `
 Array [
   Object {
     "currentValue": "12.0.0",
-    "datasource": "github-releases",
-    "depName": "gruntwork-io/terragrunt",
-  },
-]
-`;
-
-exports[`lib/manager/terragrunt-version/extract extractPackageFile() skips non ranges 1`] = `
-Array [
-  Object {
-    "currentValue": "latest",
     "datasource": "github-releases",
     "depName": "gruntwork-io/terragrunt",
   },
