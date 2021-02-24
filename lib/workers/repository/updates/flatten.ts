@@ -134,7 +134,7 @@ export async function flattenUpdates(
         generateBranchName(lockFileConfig);
         updates.push(lockFileConfig);
       }
-      if (get(manager, 'remediateLockFile')) {
+      if (get(manager, 'updateLockedDependency')) {
         for (const lockFile of packageFileConfig.lockFiles || []) {
           const remediations = config.remediations?.[lockFile];
           if (remediations) {

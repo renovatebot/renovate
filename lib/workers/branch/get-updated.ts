@@ -73,8 +73,8 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch: false,
         });
       }
-      const remediateLockFile = get(manager, 'remediateLockFile');
-      const files = await remediateLockFile({
+      const updateLockedDependency = get(manager, 'updateLockedDependency');
+      const files = await updateLockedDependency({
         ...upgrade,
         packageFileContent,
         lockFileContent,

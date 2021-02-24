@@ -229,7 +229,7 @@ export interface BumpPackageVersionResult {
   bumpedContent: string | null;
 }
 
-export interface RemediationConfig {
+export interface UpdateLockedConfig {
   packageFile?: string;
   packageFileContent?: string;
   lockFile?: string;
@@ -273,8 +273,8 @@ export interface ManagerApi {
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 
-  remediateLockFile?(
-    config: RemediationConfig
+  updateLockedDependency?(
+    config: UpdateLockedConfig
   ): Result<Record<string, string | null>>;
 }
 

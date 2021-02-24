@@ -5,7 +5,7 @@ import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { Http } from '../../util/http';
 import { api as semver } from '../../versioning/npm';
-import { RemediationConfig } from '../common';
+import { UpdateLockedConfig } from '../common';
 import { updateDependency } from './update';
 
 const http = new Http('npm');
@@ -36,7 +36,7 @@ interface LockRequirements {
   constraint: string;
 }
 
-async function findFirstSupportingVersion(
+export async function findFirstParentVersion(
   parentName: string,
   parentStartingVersion: string,
   depName: string,
@@ -81,14 +81,14 @@ async function findFirstSupportingVersion(
         const constraint = dependencies[depName] || devDependencies[depName];
         if (constraint && semver.matches(targetVersion, constraint)) {
           logger.debug(
-            `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to remediate to ${targetVersion}`
+            `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to ${targetVersion}`
           );
           return parentVersion;
         }
         if (semver.isVersion(constraint)) {
           if (semver.isGreaterThan(constraint, targetVersion)) {
             logger.debug(
-              `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to remediate to greater than ${targetVersion}`
+              `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to greater than ${targetVersion}`
             );
             return parentVersion;
           }
@@ -98,7 +98,7 @@ async function findFirstSupportingVersion(
           )
         ) {
           logger.debug(
-            `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to remediate to greater than ${targetVersion}`
+            `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to greater than ${targetVersion}`
           );
           return parentVersion;
         }
@@ -111,23 +111,23 @@ async function findFirstSupportingVersion(
   return null;
 }
 
-function getLockRequirements(
+export function getLockRequirements(
   packageJson: any,
   entry: PackageLockEntry,
-  depToRemediate: string,
+  depName: string,
   currentVersion: string,
   parentDepName?: string
 ): LockRequirements[] {
   let reqs = [];
   const { dependencies, requires, version } = entry;
-  let packageJsonConstraint = packageJson.dependencies?.[depToRemediate];
+  let packageJsonConstraint = packageJson.dependencies?.[depName];
   if (packageJsonConstraint) {
     reqs.push({
       parentDepName: 'dependencies',
       constraint: packageJsonConstraint,
     });
   }
-  packageJsonConstraint = packageJson.devDependencies?.[depToRemediate];
+  packageJsonConstraint = packageJson.devDependencies?.[depName];
   if (packageJsonConstraint) {
     reqs.push({
       parentDepName: 'devDependencies',
@@ -135,7 +135,7 @@ function getLockRequirements(
     });
   }
   if (parentDepName && requires) {
-    const constraint = requires[depToRemediate];
+    const constraint = requires[depName];
     if (constraint && semver.matches(currentVersion, constraint)) {
       const lockRequirement: LockRequirements = {
         parentDepName,
@@ -151,7 +151,7 @@ function getLockRequirements(
         getLockRequirements(
           packageJson,
           dependency,
-          depToRemediate,
+          depName,
           currentVersion,
           packageName
         )
@@ -168,10 +168,10 @@ function getLockRequirements(
   return res;
 }
 
-function getMatchingDependencies(
+export function getMatchingDependencies(
   entry: PackageLockEntry,
-  depToRemediate: string,
-  versionToRemediate: string,
+  depName: string,
+  currentVersion: string,
   parent?: string
 ): MatchingDependencies[] {
   const { dependencies } = entry;
@@ -179,17 +179,17 @@ function getMatchingDependencies(
     return [];
   }
   let res = [];
-  if (dependencies[depToRemediate]?.version === versionToRemediate) {
-    res.push({ dependency: dependencies[depToRemediate], parent });
+  if (dependencies[depName]?.version === currentVersion) {
+    res.push({ dependency: dependencies[depName], parent });
   }
   try {
-    for (const [depName, depDetails] of Object.entries(dependencies)) {
-      const parentString = parent ? `${parent}.${depName}` : depName;
+    for (const [dependency, depDetails] of Object.entries(dependencies)) {
+      const parentString = parent ? `${parent}.${dependency}` : dependency;
       res = res.concat(
         getMatchingDependencies(
           depDetails,
-          depToRemediate,
-          versionToRemediate,
+          depName,
+          currentVersion,
           parentString
         )
       );
@@ -200,8 +200,8 @@ function getMatchingDependencies(
   return res;
 }
 
-export async function remediateLockFile(
-  config: RemediationConfig,
+export async function updateLockedDependency(
+  config: UpdateLockedConfig,
   parent = false
 ): Promise<Record<string, string>> {
   const {
@@ -214,18 +214,18 @@ export async function remediateLockFile(
     lockFileContent,
   } = config;
   if (!lockFile.endsWith('package-lock.json')) {
-    logger.debug({ lockFile }, 'Unsupported remediation file');
+    logger.debug({ lockFile }, 'Unsupported lock file');
     return null;
   }
   logger.debug(
-    `npm.remediationLock: ${depName}@${currentVersion} -> ${newVersion}${
+    `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion}${
       parent ? ` [parent]` : ``
     }`
   );
   if (!(semver.isVersion(currentVersion) && semver.isVersion(newVersion))) {
     logger.warn(
       { currentVersion, newVersion },
-      'Remediate values are not valid'
+      'Update versions are not valid'
     );
     return null;
   }
@@ -264,13 +264,11 @@ export async function remediateLockFile(
     );
     logger.info({ matchingDependencies, lockRequirements }, 'info');
     if (!lockRequirements.length) {
-      logger.debug(
-        'Could not find parent requirements for remediation dependency'
-      );
+      logger.debug('Could not find parent requirements for update dependency');
       return null;
     }
-    let canRemediate = true;
-    const parentRemediations: RemediationConfig[] = [];
+    let canUpdate = true;
+    const parentUpdates: UpdateLockedConfig[] = [];
     for (const {
       parentDepName,
       parentVersion,
@@ -278,29 +276,29 @@ export async function remediateLockFile(
     } of lockRequirements) {
       if (semver.matches(newVersion, constraint)) {
         logger.debug(
-          `${depName} can be remediated to ${newVersion} in-range due to constraint "${constraint}" in ${
+          `${depName} can be updated to ${newVersion} in-range with matching constraint "${constraint}" in ${
             parentDepName ? `${parentDepName}@${parentVersion}` : packageFile
           }`
         );
       } else if (parentDepName && parentVersion) {
-        const parentRemediatedVersion = await findFirstSupportingVersion(
+        const parentUpdateVersion = await findFirstParentVersion(
           parentDepName,
           parentVersion,
           depName,
           newVersion
         );
-        if (parentRemediatedVersion) {
-          const parentRemediation: RemediationConfig = {
+        if (parentUpdateVersion) {
+          const parentUpdate: UpdateLockedConfig = {
             depName: parentDepName,
             currentVersion: parentVersion,
-            newVersion: parentRemediatedVersion,
+            newVersion: parentUpdateVersion,
           };
-          parentRemediations.push(parentRemediation);
+          parentUpdates.push(parentUpdate);
         } else {
           logger.debug(
-            `Remediation of ${depName} to ${newVersion} cannot be achieved due to parent ${parentDepName}`
+            `Update of ${depName} to ${newVersion} cannot be achieved due to parent ${parentDepName}`
           );
-          canRemediate = false;
+          canUpdate = false;
         }
       } else {
         const newConstraint = semver.getNewValue({
@@ -315,13 +313,13 @@ export async function remediateLockFile(
         });
         if (newPackageJsonContent === packageFileContent) {
           logger.debug(
-            `Remediation of ${depName} to ${newVersion} cannot be achieved as need to update ${packageFile}`
+            `Update of ${depName} to ${newVersion} cannot be achieved as need to update ${packageFile}`
           );
-          canRemediate = false;
+          canUpdate = false;
         }
       }
     }
-    if (!canRemediate) {
+    if (!canUpdate) {
       return null;
     }
     for (const { dependency } of matchingDependencies) {
@@ -330,25 +328,25 @@ export async function remediateLockFile(
       delete dependency.integrity;
     }
     let newLockFileContent = JSON.stringify(packageLockJson);
-    for (const parentRemediation of parentRemediations) {
-      const parentRemediationConfig = {
+    for (const parentUpdate of parentUpdates) {
+      const parentUpdateConfig = {
         ...config,
         lockFileContent: newLockFileContent,
-        ...parentRemediation,
+        ...parentUpdate,
       };
-      const parentRemediationResult = await remediateLockFile(
-        parentRemediationConfig,
+      const parentUpdateResult = await updateLockedDependency(
+        parentUpdateConfig,
         true
       );
-      if (!parentRemediationResult) {
+      if (!parentUpdateResult) {
         logger.debug(
-          `Remediaton of ${depName} to ${newVersion} impossible due to failed remediation of parent ${parentRemediation.depName} to ${parentRemediation.newVersion}`
+          `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`
         );
         return null;
       }
       newPackageJsonContent =
-        parentRemediationResult[packageFile] || newPackageJsonContent;
-      newLockFileContent = parentRemediationResult[lockFile];
+        parentUpdateResult[packageFile] || newPackageJsonContent;
+      newLockFileContent = parentUpdateResult[lockFile];
     }
     if (!parent) {
       // TODO: unify with post-updates
@@ -372,16 +370,16 @@ export async function remediateLockFile(
       }
     }
     const newPackageLock = JSON.parse(newLockFileContent);
-    const unremediatedDependencies = getMatchingDependencies(
+    const nonUpdatedDependencies = getMatchingDependencies(
       newPackageLock,
       depName,
       currentVersion
     );
-    if (unremediatedDependencies.length) {
-      logger.info({ unremediatedDependencies }, 'Remediation incomplete');
+    if (nonUpdatedDependencies.length) {
+      logger.info({ nonUpdatedDependencies }, 'Update incomplete');
       return null;
     }
-    logger.debug('Remediation successful');
+    logger.debug('Lock update successful');
     const files = {};
     files[lockFile] = newLockFileContent;
     if (newPackageJsonContent) {
@@ -389,7 +387,7 @@ export async function remediateLockFile(
     }
     return files;
   } catch (err) {
-    logger.warn({ err }, 'Remediation error');
+    logger.warn({ err }, 'Lock update error');
   }
   return null;
 }

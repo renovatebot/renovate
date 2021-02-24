@@ -4,7 +4,7 @@ import * as npmVersioning from '../../versioning/npm';
 export { extractAllPackageFiles } from './extract';
 export { bumpPackageVersion, updateDependency } from './update';
 export { getRangeStrategy } from './range';
-export { remediateLockFile } from './remediation';
+export { updateLockedDependency } from './update-locked';
 
 export const language = LANGUAGE_JAVASCRIPT;
 export const supportsLockFileMaintenance = true;
