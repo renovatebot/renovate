@@ -31,7 +31,7 @@ describe('platform/azure', () => {
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
-    logger = (await import('../../logger')).logger as any;
+    logger = (await import('../../logger')).logger as never;
     git = require('../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
