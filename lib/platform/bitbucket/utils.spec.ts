@@ -35,5 +35,6 @@ describe('accumulateValues()', () => {
     expect(res).toHaveLength(25);
     expect(httpMock.getTrace()).toHaveLength(3);
     expect(httpMock.getTrace()).toMatchSnapshot();
+    httpMock.reset();
   });
 });

@@ -39,6 +39,7 @@ describe(getName(__filename), () => {
 
   afterEach(() => {
     delete process.env.HTTP_PROXY;
+    httpMock.reset();
   });
 
   it('adds token', () => {

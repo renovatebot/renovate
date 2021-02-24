@@ -27,6 +27,9 @@ describe(getName(__filename), () => {
 
     setBaseUrl(baseUrl);
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
   it('posts', async () => {
     const body = ['a', 'b'];
     httpMock.scope(baseUrl).post('/some-url').reply(200, body);
