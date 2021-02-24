@@ -19,15 +19,10 @@ interface PackageLockDependency {
 
 type PackageLockDependencies = Record<string, PackageLockDependency>;
 
-interface PackageLockEntry {
+interface PackageLockOrEntry {
   version?: string;
   dependencies?: PackageLockDependencies;
   requires?: Record<string, string>;
-}
-
-interface MatchingDependencies {
-  dependency: PackageLockDependency;
-  parentDependency: string;
 }
 
 export async function fetchRegistryDetails(
@@ -56,7 +51,7 @@ export async function findFirstParentVersion(
       .filter(
         (version) => !semver.isStable(targetVersion) || semver.isStable(version)
       );
-    const parentDep = await fetchRegistryDetails(depName);
+    const parentDep = await fetchRegistryDetails(parentName);
     const parentVersions = Object.keys(parentDep.versions)
       .filter(
         (version) =>
@@ -124,13 +119,12 @@ export interface ParentDependency {
 // Finds all parent dependencies for a given depName@currentVersion
 export function getParentDependencies(
   packageJson: PackageJson,
-  lockEntry: PackageLockEntry,
+  lockEntry: PackageLockOrEntry,
   depName: string,
   currentVersion: string,
   parentDepName?: string
 ): ParentDependency[] {
   let parents = [];
-  const { dependencies, requires, version } = lockEntry;
   let packageJsonConstraint = packageJson.dependencies?.[depName];
   if (packageJsonConstraint) {
     parents.push({
@@ -145,6 +139,7 @@ export function getParentDependencies(
       constraint: packageJsonConstraint,
     });
   }
+  const { dependencies, requires, version } = lockEntry;
   if (parentDepName && requires) {
     const constraint = requires[depName];
     if (constraint && semver.matches(currentVersion, constraint)) {
@@ -179,35 +174,28 @@ export function getParentDependencies(
   return res;
 }
 
-// Finds matching dependencies withing a package lock file
-export function getMatchingDependencies(
-  entry: PackageLockEntry,
+// Finds matching dependencies withing a package lock file of sub-entry
+export function getLockedDependencies(
+  entry: PackageLockOrEntry,
   depName: string,
-  currentVersion: string,
-  parent?: string
-): MatchingDependencies[] {
+  currentVersion: string
+): PackageLockDependency[] {
   const { dependencies } = entry;
   if (!dependencies) {
     return [];
   }
-  let res = [];
-  if (dependencies[depName]?.version === currentVersion) {
-    res.push({ dependency: dependencies[depName], parent });
-  }
+  let res: PackageLockDependency[] = [];
   try {
-    for (const [dependency, depDetails] of Object.entries(dependencies)) {
-      const parentString = parent ? `${parent}.${dependency}` : dependency;
+    if (dependencies[depName]?.version === currentVersion) {
+      res.push(dependencies[depName]);
+    }
+    for (const dependency of Object.values(dependencies)) {
       res = res.concat(
-        getMatchingDependencies(
-          depDetails,
-          depName,
-          currentVersion,
-          parentString
-        )
+        getLockedDependencies(dependency, depName, currentVersion)
       );
     }
   } catch (err) {
-    logger.warn({ err }, 'Error finding nested dependencies');
+    logger.warn({ err }, 'getLockedDependencies() error');
   }
   return res;
 }
@@ -229,11 +217,6 @@ export async function updateLockedDependency(
     logger.debug({ lockFile }, 'Unsupported lock file');
     return null;
   }
-  logger.debug(
-    `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion}${
-      parent ? ` [parent]` : ``
-    }`
-  );
   if (!(semver.isVersion(currentVersion) && semver.isVersion(newVersion))) {
     logger.warn(
       { currentVersion, newVersion },
@@ -241,8 +224,11 @@ export async function updateLockedDependency(
     );
     return null;
   }
-  let packageJson: any;
-  let packageLockJson: PackageLockEntry;
+  logger.debug(
+    `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+  );
+  let packageJson: PackageJson;
+  let packageLockJson: PackageLockOrEntry;
   let newPackageJsonContent: string;
   try {
     packageJson = JSON.parse(packageFileContent);
@@ -251,68 +237,67 @@ export async function updateLockedDependency(
     logger.warn({ err }, 'Failed to parse package-lock.json');
     return null;
   }
-  logger.trace(`Parsed ${lockFile}`);
   try {
-    const matchingDependencies = getMatchingDependencies(
+    const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
       currentVersion
     );
-    if (!matchingDependencies.length) {
+    if (!lockedDeps.length) {
       logger.debug(
         `${depName}@${currentVersion} not found in ${lockFile} - no work to do`
       );
       return null;
     }
     logger.debug(
-      { matchingDependenciesCount: matchingDependencies.length },
-      'Matching dependencies result'
+      `Found matching dependencies with length ${lockedDeps.length}`
     );
-    const lockRequirements = getParentDependencies(
+    const parentDeps = getParentDependencies(
       packageJson,
       packageLockJson,
       depName,
       currentVersion
     );
-    logger.info({ matchingDependencies, lockRequirements }, 'info');
-    if (!lockRequirements.length) {
-      logger.debug('Could not find parent requirements for update dependency');
+    logger.trace({ deps: lockedDeps, parentDeps }, 'Matching details');
+    if (!parentDeps.length) {
+      logger.warn('Could not find parent requirements for update dependency');
       return null;
     }
     let canUpdate = true;
     const parentUpdates: UpdateLockedConfig[] = [];
-    for (const {
-      parentDepName,
-      parentVersion,
-      constraint,
-    } of lockRequirements) {
+    for (const { parentDepName, parentVersion, constraint } of parentDeps) {
       if (semver.matches(newVersion, constraint)) {
+        // Parent dependency is compatible with the new version we want
         logger.debug(
           `${depName} can be updated to ${newVersion} in-range with matching constraint "${constraint}" in ${
             parentDepName ? `${parentDepName}@${parentVersion}` : packageFile
           }`
         );
       } else if (parentDepName && parentVersion) {
-        const parentUpdateVersion = await findFirstParentVersion(
+        // Parent dependency needs updating too
+        const parentNewVersion = await findFirstParentVersion(
           parentDepName,
           parentVersion,
           depName,
           newVersion
         );
-        if (parentUpdateVersion) {
+        if (parentNewVersion) {
+          // Update the parent dependency so that we can update this dependency
           const parentUpdate: UpdateLockedConfig = {
             depName: parentDepName,
             currentVersion: parentVersion,
-            newVersion: parentUpdateVersion,
+            newVersion: parentNewVersion,
           };
           parentUpdates.push(parentUpdate);
         } else {
+          // For some reason it's not possible to update the parent to a version compatible with our desired dep version
           logger.debug(
             `Update of ${depName} to ${newVersion} cannot be achieved due to parent ${parentDepName}`
           );
           canUpdate = false;
         }
       } else {
+        // The constaint comes from the package.json file, so we need to update it
         const newConstraint = semver.getNewValue({
           currentValue: constraint,
           rangeStrategy: 'replace',
@@ -325,7 +310,7 @@ export async function updateLockedDependency(
         });
         if (newPackageJsonContent === packageFileContent) {
           logger.debug(
-            `Update of ${depName} to ${newVersion} cannot be achieved as need to update ${packageFile}`
+            `Update of ${depName} to ${newVersion} cannot be achieved because ${packageFile} update failed`
           );
           canUpdate = false;
         }
@@ -334,12 +319,14 @@ export async function updateLockedDependency(
     if (!canUpdate) {
       return null;
     }
-    for (const { dependency } of matchingDependencies) {
+    for (const dependency of lockedDeps) {
+      // Remove resolved and integrity fields for npm to fill in
       dependency.version = newVersion;
       delete dependency.resolved;
       delete dependency.integrity;
     }
     let newLockFileContent = JSON.stringify(packageLockJson);
+    // iterate through the parent udpates first
     for (const parentUpdate of parentUpdates) {
       const parentUpdateConfig = {
         ...config,
@@ -360,6 +347,7 @@ export async function updateLockedDependency(
         parentUpdateResult[packageFile] || newPackageJsonContent;
       newLockFileContent = parentUpdateResult[lockFile];
     }
+    // Run npm install if this update is not a parent update. We want to run it only once
     if (!parent) {
       // TODO: unify with post-updates
       await writeLocalFile(lockFile, newLockFileContent);
@@ -381,8 +369,9 @@ export async function updateLockedDependency(
         return null;
       }
     }
+    // Now check if we successfully remediated what we needed
     const newPackageLock = JSON.parse(newLockFileContent);
-    const nonUpdatedDependencies = getMatchingDependencies(
+    const nonUpdatedDependencies = getLockedDependencies(
       newPackageLock,
       depName,
       currentVersion
@@ -391,7 +380,6 @@ export async function updateLockedDependency(
       logger.info({ nonUpdatedDependencies }, 'Update incomplete');
       return null;
     }
-    logger.debug('Lock update successful');
     const files = {};
     files[lockFile] = newLockFileContent;
     if (newPackageJsonContent) {
@@ -399,7 +387,7 @@ export async function updateLockedDependency(
     }
     return files;
   } catch (err) {
-    logger.warn({ err }, 'Lock update error');
+    logger.warn({ err }, 'updateLockedDependency() error');
+    return null;
   }
-  return null;
 }
