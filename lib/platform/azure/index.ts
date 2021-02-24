@@ -637,10 +637,6 @@ export async function mergePr(
       await delay(sleepMs);
       pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
       isClosed = pr.status === PullRequestStatus.Completed;
-      logger.trace(
-        { pullRequestId, status: pr.status },
-        `PR status is now: ${PullRequestStatus[pr.status]}`
-      );
     }
 
     if (!isClosed) {
