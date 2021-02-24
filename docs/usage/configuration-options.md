@@ -1675,7 +1675,7 @@ It's not recommended to do both, due to the potential for confusion.
 It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
 
 For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
-For template fields, use the triple brace `{{{ }}}` notation to avoid `handlebars` escaping any special characters.
+For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 ### matchStrings
 
@@ -1846,23 +1846,28 @@ In the above example, each regex manager will match a single dependency each.
 ### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ### lookupNameTemplate
 
 `lookupName` is used for looking up dependency versions.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
 ### datasourceTemplate
 
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ### versioningTemplate
 
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### registryUrlTemplate
+
+If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ## registryUrls
 
