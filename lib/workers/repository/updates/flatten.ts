@@ -162,5 +162,6 @@ export async function flattenUpdates(
   }
   return updates
     .filter((update) => update.enabled)
+    .map(({ vulnerabilityAlerts, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
 }
