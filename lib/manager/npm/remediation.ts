@@ -1,12 +1,12 @@
 import url from 'url';
 import { NpmResponse } from '../../datasource/npm/get';
 import { logger } from '../../logger';
-import { updateDependency } from '../../manager/npm';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { Http } from '../../util/http';
 import { api as semver } from '../../versioning/npm';
 import { RemediationConfig } from '../common';
+import { updateDependency } from './update';
 
 const http = new Http('npm');
 
