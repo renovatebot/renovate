@@ -775,6 +775,13 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'updateInternalDeps',
+    description:
+      'Whether to update internal dep versions in a monorepo (Lerna or Yarn Workspaces).',
+    type: 'boolean',
+    stage: 'package',
+  },
+  {
     name: 'packageRules',
     description: 'Rules for matching package names.',
     type: 'array',
@@ -946,6 +953,17 @@ const options: RenovateOptions[] = [
     stage: 'package',
     parent: 'packageRules',
     mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchFiles',
+    description:
+      'List of strings to do an exact match against package files with full path. Applicable inside packageRules only.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'packageRules',
     cli: false,
     env: false,
   },
@@ -1260,8 +1278,10 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
-      rangeStrategy: 'update-lockfile',
+      rangeStrategy: 'bump',
       commitMessageSuffix: '[SECURITY]',
+      branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
+      prCreation: 'immediate',
     },
     mergeable: true,
     cli: false,
@@ -1340,7 +1360,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
     cli: false,
   },
   {
@@ -1586,9 +1606,6 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       commitMessageTopic: 'Node.js',
-      major: {
-        enabled: false,
-      },
     },
     mergeable: true,
     cli: false,

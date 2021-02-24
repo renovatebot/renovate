@@ -260,6 +260,13 @@ Object {
       "depType": "terraform",
     },
     Object {
+      "currentValue": ">= 0.13",
+      "datasource": "github-tags",
+      "depName": "hashicorp/terraform",
+      "extractVersion": "v(?<version>.*)$",
+      "lineNumber": 205,
+    },
+    Object {
       "currentValue": "2.7.2",
       "datasource": "terraform-provider",
       "depName": "docker",
@@ -345,7 +352,7 @@ Object {
       "skipReason": "invalid-dependency-specification",
     },
     Object {
-      "skipReason": "unsupported-value",
+      "skipReason": "invalid-value",
     },
   ],
 }

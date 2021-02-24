@@ -58,6 +58,8 @@ export async function ensureMasterIssue(
   if (
     !(
       config.dependencyDashboard ||
+      config.dependencyDashboardApproval ||
+      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
       branches.some(
         (branch) =>
           branch.dependencyDashboardApproval ||

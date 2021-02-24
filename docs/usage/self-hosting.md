@@ -25,8 +25,8 @@ For example, all the following are valid tags:
 
 ```sh
 $ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:24.42.1
-$ docker run --rm renovate/renovate:24.42
+$ docker run --rm renovate/renovate:24.53.0
+$ docker run --rm renovate/renovate:24.53
 $ docker run --rm renovate/renovate:24
 ```
 
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:24.42.1
+              image: renovate/renovate:24.53.0
               args:
                 - user/repo
               # Environment Variables
@@ -118,7 +118,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:24.42.1
+            - image: renovate/renovate:24.53.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -403,7 +403,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:24.42.1
+              image: renovate/renovate:24.53.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -421,3 +421,18 @@ spec:
 
 It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system.
 Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.
+
+### About the log level numbers
+
+When you use `LOG_LEVEL=debug` and `LOG_FORMAT=json`, Renovate uses numbers in the `level` field.
+
+The logging level output is controlled by the Bunyan logging library.
+
+| Level | Meaning |
+| ----: | ------- |
+|    10 | trace   |
+|    20 | debug   |
+|    30 | info    |
+|    40 | warn    |
+|    50 | error   |
+|    60 | fatal   |

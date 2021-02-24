@@ -1280,11 +1280,23 @@ Use the syntax `!/ /` like the following:
   "packageRules": [
     {
       "matchPackagePatterns": ["io.github.resilience4j"],
-      "allowedVersions": "!/^0\\./"
+      "matchCurrentVersion": "!/^0\\./"
     }
   ]
 }
 ```
+
+### matchFiles
+
+Renovate will compare `matchFiles` for an exact match against the dependency's package file or lock file.
+
+For example the following would match `package.json` but not `package/frontend/package.json`:
+
+```
+  "matchFiles": ["package.json"],
+```
+
+Use `matchPaths` instead if you need more flexible matching.
 
 ### matchPackageNames
 
@@ -1599,7 +1611,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, and `yarn`, so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn` and `poetry` so far
 
 Renovate's `"auto"` strategy works like this for npm:
 
@@ -1973,7 +1985,7 @@ If you wish to change it to something else like "ci" then it will look like `"ci
 
 If you are using a semantic prefix for your commits, then you will want to enable this setting.
 Although it's configurable to a package-level, it makes most sense to configure it at a repository level.
-If configured to `true`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
+If configured to `enabled`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 
@@ -2049,6 +2061,13 @@ Please see the above link for valid timezone names.
 ## unicodeEmoji
 
 If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
+
+## updateInternalDeps
+
+Renovate defaults to skipping any internal package dependencies within monorepos.
+In such case dependency versions won't be updated by Renovate.
+
+To opt in to letting Renovate update internal package versions normally, set this configuration option to true.
 
 ## updateLockFiles
 

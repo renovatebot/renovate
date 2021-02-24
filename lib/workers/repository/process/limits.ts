@@ -98,15 +98,21 @@ export function getConcurrentBranchesRemaining(
   if (typeof limit === 'number' && limit) {
     logger.debug(`Calculating branchConcurrentLimit (${limit})`);
     try {
-      let currentlyOpen = 0;
+      const existingBranches: string[] = [];
       for (const branch of branches) {
         if (branchExists(branch.branchName)) {
-          currentlyOpen += 1;
+          existingBranches.push(branch.branchName);
         }
       }
-      logger.debug(`${currentlyOpen} branches are currently open`);
-      const concurrentRemaining = Math.max(0, limit - currentlyOpen);
+
+      const existingCount = existingBranches.length;
+      logger.debug(
+        `${existingCount} already existing branches found: ${existingBranches.join()}`
+      );
+
+      const concurrentRemaining = Math.max(0, limit - existingCount);
       logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
+
       return concurrentRemaining;
     } catch (err) {
       logger.error({ err }, 'Error checking concurrent branches');

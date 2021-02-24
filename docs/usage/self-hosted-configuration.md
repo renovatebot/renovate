@@ -34,7 +34,7 @@ The command to install dependencies is necessary because, by default, the instal
       "postUpgradeTasks": {
         "commands": [
           "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{fromVersion}}} --to={{{toVersion}}} --migrateOnly --allowDirty --force"
+          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrateOnly --allowDirty --force"
         ],
         "fileFilters": ["**/**"]
       }

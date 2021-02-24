@@ -12,7 +12,7 @@ export interface Config extends Record<string, any> {
   depTypes?: string[];
   depName?: string;
   currentValue?: string;
-  fromVersion?: string;
+  currentVersion?: string;
   lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
@@ -28,11 +28,12 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const {
     versioning,
     packageFile,
+    lockFiles,
     depType,
     depTypes,
     depName,
     currentValue,
-    fromVersion,
+    currentVersion,
     lockedVersion,
     updateType,
     isBump,
@@ -43,6 +44,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     datasource,
   } = inputConfig;
   // Setting empty arrays simplifies our logic later
+  const matchFiles = packageRule.matchFiles || [];
   const matchPaths = packageRule.matchPaths || [];
   const matchLanguages = packageRule.matchLanguages || [];
   const matchBaseBranches = packageRule.matchBaseBranches || [];
@@ -63,6 +65,15 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     !(matchPackageNames.length || matchPackagePatterns.length)
   ) {
     matchPackagePatterns = ['.*'];
+  }
+  if (matchFiles.length) {
+    const isMatch = matchFiles.some(
+      (fileName) => packageFile === fileName || lockFiles?.includes(fileName)
+    );
+    if (!isMatch) {
+      return false;
+    }
+    positiveMatch = true;
   }
   if (matchPaths.length) {
     const isMatch = matchPaths.some(
@@ -198,7 +209,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
       const compareVersion =
         currentValue && version.isVersion(currentValue)
           ? currentValue // it's a version so we can match against it
-          : lockedVersion || fromVersion; // need to match against this fromVersion, if available
+          : lockedVersion || currentVersion; // need to match against this currentVersion, if available
       if (compareVersion) {
         // istanbul ignore next
         if (version.isVersion(compareVersion)) {

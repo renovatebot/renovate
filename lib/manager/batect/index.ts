@@ -1,6 +1,6 @@
-import { extractAllPackageFiles } from './extract';
+import { extractAllPackageFiles, extractPackageFile } from './extract';
 
-export { extractAllPackageFiles };
+export { extractAllPackageFiles, extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)batect(-bundle)?\\.yml$'],

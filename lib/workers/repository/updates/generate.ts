@@ -39,14 +39,14 @@ function getTableValues(
     datasource,
     lookupName,
     depName,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
     displayFrom,
     displayTo,
   } = upgrade;
   const name = lookupName || depName;
-  const from = fromVersion || displayFrom;
-  const to = toVersion || displayTo;
+  const from = currentVersion || displayFrom;
+  const to = newVersion || displayTo;
   if (datasource && name && from && to) {
     return [datasource, name, from, to];
   }
@@ -55,8 +55,8 @@ function getTableValues(
       datasource,
       lookupName,
       depName,
-      fromVersion,
-      toVersion,
+      currentVersion,
+      newVersion,
       displayFrom,
       displayTo,
     },
@@ -82,8 +82,8 @@ export function generateBranchConfig(
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);
     }
-    if (!toVersions.includes(upg.toVersion)) {
-      toVersions.push(upg.toVersion);
+    if (!toVersions.includes(upg.newVersion)) {
+      toVersions.push(upg.newVersion);
     }
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
@@ -118,10 +118,10 @@ export function generateBranchConfig(
         upgrade.newDigestShort ||
         upgrade.newDigest.replace('sha256:', '').substring(0, 7);
     }
+    // istanbul ignore next
     if (!upgrade.displayFrom) {
       if (upgrade.currentValue === upgrade.newValue) {
-        upgrade.displayFrom =
-          upgrade.currentDigestShort || upgrade.currentVersion || '';
+        upgrade.displayFrom = upgrade.currentDigestShort || '';
         upgrade.displayTo =
           upgrade.displayTo ||
           upgrade.newDigestShort ||
@@ -129,10 +129,7 @@ export function generateBranchConfig(
           '';
       } else {
         upgrade.displayFrom =
-          upgrade.currentValue ||
-          upgrade.currentVersion ||
-          upgrade.currentDigestShort ||
-          '';
+          upgrade.currentValue || upgrade.currentDigestShort || '';
         upgrade.displayTo =
           upgrade.displayTo ||
           upgrade.newValue ||

@@ -190,7 +190,7 @@ export const presets: Record<string, Preset> = {
         semanticCommitType: 'chore',
       },
       {
-        matchDepTypes: ['dependencies'],
+        matchDepTypes: ['dependencies', 'require'],
         semanticCommitType: 'fix',
       },
     ],

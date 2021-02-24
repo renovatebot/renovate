@@ -55,11 +55,12 @@ The `config:base` preset ignores common test and example directory names, for ex
 #### Enabling experimental managers
 
 Most managers are enabled by default.
-For those that aren't, typically because they are considered experimental, you can opt-in to them like the following:
+For those that aren't, typically because they are considered experimental, you can enable them opt-in.
+For example, if there was a manager called `some-new-manager` then you could enable it this way:
 
 ```json
 {
-  "experimental-manager": {
+  "some-new-manager": {
     "enabled": true
   }
 }
