@@ -92,6 +92,8 @@ jobs:
 
       - name: Unit tests
         run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+        env:
+          NODE_OPTIONS: --max-old-space-size=2048
 
       - name: Codecov
         uses: codecov/codecov-action@v1.2.1
