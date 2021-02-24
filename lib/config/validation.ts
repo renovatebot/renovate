@@ -58,6 +58,7 @@ export async function validateConfig(
       'forkToken',
       'repository',
       'vulnerabilityAlertsOnly',
+      'vulnerabilityAlert',
       'isVulnerabilityAlert',
       'copyLocalLibs', // deprecated - functionality is now enabled by default
       'prBody', // deprecated
