@@ -30,10 +30,14 @@ interface MatchingDependencies {
   parentDependency: string;
 }
 
-interface LockRequirements {
-  parentDepName: string;
-  parentVersion: string;
-  constraint: string;
+export async function fetchRegistryDetails(
+  depName: string
+): Promise<NpmResponse> {
+  const pkgUrl = url.resolve(
+    'https://registry.npmjs.org/',
+    encodeURIComponent(depName).replace(/^%40/, '@')
+  );
+  return (await http.getJson<NpmResponse>(pkgUrl)).body;
 }
 
 export async function findFirstParentVersion(
@@ -46,90 +50,97 @@ export async function findFirstParentVersion(
     `Finding first version of ${parentName} after ${parentStartingVersion} which supports >= ${depName}@${targetVersion}`
   );
   try {
-    let pkgUrl = url.resolve(
-      'https://registry.npmjs.org/',
-      encodeURIComponent(depName).replace(/^%40/, '@')
-    );
-    let registryEntry = await http.getJson<NpmResponse>(pkgUrl);
-    const depNameHigherVersions = Object.keys(registryEntry.body.versions)
+    const dep = await fetchRegistryDetails(depName);
+    const higherVersions = Object.keys(dep.versions)
       .filter((version) => semver.isGreaterThan(version, targetVersion))
       .filter(
         (version) => !semver.isStable(targetVersion) || semver.isStable(version)
       );
-    pkgUrl = url.resolve(
-      'https://registry.npmjs.org/',
-      encodeURIComponent(parentName).replace(/^%40/, '@')
-    );
-    registryEntry = await http.getJson<NpmResponse>(pkgUrl);
-    let parentVersions = Object.keys(
-      registryEntry.body.versions
-    ).sort((v1, v2) => semver.sortVersions(v1, v2));
-    if (semver.isStable(targetVersion)) {
-      parentVersions = parentVersions.filter((v) => semver.isStable(v));
-    }
+    const parentDep = await fetchRegistryDetails(depName);
+    const parentVersions = Object.keys(parentDep.versions)
+      .filter(
+        (version) =>
+          semver.isStable(version) &&
+          semver.isGreaterThan(version, parentStartingVersion)
+      )
+      .sort((v1, v2) => semver.sortVersions(v1, v2));
+    // iterate through parentVersions in sorted order
     for (const parentVersion of parentVersions) {
-      const { dependencies, devDependencies } = registryEntry.body.versions[
+      const { dependencies, devDependencies } = parentDep.versions[
         parentVersion
       ];
-      if (semver.isGreaterThan(parentVersion, parentStartingVersion)) {
-        if (!(dependencies[depName] || devDependencies[depName])) {
-          logger.debug(
-            `${depName} has been removed from ${parentName}@${parentVersion}`
-          );
-          return parentVersion;
-        }
-        const constraint = dependencies[depName] || devDependencies[depName];
-        if (constraint && semver.matches(targetVersion, constraint)) {
-          logger.debug(
-            `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to ${targetVersion}`
-          );
-          return parentVersion;
-        }
-        if (semver.isVersion(constraint)) {
-          if (semver.isGreaterThan(constraint, targetVersion)) {
-            logger.debug(
-              `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to greater than ${targetVersion}`
-            );
-            return parentVersion;
-          }
-        } else if (
-          depNameHigherVersions.some((version) =>
-            semver.matches(version, constraint)
-          )
-        ) {
+      const constraint = dependencies[depName] || devDependencies[depName];
+      if (!constraint) {
+        logger.debug(
+          `${depName} has been removed from ${parentName}@${parentVersion}`
+        );
+        return parentVersion;
+      }
+      if (semver.matches(targetVersion, constraint)) {
+        // could be version or range
+        logger.debug(
+          `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to ${targetVersion}`
+        );
+        return parentVersion;
+      }
+      if (semver.isVersion(constraint)) {
+        if (semver.isGreaterThan(constraint, targetVersion)) {
+          // it's not the version we were after - the parent skipped to a higher version
           logger.debug(
             `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to greater than ${targetVersion}`
           );
           return parentVersion;
         }
+      } else if (
+        higherVersions.some((version) => semver.matches(version, constraint))
+      ) {
+        // the constraint didn't match the version we wanted, but it matches one of the versions higher
+        logger.debug(
+          `${depName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to greater than ${targetVersion}`
+        );
+        return parentVersion;
       }
     }
   } catch (err) {
     logger.debug({ err }, 'findFirstSupportingVersion error');
+    return null;
   }
   logger.debug(`Could not find a matching version`);
   return null;
 }
 
-export function getLockRequirements(
-  packageJson: any,
-  entry: PackageLockEntry,
+export interface PackageJson {
+  name?: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
+
+export interface ParentDependency {
+  parentDepName: string;
+  parentVersion: string;
+  constraint: string;
+}
+
+// Finds all parent dependencies for a given depName@currentVersion
+export function getParentDependencies(
+  packageJson: PackageJson,
+  lockEntry: PackageLockEntry,
   depName: string,
   currentVersion: string,
   parentDepName?: string
-): LockRequirements[] {
-  let reqs = [];
-  const { dependencies, requires, version } = entry;
+): ParentDependency[] {
+  let parents = [];
+  const { dependencies, requires, version } = lockEntry;
   let packageJsonConstraint = packageJson.dependencies?.[depName];
   if (packageJsonConstraint) {
-    reqs.push({
+    parents.push({
       parentDepName: 'dependencies',
       constraint: packageJsonConstraint,
     });
   }
   packageJsonConstraint = packageJson.devDependencies?.[depName];
   if (packageJsonConstraint) {
-    reqs.push({
+    parents.push({
       parentDepName: 'devDependencies',
       constraint: packageJsonConstraint,
     });
@@ -137,18 +148,17 @@ export function getLockRequirements(
   if (parentDepName && requires) {
     const constraint = requires[depName];
     if (constraint && semver.matches(currentVersion, constraint)) {
-      const lockRequirement: LockRequirements = {
+      parents.push({
         parentDepName,
         parentVersion: version,
         constraint,
-      };
-      reqs.push(lockRequirement);
+      });
     }
   }
   if (dependencies) {
     for (const [packageName, dependency] of Object.entries(dependencies)) {
-      reqs = reqs.concat(
-        getLockRequirements(
+      parents = parents.concat(
+        getParentDependencies(
           packageJson,
           dependency,
           depName,
@@ -158,8 +168,9 @@ export function getLockRequirements(
       );
     }
   }
+  // dedupe
   const res = [];
-  for (const req of reqs) {
+  for (const req of parents) {
     const reqStringified = JSON.stringify(req);
     if (!res.find((i) => JSON.stringify(i) === reqStringified)) {
       res.push(req);
@@ -168,6 +179,7 @@ export function getLockRequirements(
   return res;
 }
 
+// Finds matching dependencies withing a package lock file
 export function getMatchingDependencies(
   entry: PackageLockEntry,
   depName: string,
@@ -256,7 +268,7 @@ export async function updateLockedDependency(
       { matchingDependenciesCount: matchingDependencies.length },
       'Matching dependencies result'
     );
-    const lockRequirements = getLockRequirements(
+    const lockRequirements = getParentDependencies(
       packageJson,
       packageLockJson,
       depName,
