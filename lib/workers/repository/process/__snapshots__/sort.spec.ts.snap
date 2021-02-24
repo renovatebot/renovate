@@ -46,13 +46,13 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/sort sortBranches() sorts based on vulnerabilityAlert 1`] = `
+exports[`workers/repository/process/sort sortBranches() sorts based on isVulnerabilityAlert 1`] = `
 Array [
   Object {
     "prPriority": -1,
     "prTitle": "a minor update",
     "updateType": "minor",
-    "vulnerabilityAlert": true,
+    "isVulnerabilityAlert": true,
   },
   Object {
     "prPriority": 1,
