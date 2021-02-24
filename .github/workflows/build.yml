@@ -96,6 +96,8 @@ jobs:
 
       - name: Unit tests
         run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+        env:
+          NODE_OPTIONS: --max-old-space-size=2048
 
       - name: Upload coverage
         uses: actions/upload-artifact@v2.2.2
