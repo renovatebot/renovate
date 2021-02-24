@@ -367,13 +367,61 @@ The Dependency Dashboard therefore provides visibility as well as additional con
 
 ## dependencyDashboardApproval
 
-Setting `dependencyDashboardApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Dependency Dashboard.
+By default Renovate creates branches/PRs automatically whenever a package gets an update.
 
-In this case, the Dependency Dashboard _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue.
-Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc.
-i.e. it is possible to require approval for only certain types of updates only.
+You can override the default behavior by setting `dependencyDashboardApproval` to `true`.
+Renovate waits for your approval from the Dependency Dashboard before creating a PR.
+You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
 
-Note: Enabling Dependency Dashboard Approval implicitly enables `dependencyDashboard` too, so it is not necessary to configure both to `true`.
+Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on the `dependencyDashboardApproval` explictly.
+
+You can configure Renovate to wait for approval for:
+
+- all package upgrades
+- major, minor, patch level upgrades
+- specific package upgrades
+- upgrades coming from specific package managers
+
+If you want to approve _all_ upgrades, set `dependencyDashboardApproval` to `true`:
+
+```json
+{
+  "dependencyDashboardApproval": true
+}
+```
+
+If you want to approve _major_ upgrades, set `dependencyDashboardApproval` to `true` within a `major` object:
+
+```json
+{
+  "major": {
+    "dependencyDashboardApproval": true
+  }
+}
+```
+
+If you want to approve a _specific_ package, set `dependencyDashboardApproval` to `true` within a `packageRules` array where you have defined a specific package.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^@package-name"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
+
+If you want to approve all upgrades coming from a specific package manager, set `dependencyDashboardApproval` to `true` within a "manager" object:
+
+```json
+{
+  "docker": {
+    "dependencyDashboardApproval": true
+  }
+}
+```
 
 ## dependencyDashboardAutoclose
 
