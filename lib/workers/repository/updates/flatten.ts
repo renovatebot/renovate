@@ -136,7 +136,7 @@ export async function flattenUpdates(
       }
       if (get(manager, 'remediateLockFile')) {
         for (const lockFile of packageFileConfig.lockFiles || []) {
-          const remediations = config.remediations[lockFile];
+          const remediations = config.remediations?.[lockFile];
           if (remediations) {
             for (const remediation of remediations) {
               let updateConfig = mergeChildConfig(

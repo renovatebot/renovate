@@ -1,6 +1,7 @@
 import url from 'url';
 import { NpmResponse } from '../../datasource/npm/get';
 import { logger } from '../../logger';
+import { updateDependency } from '../../manager/npm';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { Http } from '../../util/http';
@@ -122,14 +123,14 @@ function getLockRequirements(
   let packageJsonConstraint = packageJson.dependencies?.[depToRemediate];
   if (packageJsonConstraint) {
     reqs.push({
-      parentDepName: packageJson.name,
-      parentVersion: packageJson.version,
+      parentDepName: 'dependencies',
       constraint: packageJsonConstraint,
     });
   }
   packageJsonConstraint = packageJson.devDependencies?.[depToRemediate];
   if (packageJsonConstraint) {
     reqs.push({
+      parentDepName: 'devDependencies',
       constraint: packageJsonConstraint,
     });
   }
@@ -216,7 +217,11 @@ export async function remediateLockFile(
     logger.debug({ lockFile }, 'Unsupported remediation file');
     return null;
   }
-  logger.debug({ depName, currentVersion, newVersion }, 'npm remediation');
+  logger.debug(
+    `npm.remediationLock: ${depName}@${currentVersion} -> ${newVersion}${
+      parent ? ` [parent]` : ``
+    }`
+  );
   if (!(semver.isVersion(currentVersion) && semver.isVersion(newVersion))) {
     logger.warn(
       { currentVersion, newVersion },
@@ -226,6 +231,7 @@ export async function remediateLockFile(
   }
   let packageJson: any;
   let packageLockJson: PackageLockEntry;
+  let newPackageJsonContent: string;
   try {
     packageJson = JSON.parse(packageFileContent);
     packageLockJson = JSON.parse(lockFileContent);
@@ -233,7 +239,7 @@ export async function remediateLockFile(
     logger.warn({ err }, 'Failed to parse package-lock.json');
     return null;
   }
-  logger.trace('Parsed package-lock.json');
+  logger.trace(`Parsed ${lockFile}`);
   try {
     const matchingDependencies = getMatchingDependencies(
       packageLockJson,
@@ -242,8 +248,7 @@ export async function remediateLockFile(
     );
     if (!matchingDependencies.length) {
       logger.debug(
-        { depName, currentVersion },
-        'No vulnerable version found in lock file'
+        `${depName}@${currentVersion} not found in ${lockFile} - no work to do`
       );
       return null;
     }
@@ -274,7 +279,7 @@ export async function remediateLockFile(
       if (semver.matches(newVersion, constraint)) {
         logger.debug(
           `${depName} can be remediated to ${newVersion} in-range due to constraint "${constraint}" in ${
-            parentDepName ? `${parentDepName}@${parentVersion}` : 'package.json'
+            parentDepName ? `${parentDepName}@${parentVersion}` : packageFile
           }`
         );
       } else if (parentDepName && parentVersion) {
@@ -298,10 +303,22 @@ export async function remediateLockFile(
           canRemediate = false;
         }
       } else {
-        logger.debug(
-          `Remediation of ${depName} to ${newVersion} cannot be achieved as need to update ${packageFile}`
-        );
-        canRemediate = false;
+        const newConstraint = semver.getNewValue({
+          currentValue: constraint,
+          rangeStrategy: 'replace',
+          currentVersion,
+          newVersion,
+        });
+        newPackageJsonContent = updateDependency({
+          fileContent: packageFileContent,
+          upgrade: { depName, depType: parentDepName, newValue: newConstraint },
+        });
+        if (newPackageJsonContent === packageFileContent) {
+          logger.debug(
+            `Remediation of ${depName} to ${newVersion} cannot be achieved as need to update ${packageFile}`
+          );
+          canRemediate = false;
+        }
       }
     }
     if (!canRemediate) {
@@ -329,10 +346,15 @@ export async function remediateLockFile(
         );
         return null;
       }
+      newPackageJsonContent =
+        parentRemediationResult[packageFile] || newPackageJsonContent;
       newLockFileContent = parentRemediationResult[lockFile];
     }
     if (!parent) {
       await writeLocalFile(lockFile, newLockFileContent);
+      if (newPackageJsonContent) {
+        await writeLocalFile(packageFile, newPackageJsonContent);
+      }
       const execOptions: ExecOptions = {
         cwdFile: lockFile,
         docker: {
@@ -361,6 +383,9 @@ export async function remediateLockFile(
     logger.debug('Remediation successful');
     const files = {};
     files[lockFile] = newLockFileContent;
+    if (newPackageJsonContent) {
+      files[packageFile] = newPackageJsonContent;
+    }
     return files;
   } catch (err) {
     logger.warn({ err }, 'Remediation error');

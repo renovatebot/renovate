@@ -19,10 +19,9 @@ export async function getUpdatedPackageFiles(
   config: BranchConfig
 ): Promise<PackageFilesResult> {
   logger.trace({ config });
-  const { branchName, reuseExistingBranch } = config;
+  const { reuseExistingBranch } = config;
   logger.debug(
-    { reuseExistingBranch, branchName },
-    'manager.getUpdatedPackageFiles()'
+    `manager.getUpdatedPackageFiles() reuseExistinbranch=${reuseExistingBranch}`
   );
   const updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
@@ -91,7 +90,7 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch: false,
         });
       }
-      logger.debug({ packageFile, depName }, 'Updating packageFile content');
+      logger.debug(`Updating ${depName} in ${packageFile || lockFile}`);
       Object.assign(updatedFileContents, files);
     } else {
       let existingContent = updatedFileContents[packageFile];
@@ -190,7 +189,7 @@ export async function getUpdatedPackageFiles(
             reuseExistingBranch: false,
           });
         }
-        logger.debug({ packageFile, depName }, 'Updating packageFile content');
+        logger.debug(`Updating ${depName} in ${packageFile || lockFile}`);
         updatedFileContents[packageFile] = newContent;
       }
       if (newContent === existingContent) {
