@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/cloudbuild/extract extractPackageFile() extracts multiple image lines 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "19.03.8",
+    "datasource": "docker",
+    "depName": "gcr.io/cloud-builders/docker",
+    "depType": "docker",
+    "replaceString": "gcr.io/cloud-builders/docker:19.03.8",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "commitMessageTopic": "Node.js",
+    "currentDigest": undefined,
+    "currentValue": "12",
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "replaceString": "node:12",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "gcr.io/cloud-builders/kubectl",
+    "depType": "docker",
+    "replaceString": "gcr.io/cloud-builders/kubectl",
+    "versioning": "docker",
+  },
+]
+`;
