@@ -27,8 +27,8 @@ export function extractPackageFile(content: string): PackageFile {
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
-      logger.debug({ err });
       logger.debug(
+        { err },
         'YAML exception extracting Docker images from a Cloud Build configuration file.'
       );
     } else {
