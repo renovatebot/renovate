@@ -8,9 +8,7 @@ Array [
     "currentValue": "19.03.8",
     "datasource": "docker",
     "depName": "gcr.io/cloud-builders/docker",
-    "depType": "docker",
     "replaceString": "gcr.io/cloud-builders/docker:19.03.8",
-    "versioning": "docker",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -19,9 +17,7 @@ Array [
     "currentValue": "12",
     "datasource": "docker",
     "depName": "node",
-    "depType": "docker",
     "replaceString": "node:12",
-    "versioning": "docker",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -29,9 +25,7 @@ Array [
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "gcr.io/cloud-builders/kubectl",
-    "depType": "docker",
     "replaceString": "gcr.io/cloud-builders/kubectl",
-    "versioning": "docker",
   },
 ]
 `;
