@@ -76,5 +76,15 @@ Array [
     "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
     "versioning": "docker",
   },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "v1.19.0-alpine",
+    "datasource": "docker",
+    "depName": "hadolint/hadolint",
+    "depType": "docker",
+    "replaceString": "hadolint/hadolint:v1.19.0-alpine",
+    "versioning": "docker",
+  },
 ]
 `;
