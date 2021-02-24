@@ -837,11 +837,12 @@ export async function getBranchStatus(
   try {
     const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
       branchName
-    )}/check-runs`;
+    )}/check-runs?per_page=100`;
     const opts = {
       headers: {
         accept: 'application/vnd.github.antiope-preview+json',
       },
+      paginate: true,
     };
     const checkRunsRaw = (
       await githubApi.getJson<{

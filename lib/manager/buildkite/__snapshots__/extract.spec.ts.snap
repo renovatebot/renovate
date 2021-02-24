@@ -15,7 +15,7 @@ Array [
   Object {
     "currentValue": "v1.3.2",
     "depName": "github.com/buildkite/plugin-docker-compose",
-    "skipReason": "unknown",
+    "skipReason": "invalid-dependency-specification",
   },
 ]
 `;

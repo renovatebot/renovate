@@ -605,6 +605,42 @@ describe('applyPackageRules()', () => {
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBeDefined();
   });
+  it('matches packageFiles', () => {
+    const config: TestConfig = {
+      packageFile: 'examples/foo/package.json',
+      packageRules: [
+        {
+          matchFiles: ['package.json'],
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    expect(res1.x).toBeUndefined();
+    config.packageFile = 'package.json';
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    expect(res2.x).toBeDefined();
+  });
+  it('matches lock files', () => {
+    const config: TestConfig = {
+      packageFile: 'examples/foo/package.json',
+      lockFiles: ['yarn.lock'],
+      packageRules: [
+        {
+          matchFiles: ['yarn.lock'],
+          x: 1,
+        },
+      ],
+    };
+    const res = applyPackageRules(config);
+    expect(res.x).toBeDefined();
+  });
   it('matches paths', () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',

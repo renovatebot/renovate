@@ -2,7 +2,7 @@ import { parse } from '@iarna/toml';
 import * as datasourceCrate from '../../datasource/crate';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../util/fs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import {
   CargoConfig,
@@ -186,5 +186,11 @@ export async function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  return { deps };
+  const lockFileName = await findLocalSiblingOrParent(fileName, 'Cargo.lock');
+  const res: PackageFile = { deps };
+  // istanbul ignore if
+  if (lockFileName) {
+    res.lockFiles = [lockFileName];
+  }
+  return res;
 }

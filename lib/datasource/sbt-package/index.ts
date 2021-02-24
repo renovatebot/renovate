@@ -167,9 +167,6 @@ export async function getReleases({
     if (versions) {
       return {
         ...urls,
-        display: lookupName,
-        group: groupId,
-        name: artifactId,
         dependencyUrl,
         releases: versions.map((v) => ({ version: v })),
       };
