@@ -1079,7 +1079,6 @@ describe('platform/azure', () => {
 
     it('should cache the mergeMethod for subsequent merges', async () => {
       await initRepo({ repository: 'some/repo' });
-      jest.mock('delay');
       azureApi.gitApi.mockImplementation(
         () =>
           ({
