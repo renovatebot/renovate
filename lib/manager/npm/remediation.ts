@@ -351,6 +351,7 @@ export async function remediateLockFile(
       newLockFileContent = parentRemediationResult[lockFile];
     }
     if (!parent) {
+      // TODO: unify with post-updates
       await writeLocalFile(lockFile, newLockFileContent);
       if (newPackageJsonContent) {
         await writeLocalFile(packageFile, newPackageJsonContent);
