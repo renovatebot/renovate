@@ -31,3 +31,13 @@ This repository currently has no open or pending branches.
 And this is a footer
 "
 `;
+
+exports[`workers/repository/master-issue ensureMasterIssue() open or update Dependency Dashboard when rules contain approvals 1`] = `
+"This issue contains a list of Renovate updates and their statuses.
+
+This repository currently has no open or pending branches.
+
+---
+And this is a footer
+"
+`;

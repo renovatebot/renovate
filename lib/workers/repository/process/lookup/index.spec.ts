@@ -249,7 +249,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('uses minimum version for vulnerabilityAlerts', async () => {
       config.currentValue = '1.0.0';
-      config.vulnerabilityAlert = true;
+      config.isVulnerabilityAlert = true;
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);

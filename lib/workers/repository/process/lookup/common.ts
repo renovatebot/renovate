@@ -31,7 +31,7 @@ export interface LookupUpdateConfig
   rollbackPrs?: boolean;
   currentDigest?: string;
   lockedVersion?: string;
-  vulnerabilityAlert?: boolean;
+  isVulnerabilityAlert?: boolean;
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
   datasource: string;

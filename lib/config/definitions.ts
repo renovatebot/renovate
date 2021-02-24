@@ -768,6 +768,13 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'updateInternalDeps',
+    description:
+      'Whether to update internal dep versions in a monorepo (Lerna or Yarn Workspaces).',
+    type: 'boolean',
+    stage: 'package',
+  },
+  {
     name: 'packageRules',
     description: 'Rules for matching package names.',
     type: 'array',
@@ -1264,7 +1271,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
-      rangeStrategy: 'bump',
+      rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
       prCreation: 'immediate',
@@ -1592,9 +1599,6 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       commitMessageTopic: 'Node.js',
-      major: {
-        enabled: false,
-      },
     },
     mergeable: true,
     cli: false,
@@ -1852,7 +1856,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchStrings',
     description:
-      'Regex capture rule to use. Valid only within `regexManagers` object.',
+      'Regex capture rule to use. Valid only within a `regexManagers` object.',
     type: 'array',
     subType: 'string',
     format: 'regex',
@@ -1872,7 +1876,7 @@ const options: RenovateOptions[] = [
   {
     name: 'depNameTemplate',
     description:
-      'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional depName for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1881,7 +1885,7 @@ const options: RenovateOptions[] = [
   {
     name: 'lookupNameTemplate',
     description:
-      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within `regexManagers` object.',
+      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1890,7 +1894,7 @@ const options: RenovateOptions[] = [
   {
     name: 'datasourceTemplate',
     description:
-      'Optional datasource for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional datasource for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1899,7 +1903,16 @@ const options: RenovateOptions[] = [
   {
     name: 'versioningTemplate',
     description:
-      'Optional versioning for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional versioning for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'registryUrlTemplate',
+    description:
+      'Optional registry URL for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,

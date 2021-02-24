@@ -383,7 +383,7 @@ export async function ensurePr(
         if (
           !dependencyDashboardCheck &&
           isLimitReached(Limit.PullRequests) &&
-          !config.vulnerabilityAlert
+          !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
           return { prResult: PrResult.LimitReached };
