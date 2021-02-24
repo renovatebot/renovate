@@ -4,7 +4,7 @@ import {
   CONFIG_VALIDATION,
   EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
-  MANAGER_NO_PACKAGE_FILES,
+  NO_VULNERABILITY_ALERTS,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -19,12 +19,12 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
-  REPOSITORY_NO_VULNERABILITY,
+  REPOSITORY_NO_PACKAGE_FILES,
   REPOSITORY_RENAMED,
-  REPOSITORY_TEMPORARY_ERROR,
   REPOSITORY_UNINITIATED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   SYSTEM_INSUFFICIENT_MEMORY,
+  TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -46,7 +46,7 @@ describe('workers/repository/error', () => {
       REPOSITORY_DISABLED,
       REPOSITORY_CHANGED,
       REPOSITORY_FORKED,
-      MANAGER_NO_PACKAGE_FILES,
+      REPOSITORY_NO_PACKAGE_FILES,
       CONFIG_SECRETS_EXPOSED,
       CONFIG_VALIDATION,
       REPOSITORY_ARCHIVED,
@@ -60,11 +60,11 @@ describe('workers/repository/error', () => {
       MANAGER_LOCKFILE_ERROR,
       SYSTEM_INSUFFICIENT_DISK_SPACE,
       SYSTEM_INSUFFICIENT_MEMORY,
-      REPOSITORY_NO_VULNERABILITY,
+      NO_VULNERABILITY_ALERTS,
       REPOSITORY_CANNOT_FORK,
       PLATFORM_INTEGRATION_UNAUTHORIZED,
       PLATFORM_AUTHENTICATION_ERROR,
-      REPOSITORY_TEMPORARY_ERROR,
+      TEMPORARY_ERROR,
     ];
     errors.forEach((err) => {
       it(`errors ${err}`, async () => {
@@ -98,7 +98,7 @@ describe('workers/repository/error', () => {
         'fatal: not a git repository (or any parent up to mount point /mnt)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n'
       );
       const res = await handleError(config, gitError);
-      expect(res).toEqual(REPOSITORY_TEMPORARY_ERROR);
+      expect(res).toEqual(TEMPORARY_ERROR);
     });
     it('handles unknown error', async () => {
       const res = await handleError(config, new Error('abcdefg'));

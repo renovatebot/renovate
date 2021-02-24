@@ -391,7 +391,10 @@ export async function initRepo({
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken;
   } else {
-    logger.debug('Using personal access token for git init');
+    const tokenType = opts.token?.startsWith('x-access-token:')
+      ? 'app'
+      : 'personal access';
+    logger.debug(`Using ${tokenType} token for git init`);
     parsedEndpoint.auth = opts.token;
   }
   parsedEndpoint.host = parsedEndpoint.host.replace(
@@ -834,11 +837,12 @@ export async function getBranchStatus(
   try {
     const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
       branchName
-    )}/check-runs`;
+    )}/check-runs?per_page=100`;
     const opts = {
       headers: {
         accept: 'application/vnd.github.antiope-preview+json',
       },
+      paginate: true,
     };
     const checkRunsRaw = (
       await githubApi.getJson<{

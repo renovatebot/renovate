@@ -1,7 +1,7 @@
 import { RenovateConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
 import {
-  REPOSITORY_DISABLED,
+  REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
 } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
@@ -25,7 +25,7 @@ async function validateOptimizeForDisabled(
       defaultConfigFile(config)
     );
     if (renovateConfig?.enabled === false) {
-      throw new Error(REPOSITORY_DISABLED);
+      throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
   }
 }

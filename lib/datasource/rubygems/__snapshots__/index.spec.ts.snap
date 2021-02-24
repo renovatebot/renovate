@@ -2,7 +2,6 @@
 
 exports[`datasource/rubygems getReleases returns a dep for rubygems.org package hit 1`] = `
 Object {
-  "name": "1pass",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -2520,7 +2519,6 @@ Array [
 
 exports[`datasource/rubygems getReleases uses rubygems.org if no registry urls were provided 1`] = `
 Object {
-  "name": "1pass",
   "releases": Array [
     Object {
       "version": "0.1.0",

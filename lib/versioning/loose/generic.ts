@@ -84,8 +84,8 @@ export const comparer = (
     return versions.find((v) => equals(v, range)) || null;
   }
   function getNewValue(newValueConfig: NewValueConfig): string {
-    const { toVersion } = newValueConfig || {};
-    return toVersion;
+    const { newVersion } = newValueConfig || {};
+    return newVersion;
   }
   function sortVersions(version: string, other: string): number {
     return compare(version, other);
@@ -191,8 +191,8 @@ export abstract class GenericVersioningApi<
 
   // eslint-disable-next-line class-methods-use-this
   getNewValue(newValueConfig: NewValueConfig): string {
-    const { toVersion } = newValueConfig || {};
-    return toVersion;
+    const { newVersion } = newValueConfig || {};
+    return newVersion;
   }
 
   sortVersions(version: string, other: string): number {

@@ -30,7 +30,7 @@ describe('generateLockFile', () => {
     const dockerMapDotfiles = true;
     const postUpdateOptions = ['npmDedupe'];
     const updates = [
-      { depName: 'some-dep', toVersion: '1.0.1', isLockfileUpdate: false },
+      { depName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
     ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -49,7 +49,7 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
     const updates = [
-      { depName: 'some-dep', toVersion: '1.0.1', isLockfileUpdate: true },
+      { depName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
     ];
     const res = await npmHelper.generateLockFile(
       'some-dir',

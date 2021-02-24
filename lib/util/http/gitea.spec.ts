@@ -18,6 +18,10 @@ describe(getName(__filename), () => {
     setBaseUrl(baseUrl);
   });
 
+  afterEach(() => {
+    httpMock.reset();
+  });
+
   it('supports responses without pagination when enabled', async () => {
     httpMock
       .scope(baseUrl)
