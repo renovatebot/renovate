@@ -12,7 +12,7 @@ export function extractPackageFile(content: string): PackageFile {
       for (const step of doc.steps) {
         if (step.name) {
           const dep = getDep(step.name);
-          logger.debug(
+          logger.trace(
             {
               depName: dep.depName,
               currentValue: dep.currentValue,
