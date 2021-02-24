@@ -7,6 +7,9 @@ describe('datasource/gitlab-tags', () => {
     httpMock.reset();
     httpMock.setup();
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
   describe('getReleases', () => {
     it('returns tags from custom registry', async () => {
       const body = [

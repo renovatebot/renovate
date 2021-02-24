@@ -217,6 +217,7 @@ export async function validateConfig(
             }
 
             const selectors = [
+              'matchPackageRules',
               'matchPaths',
               'matchLanguages',
               'matchBaseBranches',

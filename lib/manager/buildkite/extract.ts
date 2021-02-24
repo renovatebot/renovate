@@ -52,7 +52,7 @@ export function extractPackageFile(content: string): PackageFile | null {
                 { dependency: depName },
                 'Something is wrong with buildkite plugin name'
               );
-              skipReason = SkipReason.Unknown;
+              skipReason = SkipReason.InvalidDependencySpecification;
             }
           }
           const dep: PackageDependency = {

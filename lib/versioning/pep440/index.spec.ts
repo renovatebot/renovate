@@ -4,6 +4,7 @@ describe('pep440.isValid(input)', () => {
   it('should support a version without equals', () => {
     expect(pep440.isValid('0.750')).toBeTruthy();
     expect(pep440.isValid('1.2.3')).toBeTruthy();
+    expect(pep440.isValid('1.9')).toBeTruthy();
   });
   it('should support irregular versions', () => {
     expect(pep440.isValid('17.04.0')).toBeTruthy();

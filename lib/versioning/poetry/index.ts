@@ -1,4 +1,3 @@
-import { major, minor } from 'semver';
 import { parseRange } from 'semver-utils';
 import { NewValueConfig, VersioningApi } from '../common';
 import { api as npm } from '../npm';
@@ -13,15 +12,39 @@ function notEmpty(s: string): boolean {
   return s !== '';
 }
 
+function getVersionParts(input: string): [string, string] {
+  const versionParts = input.split('-');
+  if (versionParts.length === 1) {
+    return [input, ''];
+  }
+
+  return [versionParts[0], '-' + versionParts[1]];
+}
+
+function padZeroes(input: string): string {
+  if (/[~^*]/.test(input)) {
+    // ignore ranges
+    return input;
+  }
+
+  const [output, stability] = getVersionParts(input);
+
+  const sections = output.split('.');
+  while (sections.length < 3) {
+    sections.push('0');
+  }
+  return sections.join('.') + stability;
+}
+
 // This function works like cargo2npm, but it doesn't
 // add a '^', because poetry treats versions without operators as
 // exact versions.
 function poetry2npm(input: string): string {
-  const versions = input
+  return input
     .split(',')
     .map((str) => str.trim())
-    .filter(notEmpty);
-  return versions.join(' ');
+    .filter(notEmpty)
+    .join(' ');
 }
 
 // NOTE: This function is copied from cargo versioning code.
@@ -43,13 +66,29 @@ function npm2poetry(input: string): string {
   return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
 }
 
+const equals = (a: string, b: string): boolean =>
+  npm.equals(padZeroes(a), padZeroes(b));
+
+const getMajor = (version: string): number => npm.getMajor(padZeroes(version));
+
+const getMinor = (version: string): number => npm.getMinor(padZeroes(version));
+
+const getPatch = (version: string): number => npm.getPatch(padZeroes(version));
+
+const isGreaterThan = (a: string, b: string): boolean =>
+  npm.isGreaterThan(padZeroes(a), padZeroes(b));
+
 const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange(version, poetry2npm(range));
+  npm.isLessThanRange(padZeroes(version), poetry2npm(range));
 
 export const isValid = (input: string): string | boolean =>
   npm.isValid(poetry2npm(input));
 
-const isVersion = (input: string): string | boolean => npm.isVersion(input);
+const isStable = (version: string): boolean =>
+  version && npm.isStable(padZeroes(version));
+
+const isVersion = (input: string): string | boolean =>
+  npm.isVersion(padZeroes(input));
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, poetry2npm(range));
 
@@ -69,8 +108,8 @@ function handleShort(
   currentValue: string,
   newVersion: string
 ): string {
-  const toVersionMajor = major(newVersion);
-  const toVersionMinor = minor(newVersion);
+  const toVersionMajor = getMajor(newVersion);
+  const toVersionMinor = getMinor(newVersion);
   const split = currentValue.split('.');
   if (split.length === 1) {
     // [^,~]4
@@ -118,14 +157,26 @@ function getNewValue({
   return newPoetry;
 }
 
+function sortVersions(a: string, b: string): number {
+  return npm.sortVersions(padZeroes(a), padZeroes(b));
+}
+
 export const api: VersioningApi = {
-  ...npm,
+  equals,
+  getMajor,
+  getMinor,
+  getPatch,
   getNewValue,
+  getSatisfyingVersion,
+  isCompatible: isVersion,
+  isGreaterThan,
   isLessThanRange,
   isSingleVersion,
+  isStable,
   isValid,
+  isVersion,
   matches,
-  getSatisfyingVersion,
   minSatisfyingVersion,
+  sortVersions,
 };
 export default api;

@@ -143,6 +143,9 @@ Object {
       "skipReason": "no-version",
     },
   ],
+  "lockFiles": Array [
+    "Gemfile.lock",
+  ],
   "registryUrls": Array [
     "https://rubygems.org",
   ],
@@ -1379,6 +1382,9 @@ Object {
       "skipReason": "no-version",
     },
   ],
+  "lockFiles": Array [
+    "Gemfile.lock",
+  ],
   "registryUrls": Array [
     "https://rubygems.org",
   ],
@@ -1439,6 +1445,9 @@ Object {
       },
       "skipReason": "no-version",
     },
+  ],
+  "lockFiles": Array [
+    "Gemfile.lock",
   ],
   "registryUrls": Array [
     "https://rubygems.org",
@@ -2137,6 +2146,9 @@ Object {
         "lineNumber": 160,
       },
     },
+  ],
+  "lockFiles": Array [
+    "Gemfile.lock",
   ],
   "registryUrls": Array [
     "https://rubygems.org",
@@ -4684,6 +4696,9 @@ Object {
       },
     },
   ],
+  "lockFiles": Array [
+    "Gemfile.lock",
+  ],
   "registryUrls": Array [
     "https://rubygems.org",
   ],
@@ -4715,6 +4730,9 @@ Object {
         "https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/",
       ],
     },
+  ],
+  "lockFiles": Array [
+    "Gemfile.lock",
   ],
   "registryUrls": Array [],
 }
@@ -4748,6 +4766,9 @@ Object {
       ],
       "skipReason": "no-version",
     },
+  ],
+  "lockFiles": Array [
+    "Gemfile.lock",
   ],
   "registryUrls": Array [],
 }

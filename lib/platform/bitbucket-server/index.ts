@@ -1,4 +1,4 @@
-import url, { URLSearchParams } from 'url';
+import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import type { PartialDeep } from 'type-fest';
@@ -21,7 +21,7 @@ import {
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import {
   BranchStatusConfig,
   CreatePRConfig,
@@ -326,7 +326,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }
-    const query = new URLSearchParams(searchParams).toString();
+    const query = getQueryString(searchParams);
     const values = await utils.accumulateValues(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
     );

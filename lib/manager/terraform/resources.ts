@@ -107,7 +107,7 @@ export function analyseTerraformResource(
       break;
 
     default:
-      dep.skipReason = SkipReason.UnsupportedValue;
+      dep.skipReason = SkipReason.InvalidValue;
       break;
   }
   /* eslint-enable no-param-reassign */

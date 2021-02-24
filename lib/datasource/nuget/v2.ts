@@ -16,7 +16,6 @@ export async function getReleases(
   pkgName: string
 ): Promise<ReleaseResult | null> {
   const dep: ReleaseResult = {
-    pkgName,
     releases: [],
   };
   let pkgUrlList = `${feedUrl.replace(

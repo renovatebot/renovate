@@ -51,6 +51,9 @@ Object {
       "managerData": Object {},
     },
   ],
+  "lockFiles": Array [
+    "Pipfile.lock",
+  ],
   "registryUrls": Array [
     "https://pypi.org/simple",
     "http://example.com/private-pypi/",
@@ -124,6 +127,9 @@ Object {
       },
     },
   ],
+  "lockFiles": Array [
+    "Pipfile.lock",
+  ],
   "registryUrls": Array [
     "https://pypi.python.org/simple",
   ],
@@ -172,6 +178,9 @@ Object {
       "managerData": Object {},
     },
   ],
+  "lockFiles": Array [
+    "Pipfile.lock",
+  ],
   "registryUrls": Array [
     "https://pypi.org/simple",
   ],
@@ -194,6 +203,9 @@ Object {
         "https://testpypi.python.org/pypi",
       ],
     },
+  ],
+  "lockFiles": Array [
+    "Pipfile.lock",
   ],
   "registryUrls": Array [
     "https://pypi.python.org/simple",

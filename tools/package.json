@@ -14,6 +14,6 @@
     "strip-ansi": "6.0.0"
   },
   "devDependencies": {
-    "@types/graceful-fs": "4.1.4"
+    "@types/graceful-fs": "4.1.5"
   }
 }

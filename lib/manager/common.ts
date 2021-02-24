@@ -27,6 +27,7 @@ export interface ExtractConfig extends ManagerConfig {
   yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
+  updateInternalDeps?: boolean;
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
@@ -74,13 +75,13 @@ export interface NpmLockFiles {
   pnpmShrinkwrap?: string;
   npmLock?: string;
   lernaDir?: string;
+  lockFiles?: string[];
 }
 
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
-  internalPackages?: string[]; // TODO: remove
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
@@ -188,7 +189,6 @@ export interface Upgrade<T = Record<string, any>>
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
-  dockerRepository?: string;
   localDir?: string;
   name?: string;
   newDigest?: string;
