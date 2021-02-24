@@ -373,7 +373,7 @@ You can override the default behavior by setting `dependencyDashboardApproval` t
 Renovate waits for your approval from the Dependency Dashboard before creating a PR.
 You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
 
-Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on the `dependencyDashboardApproval` explictly.
+Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explictly.
 
 You can configure Renovate to wait for approval for:
 
