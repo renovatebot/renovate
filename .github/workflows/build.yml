@@ -95,7 +95,7 @@ jobs:
         run: yarn build
 
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+        run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Upload coverage
         uses: actions/upload-artifact@v2.2.2
