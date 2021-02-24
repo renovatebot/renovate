@@ -12,8 +12,6 @@ export function extractPackageFile(content: string): PackageFile {
       for (const step of doc.steps) {
         if (step.name) {
           const dep = getDep(step.name);
-          dep.depType = 'docker';
-          dep.versioning = 'docker';
           logger.debug(
             {
               depName: dep.depName,
