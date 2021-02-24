@@ -19,6 +19,9 @@ describe('datasource/github-tags', () => {
       token: 'some-token',
     });
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
 
   describe('getDigest', () => {
     const lookupName = 'some/dep';
@@ -113,6 +116,9 @@ describe('datasource/github-tags', () => {
       hostRules.find.mockReturnValue({
         token: 'some-token',
       });
+    });
+    afterEach(() => {
+      httpMock.reset();
     });
 
     const depName = 'some/dep2';
