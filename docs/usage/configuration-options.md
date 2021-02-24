@@ -301,7 +301,7 @@ The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
-The "prefix" is usually an automatically applied semantic commit prefix, however it can also be statically configured.
+The "prefix" is usually an automatically applied prefix, however it can also be statically configured.
 
 ## commitMessageSuffix
 
@@ -1985,7 +1985,7 @@ If you wish to change it to something else like "ci" then it will look like `"ci
 
 If you are using a semantic prefix for your commits, then you will want to enable this setting.
 Although it's configurable to a package-level, it makes most sense to configure it at a repository level.
-If configured to `true`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
+If configured to `enabled`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 
