@@ -1132,7 +1132,6 @@ describe('platform/azure', () => {
 
     it('should log a warning after retrying if the PR has still not yet been set to completed', async () => {
       await initRepo({ repository: 'some/repo' });
-      jest.mock('delay');
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
