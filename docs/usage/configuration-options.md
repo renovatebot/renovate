@@ -301,7 +301,7 @@ The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
-The "prefix" is usually an automatically applied prefix, however it can also be statically configured.
+The "prefix" is usually an automatically applied semantic commit prefix, however it can also be statically configured.
 
 ## commitMessageSuffix
 
