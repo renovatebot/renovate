@@ -1,4 +1,4 @@
-import URL, { URLSearchParams } from 'url';
+import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import semver from 'semver';
@@ -21,7 +21,7 @@ import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import {
   BranchStatusConfig,
   CreatePRConfig,
@@ -384,7 +384,7 @@ async function fetchPrList(): Promise<Pr[]> {
     // default: `scope=created_by_me`
     searchParams.scope = 'all';
   }
-  const query = new URLSearchParams(searchParams).toString();
+  const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
     const res = await gitlabApi.getJson<
@@ -710,11 +710,11 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
-    const query = new URLSearchParams({
+    const query = getQueryString({
       per_page: '100',
       author_id: `${authorId}`,
       state: 'opened',
-    }).toString();
+    });
     const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
       `projects/${config.repository}/issues?${query}`,
       {
