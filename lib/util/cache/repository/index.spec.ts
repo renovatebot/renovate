@@ -34,7 +34,7 @@ describe('lib/util/cache/repository', () => {
     });
     expect(repositoryCache.getCache()).toEqual({
       repository: 'abc/def',
-      scan: {},
+      revision: repositoryCache.CACHE_REVISION,
     });
   });
   it('reads from cache and finalizes', async () => {
@@ -50,6 +50,6 @@ describe('lib/util/cache/repository', () => {
     expect(fs.outputFile.mock.calls).toHaveLength(1);
   });
   it('gets', () => {
-    expect(repositoryCache.getCache()).toEqual({ scan: {} });
+    expect(repositoryCache.getCache()).toEqual({});
   });
 });

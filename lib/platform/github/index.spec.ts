@@ -595,7 +595,7 @@ describe('platform/github', () => {
         .reply(200, {
           state: 'success',
         })
-        .get('/repos/some/repo/commits/somebranch/check-runs')
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, []);
 
       await github.initRepo({
@@ -613,7 +613,7 @@ describe('platform/github', () => {
         .reply(200, {
           state: 'failure',
         })
-        .get('/repos/some/repo/commits/somebranch/check-runs')
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, []);
 
       await github.initRepo({
@@ -631,7 +631,7 @@ describe('platform/github', () => {
         .reply(200, {
           state: 'unknown',
         })
-        .get('/repos/some/repo/commits/somebranch/check-runs')
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, []);
       await github.initRepo({
         repository: 'some/repo',
@@ -649,7 +649,7 @@ describe('platform/github', () => {
           state: 'pending',
           statuses: [],
         })
-        .get('/repos/some/repo/commits/somebranch/check-runs')
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, {
           total_count: 2,
           check_runs: [
@@ -683,7 +683,7 @@ describe('platform/github', () => {
           state: 'pending',
           statuses: [],
         })
-        .get('/repos/some/repo/commits/somebranch/check-runs')
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, {
           total_count: 3,
           check_runs: [
@@ -723,7 +723,7 @@ describe('platform/github', () => {
           state: 'pending',
           statuses: [],
         })
-        .get('/repos/some/repo/commits/somebranch/check-runs')
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, {
           total_count: 2,
           check_runs: [

@@ -2461,7 +2461,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs",
+    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs?per_page=100",
   },
 ]
 `;
@@ -2603,7 +2603,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs",
+    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs?per_page=100",
   },
 ]
 `;
@@ -2665,7 +2665,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs",
+    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs?per_page=100",
   },
 ]
 `;
@@ -2727,7 +2727,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs",
+    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs?per_page=100",
   },
 ]
 `;
@@ -2789,7 +2789,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs",
+    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs?per_page=100",
   },
 ]
 `;
@@ -2851,7 +2851,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs",
+    "url": "https://api.github.com/repos/some/repo/commits/somebranch/check-runs?per_page=100",
   },
 ]
 `;

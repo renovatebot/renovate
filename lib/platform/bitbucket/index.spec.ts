@@ -62,6 +62,9 @@ describe('platform/bitbucket', () => {
 
     setBaseUrl(baseUrl);
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
 
   async function initRepoMock(
     config?: Partial<RepoParams>,

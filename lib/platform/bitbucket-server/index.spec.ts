@@ -231,6 +231,9 @@ describe(getName(__filename), () => {
           password,
         });
       });
+      afterEach(() => {
+        httpMock.reset();
+      });
 
       describe('initPlatform()', () => {
         it('should throw if no endpoint', () => {
