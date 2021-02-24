@@ -1013,7 +1013,6 @@ describe('platform/azure', () => {
   describe('mergePr', () => {
     it('should complete the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      jest.mock('delay');
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
