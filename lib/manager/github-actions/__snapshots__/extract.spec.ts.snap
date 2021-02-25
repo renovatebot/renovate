@@ -84,7 +84,6 @@ Array [
     "depName": "hadolint/hadolint",
     "depType": "docker",
     "replaceString": "hadolint/hadolint:v1.19.0-alpine",
-    "versioning": "docker",
   },
 ]
 `;
