@@ -18,7 +18,6 @@ export function extractPackageFile(content: string): PackageFile | null {
       const [, currentFrom] = containerImageMatch;
       const dep = getDep(currentFrom);
       dep.depType = 'docker';
-      dep.versioning = dockerVersioning.id;
       deps.push(dep);
       continue; // eslint-disable-line no-continue
     }
