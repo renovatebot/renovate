@@ -79,11 +79,11 @@ Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
-    "currentValue": "v1.19.0-alpine",
+    "currentValue": "v1.0.0-alpine",
     "datasource": "docker",
     "depName": "hadolint/hadolint",
     "depType": "docker",
-    "replaceString": "hadolint/hadolint:v1.19.0-alpine",
+    "replaceString": "hadolint/hadolint:v1.0.0-alpine",
   },
 ]
 `;
