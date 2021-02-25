@@ -412,7 +412,6 @@ If you want to approve a _specific_ package, set `dependencyDashboardApproval` t
 }
 ```
 
-
 ## dependencyDashboardAutoclose
 
 You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
