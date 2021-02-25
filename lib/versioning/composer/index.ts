@@ -57,7 +57,7 @@ function normalizeVersion(input: string): string {
   return convertStabilityModifier(output);
 }
 
-function composer2npm(input: string): string {
+function composer2npm(input: string, allowPatchVersion = false): string {
   const cleanInput = normalizeVersion(input);
   if (npm.isVersion(cleanInput)) {
     return cleanInput;
@@ -72,6 +72,11 @@ function composer2npm(input: string): string {
   output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
   // ~0.4 to >=0.4 <1
   output = output.replace(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g, '>=$1 <1');
+
+  // allow security composer patch version 2.3.6-p1
+  if (allowPatchVersion && stability && /^-(p|patch)+[0-9]+$/.test(stability)) {
+    return output;
+  }
 
   return output + stability;
 }
@@ -98,7 +103,7 @@ const isSingleVersion = (input: string): string | boolean =>
   input && npm.isSingleVersion(composer2npm(input));
 
 const isStable = (version: string): boolean =>
-  version && npm.isStable(composer2npm(version));
+  version && npm.isStable(composer2npm(version, true));
 
 export const isValid = (input: string): string | boolean =>
   input && npm.isValid(composer2npm(input));
@@ -110,10 +115,16 @@ const matches = (version: string, range: string): boolean =>
   npm.matches(composer2npm(version), composer2npm(range));
 
 const getSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.getSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
+  npm.getSatisfyingVersion(
+    versions.map((version) => composer2npm(version)),
+    composer2npm(range)
+  );
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.minSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
+  npm.minSatisfyingVersion(
+    versions.map((version) => composer2npm(version)),
+    composer2npm(range)
+  );
 
 function getNewValue({
   currentValue,
