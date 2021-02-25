@@ -367,10 +367,9 @@ The Dependency Dashboard therefore provides visibility as well as additional con
 
 ## dependencyDashboardApproval
 
-By default Renovate creates branches/PRs automatically whenever a package gets an update.
+This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
 
-You can override the default behavior by setting `dependencyDashboardApproval` to `true`.
-Renovate waits for your approval from the Dependency Dashboard before creating a PR.
+By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
 You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
 
 Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explictly.
@@ -390,7 +389,7 @@ If you want to approve _all_ upgrades, set `dependencyDashboardApproval` to `tru
 }
 ```
 
-If you want to approve _major_ upgrades, set `dependencyDashboardApproval` to `true` within a `major` object:
+If you want to require approval for _major_ updates, set `dependencyDashboardApproval` to `true` within a `major` object:
 
 ```json
 {
@@ -400,7 +399,7 @@ If you want to approve _major_ upgrades, set `dependencyDashboardApproval` to `t
 }
 ```
 
-If you want to approve a _specific_ package, set `dependencyDashboardApproval` to `true` within a `packageRules` array where you have defined a specific package.
+If you want to approve a _specific_ package, set `dependencyDashboardApproval` to `true` within a `packageRules` entry where you have defined a specific package.
 
 ```json
 {
@@ -413,15 +412,6 @@ If you want to approve a _specific_ package, set `dependencyDashboardApproval` t
 }
 ```
 
-If you want to approve all upgrades coming from a specific package manager, set `dependencyDashboardApproval` to `true` within a "manager" object:
-
-```json
-{
-  "docker": {
-    "dependencyDashboardApproval": true
-  }
-}
-```
 
 ## dependencyDashboardAutoclose
 
