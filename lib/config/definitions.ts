@@ -772,6 +772,7 @@ const options: RenovateOptions[] = [
     description:
       'Whether to update internal dep versions in a monorepo (Lerna or Yarn Workspaces).',
     type: 'boolean',
+    default: false,
     stage: 'package',
   },
   {
