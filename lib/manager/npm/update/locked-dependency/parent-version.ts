@@ -1,6 +1,6 @@
 import { logger } from '../../../../logger';
 import { api as semver } from '../../../../versioning/npm';
-import { fetchRegistryDetails } from './fetch';
+import { getPkgReleases, GetPkgReleasesConfig } from '../../../../datasource';
 
 // Finds the first stable version of parentName after parentStartingVersion which either:
 // - depends on targetDepName@targetVersion or a range which it satisfies, OR
@@ -16,15 +16,26 @@ export async function findFirstParentVersion(
     `Finding first version of ${parentName} starting with ${parentStartingVersion} which supports >= ${targetDepName}@${targetVersion}`
   );
   try {
-    const targetDep = await fetchRegistryDetails(targetDepName);
-    const targetVersions = Object.keys(targetDep.versions).filter(
-      (version) =>
-        semver.isStable(version) &&
-        (version === targetVersion ||
-          semver.isGreaterThan(version, targetVersion))
-    );
-    const parentDep = await fetchRegistryDetails(parentName);
-    const parentVersions = Object.keys(parentDep.versions)
+    let lookupConfig: GetPkgReleasesConfig = {
+      datasource: 'npm',
+      depName: targetDepName,
+    };
+    const targetDep = await getPkgReleases(lookupConfig);
+    const targetVersions = targetDep.releases
+      .map((release) => release.version)
+      .filter(
+        (version) =>
+          semver.isStable(version) &&
+          (version === targetVersion ||
+            semver.isGreaterThan(version, targetVersion))
+      );
+    lookupConfig = {
+      datasource: 'npm',
+      depName: parentName,
+    };
+    const parentDep = await getPkgReleases(lookupConfig);
+    const parentVersions = parentDep.releases
+      .map((release) => release.version)
       .filter(
         (version) =>
           semver.isStable(version) &&
@@ -34,9 +45,9 @@ export async function findFirstParentVersion(
       .sort((v1, v2) => semver.sortVersions(v1, v2));
     // iterate through parentVersions in sorted order
     for (const parentVersion of parentVersions) {
-      const { dependencies, devDependencies } = parentDep.versions[
-        parentVersion
-      ];
+      const { dependencies, devDependencies } = parentDep.releases.find(
+        (release) => release.version === parentVersion
+      );
       const constraint =
         dependencies[targetDepName] || devDependencies[targetDepName];
       if (!constraint) {
@@ -72,7 +83,7 @@ export async function findFirstParentVersion(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'findFirstSupportingVersion error');
+    console.warn({ err }, 'findFirstSupportingVersion error');
     return null;
   }
   logger.debug(`Could not find a matching version`);
