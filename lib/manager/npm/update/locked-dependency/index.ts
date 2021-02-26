@@ -68,7 +68,13 @@ export async function updateLockedDependency(
       logger.debug(
         `${depName}@${currentVersion} not found in ${lockFile} - no work to do`
       );
-      return null;
+      // Don't return null if we're a parent update or else the whole update will fail
+      return isParentUpdate
+        ? {
+            packageFile: packageFileContent,
+            lockFile: lockFileContent,
+          }
+        : null;
     }
     logger.debug(
       `Found matching dependencies with length ${lockedDeps.length}`
