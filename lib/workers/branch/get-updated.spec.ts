@@ -111,6 +111,17 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
+    it('handles isRemediation', async () => {
+      config.upgrades.push({
+        manager: 'npm',
+        isRemediation: true,
+      } as never);
+      npm.updateLockedDependency.mockResolvedValueOnce({
+        'package-lock.json': 'new contents',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
     it('handles lockFileMaintenance error', async () => {
       config.upgrades.push({
         manager: 'composer',

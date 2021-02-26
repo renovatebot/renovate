@@ -10,7 +10,7 @@ const expressJson = JSON.parse(
 
 describe(getName(__filename), () => {
   describe('getLockedDependencies()', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       httpMock.setup();
     });
 

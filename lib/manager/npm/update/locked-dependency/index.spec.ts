@@ -2,10 +2,10 @@ import { readFileSync } from 'fs';
 import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
 import { getName, mocked } from '../../../../../test/util';
+import { clone } from '../../../../util/clone';
 import * as _fs from '../../../../util/fs';
 import { UpdateLockedConfig } from '../../../common';
 import { updateLockedDependency } from '.';
-import { clone } from '../../../../util/clone';
 
 jest.mock('../../../../util/exec');
 jest.mock('../../../../util/fs');

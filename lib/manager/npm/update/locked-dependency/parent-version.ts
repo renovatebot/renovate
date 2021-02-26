@@ -1,6 +1,6 @@
+import { GetPkgReleasesConfig, getPkgReleases } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import { api as semver } from '../../../../versioning/npm';
-import { getPkgReleases, GetPkgReleasesConfig } from '../../../../datasource';
 
 // Finds the first stable version of parentName after parentStartingVersion which either:
 // - depends on targetDepName@targetVersion or a range which it satisfies, OR
@@ -83,7 +83,7 @@ export async function findFirstParentVersion(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    console.warn({ err }, 'findFirstSupportingVersion error');
+    logger.warn({ err }, 'findFirstSupportingVersion error');
     return null;
   }
   logger.debug(`Could not find a matching version`);
