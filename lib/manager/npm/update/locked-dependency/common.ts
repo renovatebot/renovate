@@ -14,12 +14,6 @@ export interface PackageLockOrEntry {
   requires?: Record<string, string>;
 }
 
-export interface PackageJson {
-  name?: string;
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-}
-
 export interface ParentDependency {
   parentDepName?: string;
   parentVersion?: string;

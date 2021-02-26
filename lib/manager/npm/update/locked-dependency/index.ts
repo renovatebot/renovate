@@ -1,8 +1,9 @@
+import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../logger';
 import { api as semver } from '../../../../versioning/npm';
 import { UpdateLockedConfig } from '../../../common';
 import { updateDependency } from '../dependency';
-import { PackageJson, PackageLockOrEntry } from './common';
+import { PackageLockOrEntry } from './common';
 import { findDepConstraints } from './dep-constraints';
 import { getLockedDependencies } from './get-locked';
 import { findFirstParentVersion } from './parent-version';
