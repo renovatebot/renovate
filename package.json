@@ -218,7 +218,7 @@
     "@types/luxon": "1.26.0",
     "@types/markdown-it": "10.0.3",
     "@types/markdown-table": "2.0.0",
-    "@types/moo": "0.5.3",
+    "@types/moo": "0.5.4",
     "@types/nock": "10.0.3",
     "@types/node": "12.20.4",
     "@types/node-emoji": "1.8.1",
