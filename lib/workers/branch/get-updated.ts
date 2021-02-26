@@ -34,33 +34,33 @@ export async function getUpdatedPackageFiles(
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
     packageFileUpdatedDeps[packageFile].push(depName);
+    let packageFileContent = updatedFileContents[packageFile];
+    if (!packageFileContent) {
+      packageFileContent = await getFile(
+        packageFile,
+        reuseExistingBranch ? config.branchName : config.baseBranch
+      );
+    }
+    // istanbul ignore if
+    if (config.reuseExistingBranch && !packageFileContent) {
+      logger.debug(
+        { packageFile, depName },
+        'Rebasing branch after file not found'
+      );
+      return getUpdatedPackageFiles({
+        ...config,
+        reuseExistingBranch: false,
+      });
+    }
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else {
-      let existingContent = updatedFileContents[packageFile];
-      if (!existingContent) {
-        existingContent = await getFile(
-          packageFile,
-          reuseExistingBranch ? config.branchName : config.baseBranch
-        );
-      }
-      // istanbul ignore if
-      if (config.reuseExistingBranch && !existingContent) {
-        logger.debug(
-          { packageFile, depName },
-          'Rebasing branch after file not found'
-        );
-        return getUpdatedPackageFiles({
-          ...config,
-          reuseExistingBranch: false,
-        });
-      }
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
         let res = await doAutoReplace(
           upgrade,
-          existingContent,
+          packageFileContent,
           reuseExistingBranch
         );
         if (res) {
@@ -72,7 +72,7 @@ export async function getUpdatedPackageFiles(
             );
             res = bumpedContent;
           }
-          if (res === existingContent) {
+          if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
             if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
@@ -93,7 +93,7 @@ export async function getUpdatedPackageFiles(
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = await updateDependency({
-        fileContent: existingContent,
+        fileContent: packageFileContent,
         upgrade,
       });
       if (bumpPackageVersion && upgrade.bumpVersion) {
@@ -116,12 +116,12 @@ export async function getUpdatedPackageFiles(
           });
         }
         logger.debug(
-          { existingContent, config: upgrade },
+          { existingContent: packageFileContent, config: upgrade },
           'Error updating file'
         );
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      if (newContent !== existingContent) {
+      if (newContent !== packageFileContent) {
         if (config.reuseExistingBranch) {
           // This ensure it's always 1 commit from the bot
           logger.debug(
@@ -136,7 +136,7 @@ export async function getUpdatedPackageFiles(
         logger.debug(`Updating ${depName} in ${packageFile}`);
         updatedFileContents[packageFile] = newContent;
       }
-      if (newContent === existingContent) {
+      if (newContent === packageFileContent) {
         // istanbul ignore else
         if (upgrade.datasource === datasourceGitSubmodules.id) {
           updatedFileContents[packageFile] = newContent;
