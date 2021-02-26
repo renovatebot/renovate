@@ -8,6 +8,9 @@ describe(getName(__filename), () => {
     httpMock.reset();
     httpMock.setup();
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
   describe('getReleases', () => {
     it('returns tags from bitbucket cloud', async () => {
       const body = {

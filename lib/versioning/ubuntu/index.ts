@@ -107,7 +107,7 @@ function minSatisfyingVersion(
 }
 
 function getNewValue(newValueConfig: NewValueConfig): string {
-  return newValueConfig.toVersion;
+  return newValueConfig.newVersion;
 }
 
 function sortVersions(version: string, other: string): number {

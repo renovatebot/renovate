@@ -96,9 +96,6 @@ Object {
       "depName": "node",
       "depType": "engines",
       "lookupName": "nodejs/node",
-      "major": Object {
-        "enabled": false,
-      },
       "prettyDepType": "engine",
       "versioning": "node",
     },
@@ -376,9 +373,6 @@ Object {
       "depName": "node",
       "depType": "engines",
       "lookupName": "nodejs/node",
-      "major": Object {
-        "enabled": false,
-      },
       "prettyDepType": "engine",
       "versioning": "node",
     },
@@ -389,9 +383,6 @@ Object {
       "depName": "node",
       "depType": "volta",
       "lookupName": "nodejs/node",
-      "major": Object {
-        "enabled": false,
-      },
       "prettyDepType": "volta",
       "versioning": "node",
     },
@@ -441,9 +432,6 @@ Object {
       "depName": "node",
       "depType": "engines",
       "lookupName": "nodejs/node",
-      "major": Object {
-        "enabled": false,
-      },
       "prettyDepType": "engine",
       "versioning": "node",
     },
@@ -454,9 +442,6 @@ Object {
       "depName": "node",
       "depType": "volta",
       "lookupName": "nodejs/node",
-      "major": Object {
-        "enabled": false,
-      },
       "prettyDepType": "volta",
       "versioning": "node",
     },

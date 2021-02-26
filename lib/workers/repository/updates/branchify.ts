@@ -93,9 +93,9 @@ export async function branchifyUpgrades(
     // that are not grouped into the same branch
     const branchUpdates: Record<string, Record<string, string>> = {};
     for (const branch of branches) {
-      const { sourceUrl, branchName, depName, toVersion } = branch;
-      if (sourceUrl && toVersion) {
-        const key = `${sourceUrl}|${toVersion}`;
+      const { sourceUrl, branchName, depName, newVersion } = branch;
+      if (sourceUrl && newVersion) {
+        const key = `${sourceUrl}|${newVersion}`;
         branchUpdates[key] = branchUpdates[key] || {};
         if (!branchUpdates[key][branchName]) {
           branchUpdates[key][branchName] = depName;
@@ -104,9 +104,9 @@ export async function branchifyUpgrades(
     }
     for (const [key, value] of Object.entries(branchUpdates)) {
       if (Object.keys(value).length > 1) {
-        const [sourceUrl, toVersion] = key.split('|');
+        const [sourceUrl, newVersion] = key.split('|');
         logger.debug(
-          { sourceUrl, toVersion, branches: value },
+          { sourceUrl, newVersion, branches: value },
           'Found sourceUrl with multiple branches that should probably be combined into a group'
         );
       }

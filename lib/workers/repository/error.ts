@@ -15,11 +15,14 @@ import {
   REPOSITORY_BLOCKED,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_CHANGED,
+  REPOSITORY_CLOSED_ONBOARDING,
   REPOSITORY_DISABLED,
+  REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_CONFIG,
   REPOSITORY_NO_PACKAGE_FILES,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
@@ -46,7 +49,13 @@ export default async function handleError(
     delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
   }
-  if (err.message === REPOSITORY_DISABLED) {
+  const disabledMessages = [
+    REPOSITORY_CLOSED_ONBOARDING,
+    REPOSITORY_DISABLED,
+    REPOSITORY_DISABLED_BY_CONFIG,
+    REPOSITORY_NO_CONFIG,
+  ];
+  if (disabledMessages.includes(err.message)) {
     logger.info('Repository is disabled - skipping');
     return err.message;
   }

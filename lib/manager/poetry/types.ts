@@ -26,3 +26,12 @@ export interface PoetrySource {
   name?: string;
   url?: string;
 }
+
+export interface PoetryLockSection {
+  name?: string;
+  version?: string;
+}
+
+export interface PoetryLock {
+  package?: PoetryLockSection[];
+}

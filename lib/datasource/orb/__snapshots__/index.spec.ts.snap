@@ -3,7 +3,6 @@
 exports[`datasource/orb getReleases processes homeUrl 1`] = `
 Object {
   "homepage": "https://google.com",
-  "name": "hyper-expanse/library-release-workflows",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-12-11T05:28:14.080Z",
@@ -46,7 +45,6 @@ Object {
       "version": "4.2.0",
     },
   ],
-  "versions": Object {},
 }
 `;
 
@@ -85,7 +83,6 @@ Array [
 exports[`datasource/orb getReleases processes real data 1`] = `
 Object {
   "homepage": "https://circleci.com/developer/orbs/orb/hyper-expanse/library-release-workflows",
-  "name": "hyper-expanse/library-release-workflows",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-12-11T05:28:14.080Z",
@@ -128,7 +125,6 @@ Object {
       "version": "4.2.0",
     },
   ],
-  "versions": Object {},
 }
 `;
 

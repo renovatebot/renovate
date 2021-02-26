@@ -123,8 +123,6 @@ export async function getReleases({
     }
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
-      name: repository,
-      versions: {},
       releases: null,
     };
     if (res.source) {
@@ -137,11 +135,11 @@ export async function getReleases({
       dep.homepage = `https://registry.terraform.io/modules/${repository}`;
     }
     // set published date for latest release
-    const currentVersion = dep.releases.find(
+    const latestVersion = dep.releases.find(
       (release) => res.version === release.version
     );
-    if (currentVersion) {
-      currentVersion.releaseTimestamp = res.published_at;
+    if (latestVersion) {
+      latestVersion.releaseTimestamp = res.published_at;
     }
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 30;

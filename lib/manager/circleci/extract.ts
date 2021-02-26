@@ -53,7 +53,12 @@ export function extractPackageFile(content: string): PackageFile | null {
         );
         dep.depType = 'docker';
         dep.versioning = 'docker';
-        deps.push(dep);
+        if (
+          !dep.depName?.startsWith('ubuntu-') &&
+          !dep.depName?.startsWith('windows-server-')
+        ) {
+          deps.push(dep);
+        }
       }
     }
   } catch (err) /* istanbul ignore next */ {
