@@ -59,7 +59,7 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": "2020-11-19T09:05:35+00:00",
+      "releaseTimestamp": "2020-11-19T09:05:35.000Z",
       "version": "v1.0.0",
     },
     Object {

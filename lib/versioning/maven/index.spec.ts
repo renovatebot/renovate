@@ -391,16 +391,16 @@ describe('versioning/maven/index', () => {
       maven.getNewValue({
         currentValue: '1',
         rangeStrategy: null,
-        fromVersion: null,
-        toVersion: '1.1',
+        currentVersion: null,
+        newVersion: '1.1',
       })
     ).toBe('1.1');
     expect(
       maven.getNewValue({
         currentValue: '[1.2.3,]',
         rangeStrategy: null,
-        fromVersion: null,
-        toVersion: '1.2.4',
+        currentVersion: null,
+        newVersion: '1.2.4',
       })
     ).toBe('[1.2.3,]');
   });
@@ -418,15 +418,15 @@ describe('versioning/maven/index', () => {
       ['[1.2.3,)', '1.2.3', '1.2.4'],
       ['[1.2.3,[', '1.2.3', '1.2.4'],
     ];
-    sample.forEach(([currentValue, fromVersion, toVersion]) => {
+    sample.forEach(([currentValue, currentVersion, newVersion]) => {
       expect(
         getNewValue({
           currentValue,
           rangeStrategy: 'pin',
-          fromVersion,
-          toVersion,
+          currentVersion,
+          newVersion,
         })
-      ).toEqual(toVersion);
+      ).toEqual(newVersion);
     });
   });
 });

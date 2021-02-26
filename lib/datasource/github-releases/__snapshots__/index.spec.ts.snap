@@ -5,18 +5,18 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "1.0.0",
-      "releaseTimestamp": "2020-03-09T11:00:00Z",
+      "releaseTimestamp": "2020-03-09T11:00:00.000Z",
       "version": "1.0.0",
     },
     Object {
       "gitRef": "v1.1.0",
-      "releaseTimestamp": "2020-03-09T10:00:00Z",
+      "releaseTimestamp": "2020-03-09T10:00:00.000Z",
       "version": "v1.1.0",
     },
     Object {
       "gitRef": "2.0.0",
       "isStable": false,
-      "releaseTimestamp": "2020-04-09T10:00:00Z",
+      "releaseTimestamp": "2020-04-09T10:00:00.000Z",
       "version": "2.0.0",
     },
   ],

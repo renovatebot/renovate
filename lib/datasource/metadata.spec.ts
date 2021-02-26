@@ -11,13 +11,13 @@ describe('datasource/metadata', () => {
   it('Should handle manualChangelogUrls', () => {
     const dep = {
       releases: [
-        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17' },
+        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
         {
           version: '2.0.0.dev1',
-          releaseTimestamp: '2017-10-24T10:09:16',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
         },
-        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28' },
-        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00' },
+        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
+        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
       ],
     };
 
@@ -31,13 +31,13 @@ describe('datasource/metadata', () => {
   it('Should handle manualSourceUrls', () => {
     const dep = {
       releases: [
-        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17' },
+        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
         {
           version: '2.0.0.dev1',
-          releaseTimestamp: '2017-10-24T10:09:16',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
         },
-        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28' },
-        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00' },
+        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
+        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
       ],
     };
 
@@ -52,13 +52,13 @@ describe('datasource/metadata', () => {
     const dep = {
       sourceUrl: 'https://github.com/carltongibson/django-filter/tree/master',
       releases: [
-        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17' },
+        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
         {
           version: '2.0.0.dev1',
-          releaseTimestamp: '2017-10-24T10:09:16',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
         },
-        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28' },
-        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00' },
+        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
+        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
       ],
     };
     const datasource = datasourcePypi.id;
@@ -72,10 +72,10 @@ describe('datasource/metadata', () => {
     const dep = {
       sourceUrl: 'https://gitlab.com/meno/dropzone/tree/master',
       releases: [
-        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
         {
           version: '5.6.1',
-          releaseTimestamp: '2020-02-14T10:04:00',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
         },
       ],
     };
@@ -89,10 +89,10 @@ describe('datasource/metadata', () => {
     const dep = {
       sourceUrl: 'https://gitlab-nope',
       releases: [
-        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
         {
           version: '5.6.1',
-          releaseTimestamp: '2020-02-14T10:04:00',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
         },
       ],
     };
@@ -106,10 +106,10 @@ describe('datasource/metadata', () => {
     const dep = {
       sourceUrl: 'https://nope-nope-nope',
       releases: [
-        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
         {
           version: '5.6.1',
-          releaseTimestamp: '2020-02-14T10:04:00',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
         },
       ],
     };
@@ -123,10 +123,10 @@ describe('datasource/metadata', () => {
     const dep = {
       sourceUrl: 'not-a-url',
       releases: [
-        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
         {
           version: '5.6.1',
-          releaseTimestamp: '2020-02-14T10:04:00',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
         },
       ],
     };
@@ -173,5 +173,21 @@ describe('datasource/metadata', () => {
 
     addMetaData(dep, datasource, lookupName);
     expect(dep.sourceUrl).toEqual('https://gitlab.com/meno/dropzone');
+  });
+
+  it('Should normalize releaseTimestamp', () => {
+    const dep = {
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    addMetaData(dep, datasourceMaven.id, 'foobar');
+    expect(dep.releases).toMatchObject([
+      { releaseTimestamp: '2000-01-01T12:34:56.000Z' },
+      { releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+      { releaseTimestamp: '2000-01-03T12:34:56.000Z' },
+    ]);
   });
 });

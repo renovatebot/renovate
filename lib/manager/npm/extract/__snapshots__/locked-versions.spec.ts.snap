@@ -18,6 +18,9 @@ Array [
         "lockedVersion": "2.0.0",
       },
     ],
+    "lockFiles": Array [
+      "package-lock.json",
+    ],
     "npmLock": "package-lock.json",
   },
 ]
@@ -35,6 +38,9 @@ Array [
         "currentValue": "2.0.0",
         "depName": "b",
       },
+    ],
+    "lockFiles": Array [
+      "pnpm-lock.yaml",
     ],
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
@@ -59,6 +65,9 @@ Array [
         "lockedVersion": "2.0.0",
       },
     ],
+    "lockFiles": Array [
+      "package-lock.json",
+    ],
     "npmLock": "package-lock.json",
   },
 ]
@@ -80,6 +89,9 @@ Array [
         "lockedVersion": "2.0.0",
       },
     ],
+    "lockFiles": Array [
+      "package-lock.json",
+    ],
     "npmLock": "package-lock.json",
   },
 ]
@@ -100,6 +112,9 @@ Array [
         "depName": "b",
         "lockedVersion": "2.0.0",
       },
+    ],
+    "lockFiles": Array [
+      "yarn.lock",
     ],
     "npmLock": "package-lock.json",
     "yarnLock": "yarn.lock",
@@ -125,6 +140,9 @@ Array [
         "lockedVersion": "2.0.0",
       },
     ],
+    "lockFiles": Array [
+      "yarn.lock",
+    ],
     "npmLock": "package-lock.json",
     "yarnLock": "yarn.lock",
   },
@@ -148,6 +166,9 @@ Array [
         "depName": "b",
         "lockedVersion": "2.0.0",
       },
+    ],
+    "lockFiles": Array [
+      "yarn.lock",
     ],
     "npmLock": "package-lock.json",
     "yarnLock": "yarn.lock",

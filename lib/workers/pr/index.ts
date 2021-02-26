@@ -239,7 +239,7 @@ export async function ensurePr(
   for (const upgrade of upgrades) {
     const upgradeKey = `${upgrade.depType}-${upgrade.depName}-${
       upgrade.manager
-    }-${upgrade.fromVersion || upgrade.currentValue}-${upgrade.toVersion}`;
+    }-${upgrade.currentVersion || upgrade.currentValue}-${upgrade.newVersion}`;
     if (processedUpgrades.includes(upgradeKey)) {
       continue; // eslint-disable-line no-continue
     }
@@ -383,7 +383,7 @@ export async function ensurePr(
         if (
           !dependencyDashboardCheck &&
           isLimitReached(Limit.PullRequests) &&
-          !config.vulnerabilityAlert
+          !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
           return { prResult: PrResult.LimitReached };

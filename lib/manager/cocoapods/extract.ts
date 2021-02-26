@@ -2,6 +2,7 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourcePod from '../../datasource/pod';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { PackageDependency, PackageFile } from '../common';
 
 const regexMappings = [
@@ -72,10 +73,13 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
     }
   }
 
-  return null; // TODO: gitlab or gitTags datasources?
+  return null;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export async function extractPackageFile(
+  content: string,
+  fileName: string
+): Promise<PackageFile | null> {
   logger.trace('cocoapods.extractPackageFile()');
   const deps: PackageDependency[] = [];
   const lines: string[] = content.split('\n');
@@ -137,6 +141,11 @@ export function extractPackageFile(content: string): PackageFile | null {
       deps.push(dep);
     }
   }
-
-  return deps.length ? { deps } : null;
+  const res: PackageFile = { deps };
+  const lockFile = getSiblingFileName(fileName, 'Podfile.lock');
+  // istanbul ignore if
+  if (await localPathExists(lockFile)) {
+    res.lockFiles = [lockFile];
+  }
+  return res;
 }

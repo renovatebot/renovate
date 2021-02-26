@@ -374,6 +374,7 @@ Object {
     Object {
       "matchDepTypes": Array [
         "dependencies",
+        "require",
       ],
       "semanticCommitType": "fix",
     },

@@ -65,7 +65,7 @@ export interface RenovateSharedConfig {
 
 // Config options used only within the global worker
 // The below should contain config options where stage=global
-export interface GlobalAdminConfig {
+export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
   baseDir?: string;
@@ -85,6 +85,7 @@ export interface GlobalAdminConfig {
 export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
+  customEnvVariables?: Record<string, string>;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
@@ -92,10 +93,8 @@ export interface RepoAdminConfig {
   trustLevel?: 'low' | 'high';
 }
 
-export interface RenovateAdminConfig {
+export interface LegacyAdminConfig {
   cacheDir?: string;
-
-  customEnvVariables?: Record<string, string>;
 
   endpoint?: string;
 
@@ -141,7 +140,7 @@ export interface CustomManager {
 
 // TODO: Proper typings
 export interface RenovateConfig
-  extends RenovateAdminConfig,
+  extends LegacyAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
@@ -191,7 +190,7 @@ export interface RenovateConfig
   fetchReleaseNotes?: boolean;
 }
 
-export interface GlobalConfig extends RenovateConfig, GlobalAdminConfig {}
+export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
@@ -221,6 +220,7 @@ export interface PackageRule
   extends RenovateSharedConfig,
     UpdateConfig,
     Record<string, any> {
+  matchFiles?: string[];
   matchPaths?: string[];
   matchLanguages?: string[];
   matchBaseBranches?: string[];

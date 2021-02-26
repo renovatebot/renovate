@@ -125,6 +125,11 @@ export async function getReleases({
   const source = await getDatasource(lookupName);
   let res = null;
 
+  if (!source) {
+    logger.warn({ lookupName }, 'Unsupported dependency.');
+    return null;
+  }
+
   switch (source.datasource) {
     case github.id: {
       res = await github.getReleases(source);

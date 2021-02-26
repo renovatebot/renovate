@@ -28,8 +28,8 @@ export const isVersion = (input: string): string => valid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 
-function getNewValue({ toVersion }: NewValueConfig): string {
-  return toVersion;
+function getNewValue({ newVersion }: NewValueConfig): string {
+  return newVersion;
 }
 
 export const api: VersioningApi = {
