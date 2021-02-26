@@ -13,6 +13,15 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue; // eslint-disable-line no-continue
     }
 
+    const containerImageMatch = /^\s+image: ([^"]+)\s*$/.exec(line);
+    if (containerImageMatch) {
+      const [, currentFrom] = containerImageMatch;
+      const dep = getDep(currentFrom);
+      dep.depType = 'docker';
+      deps.push(dep);
+      continue; // eslint-disable-line no-continue
+    }
+
     const dockerMatch = /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;

@@ -19,7 +19,7 @@ describe('lib/manager/github-actions/extract', () => {
     it('extracts multiple docker image lines from yaml configuration file', () => {
       const res = extractPackageFile(workflow1);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps.filter((d) => d.datasource === 'docker')).toHaveLength(2);
+      expect(res.deps.filter((d) => d.datasource === 'docker')).toHaveLength(3);
     });
     it('extracts multiple action tag lines from yaml configuration file', () => {
       const res = extractPackageFile(workflow2);
