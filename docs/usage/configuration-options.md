@@ -399,7 +399,7 @@ If you want to require approval for _major_ updates, set `dependencyDashboardApp
 }
 ```
 
-If you want to approve a _specific_ package, set `dependencyDashboardApproval` to `true` within a `packageRules` entry where you have defined a specific package.
+If you want to approve _specific_ packages, set `dependencyDashboardApproval` to `true` within a `packageRules` entry where you have defined a specific package or pattern.
 
 ```json
 {
