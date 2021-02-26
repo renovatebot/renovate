@@ -1267,6 +1267,7 @@ const options: RenovateOptions[] = [
     name: 'transitiveRemediation',
     description: 'Enable remediation of transitive dependencies.',
     type: 'boolean',
+    default: false,
   },
   {
     name: 'vulnerabilityAlerts',
