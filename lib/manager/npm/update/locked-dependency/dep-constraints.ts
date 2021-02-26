@@ -9,7 +9,7 @@ export function findDepConstraints(
   currentVersion: string,
   parentDepName?: string
 ): ParentDependency[] {
-  let parents = [];
+  let parents: ParentDependency[] = [];
   let packageJsonConstraint = packageJson.dependencies?.[depName];
   if (packageJsonConstraint) {
     parents.push({
@@ -49,7 +49,7 @@ export function findDepConstraints(
     }
   }
   // dedupe
-  const res = [];
+  const res: ParentDependency[] = [];
   for (const req of parents) {
     const reqStringified = JSON.stringify(req);
     if (!res.find((i) => JSON.stringify(i) === reqStringified)) {
