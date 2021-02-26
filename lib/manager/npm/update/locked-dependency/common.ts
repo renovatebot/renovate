@@ -8,7 +8,7 @@ export interface PackageLockDependency {
 export type PackageLockDependencies = Record<string, PackageLockDependency>;
 
 export interface PackageLockOrEntry {
-  lockFileVersion?: number;
+  lockfileVersion?: number;
   version?: string;
   dependencies?: PackageLockDependencies;
   requires?: Record<string, string>;

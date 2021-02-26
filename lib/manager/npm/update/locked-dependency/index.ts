@@ -42,7 +42,7 @@ export async function updateLockedDependency(
     `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    if (!validateInputs) {
+    if (!validateInputs(config)) {
       return null;
     }
     let packageJson: PackageJson;
@@ -55,8 +55,8 @@ export async function updateLockedDependency(
       logger.warn({ err }, 'Failed to parse files');
       return null;
     }
-    if (packageLockJson.lockFileVersion === 2) {
-      logger.debug('Only lockFileVersion 1 is supported');
+    if (packageLockJson.lockfileVersion === 2) {
+      logger.debug('Only lockfileVersion 1 is supported');
       return null;
     }
     const lockedDeps = getLockedDependencies(
@@ -107,16 +107,22 @@ export async function updateLockedDependency(
           newVersion
         );
         if (parentNewVersion) {
-          // Update the parent dependency so that we can update this dependency
-          logger.debug(
-            `Update of ${depName} to ${newVersion} can be achieved due to parent ${parentDepName}`
-          );
-          const parentUpdate: UpdateLockedConfig = {
-            depName: parentDepName,
-            currentVersion: parentVersion,
-            newVersion: parentNewVersion,
-          };
-          parentUpdates.push(parentUpdate);
+          if (parentNewVersion === parentVersion) {
+            logger.debug(
+              `Update of ${depName} to ${newVersion} already achieved in parent ${parentDepName}@${parentNewVersion}`
+            );
+          } else {
+            // Update the parent dependency so that we can update this dependency
+            logger.debug(
+              `Update of ${depName} to ${newVersion} can be achieved due to parent ${parentDepName}`
+            );
+            const parentUpdate: UpdateLockedConfig = {
+              depName: parentDepName,
+              currentVersion: parentVersion,
+              newVersion: parentNewVersion,
+            };
+            parentUpdates.push(parentUpdate);
+          }
         } else {
           // For some reason it's not possible to update the parent to a version compatible with our desired dep version
           logger.debug(
@@ -136,12 +142,6 @@ export async function updateLockedDependency(
           fileContent: packageFileContent,
           upgrade: { depName, depType, newValue },
         });
-        if (newPackageJsonContent === packageFileContent) {
-          logger.debug(
-            `Update of ${depName} to ${newVersion} cannot be achieved because ${packageFile} update failed`
-          );
-          return null;
-        }
       }
     }
     for (const dependency of lockedDeps) {
@@ -162,6 +162,7 @@ export async function updateLockedDependency(
         parentUpdateConfig,
         true
       );
+      // istanbul ignore if: hard to test due to recursion
       if (!parentUpdateResult) {
         logger.debug(
           `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`
@@ -189,6 +190,7 @@ export async function updateLockedDependency(
       const res = await exec(commands, execOptions);
       logger.debug({ commands, res }, 'res');
       newLockFileContent = await readLocalFile(lockFile, 'utf8');
+      // istanbul ignore if: yet to find an example
       if (newLockFileContent === lockFileContent) {
         logger.debug('Package lock is unchanged');
         return null;
@@ -201,6 +203,7 @@ export async function updateLockedDependency(
       depName,
       currentVersion
     );
+    // istanbul ignore if: yet to find an example
     if (nonUpdatedDependencies.length) {
       logger.info({ nonUpdatedDependencies }, 'Update incomplete');
       return null;
@@ -211,8 +214,8 @@ export async function updateLockedDependency(
       files[packageFile] = newPackageJsonContent;
     }
     return files;
-  } catch (err) {
-    logger.warn({ err }, 'updateLockedDependency() error');
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'updateLockedDependency() error');
     return null;
   }
 }
