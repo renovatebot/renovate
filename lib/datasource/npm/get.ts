@@ -42,7 +42,7 @@ export interface NpmDependency extends ReleaseResult {
   sourceDirectory?: string;
 }
 
-interface NpmResponse {
+export interface NpmResponse {
   _id: string;
   name?: string;
   versions?: Record<
@@ -55,6 +55,8 @@ interface NpmResponse {
       homepage?: string;
       deprecated?: boolean;
       gitHead?: string;
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
     }
   >;
   repository?: {
