@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { logger } from '../../../test/util';
 import { id as datasource, getDigest } from '.';
 
 const res1 = `<!DOCTYPE html>
@@ -223,6 +224,12 @@ describe('datasource/go', () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(logger.logger.warn).toHaveBeenCalled();
+      expect(logger.logger.error).not.toHaveBeenCalledWith(
+        { lookupName: 'golang.org/foo/something' },
+        'Unsupported dependency.'
+      );
+      expect(logger.logger.fatal).not.toHaveBeenCalled();
     });
     it('support ghe', async () => {
       httpMock

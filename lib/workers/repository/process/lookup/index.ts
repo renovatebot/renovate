@@ -37,7 +37,7 @@ export async function lookupUpdates(
     packageFile,
     pinDigests,
     rollbackPrs,
-    vulnerabilityAlert,
+    isVulnerabilityAlert,
   } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   // Use the datasource's default versioning if none is configured
@@ -126,7 +126,7 @@ export async function lookupUpdates(
     let rangeStrategy = getRangeStrategy(config);
     // istanbul ignore next
     if (
-      vulnerabilityAlert &&
+      isVulnerabilityAlert &&
       rangeStrategy === 'update-lockfile' &&
       !lockedVersion
     ) {
@@ -182,7 +182,7 @@ export async function lookupUpdates(
       // Leave only compatible versions
       versioning.isCompatible(v.version, currentValue)
     );
-    if (vulnerabilityAlert) {
+    if (isVulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
     const buckets: Record<string, [Release]> = {};
@@ -366,7 +366,7 @@ export async function lookupUpdates(
       if (
         update.updateType !== 'pin' &&
         update.updateType !== 'rollback' &&
-        !vulnerabilityAlert
+        !isVulnerabilityAlert
       ) {
         update.blockedByPin = true;
       }

@@ -1,6 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
+labels: 'type:feature, status:requirements'
 ---
 
 **What would you like Renovate to be able to do?**
