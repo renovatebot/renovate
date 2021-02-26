@@ -35,6 +35,7 @@ describe('lib/manager/helm-values/extract', () => {
     it('extracts from complex values file correctly"', () => {
       const result = extractPackageFile(helmMultiAndNestedImageValues);
       expect(result).toMatchSnapshot();
+      expect(result.deps).toHaveLength(4);
     });
   });
 });
