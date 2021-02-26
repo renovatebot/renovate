@@ -1,16 +1,10 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
-import { getName, mocked } from '../../../../../test/util';
+import { getName } from '../../../../../test/util';
 import { clone } from '../../../../util/clone';
-import * as _fs from '../../../../util/fs';
 import { UpdateLockedConfig } from '../../../common';
 import { updateLockedDependency } from '.';
-
-jest.mock('../../../../util/exec');
-jest.mock('../../../../util/fs');
-
-const fs = mocked(_fs);
 
 const packageFileContent = readFileSync(
   resolve(__dirname, './__fixtures__/package.json'),
@@ -48,17 +42,8 @@ const typeIsJson = JSON.parse(
 describe(getName(__filename), () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
-    const files: Record<string, string> = {};
     beforeEach(() => {
       httpMock.setup();
-      fs.writeLocalFile.mockImplementation((fileName, fileContent) => {
-        files[fileName] = fileContent;
-        return Promise.resolve();
-      });
-      fs.readLocalFile.mockImplementation((fileName) => {
-        const content = files[fileName];
-        return Promise.resolve(content);
-      });
       config = {
         packageFile: 'package.json',
         packageFileContent,

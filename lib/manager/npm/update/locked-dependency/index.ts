@@ -1,6 +1,4 @@
 import { logger } from '../../../../logger';
-import { ExecOptions, exec } from '../../../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../../../util/fs';
 import { api as semver } from '../../../../versioning/npm';
 import { UpdateLockedConfig } from '../../../common';
 import { updateDependency } from '../dependency';
@@ -178,41 +176,6 @@ export async function updateLockedDependency(
       newPackageJsonContent =
         parentUpdateResult[packageFile] || newPackageJsonContent;
       newLockFileContent = parentUpdateResult[lockFile];
-    }
-    // Run npm install if this update is not a parent update. We want to run it only once
-    if (!isParentUpdate) {
-      // TODO: unify with post-updates
-      await writeLocalFile(lockFile, newLockFileContent);
-      if (newPackageJsonContent) {
-        await writeLocalFile(packageFile, newPackageJsonContent);
-      }
-      const execOptions: ExecOptions = {
-        cwdFile: lockFile,
-        docker: {
-          image: 'renovate/node',
-        },
-      };
-      const commands = [`npm install`];
-      const res = await exec(commands, execOptions);
-      logger.debug({ commands, res }, 'res');
-      newLockFileContent = await readLocalFile(lockFile, 'utf8');
-      // istanbul ignore if: yet to find an example
-      if (newLockFileContent === lockFileContent) {
-        logger.debug('Package lock is unchanged');
-        return null;
-      }
-    }
-    // Now check if we successfully remediated what we needed
-    const newPackageLock = JSON.parse(newLockFileContent);
-    const nonUpdatedDependencies = getLockedDependencies(
-      newPackageLock,
-      depName,
-      currentVersion
-    );
-    // istanbul ignore if: yet to find an example
-    if (nonUpdatedDependencies.length) {
-      logger.info({ nonUpdatedDependencies }, 'Update incomplete');
-      return null;
     }
     const files = {};
     files[lockFile] = newLockFileContent;
