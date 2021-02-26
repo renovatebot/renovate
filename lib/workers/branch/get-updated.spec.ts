@@ -111,12 +111,25 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
-    it('handles isRemediation', async () => {
+    it('handles isRemediation success', async () => {
       config.upgrades.push({
         manager: 'npm',
         isRemediation: true,
       } as never);
       npm.updateLockedDependency.mockResolvedValueOnce({
+        'package-lock.json': 'new contents',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles isRemediation rebase', async () => {
+      config.upgrades.push({
+        manager: 'npm',
+        isRemediation: true,
+      } as never);
+      config.reuseExistingBranch = true;
+      git.getFile.mockResolvedValueOnce('existing content');
+      npm.updateLockedDependency.mockResolvedValue({
         'package-lock.json': 'new contents',
       });
       const res = await getUpdatedPackageFiles(config);
