@@ -328,14 +328,26 @@ export async function initRepo({
           });
           logger.debug('Created new default branch in fork');
         } catch (err) /* istanbul ignore next */ {
-          logger.warn({ err }, 'Could not create parent defaultBranch in fork');
+          if (err.response?.body?.message === 'Reference already exists') {
+            logger.debug(
+              `Branch ${config.defaultBranch} already exists in the fork`
+            );
+          } else {
+            logger.warn(
+              { err },
+              'Could not create parent defaultBranch in fork'
+            );
+          }
         }
         logger.debug(
           `Setting ${config.defaultBranch} as default branch for ${config.repository}`
         );
         try {
           await githubApi.patchJson(`repos/${config.repository}`, {
-            body: { default_branch: config.defaultBranch },
+            body: {
+              name: config.repository.split('/')[1],
+              default_branch: config.defaultBranch,
+            },
           });
           logger.debug('Successfully changed default branch for fork');
         } catch (err) /* istanbul ignore next */ {
