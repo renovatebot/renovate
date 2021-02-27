@@ -320,6 +320,9 @@ export function generateBranchConfig(
         .reduce((a, b) => a.concat(b), [])
     ),
   ];
+  if (config.upgrades.some((upgrade) => upgrade.updateType === 'major')) {
+    config.updateType = 'major';
+  }
   config.blockedByPin = config.upgrades.every(
     (upgrade) => upgrade.blockedByPin
   );
