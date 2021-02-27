@@ -305,6 +305,21 @@ export function generateBranchConfig(
     (upgrade) => upgrade.prCreation === 'approval'
   );
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
+  // combine all labels
+  config.labels = [
+    ...new Set(
+      config.upgrades
+        .map((upgrade) => upgrade.labels || [])
+        .reduce((a, b) => a.concat(b), [])
+    ),
+  ];
+  config.addLabels = [
+    ...new Set(
+      config.upgrades
+        .map((upgrade) => upgrade.addLabels || [])
+        .reduce((a, b) => a.concat(b), [])
+    ),
+  ];
   config.blockedByPin = config.upgrades.every(
     (upgrade) => upgrade.blockedByPin
   );
