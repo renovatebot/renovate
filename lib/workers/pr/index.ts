@@ -284,8 +284,6 @@ export async function ensurePr(
     config.upgrades.push(upgrade);
   }
 
-  // Update the config object
-  Object.assign(config, upgrades[0]);
   config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
 
   const releaseNoteRepos: string[] = [];
