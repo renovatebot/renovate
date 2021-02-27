@@ -1870,6 +1870,7 @@ const options: RenovateOptions[] = [
     description: 'Strategy how to interpret matchStrings.',
     type: 'string',
     default: 'any',
+    allowedValues: ['any', 'recursive', 'combination'],
     parent: 'regexManagers',
     cli: false,
     env: false,
