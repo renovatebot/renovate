@@ -37,6 +37,7 @@ describe('lib/manager/helm-values/extract', () => {
     it('extracts from complex values file correctly"', async () => {
       const result = await extractPackageFile(helmMultiAndNestedImageValues);
       expect(result).toMatchSnapshot();
+      expect(result.deps).toHaveLength(4);
     });
     it('returns the package file version from the sibling Chart.yaml"', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`

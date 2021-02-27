@@ -21,3 +21,9 @@ someOtherKey:
       some-non-image-related-key: 'with-some-value'
 
 empty_key:
+
+# https://github.com/bitnami/charts/blob/eae34fdbf16e2cb6a6f809d72cd22f98f6bceccc/bitnami/harbor/values.yaml#L14-L17
+coreImage:
+  registry: docker.io
+  repository: bitnami/harbor-core
+  tag: 2.1.3-debian-10-r38

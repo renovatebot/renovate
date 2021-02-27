@@ -60,7 +60,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://custom.pypi.net/foo/dj-database-url",
+    "url": "https://custom.pypi.net/foo/dj-database-url/",
   },
 ]
 `;
@@ -114,7 +114,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://pypi.org/simple/dj-database-url",
+    "url": "https://pypi.org/simple/dj-database-url/",
   },
 ]
 `;
@@ -169,7 +169,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://some.registry.org/+simple/dj-database-url",
+    "url": "https://some.registry.org/+simple/dj-database-url/",
   },
 ]
 `;
@@ -224,7 +224,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://pypi.org/simple/dj-database-url",
+    "url": "https://pypi.org/simple/dj-database-url/",
   },
 ]
 `;
@@ -248,7 +248,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://pypi.org/simple/image-collector",
+    "url": "https://pypi.org/simple/image-collector/",
   },
 ]
 `;
@@ -435,7 +435,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://pypi.org/pypi/something",
+    "url": "https://pypi.org/pypi/something/",
   },
 ]
 `;
@@ -449,7 +449,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://pypi.org/simple/dj-database-url",
+    "url": "https://pypi.org/simple/dj-database-url/",
   },
 ]
 `;
@@ -463,7 +463,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://pypi.org/simple/dj-database-url",
+    "url": "https://pypi.org/simple/dj-database-url/",
   },
 ]
 `;

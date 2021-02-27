@@ -772,6 +772,7 @@ const options: RenovateOptions[] = [
     description:
       'Whether to update internal dep versions in a monorepo (Lerna or Yarn Workspaces).',
     type: 'boolean',
+    default: false,
     stage: 'package',
   },
   {
@@ -1271,7 +1272,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
-      rangeStrategy: 'bump',
+      rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
       prCreation: 'immediate',
@@ -1869,6 +1870,7 @@ const options: RenovateOptions[] = [
     description: 'Strategy how to interpret matchStrings.',
     type: 'string',
     default: 'any',
+    allowedValues: ['any', 'recursive', 'combination'],
     parent: 'regexManagers',
     cli: false,
     env: false,
