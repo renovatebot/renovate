@@ -2190,10 +2190,10 @@
   resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.1.tgz#283f669ff76d7b8260df8ab7a4262cc83d988256"
   integrity sha512-fZQQafSREFyuZcdWFAExYjBiCL7AUCdgsk80iO0q4yihYYdcIiH28CcuPTGFgLOCC8RlW49GSQxdHwZP+I7CNg==
 
-"@types/moo@0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@types/moo/-/moo-0.5.3.tgz#d034ae641728c473d367e7b7afd991123b8bdecb"
-  integrity sha512-PJJ/jvb5Gor8DWvXN3e75njfQyYNRz0PaFSZ3br9GfHM9N2FxvuJ/E/ytcQePJOLzHlvgFSsIJIvfUMUxWTbnA==
+"@types/moo@0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@types/moo/-/moo-0.5.4.tgz#a7d792c8c70af6f26d1717ccd20fe4a1fa926d43"
+  integrity sha512-1cJMV+3lvSvb21J4SqQlwxSwhCvrj8bmGnsHeODIokTAwGEn1fI9sGJWeAPCjArZicrtLF7Dg7frA1V7DT8Lrw==
 
 "@types/nock@10.0.3":
   version "10.0.3"
@@ -2212,10 +2212,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.25.tgz#15967a7b577ff81383f9b888aa6705d43fbbae93"
   integrity sha512-EPpXLOVqDvisVxtlbvzfyqSsFeQxltFbluZNRndIb8tr9KiBnYNLzrc1N3pyKUCww2RNrfHDViqDWWE1LCJQtQ==
 
-"@types/node@12.19.16":
-  version "12.19.16"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.19.16.tgz#15753af35cbef636182d8d8ca55b37c8583cecb3"
-  integrity sha512-7xHmXm/QJ7cbK2laF+YYD7gb5MggHIIQwqyjin3bpEGiSuvScMQ5JZZXPvRipi1MwckTQbJZROMns/JxdnIL1Q==
+"@types/node@12.20.4":
+  version "12.20.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.4.tgz#73687043dd00fcb6962c60fbf499553a24d6bdf2"
+  integrity sha512-xRCgeE0Q4pT5UZ189TJ3SpYuX/QGl6QIAOAIeDSbAVAd2gX1NxSZup4jNVK7cxIeP8KDSbJgcckun495isP1jQ==
 
 "@types/node@^13.7.0":
   version "13.13.41"
