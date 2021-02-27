@@ -324,7 +324,7 @@ export async function initRepo({
         try {
           await githubApi.postJson(`repos/${config.repository}/git/refs`, {
             body,
-            token: forkToken || opts.token,
+            token: forkToken,
           });
           logger.debug('Created new default branch in fork');
         } catch (err) /* istanbul ignore next */ {
@@ -334,7 +334,7 @@ export async function initRepo({
             );
           } else {
             logger.warn(
-              { err },
+              { err, body: err.response?.body },
               'Could not create parent defaultBranch in fork'
             );
           }
@@ -348,6 +348,7 @@ export async function initRepo({
               name: config.repository.split('/')[1],
               default_branch: config.defaultBranch,
             },
+            token: forkToken,
           });
           logger.debug('Successfully changed default branch for fork');
         } catch (err) /* istanbul ignore next */ {
