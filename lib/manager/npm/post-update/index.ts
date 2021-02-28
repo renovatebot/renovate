@@ -429,7 +429,7 @@ export async function getAdditionalFiles(
     return { artifactErrors, updatedArtifacts };
   }
   const dirs = determineLockFileDirs(config, packageFiles);
-  logger.debug({ dirs }, 'lock file dirs');
+  logger.trace({ dirs }, 'lock file dirs');
   await writeExistingFiles(config, packageFiles);
   await writeUpdatedPackageFiles(config);
 

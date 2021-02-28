@@ -3,7 +3,7 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import { ArtifactError } from '../../manager/common';
+import { ArtifactError, BumpedPackageFile } from '../../manager/common';
 import { File, getFile } from '../../util/git';
 import { BranchConfig } from '../common';
 import { doAutoReplace } from './auto-replace';
@@ -19,10 +19,9 @@ export async function getUpdatedPackageFiles(
   config: BranchConfig
 ): Promise<PackageFilesResult> {
   logger.trace({ config });
-  const { branchName, reuseExistingBranch } = config;
+  const { reuseExistingBranch } = config;
   logger.debug(
-    { reuseExistingBranch, branchName },
-    'manager.getUpdatedPackageFiles()'
+    `manager.getUpdatedPackageFiles() reuseExistinbranch=${reuseExistingBranch}`
   );
   const updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
@@ -35,45 +34,49 @@ export async function getUpdatedPackageFiles(
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
     packageFileUpdatedDeps[packageFile].push(depName);
+    let packageFileContent = updatedFileContents[packageFile];
+    if (!packageFileContent) {
+      packageFileContent = await getFile(
+        packageFile,
+        reuseExistingBranch ? config.branchName : config.baseBranch
+      );
+    }
+    // istanbul ignore if
+    if (config.reuseExistingBranch && !packageFileContent) {
+      logger.debug(
+        { packageFile, depName },
+        'Rebasing branch after file not found'
+      );
+      return getUpdatedPackageFiles({
+        ...config,
+        reuseExistingBranch: false,
+      });
+    }
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else {
-      let existingContent = updatedFileContents[packageFile];
-      if (!existingContent) {
-        existingContent = await getFile(
-          packageFile,
-          reuseExistingBranch ? config.branchName : config.baseBranch
-        );
-      }
-      // istanbul ignore if
-      if (config.reuseExistingBranch && !existingContent) {
-        logger.debug(
-          { packageFile, depName },
-          'Rebasing branch after file not found'
-        );
-        return getUpdatedPackageFiles({
-          ...config,
-          reuseExistingBranch: false,
-        });
-      }
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
         let res = await doAutoReplace(
           upgrade,
-          existingContent,
+          packageFileContent,
           reuseExistingBranch
         );
+
         if (res) {
+          let bumpedPackageFiles: BumpedPackageFile[];
           if (bumpPackageVersion && upgrade.bumpVersion) {
-            const { bumpedContent } = await bumpPackageVersion(
+            const bumpResult = await bumpPackageVersion(
               res,
               upgrade.packageFileVersion,
-              upgrade.bumpVersion
+              upgrade.bumpVersion,
+              packageFile
             );
-            res = bumpedContent;
+            res = bumpResult.bumpedContent;
+            bumpedPackageFiles = bumpResult.bumpedFiles;
           }
-          if (res === existingContent) {
+          if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
             if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
@@ -82,6 +85,18 @@ export async function getUpdatedPackageFiles(
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
+          }
+          // indicates that the version was bumped in one or more files in
+          // addition to or instead of the packageFile
+          if (bumpedPackageFiles) {
+            for (const bumpedPackageFile of bumpedPackageFiles) {
+              logger.debug(
+                { bumpedPackageFile, depName },
+                'Updating bumpedPackageFile content'
+              );
+              updatedFileContents[bumpedPackageFile.fileName] =
+                bumpedPackageFile.newContent;
+            }
           }
           continue; // eslint-disable-line no-continue
         } else if (reuseExistingBranch) {
@@ -94,14 +109,15 @@ export async function getUpdatedPackageFiles(
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = await updateDependency({
-        fileContent: existingContent,
+        fileContent: packageFileContent,
         upgrade,
       });
       if (bumpPackageVersion && upgrade.bumpVersion) {
         const { bumpedContent } = await bumpPackageVersion(
           newContent,
           upgrade.packageFileVersion,
-          upgrade.bumpVersion
+          upgrade.bumpVersion,
+          packageFile
         );
         newContent = bumpedContent;
       }
@@ -117,12 +133,12 @@ export async function getUpdatedPackageFiles(
           });
         }
         logger.debug(
-          { existingContent, config: upgrade },
+          { existingContent: packageFileContent, config: upgrade },
           'Error updating file'
         );
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      if (newContent !== existingContent) {
+      if (newContent !== packageFileContent) {
         if (config.reuseExistingBranch) {
           // This ensure it's always 1 commit from the bot
           logger.debug(
@@ -134,10 +150,10 @@ export async function getUpdatedPackageFiles(
             reuseExistingBranch: false,
           });
         }
-        logger.debug({ packageFile, depName }, 'Updating packageFile content');
+        logger.debug(`Updating ${depName} in ${packageFile}`);
         updatedFileContents[packageFile] = newContent;
       }
-      if (newContent === existingContent) {
+      if (newContent === packageFileContent) {
         // istanbul ignore else
         if (upgrade.datasource === datasourceGitSubmodules.id) {
           updatedFileContents[packageFile] = newContent;
