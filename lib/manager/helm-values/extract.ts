@@ -6,6 +6,7 @@ import { getDep } from '../dockerfile/extract';
 
 import {
   HelmDockerImageDependency,
+  getParsedSiblingChartYaml,
   matchesHelmValuesDockerHeuristic,
 } from './util';
 
@@ -53,7 +54,10 @@ function findDependencies(
   return packageDependencies;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export async function extractPackageFile(
+  content: string,
+  fileName?: string
+): Promise<PackageFile> {
   let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
   try {
     // a parser that allows extracting line numbers would be preferable, with
@@ -68,7 +72,21 @@ export function extractPackageFile(content: string): PackageFile {
     const deps = findDependencies(parsedContent, []);
     if (deps.length) {
       logger.debug({ deps }, 'Found dependencies in helm-values');
-      return { deps };
+
+      // in Helm, the current package version is the version of the chart.
+      // This fetches this version by reading it from the Chart.yaml
+      // found in the same folder as the currently processed values file.
+      const siblingChart = await getParsedSiblingChartYaml(fileName);
+      const packageFileVersion = siblingChart?.version;
+      if (packageFileVersion) {
+        return {
+          deps,
+          packageFileVersion,
+        };
+      }
+      return {
+        deps,
+      };
     }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'Error parsing helm-values parsed content');
