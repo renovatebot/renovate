@@ -30,8 +30,3 @@ jobs:
     steps:
       - name: Node 6 test
         uses: docker://node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896
-  container_image_test:
-    name: Container Image Test
-    runs-on: ubuntu-latest
-    container:
-      image: hadolint/hadolint:v1.0.0-alpine
