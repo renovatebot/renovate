@@ -6,7 +6,7 @@ import { PackageFile } from '../../../manager/common';
 import { RepoInitConfig } from '../../../workers/repository/init/common';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
-export const CACHE_REVISION = 2;
+export const CACHE_REVISION = 3;
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
