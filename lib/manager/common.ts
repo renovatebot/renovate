@@ -27,6 +27,7 @@ export interface ExtractConfig extends ManagerConfig {
   yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
+  updateInternalDeps?: boolean;
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
@@ -47,7 +48,8 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
   updateType?: UpdateType;
-  toVersion?: string;
+  newValue?: string;
+  newVersion?: string;
 }
 
 export interface PackageUpdateConfig {
@@ -73,13 +75,13 @@ export interface NpmLockFiles {
   pnpmShrinkwrap?: string;
   npmLock?: string;
   lernaDir?: string;
+  lockFiles?: string[];
 }
 
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
-  internalPackages?: string[]; // TODO: remove
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
@@ -141,16 +143,15 @@ export interface LookupUpdate {
   isRange?: boolean;
   isRollback?: boolean;
   isSingleVersion?: boolean;
-  fromVersion?: string;
+  currentVersion?: string;
   newDigest?: string;
   newDigestShort?: string;
   newMajor?: number;
   newMinor?: number;
   newValue: string;
-  newVersion?: string;
   semanticCommitType?: string;
   skippedOverVersions?: string[];
-  toVersion?: string;
+  newVersion?: string;
   updateType?: UpdateType;
   sourceUrl?: string;
 }
@@ -165,14 +166,14 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   displayFrom?: string;
   displayTo?: string;
   fixedVersion?: string;
-  fromVersion?: string;
+  currentVersion?: string;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
   sourceLine?: number;
-  toVersion?: string;
+  newVersion?: string;
   updates?: LookupUpdate[];
   replaceString?: string;
   autoReplaceStringTemplate?: string;
@@ -187,19 +188,16 @@ export interface Upgrade<T = Record<string, any>>
     NpmLockFiles {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
-  currentVersion?: string;
   depGroup?: string;
-  dockerRepository?: string;
   localDir?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;
   newMajor?: number;
   newValue?: string;
-  newVersion?: string;
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
-  toVersion?: string;
+  newVersion?: string;
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;
@@ -229,6 +227,13 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
 
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
+  // describes files that was changed instead of or in addition to the packageFile
+  bumpedFiles?: BumpedPackageFile[];
+}
+
+export interface BumpedPackageFile {
+  fileName: string;
+  newContent: string;
 }
 
 export interface ManagerApi {
@@ -239,7 +244,8 @@ export interface ManagerApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType | string
+    bumpVersion: ReleaseType | string,
+    packageFile?: string
   ): Result<BumpPackageVersionResult>;
 
   extractAllPackageFiles?(

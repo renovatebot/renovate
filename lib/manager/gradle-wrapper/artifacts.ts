@@ -74,13 +74,13 @@ export async function updateArtifacts({
         // need to reset version, otherwise we have a checksum mismatch
         await writeLocalFile(
           packageFileName,
-          newPackageFileContent.replace(config.toVersion, config.currentValue)
+          newPackageFileContent.replace(config.newValue, config.currentValue)
         );
         const checksum = await getDistributionChecksum(distributionUrl);
         cmd += ` --gradle-distribution-sha256-sum ${checksum}`;
       }
     } else {
-      cmd += ` --gradle-version ${config.toVersion}`;
+      cmd += ` --gradle-version ${config.newValue}`;
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {

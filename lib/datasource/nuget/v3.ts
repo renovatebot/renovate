@@ -173,7 +173,6 @@ export async function getReleases(
   }
 
   const dep: ReleaseResult = {
-    pkgName,
     releases,
   };
 

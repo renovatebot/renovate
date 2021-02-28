@@ -11,11 +11,12 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "latest",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "0.5.0",
@@ -57,7 +58,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -67,11 +67,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() disables major relea
 Array [
   Object {
     "bucket": "latest",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.1",
@@ -83,7 +84,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -100,29 +100,30 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "fromVersion": "0.9.4",
+    "currentVersion": "0.9.4",
     "isRange": true,
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "==0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "fromVersion": "0.9.4",
+    "currentVersion": "0.9.4",
     "isRange": true,
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "==1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -135,7 +136,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -152,14 +152,14 @@ Object {
     Object {
       "blockedByPin": true,
       "bucket": "non-major",
-      "fromVersion": "8.0.0",
+      "currentVersion": "8.0.0",
       "isSingleVersion": true,
       "newDigest": "sha256:abcdef1234567890",
       "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
-      "toVersion": "8.1.0",
+      "newVersion": "8.1.0",
       "updateType": "minor",
     },
     Object {
@@ -216,14 +216,14 @@ Object {
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "fromVersion": "8.0.0",
+      "currentVersion": "8.0.0",
       "isSingleVersion": true,
       "newDigest": "sha256:abcdef1234567890",
       "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
-      "toVersion": "8.1.0",
+      "newVersion": "8.1.0",
       "updateType": "minor",
     },
     Object {
@@ -255,10 +255,9 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles git submodul
 Object {
   "updates": Array [
     Object {
-      "fromVersion": undefined,
+      "currentVersion": undefined,
       "newValue": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
       "newVersion": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-      "toVersion": undefined,
       "updateType": "digest",
     },
   ],
@@ -282,11 +281,12 @@ Object {
   "updates": Array [
     Object {
       "bucket": "major",
-      "fromVersion": "0.9.99",
+      "currentVersion": "0.9.99",
       "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 3,
       "newValue": "1.3.0",
+      "newVersion": "1.3.0",
       "releaseTimestamp": "2015-04-26T16:42:11.311Z",
       "skippedOverVersions": Array [
         "1.0.0",
@@ -297,7 +297,6 @@ Object {
         "1.2.0",
         "1.2.1",
       ],
-      "toVersion": "1.3.0",
       "updateType": "major",
     },
   ],
@@ -311,7 +310,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() ignores deprecated 1
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
-  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v1.4.1) of dependency \`q2\` has the following deprecation notice:
+  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`q2\` has the following deprecation notice:
 
 \`true\`
 
@@ -322,13 +321,13 @@ Marking the latest version of an npm package as deprecated results in the entire
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "fromVersion": "1.3.0",
+      "currentVersion": "1.3.0",
       "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 4,
       "newValue": "1.4.0",
+      "newVersion": "1.4.0",
       "releaseTimestamp": "2015-05-09T16:52:40.699Z",
-      "toVersion": "1.4.0",
       "updateType": "minor",
     },
   ],
@@ -347,11 +346,12 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "fromVersion": "0.9.7",
+    "currentVersion": "0.9.7",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -364,7 +364,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -381,16 +380,16 @@ Object {
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "fromVersion": "1.3.0",
+      "currentVersion": "1.3.0",
       "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 4,
       "newValue": "1.4.1",
+      "newVersion": "1.4.1",
       "releaseTimestamp": "2015-05-17T04:25:07.299Z",
       "skippedOverVersions": Array [
         "1.4.0",
       ],
-      "toVersion": "1.4.1",
       "updateType": "minor",
     },
   ],
@@ -421,12 +420,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() replaces major compl
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "2.7.0",
+    "currentVersion": "2.7.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^3.0.0",
+    "newVersion": "3.8.1",
     "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "skippedOverVersions": Array [
       "3.0.0",
@@ -447,7 +447,6 @@ Array [
       "3.7.1",
       "3.8.0",
     ],
-    "toVersion": "3.8.1",
     "updateType": "major",
   },
 ]
@@ -457,17 +456,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() replaces minor compl
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -477,11 +476,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() replaces non-range i
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.1",
@@ -493,7 +493,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -503,26 +502,27 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns additional u
 Array [
   Object {
     "bucket": "patch",
-    "fromVersion": "0.4.0",
+    "currentVersion": "0.4.0",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 4,
     "newValue": "0.4.4",
+    "newVersion": "0.4.4",
     "releaseTimestamp": "2011-06-10T17:20:04.719Z",
     "skippedOverVersions": Array [
       "0.4.1",
       "0.4.2",
     ],
-    "toVersion": "0.4.4",
     "updateType": "patch",
   },
   Object {
     "bucket": "minor",
-    "fromVersion": "0.4.0",
+    "currentVersion": "0.4.0",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.5.0",
@@ -554,16 +554,16 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.4.0",
+    "currentVersion": "0.4.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -576,7 +576,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -593,11 +592,12 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.5.0",
@@ -629,17 +629,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -652,7 +652,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -668,16 +667,16 @@ Object {
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "fromVersion": "1.3.0",
+      "currentVersion": "1.3.0",
       "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 4,
       "newValue": "1.4.1",
+      "newVersion": "1.4.1",
       "releaseTimestamp": "2015-05-17T04:25:07.299Z",
       "skippedOverVersions": Array [
         "1.4.0",
       ],
-      "toVersion": "1.4.1",
       "updateType": "minor",
     },
   ],
@@ -689,11 +688,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns minor update
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.9.0",
+    "currentVersion": "0.9.0",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.9.1",
@@ -703,16 +703,16 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.0",
+    "currentVersion": "0.9.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -725,7 +725,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -735,11 +734,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns minor update
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.9.0",
+    "currentVersion": "0.9.0",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.9.1",
@@ -749,16 +749,16 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.0",
+    "currentVersion": "0.9.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -771,7 +771,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -781,11 +780,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns multiple upd
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.4.0",
+    "currentVersion": "0.4.0",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.4.1",
@@ -820,16 +820,16 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.4.0",
+    "currentVersion": "0.4.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -842,7 +842,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -852,11 +851,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns one update i
 Array [
   Object {
     "bucket": "latest",
-    "fromVersion": "0.4.0",
+    "currentVersion": "0.4.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "0.4.1",
@@ -901,7 +901,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -911,11 +910,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns patch minor 
 Array [
   Object {
     "bucket": "patch",
-    "fromVersion": "0.8.0",
+    "currentVersion": "0.8.0",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 8,
     "newValue": "0.8.12",
+    "newVersion": "0.8.12",
     "releaseTimestamp": "2012-12-29T22:51:00.329Z",
     "skippedOverVersions": Array [
       "0.8.1",
@@ -930,16 +930,16 @@ Array [
       "0.8.10",
       "0.8.11",
     ],
-    "toVersion": "0.8.12",
     "updateType": "patch",
   },
   Object {
     "bucket": "minor",
-    "fromVersion": "0.8.0",
+    "currentVersion": "0.8.0",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.9.0",
@@ -950,16 +950,16 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.8.0",
+    "currentVersion": "0.8.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -972,53 +972,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup .lookupUpdates() returns patch update if automerging patch 1`] = `
-Array [
-  Object {
-    "bucket": "non-major",
-    "fromVersion": "0.9.0",
-    "isSingleVersion": true,
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "skippedOverVersions": Array [
-      "0.9.1",
-      "0.9.2",
-      "0.9.3",
-      "0.9.4",
-      "0.9.5",
-      "0.9.6",
-    ],
-    "toVersion": "0.9.7",
-    "updateType": "patch",
-  },
-  Object {
-    "bucket": "major",
-    "fromVersion": "0.9.0",
-    "isSingleVersion": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "skippedOverVersions": Array [
-      "1.0.0",
-      "1.0.1",
-      "1.1.0",
-      "1.1.1",
-      "1.1.2",
-      "1.2.0",
-      "1.2.1",
-      "1.3.0",
-      "1.4.0",
-    ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -1028,11 +981,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns patch update
 Array [
   Object {
     "bucket": "patch",
-    "fromVersion": "0.9.0",
+    "currentVersion": "0.9.0",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.9.1",
@@ -1042,16 +996,16 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "patch",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.0",
+    "currentVersion": "0.9.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -1064,7 +1018,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -1083,11 +1036,12 @@ Array [
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.99",
+    "currentVersion": "0.9.99",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -1100,7 +1054,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -1124,11 +1077,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() should allow unstabl
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "3.1.0-dev.20180731",
+    "currentVersion": "3.1.0-dev.20180731",
     "isSingleVersion": true,
     "newMajor": 3,
     "newMinor": 1,
     "newValue": "3.1.0-dev.20180813",
+    "newVersion": "3.1.0-dev.20180813",
     "releaseTimestamp": "2018-08-13T19:05:14.347Z",
     "skippedOverVersions": Array [
       "3.1.0-dev.20180801",
@@ -1140,7 +1094,6 @@ Array [
       "3.1.0-dev.20180809",
       "3.1.0-dev.20180810",
     ],
-    "toVersion": "3.1.0-dev.20180813",
     "updateType": "minor",
   },
 ]
@@ -1150,13 +1103,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() should allow unstabl
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "2.5.16",
+    "currentVersion": "2.5.16",
     "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 5,
     "newValue": "2.5.17-beta.0",
+    "newVersion": "2.5.17-beta.0",
     "releaseTimestamp": "2018-03-23T23:29:13.819Z",
-    "toVersion": "2.5.17-beta.0",
     "updateType": "minor",
   },
 ]
@@ -1178,13 +1131,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() should follow dist-t
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "3.0.1-insiders.20180713",
+    "currentVersion": "3.0.1-insiders.20180713",
     "isSingleVersion": true,
     "newMajor": 3,
     "newMinor": 0,
     "newValue": "3.0.1-insiders.20180726",
+    "newVersion": "3.0.1-insiders.20180726",
     "releaseTimestamp": "2018-07-26T18:20:51.679Z",
-    "toVersion": "3.0.1-insiders.20180726",
     "updateType": "minor",
   },
 ]
@@ -1194,12 +1147,12 @@ exports[`workers/repository/process/lookup .lookupUpdates() should ignore unstab
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "1.4.4",
+    "currentVersion": "1.4.4",
     "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "2.0.0",
-    "toVersion": "2.0.0",
+    "newVersion": "2.0.0",
     "updateType": "major",
   },
 ]
@@ -1209,13 +1162,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() should jump unstable
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "3.0.0-insiders.20180706",
+    "currentVersion": "3.0.0-insiders.20180706",
     "isSingleVersion": true,
     "newMajor": 3,
     "newMinor": 0,
     "newValue": "3.0.1-insiders.20180726",
+    "newVersion": "3.0.1-insiders.20180726",
     "releaseTimestamp": "2018-07-26T18:20:51.679Z",
-    "toVersion": "3.0.1-insiders.20180726",
     "updateType": "minor",
   },
 ]
@@ -1225,13 +1178,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() should not jump unst
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "3.0.1-insiders.20180726",
+    "currentVersion": "3.0.1-insiders.20180726",
     "isSingleVersion": true,
     "newMajor": 3,
     "newMinor": 0,
     "newValue": "3.0.1",
+    "newVersion": "3.0.1",
     "releaseTimestamp": "2018-07-30T16:21:13.150Z",
-    "toVersion": "3.0.1",
     "updateType": "minor",
   },
 ]
@@ -1255,14 +1208,14 @@ exports[`workers/repository/process/lookup .lookupUpdates() should treat zero ze
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.0.34",
+    "currentVersion": "0.0.34",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 0,
     "newValue": "^0.0.35",
+    "newVersion": "0.0.35",
     "releaseTimestamp": "2017-04-27T16:59:06.479Z",
-    "toVersion": "0.0.35",
     "updateType": "minor",
   },
 ]
@@ -1280,13 +1233,12 @@ Object {
   "updates": Array [
     Object {
       "bucket": "major",
-      "fromVersion": "8",
+      "currentVersion": "8",
       "isSingleVersion": true,
       "newMajor": 9,
       "newMinor": null,
       "newValue": "9",
       "newVersion": "9",
-      "toVersion": "9",
       "updateType": "major",
     },
   ],
@@ -1304,24 +1256,22 @@ Object {
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "fromVersion": "8.1",
+      "currentVersion": "8.1",
       "isSingleVersion": true,
       "newMajor": 8,
       "newMinor": 2,
       "newValue": "8.2",
       "newVersion": "8.2",
-      "toVersion": "8.2",
       "updateType": "minor",
     },
     Object {
       "bucket": "major",
-      "fromVersion": "8.1",
+      "currentVersion": "8.1",
       "isSingleVersion": true,
       "newMajor": 9,
       "newMinor": 0,
       "newValue": "9.0",
       "newVersion": "9.0",
-      "toVersion": "9.0",
       "updateType": "major",
     },
   ],
@@ -1339,7 +1289,7 @@ Object {
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "fromVersion": "8.1.0",
+      "currentVersion": "8.1.0",
       "isSingleVersion": true,
       "newMajor": 8,
       "newMinor": 2,
@@ -1349,7 +1299,6 @@ Object {
         "8.1.5",
         "8.2.0",
       ],
-      "toVersion": "8.2.5",
       "updateType": "minor",
     },
   ],
@@ -1359,7 +1308,7 @@ Object {
 
 exports[`workers/repository/process/lookup .lookupUpdates() skips undefined values 1`] = `
 Object {
-  "skipReason": "unsupported-value",
+  "skipReason": "invalid-value",
   "updates": Array [],
   "warnings": Array [],
 }
@@ -1367,7 +1316,7 @@ Object {
 
 exports[`workers/repository/process/lookup .lookupUpdates() skips unsupported values 1`] = `
 Object {
-  "skipReason": "unsupported-value",
+  "skipReason": "invalid-value",
   "updates": Array [],
   "warnings": Array [],
 }
@@ -1377,18 +1326,18 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports > latest ve
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "1.4.1",
+    "currentVersion": "1.4.1",
     "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "2.0.3",
+    "newVersion": "2.0.3",
     "releaseTimestamp": "2015-01-31T08:11:47.852Z",
     "skippedOverVersions": Array [
       "2.0.0",
       "2.0.1",
       "2.0.2",
     ],
-    "toVersion": "2.0.3",
     "updateType": "major",
   },
 ]
@@ -1398,12 +1347,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports complex maj
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "2.7.0",
+    "currentVersion": "2.7.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1.x - 3.x",
+    "newVersion": "3.8.1",
     "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "skippedOverVersions": Array [
       "3.0.0",
@@ -1424,7 +1374,6 @@ Array [
       "3.7.1",
       "3.8.0",
     ],
-    "toVersion": "3.8.1",
     "updateType": "major",
   },
 ]
@@ -1434,12 +1383,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports complex maj
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "2.7.0",
+    "currentVersion": "2.7.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^1.0.0 || ^2.0.0 || ^3.0.0",
+    "newVersion": "3.8.1",
     "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "skippedOverVersions": Array [
       "3.0.0",
@@ -1460,7 +1410,6 @@ Array [
       "3.7.1",
       "3.8.0",
     ],
-    "toVersion": "3.8.1",
     "updateType": "major",
   },
 ]
@@ -1469,12 +1418,13 @@ Array [
 exports[`workers/repository/process/lookup .lookupUpdates() supports complex ranges 1`] = `
 Object {
   "bucket": "non-major",
-  "fromVersion": "0.8.12",
+  "currentVersion": "0.8.12",
   "isRange": true,
   "isSingleVersion": false,
   "newMajor": 0,
   "newMinor": 9,
   "newValue": "^0.7.0 || ^0.8.0 || ^0.9.0",
+  "newVersion": "0.9.7",
   "releaseTimestamp": "2013-09-04T17:07:22.948Z",
   "skippedOverVersions": Array [
     "0.9.0",
@@ -1485,7 +1435,6 @@ Object {
     "0.9.5",
     "0.9.6",
   ],
-  "toVersion": "0.9.7",
   "updateType": "minor",
 }
 `;
@@ -1494,17 +1443,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports complex til
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.2.0 || ~1.3.0 || ~1.4.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -1514,13 +1463,14 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports in-range ca
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isBump": true,
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.1",
@@ -1532,7 +1482,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -1542,13 +1491,14 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports in-range gt
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isBump": true,
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">=1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.1",
@@ -1560,7 +1510,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -1570,25 +1519,26 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports in-range ti
 Array [
   Object {
     "bucket": "patch",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isBump": true,
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 0,
     "newValue": "~1.0.1",
+    "newVersion": "1.0.1",
     "releaseTimestamp": "2014-03-11T18:47:17.560Z",
-    "toVersion": "1.0.1",
     "updateType": "patch",
   },
   Object {
     "bucket": "minor",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.1.0",
@@ -1599,7 +1549,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -1609,25 +1558,26 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports in-range ti
 Array [
   Object {
     "bucket": "patch",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isBump": true,
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 0,
     "newValue": "~1.0.1",
+    "newVersion": "1.0.1",
     "releaseTimestamp": "2014-03-11T18:47:17.560Z",
-    "toVersion": "1.0.1",
     "updateType": "patch",
   },
   Object {
     "bucket": "minor",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.1.0",
@@ -1638,7 +1588,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -1648,31 +1597,32 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports lock file u
 Array [
   Object {
     "bucket": "patch",
+    "currentVersion": "0.4.0",
     "displayFrom": "0.4.0",
     "displayTo": "0.4.4",
-    "fromVersion": "0.4.0",
     "isLockfileUpdate": true,
     "isRange": true,
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 4,
     "newValue": "^0.4.0",
+    "newVersion": "0.4.4",
     "releaseTimestamp": "2011-06-10T17:20:04.719Z",
     "skippedOverVersions": Array [
       "0.4.1",
       "0.4.2",
     ],
-    "toVersion": "0.4.4",
     "updateType": "patch",
   },
   Object {
     "bucket": "minor",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "^0.9.0",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.5.0",
@@ -1704,17 +1654,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.0.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -1727,7 +1677,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -1737,13 +1686,14 @@ exports[`workers/repository/process/lookup .lookupUpdates() supports majorgte up
 Array [
   Object {
     "bucket": "latest",
-    "fromVersion": "0.9.0",
+    "currentVersion": "0.9.0",
     "isBump": true,
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">=1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "0.9.1",
@@ -1763,7 +1713,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -1780,11 +1729,12 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.5.0",
@@ -1816,17 +1766,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -1839,7 +1789,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -1856,11 +1805,12 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.5.0",
@@ -1892,17 +1842,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "fromVersion": "0.4.4",
+    "currentVersion": "0.4.4",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -1915,7 +1865,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -1925,17 +1874,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades .x complex 
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.2.x - 1.4.x",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -1945,12 +1894,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades .x major ra
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.7",
+    "currentVersion": "0.9.7",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.x",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -1963,7 +1913,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -1980,16 +1929,16 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -1999,17 +1948,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades .x minor ra
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.x",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2019,17 +1968,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades equal minor
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.1",
+    "currentVersion": "1.3.1",
     "isRange": true,
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "=1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2039,19 +1988,19 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than e
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "1.4.1",
+    "currentVersion": "1.4.1",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "<= 2",
+    "newVersion": "2.0.3",
     "releaseTimestamp": "2015-01-31T08:11:47.852Z",
     "skippedOverVersions": Array [
       "2.0.0",
       "2.0.1",
       "2.0.2",
     ],
-    "toVersion": "2.0.3",
     "updateType": "major",
   },
 ]
@@ -2061,17 +2010,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than e
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2081,12 +2030,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than e
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.7.2",
+    "currentVersion": "0.7.2",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "<= 0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.8.0",
@@ -2110,17 +2060,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.7.2",
+    "currentVersion": "0.7.2",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2133,7 +2083,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2143,12 +2092,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than m
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.7",
+    "currentVersion": "0.9.7",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 2",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2161,7 +2111,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2171,12 +2120,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than r
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.7.1",
+    "currentVersion": "0.7.1",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "< 0.9.8",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.7.2",
@@ -2201,17 +2151,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.7.1",
+    "currentVersion": "0.7.1",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 1.4.2",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2224,7 +2174,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2234,12 +2183,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades major great
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.7",
+    "currentVersion": "0.9.7",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 < 2.0.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2252,7 +2202,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2262,12 +2211,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades major less 
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.1",
@@ -2279,7 +2229,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2289,12 +2238,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades major less 
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.7",
+    "currentVersion": "0.9.7",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 2.0.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2307,7 +2257,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2317,12 +2266,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades minor great
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.8.0",
+    "currentVersion": "0.8.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": ">= 0.5.0 <= 0.9.7",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.8.1",
@@ -2345,17 +2295,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.8.0",
+    "currentVersion": "0.8.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 <= 1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2368,7 +2318,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2378,12 +2327,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades minor great
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.7.2",
+    "currentVersion": "0.7.2",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": ">= 0.5.0 <0.10",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.8.0",
@@ -2407,17 +2357,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.7.2",
+    "currentVersion": "0.7.2",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 <1.5",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2430,7 +2380,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2447,11 +2396,12 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "fromVersion": "1.0.1",
+    "currentVersion": "1.0.1",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.1.0",
@@ -2462,7 +2412,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2472,12 +2421,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades multiple ca
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.7.2",
+    "currentVersion": "0.7.2",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "^0.9.0",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.8.0",
@@ -2501,17 +2451,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.7.2",
+    "currentVersion": "0.7.2",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.0.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2524,7 +2474,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2534,12 +2483,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades multiple ti
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "0.7.2",
+    "currentVersion": "0.7.2",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "~0.9.0",
+    "newVersion": "0.9.7",
     "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "skippedOverVersions": Array [
       "0.8.0",
@@ -2563,17 +2513,17 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "toVersion": "0.9.7",
     "updateType": "minor",
   },
   Object {
     "bucket": "major",
-    "fromVersion": "0.7.2",
+    "currentVersion": "0.7.2",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2586,7 +2536,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2596,12 +2545,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades shorthand m
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "0.9.7",
+    "currentVersion": "0.9.7",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.0",
@@ -2614,7 +2564,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "major",
   },
 ]
@@ -2624,17 +2573,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades shorthand m
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2651,16 +2600,16 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2670,17 +2619,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() upgrades tilde range
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2690,13 +2639,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() uses minimum version
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 0,
     "newValue": "1.0.1",
+    "newVersion": "1.0.1",
     "releaseTimestamp": "2014-03-11T18:47:17.560Z",
-    "toVersion": "1.0.1",
     "updateType": "minor",
   },
 ]
@@ -2713,11 +2662,12 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "fromVersion": "1.0.0",
+    "currentVersion": "1.0.0",
     "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.0.1",
@@ -2729,7 +2679,6 @@ Array [
       "1.3.0",
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2739,12 +2688,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() widens .x OR ranges 
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "2.7.0",
+    "currentVersion": "2.7.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1.x || 2.x || 3.x",
+    "newVersion": "3.8.1",
     "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "skippedOverVersions": Array [
       "3.0.0",
@@ -2765,7 +2715,6 @@ Array [
       "3.7.1",
       "3.8.0",
     ],
-    "toVersion": "3.8.1",
     "updateType": "major",
   },
 ]
@@ -2775,12 +2724,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() widens major ranged 
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "2.7.0",
+    "currentVersion": "2.7.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^2.0.0 || ^3.0.0",
+    "newVersion": "3.8.1",
     "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "skippedOverVersions": Array [
       "3.0.0",
@@ -2801,7 +2751,6 @@ Array [
       "3.7.1",
       "3.8.0",
     ],
-    "toVersion": "3.8.1",
     "updateType": "major",
   },
 ]
@@ -2811,17 +2760,17 @@ exports[`workers/repository/process/lookup .lookupUpdates() widens minor ranged 
 Array [
   Object {
     "bucket": "non-major",
-    "fromVersion": "1.3.0",
+    "currentVersion": "1.3.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.3.0 || ~1.4.0",
+    "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "skippedOverVersions": Array [
       "1.4.0",
     ],
-    "toVersion": "1.4.1",
     "updateType": "minor",
   },
 ]
@@ -2831,12 +2780,13 @@ exports[`workers/repository/process/lookup .lookupUpdates() widens stanndalone m
 Array [
   Object {
     "bucket": "major",
-    "fromVersion": "2.7.0",
+    "currentVersion": "2.7.0",
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1 || 2 || 3",
+    "newVersion": "3.8.1",
     "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "skippedOverVersions": Array [
       "3.0.0",
@@ -2857,7 +2807,6 @@ Array [
       "3.7.1",
       "3.8.0",
     ],
-    "toVersion": "3.8.1",
     "updateType": "major",
   },
 ]

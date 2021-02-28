@@ -175,7 +175,7 @@ async function getSimpleDependency(
   packageName: string,
   hostUrl: string
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${packageName}`);
+  const lookupUrl = url.resolve(hostUrl, ensureTrailingSlash(packageName));
   const dependency: ReleaseResult = { releases: null };
   const response = await http.get(lookupUrl);
   const dep = response?.body;

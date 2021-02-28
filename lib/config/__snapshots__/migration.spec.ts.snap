@@ -88,7 +88,6 @@ Object {
   "branchName": "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}{{{packageFileDir}}}",
   "branchPrefix": "renovate/",
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
-  "commitMessageExtra": "{{currentValue}} something",
   "constraints": Object {
     "python": "3.7",
   },
@@ -318,6 +317,22 @@ Object {
         "other/package.json",
       ],
       "rangeStrategy": "pin",
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates packageRules objects 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "commitMessage": "fix(package): update peerDependency to accept typescript ^{{newMajor}} {{newMajor}}",
+      "matchPackageNames": Array [
+        "typescript",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
     },
   ],
 }

@@ -153,7 +153,6 @@ describe('manager/gomod/update', () => {
       const upgrade = {
         depName: 'github.com/spf13/jwalterweatherman',
         managerData: { lineNumber: 43, multiLine: true },
-        currentVersion: 'v0.0.0',
         updateType: 'digest' as UpdateType,
         currentDigest: '14d3d4c51834',
         newDigest: '123456123456abcdef',
@@ -168,7 +167,6 @@ describe('manager/gomod/update', () => {
       const upgrade = {
         depName: 'github.com/spf13/jwalterweatherman',
         managerData: { lineNumber: 43, multiLine: true },
-        currentVersion: 'v0.0.0',
         updateType: 'digest' as UpdateType,
         currentDigest: 'abcdefabcdef',
         newDigest: '14d3d4c51834000000',

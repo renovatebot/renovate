@@ -9,8 +9,8 @@ export type RangeStrategy = _RangeStrategy;
 export interface NewValueConfig {
   currentValue: string;
   rangeStrategy: RangeStrategy;
-  fromVersion?: string;
-  toVersion: string;
+  currentVersion?: string;
+  newVersion: string;
 }
 export interface VersioningApi {
   // validation
