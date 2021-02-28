@@ -2,6 +2,7 @@ import { defaultConfig, git, mocked } from '../../../test/util';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
+import * as _helmValues from '../../manager/helm-values';
 import * as _helmv3 from '../../manager/helmv3';
 import * as _npm from '../../manager/npm';
 import { BranchConfig } from '../common';
@@ -11,11 +12,13 @@ import { getUpdatedPackageFiles } from './get-updated';
 const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
 const helmv3 = mocked(_helmv3);
+const helmValues = mocked(_helmValues);
 const npm = mocked(_npm);
 const autoReplace = mocked(_autoReplace);
 
 jest.mock('../../manager/composer');
 jest.mock('../../manager/helmv3');
+jest.mock('../../manager/helm-values');
 jest.mock('../../manager/npm');
 jest.mock('../../manager/git-submodules');
 jest.mock('../../util/git');
@@ -183,18 +186,63 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
-    it('bumps versions in autoReplace managers', async () => {
-      config.upgrades.push({
-        branchName: undefined,
-        bumpVersion: 'patch',
-        manager: 'helmv3',
+
+    describe('in autoReplace managers', () => {
+      it('bumps versions', async () => {
+        config.upgrades.push({
+          branchName: undefined,
+          bumpVersion: 'patch',
+          manager: 'helmv3',
+        });
+        autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
+        helmv3.bumpPackageVersion.mockReturnValue({
+          bumpedContent: 'version: 0.0.2',
+        });
+        const res = await getUpdatedPackageFiles(config);
+        expect(res).toMatchSnapshot();
       });
-      autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
-      helmv3.bumpPackageVersion.mockReturnValue({
-        bumpedContent: 'version: 0.0.2',
+      it('bumps versions with a bumpPackageFile different from the packageFile', async () => {
+        config.upgrades.push({
+          branchName: undefined,
+          bumpVersion: 'patch',
+          manager: 'helm-values',
+        });
+        autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
+        helmValues.bumpPackageVersion.mockResolvedValue({
+          bumpedContent: 'existing content',
+          bumpedFiles: [
+            {
+              fileName: '/test/Chart.yaml',
+              newContent: 'version: 0.0.2',
+            },
+          ],
+        });
+        const res = await getUpdatedPackageFiles(config);
+        expect(res).toMatchSnapshot();
       });
-      const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot();
+      it('bumps versions in all files if multiple files were bumped', async () => {
+        config.upgrades.push({
+          branchName: undefined,
+          bumpVersion: 'patch',
+          manager: 'helm-values',
+        });
+        autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
+        helmValues.bumpPackageVersion.mockResolvedValue({
+          bumpedContent: 'existing content',
+          bumpedFiles: [
+            {
+              fileName: '/test/Chart.yaml',
+              newContent: 'version: 0.0.2',
+            },
+            {
+              fileName: '/test/README.md',
+              newContent: '# Version 0.0.2',
+            },
+          ],
+        });
+        const res = await getUpdatedPackageFiles(config);
+        expect(res).toMatchSnapshot();
+      });
     });
   });
 });
