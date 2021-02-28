@@ -38,6 +38,10 @@ describe('semver.isStable(input)', () => {
   it('should pad short version', () => {
     expect(semver.isStable('v1.2')).toBeTruthy();
   });
+    it('should mark -p/-patch version as stable', () => {
+        expect(semver.isStable('1.2.3-p1')).toBeTruthy();
+        expect(semver.isStable('1.2.3-patch1')).toBeTruthy();
+    });
 });
 describe('semver.isValid(input)', () => {
   it('should support simple semver', () => {
@@ -448,7 +452,7 @@ describe('semver.getNewValue()', () => {
 describe('.sortVersions', () => {
   it('sorts versions in an ascending order', () => {
     expect(
-      ['1.2.3-beta', '2.0.1', '1.3.4', '1.2.3'].sort(semver.sortVersions)
-    ).toEqual(['1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']);
+      ['1.2.3-beta', '1.2.3-p1', '2.0.1', '1.3.4', '1.3.4-patch1', '1.2.3'].sort(semver.sortVersions)
+    ).toEqual(['1.2.3-beta', '1.2.3', '1.2.3-p1', '1.3.4', '1.3.4-patch1', '2.0.1']);
   });
 });
