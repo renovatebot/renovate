@@ -66,11 +66,12 @@ export function getRegistryRepository(
   registryUrl: string
 ): RegistryRepository {
   if (registryUrl !== defaultRegistryUrls[0]) {
-    const registry = registryUrl.replace('https://', '').replace(/\/?$/, '/');
-    if (lookupName.startsWith(registry)) {
+    const registry = registryUrl.replace('https://', '');
+    const registryEndingWithSlash = registry.replace(/\/?$/, '/');
+    if (lookupName.startsWith(registryEndingWithSlash)) {
       return {
         registry,
-        repository: lookupName.replace(registry, ''),
+        repository: lookupName.replace(registryEndingWithSlash, ''),
       };
     }
   }
