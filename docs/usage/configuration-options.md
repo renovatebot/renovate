@@ -146,7 +146,9 @@ So for example you could elect to automerge all (passing) `devDependencies` only
 
 Important: Renovate won't automerge on GitHub if a PR has a negative review outstanding.
 
-Note: on Azure there can be a delay between a PR being set as completed by RenovateBot, and Azure merging the PR / finishing it's tasks. RenovateBot will try to delay until Azure is in the expected state, however if it takes too long it will continue. In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
+Note: on Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
+Renovate will try to delay until Azure is in the expected state, however if it takes too long it will continue.
+In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
 ## automergeComment
 
