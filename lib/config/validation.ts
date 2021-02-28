@@ -59,6 +59,7 @@ export async function validateConfig(
       'repository',
       'vulnerabilityAlertsOnly',
       'vulnerabilityAlert',
+      'isVulnerabilityAlert',
       'copyLocalLibs', // deprecated - functionality is now enabled by default
       'prBody', // deprecated
     ];

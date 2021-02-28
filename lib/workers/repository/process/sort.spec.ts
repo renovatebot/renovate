@@ -51,7 +51,7 @@ describe('workers/repository/process/sort', () => {
       sortBranches(branches);
       expect(branches).toMatchSnapshot();
     });
-    it('sorts based on vulnerabilityAlert', () => {
+    it('sorts based on isVulnerabilityAlert', () => {
       const branches = [
         {
           updateType: 'major' as UpdateType,
@@ -72,7 +72,7 @@ describe('workers/repository/process/sort', () => {
           updateType: 'minor' as UpdateType,
           prTitle: 'a minor update',
           prPriority: -1,
-          vulnerabilityAlert: true,
+          isVulnerabilityAlert: true,
         },
       ];
       sortBranches(branches);
