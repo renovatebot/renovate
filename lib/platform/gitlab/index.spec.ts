@@ -40,6 +40,9 @@ describe('platform/gitlab', () => {
     httpMock.reset();
     httpMock.setup();
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
 
   describe('initPlatform()', () => {
     it(`should throw if no token`, async () => {

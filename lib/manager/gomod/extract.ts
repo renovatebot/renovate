@@ -18,21 +18,12 @@ function getDep(
       lineNumber,
     },
     depName,
-    lookupName: depName,
     depType: type,
     currentValue,
   };
   if (!isVersion(currentValue)) {
     dep.skipReason = SkipReason.UnsupportedVersion;
   } else {
-    if (depName.startsWith('gopkg.in/')) {
-      const [pkg] = depName.replace('gopkg.in/', '').split('.');
-      dep.depName = pkg;
-    } else if (depName.startsWith('github.com/')) {
-      dep.depName = depName.replace('github.com/', '');
-    } else {
-      dep.depName = depName;
-    }
     dep.datasource = datasourceGo.id;
   }
   const digestMatch = /v0\.0.0-\d{14}-([a-f0-9]{12})/.exec(currentValue);

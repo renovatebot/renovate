@@ -5,21 +5,21 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
-      "fromVersion": "0.3.1",
     },
     Object {
       "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
-      "fromVersion": "1.0.0",
     },
     Object {
       "currentValue": "==1.9",
+      "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
-      "fromVersion": "1.9",
     },
   ],
   "registryUrls": Array [
@@ -32,33 +32,33 @@ exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts mult
 Array [
   Object {
     "currentValue": "==1",
+    "currentVersion": "1",
     "datasource": "pypi",
     "depName": "Django",
-    "fromVersion": "1",
   },
   Object {
     "currentValue": "==0.6.27",
+    "currentVersion": "0.6.27",
     "datasource": "pypi",
     "depName": "distribute",
-    "fromVersion": "0.6.27",
   },
   Object {
     "currentValue": "==0.2",
+    "currentVersion": "0.2",
     "datasource": "pypi",
     "depName": "dj-database-url",
-    "fromVersion": "0.2",
   },
   Object {
     "currentValue": "==2.4.5",
+    "currentVersion": "2.4.5",
     "datasource": "pypi",
     "depName": "psycopg2",
-    "fromVersion": "2.4.5",
   },
   Object {
     "currentValue": "==0.1.2",
+    "currentVersion": "0.1.2",
     "datasource": "pypi",
     "depName": "wsgiref",
-    "fromVersion": "0.1.2",
   },
 ]
 `;
@@ -67,34 +67,34 @@ exports[`lib/manager/pip_requirements/extract extractPackageFile() handles comme
 Array [
   Object {
     "currentValue": "==1.11.23",
+    "currentVersion": "1.11.23",
     "datasource": "pypi",
     "depName": "Django",
-    "fromVersion": "1.11.23",
   },
   Object {
     "currentValue": "==0.6.27",
+    "currentVersion": "0.6.27",
     "datasource": "pypi",
     "depName": "distribute",
-    "fromVersion": "0.6.27",
     "skipReason": "ignored",
   },
   Object {
     "currentValue": "==0.2",
+    "currentVersion": "0.2",
     "datasource": "pypi",
     "depName": "dj-database-url",
-    "fromVersion": "0.2",
   },
   Object {
     "currentValue": "==2.4.5",
+    "currentVersion": "2.4.5",
     "datasource": "pypi",
     "depName": "psycopg2",
-    "fromVersion": "2.4.5",
   },
   Object {
     "currentValue": "==0.1.2",
+    "currentVersion": "0.1.2",
     "datasource": "pypi",
     "depName": "wsgiref",
-    "fromVersion": "0.1.2",
   },
 ]
 `;
@@ -104,15 +104,15 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
-      "fromVersion": "2.0.12",
     },
     Object {
       "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
-      "fromVersion": "4.1.1",
     },
     Object {
       "currentValue": " == 3.2.1",
@@ -121,21 +121,21 @@ Object {
     },
     Object {
       "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
-      "fromVersion": "0.3.1",
     },
     Object {
       "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
-      "fromVersion": "1.0.0",
     },
     Object {
       "currentValue": "==1.9",
+      "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
-      "fromVersion": "1.9",
     },
   ],
   "registryUrls": Array [
@@ -150,15 +150,15 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
-      "fromVersion": "2.0.12",
     },
     Object {
       "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
-      "fromVersion": "4.1.1",
     },
     Object {
       "currentValue": " == 3.2.1",
@@ -167,21 +167,21 @@ Object {
     },
     Object {
       "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
-      "fromVersion": "0.3.1",
     },
     Object {
       "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
-      "fromVersion": "1.0.0",
     },
     Object {
       "currentValue": "==1.9",
+      "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
-      "fromVersion": "1.9",
     },
   ],
   "registryUrls": Array [
@@ -196,15 +196,15 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
-      "fromVersion": "2.0.12",
     },
     Object {
       "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
-      "fromVersion": "4.1.1",
     },
     Object {
       "currentValue": " == 3.2.1",
@@ -213,21 +213,21 @@ Object {
     },
     Object {
       "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
-      "fromVersion": "0.3.1",
     },
     Object {
       "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
-      "fromVersion": "1.0.0",
     },
     Object {
       "currentValue": "==1.9",
+      "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
-      "fromVersion": "1.9",
     },
   ],
   "registryUrls": Array [
@@ -242,15 +242,15 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
-      "fromVersion": "2.0.12",
     },
     Object {
       "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
-      "fromVersion": "4.1.1",
     },
     Object {
       "currentValue": " == 3.2.1",

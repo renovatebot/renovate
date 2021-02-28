@@ -7,6 +7,10 @@ import {
 } from './providers';
 import { extractTerraformRequiredProviders } from './required-providers';
 import {
+  analyseTerraformVersion,
+  extractTerraformRequiredVersion,
+} from './required-version';
+import {
   analyseTerraformResource,
   extractTerraformResource,
 } from './resources';
@@ -70,6 +74,10 @@ export function extractPackageFile(content: string): PackageFile | null {
             result = extractTerraformResource(lineNumber, lines);
             break;
           }
+          case TerraformDependencyTypes.terraform_version: {
+            result = extractTerraformRequiredVersion(lineNumber, lines);
+            break;
+          }
           /* istanbul ignore next */
           default:
             logger.trace(
@@ -98,6 +106,9 @@ export function extractPackageFile(content: string): PackageFile | null {
         break;
       case TerraformDependencyTypes.resource:
         analyseTerraformResource(dep);
+        break;
+      case TerraformDependencyTypes.terraform_version:
+        analyseTerraformVersion(dep);
         break;
       /* istanbul ignore next */
       default:

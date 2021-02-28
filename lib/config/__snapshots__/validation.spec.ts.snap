@@ -79,7 +79,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageRules: Each packageRule must contain at least one selector (matchPaths, matchLanguages, matchBaseBranches, matchManagers, matchDatasources, matchDepTypes, matchPackageNames, matchPackagePatterns, excludePackageNames, excludePackagePatterns, matchCurrentVersion, matchSourceUrlPrefixes, matchUpdateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "packageRules: Each packageRule must contain at least one selector (matchPackageRules, matchPaths, matchLanguages, matchBaseBranches, matchManagers, matchDatasources, matchDepTypes, matchPackageNames, matchPackagePatterns, excludePackageNames, excludePackagePatterns, matchCurrentVersion, matchSourceUrlPrefixes, matchUpdateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
   },
   Object {
     "depName": "Configuration Error",

@@ -55,7 +55,8 @@ export async function extract(
   const baseBranchSha = getBranchCommit(baseBranch);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
-  const cachedExtract = cache?.scan?.[baseBranch];
+  cache.scan ||= {};
+  const cachedExtract = cache.scan[baseBranch];
   const configHash = hasha(JSON.stringify(config));
   // istanbul ignore if
   if (

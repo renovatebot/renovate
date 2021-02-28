@@ -95,6 +95,7 @@ export async function extractPackageFile(
   let lockParsed: ComposerLock;
   if (lockContents) {
     logger.debug({ packageFile: fileName }, 'Found composer lock file');
+    res.lockFiles = [lockfilePath];
     try {
       lockParsed = JSON.parse(lockContents) as ComposerLock;
     } catch (err) /* istanbul ignore next */ {

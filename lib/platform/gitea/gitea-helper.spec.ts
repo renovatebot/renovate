@@ -143,6 +143,9 @@ describe('platform/gitea/gitea-helper', () => {
     httpMock.setup();
     setBaseUrl(baseUrl);
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
 
   describe('getCurrentUser', () => {
     it('should call /api/v1/user endpoint', async () => {

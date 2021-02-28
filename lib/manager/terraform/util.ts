@@ -14,6 +14,7 @@ export enum TerraformDependencyTypes {
   provider = 'provider',
   required_providers = 'required_providers',
   resource = 'resource',
+  terraform_version = 'terraform_version',
 }
 
 export interface TerraformManagerData {
@@ -63,6 +64,9 @@ export function getTerraformDependencyType(
     }
     case 'resource': {
       return TerraformDependencyTypes.resource;
+    }
+    case 'terraform': {
+      return TerraformDependencyTypes.terraform_version;
     }
     default: {
       return TerraformDependencyTypes.unknown;

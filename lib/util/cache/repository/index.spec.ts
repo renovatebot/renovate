@@ -34,11 +34,13 @@ describe('lib/util/cache/repository', () => {
     });
     expect(repositoryCache.getCache()).toEqual({
       repository: 'abc/def',
-      scan: {},
+      revision: repositoryCache.CACHE_REVISION,
     });
   });
   it('reads from cache and finalizes', async () => {
-    fs.readFile.mockResolvedValueOnce('{"repository":"abc/def"}' as any);
+    fs.readFile.mockResolvedValueOnce(
+      `{"repository":"abc/def","revision":${repositoryCache.CACHE_REVISION}}` as any
+    );
     await repositoryCache.initialize({
       ...config,
       repositoryCache: 'enabled',
@@ -48,6 +50,6 @@ describe('lib/util/cache/repository', () => {
     expect(fs.outputFile.mock.calls).toHaveLength(1);
   });
   it('gets', () => {
-    expect(repositoryCache.getCache()).toEqual({ scan: {} });
+    expect(repositoryCache.getCache()).toEqual({});
   });
 });

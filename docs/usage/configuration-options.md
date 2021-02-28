@@ -253,7 +253,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `helm-values`, `npm` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -367,13 +367,50 @@ The Dependency Dashboard therefore provides visibility as well as additional con
 
 ## dependencyDashboardApproval
 
-Setting `dependencyDashboardApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Dependency Dashboard.
+This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
 
-In this case, the Dependency Dashboard _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue.
-Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc.
-i.e. it is possible to require approval for only certain types of updates only.
+By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
+You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
 
-Note: Enabling Dependency Dashboard Approval implicitly enables `dependencyDashboard` too, so it is not necessary to configure both to `true`.
+Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explictly.
+
+You can configure Renovate to wait for approval for:
+
+- all package upgrades
+- major, minor, patch level upgrades
+- specific package upgrades
+- upgrades coming from specific package managers
+
+If you want to approve _all_ upgrades, set `dependencyDashboardApproval` to `true`:
+
+```json
+{
+  "dependencyDashboardApproval": true
+}
+```
+
+If you want to require approval for _major_ updates, set `dependencyDashboardApproval` to `true` within a `major` object:
+
+```json
+{
+  "major": {
+    "dependencyDashboardApproval": true
+  }
+}
+```
+
+If you want to approve _specific_ packages, set `dependencyDashboardApproval` to `true` within a `packageRules` entry where you have defined a specific package or pattern.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^@package-name"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
 
 ## dependencyDashboardAutoclose
 
@@ -1280,11 +1317,23 @@ Use the syntax `!/ /` like the following:
   "packageRules": [
     {
       "matchPackagePatterns": ["io.github.resilience4j"],
-      "allowedVersions": "!/^0\\./"
+      "matchCurrentVersion": "!/^0\\./"
     }
   ]
 }
 ```
+
+### matchFiles
+
+Renovate will compare `matchFiles` for an exact match against the dependency's package file or lock file.
+
+For example the following would match `package.json` but not `package/frontend/package.json`:
+
+```
+  "matchFiles": ["package.json"],
+```
+
+Use `matchPaths` instead if you need more flexible matching.
 
 ### matchPackageNames
 
@@ -1599,7 +1648,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, and `yarn`, so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn` and `poetry` so far
 
 Renovate's `"auto"` strategy works like this for npm:
 
@@ -1663,7 +1712,7 @@ It's not recommended to do both, due to the potential for confusion.
 It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
 
 For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
-For template fields, use the triple brace `{{{ }}}` notation to avoid `handlebars` escaping any special characters.
+For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 ### matchStrings
 
@@ -1834,23 +1883,28 @@ In the above example, each regex manager will match a single dependency each.
 ### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ### lookupNameTemplate
 
 `lookupName` is used for looking up dependency versions.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
 ### datasourceTemplate
 
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ### versioningTemplate
 
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### registryUrlTemplate
+
+If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ## registryUrls
 
@@ -1973,7 +2027,7 @@ If you wish to change it to something else like "ci" then it will look like `"ci
 
 If you are using a semantic prefix for your commits, then you will want to enable this setting.
 Although it's configurable to a package-level, it makes most sense to configure it at a repository level.
-If configured to `true`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
+If configured to `enabled`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 
@@ -2049,6 +2103,13 @@ Please see the above link for valid timezone names.
 ## unicodeEmoji
 
 If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
+
+## updateInternalDeps
+
+Renovate defaults to skipping any internal package dependencies within monorepos.
+In such case dependency versions won't be updated by Renovate.
+
+To opt in to letting Renovate update internal package versions normally, set this configuration option to true.
 
 ## updateLockFiles
 
