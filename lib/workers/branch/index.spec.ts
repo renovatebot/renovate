@@ -219,6 +219,22 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.PrEdited);
     });
+    it('continues branch if branch edited and but PR found', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('abc123');
+      platform.findPr.mockResolvedValueOnce({ sha: 'abc123' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual(ProcessBranchResult.Error);
+    });
+    it('skips branch if branch edited and and PR found with sha mismatch', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('abc123');
+      platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual(ProcessBranchResult.PrEdited);
+    });
     it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
