@@ -29,7 +29,7 @@ describe('workers/repository/onboarding/pr', () => {
       };
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
-      platform.getPrBody = jest.fn((input) => input);
+      platform.massageMarkdown = jest.fn((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
       setAdminConfig();
     });

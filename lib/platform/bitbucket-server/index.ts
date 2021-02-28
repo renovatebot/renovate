@@ -985,8 +985,8 @@ export async function mergePr(
   return true;
 }
 
-export function getPrBody(input: string): string {
-  logger.debug(`getPrBody(${input.split('\n')[0]})`);
+export function massageMarkdown(input: string): string {
+  logger.debug(`massageMarkdown(${input.split('\n')[0]})`);
   // Remove any HTML we use
   return smartTruncate(input, 30000)
     .replace(

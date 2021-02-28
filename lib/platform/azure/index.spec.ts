@@ -938,11 +938,11 @@ describe('platform/azure', () => {
     });
   });
 
-  describe('getPrBody(input)', () => {
+  describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
       const input =
         '<details>https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(azure.getPrBody(input)).toMatchSnapshot();
+      expect(azure.massageMarkdown(input)).toMatchSnapshot();
     });
   });
 
