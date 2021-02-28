@@ -7,6 +7,7 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import delay from 'delay';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -587,10 +588,7 @@ export async function mergePr(
   logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
   const azureApiGit = await azureApi.gitApi();
 
-  const pr = await azureApiGit.getPullRequestById(
-    pullRequestId,
-    config.project
-  );
+  let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
   const mergeMethod =
     config.mergeMethods[pr.targetRefName] ??
@@ -620,11 +618,35 @@ export async function mergePr(
   );
 
   try {
-    await azureApiGit.updatePullRequest(
+    const response = await azureApiGit.updatePullRequest(
       objToUpdate,
       config.repoId,
       pullRequestId
     );
+
+    let retries = 0;
+    let isClosed = response.status === PullRequestStatus.Completed;
+    while (!isClosed && retries < 5) {
+      retries += 1;
+      const sleepMs = retries * 1000;
+      logger.trace(
+        { pullRequestId, status: pr.status, retries },
+        `Updated PR to closed status but change has not taken effect yet. Retrying...`
+      );
+
+      await delay(sleepMs);
+      pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
+      isClosed = pr.status === PullRequestStatus.Completed;
+    }
+
+    if (!isClosed) {
+      logger.warn(
+        { pullRequestId, status: pr.status },
+        `Expected PR to have status ${
+          PullRequestStatus[PullRequestStatus.Completed]
+        }, however it is ${PullRequestStatus[pr.status]}.`
+      );
+    }
     return true;
   } catch (err) {
     logger.debug({ err }, 'Failed to set the PR as completed.');
