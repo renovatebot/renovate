@@ -201,6 +201,7 @@ export interface Upgrade<T = Record<string, any>>
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;
+  isRemediation?: boolean;
 }
 
 export interface ArtifactError {
@@ -289,7 +290,7 @@ export interface ManagerApi {
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   cacheDir?: string;
-
+  updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
 

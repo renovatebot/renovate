@@ -239,7 +239,7 @@ export async function writeUpdatedPackageFiles(
       continue; // eslint-disable-line
     }
     logger.debug(`Writing ${String(packageFile.name)}`);
-    const massagedFile = JSON.parse(packageFile.contents);
+    const massagedFile = JSON.parse(packageFile.contents.toString());
     try {
       const { token } = hostRules.find({
         hostType: config.platform,
