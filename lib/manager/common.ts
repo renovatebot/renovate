@@ -236,6 +236,16 @@ export interface BumpedPackageFile {
   newContent: string;
 }
 
+export interface UpdateLockedConfig {
+  packageFile?: string;
+  packageFileContent?: string;
+  lockFile?: string;
+  lockFileContent?: string;
+  depName?: string;
+  currentVersion?: string;
+  newVersion?: string;
+}
+
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
   language?: string;
@@ -270,6 +280,10 @@ export interface ManagerApi {
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
+
+  updateLockedDependency?(
+    config: UpdateLockedConfig
+  ): Result<Record<string, string | null>>;
 }
 
 // TODO: name and properties used by npm manager

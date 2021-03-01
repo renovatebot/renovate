@@ -29,7 +29,7 @@ export async function getUpdatedPackageFiles(
   const packageFileUpdatedDeps: Record<string, string[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    const { manager, packageFile, depName } = upgrade;
+    const { manager, packageFile, lockFile, depName } = upgrade;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
@@ -42,7 +42,7 @@ export async function getUpdatedPackageFiles(
       );
     }
     // istanbul ignore if
-    if (config.reuseExistingBranch && !packageFileContent) {
+    if (reuseExistingBranch && !packageFileContent) {
       logger.debug(
         { packageFile, depName },
         'Rebasing branch after file not found'
@@ -54,6 +54,45 @@ export async function getUpdatedPackageFiles(
     }
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
+    } else if (upgrade.isRemediation) {
+      let lockFileContent = updatedFileContents[lockFile];
+      if (!lockFileContent) {
+        lockFileContent = await getFile(
+          lockFile,
+          reuseExistingBranch ? config.branchName : config.baseBranch
+        );
+      }
+      // istanbul ignore if: to hard to test
+      if (reuseExistingBranch && !lockFileContent) {
+        logger.debug(
+          { lockFile, depName },
+          'Rebasing branch after lock file not found'
+        );
+        return getUpdatedPackageFiles({
+          ...config,
+          reuseExistingBranch: false,
+        });
+      }
+      const updateLockedDependency = get(manager, 'updateLockedDependency');
+      const files = await updateLockedDependency({
+        ...upgrade,
+        packageFileContent,
+        lockFileContent,
+      });
+      if (files) {
+        if (reuseExistingBranch) {
+          // This ensure it's always 1 commit from the bot
+          logger.debug(
+            { lockFile, depName },
+            'Need to update file(s) so will rebase first'
+          );
+          return getUpdatedPackageFiles({
+            ...config,
+            reuseExistingBranch: false,
+          });
+        }
+        Object.assign(updatedFileContents, files);
+      }
     } else {
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
       const updateDependency = get(manager, 'updateDependency');
@@ -122,7 +161,7 @@ export async function getUpdatedPackageFiles(
         newContent = bumpedContent;
       }
       if (!newContent) {
-        if (config.reuseExistingBranch) {
+        if (reuseExistingBranch) {
           logger.debug(
             { packageFile, depName },
             'Rebasing branch after error updating content'
@@ -139,7 +178,7 @@ export async function getUpdatedPackageFiles(
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       if (newContent !== packageFileContent) {
-        if (config.reuseExistingBranch) {
+        if (reuseExistingBranch) {
           // This ensure it's always 1 commit from the bot
           logger.debug(
             { packageFile, depName },
@@ -150,7 +189,7 @@ export async function getUpdatedPackageFiles(
             reuseExistingBranch: false,
           });
         }
-        logger.debug(`Updating ${depName} in ${packageFile}`);
+        logger.debug(`Updating ${depName} in ${packageFile || lockFile}`);
         updatedFileContents[packageFile] = newContent;
       }
       if (newContent === packageFileContent) {
@@ -223,7 +262,7 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
-  if (!config.reuseExistingBranch) {
+  if (!reuseExistingBranch) {
     // Only perform lock file maintenance if it's a fresh commit
     for (const packageFile of lockFileMaintenanceFiles) {
       const manager = packageFileManagers[packageFile];
@@ -233,7 +272,7 @@ export async function getUpdatedPackageFiles(
           updatedFileContents[packageFile] ||
           (await getFile(
             packageFile,
-            config.reuseExistingBranch ? config.branchName : config.baseBranch
+            reuseExistingBranch ? config.branchName : config.baseBranch
           ));
         const results = await updateArtifacts({
           packageFileName: packageFile,
@@ -255,7 +294,7 @@ export async function getUpdatedPackageFiles(
     }
   }
   return {
-    reuseExistingBranch: config.reuseExistingBranch, // Need to overwrite original config
+    reuseExistingBranch, // Need to overwrite original config
     updatedPackageFiles,
     updatedArtifacts,
     artifactErrors,

@@ -2104,6 +2104,13 @@ The above config will suppress the comment which is added to a PR whenever you c
 It is only recommended to configure this field if you wish to use the `schedules` feature and want to write them in your local timezone.
 Please see the above link for valid timezone names.
 
+## transitiveRemediation
+
+When enabled, Renovate will attempt to remediate vulnerabilities even if they exist only in transitive dependencies.
+
+Applicable only for GitHub platform (with vulnerability alerts enabled), `npm` manager, and when a `package-lock.json` v1 format is present.
+This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
+
 ## unicodeEmoji
 
 If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
