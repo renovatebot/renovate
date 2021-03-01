@@ -104,7 +104,9 @@ describe(getName(__filename), () => {
         currentVersion: '1.2.11',
         newVersion: '1.2.12',
       });
-      expect(res['package-lock.json']).toContain('"mime":{"version":"1.2.12"');
+      expect(
+        JSON.parse(res['package-lock.json']).dependencies.mime.version
+      ).toEqual('1.2.12');
     });
     it('fails to remediate if parent dep cannot support', async () => {
       const acceptsModified = clone(acceptsJson);
@@ -131,9 +133,8 @@ describe(getName(__filename), () => {
       config.newVersion = '4.1.0';
       const res = await updateLockedDependency(config);
       expect(res['package.json']).toContain('"express": "4.1.0"');
-      expect(res['package-lock.json']).toContain(
-        '"express":{"version":"4.1.0"'
-      );
+      const packageLock = JSON.parse(res['package-lock.json']);
+      expect(packageLock.dependencies.express.version).toEqual('4.1.0');
     });
     it('remediates mime', async () => {
       config.depName = 'mime';
@@ -164,11 +165,9 @@ describe(getName(__filename), () => {
         .get('/type-is')
         .reply(200, typeIsJson);
       const res = await updateLockedDependency(config);
-      expect(res['package-lock.json']).toContain('"mime":{"version":"1.4.1"');
-      expect(res['package-lock.json']).toContain(
-        '"express":{"version":"4.16.0"'
-      );
-      expect(res['package.json']).toContain('"express": "4.16.0"');
+      const packageLock = JSON.parse(res['package-lock.json']);
+      expect(packageLock.dependencies.mime.version).toEqual('1.4.1');
+      expect(packageLock.dependencies.express.version).toEqual('4.16.0');
     });
   });
 });
