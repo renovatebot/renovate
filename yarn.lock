@@ -2146,10 +2146,10 @@
   resolved "https://registry.yarnpkg.com/@types/linkify-markdown/-/linkify-markdown-1.0.0.tgz#50c357a0a60bb220209f19310a79b939e1b8e2a3"
   integrity sha512-p3rl2HtugwjkH8qjEjUi5JByoZkVc2lz6E7D96X5/FqNyj2/jlgIrMlyrbck0U+HyjhOIy0XyTwES3RRz+1koQ==
 
-"@types/luxon@1.26.0":
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.26.0.tgz#8e783986370ad3bb9f885d93eb1a91caeecaed36"
-  integrity sha512-zYmLYGczqBaOFaFjR1giG1QCbGMlXWOJcYgH9Mnk0MGcZHq1aer3ZwGXX8vd9NOfai6mAI/mVU6jD9hK0Wys7Q==
+"@types/luxon@1.26.1":
+  version "1.26.1"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.26.1.tgz#fc5ad97717e2356a2106e936f6c225cb11d79a4f"
+  integrity sha512-VW+JT7SDiSKjQss7iX/3bB8CUwSqzhKuW8EcyhzFTb/mwbIkcm92cPmok5FDWYz5TskB/tWFK/mn2ByHCf44AQ==
 
 "@types/markdown-it@10.0.3":
   version "10.0.3"
