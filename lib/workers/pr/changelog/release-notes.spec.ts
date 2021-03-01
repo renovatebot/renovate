@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
-import * as _hostRules from '../../../util/host-rules';
 import * as httpMock from '../../../../test/http-mock';
 import { getName, mocked } from '../../../../test/util';
+import * as _hostRules from '../../../util/host-rules';
 import { ChangeLogNotes } from './common';
 import {
   addReleaseNotes,
