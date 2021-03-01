@@ -157,7 +157,7 @@ export async function updateLockedDependency(
       delete dependency.resolved;
       delete dependency.integrity;
     }
-    let newLockFileContent = JSON.stringify(packageLockJson);
+    let newLockFileContent = JSON.stringify(packageLockJson, null, 2);
     // iterate through the parent updates first
     for (const parentUpdate of parentUpdates) {
       const parentUpdateConfig = {
