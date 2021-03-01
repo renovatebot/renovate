@@ -61,18 +61,11 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci
-
-      - name: Upload coverage
-        uses: actions/upload-artifact@v2.2.2
-        with:
-          name: coverage
-          path: coverage
+        run: yarn jest --logHeapUsage --maxWorkers=2 --ci
 
       - name: Codecov
-        shell: bash
-        continue-on-error: true
-        run: bash <(curl -s https://codecov.io/bash)
+        uses: codecov/codecov-action@v1.2.1
+        if: always() && env.coverage == 'true'
 
       # build after tests to exclude files
       - name: Build
