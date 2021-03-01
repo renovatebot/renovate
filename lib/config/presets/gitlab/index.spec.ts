@@ -106,7 +106,11 @@ describe(getName(__filename), () => {
         .get(`${basePath}/files/some.json/raw?ref=devel`)
         .reply(200, { preset: { file: {} } });
       expect(
-        await gitlab.getPresetFromEndpoint('some/repo', 'some/preset/file')
+        await gitlab.getPresetFromEndpoint(
+          'some/repo',
+          'some/preset/file',
+          undefined
+        )
       ).toEqual({});
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
