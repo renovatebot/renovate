@@ -1264,6 +1264,12 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'transitiveRemediation',
+    description: 'Enable remediation of transitive dependencies.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'vulnerabilityAlerts',
     description:
       'Config to apply when a PR is necessary due to vulnerability of existing package version.',
@@ -1870,6 +1876,7 @@ const options: RenovateOptions[] = [
     description: 'Strategy how to interpret matchStrings.',
     type: 'string',
     default: 'any',
+    allowedValues: ['any', 'recursive', 'combination'],
     parent: 'regexManagers',
     cli: false,
     env: false,

@@ -1698,17 +1698,17 @@ describe(getName(__filename), () => {
         });
       });
 
-      describe('getPrBody()', () => {
+      describe('massageMarkdown()', () => {
         it('returns diff files', () => {
           expect(
-            bitbucket.getPrBody(
+            bitbucket.massageMarkdown(
               '<details><summary>foo</summary>bar</details>text<details>'
             )
           ).toMatchSnapshot();
         });
 
         it('sanitizes HTML comments in the body', () => {
-          const prBody = bitbucket.getPrBody(`---
+          const prBody = bitbucket.massageMarkdown(`---
 
 - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box
 - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>

@@ -45,7 +45,7 @@ export function determineLockFileDirs(
   const lernaDirs = [];
 
   for (const upgrade of config.upgrades) {
-    if (upgrade.updateType === 'lockFileMaintenance') {
+    if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
       // Return every directory that contains a lockfile
       if (upgrade.lernaDir && upgrade.npmLock) {
         lernaDirs.push(upgrade.lernaDir);
@@ -235,11 +235,19 @@ export async function writeUpdatedPackageFiles(
     return;
   }
   for (const packageFile of config.updatedPackageFiles) {
+    if (packageFile.name.endsWith('package-lock.json')) {
+      logger.debug(`Writing package-lock file: ${packageFile.name}`);
+      await outputFile(
+        upath.join(config.localDir, packageFile.name),
+        packageFile.contents
+      );
+      continue; // eslint-disable-line
+    }
     if (!packageFile.name.endsWith('package.json')) {
       continue; // eslint-disable-line
     }
     logger.debug(`Writing ${String(packageFile.name)}`);
-    const massagedFile = JSON.parse(packageFile.contents);
+    const massagedFile = JSON.parse(packageFile.contents.toString());
     try {
       const { token } = hostRules.find({
         hostType: config.platform,

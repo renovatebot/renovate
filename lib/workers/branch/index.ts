@@ -25,6 +25,7 @@ import { readLocalFile, writeLocalFile } from '../../util/fs';
 import {
   checkoutBranch,
   deleteBranch,
+  getBranchCommit,
   getRepoStatus,
   branchExists as gitBranchExists,
   isBranchModified,
@@ -208,8 +209,28 @@ export async function processBranch(
           }
         }
       } else if (branchIsModified) {
-        logger.debug('Branch has been edited');
-        return ProcessBranchResult.PrEdited;
+        const oldPr = await platform.findPr({
+          branchName: config.branchName,
+          state: PrState.NotOpen,
+        });
+        if (!oldPr) {
+          logger.debug('Branch has been edited but found no PR - skipping');
+          return ProcessBranchResult.PrEdited;
+        }
+        const branchSha = getBranchCommit(config.branchName);
+        const oldPrSha = oldPr?.sha;
+        if (!oldPrSha || oldPrSha === branchSha) {
+          logger.debug(
+            { oldPrNumber: oldPr.number, oldPrSha, branchSha },
+            'Found old PR matching this branch - will override it'
+          );
+        } else {
+          logger.debug(
+            { oldPrNumber: oldPr.number, oldPrSha, branchSha },
+            'Found old PR but the SHA is different'
+          );
+          return ProcessBranchResult.PrEdited;
+        }
       }
     }
 
@@ -637,7 +658,7 @@ export async function processBranch(
           content += `##### File name: ${error.lockFile}\n\n`;
           content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
         });
-        content = platform.getPrBody(content);
+        content = platform.massageMarkdown(content);
         if (
           !(
             config.suppressNotifications.includes('artifactErrors') ||
