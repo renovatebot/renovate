@@ -800,7 +800,7 @@ const platform: Platform = {
     }
   },
 
-  getPrBody(prBody: string): string {
+  massageMarkdown(prBody: string): string {
     return smartTruncate(smartLinks(prBody), 1000000);
   },
 
@@ -827,7 +827,7 @@ export const {
   getJsonFile,
   getIssueList,
   getPr,
-  getPrBody,
+  massageMarkdown,
   getPrList,
   getRepoForceRebase,
   getRepos,

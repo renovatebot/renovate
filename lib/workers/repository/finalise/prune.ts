@@ -99,7 +99,13 @@ export async function pruneStaleBranches(
     logger.debug('No renovate branches found');
     return;
   }
-  logger.debug({ branchList, renovateBranches }, 'Branch lists');
+  logger.debug(
+    {
+      branchList: branchList?.sort(),
+      renovateBranches: renovateBranches?.sort(),
+    },
+    'Branch lists'
+  );
   const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch

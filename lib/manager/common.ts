@@ -227,6 +227,23 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
 
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
+  // describes files that was changed instead of or in addition to the packageFile
+  bumpedFiles?: BumpedPackageFile[];
+}
+
+export interface BumpedPackageFile {
+  fileName: string;
+  newContent: string;
+}
+
+export interface UpdateLockedConfig {
+  packageFile?: string;
+  packageFileContent?: string;
+  lockFile?: string;
+  lockFileContent?: string;
+  depName?: string;
+  currentVersion?: string;
+  newVersion?: string;
 }
 
 export interface ManagerApi {
@@ -237,7 +254,8 @@ export interface ManagerApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType | string
+    bumpVersion: ReleaseType | string,
+    packageFile?: string
   ): Result<BumpPackageVersionResult>;
 
   extractAllPackageFiles?(
@@ -262,6 +280,10 @@ export interface ManagerApi {
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
+
+  updateLockedDependency?(
+    config: UpdateLockedConfig
+  ): Result<Record<string, string | null>>;
 }
 
 // TODO: name and properties used by npm manager
