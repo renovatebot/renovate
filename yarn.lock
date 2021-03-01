@@ -4146,7 +4146,7 @@ debug@3.1.0:
   dependencies:
     ms "2.0.0"
 
-debug@4, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1:
+debug@4, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.1.tgz#f0d229c505e0c6d8c49ac553d1b13dc183f6b2ee"
   integrity sha512-doEwdvm4PCeK4K3RQN2ZC2BYUBaxwLARCqZmMjtF8a51J2Rb0xpVloFRnCODwqjpwnAoao4pelN8l3RJdv3gRQ==
@@ -4166,6 +4166,13 @@ debug@^3.1.0:
   integrity sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==
   dependencies:
     ms "^2.1.1"
+
+debug@^4.3.2:
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.2.tgz#f0a49c18ac8779e31d4a0c6029dfb76873c7428b"
+  integrity sha512-mOp8wKcvj7XxC78zLgw/ZA+6TSgkoE2C/ienthhRD298T7UNwAg9diBpLRxC0mOezLl4B0xV7M0cCO6P/O0Xhw==
+  dependencies:
+    ms "2.1.2"
 
 debuglog@^1.0.1:
   version "1.0.1"
@@ -10146,14 +10153,14 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@2.34.2:
-  version "2.34.2"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.34.2.tgz#da26e5bd681787a751e2ea039d23bcd8d4b32a18"
-  integrity sha512-/EX4FtcpAj5L/Bs5zgaBGYDrnkrKflFVNppNLH9VXpIjZBLHx5cZ6/mOYJCoKXKlLRuk3iTvzrIsHo7v42zWHg==
+simple-git@2.35.2:
+  version "2.35.2"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.35.2.tgz#b0f4d30bfba2b6998a3f435f25ef13ccef26305e"
+  integrity sha512-UjOKsrz92Bx7z00Wla5V6qLSf5X2XSp0sL2gzKw1Bh7iJfDPDaU7gK5avIup0yo1/sMOSUMQer2b9GcnF6nmTQ==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
-    debug "^4.3.1"
+    debug "^4.3.2"
 
 sisteransi@^1.0.5:
   version "1.0.5"
