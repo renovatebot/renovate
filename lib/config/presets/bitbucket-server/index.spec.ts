@@ -118,5 +118,24 @@ describe(getName(__filename), () => {
       ).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('uses custom path', async () => {
+      httpMock
+        .scope('https://api.github.example.org')
+        .get(`${basePath}/path/default.json`)
+        .query({ limit: 20000 })
+        .reply(200, {
+          isLastPage: true,
+          lines: [{ text: '{"from":"api"}' }],
+        });
+      expect(
+        await bitbucketServer.getPresetFromEndpoint(
+          'some/repo',
+          'default',
+          'path',
+          'https://api.github.example.org'
+        )
+      ).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
 });
