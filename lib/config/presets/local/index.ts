@@ -39,6 +39,7 @@ export function getPreset({
       return bitbucketServer.getPresetFromEndpoint(
         pkgName,
         presetName,
+        presetPath,
         endpoint
       );
     case PLATFORM_TYPE_GITEA:

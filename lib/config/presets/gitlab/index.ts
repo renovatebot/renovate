@@ -57,7 +57,7 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   pkgName: string,
   presetName: string,
-  presetPath?: string,
+  presetPath: string,
   endpoint = Endpoint
 ): Promise<Preset> {
   return fetchPreset({

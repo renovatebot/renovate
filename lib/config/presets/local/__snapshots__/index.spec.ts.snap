@@ -5,6 +5,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     "https://git.example.com",
   ],
 ]

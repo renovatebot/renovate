@@ -184,7 +184,7 @@ describe(getName(__filename), () => {
           content: Buffer.from('{"from":"api"}').toString('base64'),
         });
       expect(
-        await gitea.getPresetFromEndpoint('some/repo', 'default')
+        await gitea.getPresetFromEndpoint('some/repo', 'default', undefined)
       ).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

@@ -112,6 +112,7 @@ describe(getName(__filename), () => {
         await bitbucketServer.getPresetFromEndpoint(
           'some/repo',
           'default',
+          undefined,
           'https://api.github.example.org'
         )
       ).toEqual({ from: 'api' });

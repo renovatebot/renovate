@@ -40,7 +40,7 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
-  presetPath?: string,
+  presetPath: string,
   endpoint = Endpoint
 ): Promise<Preset> {
   return fetchPreset({
