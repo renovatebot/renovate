@@ -62,7 +62,7 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch ? config.branchName : config.baseBranch
         );
       }
-      // istanbul ignore if
+      // istanbul ignore if: to hard to test
       if (reuseExistingBranch && !lockFileContent) {
         logger.debug(
           { lockFile, depName },
