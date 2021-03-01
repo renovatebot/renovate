@@ -28,6 +28,7 @@
     "prepare": "run-s prepare:*",
     "prepare:tools": "tsc -p tools",
     "prepare:re2": "node --experimental-modules tools/check-re2.mjs",
+    "prepare:patch": "patch-package",
     "prepare:generate": "run-s generate:*",
     "prestart": "run-s generate:* ",
     "pretest": "run-s generate:* ",
