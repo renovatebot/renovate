@@ -1,0 +1,13 @@
+diff --git a/node_modules/v8-to-istanbul/lib/v8-to-istanbul.js b/node_modules/v8-to-istanbul/lib/v8-to-istanbul.js
+index 428c02a..e5be920 100644
+--- a/node_modules/v8-to-istanbul/lib/v8-to-istanbul.js
++++ b/node_modules/v8-to-istanbul/lib/v8-to-istanbul.js
+@@ -54,7 +54,7 @@ module.exports = class V8ToIstanbul {
+         this.sourceTranspiled = new CovSource(rawSource, this.wrapperLength)
+       } else {
+         const candidatePath = this.rawSourceMap.sourcemap.sources.length >= 1 ? this.rawSourceMap.sourcemap.sources[0] : this.rawSourceMap.sourcemap.file
+-        this.path = this._resolveSource(this.rawSourceMap, candidatePath)
++        this.path = this._resolveSource(this.rawSourceMap, candidatePath || this.path)
+         this.sourceMap = await new SourceMapConsumer(this.rawSourceMap.sourcemap)
+ 
+         let originalRawSource

@@ -3,6 +3,7 @@ const ci = !!process.env.CI;
 module.exports = {
   cacheDirectory: '.cache/jest',
   coverageDirectory: './coverage',
+  coverageProvider: 'v8',
   collectCoverage: true,
   collectCoverageFrom: [
     'lib/**/*.{js,ts}',
