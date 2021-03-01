@@ -193,7 +193,7 @@ export async function getReleases(
         dep.sourceUrl = sourceUrl;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
     if (err instanceof RequestError && err.response?.statusCode === 404) {
       logger.debug(

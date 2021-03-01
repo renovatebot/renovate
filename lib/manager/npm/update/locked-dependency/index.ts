@@ -186,7 +186,7 @@ export async function updateLockedDependency(
       files[packageFile] = newPackageJsonContent;
     }
     return files;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.error({ err }, 'updateLockedDependency() error');
     return null;
   }

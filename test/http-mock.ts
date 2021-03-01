@@ -141,7 +141,7 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
   });
 }
 
-export function getTrace(): RequestLogItem[] /* istanbul ignore next */ {
+export function getTrace(): RequestLogItem[] /* c8 ignore next */ {
   const errorLines = [];
   if (missingLog.length) {
     errorLines.push('Missing mocks:');

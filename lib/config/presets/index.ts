@@ -211,7 +211,7 @@ export async function resolveConfigPresets(
           `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
         );
       } else if (ignorePresets.includes(preset)) {
-        // istanbul ignore next
+        /* c8 ignore next */
         logger.debug(
           `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
         );

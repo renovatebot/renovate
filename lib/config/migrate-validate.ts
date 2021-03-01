@@ -41,7 +41,7 @@ export async function migrateAndValidate(
       massagedConfig.warnings = (config.warnings || []).concat(warnings);
     }
     return massagedConfig;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ config: input }, 'migrateAndValidate error');
     throw err;
   }

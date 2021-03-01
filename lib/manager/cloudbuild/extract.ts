@@ -25,7 +25,7 @@ export function extractPackageFile(content: string): PackageFile {
         }
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug(
         { err },

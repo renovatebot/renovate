@@ -59,7 +59,7 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
     if (sha) {
       try {
         isModified = await isBranchModified(branchName);
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         // Do nothing
       }
     }

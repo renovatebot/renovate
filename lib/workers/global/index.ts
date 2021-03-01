@@ -68,7 +68,7 @@ export async function start(): Promise<number> {
       await repositoryWorker.renovateRepository(repoConfig);
       setMeta({});
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));
     } else {

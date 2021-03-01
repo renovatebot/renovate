@@ -35,7 +35,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             result = extractTerragruntModule(lineNumber, lines);
             break;
           }
-          /* istanbul ignore next */
+          /* c8 ignore next */
           default:
             logger.trace(
               `Could not identify TerragruntDependencyType ${terragruntDependency.groups.type} on line ${lineNumber}.`
@@ -49,7 +49,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error extracting terragrunt plugins');
   }
   deps.forEach((dep) => {
@@ -57,7 +57,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       case TerragruntDependencyTypes.terragrunt:
         analyseTerragruntModule(dep);
         break;
-      /* istanbul ignore next */
+      /* c8 ignore next */
       default:
     }
     // eslint-disable-next-line no-param-reassign

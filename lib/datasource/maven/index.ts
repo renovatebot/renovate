@@ -168,7 +168,7 @@ async function getVersionsFromMetadata(
 
 type ArtifactsInfo = Record<string, boolean | null>;
 
-// istanbul ignore next
+/* c8 ignore next */
 function isValidArtifactsInfo(
   info: ArtifactsInfo | null,
   versions: string[]
@@ -267,7 +267,7 @@ export async function getReleases({
       );
     }
 
-    /* istanbul ignore next */
+    /* c8 ignore next */
     releases = releases || metadataVersions.map((version) => ({ version }));
 
     const latestVersion = getLatestStableVersion(releases);

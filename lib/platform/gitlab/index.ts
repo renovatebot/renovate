@@ -237,7 +237,7 @@ export async function initRepo({
       gitAuthorName: global.gitAuthor?.name,
       gitAuthorEmail: global.gitAuthor?.email,
     });
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
@@ -290,7 +290,7 @@ async function getStatus(
         useCache,
       })
     ).body;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
@@ -405,7 +405,7 @@ async function fetchPrList(): Promise<Pr[]> {
         createdAt: pr.created_at,
       })
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
@@ -452,7 +452,7 @@ async function tryPrAutomerge(
           },
         }
       );
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.debug({ err }, 'Automerge on PR creation failed');
     }
   }
@@ -581,7 +581,7 @@ export async function mergePr(iid: number): Promise<boolean> {
       }
     );
     return true;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 401) {
       logger.debug('No permissions to merge PR');
       return false;
@@ -691,7 +691,7 @@ export async function setBranchStatus({
 
     // update status cache
     await getStatus(branchName, false);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (
       err.body?.message?.startsWith(
         'Cannot transition status via :enqueue from :pending'
@@ -752,7 +752,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
       number: issue.iid,
       body: issueBody,
     };
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn('Error finding issue');
     return null;
   }
@@ -799,7 +799,7 @@ export async function ensureIssue({
       delete config.issueList;
       return 'created';
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
@@ -880,7 +880,7 @@ export async function deleteLabel(
         body: { labels },
       }
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
 }

@@ -28,7 +28,7 @@ export async function extractDependencies(
   /* eslint-disable no-param-reassign */
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
-  // istanbul ignore next
+  /* c8 ignore next */
   if (
     config.dependencyDashboard ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||

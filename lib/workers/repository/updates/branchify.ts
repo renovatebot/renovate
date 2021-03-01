@@ -87,7 +87,7 @@ export async function branchifyUpgrades(
   const branchList = config.repoIsOnboarded
     ? branches.map((upgrade) => upgrade.branchName)
     : config.branchList;
-  // istanbul ignore next
+  /* c8 ignore next */
   try {
     // Here we check if there are updates from the same source repo
     // that are not grouped into the same branch

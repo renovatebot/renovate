@@ -122,7 +122,7 @@ export async function getRepos(): Promise<string[]> {
       { paginate: 'all' }
     );
     return res.body.map((repo) => repo.full_name);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
   }
@@ -244,7 +244,7 @@ export async function initRepo({
       // This happens if we don't have Administrator read access, it is not a critical error
       logger.debug('Could not find allowed merge methods for repo');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug('Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
@@ -327,7 +327,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Created new default branch in fork');
-        } catch (err) /* istanbul ignore next */ {
+        } catch (err) /* c8 ignore next */ {
           if (err.response?.body?.message === 'Reference already exists') {
             logger.debug(
               `Branch ${config.defaultBranch} already exists in the fork`
@@ -351,11 +351,11 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Successfully changed default branch for fork');
-        } catch (err) /* istanbul ignore next */ {
+        } catch (err) /* c8 ignore next */ {
           logger.warn({ err }, 'Could not set default branch');
         }
       }
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
     }
@@ -380,7 +380,7 @@ export async function initRepo({
             token: forkToken || opts.token,
           }
         );
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.error(
           { err: err.err || err },
           'Error updating fork from upstream - cannot continue'
@@ -530,7 +530,7 @@ async function getClosedPrs(): Promise<PrList> {
       }
       prNumbers.sort();
       logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.warn({ query, err }, 'getClosedPrs error');
     }
   }
@@ -656,7 +656,7 @@ async function getOpenPrs(): Promise<PrList> {
       }
       prNumbers.sort();
       logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.warn({ query, err }, 'getOpenPrs error');
     }
   }
@@ -735,7 +735,7 @@ export async function getPrList(): Promise<Pr[]> {
           { paginate: true }
         )
       ).body;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
@@ -757,7 +757,7 @@ export async function getPrList(): Promise<Pr[]> {
             title: pr.title,
             state:
               pr.state === PrState.Closed && pr.merged_at?.length
-                ? /* istanbul ignore next */ PrState.Merged
+                ? /* c8 ignore next */ PrState.Merged
                 : pr.state,
             createdAt: pr.created_at,
             closed_at: pr.closed_at,
@@ -831,7 +831,7 @@ export async function getBranchStatus(
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 404) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted'
@@ -870,10 +870,10 @@ export async function getBranchStatus(
       }));
       logger.debug({ checkRuns }, 'check runs result');
     } else {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.debug({ result: checkRunsRaw }, 'No check runs found');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -944,7 +944,7 @@ export async function getBranchStatusCheck(
       }
     }
     return null;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
@@ -992,7 +992,7 @@ export async function setBranchStatus({
     // update status cache
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ err, url }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
   }
@@ -1000,7 +1000,7 @@ export async function setBranchStatus({
 
 // Issue
 
-/* istanbul ignore next */
+/* c8 ignore next */
 async function getIssues(): Promise<Issue[]> {
   // prettier-ignore
   const query = `
@@ -1147,7 +1147,7 @@ export async function ensureIssue({
     // reset issueList so that it will be fetched again as-needed
     delete config.issueList;
     return 'created';
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(
         `Issues are disabled, so could not create issue: ${
@@ -1207,7 +1207,7 @@ export async function addReviewers(
         },
       }
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Failed to assign reviewer');
   }
 }
@@ -1235,7 +1235,7 @@ export async function deleteLabel(
     await githubApi.deleteJson(
       `repos/${repository}/issues/${issueNo}/labels/${label}`
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
 }
@@ -1292,7 +1292,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     ).body;
     logger.debug(`Found ${comments.length} comments`);
     return comments;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
@@ -1347,7 +1347,7 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1387,7 +1387,7 @@ export async function ensureCommentRemoval({
       logger.debug({ issueNo }, 'Removing comment');
       await deleteComment(commentId);
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error deleting comment');
   }
 }
@@ -1471,7 +1471,7 @@ export async function updatePr({
       options
     );
     logger.debug({ pr: prNo }, 'PR updated');
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1522,7 +1522,7 @@ export async function mergePr(
       automerged = true;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 405) {
-        // istanbul ignore next
+        /* c8 ignore next */
         logger.debug(
           { response: err.response ? err.response.body : undefined },
           'GitHub blocking PR merge -- will keep trying'

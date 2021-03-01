@@ -52,7 +52,7 @@ const ltr = (version: string, range: string): boolean | null => {
           gemVersion.compare(ver) < 0 &&
           gemVersion.release().compare(ver.bump()) <= 0
         );
-      // istanbul ignore next
+      /* c8 ignore next */
       default:
         logger.warn(`Unsupported operator '${operator}'`);
         return null;

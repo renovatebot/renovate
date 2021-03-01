@@ -24,7 +24,7 @@ async function cargoUpdate(
   };
   try {
     await exec(cmd, execOptions);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     // Two different versions of one dependency can be present in the same
     // crate, and when that happens an attempt to update it with --package ${dep}
     // key results in cargo exiting with error code `101` and an error message:

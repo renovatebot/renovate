@@ -45,7 +45,7 @@ function callApi<T>(
   method: string,
   options?: HttpOptions | HttpPostOptions
 ): Promise<HttpResponse<T>> {
-  /* istanbul ignore next */
+  /* c8 ignore next */
   switch (method.toLowerCase()) {
     case 'post':
       return bitbucketServerHttp.postJson<T>(

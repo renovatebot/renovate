@@ -56,7 +56,7 @@ const normalizeScalaVersion = (str: string): string => {
   if (/^\d+\.\d+\.\d+$/.test(str)) {
     return str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2');
   }
-  // istanbul ignore next
+  /* c8 ignore next */
   return str;
 };
 

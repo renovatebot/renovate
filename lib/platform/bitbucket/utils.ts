@@ -84,7 +84,7 @@ function callApi<T>(
   method: string,
   options?: HttpOptions | HttpPostOptions
 ): Promise<HttpResponse<T>> {
-  /* istanbul ignore next */
+  /* c8 ignore next */
   switch (method.toLowerCase()) {
     case 'post':
       return bitbucketHttp.postJson<T>(apiUrl, options as HttpPostOptions);
@@ -132,9 +132,7 @@ interface Files {
   }[];
 }
 
-export /* istanbul ignore next */ function isConflicted(
-  files: Files[]
-): boolean {
+export /* c8 ignore next */ function isConflicted(files: Files[]): boolean {
   for (const file of files) {
     for (const chunk of file.chunks) {
       for (const change of chunk.changes) {
@@ -174,12 +172,12 @@ export interface PrResponse {
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
-    body: pr.summary ? pr.summary.raw : /* istanbul ignore next */ undefined,
+    body: pr.summary ? pr.summary.raw : /* c8 ignore next */ undefined,
     sourceBranch: pr.source.branch.name,
     targetBranch: pr.destination.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)
-      ? /* istanbul ignore next */ PrState.Closed
+      ? /* c8 ignore next */ PrState.Closed
       : pr.state.toLowerCase(),
     createdAt: pr.created_on,
   };

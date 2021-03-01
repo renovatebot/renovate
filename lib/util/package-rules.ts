@@ -211,7 +211,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
           ? currentValue // it's a version so we can match against it
           : lockedVersion || currentVersion; // need to match against this currentVersion, if available
       if (compareVersion) {
-        // istanbul ignore next
+        /* c8 ignore next */
         if (version.isVersion(compareVersion)) {
           const isMatch = version.matches(compareVersion, matchCurrentVersion);
           // istanbul ignore if

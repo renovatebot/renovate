@@ -71,7 +71,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         } while (foundImage);
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error extracting GitLab CI dependencies');
   }
   if (!deps.length) {

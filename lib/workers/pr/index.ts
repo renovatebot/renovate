@@ -400,7 +400,7 @@ export async function ensurePr(
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr.number, prTitle }, 'PR created');
       }
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.debug({ err }, 'Pull request creation error');
       if (
         err.body?.message === 'Validation failed' &&

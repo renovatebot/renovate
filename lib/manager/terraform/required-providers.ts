@@ -29,7 +29,7 @@ function extractBlock(
           dep.currentValue = kvMatch.groups.value;
           break;
 
-        /* istanbul ignore next */
+        /* c8 ignore next */
         default:
           break;
       }

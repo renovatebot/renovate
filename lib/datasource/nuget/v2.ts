@@ -43,7 +43,7 @@ export async function getReleases(
             dep.sourceUrl = projectUrl;
           }
         }
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.debug(
           { err, pkgName, feedUrl },
           `nuget registry failure: can't parse pkg info for project url`

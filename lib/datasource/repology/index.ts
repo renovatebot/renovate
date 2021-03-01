@@ -217,7 +217,7 @@ export async function getReleases({
     return { releases };
   } catch (err) {
     if (err.message === HOST_DISABLED) {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.trace({ lookupName, err }, 'Host disabled');
     } else {
       logger.warn(

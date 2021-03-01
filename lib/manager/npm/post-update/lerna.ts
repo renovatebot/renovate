@@ -111,7 +111,7 @@ export async function generateLockFiles(
     preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
     cmd.push(lernaCommand);
     await exec(cmd, execOptions);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug(
       {
         cmd,

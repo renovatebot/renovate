@@ -19,7 +19,7 @@ export type ExtractResult = {
   packageFiles: Record<string, PackageFile[]>;
 };
 
-// istanbul ignore next
+/* c8 ignore next */
 function extractStats(packageFiles: Record<string, PackageFile[]>): any {
   if (!packageFiles) {
     return {};

@@ -35,7 +35,7 @@ async function updateRubyGemsVersions(): Promise<void> {
     newLines = (await http.get(url, options)).body;
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug({ durationMs }, 'Rubygems: Fetched rubygems.org versions');
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode !== 416) {
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
@@ -73,7 +73,7 @@ async function updateRubyGemsVersions(): Promise<void> {
           packageReleases[pkg].push(copystr(lineVersion));
         }
       }
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.warn(
         { err, line, split, pkg, versions },
         'Rubygems line parsing error'

@@ -1,7 +1,7 @@
 import * as template from '../../../util/template';
 import { BranchConfig } from '../../common';
 
-// istanbul ignore next
+/* c8 ignore next */
 export function getPrHeader(config: BranchConfig): string {
   if (!config.prHeader) {
     return '';

@@ -183,7 +183,7 @@ export async function updateDependency({
       return fileContent;
     }
   }
-  // istanbul ignore next
+  /* c8 ignore next */
   if (!newSha256) {
     logger.debug(
       `Failed to generate new sha256 for ${upgrade.depName} - update failed`

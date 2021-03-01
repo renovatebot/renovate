@@ -65,7 +65,7 @@ function parseRepositories(
     } else {
       logger.debug('Disabling packagist.org');
     }
-  } catch (e) /* istanbul ignore next */ {
+  } catch (e) /* c8 ignore next */ {
     logger.debug(
       { repositories: repoJson },
       'Error parsing composer.json repositories config'
@@ -98,7 +98,7 @@ export async function extractPackageFile(
     res.lockFiles = [lockfilePath];
     try {
       lockParsed = JSON.parse(lockContents) as ComposerLock;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.warn({ err }, 'Error processing composer.lock');
     }
   }
@@ -156,7 +156,7 @@ export async function extractPackageFile(
             const lockField =
               depType === 'require'
                 ? 'packages'
-                : /* istanbul ignore next */ 'packages-dev';
+                : /* c8 ignore next */ 'packages-dev';
             const lockedDep = lockParsed[lockField]?.find(
               (item) => item.name === dep.depName
             );
@@ -166,7 +166,7 @@ export async function extractPackageFile(
           }
           deps.push(dep);
         }
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.debug({ fileName, depType, err }, 'Error parsing composer.json');
         return null;
       }

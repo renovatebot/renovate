@@ -114,7 +114,7 @@ async function getJenkinsUpdateCenterResponse<T>(
       { durationMs },
       `jenkins-plugins: Fetched Jenkins plugins ${cache.name}`
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     // eslint-disable-next-line no-param-reassign
     cache.cache = Object.create(null);
     throw new ExternalHostError(

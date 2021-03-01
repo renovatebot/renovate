@@ -23,8 +23,10 @@ import * as npm from './npm';
 import * as pnpm from './pnpm';
 import * as yarn from './yarn';
 
+/* c8 ignore start */
+
 // Strips empty values, deduplicates, and returns the directories from filenames
-// istanbul ignore next
+/* c8 ignore next */
 const getDirs = (arr: string[]): string[] =>
   Array.from(new Set(arr.filter(Boolean)));
 
@@ -34,7 +36,8 @@ export interface DetermineLockFileDirsResult {
   pnpmShrinkwrapDirs: string[];
   lernaDirs: string[];
 }
-// istanbul ignore next
+
+/* c8 ignore next */
 export function determineLockFileDirs(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
@@ -117,7 +120,7 @@ export function determineLockFileDirs(
   };
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
@@ -152,7 +155,7 @@ export async function writeExistingFiles(
     if (npmrc) {
       try {
         await outputFile(npmrcFilename, `${npmrc}\n`);
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
@@ -166,7 +169,7 @@ export async function writeExistingFiles(
             .replace('--install.pure-lockfile true', '')
             .replace('--install.frozen-lockfile true', '')
         );
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
       }
     }
@@ -217,14 +220,14 @@ export async function writeExistingFiles(
     if (yarnLock && config.reuseLockFiles === false) {
       await deleteLocalFile(yarnLock);
     }
-    // istanbul ignore next
+    /* c8 ignore next */
     if (packageFile.pnpmShrinkwrap && config.reuseLockFiles === false) {
       await deleteLocalFile(packageFile.pnpmShrinkwrap);
     }
   }
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function writeUpdatedPackageFiles(
   config: PostUpdateConfig
 ): Promise<void> {
@@ -287,7 +290,7 @@ interface UpdatedArtifacts {
   contents: string | Buffer;
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
   let originalNpmrcContent = null;
@@ -302,7 +305,7 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   return originalNpmrcContent;
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 async function updateNpmrcContent(
   dir: string,
   originalContent: string,
@@ -323,7 +326,7 @@ async function updateNpmrcContent(
   }
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 async function resetNpmrcContent(
   dir: string,
   originalContent: string
@@ -344,7 +347,7 @@ async function resetNpmrcContent(
   }
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 async function updateYarnOffline(
   lockFileDir: string,
   localDir: string,
@@ -412,7 +415,7 @@ export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
   updatedArtifacts: UpdatedArtifacts[];
 }
-// istanbul ignore next
+/* c8 ignore next */
 export async function getAdditionalFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles

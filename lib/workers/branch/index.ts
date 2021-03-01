@@ -58,7 +58,7 @@ const rebasingRegex = /\*\*Rebasing\*\*: .*/;
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
     await deleteBranch(branchName);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
   }
 }
@@ -542,7 +542,7 @@ export async function processBranch(
         config.branchAutomergeFailureMessage = mergeStatus;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -719,7 +719,7 @@ export async function processBranch(
         }
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (
       err instanceof ExternalHostError ||
       [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)

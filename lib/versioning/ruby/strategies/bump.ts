@@ -24,7 +24,7 @@ export default ({ range, to }: { range: string; to: string }): string => {
         return `${operator}${delimiter}${to}`;
       case NOT_EQUAL:
         return `${NOT_EQUAL}${delimiter}${ver}`;
-      // istanbul ignore next
+      /* c8 ignore next */
       default:
         logger.warn(`Unsupported operator '${operator}'`);
         return null;

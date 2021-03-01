@@ -121,7 +121,7 @@ const isStable = (version: string): boolean | null => {
   return null;
 };
 
-// istanbul ignore next
+/* c8 ignore next */
 const getSatisfyingVersion = (versions: string[], range: string): string =>
   versions.reduce((result, version) => {
     if (matches(version, range)) {

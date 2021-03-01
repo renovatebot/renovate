@@ -59,12 +59,12 @@ export async function deleteLocalFile(fileName: string): Promise<void> {
   }
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function ensureDir(dirName: string): Promise<void> {
   await fs.ensureDir(dirName);
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function ensureLocalDir(dirName: string): Promise<void> {
   const localDirName = join(localDir, dirName);
   await fs.ensureDir(localDirName);

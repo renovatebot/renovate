@@ -73,7 +73,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
         return result;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.error({ err }, 'Unknown error parsing gitAuthor');
   }
   // give up
@@ -97,7 +97,7 @@ export async function initPlatform(
       'Using default gitAuthor: Renovate Bot <renovate@whitesourcesoftware.com>'
     );
     gitAuthor = 'Renovate Bot <renovate@whitesourcesoftware.com>';
-  } /* istanbul ignore next */ else {
+  } /* c8 ignore next */ else {
     logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
     gitAuthor = platformInfo.gitAuthor;
   }

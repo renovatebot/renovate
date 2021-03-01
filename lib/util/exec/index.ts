@@ -144,7 +144,7 @@ export async function exec(
     const { timeout } = rawExecOptions;
     if (useDocker) {
       await removeDockerContainer(docker.image);
-      // istanbul ignore next
+      /* c8 ignore next */
       timer = setTimeout(() => {
         removeDockerContainer(docker.image); // eslint-disable-line
         logger.info({ timeout, rawExecCommand }, 'Docker run timed out');

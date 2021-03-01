@@ -214,7 +214,7 @@ const platform: Platform = {
         config.defaultBranch
       );
       return JSON.parse(contents.contentString);
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       return null;
     }
   },

@@ -19,11 +19,11 @@ let renovateVersion = 'unknown';
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
-} catch (err) /* istanbul ignore next */ {
+} catch (err) /* c8 ignore next */ {
   logger.debug({ err }, 'Error getting renovate version');
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function renovateRepository(
   repoConfig: RenovateConfig
 ): Promise<ProcessResult> {
@@ -52,7 +52,7 @@ export async function renovateRepository(
     }
     await finaliseRepo(config, branchList);
     repoResult = processResult(config, res);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);

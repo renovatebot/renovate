@@ -57,7 +57,7 @@ export async function updateArtifacts({
       : ['mix'];
   cmdParts.push('deps.update');
 
-  /* istanbul ignore next */
+  /* c8 ignore next */
   try {
     const command = [...cmdParts, ...updatedDeps.map(quote)].join(' ');
     await exec(command, { cwd });

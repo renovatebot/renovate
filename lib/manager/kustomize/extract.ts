@@ -73,7 +73,7 @@ export function parseKustomize(content: string): Kustomize | null {
   let pkg = null;
   try {
     pkg = safeLoad(content, { json: true });
-  } catch (e) /* istanbul ignore next */ {
+  } catch (e) /* c8 ignore next */ {
     return null;
   }
 

@@ -51,7 +51,7 @@ export async function rebaseOnboardingBranch(
     return null;
   }
   logger.debug('Rebasing onboarding branch');
-  // istanbul ignore next
+  /* c8 ignore next */
   const commitMessage = getCommitMessage(config);
 
   // istanbul ignore if

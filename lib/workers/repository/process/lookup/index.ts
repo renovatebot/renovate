@@ -124,7 +124,7 @@ export async function lookupUpdates(
       res.updates.push(rollback);
     }
     let rangeStrategy = getRangeStrategy(config);
-    // istanbul ignore next
+    /* c8 ignore next */
     if (
       isVulnerabilityAlert &&
       rangeStrategy === 'update-lockfile' &&
@@ -218,7 +218,7 @@ export async function lookupUpdates(
           currentVersion,
           newVersion,
         });
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.warn(
           { err, currentValue, rangeStrategy, currentVersion, newVersion },
           'getNewValue error'

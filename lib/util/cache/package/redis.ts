@@ -38,7 +38,7 @@ export async function get<T = never>(
         logger.trace({ namespace, key }, 'Returning cached value');
         return cachedValue.value;
       }
-      // istanbul ignore next
+      /* c8 ignore next */
       await rm(namespace, key);
     }
   } catch (err) {

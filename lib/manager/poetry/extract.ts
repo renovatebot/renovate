@@ -167,7 +167,7 @@ export async function extractPackageFile(
   };
   // Try poetry.lock first
   let lockFile = getSiblingFileName(fileName, 'poetry.lock');
-  // istanbul ignore next
+  /* c8 ignore next */
   if (await localPathExists(lockFile)) {
     res.lockFiles = [lockFile];
   } else {

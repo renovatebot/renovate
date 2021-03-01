@@ -274,7 +274,7 @@ export async function getPkgReleases(
         lookupName,
       })
     );
-  } catch (e) /* istanbul ignore next */ {
+  } catch (e) /* c8 ignore next */ {
     if (e instanceof ExternalHostError) {
       e.hostType = config.datasource;
       e.lookupName = lookupName;

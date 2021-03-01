@@ -38,7 +38,7 @@ export async function tryBranchAutomerge(
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       if (err.message === 'not ready') {
         logger.debug('Branch is not ready for automerge');
         return 'not ready';

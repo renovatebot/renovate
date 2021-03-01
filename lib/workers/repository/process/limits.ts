@@ -69,7 +69,7 @@ export async function getConcurrentPrsRemaining(
       );
       logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
       return concurrentRemaining;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.error({ err }, 'Error checking concurrent PRs');
       return config.prConcurrentLimit;
     }

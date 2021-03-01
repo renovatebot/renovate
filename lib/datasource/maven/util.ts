@@ -66,12 +66,12 @@ export async function downloadHttpProtocol(
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.message === HOST_DISABLED) {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.trace({ failedUrl }, 'Host disabled');
     } else if (isNotFoundError(err)) {
       logger.trace({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.debug({ failedUrl }, `Cannot connect to ${hostType} host`);
     } else if (isPermissionsIssue(err)) {
       logger.debug(
@@ -84,10 +84,10 @@ export async function downloadHttpProtocol(
         throw new ExternalHostError(err);
       }
     } else if (isConnectionError(err)) {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.debug({ failedUrl }, 'Connection refused to maven registry');
     } else if (isUnsupportedHostError(err)) {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.debug({ failedUrl }, 'Unsupported host');
     } else {
       logger.info({ failedUrl, err }, 'Unknown error');

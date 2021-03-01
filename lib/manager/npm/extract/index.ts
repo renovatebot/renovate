@@ -136,7 +136,7 @@ export async function extractPackageFile(
   try {
     const lernaJsonFileName = getSiblingFileName(fileName, 'lerna.json');
     lernaJson = JSON.parse(await readLocalFile(lernaJsonFileName, 'utf8'));
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');
   }
   if (lernaJson && !lernaJson.useWorkspaces) {
@@ -322,7 +322,7 @@ export async function extractPackageFile(
           dep.prettyDepType = depTypes[depType];
           deps.push(dep);
         }
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.debug({ fileName, depType, err }, 'Error parsing package.json');
         return null;
       }

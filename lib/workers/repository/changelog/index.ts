@@ -2,12 +2,14 @@ import pMap from 'p-map';
 import { BranchUpgradeConfig } from '../../common';
 import { getChangeLogJSON } from '../../pr/changelog';
 
-// istanbul ignore next
+/* c8 ignore start */
+
+/* c8 ignore next */
 async function embedChangelog(upgrade): Promise<void> {
   upgrade.logJSON = await getChangeLogJSON(upgrade); // eslint-disable-line
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function embedChangelogs(
   branchUpgrades: Record<string, BranchUpgradeConfig[]>
 ): Promise<void> {

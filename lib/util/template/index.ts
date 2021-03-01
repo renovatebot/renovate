@@ -6,7 +6,7 @@ import { clone } from '../clone';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
-// istanbul ignore next
+/* c8 ignore next */
 handlebars.registerHelper('replace', (find, replace, context) =>
   context.replace(new RegExp(find, 'g'), replace)
 );

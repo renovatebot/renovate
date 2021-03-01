@@ -49,7 +49,7 @@ function parseUrl(urlString: string): UrlParsedResult | null {
   if (currentValue) {
     return { datasource, repo, currentValue };
   }
-  // istanbul ignore next
+  /* c8 ignore next */
   return null;
 }
 

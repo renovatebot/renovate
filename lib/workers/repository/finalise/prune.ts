@@ -68,7 +68,7 @@ async function cleanUpBranches(
         logger.info({ branch: branchName }, `Deleting orphan branch`);
         await deleteBranch(branchName);
       }
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       if (err.message?.includes("bad revision 'origin/")) {
         logger.debug(
           { branchName },

@@ -71,7 +71,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     if (fileType === '.json5') {
       try {
         configFileParsed = JSON5.parse(rawFileContents);
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },
           'Error parsing renovate config renovate.json5'
@@ -112,7 +112,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       }
       try {
         configFileParsed = JSON.parse(rawFileContents);
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },
           'Error parsing renovate config'
@@ -226,7 +226,7 @@ export async function mergeRenovateConfig(
   return returnConfig;
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function getRepoConfig(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {

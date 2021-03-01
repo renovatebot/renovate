@@ -61,7 +61,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     const cacheMinutes = 3 * 24 * 60; // 3 days
     await packageCache.set(cacheNamespace, url, hash, cacheMinutes);
     return hash;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     return null;
   }
 }
@@ -157,7 +157,7 @@ export async function updateDependency({
       return null;
     }
     return fileContent.replace(existingDef, newDef);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ err }, 'Error setting new bazel WORKSPACE version');
     return null;
   }

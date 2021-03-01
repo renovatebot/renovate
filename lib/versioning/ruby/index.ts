@@ -115,7 +115,7 @@ const getNewValue = ({
           to: vtrim(newVersion),
         });
         break;
-      // istanbul ignore next
+      /* c8 ignore next */
       default:
         logger.warn(`Unsupported strategy ${rangeStrategy}`);
     }

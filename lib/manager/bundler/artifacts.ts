@@ -157,7 +157,7 @@ export async function updateArtifacts(
         },
       },
     ];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
       err.message.includes('fatal: Could not parse object') ||

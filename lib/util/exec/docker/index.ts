@@ -104,7 +104,7 @@ async function getDockerTag(
       );
       return version;
     }
-  } /* istanbul ignore next */ else {
+  } /* c8 ignore next */ else {
     logger.error(`No ${depName} releases found`);
     return 'latest';
   }
@@ -137,7 +137,7 @@ export async function removeDockerContainer(image: string): Promise<void> {
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn(
       { image, containerName, cmd, err },
       'Could not remove Docker container'
@@ -145,7 +145,7 @@ export async function removeDockerContainer(image: string): Promise<void> {
   }
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function removeDanglingContainers(): Promise<void> {
   try {
     const res = await rawExec(`docker ps --filter label=renovate_child -aq`, {
@@ -164,7 +164,7 @@ export async function removeDanglingContainers(): Promise<void> {
     } else {
       logger.debug('No dangling containers to remove');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.errno === 'ENOMEM') {
       throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
     }

@@ -84,7 +84,7 @@ export async function findFirstParentVersion(
         return parentVersion;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'findFirstSupportingVersion error');
     return null;
   }

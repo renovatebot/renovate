@@ -88,7 +88,7 @@ export async function extractPackageFile(
         deps,
       };
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.error({ err }, 'Error parsing helm-values parsed content');
   }
   return null;

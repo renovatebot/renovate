@@ -556,7 +556,7 @@ export function migrateConfig(
       };
     }
     return { isMigrated, migratedConfig };
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ config, err }, 'migrateConfig() error');
     throw err;
   }

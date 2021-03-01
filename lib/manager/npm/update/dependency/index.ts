@@ -65,6 +65,8 @@ export function updateDependency({
         }
       }
     }
+
+    /* c8 ignore start */
     // istanbul ignore if
     if (!newFileContent) {
       logger.debug(
@@ -73,6 +75,8 @@ export function updateDependency({
       );
       return fileContent;
     }
+    /* c8 ignore stop */
+
     if (parsedContents?.resolutions) {
       let depKey: string;
       if (parsedContents.resolutions[depName]) {
@@ -81,6 +85,7 @@ export function updateDependency({
         depKey = `**/${depName}`;
       }
       if (depKey) {
+        /* c8 ignore start */
         // istanbul ignore if
         if (parsedContents.resolutions[depKey] !== oldVersion) {
           logger.debug(
@@ -93,6 +98,8 @@ export function updateDependency({
             'Upgraded dependency exists in yarn resolutions but is different version'
           );
         }
+
+        /* c8 ignore stop */
         // Look for the old version number
         const oldResolution = `"${String(parsedContents.resolutions[depKey])}"`;
         const newResolution = `"${newValue}"`;

@@ -191,7 +191,7 @@ async function getAuthHeaders(
     return {
       authorization: `Bearer ${token}`,
     };
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors
       return null;
@@ -266,7 +266,7 @@ async function getManifestResponse(
       headers,
     });
     return manifestResponse;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -404,7 +404,7 @@ export async function getDigest(
       digest = extractDigestFromResponse(manifestResponse) || null;
       logger.debug({ digest }, 'Got docker digest');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -458,7 +458,7 @@ async function getTags(
     const cacheMinutes = 30;
     await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -588,7 +588,7 @@ async function getLabels(
     ) {
       logger.debug({ registry, err }, 'Error connecting to docker registry');
     } else if (registry === 'https://quay.io') {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.debug(
         'Ignoring quay.io errors until they fully support v2 schema'
       );

@@ -52,7 +52,7 @@ function handleError(lookupName: string, err: HttpError): void {
   } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
   } else if (err.message === HOST_DISABLED) {
-    // istanbul ignore next
+    /* c8 ignore next */
     logger.trace(errorData, 'Host disabled');
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');

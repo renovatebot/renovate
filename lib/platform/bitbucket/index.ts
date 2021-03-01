@@ -94,7 +94,7 @@ export async function getRepos(): Promise<string[]> {
       `/2.0/repositories/?role=contributor`
     );
     return repos.map((repo) => repo.full_name);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
   }
@@ -147,7 +147,7 @@ export async function initRepo({
     });
 
     logger.debug(`${repository} owner = ${config.owner}`);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
@@ -190,7 +190,7 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(false);
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PrState.All) {
     return true;
@@ -299,7 +299,7 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
       )
     ).body;
     return branch.target.hash;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
     return null;
   }
@@ -390,7 +390,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || /* istanbul ignore next */ 'http://bitbucket.org';
+  const url = targetUrl || /* c8 ignore next */ 'http://bitbucket.org';
 
   const body = {
     name: context,
@@ -424,9 +424,9 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
         await bitbucketHttp.getJson<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`
         )
-      ).body.values || /* istanbul ignore next */ []
+      ).body.values || /* c8 ignore next */ []
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error finding issues');
     return [];
   }
@@ -532,7 +532,7 @@ export async function ensureIssue({
       );
       return 'created';
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(
         `Issues are disabled, so could not create issue: ${
@@ -546,9 +546,7 @@ export async function ensureIssue({
   return null;
 }
 
-export /* istanbul ignore next */ async function getIssueList(): Promise<
-  Issue[]
-> {
+export /* c8 ignore next */ async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
 
   /* istanbul ignore if */
@@ -568,9 +566,9 @@ export /* istanbul ignore next */ async function getIssueList(): Promise<
         await bitbucketHttp.getJson<{ values: Issue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`
         )
-      ).body.values || /* istanbul ignore next */ []
+      ).body.values || /* c8 ignore next */ []
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error finding issues');
     return [];
   }
@@ -619,7 +617,7 @@ export async function addReviewers(
   );
 }
 
-export /* istanbul ignore next */ function deleteLabel(): never {
+export /* c8 ignore next */ function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
 
@@ -708,7 +706,7 @@ export async function createPr({
       config.prList.push(pr);
     }
     return pr;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error creating pull request');
     throw err;
   }
@@ -768,7 +766,7 @@ export async function mergePr(
       }
     );
     logger.debug('Automerging succeeded');
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     return false;
   }
   return true;

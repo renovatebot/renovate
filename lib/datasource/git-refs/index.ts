@@ -61,7 +61,7 @@ export async function getRawRefs({
           hash: match.groups.hash,
         };
       }
-      // istanbul ignore next
+      /* c8 ignore next */
       return null;
     })
     .filter(Boolean)

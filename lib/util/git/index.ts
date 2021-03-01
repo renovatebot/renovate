@@ -54,7 +54,7 @@ interface LocalConfig extends StorageConfig {
   branchPrefix: string;
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 function checkForPlatformFailure(err: Error): void {
   if (process.env.NODE_ENV === 'test') {
     return;
@@ -118,7 +118,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
   try {
     const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
     return res.replace('refs/remotes/origin/', '').trim();
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
     if (
       err.message.startsWith(
@@ -154,7 +154,7 @@ async function fetchBranchCommits(): Promise<void> {
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ err }, 'git error');
     if (err.message?.includes('Please ask the owner to check their account')) {
       throw new Error(REPOSITORY_DISABLED);
@@ -208,7 +208,7 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
     try {
       await git.fetch(['origin', ref, '--depth=2', '--force']);
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       checkForPlatformFailure(err);
       throw err;
     }
@@ -229,7 +229,7 @@ export async function getSubmodules(): Promise<string[]> {
       .trim()
       .split(/[\n\s]/)
       .filter((_e: string, i: number) => i % 2);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error getting submodules');
     return [];
   }
@@ -257,7 +257,7 @@ export async function syncGit(): Promise<void> {
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.debug({ durationMs }, 'git fetch completed');
       clone = false;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
@@ -276,7 +276,7 @@ export async function syncGit(): Promise<void> {
         );
       }
       await git.clone(config.url, '.', opts);
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
@@ -304,7 +304,7 @@ export async function syncGit(): Promise<void> {
   try {
     const latestCommitDate = (await git.log({ n: 1 })).latest.date;
     logger.debug({ latestCommitDate }, 'latest commit');
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
     if (err.message.includes('does not have any commits yet')) {
       throw new Error(REPOSITORY_EMPTY);
@@ -321,7 +321,7 @@ export async function syncGit(): Promise<void> {
       logger.debug({ gitAuthorEmail }, 'Setting git author email');
       await git.raw(['config', 'user.email', gitAuthorEmail]);
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
     logger.debug({ err }, 'Error setting git author config');
     throw new Error(TEMPORARY_ERROR);
@@ -332,7 +332,7 @@ export async function syncGit(): Promise<void> {
   }
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function getRepoStatus(): Promise<StatusResult> {
   await syncGit();
   return git.status();
@@ -351,7 +351,7 @@ async function syncBranch(branchName: string): Promise<void> {
   try {
     await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
     await git.fetch(['origin', branchName, '--depth=2']);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
   }
 }
@@ -404,7 +404,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
     throw err;
   }
@@ -443,7 +443,7 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
       config.currentBranchSha,
     ]);
     return !branches.all.map(localName).includes(branchName);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
     throw err;
   }
@@ -494,13 +494,13 @@ export async function deleteBranch(branchName: string): Promise<void> {
   try {
     await git.raw(['push', '--delete', 'origin', branchName]);
     logger.debug({ branchName }, 'Deleted remote branch');
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
     logger.debug({ branchName }, 'No remote branch to delete');
   }
   try {
     await deleteLocalBranch(branchName);
-    // istanbul ignore next
+    /* c8 ignore next */
     logger.debug({ branchName }, 'Deleted local branch');
   } catch (err) {
     checkForPlatformFailure(err);
@@ -540,7 +540,7 @@ export async function getBranchFiles(branchName: string): Promise<string[]> {
       `origin/${branchName}^`,
     ]);
     return diff.files.map((file) => file.file);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'getBranchFiles error');
     checkForPlatformFailure(err);
     return null;
@@ -643,7 +643,7 @@ export async function commitFiles({
       for (const f of deleted) {
         try {
           await git.rm([f]);
-        } catch (err) /* istanbul ignore next */ {
+        } catch (err) /* c8 ignore next */ {
           checkForPlatformFailure(err);
           logger.debug({ err }, 'Cannot delete ' + f);
         }
@@ -674,7 +674,7 @@ export async function commitFiles({
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
     return commit;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
     if (
       err.message.includes(

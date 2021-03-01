@@ -1,4 +1,4 @@
-// istanbul ignore next
+/* c8 ignore next */
 export default function cmdSerializer(
   cmd: string | string[]
 ): string | string[] {

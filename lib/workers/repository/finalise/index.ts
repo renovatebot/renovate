@@ -3,7 +3,7 @@ import { platform } from '../../../platform';
 import * as repositoryCache from '../../../util/cache/repository';
 import { pruneStaleBranches } from './prune';
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function finaliseRepo(
   config: RenovateConfig,
   branchList: string[]

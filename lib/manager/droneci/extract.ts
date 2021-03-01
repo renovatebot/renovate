@@ -24,7 +24,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error extracting DroneCI images');
   }
   if (!deps.length) {

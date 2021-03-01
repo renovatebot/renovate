@@ -30,7 +30,7 @@ export async function confirmIfDepUpdated(
       upgrade
     );
     newUpgrade = newExtract.deps[depIndex];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
   if (!newUpgrade) {
@@ -71,7 +71,7 @@ export async function confirmIfDepUpdated(
   if (!currentDigest && !pinDigests) {
     return true;
   }
-  // istanbul ignore next
+  /* c8 ignore next */
   return false;
 }
 
@@ -92,7 +92,7 @@ export async function checkBranchDepsMatchBaseDeps(
       upgrade
     );
     return getDepsSignature(baseDeps) === getDepsSignature(branchDeps);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.info(
       { manager, packageFile },
       'Failed to parse branchContent - rebasing'
@@ -185,13 +185,13 @@ export async function doAutoReplace(
         if (await confirmIfDepUpdated(upgrade, testContent)) {
           return testContent;
         }
-        // istanbul ignore next
+        /* c8 ignore next */
         await writeLocalFile(upgrade.packageFile, existingContent);
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
-  // istanbul ignore next
+  /* c8 ignore next */
   throw new Error(WORKER_FILE_UPDATE_FAILED);
 }

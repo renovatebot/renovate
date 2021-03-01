@@ -50,7 +50,7 @@ export async function getReleases({
         version: release.version,
         releaseTimestamp: formatBuildTime(release.buildTime),
       }));
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.host === 'services.gradle.org') {
       throw new ExternalHostError(err);
     }
@@ -65,6 +65,6 @@ export async function getReleases({
   if (res.releases.length) {
     return res;
   }
-  // istanbul ignore next
+  /* c8 ignore next */
   return null;
 }

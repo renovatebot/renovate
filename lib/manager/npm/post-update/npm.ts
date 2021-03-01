@@ -110,7 +110,7 @@ export async function generateLockFile(
       );
       try {
         await remove(lockFileName);
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.debug(
           { err, lockFileName },
           'Error removing yarn.lock for lock file maintenance'
@@ -134,7 +134,7 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readFile(join(cwd, filename), 'utf8');
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.debug(
       {
         err,

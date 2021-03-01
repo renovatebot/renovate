@@ -71,7 +71,7 @@ const defaults: {
   hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
 };
 
-/* istanbul ignore next */
+/* c8 ignore next */
 function updatePrVersion(pr: number, version: number): number {
   const res = Math.max(config.prVersions.get(pr) || 0, version);
   config.prVersions.set(pr, res);
@@ -113,7 +113,7 @@ export async function getRepos(): Promise<string[]> {
     );
     logger.debug({ result }, 'result of getRepos()');
     return result;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
   }
@@ -192,7 +192,7 @@ export async function initRepo({
         protocol: defaults.endpoint.split(':')[0] as GitProtocol,
         auth: `${opts.username}:${opts.password}`,
         host: `${host}${pathname}${
-          pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+          pathname.endsWith('/') ? '' : /* c8 ignore next */ '/'
         }scm`,
         repository,
       });
@@ -222,7 +222,7 @@ export async function initRepo({
     };
 
     return repoConfig;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
@@ -292,7 +292,7 @@ export async function getPr(
 }
 
 // TODO: coverage
-// istanbul ignore next
+/* c8 ignore next */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PrState.All) {
     return true;
@@ -304,7 +304,7 @@ function matchesState(state: string, desiredState: string): boolean {
 }
 
 // TODO: coverage
-// istanbul ignore next
+/* c8 ignore next */
 const isRelevantPr = (
   branchName: string,
   prTitle: string | null | undefined,
@@ -317,7 +317,7 @@ const isRelevantPr = (
 // TODO: coverage
 export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   logger.debug(`getPrList()`);
-  // istanbul ignore next
+  /* c8 ignore next */
   if (!config.prList || refreshCache) {
     const searchParams = {
       state: 'ALL',
@@ -340,7 +340,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
 }
 
 // TODO: coverage
-// istanbul ignore next
+/* c8 ignore next */
 export async function findPr({
   branchName,
   prTitle,
@@ -368,7 +368,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
   await delay(1000);
@@ -535,7 +535,7 @@ export async function setBranchStatus({
 //   return [];
 // }
 
-export /* istanbul ignore next */ function findIssue(
+export /* c8 ignore next */ function findIssue(
   title: string
 ): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
@@ -545,7 +545,7 @@ export /* istanbul ignore next */ function findIssue(
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue({
+export /* c8 ignore next */ function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.warn({ title }, 'Cannot ensure issue');
@@ -555,13 +555,13 @@ export /* istanbul ignore next */ function ensureIssue({
   return null;
 }
 
-export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
+export /* c8 ignore next */ function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return Promise.resolve([]);
 }
 
-export /* istanbul ignore next */ function ensureIssueClosing(
+export /* c8 ignore next */ function ensureIssueClosing(
   title: string
 ): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
@@ -743,7 +743,7 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
   }
@@ -776,7 +776,7 @@ export async function ensureCommentRemoval({
     if (commentId) {
       await deleteComment(prNo, commentId);
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error ensuring comment removal');
   }
 }
@@ -839,7 +839,7 @@ export async function createPr({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
       { body }
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (
       err.body?.errors?.[0]?.exceptionName ===
       'com.atlassian.bitbucket.pull.EmptyPullRequestException'

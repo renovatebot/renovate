@@ -426,7 +426,7 @@ export async function validateConfig(
     if (a.depName === b.depName) {
       return a.message > b.message ? 1 : -1;
     }
-    // istanbul ignore next: currently never happen
+    /* c8 ignore next */
     return a.depName > b.depName ? 1 : -1;
   }
   errors.sort(sortAll);

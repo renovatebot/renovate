@@ -99,7 +99,7 @@ export class RenovateStream extends Stream {
     this.writable = true;
   }
 
-  // istanbul ignore next
+  /* c8 ignore next */
   write(data: BunyanRecord): boolean {
     this.emit('data', formatRecord(data));
     return true;

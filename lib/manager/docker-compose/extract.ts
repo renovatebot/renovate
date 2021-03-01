@@ -93,7 +93,7 @@ export function extractPackageFile(
 
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn(
       { fileName, content, err },
       'Error extracting Docker Compose file'

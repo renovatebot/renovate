@@ -128,12 +128,12 @@ export function getNewValue({
       }
 
       // unless PEP440 changes, this won't happen
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.error(
         { newVersion, currentValue, range },
         'pep440: failed to process range'
       );
-      // istanbul ignore next
+      /* c8 ignore next */
       return null;
     })
     .filter(Boolean)

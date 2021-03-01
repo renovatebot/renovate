@@ -53,7 +53,7 @@ export function processResult(
   let status: ProcessStatus;
   let enabled: boolean;
   let onboarded: boolean;
-  // istanbul ignore next
+  /* c8 ignore next */
   if (disabledStatuses.includes(res)) {
     status = 'disabled';
     enabled = false;

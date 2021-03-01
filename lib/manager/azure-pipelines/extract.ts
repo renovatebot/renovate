@@ -73,7 +73,7 @@ export function parseAzurePipelines(
   let pkg = null;
   try {
     pkg = safeLoad(content, { json: true });
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.info({ filename, err }, 'Error parsing azure-pipelines content');
     return null;
   }

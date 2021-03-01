@@ -16,7 +16,7 @@ function releaseSegments(version: string): SegmentElement[] {
   if (v) {
     return v.release().getSegments();
   }
-  /* istanbul ignore next */
+  /* c8 ignore next */
   return [];
 }
 
@@ -33,7 +33,7 @@ const adapt = (left: string, right: string): string =>
 const floor = (version: string): string =>
   [...releaseSegments(version).slice(0, -1), 0].join('.');
 
-// istanbul ignore next
+/* c8 ignore next */
 const incrementLastSegment = (version: string): string => {
   const segments = releaseSegments(version);
   const nextLast = parseInt(segments.pop() as string, 10) + 1;
@@ -41,7 +41,7 @@ const incrementLastSegment = (version: string): string => {
   return [...segments, nextLast].join('.');
 };
 
-// istanbul ignore next
+/* c8 ignore next */
 const incrementMajor = (
   maj: number,
   min: number,
@@ -49,15 +49,15 @@ const incrementMajor = (
   pre: string[]
 ): number => (min === 0 || ptch === 0 || pre.length === 0 ? maj + 1 : maj);
 
-// istanbul ignore next
+/* c8 ignore next */
 const incrementMinor = (min: number, ptch: number, pre: string[]): number =>
   ptch === 0 || pre.length === 0 ? min + 1 : min;
 
-// istanbul ignore next
+/* c8 ignore next */
 const incrementPatch = (ptch: number, pre: string[]): number =>
   pre.length === 0 ? ptch + 1 : ptch;
 
-// istanbul ignore next
+/* c8 ignore next */
 const increment = (from: string, to: string): string => {
   const parsed = parse(from);
   const { major: maj, prerelease: pre } = parsed;
@@ -87,7 +87,7 @@ const increment = (from: string, to: string): string => {
   return increment(nextVersion, to);
 };
 
-// istanbul ignore next
+/* c8 ignore next */
 const decrement = (version: string): string => {
   const segments = releaseSegments(version);
   const nextSegments = segments

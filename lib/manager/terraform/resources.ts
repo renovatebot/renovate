@@ -55,7 +55,7 @@ export function extractTerraformResource(
           dep.currentValue = kvMatch.groups.value;
           break;
         default:
-          /* istanbul ignore next */
+          /* c8 ignore next */
           break;
       }
     }

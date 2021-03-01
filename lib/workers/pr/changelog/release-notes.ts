@@ -29,7 +29,7 @@ export async function getReleaseList(
       return await gitlab.getReleaseList(apiBaseUrl, repository);
     }
     return await github.getReleaseList(apiBaseUrl, repository);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 404) {
       logger.debug({ repository }, 'getReleaseList 404');
     } else {
@@ -116,7 +116,7 @@ export async function getReleaseNotes(
               repository: `${baseUrl}${repository}`,
             });
           }
-        } catch (err) /* istanbul ignore next */ {
+        } catch (err) /* c8 ignore next */ {
           logger.warn({ err, baseUrl, repository }, 'Error linkifying');
         }
       }
@@ -154,10 +154,10 @@ function isUrl(url: string): boolean {
   try {
     return !!URL.parse(url).hostname;
   } catch (err) {
-    // istanbul ignore next
+    /* c8 ignore next */
     logger.debug({ err }, `Error parsing ${url} in URL.parse`);
   }
-  // istanbul ignore next
+  /* c8 ignore next */
   return false;
 }
 
@@ -170,7 +170,7 @@ export async function getReleaseNotesMdFileInner(
       return await gitlab.getReleaseNotesMd(repository, apiBaseUrl);
     }
     return await github.getReleaseNotesMd(repository, apiBaseUrl);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('Error 404 getting changelog md');
     } else {
@@ -241,7 +241,7 @@ export async function getReleaseNotesMd(
                   body = linkify(body, {
                     repository: `${baseUrl}${repository}`,
                   });
-                } catch (err) /* istanbul ignore next */ {
+                } catch (err) /* c8 ignore next */ {
                   logger.warn({ body, err }, 'linkify error');
                 }
               }
@@ -251,7 +251,7 @@ export async function getReleaseNotesMd(
               };
             }
           }
-        } catch (err) /* istanbul ignore next */ {
+        } catch (err) /* c8 ignore next */ {
           logger.warn({ err }, `Error parsing ${changelogFile}`);
         }
       }

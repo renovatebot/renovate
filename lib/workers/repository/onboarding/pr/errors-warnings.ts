@@ -73,7 +73,7 @@ export function getDepWarnings(
       warningFiles.map((f) => '`' + f + '`').join(', ') +
       '\n\n';
   } catch (err) {
-    // istanbul ignore next
+    /* c8 ignore next */
     logger.error({ err }, 'Error generating dep warnings text');
   }
   return warningText;

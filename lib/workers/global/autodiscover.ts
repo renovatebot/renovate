@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../config';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 
-// istanbul ignore next
+/* c8 ignore next */
 function repoName(value: string | { repository: string }): string {
   return String(is.string(value) ? value : value.repository).toLowerCase();
 }

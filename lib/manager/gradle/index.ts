@@ -71,7 +71,7 @@ export async function executeGradle(
   try {
     logger.debug({ cmd }, 'Start gradle command');
     ({ stdout, stderr } = await exec(cmd, execOptions));
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.code === TIMEOUT_CODE) {
       throw new ExternalHostError(err, 'gradle');
     }
@@ -136,7 +136,7 @@ export async function extractAllPackageFiles(
 
       collectVersionVariables(dependencies, content);
     } else {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }

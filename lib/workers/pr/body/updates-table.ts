@@ -47,7 +47,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
         } else {
           res[header] = '';
         }
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.warn({ header, value, err }, 'Handlebars compilation error');
       }
     }

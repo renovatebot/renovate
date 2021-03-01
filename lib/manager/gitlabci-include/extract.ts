@@ -60,7 +60,7 @@ export async function extractPackageFile(
         }
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug({ err });
       logger.debug('YAML exception extracting GitLab CI includes');

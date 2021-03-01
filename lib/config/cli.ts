@@ -88,7 +88,7 @@ export function getConfig(input: string[]): GlobalConfig {
     }
   });
 
-  /* istanbul ignore next */
+  /* c8 ignore next */
   function helpConsole(): void {
     /* eslint-disable no-console */
     console.log('  Examples:');

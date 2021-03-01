@@ -78,7 +78,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             result = extractTerraformRequiredVersion(lineNumber, lines);
             break;
           }
-          /* istanbul ignore next */
+          /* c8 ignore next */
           default:
             logger.trace(
               `Could not identify TerraformDependencyType ${terraformDependency.groups.type} on line ${lineNumber}.`
@@ -92,7 +92,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn({ err }, 'Error extracting terraform plugins');
   }
   deps.forEach((dep) => {
@@ -110,7 +110,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       case TerraformDependencyTypes.terraform_version:
         analyseTerraformVersion(dep);
         break;
-      /* istanbul ignore next */
+      /* c8 ignore next */
       default:
     }
     // eslint-disable-next-line no-param-reassign

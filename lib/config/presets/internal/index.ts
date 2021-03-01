@@ -33,5 +33,5 @@ export function getPreset({
 }: PresetConfig): Preset | undefined {
   return groups[pkgName]
     ? groups[pkgName][presetName]
-    : /* istanbul ignore next */ undefined;
+    : /* c8 ignore next */ undefined;
 }

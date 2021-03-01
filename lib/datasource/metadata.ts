@@ -201,7 +201,7 @@ export function addMetaData(
     delete dep.homepage;
   }
   const extraBaseUrls = [];
-  // istanbul ignore next
+  /* c8 ignore next */
   hostRules.hosts({ hostType: 'github' }).forEach((host) => {
     extraBaseUrls.push(host, `gist.${host}`);
   });

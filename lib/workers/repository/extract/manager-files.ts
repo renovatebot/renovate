@@ -64,7 +64,7 @@ export async function getManagerPackageFiles(
         });
       }
     } else {
-      // istanbul ignore next
+      /* c8 ignore next */
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }

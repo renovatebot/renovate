@@ -37,7 +37,7 @@ export async function getChangeLogJSON(
       res = await sourceGithub.getChangeLogJSON({ ...args, releases });
     }
     return res;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.error({ config: args, err }, 'getChangeLogJSON error');
     return null;
   }
