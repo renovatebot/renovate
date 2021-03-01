@@ -1,7 +1,7 @@
 import url from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../logger';
-import { HTMLElement, parse } from '../../util/html';
+import { parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import * as pep440 from '../../versioning/pep440';
@@ -186,7 +186,7 @@ async function getSimpleDependency(
   if (response.authorization) {
     dependency.isPrivate = true;
   }
-  const root: HTMLElement = parse(cleanSimpleHtml(dep));
+  const root = parse(cleanSimpleHtml(dep));
   const links = root.querySelectorAll('a');
   const releases: Releases = {};
   for (const link of Array.from(links)) {
