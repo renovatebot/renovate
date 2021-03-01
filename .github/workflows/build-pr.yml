@@ -1,6 +1,9 @@
 name: build-pr
 
 on:
+  push:
+    branches:
+      - 'renovate/**'
   pull_request:
 
 env:
