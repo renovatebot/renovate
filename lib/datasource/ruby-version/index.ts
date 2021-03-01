@@ -1,6 +1,6 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { parse } from '../../util/html';
+import { HTMLElement, parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
 import { GetReleasesConfig, ReleaseResult } from '../common';

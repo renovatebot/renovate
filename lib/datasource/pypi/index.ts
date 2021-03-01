@@ -1,7 +1,7 @@
 import url from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../logger';
-import { parse } from '../../util/html';
+import { HTMLElement, parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import * as pep440 from '../../versioning/pep440';
