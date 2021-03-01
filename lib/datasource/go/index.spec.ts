@@ -1,7 +1,12 @@
 import { getPkgReleases } from '..';
+import * as _hostRules from '../../util/host-rules';
 import * as httpMock from '../../../test/http-mock';
-import { logger } from '../../../test/util';
+import { logger, mocked } from '../../../test/util';
 import { id as datasource, getDigest } from '.';
+
+jest.mock('../../util/host-rules');
+
+const hostRules = mocked(_hostRules);
 
 const res1 = `<!DOCTYPE html>
 <html>
@@ -14,6 +19,17 @@ const res1 = `<!DOCTYPE html>
 <body>
 Nothing to see here; <a href="https://godoc.org/golang.org/x/text">move along</a>.
 </body>
+</html>`;
+
+const resGitLabEE = `<html>
+<head>
+	<meta name="go-import" content="my.custom.domain/golang/myrepo git https://my.custom.domain/golang/myrepo.git" />
+	<meta name="go-source"
+		content="my.custom.domain/golang/myrepo https://my.custom.domain/golang/myrepo https://my.custom.domain/golang/myrepo/-/tree/master{/dir} https://my.custom.domain/golang/myrepo/-/blob/master{/dir}/{file}#L{line}" />
+</head>
+
+<body>go get https://my.custom.domain/golang/myrepo</body>
+
 </html>`;
 
 const resGitHubEnterprise = `<!DOCTYPE html>
@@ -33,10 +49,13 @@ const resGitHubEnterprise = `<!DOCTYPE html>
 describe('datasource/go', () => {
   beforeEach(() => {
     httpMock.setup();
+    hostRules.find.mockReturnValue({});
+    hostRules.hosts.mockReturnValue([]);
   });
 
   afterEach(() => {
     httpMock.reset();
+    jest.resetAllMocks();
   });
 
   describe('getDigest', () => {
@@ -194,6 +213,25 @@ describe('datasource/go', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('support self hosted gitlab private repositories', async () => {
+      hostRules.find.mockReturnValue({ token: 'some-token' });
+      httpMock
+        .scope('https://my.custom.domain/')
+        .get('/golang/myrepo?go-get=1')
+        .reply(200, resGitLabEE);
+      httpMock
+        .scope('https://my.custom.domain/')
+        .get('/api/v4/projects/golang%2Fmyrepo/repository/tags?per_page=100')
+        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'my.custom.domain/golang/myrepo',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('support bitbucket tags', async () => {
       httpMock
         .scope('https://api.bitbucket.org/')
@@ -216,7 +254,7 @@ describe('datasource/go', () => {
       httpMock
         .scope('https://some.unknown.website/')
         .get('/example/module?go-get=1')
-        .reply(404);
+        .reply(200);
       const res = await getPkgReleases({
         datasource,
         depName: 'some.unknown.website/example/module',
@@ -224,11 +262,11 @@ describe('datasource/go', () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
-      expect(logger.logger.warn).toHaveBeenCalled();
-      expect(logger.logger.error).not.toHaveBeenCalledWith(
-        { lookupName: 'golang.org/foo/something' },
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { lookupName: 'some.unknown.website/example/module' },
         'Unsupported dependency.'
       );
+      expect(logger.logger.error).not.toHaveBeenCalled();
       expect(logger.logger.fatal).not.toHaveBeenCalled();
     });
     it('support ghe', async () => {
