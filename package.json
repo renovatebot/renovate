@@ -142,7 +142,7 @@
     "git-url-parse": "11.4.4",
     "github-url-from-git": "1.5.0",
     "global-agent": "2.1.12",
-    "got": "11.8.1",
+    "got": "11.8.2",
     "handlebars": "4.7.7",
     "handy-redis": "2.2.1",
     "hasha": "5.2.2",
