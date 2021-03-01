@@ -1040,7 +1040,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+exports[`platform/bitbucket massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
 
 exports[`platform/bitbucket getPrList() filters PR list by author 1`] = `
 Array [

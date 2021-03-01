@@ -2,7 +2,11 @@ import { LANGUAGE_JAVASCRIPT } from '../../constants/languages';
 import * as npmVersioning from '../../versioning/npm';
 
 export { extractAllPackageFiles } from './extract';
-export { bumpPackageVersion, updateDependency } from './update';
+export {
+  bumpPackageVersion,
+  updateDependency,
+  updateLockedDependency,
+} from './update';
 export { getRangeStrategy } from './range';
 
 export const language = LANGUAGE_JAVASCRIPT;

@@ -48,6 +48,8 @@ export interface Release {
   version: string;
   newDigest?: string;
   constraints?: Record<string, string[]>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
 }
 
 export interface ReleaseResult {

@@ -152,7 +152,7 @@ export interface Platform {
   ensureIssue(
     issueConfig: EnsureIssueConfig
   ): Promise<EnsureIssueResult | null>;
-  getPrBody(prBody: string): string;
+  massageMarkdown(prBody: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(number: number, branchName: string): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;

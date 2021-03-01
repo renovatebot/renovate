@@ -42,7 +42,7 @@ export interface NpmDependency extends ReleaseResult {
   sourceDirectory?: string;
 }
 
-interface NpmResponse {
+export interface NpmResponse {
   _id: string;
   name?: string;
   versions?: Record<
@@ -55,6 +55,8 @@ interface NpmResponse {
       homepage?: string;
       deprecated?: boolean;
       gitHead?: string;
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
     }
   >;
   repository?: {
@@ -210,6 +212,8 @@ export async function getDependency(
       const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,
+        dependencies: res.versions[version].dependencies,
+        devDependencies: res.versions[version].devDependencies,
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];

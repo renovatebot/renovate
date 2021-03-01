@@ -284,8 +284,6 @@ export async function ensurePr(
     config.upgrades.push(upgrade);
   }
 
-  // Update the config object
-  Object.assign(config, upgrades[0]);
   config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
 
   const releaseNoteRepos: string[] = [];
@@ -383,7 +381,7 @@ export async function ensurePr(
         if (
           !dependencyDashboardCheck &&
           isLimitReached(Limit.PullRequests) &&
-          !config.vulnerabilityAlert
+          !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
           return { prResult: PrResult.LimitReached };
@@ -437,7 +435,7 @@ export async function ensurePr(
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }
-      content = platform.getPrBody(content);
+      content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
       if (getAdminConfig().dryRun) {

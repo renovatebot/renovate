@@ -726,10 +726,10 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('getPrBody()', () => {
+  describe('massageMarkdown()', () => {
     it('returns diff files', () => {
       expect(
-        bitbucket.getPrBody(
+        bitbucket.massageMarkdown(
           '<details><summary>foo</summary>bar</details>text<details>'
         )
       ).toMatchSnapshot();

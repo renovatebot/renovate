@@ -201,7 +201,7 @@ describe('workers/pr', () => {
         displayNumber: 'New Pull Request',
       } as never);
       config.upgrades = [config];
-      platform.getPrBody = jest.fn((input) => input);
+      platform.massageMarkdown = jest.fn((input) => input);
       platform.getBranchPr = jest.fn();
       platform.getBranchStatus = jest.fn();
     });
