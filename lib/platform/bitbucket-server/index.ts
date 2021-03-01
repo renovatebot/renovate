@@ -1,4 +1,3 @@
-import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import type { PartialDeep } from 'type-fest';
@@ -21,7 +20,7 @@ import {
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash, getQueryString } from '../../util/url';
+import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
 import {
   BranchStatusConfig,
   CreatePRConfig,
@@ -187,7 +186,7 @@ export async function initRepo({
     let gitUrl: string;
     if (!cloneUrl) {
       // Fallback to generating the url if the API didn't give us an URL
-      const { host, pathname } = url.parse(defaults.endpoint);
+      const { host, pathname } = parseUrl(defaults.endpoint);
       gitUrl = git.getUrl({
         protocol: defaults.endpoint.split(':')[0] as GitProtocol,
         auth: `${opts.username}:${opts.password}`,
@@ -198,9 +197,10 @@ export async function initRepo({
       });
     } else if (cloneUrl.name === 'http') {
       // Inject auth into the API provided URL
-      const repoUrl = url.parse(cloneUrl.href);
-      repoUrl.auth = `${opts.username}:${opts.password}`;
-      gitUrl = url.format(repoUrl);
+      const repoUrl = parseUrl(cloneUrl.href);
+      repoUrl.username = opts.username;
+      repoUrl.password = opts.password;
+      gitUrl = repoUrl.toString();
     } else {
       // SSH urls can be used directly
       gitUrl = cloneUrl.href;

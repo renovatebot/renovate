@@ -1,4 +1,3 @@
-import url from 'url';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -23,6 +22,7 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { parseUrl } from '../../util/url';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { composerVersioningId, getConstraint } from './utils';
 
@@ -47,7 +47,7 @@ function getHost({
   if (!host) {
     try {
       host = endpoint || baseUrl;
-      host = url.parse(host).host;
+      host = parseUrl(host).host;
     } catch (err) {
       logger.warn(`Composer: can't parse ${host}`);
       host = null;

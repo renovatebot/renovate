@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -15,7 +14,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../util/url';
 import {
   BranchStatusConfig,
   CreatePRConfig,
@@ -287,13 +286,13 @@ const platform: Platform = {
       hostType: PLATFORM_TYPE_GITEA,
       url: defaults.endpoint,
     });
-    const gitEndpoint = URL.parse(repo.clone_url);
-    gitEndpoint.auth = opts.token;
+    const gitEndpoint = parseUrl(repo.clone_url);
+    gitEndpoint.username = opts.token;
 
     // Initialize Git storage
     await git.initRepo({
       ...config,
-      url: URL.format(gitEndpoint),
+      url: gitEndpoint.toString(),
       gitAuthorName: global.gitAuthor?.name,
       gitAuthorEmail: global.gitAuthor?.email,
     });

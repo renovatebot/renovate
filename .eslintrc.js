@@ -60,6 +60,7 @@ module.exports = {
         },
       },
     ],
+    'no-restricted-imports': [1, { paths: ['url'] }],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [

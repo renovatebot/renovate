@@ -1,8 +1,8 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../util/host-rules';
+import { parseUrl } from '../util/url';
 import { ReleaseResult } from './common';
 
 // Use this object to define changelog URLs for packages
@@ -207,7 +207,7 @@ export function addMetaData(
   });
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    const parsedUrl = URL.parse(dep.sourceUrl);
+    const parsedUrl = parseUrl(dep.sourceUrl);
     if (parsedUrl?.hostname) {
       let massagedUrl;
       if (parsedUrl.hostname.includes('gitlab')) {

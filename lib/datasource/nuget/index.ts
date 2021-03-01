@@ -1,5 +1,5 @@
-import urlApi from 'url';
 import { logger } from '../../logger';
+import { parseUrl } from '../../util/url';
 import * as nugetVersioning from '../../versioning/nuget';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import * as v2 from './v2';
@@ -15,7 +15,7 @@ function parseRegistryUrl(
   registryUrl: string
 ): { feedUrl: string; protocolVersion: number } {
   try {
-    const parsedUrl = urlApi.parse(registryUrl);
+    const parsedUrl = parseUrl(registryUrl);
     let protocolVersion = 2;
     const protocolVersionRegExp = /#protocolVersion=(2|3)/;
     const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
@@ -25,7 +25,7 @@ function parseRegistryUrl(
     } else if (parsedUrl.pathname.endsWith('.json')) {
       protocolVersion = 3;
     }
-    return { feedUrl: urlApi.format(parsedUrl), protocolVersion };
+    return { feedUrl: parsedUrl.toString(), protocolVersion };
   } catch (err) {
     logger.debug({ err }, `nuget registry failure: can't parse ${registryUrl}`);
     return { feedUrl: registryUrl, protocolVersion: null };

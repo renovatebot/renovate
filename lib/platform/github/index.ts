@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import {
@@ -23,7 +22,7 @@ import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../util/url';
 import {
   AggregatedVulnerabilities,
   BranchStatusConfig,
@@ -185,7 +184,7 @@ export async function initRepo({
     hostType: PLATFORM_TYPE_GITHUB,
     url: defaults.endpoint,
   });
-  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
+  config.isGhe = parseUrl(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
@@ -398,24 +397,24 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = URL.parse(defaults.endpoint);
+  const parsedEndpoint = parseUrl(defaults.endpoint);
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = config.forkToken;
+    parsedEndpoint.username = config.forkToken;
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
-    parsedEndpoint.auth = opts.token;
+    parsedEndpoint.username = opts.token;
   }
   parsedEndpoint.host = parsedEndpoint.host.replace(
     'api.github.com',
     'github.com'
   );
   parsedEndpoint.pathname = config.repository + '.git';
-  const url = URL.format(parsedEndpoint);
+  const url = parsedEndpoint.toString();
   await git.initRepo({
     ...config,
     url,

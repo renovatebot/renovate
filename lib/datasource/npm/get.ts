@@ -1,5 +1,4 @@
 import { OutgoingHttpHeaders } from 'http';
-import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import registryAuthToken from 'registry-auth-token';
@@ -10,6 +9,7 @@ import * as packageCache from '../../util/cache/package';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
+import { parseUrl, resolveBaseUrl } from '../../util/url';
 import { Release, ReleaseResult } from '../common';
 import { id } from './common';
 import { getNpmrc } from './npmrc';
@@ -87,7 +87,7 @@ export async function getDependency(
   } catch (err) {
     regUrl = 'https://registry.npmjs.org';
   }
-  const pkgUrl = url.resolve(
+  const pkgUrl = resolveBaseUrl(
     regUrl,
     encodeURIComponent(packageName).replace(/^%40/, '@')
   );
@@ -139,7 +139,7 @@ export async function getDependency(
     }
   }
 
-  const uri = url.parse(pkgUrl);
+  const uri = parseUrl(pkgUrl);
 
   if (uri.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
     // Delete the authorization header for non-scoped public packages to improve http caching

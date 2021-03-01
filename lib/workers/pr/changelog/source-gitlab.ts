@@ -1,9 +1,9 @@
-import URL from 'url';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogRelease, ChangeLogResult } from './common';
@@ -39,7 +39,7 @@ export async function getChangeLogJSON({
 }: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
-  const { protocol, host, pathname } = URL.parse(sourceUrl);
+  const { protocol, host, pathname } = parseUrl(sourceUrl);
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = protocol.concat('//', host, '/');
   const apiBaseUrl = baseUrl.concat('api/v4/');

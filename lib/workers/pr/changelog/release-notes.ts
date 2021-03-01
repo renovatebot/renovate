@@ -1,4 +1,3 @@
-import * as URL from 'url';
 import is from '@sindresorhus/is';
 import { linkify } from 'linkify-markdown';
 import { DateTime } from 'luxon';
@@ -7,6 +6,7 @@ import MarkdownIt from 'markdown-it';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
+import { parseUrl } from '../../../util/url';
 import { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './common';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -152,7 +152,7 @@ function sectionize(text: string, level: number): string[] {
 
 function isUrl(url: string): boolean {
   try {
-    return !!URL.parse(url).hostname;
+    return !!parseUrl(url).hostname;
   } catch (err) {
     // istanbul ignore next
     logger.debug({ err }, `Error parsing ${url} in URL.parse`);

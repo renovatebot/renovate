@@ -1,9 +1,8 @@
-// SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
-import url from 'url';
 import { HTTPError, Response } from 'got';
 import { PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
+import { parseUrl } from '../../util/url';
 import { BbsPr, BbsRestPr } from './types';
 
 const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
@@ -32,12 +31,9 @@ export function prInfo(pr: BbsRestPr): BbsPr {
 }
 
 const addMaxLength = (inputUrl: string, limit = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
-  const maxedUrl = url.format({
-    ...parsedUrl,
-    query: { ...parsedUrl.query, limit },
-  });
-  return maxedUrl;
+  const url = parseUrl(inputUrl);
+  url.searchParams.set('limit', `${limit}`);
+  return url.toString();
 };
 
 function callApi<T>(
@@ -93,14 +89,9 @@ export async function accumulateValues<T = any>(
       break;
     }
 
-    const { search, ...parsedUrl } = url.parse(nextUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
-    nextUrl = url.format({
-      ...parsedUrl,
-      query: {
-        ...parsedUrl.query,
-        start: body.nextPageStart,
-      },
-    });
+    const url = parseUrl(nextUrl);
+    url.searchParams.set('start', body.nextPageStart);
+    nextUrl = url.toString();
   }
 
   return accumulator;

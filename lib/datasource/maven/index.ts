@@ -1,9 +1,9 @@
-import url from 'url';
 import fs from 'fs-extra';
 import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
+import { parseUrl } from '../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
@@ -33,12 +33,12 @@ function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
   path: string
-): url.URL | null {
-  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+): URL | null {
+  return parseUrl(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 async function downloadMavenXml(
-  pkgUrl: url.URL | null
+  pkgUrl: URL | null
 ): Promise<XmlDocument | null> {
   /* istanbul ignore if */
   if (!pkgUrl) {

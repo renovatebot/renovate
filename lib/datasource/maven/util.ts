@@ -1,8 +1,8 @@
-import url from 'url';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
+import { parseUrl } from '../../util/url';
 
 import { MAVEN_REPO, id } from './common';
 
@@ -15,9 +15,9 @@ function httpByHostType(hostType: string): Http {
   return http[hostType];
 }
 
-const getHost = (x: string): string => new url.URL(x).host;
+const getHost = (x: string): string => parseUrl(x).host;
 
-function isMavenCentral(pkgUrl: url.URL | string): boolean {
+function isMavenCentral(pkgUrl: URL | string): boolean {
   const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
   return getHost(MAVEN_REPO) === host;
 }
@@ -55,7 +55,7 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 }
 
 export async function downloadHttpProtocol(
-  pkgUrl: url.URL | string,
+  pkgUrl: URL | string,
   hostType = id
 ): Promise<string | null> {
   let raw: { body: string };
@@ -97,13 +97,13 @@ export async function downloadHttpProtocol(
 }
 
 export async function isHttpResourceExists(
-  pkgUrl: url.URL | string,
+  pkgUrl: URL | string,
   hostType = id
 ): Promise<boolean | string | null> {
   try {
     const httpClient = httpByHostType(hostType);
     const res = await httpClient.head(pkgUrl.toString());
-    const pkgUrlHost = url.parse(pkgUrl.toString()).host;
+    const pkgUrlHost = parseUrl(pkgUrl.toString()).host;
     if (pkgUrlHost === 'repo.maven.apache.org') {
       const timestamp = res?.headers?.['last-modified'] as string;
       return timestamp || true;

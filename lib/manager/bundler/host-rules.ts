@@ -1,6 +1,6 @@
-import URL from 'url';
 import { HostRule } from '../../types';
 import { findAll } from '../../util/host-rules';
+import { parseUrl } from '../../util/url';
 
 function isAuthenticatable(rule: HostRule): boolean {
   return (
@@ -25,7 +25,7 @@ export function getDomain(hostRule: HostRule): string {
     return hostRule.domainName;
   }
   if (hostRule.baseUrl) {
-    return URL.parse(hostRule.baseUrl).host;
+    return parseUrl(hostRule.baseUrl).host;
   }
 
   return null;

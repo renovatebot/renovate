@@ -1,9 +1,8 @@
-import url from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../logger';
 import { parse } from '../../util/html';
 import { Http } from '../../util/http';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, resolveBaseUrl } from '../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
@@ -42,7 +41,7 @@ async function getDependency(
   packageName: string,
   hostUrl: string
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
+  const lookupUrl = resolveBaseUrl(hostUrl, `${packageName}/json`);
   const dependency: ReleaseResult = { releases: null };
   logger.trace({ lookupUrl }, 'Pypi api got lookup');
   const rep = await http.getJson<PypiJSON>(lookupUrl);
@@ -175,7 +174,7 @@ async function getSimpleDependency(
   packageName: string,
   hostUrl: string
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, ensureTrailingSlash(packageName));
+  const lookupUrl = resolveBaseUrl(hostUrl, ensureTrailingSlash(packageName));
   const dependency: ReleaseResult = { releases: null };
   const response = await http.get(lookupUrl);
   const dep = response?.body;

@@ -1,5 +1,4 @@
 import { OutgoingHttpHeaders } from 'http';
-import URL from 'url';
 import { ECR } from '@aws-sdk/client-ecr';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
@@ -11,6 +10,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import { resolveBaseUrl } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { Image, ImageList, MediaType } from './types';
@@ -452,7 +452,7 @@ async function getTags(
       const res = await http.getJson<{ tags: string[] }>(url, { headers });
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link as string);
-      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      url = linkHeader?.next ? resolveBaseUrl(url, linkHeader.next.url) : null;
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 30;

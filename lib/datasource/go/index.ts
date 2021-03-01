@@ -1,7 +1,7 @@
-import URL from 'url';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
+import { parseUrl } from '../../util/url';
 import * as bitbucket from '../bitbucket-tags';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as github from '../github-tags';
@@ -89,7 +89,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       logger.debug({ goModule, goImportURL }, 'Go lookup import url');
 
       // get server base url from import url
-      const parsedUrl = URL.parse(goImportURL);
+      const parsedUrl = parseUrl(goImportURL);
 
       // split the go module from the URL: host/go/module -> go/module
       const split = goModule.split('/');

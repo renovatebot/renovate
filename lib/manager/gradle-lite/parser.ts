@@ -1,7 +1,7 @@
-import * as url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
+import { parseUrl } from '../../util/url';
 import { PackageDependency } from '../common';
 import {
   GOOGLE_REPO,
@@ -197,7 +197,7 @@ function processCustomRegistryUrl({
   const registryUrl = tokenMap.registryUrl?.value;
   try {
     if (registryUrl) {
-      const { host, protocol } = url.parse(registryUrl);
+      const { host, protocol } = parseUrl(registryUrl);
       if (host && protocol) {
         return { urls: [registryUrl] };
       }

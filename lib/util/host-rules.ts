@@ -1,8 +1,8 @@
-import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
 import { HostRule } from '../types';
 import * as sanitize from './sanitize';
+import { parseUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
@@ -66,7 +66,7 @@ function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
 }
 
 function matchesDomainName(rule: HostRule, search: HostRuleSearch): boolean {
-  const hostname = search.url && URL.parse(search.url).hostname;
+  const hostname = search.url && parseUrl(search.url).hostname;
   return (
     search.url &&
     rule.domainName &&
@@ -79,7 +79,7 @@ function matchesHostName(rule: HostRule, search: HostRuleSearch): boolean {
   return (
     search.url &&
     rule.hostName &&
-    URL.parse(search.url).hostname === rule.hostName
+    parseUrl(search.url).hostname === rule.hostName
   );
 }
 
@@ -151,7 +151,7 @@ export function hosts({ hostType }: { hostType: string }): string[] {
         return rule.hostName;
       }
       if (rule.baseUrl) {
-        return URL.parse(rule.baseUrl).hostname;
+        return parseUrl(rule.baseUrl).hostname;
       }
       return null;
     })

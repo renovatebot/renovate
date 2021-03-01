@@ -32,3 +32,7 @@ export function getQueryString(params: Record<string, any>): string {
   const res = usp.toString();
   return res;
 }
+
+export function parseUrl(url: string, base?: string | URL): URL {
+  return new URL(url, base);
+}

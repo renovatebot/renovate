@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
@@ -9,6 +8,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { sanitize } from '../../util/sanitize';
+import { parseUrl } from '../../util/url';
 import {
   BranchStatusConfig,
   CreatePRConfig,
@@ -155,7 +155,7 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = URL.parse(defaults.endpoint);
+  const { hostname } = parseUrl(defaults.endpoint);
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`

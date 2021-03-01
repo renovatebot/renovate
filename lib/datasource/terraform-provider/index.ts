@@ -1,7 +1,7 @@
-import URL from 'url';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
+import { parseUrl } from '../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
@@ -123,7 +123,7 @@ export async function getReleases({
 
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
   let dep: ReleaseResult = null;
-  const registryHost = URL.parse(registryUrl).host;
+  const registryHost = parseUrl(registryUrl).host;
   if (registryHost === 'releases.hashicorp.com') {
     dep = await queryReleaseBackend(lookupName, registryUrl, repository);
   } else {

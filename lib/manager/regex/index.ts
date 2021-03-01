@@ -1,4 +1,3 @@
-import { URL } from 'url';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';

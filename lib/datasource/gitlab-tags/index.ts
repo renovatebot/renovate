@@ -1,6 +1,6 @@
-import URL from 'url';
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
+import { resolveBaseUrl } from '../../util/url';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 const gitlabApi = new GitlabHttp();
@@ -38,7 +38,7 @@ export async function getReleases({
   const urlEncodedRepo = encodeURIComponent(repo);
 
   // tag
-  const url = URL.resolve(
+  const url = resolveBaseUrl(
     depHost,
     `/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`
   );
@@ -50,7 +50,7 @@ export async function getReleases({
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: URL.resolve(depHost, repo),
+    sourceUrl: resolveBaseUrl(depHost, repo),
     releases: null,
   };
   dependency.releases = gitlabTags.map(({ name, commit }) => ({
