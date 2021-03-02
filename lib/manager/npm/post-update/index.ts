@@ -427,6 +427,13 @@ export async function getAdditionalFiles(
     logger.debug('Skipping lock file generation');
     return { artifactErrors, updatedArtifacts };
   }
+  if (
+    !config.updatedPackageFiles?.length &&
+    config.upgrades?.every((upgrade) => upgrade.isRemediation)
+  ) {
+    logger.debug('Skipping lock file generation for remediations');
+    return { artifactErrors, updatedArtifacts };
+  }
   logger.debug('Getting updated lock files');
   if (
     config.updateType === 'lockFileMaintenance' &&
