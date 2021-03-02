@@ -1,8 +1,8 @@
 import { safeLoad } from 'js-yaml';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency, PackageFile } from '../types';
 
 interface Container {
   image: string;

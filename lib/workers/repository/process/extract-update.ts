@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
-import { RenovateConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { PackageFile } from '../../../manager/common';
+import type { PackageFile } from '../../../manager/types';
 import { getCache } from '../../../util/cache/repository';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
 import { raiseDeprecationWarnings } from './deprecated';

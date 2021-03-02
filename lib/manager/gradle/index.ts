@@ -8,12 +8,12 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import * as gradleVersioning from '../../versioning/gradle';
-import {
+import type {
   ExtractConfig,
   PackageFile,
   UpdateDependencyConfig,
   Upgrade,
-} from '../common';
+} from '../types';
 import {
   GradleDependency,
   collectVersionVariables,

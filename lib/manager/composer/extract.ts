@@ -5,7 +5,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { api as semverComposer } from '../../versioning/composer';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 import type { ComposerConfig, ComposerLock, Repo } from './types';
 import { extractContraints } from './utils';
 

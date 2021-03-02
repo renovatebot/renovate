@@ -1,12 +1,12 @@
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
-import { BranchUpgradeConfig } from '../../common';
-import { ChangeLogResult } from './common';
+import type { BranchUpgradeConfig } from '../../types';
 import { getInRangeReleases } from './releases';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
+import type { ChangeLogResult } from './types';
 
-export * from './common';
+export * from './types';
 
 export async function getChangeLogJSON(
   args: BranchUpgradeConfig

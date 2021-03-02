@@ -5,7 +5,7 @@ import { Stream } from 'stream';
 import * as util from 'util';
 import chalk from 'chalk';
 import stringify from 'json-stringify-pretty-compact';
-import { BunyanRecord } from './utils';
+import type { BunyanRecord } from './utils';
 
 const bunyanFields = [
   'name',

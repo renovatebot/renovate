@@ -1,4 +1,4 @@
-import { Preset } from '../types';
+import type { Preset } from '../types';
 import * as monorepos from './monorepo';
 
 const staticGroups = {

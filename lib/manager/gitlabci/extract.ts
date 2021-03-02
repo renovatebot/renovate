@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency, PackageFile } from '../types';
 
 function skipCommentLines(
   lines: string[],

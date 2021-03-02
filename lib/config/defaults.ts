@@ -1,5 +1,5 @@
-import { GlobalConfig } from './types';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
+import type { GlobalConfig, RenovateOptions } from './types';
 
 const defaultValues = {
   boolean: true,

@@ -1,6 +1,6 @@
-import { RenovateConfig } from '../../../../config';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { PackageFile } from '../../../../manager/common';
+import type { PackageFile } from '../../../../manager/types';
 import { emojify } from '../../../../util/emoji';
 
 export function getWarnings(config: RenovateConfig): string {

@@ -12,7 +12,7 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
 import * as dockerVersioning from '../../versioning/docker';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { Image, ImageList, MediaType } from './types';
 
 // TODO: add got typings when available

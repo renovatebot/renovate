@@ -32,9 +32,9 @@ import {
 } from '../../util/git';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
-import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
+import { BranchConfig, PrResult, ProcessBranchResult } from '../types';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';

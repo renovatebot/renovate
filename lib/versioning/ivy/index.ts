@@ -1,4 +1,3 @@
-import { NewValueConfig, VersioningApi } from '../types';
 import maven from '../maven';
 import {
   TYPE_QUALIFIER,
@@ -6,6 +5,7 @@ import {
   isSubversion,
   tokenize,
 } from '../maven/compare';
+import type { NewValueConfig, VersioningApi } from '../types';
 import {
   LATEST_REGEX,
   REV_TYPE_LATEST,

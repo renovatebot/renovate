@@ -6,7 +6,7 @@ import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
-import { BranchConfig, BranchUpgradeConfig } from '../../common';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { formatCommitMessagePrefix } from '../util/commit-message';
 
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {

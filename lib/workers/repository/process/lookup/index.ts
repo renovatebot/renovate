@@ -1,4 +1,4 @@
-import { ValidationMessage } from '../../../../config';
+import type { ValidationMessage } from '../../../../config/types';
 import {
   Release,
   getDefaultVersioning,
@@ -10,16 +10,16 @@ import {
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
-import { LookupUpdate } from '../../../../manager/common';
+import type { LookupUpdate } from '../../../../manager/types';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
-import { LookupUpdateConfig, UpdateResult } from './common';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { getRollbackUpdate } from './rollback';
+import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
 export async function lookupUpdates(

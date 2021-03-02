@@ -11,8 +11,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { find } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { PackageDependency, PackageFile } from '../common';
-
+import type { PackageDependency, PackageFile } from '../types';
 import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,

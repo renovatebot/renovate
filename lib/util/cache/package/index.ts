@@ -1,6 +1,6 @@
-import { GlobalConfig } from '../../../config/types';
+import type { GlobalConfig } from '../../../config/types';
 import * as memCache from '../memory';
-import { PackageCache } from './common';
+import type { PackageCache } from './common';
 import * as fileCache from './file';
 import * as redisCache from './redis';
 

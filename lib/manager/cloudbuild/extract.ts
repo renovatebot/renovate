@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];

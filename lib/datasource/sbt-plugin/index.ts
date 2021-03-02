@@ -1,7 +1,6 @@
 import { logger } from '../../logger';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
-import { GetReleasesConfig, ReleaseResult } from '../common';
 import { downloadHttpProtocol } from '../maven/util';
 import {
   getArtifactSubdirs,
@@ -9,6 +8,7 @@ import {
   getPackageReleases,
   getUrls,
 } from '../sbt-package';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { SBT_PLUGINS_REPO, parseIndexDir } from './util';
 
 export const id = 'sbt-plugin';

@@ -1,7 +1,10 @@
-import { RenovateConfig, ValidationMessage } from '../../../../config/types';
-import { Release } from '../../../../datasource';
-import { LookupUpdate, RangeConfig } from '../../../../manager/common';
-import { SkipReason } from '../../../../types';
+import type {
+  RenovateConfig,
+  ValidationMessage,
+} from '../../../../config/types';
+import type { Release } from '../../../../datasource/types';
+import type { LookupUpdate, RangeConfig } from '../../../../manager/types';
+import type { SkipReason } from '../../../../types';
 
 export interface FilterConfig {
   allowedVersions?: string;

@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { version } from '../../package.json';
-import { GlobalConfig } from './types';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
+import type { GlobalConfig, RenovateOptions } from './types';
 
 export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {

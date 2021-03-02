@@ -9,7 +9,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 interface UrlParsedResult {
   datasource: string;

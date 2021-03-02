@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import * as upath from 'upath';
-import { ExtractConfig } from '../common';
+import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
 
 describe('lib/manager/nuget/extract', () => {

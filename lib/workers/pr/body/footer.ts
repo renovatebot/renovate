@@ -1,5 +1,5 @@
 import * as template from '../../../util/template';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 
 /* c8 ignore next */
 export function getPrFooter(config: BranchConfig): string {

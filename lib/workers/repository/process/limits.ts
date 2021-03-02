@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon';
-import { RenovateConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { Pr, platform } from '../../../platform';
 import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 
 export async function getPrHourlyRemaining(
   config: RenovateConfig

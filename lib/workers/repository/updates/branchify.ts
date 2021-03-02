@@ -1,7 +1,7 @@
 import type { Merge } from 'type-fest';
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
-import { BranchConfig, BranchUpgradeConfig } from '../../common';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { embedChangelogs } from '../changelog';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';

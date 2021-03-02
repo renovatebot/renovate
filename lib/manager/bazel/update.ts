@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
-import { UpdateDependencyConfig } from '../common';
+import type { UpdateDependencyConfig } from '../types';
 
 const http = new Http('bazel');
 

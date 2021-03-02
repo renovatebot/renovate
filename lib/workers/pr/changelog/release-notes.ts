@@ -3,15 +3,14 @@ import is from '@sindresorhus/is';
 import { linkify } from 'linkify-markdown';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
-
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
-import { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './common';
 import * as github from './github';
 import * as gitlab from './gitlab';
+import type { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './types';
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);

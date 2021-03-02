@@ -1,10 +1,5 @@
-import { Range, SemVer } from 'semver';
-import { RangeStrategy as _RangeStrategy } from '../types';
-
-/**
- * @deprecated import from `lib/types`
- */
-export type RangeStrategy = _RangeStrategy;
+import type { Range, SemVer } from 'semver';
+import type { RangeStrategy } from '../types';
 
 export interface NewValueConfig {
   currentValue: string;
@@ -41,10 +36,4 @@ export interface VersioningApi {
 
 export interface VersioningApiConstructor {
   new (config?: string): VersioningApi;
-}
-
-export function isVersioningApiConstructor(
-  obj: VersioningApi | VersioningApiConstructor
-): obj is VersioningApiConstructor {
-  return typeof obj === 'function';
 }

@@ -1,7 +1,7 @@
 import * as datasourceHelm from '../../datasource/helm';
 import { SkipReason } from '../../types';
-import { PackageDependency } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency } from '../types';
 import {
   ExtractionResult,
   ResourceManagerData,

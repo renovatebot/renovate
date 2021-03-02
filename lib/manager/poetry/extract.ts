@@ -10,8 +10,8 @@ import {
 } from '../../util/fs';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
-import { PackageDependency, PackageFile } from '../common';
-import {
+import type { PackageDependency, PackageFile } from '../types';
+import type {
   PoetryFile,
   PoetryLock,
   PoetryLockSection,

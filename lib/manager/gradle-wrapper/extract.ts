@@ -1,7 +1,7 @@
 import * as datasourceGradleVersion from '../../datasource/gradle-version';
 import { logger } from '../../logger';
 import * as gradleVersioning from '../../versioning/gradle';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 const DISTRIBUTION_URL_REGEX = /^(?<assignment>distributionUrl\s*=\s*)\S*-(?<version>(\d|\.)+)-(?<type>bin|all)\.zip\s*$/;
 

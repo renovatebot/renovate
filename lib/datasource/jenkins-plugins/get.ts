@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { clone } from '../../util/clone';
 import { Http } from '../../util/http';
-import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { id } from './common';
 
 const http = new Http(id);

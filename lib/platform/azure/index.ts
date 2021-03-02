@@ -11,12 +11,12 @@ import delay from 'delay';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
-import {
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -30,12 +30,11 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
-import { AzurePr } from './types';
+import type { AzurePr } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -668,21 +667,25 @@ export function massageMarkdown(input: string): string {
     .replace('</details>', '');
 }
 
-export /* c8 ignore next */ function findIssue(): Promise<Issue | null> {
+/* istanbul ignore next */
+export function findIssue(): Promise<Issue | null> {
   logger.warn(`findIssue() is not implemented`);
   return null;
 }
 
-export /* c8 ignore next */ function ensureIssue(): Promise<EnsureIssueResult | null> {
+/* istanbul ignore next */
+export function ensureIssue(): Promise<EnsureIssueResult | null> {
   logger.warn(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
-export /* c8 ignore next */ function ensureIssueClosing(): Promise<void> {
+/* istanbul ignore next */
+export function ensureIssueClosing(): Promise<void> {
   return Promise.resolve();
 }
 
-export /* c8 ignore next */ function getIssueList(): Promise<Issue[]> {
+/* istanbul ignore next */
+export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return Promise.resolve([]);
@@ -779,7 +782,7 @@ export async function addReviewers(
   );
 }
 
-export /* c8 ignore next */ async function deleteLabel(
+export async function deleteLabel(
   prNumber: number,
   label: string
 ): Promise<void> {

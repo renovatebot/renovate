@@ -1,12 +1,12 @@
-import { RenovateConfig } from '../../../../config';
 import { getAdminConfig } from '../../../../config/admin';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { PackageFile } from '../../../../manager/common';
+import type { PackageFile } from '../../../../manager/types';
 import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch, isBranchModified } from '../../../../util/git';
-import { BranchConfig } from '../../../common';
 import { addAssigneesReviewers, getPlatformPrOptions } from '../../../pr';
+import type { BranchConfig } from '../../../types';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';

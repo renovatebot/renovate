@@ -297,7 +297,10 @@ export async function syncGit(): Promise<void> {
         logger.debug(`Cloning git submodule at ${submodule}`);
         await git.submoduleUpdate(['--init', submodule]);
       } catch (err) {
-        logger.warn(`Unable to initialise git submodule at ${submodule}`);
+        logger.warn(
+          { err },
+          `Unable to initialise git submodule at ${submodule}`
+        );
       }
     }
   }

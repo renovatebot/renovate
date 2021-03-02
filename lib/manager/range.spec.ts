@@ -1,4 +1,4 @@
-import { RangeConfig } from './common';
+import type { RangeConfig } from './types';
 import { getRangeStrategy } from '.';
 
 describe('getRangeStrategy', () => {

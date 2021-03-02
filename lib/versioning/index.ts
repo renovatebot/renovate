@@ -1,10 +1,7 @@
 import { logger } from '../logger';
-import versionings from './api.generated';
-import {
-  VersioningApi,
-  VersioningApiConstructor,
-  isVersioningApiConstructor,
-} from './types';
+import versionings from './api';
+import { isVersioningApiConstructor } from './common';
+import type { VersioningApi, VersioningApiConstructor } from './types';
 
 export * from './types';
 

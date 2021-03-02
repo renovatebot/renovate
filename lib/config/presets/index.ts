@@ -16,11 +16,8 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
-import type { PresetApi, ParsedPreset as _ParsedPreset } from './types';
+import type { ParsedPreset, PresetApi } from './types';
 import { PRESET_DEP_NOT_FOUND } from './util';
-
-// TODO: remove me when babel is removed
-export type ParsedPreset = _ParsedPreset;
 
 const presetSources: Record<string, PresetApi> = {
   github,

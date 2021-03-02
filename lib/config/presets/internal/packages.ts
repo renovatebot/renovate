@@ -1,4 +1,4 @@
-import { Preset } from '../types';
+import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   angularJs: {

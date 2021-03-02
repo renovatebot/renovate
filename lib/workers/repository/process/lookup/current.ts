@@ -1,6 +1,6 @@
 import { logger } from '../../../../logger';
 import * as allVersioning from '../../../../versioning';
-import { LookupUpdateConfig } from './common';
+import type { LookupUpdateConfig } from './types';
 
 export function getCurrentVersion(
   config: LookupUpdateConfig,

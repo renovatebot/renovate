@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
 import { SkipReason } from '../../types';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import {
   ExtractionResult,
   TerraformDependencyTypes,

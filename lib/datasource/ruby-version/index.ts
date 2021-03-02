@@ -3,7 +3,7 @@ import * as packageCache from '../../util/cache/package';
 import { parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'ruby-version';
 export const defaultVersioning = rubyVersioningId;

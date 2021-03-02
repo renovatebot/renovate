@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
 import {
   TerraformManagerData,

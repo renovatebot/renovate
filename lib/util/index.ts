@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../config/types';
+import type { RenovateConfig } from '../config/types';
 import { setExecConfig } from './exec';
 import { setFsConfig } from './fs';
 

@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../types';
+import type { RenovateConfig } from '../types';
 
 // TODO: Proper typing
 export type Preset = RenovateConfig & Record<string, unknown>;

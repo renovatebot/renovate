@@ -14,16 +14,16 @@ import {
 } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
-import {
+import type {
   ExtractConfig,
   NpmLockFiles,
   PackageDependency,
   PackageFile,
-} from '../../common';
-import { NpmPackage, NpmPackageDependency } from './common';
+} from '../../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
+import type { NpmPackage, NpmPackageDependency } from './types';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {

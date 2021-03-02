@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
   packageFileName,

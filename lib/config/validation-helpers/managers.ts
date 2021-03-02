@@ -1,5 +1,5 @@
 import { getManagerList } from '../../manager';
-import { PackageRule, ValidationMessage } from '../types';
+import type { PackageRule, ValidationMessage } from '../types';
 
 export interface CheckManagerArgs {
   resolvedRule: PackageRule;

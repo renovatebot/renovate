@@ -8,11 +8,11 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import {
+import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../common';
+} from '../types';
 
 function getPythonConstraint(
   existingLockFileContent: string,

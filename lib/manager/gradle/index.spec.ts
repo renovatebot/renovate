@@ -14,7 +14,7 @@ import { BinarySource } from '../../util/exec/common';
 import * as _docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _fs from '../../util/fs';
-import { ExtractConfig } from '../common';
+import type { ExtractConfig } from '../types';
 import { GRADLE_DEPENDENCY_REPORT_FILENAME } from './gradle-updates-report';
 import * as _manager from '.';
 

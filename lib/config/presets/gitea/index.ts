@@ -4,7 +4,7 @@ import {
   getRepoContents,
 } from '../../../platform/gitea/gitea-helper';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { Preset, PresetConfig } from '../types';
+import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
 
 export const Endpoint = 'https://gitea.com/api/v1/';

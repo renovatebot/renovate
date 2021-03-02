@@ -1,5 +1,5 @@
-import { RangeStrategy } from '../../versioning';
-import { RangeConfig } from '../common';
+import type { RangeStrategy } from '../../types';
+import type { RangeConfig } from '../types';
 
 /*
  * The getRangeStrategy() function is optional and can be removed if not applicable.
