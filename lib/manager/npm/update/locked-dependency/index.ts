@@ -178,10 +178,12 @@ export async function updateLockedDependency(
       }
       newPackageJsonContent =
         parentUpdateResult[packageFile] || newPackageJsonContent;
-      newLockFileContent = parentUpdateResult[lockFile];
+      newLockFileContent = parentUpdateResult[lockFile] || newLockFileContent;
     }
     const files = {};
-    files[lockFile] = newLockFileContent;
+    if (newLockFileContent) {
+      files[lockFile] = newLockFileContent;
+    }
     if (newPackageJsonContent) {
       files[packageFile] = newPackageJsonContent;
     }
