@@ -18,7 +18,7 @@ const config: InitialOptionsTsJest = {
     : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
-      branches: 94.19,
+      branches: 94.15,
       functions: 100,
       lines: 100,
       statements: 100,
@@ -32,6 +32,7 @@ const config: InitialOptionsTsJest = {
   globals: {
     'ts-jest': {
       diagnostics: false,
+      isolatedModules: true,
     },
   },
 };
