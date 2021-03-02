@@ -78,28 +78,6 @@ function updatePrVersion(pr: number, version: number): number {
   return res;
 }
 
-export function initPlatform({
-  endpoint,
-  username,
-  password,
-}: PlatformParams): Promise<PlatformResult> {
-  if (!endpoint) {
-    throw new Error('Init: You must configure a Bitbucket Server endpoint');
-  }
-  if (!(username && password)) {
-    throw new Error(
-      'Init: You must configure a Bitbucket Server username/password'
-    );
-  }
-  // TODO: Add a connection check that endpoint/username/password combination are valid
-  defaults.endpoint = ensureTrailingSlash(endpoint);
-  setBaseUrl(defaults.endpoint);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-  };
-  return Promise.resolve(platformConfig);
-}
-
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Server repositories');
@@ -1002,4 +980,52 @@ export function massageMarkdown(input: string): string {
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   logger.debug(`getVulnerabilityAlerts()`);
   return Promise.resolve([]);
+}
+
+export async function invalidatePr(branchName: string): Promise<void> {
+  const pr: Pr = await getBranchPr(branchName);
+  const prNo = pr?.number;
+  if (prNo) {
+    logger.debug(`Invalidating PR #${prNo}`);
+    const prUpdate = {
+      number: prNo,
+      prTitle: `${pr.title} - autoclosed`,
+      state: PrState.Closed as PrState.Closed,
+      bitbucketInvalidReviewers: undefined,
+    };
+    await updatePr(prUpdate);
+
+    // Even though the PR in the repo has been removed, we need to manually
+    // update the local PR cache in order to create a new PR for this branch
+    const prCacheIndexToDelete = config.prList.findIndex(
+      (prToCheck) => prToCheck.number === prNo
+    );
+    config.prList.splice(prCacheIndexToDelete, 1);
+  }
+}
+
+export function initPlatform({
+  endpoint,
+  username,
+  password,
+  gitDeleteBeforePush,
+}: PlatformParams): Promise<PlatformResult> {
+  if (!endpoint) {
+    throw new Error('Init: You must configure a Bitbucket Server endpoint');
+  }
+  if (!(username && password)) {
+    throw new Error(
+      'Init: You must configure a Bitbucket Server username/password'
+    );
+  }
+
+  // TODO: Add a connection check that endpoint/username/password combination are valid
+  defaults.endpoint = ensureTrailingSlash(endpoint);
+  setBaseUrl(defaults.endpoint);
+  const platformConfig: PlatformResult = {
+    endpoint: defaults.endpoint,
+  };
+  git.setInvalidatePr(invalidatePr);
+  git.setGitDeleteBeforePush(gitDeleteBeforePush);
+  return Promise.resolve(platformConfig);
 }

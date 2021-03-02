@@ -181,6 +181,8 @@ export interface RenovateConfig
 
   repoIsOnboarded?: boolean;
 
+  gitDeleteBeforePush?: boolean;
+
   updateType?: UpdateType;
 
   warnings?: ValidationMessage[];

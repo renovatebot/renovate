@@ -448,4 +448,60 @@ describe('platform/git', () => {
       expect(res).toBe('test-extra-config-value');
     });
   });
+
+  describe('pushBranch()', () => {
+    beforeEach(() => {
+      git.setGitDeleteBeforePush(undefined);
+      git.setInvalidatePr(undefined);
+    });
+
+    it('does not call invalidatePr() when gitDeleteBeforePush is falsy', async () => {
+      const invalidatePr = jest
+        .fn()
+        .mockImplementation((branchName: string) => true);
+      git.setInvalidatePr(invalidatePr);
+
+      const file = {
+        name: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [file],
+        message: 'Create something',
+      });
+
+      expect(invalidatePr).not.toHaveBeenCalled();
+    });
+
+    it('calls invalidatePr() when gitDeleteBeforePush is true', async () => {
+      const invalidatePr = jest
+        .fn()
+        .mockImplementation((branchName: string) => true);
+      git.setInvalidatePr(invalidatePr);
+
+      git.setGitDeleteBeforePush(true);
+
+      const file = {
+        name: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      await git.commitFiles({
+        branchName: 'renovate/past_branch',
+        files: [file],
+        message: 'Create something',
+      });
+
+      expect(invalidatePr).toHaveBeenCalled();
+    });
+  });
+
+  describe('getHttpUrl', () => {
+    it('returns expected URL', () => {
+      const url = 'someurl.com';
+      const token = 'abc123';
+      const derivedUrl = git.getHttpUrl('someurl.com', 'abc123');
+      expect(derivedUrl).toBe(`https://${token}@/${url}`);
+    });
+  });
 });

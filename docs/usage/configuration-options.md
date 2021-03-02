@@ -635,6 +635,10 @@ If configured, Renovate bypasses its normal major/minor/patch upgrade logic and 
 Beware that Renovate follows tags strictly.
 For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
 
+## gitDeleteBeforePush
+
+Configure this to `true` to change branch push behavior from using force push to deleting the branch (if it exists) and repushing (Bitbucket-server-only). This is generally reserved for environments where force push has been disabled. This will cause open pull requests for the deleted branch to be removed.
+
 ## gitLabAutomerge
 
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.

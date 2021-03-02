@@ -1011,6 +1011,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'gitDeleteBeforePush',
+    description:
+      'If set to true, branches will be deleted and repushed in order to be updated. Open pull requests will be removed.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'ignoreUnstable',
     description: 'Ignore versions with unstable SemVer.',
     stage: 'package',

@@ -594,6 +594,63 @@ export type CommitFilesConfig = {
   force?: boolean;
 };
 
+let gitDeleteBeforePush: boolean;
+let invalidatePr: (branchName: string) => Promise<void>;
+
+export function setInvalidatePr(
+  method: (branchName: string) => Promise<void>
+): void {
+  invalidatePr = method;
+}
+
+export function setGitDeleteBeforePush(value: boolean): void {
+  gitDeleteBeforePush = value;
+}
+
+async function pushBranch(branchName: string): Promise<void> {
+  if (gitDeleteBeforePush && invalidatePr) {
+    try {
+      await invalidatePr(branchName);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug({ err }, 'PR could not be invalidated or does not exist.');
+    }
+    try {
+      await git.raw('push', 'origin', '--delete', `${branchName}`);
+      logger.debug(`Deleted remote branch ${branchName}.`);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug(
+        { err },
+        `Remote branch ${branchName} could not be deleted or does not exist.`
+      );
+    }
+    try {
+      await git.push('origin', `${branchName}:${branchName}`, {
+        '-u': null,
+        '--no-verify': null,
+      });
+      logger.debug(`Pushed remote branch ${branchName}.`);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug({ err }, `Remote branch ${branchName} could not be pushed.`);
+    }
+  } else {
+    try {
+      await git.push('origin', `${branchName}:${branchName}`, {
+        '--force': null,
+        '-u': null,
+        '--no-verify': null,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug(
+        { err },
+        `Remote branch ${branchName} could not be force pushed.`
+      );
+    }
+  }
+}
 export async function commitFiles({
   branchName,
   files,
@@ -660,11 +717,7 @@ export async function commitFiles({
       );
       return null;
     }
-    await git.push('origin', `${branchName}:${branchName}`, {
-      '--force': null,
-      '-u': null,
-      '--no-verify': null,
-    });
+    await pushBranch(branchName);
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
