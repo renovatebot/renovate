@@ -272,7 +272,6 @@
     "**/lock-verify/@iarna/cli": ">=2"
   },
   "files": [
-    "data",
     "dist"
   ],
   "publishConfig": {
