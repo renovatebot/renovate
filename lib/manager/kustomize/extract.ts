@@ -1,22 +1,11 @@
 import { safeLoad } from 'js-yaml';
-import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import * as dockerVersioning from '../../versioning/docker';
+import { escapeRegExp, regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../common';
-
-interface Image {
-  name: string;
-  newTag: string;
-  newName?: string;
-}
-
-interface Kustomize {
-  kind: string;
-  bases: string[];
-  images: Image[];
-}
+import { getDep } from '../dockerfile/extract';
+import type { Kustomize, KustomizeImage } from './types';
 
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format
@@ -45,25 +34,53 @@ export function extractBase(base: string): PackageDependency | null {
   };
 }
 
-export function extractImage(image: Image): PackageDependency | null {
-  if (image?.name && image.newTag) {
-    const replaceString = image.newTag;
-    let currentValue;
-    let currentDigest;
-    if (replaceString.startsWith('sha256:')) {
-      currentDigest = replaceString;
-      currentValue = undefined;
-    } else {
-      currentValue = replaceString;
+function createRegex(val: string, digest: string): RegExp {
+  const re = `newTag:\\s+['"]?${val}['"]?\\s+digest:\\s+['"]?${digest}['"]?|digest:\\s+['"]?${digest}['"]?\\s+newTag:\\s+['"]?${val}['"]?`;
+  // TODO: remove console.warn(re);
+  return regEx(re, 's');
+}
+
+export function extractImage(
+  image: KustomizeImage,
+  content: string
+): PackageDependency | null {
+  if (image?.name) {
+    const depName = image.newName ?? image.name;
+
+    // reuse docker extraction
+    const res = getDep(depName, false);
+
+    if (res.skipReason) {
+      return res;
     }
-    return {
-      datasource: datasourceDocker.id,
-      versioning: dockerVersioning.id,
-      depName: image.newName ?? image.name,
-      currentValue,
-      currentDigest,
-      replaceString,
-    };
+
+    // if (image.newTag && image.digest) {
+    //   logger.warn({ image }, 'Kustomize: Only one of `newTag` and `digest` are allowed.');
+    //   return { ...res, skipReason: SkipReason.InvalidValue };
+    // }
+
+    // better autoreplace
+    res.replaceString = depName;
+
+    if (image.digest) {
+      res.currentDigest = image.digest;
+      if (image.newTag) {
+        res.currentValue = image.newTag;
+        // we have two yaml properties to update, so we need to help autoreplace
+        const val = escapeRegExp(image.newTag);
+        const digest = escapeRegExp(image.digest);
+        const m = createRegex(val, digest).exec(content);
+        if (m) {
+          res.replaceString = m[0];
+          // TODO: remove console.warn(res.replaceString);
+        }
+      }
+    } else if (image.newTag.startsWith('sha256:')) {
+      res.currentDigest = image.newTag;
+    } else {
+      res.currentValue = image.newTag;
+    }
+    return res;
   }
 
   return null;
@@ -110,9 +127,9 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   // grab the image tags
   for (const image of pkg.images) {
-    const dep = extractImage(image);
+    const dep = extractImage(image, content);
     if (dep) {
-      deps.push(dep);
+      deps.push({ ...dep });
     }
   }
 
