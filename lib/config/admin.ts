@@ -1,4 +1,4 @@
-import { RenovateConfig, RepoAdminConfig } from './common';
+import type { RenovateConfig, RepoAdminConfig } from './types';
 
 let adminConfig: RepoAdminConfig = {};
 

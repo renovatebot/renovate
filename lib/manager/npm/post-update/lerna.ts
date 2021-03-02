@@ -4,7 +4,7 @@ import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import { PackageFile, PostUpdateConfig } from '../../common';
+import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import { optimizeCommand } from './yarn';
 

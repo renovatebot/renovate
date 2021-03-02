@@ -1,14 +1,15 @@
 import URL from 'url';
 import addrs from 'email-addresses';
-import { GlobalConfig } from '../config/common';
+import { GlobalConfig } from '../config/types';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
+import type { HostRule } from '../types';
 import { setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
 import platforms from './api';
-import { Platform } from './common';
+import type { Platform } from './types';
 
-export * from './common';
+export * from './types';
 
 export const getPlatformList = (): string[] => Array.from(platforms.keys());
 export const getPlatforms = (): Map<string, Platform> => platforms;
@@ -110,8 +111,8 @@ export async function initPlatform(
     name: gitAuthorParsed.name,
     email: gitAuthorParsed.address,
   };
-  // TODO: types
-  const platformRule: any = {
+
+  const platformRule: HostRule = {
     hostType: returnConfig.platform,
     hostName: URL.parse(returnConfig.endpoint).hostname,
   };

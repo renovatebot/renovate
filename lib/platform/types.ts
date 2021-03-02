@@ -1,10 +1,4 @@
-import {
-  BranchStatus,
-  PrState,
-  VulnerabilityAlert as _VulnerabilityAlert,
-} from '../types';
-
-export type VulnerabilityAlert = _VulnerabilityAlert;
+import type { BranchStatus, PrState, VulnerabilityAlert } from '../types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;

@@ -11,7 +11,6 @@
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
-    "compile:dts": "tsc -p tsconfig.dts.json",
     "config-validator": "node -r ts-node/register/transpile-only -- lib/config-validator.ts",
     "generate": "run-s generate:*",
     "generate:imports": "node tmp/tools/generate-imports.js",

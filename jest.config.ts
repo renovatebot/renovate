@@ -11,6 +11,7 @@ const config: InitialOptionsTsJest = {
     'lib/**/*.{js,ts}',
     '!lib/**/*.{d,spec}.ts',
     '!lib/**/{__fixtures__,__mocks__,__testutil__}/**/*.{js,ts}',
+    '!lib/**/types.ts',
   ],
   coverageReporters: ci
     ? ['html', 'json', 'text-summary']

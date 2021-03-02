@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import { logger } from '../../logger';
-import { UpdateDependencyConfig } from '../common';
+import type { UpdateDependencyConfig } from '../types';
 
 export function updateDependency({
   fileContent,

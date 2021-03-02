@@ -1,7 +1,7 @@
 import { defaultConfig, partial } from '../../../../test/util';
-import { UpdateType } from '../../../config';
+import type { UpdateType } from '../../../config/types';
 import * as datasourceNpm from '../../../datasource/npm';
-import { BranchUpgradeConfig } from '../../common';
+import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
 beforeEach(() => {

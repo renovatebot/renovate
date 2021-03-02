@@ -3,7 +3,7 @@ import { getName, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 import { ChangeLogError, getChangeLogJSON } from '.';
 
 jest.mock('../../../datasource/npm');

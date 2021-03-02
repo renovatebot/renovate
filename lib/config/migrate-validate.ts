@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { RenovateConfig, ValidationMessage } from './common';
+import { RenovateConfig, ValidationMessage } from './types';
 import * as configMassage from './massage';
 import * as configMigration from './migration';
 import * as configValidation from './validation';

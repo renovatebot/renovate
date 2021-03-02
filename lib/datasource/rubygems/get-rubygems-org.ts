@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
-import { ReleaseResult } from '../common';
+import type { ReleaseResult } from '../types';
 import { id } from './common';
 
 const http = new Http(id);

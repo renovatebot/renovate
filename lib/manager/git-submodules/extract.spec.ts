@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { partial } from '../../../test/util';
-import { PackageFile } from '../common';
+import type { PackageFile } from '../types';
 import extractPackageFile from './extract';
 
 jest.mock('simple-git');

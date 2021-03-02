@@ -3,7 +3,7 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceTerragruntModule from '../../datasource/terraform-module';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import { extractTerragruntProvider } from './providers';
 import { ExtractionResult, TerragruntDependencyTypes } from './util';
 

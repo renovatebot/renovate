@@ -1,7 +1,7 @@
-import { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
-import { RenovateConfig } from '../../config/common';
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import {
   BinarySource,

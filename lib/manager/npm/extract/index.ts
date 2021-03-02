@@ -14,13 +14,13 @@ import {
 } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
-import {
+import type {
   ExtractConfig,
   NpmLockFiles,
   PackageDependency,
   PackageFile,
-} from '../../common';
-import { NpmPackage, NpmPackageDependency } from './common';
+} from '../../types';
+import { NpmPackage, NpmPackageDependency } from './types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
