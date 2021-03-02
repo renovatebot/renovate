@@ -7,6 +7,7 @@ import {
   logger,
   platform,
 } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { Platform, Pr } from '../../platform';
 import { PrState } from '../../types';
@@ -38,7 +39,7 @@ async function dryRun(
   findPrCalls = 0
 ) {
   jest.clearAllMocks();
-  config.dryRun = true;
+  setAdminConfig({ dryRun: true });
   await dependencyDashboard.ensureMasterIssue(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
@@ -50,6 +51,9 @@ async function dryRun(
 
 describe('workers/repository/master-issue', () => {
   describe('ensureMasterIssue()', () => {
+    beforeEach(() => {
+      setAdminConfig();
+    });
     it('do nothing if masterissue is disable', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureMasterIssue(config, branches);
@@ -133,6 +137,29 @@ describe('workers/repository/master-issue', () => {
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
+      config.dependencyDashboardFooter = 'And this is a footer';
+      await dependencyDashboard.ensureMasterIssue(config, branches);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
+      expect(platform.findPr).toHaveBeenCalledTimes(0);
+
+      // same with dry run
+      await dryRun(branches, platform);
+    });
+
+    it('open or update Dependency Dashboard when rules contain approvals', async () => {
+      const branches: BranchConfig[] = [];
+      config.packageRules = [
+        {
+          dependencyDashboardApproval: true,
+        },
+        {},
+      ];
       config.dependencyDashboardFooter = 'And this is a footer';
       await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);

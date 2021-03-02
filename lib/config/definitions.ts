@@ -102,7 +102,7 @@ const options: RenovateOptions[] = [
   {
     name: 'allowedPostUpgradeCommands',
     description:
-      'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run.',
+      'A list of regular expressions that determine which post-upgrade tasks are allowed.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -298,7 +298,7 @@ const options: RenovateOptions[] = [
     name: 'baseDir',
     description:
       'The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.',
-    admin: true,
+    stage: 'global',
     type: 'string',
   },
   {
@@ -768,6 +768,14 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'updateInternalDeps',
+    description:
+      'Whether to update internal dep versions in a monorepo (Lerna or Yarn Workspaces).',
+    type: 'boolean',
+    default: false,
+    stage: 'package',
+  },
+  {
     name: 'packageRules',
     description: 'Rules for matching package names.',
     type: 'array',
@@ -939,6 +947,17 @@ const options: RenovateOptions[] = [
     stage: 'package',
     parent: 'packageRules',
     mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchFiles',
+    description:
+      'List of strings to do an exact match against package files with full path. Applicable inside packageRules only.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'packageRules',
     cli: false,
     env: false,
   },
@@ -1245,6 +1264,12 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'transitiveRemediation',
+    description: 'Enable remediation of transitive dependencies.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'vulnerabilityAlerts',
     description:
       'Config to apply when a PR is necessary due to vulnerability of existing package version.',
@@ -1255,6 +1280,8 @@ const options: RenovateOptions[] = [
       dependencyDashboardApproval: false,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
+      branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
+      prCreation: 'immediate',
     },
     mergeable: true,
     cli: false,
@@ -1333,7 +1360,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
     cli: false,
   },
   {
@@ -1579,9 +1606,6 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       commitMessageTopic: 'Node.js',
-      major: {
-        enabled: false,
-      },
     },
     mergeable: true,
     cli: false,
@@ -1839,7 +1863,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchStrings',
     description:
-      'Regex capture rule to use. Valid only within `regexManagers` object.',
+      'Regex capture rule to use. Valid only within a `regexManagers` object.',
     type: 'array',
     subType: 'string',
     format: 'regex',
@@ -1852,6 +1876,7 @@ const options: RenovateOptions[] = [
     description: 'Strategy how to interpret matchStrings.',
     type: 'string',
     default: 'any',
+    allowedValues: ['any', 'recursive', 'combination'],
     parent: 'regexManagers',
     cli: false,
     env: false,
@@ -1859,7 +1884,7 @@ const options: RenovateOptions[] = [
   {
     name: 'depNameTemplate',
     description:
-      'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional depName for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1868,7 +1893,7 @@ const options: RenovateOptions[] = [
   {
     name: 'lookupNameTemplate',
     description:
-      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within `regexManagers` object.',
+      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1877,7 +1902,7 @@ const options: RenovateOptions[] = [
   {
     name: 'datasourceTemplate',
     description:
-      'Optional datasource for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional datasource for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1886,7 +1911,16 @@ const options: RenovateOptions[] = [
   {
     name: 'versioningTemplate',
     description:
-      'Optional versioning for extracted dependencies. Valid only within `regexManagers` object.',
+      'Optional versioning for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'registryUrlTemplate',
+    description:
+      'Optional registry URL for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1918,10 +1952,6 @@ const options: RenovateOptions[] = [
 
 export function getOptions(): RenovateOptions[] {
   return options;
-}
-
-export function getAdminOptionNames(): string[] {
-  return options.filter((option) => option.admin).map((option) => option.name);
 }
 
 function loadManagerOptions(): void {

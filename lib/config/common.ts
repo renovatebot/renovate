@@ -64,36 +64,37 @@ export interface RenovateSharedConfig {
 }
 
 // Config options used only within the global worker
-export interface GlobalAdminConfig {
+// The below should contain config options where stage=global
+export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
+  baseDir?: string;
   forceCli?: boolean;
   gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
   logLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
+  privateKeyPath?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }
 
-// Config options used within the repository worker, but non-user configurable
+// Config options used within the repository worker, but not user configurable
+// The below should contain config options where admin=true
 export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
+  customEnvVariables?: Record<string, string>;
   dockerImagePrefix?: string;
   dockerUser?: string;
+  dryRun?: boolean;
+  privateKey?: string | Buffer;
   trustLevel?: 'low' | 'high';
 }
 
-export interface RenovateAdminConfig {
-  baseDir?: string;
+export interface LegacyAdminConfig {
   cacheDir?: string;
-  configWarningReuseIssue?: boolean;
-
-  customEnvVariables?: Record<string, string>;
-
-  dryRun?: boolean;
 
   endpoint?: string;
 
@@ -109,9 +110,6 @@ export interface RenovateAdminConfig {
   onboardingConfigFileName?: string;
 
   platform?: string;
-  postUpdateOptions?: string[];
-  privateKey?: string | Buffer;
-  privateKeyPath?: string;
   requireConfig?: boolean;
 }
 
@@ -142,7 +140,7 @@ export interface CustomManager {
 
 // TODO: Proper typings
 export interface RenovateConfig
-  extends RenovateAdminConfig,
+  extends LegacyAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
@@ -165,7 +163,7 @@ export interface RenovateConfig
   isFork?: boolean;
 
   fileList?: string[];
-
+  configWarningReuseIssue?: boolean;
   dependencyDashboard?: boolean;
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
@@ -175,6 +173,7 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
+  postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
@@ -191,7 +190,7 @@ export interface RenovateConfig
   fetchReleaseNotes?: boolean;
 }
 
-export interface GlobalConfig extends RenovateConfig, GlobalAdminConfig {}
+export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
@@ -221,6 +220,7 @@ export interface PackageRule
   extends RenovateSharedConfig,
     UpdateConfig,
     Record<string, any> {
+  matchFiles?: string[];
   matchPaths?: string[];
   matchLanguages?: string[];
   matchBaseBranches?: string[];

@@ -219,6 +219,22 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.PrEdited);
     });
+    it('continues branch if branch edited and but PR found', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('abc123');
+      platform.findPr.mockResolvedValueOnce({ sha: 'abc123' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual(ProcessBranchResult.Error);
+    });
+    it('skips branch if branch edited and and PR found with sha mismatch', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('abc123');
+      platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual(ProcessBranchResult.PrEdited);
+    });
     it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -324,7 +340,8 @@ describe('workers/branch', () => {
       git.branchExists.mockReturnValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      await branchWorker.processBranch({ ...config, dryRun: true });
+      setAdminConfig({ dryRun: true });
+      await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -553,9 +570,10 @@ describe('workers/branch', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
       } as never);
-      expect(
-        await branchWorker.processBranch({ ...config, dryRun: true })
-      ).toEqual(ProcessBranchResult.AlreadyExisted);
+      setAdminConfig({ dryRun: true });
+      expect(await branchWorker.processBranch(config)).toEqual(
+        ProcessBranchResult.AlreadyExisted
+      );
     });
 
     it('branch pr no rebase (dry run)', async () => {
@@ -564,9 +582,10 @@ describe('workers/branch', () => {
         state: PrState.Open,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
-      expect(
-        await branchWorker.processBranch({ ...config, dryRun: true })
-      ).toEqual(ProcessBranchResult.PrEdited);
+      setAdminConfig({ dryRun: true });
+      expect(await branchWorker.processBranch(config)).toEqual(
+        ProcessBranchResult.PrEdited
+      );
     });
 
     it('branch pr no schedule lockfile (dry run)', async () => {
@@ -587,11 +606,10 @@ describe('workers/branch', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-
+      setAdminConfig({ dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
-          dryRun: true,
           updateType: 'lockFileMaintenance',
           reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
@@ -621,10 +639,10 @@ describe('workers/branch', () => {
         pr: {},
       } as never);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      setAdminConfig({ dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
-          dryRun: true,
           artifactErrors: [{}],
         })
       ).toEqual(ProcessBranchResult.Done);

@@ -17,7 +17,6 @@ Array [
 exports[`datasource/helm getReleases returns list of versions for normal response 1`] = `
 Object {
   "homepage": "https://www.getambassador.io/",
-  "name": "ambassador",
   "releases": Array [
     Object {
       "releaseTimestamp": "2019-02-13T00:56:01.476Z",

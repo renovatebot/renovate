@@ -48,27 +48,21 @@ export interface Release {
   version: string;
   newDigest?: string;
   constraints?: Record<string, string[]>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
 }
 
 export interface ReleaseResult {
-  sourceDirectory?: string;
-  latestVersion?: string;
+  deprecationMessage?: string;
+  isPrivate?: boolean;
+  releases: Release[];
+  tags?: Record<string, string>;
+  // URL metadata
   changelogUrl?: string;
   dependencyUrl?: string;
-  deprecationMessage?: string;
-  display?: string;
-  dockerRegistry?: string;
-  dockerRepository?: string;
-  group?: string;
   homepage?: string;
-  name?: string;
-  pkgName?: string;
-  releases: Release[];
   sourceUrl?: string;
-  tags?: Record<string, string>;
-  versions?: any;
-  registryUrl?: string;
-  isPrivate?: boolean;
+  sourceDirectory?: string;
 }
 
 export interface DatasourceApi {

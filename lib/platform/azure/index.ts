@@ -7,6 +7,7 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import delay from 'delay';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -587,10 +588,7 @@ export async function mergePr(
   logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
   const azureApiGit = await azureApi.gitApi();
 
-  const pr = await azureApiGit.getPullRequestById(
-    pullRequestId,
-    config.project
-  );
+  let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
   const mergeMethod =
     config.mergeMethods[pr.targetRefName] ??
@@ -620,11 +618,35 @@ export async function mergePr(
   );
 
   try {
-    await azureApiGit.updatePullRequest(
+    const response = await azureApiGit.updatePullRequest(
       objToUpdate,
       config.repoId,
       pullRequestId
     );
+
+    let retries = 0;
+    let isClosed = response.status === PullRequestStatus.Completed;
+    while (!isClosed && retries < 5) {
+      retries += 1;
+      const sleepMs = retries * 1000;
+      logger.trace(
+        { pullRequestId, status: pr.status, retries },
+        `Updated PR to closed status but change has not taken effect yet. Retrying...`
+      );
+
+      await delay(sleepMs);
+      pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
+      isClosed = pr.status === PullRequestStatus.Completed;
+    }
+
+    if (!isClosed) {
+      logger.warn(
+        { pullRequestId, status: pr.status },
+        `Expected PR to have status ${
+          PullRequestStatus[PullRequestStatus.Completed]
+        }, however it is ${PullRequestStatus[pr.status]}.`
+      );
+    }
     return true;
   } catch (err) {
     logger.debug({ err }, 'Failed to set the PR as completed.');
@@ -632,7 +654,7 @@ export async function mergePr(
   }
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 4000)
     .replace(
@@ -646,21 +668,25 @@ export function getPrBody(input: string): string {
     .replace('</details>', '');
 }
 
-export /* istanbul ignore next */ function findIssue(): Promise<Issue | null> {
+/* istanbul ignore next */
+export function findIssue(): Promise<Issue | null> {
   logger.warn(`findIssue() is not implemented`);
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue(): Promise<EnsureIssueResult | null> {
+/* istanbul ignore next */
+export function ensureIssue(): Promise<EnsureIssueResult | null> {
   logger.warn(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
-export /* istanbul ignore next */ function ensureIssueClosing(): Promise<void> {
+/* istanbul ignore next */
+export function ensureIssueClosing(): Promise<void> {
   return Promise.resolve();
 }
 
-export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
+/* istanbul ignore next */
+export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return Promise.resolve([]);
@@ -675,7 +701,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const members = await Promise.all(
     teams.map(
       async (t) =>
-        /* eslint-disable no-return-await */
+        /* eslint-disable no-return-await,@typescript-eslint/return-await */
         await azureApiCore.getTeamMembersWithExtendedProperties(
           repo.project.id,
           t.id
@@ -757,7 +783,7 @@ export async function addReviewers(
   );
 }
 
-export /* istanbul ignore next */ async function deleteLabel(
+export async function deleteLabel(
   prNumber: number,
   label: string
 ): Promise<void> {

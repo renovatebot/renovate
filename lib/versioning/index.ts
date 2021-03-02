@@ -1,5 +1,5 @@
 import { logger } from '../logger';
-import versionings from './api.generated';
+import versionings from './api';
 import {
   VersioningApi,
   VersioningApiConstructor,

@@ -1313,11 +1313,11 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('getPrBody', () => {
+  describe('massageMarkdown', () => {
     it('should truncate body to 1000000 characters', () => {
       const excessiveBody = '*'.repeat(1000001);
 
-      expect(gitea.getPrBody(excessiveBody)).toHaveLength(1000000);
+      expect(gitea.massageMarkdown(excessiveBody)).toHaveLength(1000000);
     });
   });
 

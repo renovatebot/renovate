@@ -467,7 +467,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '^1.0.0',
-        fromVersion: '1.0.3',
+        currentVersion: '1.0.3',
       },
     });
     expect(res1.x).toBeDefined();
@@ -495,7 +495,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '2.4.6',
-        fromVersion: '2.4.6',
+        currentVersion: '2.4.6',
       },
     });
     expect(res1.x).toBeDefined();
@@ -542,7 +542,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     expect(res1.x).toBeDefined();
@@ -562,7 +562,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     const res2 = applyPackageRules({
@@ -570,7 +570,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '5.6.0',
-        fromVersion: '5.6.0',
+        currentVersion: '5.6.0',
       },
     });
     expect(res1.x).toBeDefined();
@@ -591,7 +591,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     const res2 = applyPackageRules({
@@ -599,11 +599,47 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '5.6.0',
-        fromVersion: '5.6.0',
+        currentVersion: '5.6.0',
       },
     });
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBeDefined();
+  });
+  it('matches packageFiles', () => {
+    const config: TestConfig = {
+      packageFile: 'examples/foo/package.json',
+      packageRules: [
+        {
+          matchFiles: ['package.json'],
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    expect(res1.x).toBeUndefined();
+    config.packageFile = 'package.json';
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    expect(res2.x).toBeDefined();
+  });
+  it('matches lock files', () => {
+    const config: TestConfig = {
+      packageFile: 'examples/foo/package.json',
+      lockFiles: ['yarn.lock'],
+      packageRules: [
+        {
+          matchFiles: ['yarn.lock'],
+          x: 1,
+        },
+      ],
+    };
+    const res = applyPackageRules(config);
+    expect(res.x).toBeDefined();
   });
   it('matches paths', () => {
     const config: TestConfig = {

@@ -4,9 +4,11 @@ import { linkify } from 'linkify-markdown';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 
+import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
+import * as hostRules from '../../../util/host-rules';
 import { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './common';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -28,6 +30,15 @@ export async function getReleaseList(
     if (apiBaseUrl.includes('gitlab')) {
       return await gitlab.getReleaseList(apiBaseUrl, repository);
     }
+
+    const opts = hostRules.find({
+      hostType: PLATFORM_TYPE_GITLAB,
+      url: apiBaseUrl,
+    });
+    if (opts.token) {
+      return await gitlab.getReleaseList(apiBaseUrl, repository);
+    }
+
     return await github.getReleaseList(apiBaseUrl, repository);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
@@ -169,6 +180,15 @@ export async function getReleaseNotesMdFileInner(
     if (apiBaseUrl.includes('gitlab')) {
       return await gitlab.getReleaseNotesMd(repository, apiBaseUrl);
     }
+
+    const opts = hostRules.find({
+      hostType: PLATFORM_TYPE_GITLAB,
+      url: apiBaseUrl,
+    });
+    if (opts.token) {
+      return await gitlab.getReleaseNotesMd(repository, apiBaseUrl);
+    }
+
     return await github.getReleaseNotesMd(repository, apiBaseUrl);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {

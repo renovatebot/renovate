@@ -59,6 +59,7 @@ export async function validateConfig(
       'repository',
       'vulnerabilityAlertsOnly',
       'vulnerabilityAlert',
+      'isVulnerabilityAlert',
       'copyLocalLibs', // deprecated - functionality is now enabled by default
       'prBody', // deprecated
     ];
@@ -217,6 +218,7 @@ export async function validateConfig(
             }
 
             const selectors = [
+              'matchPackageRules',
               'matchPaths',
               'matchLanguages',
               'matchBaseBranches',

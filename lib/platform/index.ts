@@ -5,7 +5,7 @@ import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
 import { setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
-import platforms from './api.generated';
+import platforms from './api';
 import { Platform } from './common';
 
 export * from './common';

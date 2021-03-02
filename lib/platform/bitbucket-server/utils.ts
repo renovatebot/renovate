@@ -4,7 +4,7 @@ import { HTTPError, Response } from 'got';
 import { PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
-import { BbbsRestPr, BbsPr } from './types';
+import type { BbsPr, BbsRestPr } from './types';
 
 const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
@@ -18,7 +18,7 @@ const prStateMapping: any = {
   OPEN: PrState.Open,
 };
 
-export function prInfo(pr: BbbsRestPr): BbsPr {
+export function prInfo(pr: BbsRestPr): BbsPr {
   return {
     version: pr.version,
     number: pr.id,

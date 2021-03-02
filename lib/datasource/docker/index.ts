@@ -66,13 +66,12 @@ export function getRegistryRepository(
   registryUrl: string
 ): RegistryRepository {
   if (registryUrl !== defaultRegistryUrls[0]) {
-    const dockerRegistry = registryUrl
-      .replace('https://', '')
-      .replace(/\/?$/, '/');
-    if (lookupName.startsWith(dockerRegistry)) {
+    const registry = registryUrl.replace('https://', '');
+    const registryEndingWithSlash = registry.replace(/\/?$/, '/');
+    if (lookupName.startsWith(registryEndingWithSlash)) {
       return {
-        registry: dockerRegistry,
-        repository: lookupName.replace(dockerRegistry, ''),
+        registry,
+        repository: lookupName.replace(registryEndingWithSlash, ''),
       };
     }
   }
@@ -133,7 +132,7 @@ async function getECRAuthToken(
 
 async function getAuthHeaders(
   registry: string,
-  repository: string
+  dockerRepository: string
 ): Promise<OutgoingHttpHeaders | null> {
   try {
     const apiCheckUrl = `${registry}/v2/`;
@@ -166,15 +165,15 @@ async function getAuthHeaders(
     delete opts.password;
 
     if (authenticateHeader.scheme.toUpperCase() === 'BASIC') {
-      logger.debug(`Using Basic auth for docker registry ${repository}`);
+      logger.debug(`Using Basic auth for docker registry ${dockerRepository}`);
       await http.get(apiCheckUrl, opts);
       return opts.headers;
     }
 
     // prettier-ignore
-    const authUrl = `${String(authenticateHeader.parms.realm)}?service=${String(authenticateHeader.parms.service)}&scope=repository:${repository}:pull`;
+    const authUrl = `${String(authenticateHeader.parms.realm)}?service=${String(authenticateHeader.parms.service)}&scope=repository:${dockerRepository}:pull`;
     logger.trace(
-      `Obtaining docker registry token for ${repository} using url ${authUrl}`
+      `Obtaining docker registry token for ${dockerRepository} using url ${authUrl}`
     );
     const authResponse = (
       await http.getJson<{ token?: string; access_token?: string }>(
@@ -199,7 +198,7 @@ async function getAuthHeaders(
     }
     if (err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository: repository },
+        { registry, dockerRepository },
         'Unauthorized docker lookup'
       );
       logger.debug({ err });
@@ -207,7 +206,7 @@ async function getAuthHeaders(
     }
     if (err.statusCode === 403) {
       logger.debug(
-        { registry, dockerRepository: repository },
+        { registry, dockerRepository },
         'Not allowed to access docker registry'
       );
       logger.debug({ err });
@@ -225,14 +224,11 @@ async function getAuthHeaders(
       throw new ExternalHostError(err);
     }
     if (err.message === HOST_DISABLED) {
-      logger.trace(
-        { registry, dockerRepository: repository, err },
-        'Host disabled'
-      );
+      logger.trace({ registry, dockerRepository, err }, 'Host disabled');
       return null;
     }
     logger.warn(
-      { registry, dockerRepository: repository, err },
+      { registry, dockerRepository, err },
       'Error obtaining docker token'
     );
     return null;
@@ -253,19 +249,19 @@ function extractDigestFromResponse(manifestResponse: HttpResponse): string {
 // TODO: make generic to return json object
 async function getManifestResponse(
   registry: string,
-  repository: string,
+  dockerRepository: string,
   tag: string
 ): Promise<HttpResponse> {
-  logger.debug(`getManifestResponse(${registry}, ${repository}, ${tag})`);
+  logger.debug(`getManifestResponse(${registry}, ${dockerRepository}, ${tag})`);
   try {
-    const headers = await getAuthHeaders(registry, repository);
+    const headers = await getAuthHeaders(registry, dockerRepository);
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return null;
     }
     headers.accept =
       'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
-    const url = `${registry}/v2/${repository}/manifests/${tag}`;
+    const url = `${registry}/v2/${dockerRepository}/manifests/${tag}`;
     const manifestResponse = await http.get(url, {
       headers,
     });
@@ -276,7 +272,7 @@ async function getManifestResponse(
     }
     if (err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository: repository },
+        { registry, dockerRepository },
         'Unauthorized docker lookup'
       );
       logger.debug({ err });
@@ -287,7 +283,7 @@ async function getManifestResponse(
         {
           err,
           registry,
-          dockerRepository: repository,
+          dockerRepository,
           tag,
         },
         'Docker Manifest is unknown'
@@ -313,7 +309,7 @@ async function getManifestResponse(
       {
         err,
         registry,
-        dockerRepository: repository,
+        dockerRepository,
         tag,
       },
       'Unknown Error looking up docker manifest'
@@ -324,10 +320,14 @@ async function getManifestResponse(
 
 async function getConfigDigest(
   registry: string,
-  repository: string,
+  dockerRepository: string,
   tag: string
 ): Promise<string> {
-  const manifestResponse = await getManifestResponse(registry, repository, tag);
+  const manifestResponse = await getManifestResponse(
+    registry,
+    dockerRepository,
+    tag
+  );
   // If getting the manifest fails here, then abort
   // This means that the latest tag doesn't have a manifest, which shouldn't
   // be possible
@@ -338,7 +338,7 @@ async function getConfigDigest(
   const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
   if (manifest.schemaVersion !== 2) {
     logger.debug(
-      { registry, dockerRepository: repository, tag },
+      { registry, dockerRepository, tag },
       'Manifest schema version is not 2'
     );
     return null;
@@ -346,10 +346,14 @@ async function getConfigDigest(
 
   if (manifest.mediaType === MediaType.manifestListV2) {
     logger.trace(
-      { registry, dockerRepository: repository, tag },
+      { registry, dockerRepository, tag },
       'Found manifest list, using first image'
     );
-    return getConfigDigest(registry, repository, manifest.manifests[0].digest);
+    return getConfigDigest(
+      registry,
+      dockerRepository,
+      manifest.manifests[0].digest
+    );
   }
 
   if (manifest.mediaType === MediaType.manifestV2) {
@@ -500,12 +504,12 @@ async function getTags(
 
 async function getLabels(
   registry: string,
-  repository: string,
+  dockerRepository: string,
   tag: string
 ): Promise<Record<string, string>> {
-  logger.debug(`getLabels(${registry}, ${repository}, ${tag})`);
+  logger.debug(`getLabels(${registry}, ${dockerRepository}, ${tag})`);
   const cacheNamespace = 'datasource-docker-labels';
-  const cacheKey = `${registry}:${repository}:${tag}`;
+  const cacheKey = `${registry}:${dockerRepository}:${tag}`;
   const cachedResult = await packageCache.get<Record<string, string>>(
     cacheNamespace,
     cacheKey
@@ -516,18 +520,18 @@ async function getLabels(
   }
   try {
     let labels: Record<string, string> = {};
-    const configDigest = await getConfigDigest(registry, repository, tag);
+    const configDigest = await getConfigDigest(registry, dockerRepository, tag);
     if (!configDigest) {
       return {};
     }
 
-    const headers = await getAuthHeaders(registry, repository);
+    const headers = await getAuthHeaders(registry, dockerRepository);
     // istanbul ignore if: Should never be happen
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return {};
     }
-    const url = `${registry}/v2/${repository}/blobs/${configDigest}`;
+    const url = `${registry}/v2/${dockerRepository}/blobs/${configDigest}`;
     const configResponse = await http.get(url, {
       headers,
     });
@@ -550,7 +554,7 @@ async function getLabels(
     }
     if (err.statusCode === 400 || err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository: repository, err },
+        { registry, dockerRepository, err },
         'Unauthorized docker lookup'
       );
     } else if (err.statusCode === 404) {
@@ -558,7 +562,7 @@ async function getLabels(
         {
           err,
           registry,
-          dockerRepository: repository,
+          dockerRepository,
           tag,
         },
         'Config Manifest is unknown'
@@ -573,7 +577,7 @@ async function getLabels(
         {
           err,
           registry,
-          dockerRepository: repository,
+          dockerRepository,
           tag,
         },
         'docker registry failure: internal error'
@@ -590,7 +594,7 @@ async function getLabels(
       );
     } else {
       logger.info(
-        { registry, dockerRepository: repository, tag, err },
+        { registry, dockerRepository, tag, err },
         'Unknown error getting Docker labels'
       );
     }
@@ -623,8 +627,6 @@ export async function getReleases({
   }
   const releases = tags.map((version) => ({ version }));
   const ret: ReleaseResult = {
-    dockerRegistry: registry,
-    dockerRepository: repository,
     releases,
   };
 

@@ -33,7 +33,7 @@ The command to install dependencies (`npm ci --ignore-scripts`) is necessary bec
       "postUpgradeTasks": {
         "commands": [
           "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{fromVersion}}} --to={{{toVersion}}} --migrateOnly --allowDirty --force"
+          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrateOnly --allowDirty --force"
         ],
         "fileFilters": ["**/**"]
       }
@@ -52,13 +52,15 @@ npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty 
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed.
-If the list is empty no tasks will be executed.
+If this list is empty then no tasks will be executed.
+Also you need to have `"trustLevel": "high"`, otherwise these tasks will be ignored.
 
 e.g.
 
 ```json
 {
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"],
+  "trustLevel": "high"
 }
 ```
 

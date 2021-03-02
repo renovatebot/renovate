@@ -1,10 +1,11 @@
-import { mocked } from '../../test/util';
+import { getName, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
 } from '../constants/error-messages';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
+import type { Datasource } from './common';
 import * as datasourceDocker from './docker';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
@@ -22,7 +23,7 @@ const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe('datasource/index', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -31,10 +32,7 @@ describe('datasource/index', () => {
     expect(datasource.getDatasourceList()).toBeDefined();
   });
   it('validates dataource', () => {
-    function validateDatasource(
-      module: datasource.Datasource,
-      name: string
-    ): boolean {
+    function validateDatasource(module: Datasource, name: string): boolean {
       if (!module.getReleases) {
         return false;
       }

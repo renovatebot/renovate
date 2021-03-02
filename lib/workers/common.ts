@@ -1,7 +1,7 @@
 import type { Merge } from 'type-fest';
 import {
   GroupConfig,
-  RenovateAdminConfig,
+  LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -31,7 +31,6 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
-  currentVersion?: string;
   endpoint?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
@@ -42,7 +41,7 @@ export interface BranchUpgradeConfig
   language?: string;
   manager?: string;
   packageFile?: string;
-
+  lockFile?: string;
   reuseExistingBranch?: boolean;
   prHeader?: string;
   prFooter?: string;
@@ -100,7 +99,7 @@ export enum ProcessBranchResult {
 
 export interface BranchConfig
   extends BranchUpgradeConfig,
-    RenovateAdminConfig,
+    LegacyAdminConfig,
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;

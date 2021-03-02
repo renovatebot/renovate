@@ -32,7 +32,7 @@ export async function getReleases(
       releases: [],
     };
     const response = await http.get(rubyVersionsUrl);
-    const root: HTMLElement = parse(response.body);
+    const root = parse(response.body);
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
     rows.forEach((row) => {
       const tds = row.querySelectorAll('td');

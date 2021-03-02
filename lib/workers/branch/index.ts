@@ -25,6 +25,7 @@ import { readLocalFile, writeLocalFile } from '../../util/fs';
 import {
   checkoutBranch,
   deleteBranch,
+  getBranchCommit,
   getRepoStatus,
   branchExists as gitBranchExists,
   isBranchModified,
@@ -116,7 +117,7 @@ export async function processBranch(
         content +=
           '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
         if (!config.suppressNotifications.includes('prIgnoreNotification')) {
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(
               `DRY-RUN: Would ensure closed PR comment in PR #${existingPr.number}`
             );
@@ -129,7 +130,7 @@ export async function processBranch(
           }
         }
         if (branchExists) {
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info('DRY-RUN: Would delete branch ' + config.branchName);
           } else {
             await deleteBranch(config.branchName);
@@ -156,7 +157,7 @@ export async function processBranch(
       !branchExists &&
       isLimitReached(Limit.Branches) &&
       !dependencyDashboardCheck &&
-      !config.vulnerabilityAlert
+      !config.isVulnerabilityAlert
     ) {
       logger.debug('Reached branch limit - skipping branch creation');
       return ProcessBranchResult.BranchLimitReached;
@@ -164,7 +165,7 @@ export async function processBranch(
     if (
       isLimitReached(Limit.Commits) &&
       !dependencyDashboardCheck &&
-      !config.vulnerabilityAlert
+      !config.isVulnerabilityAlert
     ) {
       logger.debug('Reached commits limit - skipping branch');
       return ProcessBranchResult.CommitLimitReached;
@@ -208,8 +209,28 @@ export async function processBranch(
           }
         }
       } else if (branchIsModified) {
-        logger.debug('Branch has been edited');
-        return ProcessBranchResult.PrEdited;
+        const oldPr = await platform.findPr({
+          branchName: config.branchName,
+          state: PrState.NotOpen,
+        });
+        if (!oldPr) {
+          logger.debug('Branch has been edited but found no PR - skipping');
+          return ProcessBranchResult.PrEdited;
+        }
+        const branchSha = getBranchCommit(config.branchName);
+        const oldPrSha = oldPr?.sha;
+        if (!oldPrSha || oldPrSha === branchSha) {
+          logger.debug(
+            { oldPrNumber: oldPr.number, oldPrSha, branchSha },
+            'Found old PR matching this branch - will override it'
+          );
+        } else {
+          logger.debug(
+            { oldPrNumber: oldPr.number, oldPrSha, branchSha },
+            'Found old PR but the SHA is different'
+          );
+          return ProcessBranchResult.PrEdited;
+        }
       }
     }
 
@@ -596,7 +617,7 @@ export async function processBranch(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
     const { prResult: result, pr } = await ensurePr(config);
-    if (result === PrResult.LimitReached && !config.vulnerabilityAlert) {
+    if (result === PrResult.LimitReached && !config.isVulnerabilityAlert) {
       logger.debug('Reached PR limit - skipping PR creation');
       return ProcessBranchResult.PrLimitReached;
     }
@@ -637,14 +658,14 @@ export async function processBranch(
           content += `##### File name: ${error.lockFile}\n\n`;
           content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
         });
-        content = platform.getPrBody(content);
+        content = platform.massageMarkdown(content);
         if (
           !(
             config.suppressNotifications.includes('artifactErrors') ||
             config.suppressNotifications.includes('lockFileErrors')
           )
         ) {
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );
@@ -666,7 +687,7 @@ export async function processBranch(
         // Check if state needs setting
         if (existingState !== state) {
           logger.debug(`Updating status check state to failed`);
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(
               'DRY-RUN: Would set branch status in ' + config.branchName
             );
@@ -682,7 +703,7 @@ export async function processBranch(
       } else {
         if (config.updatedArtifacts?.length) {
           // istanbul ignore if
-          if (config.dryRun) {
+          if (getAdminConfig().dryRun) {
             logger.info(
               `DRY-RUN: Would ensure comment removal in PR #${pr.number}`
             );

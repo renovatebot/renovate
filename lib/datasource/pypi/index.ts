@@ -175,7 +175,7 @@ async function getSimpleDependency(
   packageName: string,
   hostUrl: string
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${packageName}`);
+  const lookupUrl = url.resolve(hostUrl, ensureTrailingSlash(packageName));
   const dependency: ReleaseResult = { releases: null };
   const response = await http.get(lookupUrl);
   const dep = response?.body;
@@ -186,7 +186,7 @@ async function getSimpleDependency(
   if (response.authorization) {
     dependency.isPrivate = true;
   }
-  const root: HTMLElement = parse(cleanSimpleHtml(dep));
+  const root = parse(cleanSimpleHtml(dep));
   const links = root.querySelectorAll('a');
   const releases: Releases = {};
   for (const link of Array.from(links)) {
