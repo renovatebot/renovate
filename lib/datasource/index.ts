@@ -8,7 +8,7 @@ import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
 import * as allVersioning from '../versioning';
-import datasources from './api.generated';
+import datasources from './api';
 import {
   Datasource,
   DigestConfig,
