@@ -84,7 +84,8 @@ export async function updateLockedDependency(
       packageJson,
       packageLockJson,
       depName,
-      currentVersion
+      currentVersion,
+      newVersion
     );
     logger.trace({ deps: lockedDeps, constraints }, 'Matching details');
     if (!constraints.length) {
