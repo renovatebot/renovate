@@ -186,7 +186,7 @@ async function getSimpleDependency(
   if (response.authorization) {
     dependency.isPrivate = true;
   }
-  const root: HTMLElement = parse(cleanSimpleHtml(dep));
+  const root = parse(cleanSimpleHtml(dep));
   const links = root.querySelectorAll('a');
   const releases: Releases = {};
   for (const link of Array.from(links)) {

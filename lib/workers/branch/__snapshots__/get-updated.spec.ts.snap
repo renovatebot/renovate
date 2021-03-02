@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in autoReplace managers 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "version: 0.0.2",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
 exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in updateDependency managers 1`] = `
 Object {
   "artifactErrors": Array [],
@@ -88,6 +102,34 @@ Object {
 }
 `;
 
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles isRemediation rebase 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": false,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new contents",
+      "name": "package-lock.json",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles isRemediation success 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new contents",
+      "name": "package-lock.json",
+    },
+  ],
+}
+`;
+
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock file errors 1`] = `
 Object {
   "artifactErrors": Array [
@@ -168,52 +210,6 @@ Object {
     Object {
       "contents": "existing content",
       "name": "undefined",
-    },
-  ],
-}
-`;
-
-exports[`workers/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
-      "contents": "version: 0.0.2",
-      "name": "undefined",
-    },
-  ],
-}
-`;
-
-exports[`workers/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions in all files if multiple files were bumped 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
-      "contents": "version: 0.0.2",
-      "name": "/test/Chart.yaml",
-    },
-    Object {
-      "contents": "# Version 0.0.2",
-      "name": "/test/README.md",
-    },
-  ],
-}
-`;
-
-exports[`workers/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions with a bumpPackageFile different from the packageFile 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
-      "contents": "version: 0.0.2",
-      "name": "/test/Chart.yaml",
     },
   ],
 }

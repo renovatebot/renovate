@@ -212,6 +212,8 @@ export async function getDependency(
       const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,
+        dependencies: res.versions[version].dependencies,
+        devDependencies: res.versions[version].devDependencies,
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];

@@ -102,7 +102,7 @@ If you need any further assistance then you can also [request help here](${confi
   }
   logger.trace('prBody:\n' + prBody);
 
-  prBody = platform.getPrBody(prBody);
+  prBody = platform.massageMarkdown(prBody);
 
   if (existingPr) {
     logger.debug('Found open onboarding PR');

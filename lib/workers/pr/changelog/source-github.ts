@@ -82,7 +82,7 @@ export async function getChangeLogJSON({
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   if (validReleases.length < 2) {
-    logger.debug('Not enough valid releases');
+    logger.debug(`Not enough valid releases for dep ${depName}`);
     return null;
   }
 
