@@ -65,8 +65,7 @@ describe('manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod2);
-      expect(res).toContain(upgrade.newValue);
-      expect(res).toContain('github.com/pkg/errors/v2');
+      expect(res).toContain('github.com/pkg/errors/v2 v2.0.0');
     });
     it('replaces major gopkg.in updates', () => {
       const upgrade = {
@@ -105,7 +104,7 @@ describe('manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod2, upgrade });
       expect(res).not.toEqual(gomod2);
-      expect(res).toContain(upgrade.newValue);
+      expect(res).toContain('github.com/fatih/color v1.8.0');
     });
     it('replaces quoted multiline', () => {
       const upgrade = {
@@ -131,8 +130,7 @@ describe('manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod2, upgrade });
       expect(res).not.toEqual(gomod2);
-      expect(res).toContain(upgrade.newValue);
-      expect(res).toContain('github.com/emirpasic/gods/v2');
+      expect(res).toContain('github.com/emirpasic/gods/v2 v2.0.0');
     });
     it('bumps major multiline', () => {
       const upgrade = {
@@ -146,8 +144,7 @@ describe('manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod2, upgrade });
       expect(res).not.toEqual(gomod2);
-      expect(res).toContain(upgrade.newValue);
-      expect(res).toContain('github.com/src-d/gcfg/v3');
+      expect(res).toContain('github.com/src-d/gcfg/v3 v3.0.0');
     });
     it('update multiline digest', () => {
       const upgrade = {
@@ -195,7 +192,7 @@ describe('manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       // Assert that the version still contains +incompatible tag.
-      expect(res).toContain(upgrade.newValue + '+incompatible');
+      expect(res).toContain('github.com/Azure/azure-sdk-for-go v26.0.0+incompatible');
     });
     it('handles replace line with minor version update', () => {
       const upgrade = {
@@ -206,7 +203,7 @@ describe('manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
-      expect(res).toContain(upgrade.newValue);
+      expect(res).toContain('github.com/pravesht/gocql v0.0.1');
     });
     it('handles replace line with major version update', () => {
       const upgrade = {
@@ -220,7 +217,7 @@ describe('manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
-      expect(res).toContain(upgrade.newValue);
+      expect(res).toContain('github.com/pravesht/gocql/v2 v2.0.0');
     });
     it('handles replace line with digest', () => {
       const upgrade = {
@@ -250,8 +247,7 @@ describe('manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
-      expect(res).toContain(upgrade.newValue);
-      expect(res).toContain(upgrade.depName + '/v6');
+      expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
     });
   });
 });
