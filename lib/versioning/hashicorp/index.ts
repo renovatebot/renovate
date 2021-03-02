@@ -1,4 +1,4 @@
-import { NewValueConfig, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../types';
 import { api as npm } from '../npm';
 
 export const id = 'hashicorp';

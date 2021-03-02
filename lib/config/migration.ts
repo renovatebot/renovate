@@ -4,7 +4,7 @@ import equal from 'fast-deep-equal';
 import { logger } from '../logger';
 import { HostRule } from '../types';
 import { clone } from '../util/clone';
-import type { PackageRule, RenovateConfig } from './common';
+import type { PackageRule, RenovateConfig } from './types';
 import { RenovateOptions, getOptions } from './definitions';
 
 const options = getOptions();

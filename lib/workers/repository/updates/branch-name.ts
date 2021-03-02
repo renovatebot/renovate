@@ -1,7 +1,7 @@
 import { clean as cleanGitRef } from 'clean-git-ref';
 import hasha from 'hasha';
 import slugify from 'slugify';
-import { RenovateConfig } from '../../../config/common';
+import { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
 

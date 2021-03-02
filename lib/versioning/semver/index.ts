@@ -1,6 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import { NewValueConfig, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'semver';
 export const displayName = 'Semantic';

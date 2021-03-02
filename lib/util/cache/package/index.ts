@@ -1,4 +1,4 @@
-import { GlobalConfig } from '../../../config/common';
+import { GlobalConfig } from '../../../config/types';
 import * as memCache from '../memory';
 import { PackageCache } from './common';
 import * as fileCache from './file';

@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-// istanbul ignore file
 import equal from 'fast-deep-equal';
 import { readFileSync } from 'fs-extra';
 import JSON5 from 'json5';
 import { configFileNames } from './config/app-strings';
-import { RenovateConfig } from './config/common';
+import { RenovateConfig } from './config/types';
 import { getConfig as getFileConfig } from './config/file';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';

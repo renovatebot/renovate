@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { RenovateConfig } from '../../../config/common';
+import { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,

@@ -9,7 +9,7 @@ import {
 } from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
-import { NewValueConfig } from '../common';
+import { NewValueConfig } from '../types';
 
 export function getNewValue({
   currentValue,

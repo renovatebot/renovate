@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { Preset } from '../common';
+import { Preset } from '../types';
 
 const repoGroups = {
   'ag-grid': 'https://github.com/ag-grid/ag-grid',

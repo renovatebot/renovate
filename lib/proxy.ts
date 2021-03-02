@@ -6,7 +6,6 @@ let agent = false;
 
 export function bootstrap(): void {
   envVars.forEach((envVar) => {
-    /* istanbul ignore if: env is case-insensitive on windows */
     if (
       typeof process.env[envVar] === 'undefined' &&
       typeof process.env[envVar.toLowerCase()] !== 'undefined'

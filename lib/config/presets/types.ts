@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../common';
+import { RenovateConfig } from '../types';
 
 // TODO: Proper typing
 export type Preset = RenovateConfig & Record<string, unknown>;
@@ -11,4 +11,11 @@ export type PresetConfig = {
 
 export interface PresetApi {
   getPreset(config: PresetConfig): Promise<Preset> | Preset;
+}
+
+export interface ParsedPreset {
+  presetSource: string;
+  packageName: string;
+  presetName: string;
+  params?: string[];
 }

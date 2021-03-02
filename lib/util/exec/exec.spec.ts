@@ -5,7 +5,7 @@ import {
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
 import { setAdminConfig } from '../../config/admin';
-import { RepoAdminConfig } from '../../config/common';
+import { RepoAdminConfig } from '../../config/types';
 import {
   BinarySource,
   ExecConfig,

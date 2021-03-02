@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { logger } from '../logger';
-import { GlobalConfig } from './common';
+import { GlobalConfig } from './types';
 import { migrateConfig } from './migration';
 
 export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {

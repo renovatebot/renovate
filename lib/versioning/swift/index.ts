@@ -1,6 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import { VersioningApi } from '../common';
+import { VersioningApi } from '../types';
 import { getNewValue, toSemverRange } from './range';
 
 export const id = 'swift';

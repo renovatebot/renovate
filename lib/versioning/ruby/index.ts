@@ -7,7 +7,7 @@ import {
   valid,
 } from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
-import { NewValueConfig, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
 import { ltr, parse as parseRange } from './range';
 import { bump, pin, replace } from './strategies';

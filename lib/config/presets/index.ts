@@ -6,18 +6,21 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
-import { GlobalConfig, RenovateConfig } from '../common';
 import * as massage from '../massage';
 import * as migration from '../migration';
+import type { GlobalConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
-import { PresetApi } from './common';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
+import type { PresetApi, ParsedPreset as _ParsedPreset } from './types';
 import { PRESET_DEP_NOT_FOUND } from './util';
+
+// TODO: remove me when babel is removed
+export type ParsedPreset = _ParsedPreset;
 
 const presetSources: Record<string, PresetApi> = {
   github,
@@ -165,7 +168,7 @@ export async function getPreset(
   }
   logger.trace({ presetConfig }, `Applied params to preset ${preset}`);
   const presetKeys = Object.keys(presetConfig);
-  // istanbul ignore if
+  /* c8 ignore start */
   if (
     presetKeys.length === 2 &&
     presetKeys.includes('description') &&
@@ -174,6 +177,7 @@ export async function getPreset(
     // preset is just a collection of other presets
     delete presetConfig.description;
   }
+  /* c8 ignore stop */
   const packageListKeys = [
     'description',
     'matchPackageNames',
@@ -205,7 +209,7 @@ export async function resolveConfigPresets(
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
-      // istanbul ignore if
+      /* c8 ignore next 4 */
       if (existingPresets.includes(preset)) {
         logger.debug(
           `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
@@ -222,11 +226,11 @@ export async function resolveConfigPresets(
           fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
-          // istanbul ignore if
+          /* c8 ignore next 3 */
           if (err instanceof ExternalHostError) {
             throw err;
           }
-          // istanbul ignore if
+          /* c8 ignore next 3 */
           if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
             throw err;
           }
@@ -238,7 +242,7 @@ export async function resolveConfigPresets(
           } else if (err.message === 'preset not found') {
             error.validationError = `Preset name not found within published preset config (${preset})`;
           }
-          // istanbul ignore if
+          /* c8 ignore next 4 */
           if (existingPresets.length) {
             error.validationError +=
               '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
@@ -255,7 +259,7 @@ export async function resolveConfigPresets(
           ignorePresets,
           existingPresets.concat([preset])
         );
-        // istanbul ignore if
+        /* c8 ignore next 3 */
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
@@ -302,11 +306,4 @@ export async function resolveConfigPresets(
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
   return config;
-}
-
-export interface ParsedPreset {
-  presetSource: string;
-  packageName: string;
-  presetName: string;
-  params?: string[];
 }

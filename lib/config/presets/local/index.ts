@@ -5,7 +5,7 @@ import {
   PLATFORM_TYPE_GITLAB,
 } from '../../../constants/platforms';
 import * as bitbucketServer from '../bitbucket-server';
-import { Preset, PresetConfig } from '../common';
+import { Preset, PresetConfig } from '../types';
 import * as gitea from '../gitea';
 import * as github from '../github';
 import * as gitlab from '../gitlab';

@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { NewValueConfig, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../types';
 import npm, { isValid, isVersion } from '../npm';
 import { nodeSchedule } from './schedule';
 

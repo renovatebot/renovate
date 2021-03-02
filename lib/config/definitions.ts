@@ -6,7 +6,7 @@ import * as dockerVersioning from '../versioning/docker';
 import * as pep440Versioning from '../versioning/pep440';
 import * as semverVersioning from '../versioning/semver';
 
-import { RenovateConfigStage } from './common';
+import { RenovateConfigStage } from './types';
 
 export interface RenovateOptionBase {
   admin?: boolean;

@@ -1,4 +1,4 @@
-import { GlobalConfig } from './common';
+import { GlobalConfig } from './types';
 import { RenovateOptions, getOptions } from './definitions';
 
 const defaultValues = {

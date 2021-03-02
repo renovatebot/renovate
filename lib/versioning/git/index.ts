@@ -1,4 +1,4 @@
-import { VersioningApi } from '../common';
+import { VersioningApi } from '../types';
 import * as generic from '../loose/generic';
 
 export const id = 'git';

@@ -4,9 +4,9 @@ import {
   VersioningApi,
   VersioningApiConstructor,
   isVersioningApiConstructor,
-} from './common';
+} from './types';
 
-export * from './common';
+export * from './types';
 
 export const getVersioningList = (): string[] => Array.from(versionings.keys());
 /**

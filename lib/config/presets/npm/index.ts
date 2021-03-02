@@ -1,6 +1,6 @@
 import { getDependency } from '../../../datasource/npm/get';
 import { logger } from '../../../logger';
-import { Preset, PresetConfig } from '../common';
+import { Preset, PresetConfig } from '../types';
 
 export async function getPreset({
   packageName: pkgName,

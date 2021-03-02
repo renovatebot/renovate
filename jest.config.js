@@ -12,6 +12,7 @@ module.exports = {
     '!lib/config-validator.ts',
     '!lib/manager/common.ts',
     '!lib/types/**/*.ts',
+    '!lib/**/types.ts',
   ],
   coverageReporters: ci
     ? ['html', 'json', 'text-summary']

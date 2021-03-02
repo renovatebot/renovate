@@ -1,4 +1,4 @@
-import { RenovateConfig, ValidationMessage } from '../../../../config/common';
+import { RenovateConfig, ValidationMessage } from '../../../../config/types';
 import { Release } from '../../../../datasource';
 import { LookupUpdate, RangeConfig } from '../../../../manager/common';
 import { SkipReason } from '../../../../types';

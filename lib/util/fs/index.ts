@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
-import { RenovateConfig } from '../../config/common';
+import { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 
 export * from './proxies';

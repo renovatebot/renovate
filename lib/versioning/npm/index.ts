@@ -1,6 +1,6 @@
 import * as semver from 'semver';
 import { is as isStable } from 'semver-stable';
-import { VersioningApi } from '../common';
+import { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
 export const id = 'npm';

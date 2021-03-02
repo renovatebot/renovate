@@ -3,7 +3,7 @@ import { getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import { RenovateConfig, ValidationMessage } from './common';
+import { RenovateConfig, ValidationMessage } from './types';
 import { RenovateOptions, getOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { check } from './validation-helpers/managers';

@@ -1,7 +1,7 @@
 import os from 'os';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { GlobalConfig, RenovateConfig } from '../../config/common';
+import { GlobalConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { initPlatform } from '../../platform';
 import * as packageCache from '../../util/cache/package';

@@ -1,4 +1,4 @@
-import { NewValueConfig, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';

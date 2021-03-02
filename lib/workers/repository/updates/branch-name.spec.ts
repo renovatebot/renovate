@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../../config/common';
+import { RenovateConfig } from '../../../config/types';
 import { generateBranchName } from './branch-name';
 
 describe('workers/repository/updates/branch-name', () => {

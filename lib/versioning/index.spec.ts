@@ -4,7 +4,7 @@ import {
   VersioningApi,
   VersioningApiConstructor,
   isVersioningApiConstructor,
-} from './common';
+} from './types';
 import { GenericVersion, GenericVersioningApi } from './loose/generic';
 import * as semverVersioning from './semver';
 import * as allVersioning from '.';

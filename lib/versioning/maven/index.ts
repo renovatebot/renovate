@@ -1,4 +1,4 @@
-import { NewValueConfig, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../types';
 import {
   EXCLUDING_POINT,
   QualifierTypes,

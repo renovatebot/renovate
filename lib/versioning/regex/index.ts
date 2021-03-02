@@ -1,7 +1,7 @@
 import { compare, ltr, maxSatisfying, minSatisfying, satisfies } from 'semver';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { regEx } from '../../util/regex';
-import { VersioningApiConstructor } from '../common';
+import { VersioningApiConstructor } from '../types';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 
 export const id = 'regex';

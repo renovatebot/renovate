@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import { join } from 'upath';
-import { RenovateConfig, RepositoryCacheConfig } from '../../../config/common';
+import { RenovateConfig, RepositoryCacheConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { RepoInitConfig } from '../../../workers/repository/init/common';

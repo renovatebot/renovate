@@ -1,4 +1,4 @@
-import { Preset, PresetConfig } from '../common';
+import { Preset, PresetConfig } from '../types';
 import * as configPreset from './config';
 import * as defaultPreset from './default';
 import * as dockerPreset from './docker';

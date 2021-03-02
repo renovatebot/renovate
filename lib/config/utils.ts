@@ -1,6 +1,6 @@
 import { logger } from '../logger';
 import { clone } from '../util/clone';
-import { RenovateConfig } from './common';
+import { RenovateConfig } from './types';
 import * as definitions from './definitions';
 
 export function mergeChildConfig<T, TChild>(

@@ -3,7 +3,7 @@ import {
   MatchStringsStrategy,
   UpdateType,
   ValidationMessage,
-} from '../config/common';
+} from '../config/types';
 import { RangeStrategy, SkipReason } from '../types';
 import { File } from '../util/git';
 

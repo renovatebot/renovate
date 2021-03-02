@@ -1,4 +1,4 @@
-import { Preset } from '../common';
+import { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   dockerfileVersions: {
