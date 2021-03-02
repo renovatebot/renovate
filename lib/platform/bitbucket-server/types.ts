@@ -1,4 +1,4 @@
-import { Pr } from '../common';
+import type { Pr } from '../types';
 
 export interface BbsConfig {
   bbUseDefaultReviewers: boolean;

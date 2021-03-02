@@ -5,9 +5,9 @@ import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import * as bitbucket from '../bitbucket-tags';
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'go';
 

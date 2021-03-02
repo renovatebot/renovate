@@ -5,12 +5,12 @@ import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { StatusResult, getRepoStatus } from '../../util/git';
 import { Http } from '../../util/http';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
   extraEnv,
   gradleWrapperFileName,
   prepareGradleCommand,
 } from '../gradle/utils';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const http = new Http('gradle-wrapper');
 

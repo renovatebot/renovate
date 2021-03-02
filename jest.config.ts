@@ -11,13 +11,14 @@ const config: InitialOptionsTsJest = {
     'lib/**/*.{js,ts}',
     '!lib/**/*.{d,spec}.ts',
     '!lib/**/{__fixtures__,__mocks__,__testutil__}/**/*.{js,ts}',
+    '!lib/**/types.ts',
   ],
   coverageReporters: ci
     ? ['html', 'json', 'text-summary']
     : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
-      branches: 94.19,
+      branches: 94.15,
       functions: 100,
       lines: 100,
       statements: 100,
@@ -31,6 +32,7 @@ const config: InitialOptionsTsJest = {
   globals: {
     'ts-jest': {
       diagnostics: false,
+      isolatedModules: true,
     },
   },
 };

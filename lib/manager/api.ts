@@ -11,7 +11,6 @@ import * as cdnurl from './cdnurl';
 import * as circleci from './circleci';
 import * as cloudbuild from './cloudbuild';
 import * as cocoapods from './cocoapods';
-import type { ManagerApi } from './common';
 import * as composer from './composer';
 import * as depsEdn from './deps-edn';
 import * as dockerCompose from './docker-compose';
@@ -58,6 +57,7 @@ import * as terraformVersion from './terraform-version';
 import * as terragrunt from './terragrunt';
 import * as terragruntVersion from './terragrunt-version';
 import * as travis from './travis';
+import type { ManagerApi } from './types';
 
 const api = new Map<string, ManagerApi>();
 export default api;

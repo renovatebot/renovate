@@ -5,9 +5,9 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as _git from '../../util/git';
-import { Platform, VulnerabilityAlert } from '../common';
+import type { Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 

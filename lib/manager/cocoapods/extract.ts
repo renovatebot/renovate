@@ -3,7 +3,7 @@ import * as datasourcePod from '../../datasource/pod';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,

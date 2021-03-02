@@ -2,8 +2,8 @@ import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import { DotnetToolsManifest } from './types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { DotnetToolsManifest } from './types';
 import { getConfiguredRegistries } from './util';
 
 /**

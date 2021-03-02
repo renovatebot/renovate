@@ -2,7 +2,7 @@ import { OutgoingHttpHeaders } from 'http';
 import urlJoin from 'url-join';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import { ReleaseResult } from '../common';
+import type { ReleaseResult } from '../types';
 import { id } from './common';
 
 const http = new Http(id);

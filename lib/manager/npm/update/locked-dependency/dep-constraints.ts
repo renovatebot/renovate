@@ -1,7 +1,6 @@
 import type { PackageJson } from 'type-fest';
-
 import { api as semver } from '../../../../versioning/npm';
-import { PackageLockOrEntry, ParentDependency } from './common';
+import type { PackageLockOrEntry, ParentDependency } from './types';
 
 // Finds all parent dependencies for a given depName@currentVersion
 export function findDepConstraints(

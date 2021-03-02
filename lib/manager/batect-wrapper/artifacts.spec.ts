@@ -1,6 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-
-import { UpdateArtifact } from '../common';
+import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
 const defaultTo = '1.2.3';

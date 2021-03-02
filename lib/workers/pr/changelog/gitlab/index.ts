@@ -1,9 +1,9 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../logger';
-import { GitlabTreeNode } from '../../../../types/platform/gitlab';
+import type { GitlabTreeNode } from '../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../util/http/gitlab';
 import { ensureTrailingSlash } from '../../../../util/url';
-import { ChangeLogFile, ChangeLogNotes } from '../common';
+import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
 const http = new GitlabHttp();
 

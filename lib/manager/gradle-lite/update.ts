@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
-import { UpdateDependencyConfig } from '../common';
-import { ManagerData } from './common';
+import type { UpdateDependencyConfig } from '../types';
+import type { ManagerData } from './common';
 import { versionLikeSubstring } from './utils';
 
 export function updateDependency({

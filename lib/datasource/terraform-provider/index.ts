@@ -3,8 +3,8 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
-import { GetReleasesConfig, ReleaseResult } from '../common';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'terraform-provider';
 export const defaultRegistryUrls = [

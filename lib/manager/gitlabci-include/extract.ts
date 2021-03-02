@@ -4,8 +4,8 @@ import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as gitlabci from '../gitlabci/extract';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 function extractDepFromIncludeFile(includeObj: {
   file: any;

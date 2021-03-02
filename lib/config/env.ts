@@ -3,8 +3,8 @@ import is from '@sindresorhus/is';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import * as datasourceDocker from '../datasource/docker';
 import { logger } from '../logger';
-import { GlobalConfig } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
+import type { GlobalConfig, RenovateOptions } from './types';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {

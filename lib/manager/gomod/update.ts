@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { UpdateDependencyConfig } from '../common';
+import type { UpdateDependencyConfig } from '../types';
 
 export function updateDependency({
   fileContent,

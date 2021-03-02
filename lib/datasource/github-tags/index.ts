@@ -2,8 +2,8 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as githubReleases from '../github-releases';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'github-tags';
 export const defaultRegistryUrls = ['https://github.com'];

@@ -6,7 +6,7 @@ import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-message
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
-import { PostUpdateConfig, Upgrade } from '../../common';
+import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {

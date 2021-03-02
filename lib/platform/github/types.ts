@@ -1,4 +1,4 @@
-import { Pr } from '../common';
+import { Pr } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
