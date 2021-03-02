@@ -1,7 +1,7 @@
 import * as bitbucketTags from './bitbucket-tags';
 import * as cdnjs from './cdnjs';
 import * as clojure from './clojure';
-import { DatasourceApi } from './common';
+import type { DatasourceApi } from './common';
 import * as crate from './crate';
 import * as dart from './dart';
 import * as docker from './docker';

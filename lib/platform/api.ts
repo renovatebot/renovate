@@ -1,7 +1,7 @@
 import * as azure from './azure';
 import * as bitbucket from './bitbucket';
 import * as bitbucketServer from './bitbucket-server';
-import { Platform } from './common';
+import type { Platform } from './common';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';

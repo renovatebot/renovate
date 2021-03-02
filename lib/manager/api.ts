@@ -11,7 +11,7 @@ import * as cdnurl from './cdnurl';
 import * as circleci from './circleci';
 import * as cloudbuild from './cloudbuild';
 import * as cocoapods from './cocoapods';
-import { ManagerApi } from './common';
+import type { ManagerApi } from './common';
 import * as composer from './composer';
 import * as depsEdn from './deps-edn';
 import * as dockerCompose from './docker-compose';

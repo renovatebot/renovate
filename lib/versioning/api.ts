@@ -1,5 +1,5 @@
 import * as cargo from './cargo';
-import { VersioningApi, VersioningApiConstructor } from './common';
+import type { VersioningApi, VersioningApiConstructor } from './common';
 import * as composer from './composer';
 import * as docker from './docker';
 import * as git from './git';
