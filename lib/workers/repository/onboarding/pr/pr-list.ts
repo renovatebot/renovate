@@ -2,7 +2,7 @@ import { RenovateConfig } from '../../../../config';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
 import { sanitizeMarkdown } from '../../../../util/markdown';
-import { BranchConfig } from '../../../common';
+import type { BranchConfig } from '../../../types';
 
 export function getPrList(
   config: RenovateConfig,

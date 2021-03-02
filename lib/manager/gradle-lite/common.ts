@@ -1,4 +1,4 @@
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 
 export { MAVEN_REPO } from '../../datasource/maven/common';
 

@@ -10,7 +10,7 @@ import * as packageCache from '../../util/cache/package';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import { Release, ReleaseResult } from '../common';
+import type { Release, ReleaseResult } from '../types';
 import { id } from './common';
 import { getNpmrc } from './npmrc';
 
@@ -212,6 +212,8 @@ export async function getDependency(
       const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,
+        dependencies: res.versions[version].dependencies,
+        devDependencies: res.versions[version].devDependencies,
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];

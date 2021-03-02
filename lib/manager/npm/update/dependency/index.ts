@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal';
 import { logger } from '../../../../logger';
 import { matchAt, replaceAt } from '../../../../util/string';
-import { UpdateDependencyConfig } from '../../../common';
+import type { UpdateDependencyConfig } from '../../../types';
 
 export function updateDependency({
   fileContent,

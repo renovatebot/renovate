@@ -5,9 +5,9 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as _git from '../../util/git';
-import { Platform, VulnerabilityAlert } from '../common';
+import type { Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -1852,11 +1852,11 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getPrBody(input)', () => {
+  describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
       const input =
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(github.getPrBody(input)).toMatchSnapshot();
+      expect(github.massageMarkdown(input)).toMatchSnapshot();
     });
     it('returns not-updated pr body for GHE', async () => {
       const scope = httpMock
@@ -1880,7 +1880,7 @@ describe('platform/github', () => {
       } as any);
       const input =
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(github.getPrBody(input)).toEqual(input);
+      expect(github.massageMarkdown(input)).toEqual(input);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

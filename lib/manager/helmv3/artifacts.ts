@@ -7,7 +7,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function helmUpdate(manifestPath: string): Promise<void> {
   const cmd = `helm dependency update ${quote(getSubDirectory(manifestPath))}`;

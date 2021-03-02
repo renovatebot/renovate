@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as template from '../../../util/template';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 
 type TableDefinition = {
   header: string;

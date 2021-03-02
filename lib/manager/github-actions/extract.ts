@@ -2,23 +2,14 @@ import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
-import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
   for (const line of content.split('\n')) {
     if (line.trim().startsWith('#')) {
-      continue; // eslint-disable-line no-continue
-    }
-
-    const containerImageMatch = /^\s+image: ([^"]+)\s*$/.exec(line);
-    if (containerImageMatch) {
-      const [, currentFrom] = containerImageMatch;
-      const dep = getDep(currentFrom);
-      dep.depType = 'docker';
-      deps.push(dep);
       continue; // eslint-disable-line no-continue
     }
 

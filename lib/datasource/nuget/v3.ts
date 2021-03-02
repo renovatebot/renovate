@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
-import { Release, ReleaseResult } from '../common';
+import type { Release, ReleaseResult } from '../types';
 
 import { id, removeBuildMeta } from './common';
 

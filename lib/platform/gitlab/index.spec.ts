@@ -1364,9 +1364,9 @@ These updates have all been created already. Click a checkbox below to force a r
 
  - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\`gh-got\`, \`gl-got\`, \`got\`)
 `;
-  describe('getPrBody(input)', () => {
+  describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
-      expect(gitlab.getPrBody(prBody)).toMatchSnapshot();
+      expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });
   describe('getVulnerabilityAlerts()', () => {

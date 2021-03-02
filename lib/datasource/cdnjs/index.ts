@@ -1,6 +1,6 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'cdnjs';
 export const caching = true;

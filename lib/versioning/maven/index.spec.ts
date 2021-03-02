@@ -4,7 +4,7 @@ import {
   parseRange,
   rangeToStr,
 } from './compare';
-import maven from '.';
+import maven, { isValid as _isValid } from '.';
 
 const {
   isValid,
@@ -290,6 +290,7 @@ describe('versioning/maven/index', () => {
     expect(isValid('1.0.0')).toBe(true);
     expect(isValid('[1.12.6,1.18.6]')).toBe(true);
     expect(isValid(undefined)).toBe(false);
+    expect(isValid === _isValid).toBe(true);
   });
   it('validates version string', () => {
     expect(isVersion('')).toBe(false);

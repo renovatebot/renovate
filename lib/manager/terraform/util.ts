@@ -1,4 +1,4 @@
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 
 export const keyValueExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/;
 export const resourceTypeExtractionRegex = /^\s*resource\s+"(?<type>[^\s]+)"\s+"(?<name>[^"]+)"\s*{/;

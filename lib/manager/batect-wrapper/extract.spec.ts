@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { id as githubReleaseDatasource } from '../../datasource/github-releases';
 import { id as semverVersioning } from '../../versioning/semver';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import { extractPackageFile } from './extract';
 
 const validWrapperContent = readFileSync(

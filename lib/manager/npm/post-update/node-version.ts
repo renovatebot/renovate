@@ -2,7 +2,7 @@ import { satisfies, validRange } from 'semver';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { isStable } from '../../../versioning/node';
-import { PostUpdateConfig } from '../../common';
+import type { PostUpdateConfig } from '../../types';
 
 async function getNodeFile(filename: string): Promise<string> | null {
   try {
