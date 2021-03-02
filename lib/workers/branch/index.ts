@@ -373,28 +373,44 @@ export async function processBranch(
                 regEx(pattern).test(cmd)
               )
             ) {
+              const msg = 'Post-upgrade task did not match any on allowed list';
               logger.warn(
                 {
                   cmd,
                   allowedPostUpgradeCommands,
                 },
-                'Post-upgrade task did not match any on allowed list'
+                msg
               );
-            } else {
-              const compiledCmd = allowPostUpgradeCommandTemplating
-                ? template.compile(cmd, upgrade)
-                : cmd;
-
-              logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
-
-              const execResult = await exec(compiledCmd, {
-                cwd: config.localDir,
+              config.artifactErrors.push({
+                lockFile: upgrade.packageFile,
+                stderr: msg,
               });
+            } else {
+              try {
+                const compiledCmd = allowPostUpgradeCommandTemplating
+                  ? template.compile(cmd, upgrade)
+                  : cmd;
 
-              logger.debug(
-                { cmd: compiledCmd, ...execResult },
-                'Executed post-upgrade task'
-              );
+                logger.debug(
+                  { cmd: compiledCmd },
+                  'Executing post-upgrade task'
+                );
+                const execResult = await exec(compiledCmd, {
+                  cwd: config.localDir,
+                });
+
+                logger.debug(
+                  { cmd: compiledCmd, ...execResult },
+                  'Executed post-upgrade task'
+                );
+              } catch (error) {
+                config.artifactErrors.push({
+                  lockFile: upgrade.packageFile,
+                  stderr:
+                    error.message ||
+                    'Error when executing post upgrade command',
+                });
+              }
             }
           }
 
