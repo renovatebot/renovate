@@ -20,6 +20,7 @@ describe('platform/git', () => {
     await repo.addConfig('user.email', 'Jest@example.com');
     await repo.addConfig('user.name', 'Jest');
     await fs.writeFile(base.path + '/past_file', 'past');
+    await repo.addConfig('commit.gpgsign', 'false');
     await repo.add(['past_file']);
     await repo.commit('past message');
 
@@ -64,6 +65,7 @@ describe('platform/git', () => {
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
+    await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
     await git.initRepo({
       localDir: tmpDir.path,
