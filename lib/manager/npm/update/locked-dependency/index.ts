@@ -70,10 +70,10 @@ export async function updateLockedDependency(
       // Don't return null if we're a parent update or else the whole update will fail
       // istanbul ignore if: too hard to replicate
       if (isParentUpdate) {
-        return {
-          packageFile: packageFileContent,
-          lockFile: lockFileContent,
-        };
+        const res = {};
+        res[packageFile] = packageFileContent;
+        res[lockFile] = lockFileContent;
+        return res;
       }
       return null;
     }
