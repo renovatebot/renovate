@@ -8,7 +8,7 @@
       "program": "${workspaceFolder}/lib/renovate.ts",
       "env": { "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
-      "runtimeArgs": ["-r", "ts-node/register"],
+      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
