@@ -666,6 +666,7 @@ export async function commitFiles({
       '-u': null,
       '--no-verify': null,
     });
+    delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
