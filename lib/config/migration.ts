@@ -4,7 +4,7 @@ import equal from 'fast-deep-equal';
 import { logger } from '../logger';
 import { HostRule } from '../types';
 import { clone } from '../util/clone';
-import { PackageRule, RenovateConfig } from './common';
+import type { PackageRule, RenovateConfig } from './common';
 import { RenovateOptions, getOptions } from './definitions';
 
 const options = getOptions();
@@ -331,9 +331,7 @@ export function migrateConfig(
           migratedConfig.minor.automerge = true;
           migratedConfig.major = migratedConfig.major || {};
           migratedConfig.major.automerge = false;
-        } /* istanbul ignore else: we can never go to else */ else if (
-          val === 'any'
-        ) {
+        } else if (val === 'any') {
           migratedConfig.automerge = true;
         }
       } else if (key === 'packages') {
@@ -556,7 +554,8 @@ export function migrateConfig(
       };
     }
     return { isMigrated, migratedConfig };
-  } catch (err) /* c8 ignore next */ {
+    /* c8 ignore next 4 */
+  } catch (err) {
     logger.debug({ config, err }, 'migrateConfig() error');
     throw err;
   }

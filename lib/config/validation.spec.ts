@@ -1,7 +1,8 @@
+import { getName } from '../../test/util';
 import * as configValidation from './validation';
 import { RenovateConfig } from '.';
 
-describe('config/validation', () => {
+describe(getName(__filename), () => {
   describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
       const config = {

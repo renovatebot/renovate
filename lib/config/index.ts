@@ -11,6 +11,7 @@ import * as fileParser from './file';
 import { resolveConfigPresets } from './presets';
 import { mergeChildConfig } from './utils';
 
+/* c8 ignore next */
 export * from './common';
 export { mergeChildConfig };
 
@@ -81,13 +82,14 @@ export async function parseConfigs(
   }
 
   // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
-  // istanbul ignore if
+  /* c8 ignore start */
   if (config.logLevel) {
     logger.warn(
       'Configuring logLevel in CLI or file is deprecated. Use LOG_LEVEL environment variable instead'
     );
     levels('stdout', config.logLevel);
   }
+  /* c8 ignore stop */
 
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
@@ -95,7 +97,7 @@ export async function parseConfigs(
   }
 
   // Add file logger
-  // istanbul ignore if
+  /* c8 ignore start */
   if (config.logFile) {
     logger.debug(
       `Enabling ${config.logFileLevel} logging to ${config.logFile}`
@@ -106,6 +108,7 @@ export async function parseConfigs(
       level: config.logFileLevel,
     });
   }
+  /* c8 ignore stop */
 
   logger.trace({ config: defaultConfig }, 'Default config');
   logger.debug({ config: fileConfig }, 'File config');

@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { RenovateConfig, ValidationMessage } from './common';
-import * as configMassage from './massage';
-import * as configMigration from './migration';
-import * as configValidation from './validation';
+import type { RenovateConfig, ValidationMessage } from './common';
+import { massageConfig } from './massage';
+import { migrateConfig } from './migration';
+import { validateConfig } from './validation';
 
 export async function migrateAndValidate(
   config: RenovateConfig,
@@ -11,7 +11,7 @@ export async function migrateAndValidate(
 ): Promise<RenovateConfig> {
   logger.debug('migrateAndValidate()');
   try {
-    const { isMigrated, migratedConfig } = configMigration.migrateConfig(input);
+    const { isMigrated, migratedConfig } = migrateConfig(input);
     if (isMigrated) {
       logger.debug(
         { oldConfig: input, newConfig: migratedConfig },
@@ -20,7 +20,7 @@ export async function migrateAndValidate(
     } else {
       logger.debug('No config migration necessary');
     }
-    const massagedConfig = configMassage.massageConfig(migratedConfig);
+    const massagedConfig = massageConfig(migratedConfig);
     logger.debug({ config: massagedConfig }, 'massaged config');
     const {
       warnings,
@@ -28,8 +28,8 @@ export async function migrateAndValidate(
     }: {
       warnings: ValidationMessage[];
       errors: ValidationMessage[];
-    } = await configValidation.validateConfig(massagedConfig);
-    // istanbul ignore if
+    } = await validateConfig(massagedConfig);
+    /* c8 ignore next 3 */
     if (is.nonEmptyArray(warnings)) {
       logger.warn({ warnings }, 'Found renovate config warnings');
     }
@@ -41,7 +41,8 @@ export async function migrateAndValidate(
       massagedConfig.warnings = (config.warnings || []).concat(warnings);
     }
     return massagedConfig;
-  } catch (err) /* c8 ignore next */ {
+    /* c8 ignore next 4 */
+  } catch (err) {
     logger.debug({ config: input }, 'migrateAndValidate error');
     throw err;
   }

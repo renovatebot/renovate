@@ -6,7 +6,7 @@ import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import { RenovateConfig, ValidationMessage } from './common';
 import { RenovateOptions, getOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
-import * as managerValidator from './validation-helpers/managers';
+import { check } from './validation-helpers/managers';
 
 const options = getOptions();
 
@@ -82,7 +82,7 @@ export async function validateConfig(
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
-    // istanbul ignore if
+    /* c8 ignore start */
     if (key === '__proto__') {
       errors.push({
         depName: 'Config security error',
@@ -90,6 +90,7 @@ export async function validateConfig(
       });
       continue; // eslint-disable-line
     }
+    /* c8 ignore stop */
     if (key === 'fileMatch') {
       if (parentPath === undefined) {
         errors.push({
@@ -241,9 +242,7 @@ export async function validateConfig(
                     packageRule as RenovateConfig,
                     config
                   );
-                  errors.push(
-                    ...managerValidator.check({ resolvedRule, currentPath })
-                  );
+                  errors.push(...check({ resolvedRule, currentPath }));
                   for (const pKey of Object.keys(resolvedRule)) {
                     if (selectors.includes(pKey)) {
                       hasSelector = true;
@@ -422,11 +421,9 @@ export async function validateConfig(
     }
   }
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
-    // istanbul ignore else: currently never happen
     if (a.depName === b.depName) {
       return a.message > b.message ? 1 : -1;
     }
-    /* c8 ignore next */
     return a.depName > b.depName ? 1 : -1;
   }
   errors.sort(sortAll);

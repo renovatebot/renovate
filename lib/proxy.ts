@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { createGlobalProxyAgent } from 'global-agent';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 
@@ -20,6 +19,8 @@ export function bootstrap(): void {
     is.nonEmptyString(process.env.HTTP_PROXY) ||
     is.nonEmptyString(process.env.HTTPS_PROXY)
   ) {
+    // eslint-disable-next-line
+    const { createGlobalProxyAgent } = require('global-agent');
     createGlobalProxyAgent({
       environmentVariableNamespace: '',
     });

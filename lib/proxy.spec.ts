@@ -1,5 +1,7 @@
 import { bootstrap, hasProxy } from './proxy';
 
+jest.mock('global-agent');
+
 describe('proxy', () => {
   const httpProxy = 'http://example.org/http-proxy';
   const httpsProxy = 'http://example.org/https-proxy';

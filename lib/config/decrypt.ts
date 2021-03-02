@@ -36,7 +36,7 @@ export function decryptConfig(config: RenovateConfig): RenovateConfig {
                 .toString();
               // let it throw if the above fails
             }
-            // istanbul ignore if
+            /* c8 ignore next 3 */
             if (!decryptedStr.length) {
               throw new Error('empty string');
             }

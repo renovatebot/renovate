@@ -14,7 +14,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     // eslint-disable-next-line global-require,import/no-dynamic-require
     config = require(configFile);
   } catch (err) {
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (err instanceof SyntaxError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
       process.exit(1);

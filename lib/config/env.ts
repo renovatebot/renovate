@@ -34,7 +34,8 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     if (option.env !== false) {
       const envName = getEnvName(option);
       if (env[envName]) {
-        // istanbul ignore if
+        // TODO: add tests
+        /* c8 ignore next 14 */
         if (option.type === 'array' && option.subType === 'object') {
           try {
             const parsed = JSON.parse(env[envName]);

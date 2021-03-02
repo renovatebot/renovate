@@ -88,7 +88,7 @@ export function getConfig(input: string[]): GlobalConfig {
     }
   });
 
-  /* c8 ignore next */
+  /* c8 ignore start */
   function helpConsole(): void {
     /* eslint-disable no-console */
     console.log('  Examples:');
@@ -103,6 +103,7 @@ export function getConfig(input: string[]): GlobalConfig {
     );
     /* eslint-enable no-console */
   }
+  /* c8 ignore stop */
 
   program = program
     .version(version, '-v, --version')

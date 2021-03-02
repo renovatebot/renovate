@@ -1,6 +1,6 @@
 import * as renovateWorker from './workers/global';
 
-Object.defineProperty(renovateWorker, 'start', { value: jest.fn() });
+jest.mock('./workers/global');
 
 describe('renovate', () => {
   it('starts', () => {
