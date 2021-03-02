@@ -192,7 +192,7 @@
     "@babel/plugin-proposal-class-properties": "7.13.0",
     "@babel/plugin-proposal-object-rest-spread": "7.13.8",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
-    "@babel/preset-env": "7.13.8",
+    "@babel/preset-env": "7.13.9",
     "@babel/preset-typescript": "7.13.0",
     "@jest/globals": "26.6.2",
     "@jest/reporters": "26.6.2",
