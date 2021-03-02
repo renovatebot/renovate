@@ -1,6 +1,9 @@
+import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
+
 const ci = !!process.env.CI;
 
-module.exports = {
+const config: InitialOptionsTsJest = {
+  preset: 'ts-jest',
   cacheDirectory: '.cache/jest',
   coverageDirectory: './coverage',
   collectCoverage: true,
@@ -14,7 +17,7 @@ module.exports = {
     : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
-      branches: 96,
+      branches: 94.19,
       functions: 100,
       lines: 100,
       statements: 100,
@@ -25,7 +28,11 @@ module.exports = {
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   testEnvironment: 'node',
   testRunner: 'jest-circus/runner',
-  transform: {
-    '^.+\\.(j|t)s$': 'babel-jest',
+  globals: {
+    'ts-jest': {
+      diagnostics: false,
+    },
   },
 };
+
+export default config;

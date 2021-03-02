@@ -132,9 +132,7 @@ interface Files {
   }[];
 }
 
-export /* istanbul ignore next */ function isConflicted(
-  files: Files[]
-): boolean {
+export function isConflicted(files: Files[]): boolean {
   for (const file of files) {
     for (const chunk of file.chunks) {
       for (const change of chunk.changes) {

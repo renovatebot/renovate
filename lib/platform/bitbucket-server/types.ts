@@ -19,11 +19,7 @@ export interface BbsPr extends Pr {
   version?: number;
 }
 
-export enum BbsRestPrState {
-  Declined = 'DECLINED',
-  Open = 'OPEN',
-  Merged = 'MERGED',
-}
+export type BbsRestPrState = 'DECLINED' | 'OPEN' | 'MERGED';
 
 export interface BbsRestBranchRef {
   displayId: string;

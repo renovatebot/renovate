@@ -8,8 +8,7 @@
       "program": "${workspaceFolder}/lib/renovate.ts",
       "env": { "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
-      "runtimeArgs": ["--extensions", ".ts,.js"],
+      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },

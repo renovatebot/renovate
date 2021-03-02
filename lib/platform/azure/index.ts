@@ -668,21 +668,25 @@ export function massageMarkdown(input: string): string {
     .replace('</details>', '');
 }
 
-export /* istanbul ignore next */ function findIssue(): Promise<Issue | null> {
+/* istanbul ignore next */
+export function findIssue(): Promise<Issue | null> {
   logger.warn(`findIssue() is not implemented`);
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue(): Promise<EnsureIssueResult | null> {
+/* istanbul ignore next */
+export function ensureIssue(): Promise<EnsureIssueResult | null> {
   logger.warn(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
-export /* istanbul ignore next */ function ensureIssueClosing(): Promise<void> {
+/* istanbul ignore next */
+export function ensureIssueClosing(): Promise<void> {
   return Promise.resolve();
 }
 
-export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
+/* istanbul ignore next */
+export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return Promise.resolve([]);
@@ -779,7 +783,7 @@ export async function addReviewers(
   );
 }
 
-export /* istanbul ignore next */ async function deleteLabel(
+export async function deleteLabel(
   prNumber: number,
   label: string
 ): Promise<void> {

@@ -40,7 +40,7 @@ import {
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
-import {
+import type {
   BbsConfig,
   BbsPr,
   BbsRestBranch,
@@ -527,17 +527,8 @@ export async function setBranchStatus({
 
 // Issue
 
-// function getIssueList() {
-//   logger.debug(`getIssueList()`);
-//   // TODO: Needs implementation
-//   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
-//   // BB Server doesnt have issues
-//   return [];
-// }
-
-export /* istanbul ignore next */ function findIssue(
-  title: string
-): Promise<Issue | null> {
+/* istanbul ignore next */
+export function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
@@ -545,7 +536,8 @@ export /* istanbul ignore next */ function findIssue(
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue({
+/* istanbul ignore next */
+export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.warn({ title }, 'Cannot ensure issue');
@@ -555,15 +547,15 @@ export /* istanbul ignore next */ function ensureIssue({
   return null;
 }
 
-export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
+/* istanbul ignore next */
+export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return Promise.resolve([]);
 }
 
-export /* istanbul ignore next */ function ensureIssueClosing(
-  title: string
-): Promise<void> {
+/* istanbul ignore next */
+export function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
