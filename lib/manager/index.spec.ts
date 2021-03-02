@@ -27,6 +27,9 @@ describe('manager', () => {
       if (!module.extractPackageFile && !module.extractAllPackageFiles) {
         return false;
       }
+      if (Object.values(module).some((v) => v === undefined)) {
+        return false;
+      }
       return true;
     }
     const mgrs = manager.getManagers();

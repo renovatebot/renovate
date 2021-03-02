@@ -546,12 +546,10 @@ export async function ensureIssue({
   return null;
 }
 
-export /* istanbul ignore next */ async function getIssueList(): Promise<
-  Issue[]
-> {
+/* istanbul ignore next */
+export async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
 
-  /* istanbul ignore if */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot getIssueList');
     return [];
@@ -568,9 +566,9 @@ export /* istanbul ignore next */ async function getIssueList(): Promise<
         await bitbucketHttp.getJson<{ values: Issue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`
         )
-      ).body.values || /* istanbul ignore next */ []
+      ).body.values || []
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.warn({ err }, 'Error finding issues');
     return [];
   }
@@ -619,7 +617,8 @@ export async function addReviewers(
   );
 }
 
-export /* istanbul ignore next */ function deleteLabel(): never {
+/* istanbul ignore next */
+export function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
 

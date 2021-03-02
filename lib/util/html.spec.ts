@@ -8,6 +8,7 @@ describe(getName(__filename), () => {
     const div = body.childNodes[0] as HTMLElement;
     expect(div.tagName).toBe('DIV');
     expect(div.textContent).toBe('Hello, world!');
+    expect(div instanceof HTMLElement).toBe(true);
   });
   it('returns empty', () => {
     const body = parse('');
