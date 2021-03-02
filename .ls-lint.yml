@@ -12,7 +12,7 @@ ignore:
   - .github/ISSUE_TEMPLATE
   - .github/pull_request_template.md
   - dist
-  - jest.config.js
+  - jest.config.ts
   - node_modules
   - SECURITY.md
   - test/e2e/node_modules
