@@ -20,10 +20,10 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../types';
-import { NpmPackage, NpmPackageDependency } from './types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
+import type { NpmPackage, NpmPackageDependency } from './types';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {

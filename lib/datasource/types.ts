@@ -9,7 +9,7 @@ export interface DigestConfig extends Config {
   registryUrl?: string;
 }
 
-interface ReleasesConfigBase {
+export interface ReleasesConfigBase {
   npmrc?: string;
   registryUrls?: string[];
 }

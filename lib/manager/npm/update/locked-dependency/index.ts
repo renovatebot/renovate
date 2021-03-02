@@ -3,10 +3,10 @@ import { logger } from '../../../../logger';
 import { api as semver } from '../../../../versioning/npm';
 import type { UpdateLockedConfig } from '../../../types';
 import { updateDependency } from '../dependency';
-import type { PackageLockOrEntry } from './types';
 import { findDepConstraints } from './dep-constraints';
 import { getLockedDependencies } from './get-locked';
 import { findFirstParentVersion } from './parent-version';
+import type { PackageLockOrEntry } from './types';
 
 export function validateInputs(config: UpdateLockedConfig): boolean {
   const { currentVersion, newVersion, lockFile } = config;

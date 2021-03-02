@@ -2,7 +2,7 @@ import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { clone } from '../util/clone';
 import { getOptions } from './definitions';
 import type { PackageRule, RenovateConfig, RenovateOptions } from './types';

@@ -3,12 +3,16 @@ import { get, getLanguageList, getManagerList } from '../manager';
 import { readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
 import * as cliParser from './cli';
-import { GlobalConfig, RenovateConfig, RenovateConfigStage } from './types';
 import * as defaultsParser from './defaults';
 import * as definitions from './definitions';
 import * as envParser from './env';
 import * as fileParser from './file';
 import { resolveConfigPresets } from './presets';
+import type {
+  GlobalConfig,
+  RenovateConfig,
+  RenovateConfigStage,
+} from './types';
 import { mergeChildConfig } from './utils';
 
 export * from './types';
