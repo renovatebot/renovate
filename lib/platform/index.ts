@@ -1,6 +1,6 @@
 import URL from 'url';
 import addrs from 'email-addresses';
-import { GlobalConfig } from '../config/types';
+import type { GlobalConfig } from '../config/types';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
