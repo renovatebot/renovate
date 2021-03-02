@@ -65,7 +65,7 @@ jobs:
 
       - name: Codecov
         uses: codecov/codecov-action@v1.2.1
-        if: always() && env.coverage == 'true'
+        if: always()
 
       # build after tests to exclude files
       - name: Build

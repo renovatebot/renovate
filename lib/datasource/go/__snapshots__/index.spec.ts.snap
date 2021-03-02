@@ -398,6 +398,48 @@ Array [
 ]
 `;
 
+exports[`datasource/go getReleases support self hosted gitlab private repositories 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v2.0.0",
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": "https://my.custom.domain/golang/myrepo",
+}
+`;
+
+exports[`datasource/go getReleases support self hosted gitlab private repositories 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "my.custom.domain",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://my.custom.domain/golang/myrepo?go-get=1",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "my.custom.domain",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://my.custom.domain/api/v4/projects/golang%2Fmyrepo/repository/tags?per_page=100",
+  },
+]
+`;
+
 exports[`datasource/go getReleases unknown datasource returns null 1`] = `null`;
 
 exports[`datasource/go getReleases unknown datasource returns null 2`] = `

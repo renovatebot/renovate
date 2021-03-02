@@ -21,6 +21,7 @@ describe('platform/git', () => {
     await repo.addConfig('user.name', 'Jest');
     await repo.addConfig('commit.gpgsign', 'false');
     await fs.writeFile(base.path + '/past_file', 'past');
+    await repo.addConfig('commit.gpgsign', 'false');
     await repo.add(['past_file']);
     await repo.commit('past message');
 
