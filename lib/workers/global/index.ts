@@ -53,17 +53,17 @@ function checkEnv(): void {
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.error(
       { release: process.release, versions: process.versions },
-      'Unsuported node environment detected.'
+      'Unsupported node environment detected.'
     );
   } else if (!satisfies(process.versions?.node, range)) {
     logger.error(
       { versions: process.versions, range },
-      'Unsuported node environment detected. Please update node version.'
+      'Unsupported node environment detected. Please update your node version.'
     );
   } else if (rangeNext && !satisfies(process.versions?.node, rangeNext)) {
     logger.warn(
       { versions: process.versions, range: rangeNext },
-      'Unsuported node environment detected. Please update node version.'
+      'Unsupported node environment detected. Please update your node version.'
     );
   }
 }
