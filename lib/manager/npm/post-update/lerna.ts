@@ -60,8 +60,8 @@ export async function generateLockFiles(
       const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
         installNpm += `@${quote(npmCompatibility)}`;
-        preCommands.push(installNpm, 'hash -d npm');
       }
+      preCommands.push(installNpm, 'hash -d npm');
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
