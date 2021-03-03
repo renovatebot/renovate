@@ -1,8 +1,8 @@
 import URL from 'url';
-import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../util/host-rules';
+import { validateUrl } from '../util/url';
 import type { ReleaseResult } from './types';
 
 // Use this object to define changelog URLs for packages
@@ -226,16 +226,12 @@ export function addMetaData(
   }
 
   // Clean up any empty urls
-  const urls = ['homepage', 'sourceUrl', 'changelogUrl'];
+  const urls = ['homepage', 'sourceUrl', 'changelogUrl', 'dependencyUrl'];
   for (const url of urls) {
-    if (is.nonEmptyString(dep[url])) {
-      dep[url] = dep[url].trim();
-      // istanbul ignore if
-      if (!dep[url].match(/^https?:\/\//)) {
-        delete dep[url];
-      }
-    } else {
+    if (!validateUrl(dep[url]?.trim())) {
       delete dep[url];
+    } else {
+      dep[url] = dep[url].trim();
     }
   }
 }
