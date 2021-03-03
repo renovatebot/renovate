@@ -114,7 +114,7 @@
   },
   "engines-next": {
     "description": "Versions other than the below are deprecated and a warning will be logged",
-    "node": ">=14.15.4"
+    "node": ">=14.15.0"
   },
   "dependencies": {
     "@aws-sdk/client-ecr": "3.5.0",
