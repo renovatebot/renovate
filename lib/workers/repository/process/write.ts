@@ -15,7 +15,7 @@ export async function writeUpdates(
   let branches = allBranches;
   logger.debug(
     `Processing ${branches.length} branch${
-      branches.length !== 1 ? 'es' : ''
+      branches.length === 1 ? '' : 'es'
     }: ${branches
       .map((b) => b.branchName)
       .sort()

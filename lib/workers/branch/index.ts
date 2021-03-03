@@ -390,18 +390,10 @@ export async function processBranch(
 
           for (const cmd of commands) {
             if (
-              !allowedPostUpgradeCommands.some((pattern) =>
+              allowedPostUpgradeCommands.some((pattern) =>
                 regEx(pattern).test(cmd)
               )
             ) {
-              logger.warn(
-                {
-                  cmd,
-                  allowedPostUpgradeCommands,
-                },
-                'Post-upgrade task did not match any on allowed list'
-              );
-            } else {
               const compiledCmd = allowPostUpgradeCommandTemplating
                 ? template.compile(cmd, upgrade)
                 : cmd;
@@ -415,6 +407,14 @@ export async function processBranch(
               logger.debug(
                 { cmd: compiledCmd, ...execResult },
                 'Executed post-upgrade task'
+              );
+            } else {
+              logger.warn(
+                {
+                  cmd,
+                  allowedPostUpgradeCommands,
+                },
+                'Post-upgrade task did not match any on allowed list'
               );
             }
           }
