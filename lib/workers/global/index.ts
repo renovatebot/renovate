@@ -47,15 +47,16 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
+  const range = '>=14.15.4';
   if (process.release?.name !== 'node') {
     logger.warn(
       { release: process.release },
       'Unsuported node environment detected.'
     );
-  } else if (!satisfies(process.versions?.node, '>=14.15.0')) {
+  } else if (!satisfies(process.versions?.node, range)) {
     logger.warn(
-      { versions: process.versions },
-      'Unsuported node environment detected. Please update node version'
+      { versions: process.versions, range },
+      'Unsuported node environment detected. Please update node version.'
     );
   }
 }
