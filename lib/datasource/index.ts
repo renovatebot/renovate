@@ -60,7 +60,7 @@ async function getRegistryReleases(
       cacheNamespace,
       cacheKey
     );
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (cachedResult) {
       logger.debug({ cacheKey }, 'Returning cached datasource response');
       return cachedResult;
@@ -200,7 +200,7 @@ async function fetchReleases(
   let dep: ReleaseResult = null;
   try {
     if (datasource.registryStrategy) {
-      // istanbul ignore if
+      /* c8 ignore next 7 */
       if (!registryUrls.length) {
         logger.warn(
           { datasource: datasourceName, depName: config.depName },
@@ -246,7 +246,7 @@ function getRawReleases(
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult !== undefined) {
     return cachedResult;
   }

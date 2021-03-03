@@ -201,8 +201,8 @@ export function addMetaData(
     delete dep.homepage;
   }
   const extraBaseUrls = [];
-  /* c8 ignore next */
   hostRules.hosts({ hostType: 'github' }).forEach((host) => {
+    /* c8 ignore next */
     extraBaseUrls.push(host, `gist.${host}`);
   });
   extraBaseUrls.push('gitlab.com');
@@ -230,7 +230,7 @@ export function addMetaData(
   for (const url of urls) {
     if (is.nonEmptyString(dep[url])) {
       dep[url] = dep[url].trim();
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (!dep[url].match(/^https?:\/\//)) {
         delete dep[url];
       }

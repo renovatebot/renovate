@@ -201,7 +201,7 @@ export async function getReleases(
 ): Promise<ReleaseResult | null> {
   const { lookupName, registryUrl } = config;
 
-  // istanbul ignore if
+  /* c8 ignore next 5 */
   if (!registryUrl) {
     logger.warn(
       'crate datasource: No registryUrl specified, cannot perform getReleases'
@@ -218,7 +218,7 @@ export async function getReleases(
       cacheNamespace,
       cacheKey
     );
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (cachedResult) {
       logger.debug({ cacheKey }, 'Returning cached resource');
       return cachedResult;

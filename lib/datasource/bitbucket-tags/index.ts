@@ -32,7 +32,7 @@ export async function getReleases({
     cacheNamespace,
     cacheKey
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -66,7 +66,7 @@ async function getTagCommit(
 ): Promise<string | null> {
   const cacheKey = getCacheKey(registryUrl, repo, `tag-${tag}`);
   const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -95,7 +95,7 @@ export async function getDigest(
 
   const cacheKey = getCacheKey(registryUrl, repo, 'digest');
   const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }

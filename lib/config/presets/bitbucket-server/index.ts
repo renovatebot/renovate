@@ -22,7 +22,8 @@ export async function fetchJSONFile(
   try {
     res = await http.getJson(url);
   } catch (err) {
-    // istanbul ignore if: not testable with nock
+    // not testable with nock
+    /* c8 ignore next 3 */
     if (err instanceof ExternalHostError) {
       throw err;
     }

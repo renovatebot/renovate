@@ -5,6 +5,8 @@ const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 let agent = false;
 
 export function bootstrap(): void {
+  /* c8 ignore start */
+  /* env is case-insensitive on windows */
   envVars.forEach((envVar) => {
     if (
       typeof process.env[envVar] === 'undefined' &&
@@ -13,6 +15,7 @@ export function bootstrap(): void {
       process.env[envVar] = process.env[envVar.toLowerCase()];
     }
   });
+  /* c8 ignore stop */
 
   if (
     is.nonEmptyString(process.env.HTTP_PROXY) ||

@@ -183,7 +183,7 @@ async function getAuthHeaders(
     ).body;
 
     const token = authResponse.token || authResponse.access_token;
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
       return null;
@@ -191,7 +191,8 @@ async function getAuthHeaders(
     return {
       authorization: `Bearer ${token}`,
     };
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) {
+    /* c8 ignore start */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors
       return null;
@@ -227,6 +228,7 @@ async function getAuthHeaders(
       logger.trace({ registry, dockerRepository, err }, 'Host disabled');
       return null;
     }
+    /* c8 ignore stop */
     logger.warn(
       { registry, dockerRepository, err },
       'Error obtaining docker token'
@@ -266,7 +268,8 @@ async function getManifestResponse(
       headers,
     });
     return manifestResponse;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) {
+    /* c8 ignore start */
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -305,6 +308,7 @@ async function getManifestResponse(
       logger.debug({ err });
       return null;
     }
+    /* c8 ignore stop */
     logger.debug(
       {
         err,
@@ -331,7 +335,7 @@ async function getConfigDigest(
   // If getting the manifest fails here, then abort
   // This means that the latest tag doesn't have a manifest, which shouldn't
   // be possible
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!manifestResponse) {
     return null;
   }
@@ -391,7 +395,7 @@ export async function getDigest(
       cacheNamespace,
       cacheKey
     );
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (cachedResult !== undefined) {
       return cachedResult;
     }
@@ -404,10 +408,11 @@ export async function getDigest(
       digest = extractDigestFromResponse(manifestResponse) || null;
       logger.debug({ digest }, 'Got docker digest');
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;
     }
+    /* c8 ignore next 8 */
     logger.debug(
       {
         err,
@@ -434,7 +439,7 @@ async function getTags(
       cacheNamespace,
       cacheKey
     );
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (cachedResult !== undefined) {
       return cachedResult;
     }
@@ -458,7 +463,8 @@ async function getTags(
     const cacheMinutes = 30;
     await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) {
+    /* c8 ignore start */
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -491,6 +497,7 @@ async function getTags(
       );
       throw new ExternalHostError(err);
     }
+    /* c8 ignore stop */
     throw err;
   }
 }
@@ -514,7 +521,7 @@ async function getLabels(
     cacheNamespace,
     cacheKey
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult !== undefined) {
     return cachedResult;
   }
@@ -526,7 +533,8 @@ async function getLabels(
     }
 
     const headers = await getAuthHeaders(registry, dockerRepository);
-    // istanbul ignore if: Should never be happen
+    //  Should never be happen
+    /* c8 ignore next 4 */
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return {};
@@ -548,7 +556,8 @@ async function getLabels(
     const cacheMinutes = 60;
     await packageCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
-  } catch (err) /* istanbul ignore next: should be tested in future */ {
+  } catch (err) {
+    /* c8 ignore start */
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -588,7 +597,6 @@ async function getLabels(
     ) {
       logger.debug({ registry, err }, 'Error connecting to docker registry');
     } else if (registry === 'https://quay.io') {
-      /* c8 ignore next */
       logger.debug(
         'Ignoring quay.io errors until they fully support v2 schema'
       );
@@ -598,6 +606,7 @@ async function getLabels(
         'Unknown error getting Docker labels'
       );
     }
+    /* c8 ignore stop */
     return {};
   }
 }
