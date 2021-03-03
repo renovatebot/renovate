@@ -63,7 +63,7 @@ function checkEnv(): void {
   } else if (rangeNext && !satisfies(process.versions?.node, rangeNext)) {
     logger.warn(
       { versions: process.versions, range: rangeNext },
-      'Unsupported node environment detected. Please update your node version.'
+      'Unsupported node environment detected. Please check your node version.'
     );
   }
 }
