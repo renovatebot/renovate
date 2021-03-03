@@ -2,9 +2,9 @@
 
 ## Add new NodeJS version
 
-- Add new versions via `package.json>engines>node` and `package.json>engines-next>node`
+- Add new version via `package.json>engines>node` and `package.json>engines-next>node`
 - Update the node version in the [local-development](./local-development.md) docs
-- Update the node versions in the Github Actions workflow files
+- Update the node version in the Github Actions workflow files
 
 ## Deprecate old NodeJS version
 
