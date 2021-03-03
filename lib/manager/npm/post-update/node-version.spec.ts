@@ -41,7 +41,6 @@ describe('getNodeConstraint', () => {
     expect(isAugmentedRange || node16IsStable).toBe(true);
   });
   it('forces node 15 if v2 lockfile detected and no constraint', async () => {
-    fs.readLocalFile = jest.fn();
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.readLocalFile.mockResolvedValueOnce('{"lockfileVersion":2}');
