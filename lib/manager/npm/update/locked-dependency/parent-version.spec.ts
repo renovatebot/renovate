@@ -40,32 +40,6 @@ describe(getName(__filename), () => {
         await findFirstParentVersion('express', '4.0.0', 'send', '0.11.1')
       ).toEqual('4.11.1');
     });
-    it('finds indirect devDependency', async () => {
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/cookie-parser')
-        .reply(200, {
-          name: 'cookie-parser',
-          repository: {},
-          versions: {
-            '1.0.1': {},
-            '1.0.2': {},
-          },
-          'dist-tags': { latest: '1.0.2' },
-        });
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
-      expect(
-        await findFirstParentVersion(
-          'express',
-          '4.0.0',
-          'cookie-parser',
-          '1.0.2'
-        )
-      ).toEqual('4.3.0');
-    });
     it('finds removed dependencies', async () => {
       httpMock
         .scope('https://registry.npmjs.org')
