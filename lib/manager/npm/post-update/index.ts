@@ -466,7 +466,7 @@ export async function getAdditionalFiles(
           `//${hostRule.hostName}/:_authToken=${hostRule.token}`
         );
       }
-    } else if (hostRule.username || hostRule.password) {
+    } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
       if (hostRule.baseUrl) {
         const uri = hostRule.baseUrl.replace(/^https?:/, '');
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
