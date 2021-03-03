@@ -113,6 +113,7 @@
     "yarn": "^1.17.0"
   },
   "engines-next": {
+    "description": "Versions other than the below are deprecated and a warning will be logged",
     "node": ">=14.15.4"
   },
   "dependencies": {
