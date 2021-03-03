@@ -79,7 +79,8 @@ export async function generateLockFiles(
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
     lernaCommand += cmdOptions;
-    const tagConstraint = await getNodeConstraint(config);
+    const allowUnstable = true; // lerna will pick the default installed npm@6 if we use node@<15
+    const tagConstraint = await getNodeConstraint(config, allowUnstable);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
