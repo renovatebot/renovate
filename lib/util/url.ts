@@ -4,6 +4,10 @@ export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
 }
 
+export function trimTrailingSlash(url: string): string {
+  return url.replace(/\/?$/, '');
+}
+
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   const inputString = input.toString();
 

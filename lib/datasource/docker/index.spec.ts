@@ -71,6 +71,20 @@ describe(getName(__filename), () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('supports http registryUrls', () => {
+      const res = docker.getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'http://my.local.registry/prefix'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('supports schemeless registryUrls', () => {
+      const res = docker.getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'my.local.registry/prefix'
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('getDigest', () => {
     it('returns null if no token', async () => {
