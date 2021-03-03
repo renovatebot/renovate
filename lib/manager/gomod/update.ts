@@ -82,12 +82,6 @@ export function updateDependency({
         if (depName === depNameNoVersion) {
           // If package currently has no version, pin to latest one.
           newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
-        } else if (/^v(0|1)\./.test(upgrade.currentValue)) {
-          // Add version
-          newLine = newLine.replace(
-            updateLineExp,
-            `$1/v${upgrade.newMajor}$2$3`
-          );
         } else {
           // Replace version
           const [oldV] = upgrade.currentValue.split('.');

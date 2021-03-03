@@ -53,6 +53,20 @@ describe('manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).toEqual(gomod1);
     });
+    it('bumps major v0 > v1', () => {
+      const upgrade = {
+        depName: 'github.com/pkg/errors',
+        managerData: { lineNumber: 2 },
+        currentValue: 'v0.7.0',
+        newValue: 'v1.0.0',
+        newMajor: 1,
+        updateType: 'major' as UpdateType,
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain('github.com/pkg/errors v1.0.0');
+    });
     it('replaces major updates > 1', () => {
       const upgrade = {
         depName: 'github.com/pkg/errors',
@@ -145,6 +159,20 @@ describe('manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod2, upgrade });
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/src-d/gcfg/v3 v3.0.0');
+    });
+    it('bumps major v0 > v1 multiline', () => {
+      const upgrade = {
+        depName: 'golang.org/x/text',
+        managerData: { lineNumber: 56, multiLine: true },
+        currentValue: 'v0.3.0',
+        newValue: 'v1.0.0',
+        newMajor: 1,
+        updateType: 'major' as UpdateType,
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod2, upgrade });
+      expect(res).not.toEqual(gomod2);
+      expect(res).toContain('golang.org/x/text v1.0.0');
     });
     it('update multiline digest', () => {
       const upgrade = {
