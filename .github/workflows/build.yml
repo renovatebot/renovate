@@ -23,14 +23,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12, 14]
+        node-version: [14]
         python-version: [3.8]
         java-version: [11]
-        exclude:
-          - os: windows-latest
-            node-version: 12
-          - os: macos-latest
-            node-version: 12
+        # exclude:
+        #   - os: windows-latest
+        #     node-version: 12
+        #   - os: macos-latest
+        #     node-version: 12
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}

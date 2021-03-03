@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
+import { satisfies } from 'semver';
 import upath from 'upath';
 import * as configParser from '../../config';
 import { GlobalConfig } from '../../config';
@@ -44,6 +45,21 @@ function haveReachedLimits(): boolean {
   return false;
 }
 
+/* istanbul ignore next */
+function checkEnv(): void {
+  if (process.release?.name !== 'node') {
+    logger.warn(
+      { release: process.release },
+      'Unsuported node environment detected.'
+    );
+  } else if (!satisfies(process.versions?.node, '>=14.15.0')) {
+    logger.warn(
+      { versions: process.versions },
+      'Unsuported node environment detected. Please update node version'
+    );
+  }
+}
+
 export async function start(): Promise<number> {
   let config: GlobalConfig;
   try {
@@ -51,6 +67,9 @@ export async function start(): Promise<number> {
     config = await getGlobalConfig();
     // initialize all submodules
     config = await globalInitialize(config);
+
+    checkEnv();
+
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
     // Iterate through repositories sequentially
