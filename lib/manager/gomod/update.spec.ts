@@ -134,7 +134,7 @@ describe('manager/gomod/update', () => {
     });
     it('bumps major multiline', () => {
       const upgrade = {
-        depName: 'github.com/src-d/gcfg',
+        depName: 'github.com/src-d/gcfg/v2',
         managerData: { lineNumber: 47, multiLine: true },
         currentValue: 'v2.3.0',
         newValue: 'v3.0.0',
@@ -192,7 +192,9 @@ describe('manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       // Assert that the version still contains +incompatible tag.
-      expect(res).toContain('github.com/Azure/azure-sdk-for-go v26.0.0+incompatible');
+      expect(res).toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+      );
     });
     it('handles replace line with minor version update', () => {
       const upgrade = {
