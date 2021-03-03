@@ -16,7 +16,6 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
     'prettier',
-    'prettier/@typescript-eslint',
   ],
   parserOptions: {
     ecmaVersion: 9,
