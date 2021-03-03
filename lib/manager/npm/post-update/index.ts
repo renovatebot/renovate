@@ -17,7 +17,7 @@ import {
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
+import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
@@ -45,7 +45,7 @@ export function determineLockFileDirs(
   const lernaDirs = [];
 
   for (const upgrade of config.upgrades) {
-    if (upgrade.updateType === 'lockFileMaintenance') {
+    if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
       // Return every directory that contains a lockfile
       if (upgrade.lernaDir && upgrade.npmLock) {
         lernaDirs.push(upgrade.lernaDir);
@@ -235,11 +235,19 @@ export async function writeUpdatedPackageFiles(
     return;
   }
   for (const packageFile of config.updatedPackageFiles) {
+    if (packageFile.name.endsWith('package-lock.json')) {
+      logger.debug(`Writing package-lock file: ${packageFile.name}`);
+      await outputFile(
+        upath.join(config.localDir, packageFile.name),
+        packageFile.contents
+      );
+      continue; // eslint-disable-line
+    }
     if (!packageFile.name.endsWith('package.json')) {
       continue; // eslint-disable-line
     }
     logger.debug(`Writing ${String(packageFile.name)}`);
-    const massagedFile = JSON.parse(packageFile.contents);
+    const massagedFile = JSON.parse(packageFile.contents.toString());
     try {
       const { token } = hostRules.find({
         hostType: config.platform,
@@ -419,6 +427,13 @@ export async function getAdditionalFiles(
     logger.debug('Skipping lock file generation');
     return { artifactErrors, updatedArtifacts };
   }
+  if (
+    !config.updatedPackageFiles?.length &&
+    config.upgrades?.every((upgrade) => upgrade.isRemediation)
+  ) {
+    logger.debug('Skipping lock file generation for remediations');
+    return { artifactErrors, updatedArtifacts };
+  }
   logger.debug('Getting updated lock files');
   if (
     config.updateType === 'lockFileMaintenance' &&
@@ -429,7 +444,7 @@ export async function getAdditionalFiles(
     return { artifactErrors, updatedArtifacts };
   }
   const dirs = determineLockFileDirs(config, packageFiles);
-  logger.debug({ dirs }, 'lock file dirs');
+  logger.trace({ dirs }, 'lock file dirs');
   await writeExistingFiles(config, packageFiles);
   await writeUpdatedPackageFiles(config);
 

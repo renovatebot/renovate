@@ -15,11 +15,14 @@ const complexPodfile = fs.readFileSync(
 
 describe('lib/manager/cocoapods/extract', () => {
   describe('extractPackageFile()', () => {
-    it('extracts all dependencies', () => {
-      const simpleResult = extractPackageFile(simplePodfile).deps;
+    it('extracts all dependencies', async () => {
+      const simpleResult = (await extractPackageFile(simplePodfile, 'Podfile'))
+        .deps;
       expect(simpleResult).toMatchSnapshot();
 
-      const complexResult = extractPackageFile(complexPodfile).deps;
+      const complexResult = (
+        await extractPackageFile(complexPodfile, 'Podfile')
+      ).deps;
       expect(complexResult).toMatchSnapshot();
     });
   });

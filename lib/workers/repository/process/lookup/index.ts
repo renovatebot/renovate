@@ -1,4 +1,4 @@
-import { ValidationMessage } from '../../../../config';
+import type { ValidationMessage } from '../../../../config/types';
 import {
   Release,
   getDefaultVersioning,
@@ -10,16 +10,16 @@ import {
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
-import { LookupUpdate } from '../../../../manager/common';
+import type { LookupUpdate } from '../../../../manager/types';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
-import { LookupUpdateConfig, UpdateResult } from './common';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { getRollbackUpdate } from './rollback';
+import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
 export async function lookupUpdates(
@@ -37,7 +37,7 @@ export async function lookupUpdates(
     packageFile,
     pinDigests,
     rollbackPrs,
-    vulnerabilityAlert,
+    isVulnerabilityAlert,
   } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   // Use the datasource's default versioning if none is configured
@@ -126,7 +126,7 @@ export async function lookupUpdates(
     let rangeStrategy = getRangeStrategy(config);
     // istanbul ignore next
     if (
-      vulnerabilityAlert &&
+      isVulnerabilityAlert &&
       rangeStrategy === 'update-lockfile' &&
       !lockedVersion
     ) {
@@ -182,7 +182,7 @@ export async function lookupUpdates(
       // Leave only compatible versions
       versioning.isCompatible(v.version, currentValue)
     );
-    if (vulnerabilityAlert) {
+    if (isVulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
     const buckets: Record<string, [Release]> = {};
@@ -366,7 +366,7 @@ export async function lookupUpdates(
       if (
         update.updateType !== 'pin' &&
         update.updateType !== 'rollback' &&
-        !vulnerabilityAlert
+        !isVulnerabilityAlert
       ) {
         update.blockedByPin = true;
       }

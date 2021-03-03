@@ -1,7 +1,7 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 import { isSpace, removeComments, skip } from './util';
 
 function parseSha256(idx: number, content: string): string | null {

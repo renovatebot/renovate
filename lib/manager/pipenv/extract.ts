@@ -4,7 +4,8 @@ import is from '@sindresorhus/is';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { PackageDependency, PackageFile } from '../common';
+import { localPathExists } from '../../util/fs';
+import type { PackageDependency, PackageFile } from '../types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
@@ -117,7 +118,10 @@ function extractFromSection(
   return deps;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export async function extractPackageFile(
+  content: string,
+  fileName: string
+): Promise<PackageFile | null> {
   logger.debug('pipenv.extractPackageFile()');
 
   let pipfile: PipFile;
@@ -153,6 +157,11 @@ export function extractPackageFile(content: string): PackageFile | null {
     constraints.pipenv = pipfile.packages.pipenv;
   } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
     constraints.pipenv = pipfile['dev-packages'].pipenv;
+  }
+
+  const lockFileName = fileName + '.lock';
+  if (await localPathExists(lockFileName)) {
+    res.lockFiles = [lockFileName];
   }
 
   res.constraints = constraints;

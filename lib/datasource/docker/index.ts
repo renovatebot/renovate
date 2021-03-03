@@ -12,7 +12,7 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
 import * as dockerVersioning from '../../versioning/docker';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { Image, ImageList, MediaType } from './types';
 
 // TODO: add got typings when available
@@ -66,11 +66,12 @@ export function getRegistryRepository(
   registryUrl: string
 ): RegistryRepository {
   if (registryUrl !== defaultRegistryUrls[0]) {
-    const registry = registryUrl.replace('https://', '').replace(/\/?$/, '/');
-    if (lookupName.startsWith(registry)) {
+    const registry = registryUrl.replace('https://', '');
+    const registryEndingWithSlash = registry.replace(/\/?$/, '/');
+    if (lookupName.startsWith(registryEndingWithSlash)) {
       return {
         registry,
-        repository: lookupName.replace(registry, ''),
+        repository: lookupName.replace(registryEndingWithSlash, ''),
       };
     }
   }

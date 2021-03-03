@@ -1,14 +1,14 @@
 import URL from 'url';
-import { Release } from '../../../datasource';
+import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import { regEx } from '../../../util/regex';
 import * as allVersioning from '../../../versioning';
-import { BranchUpgradeConfig } from '../../common';
-import { ChangeLogRelease, ChangeLogResult } from './common';
+import type { BranchUpgradeConfig } from '../../types';
 import { getTags } from './gitlab';
 import { addReleaseNotes } from './release-notes';
+import type { ChangeLogRelease, ChangeLogResult } from './types';
 
 const cacheNamespace = 'changelog-gitlab-release';
 

@@ -7,7 +7,7 @@ import { BinarySource } from '../../util/exec/common';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { find } from '../../util/host-rules';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 function getPreCommands(): string[] | null {
   const credentials = find({

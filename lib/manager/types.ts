@@ -1,11 +1,11 @@
-import { ReleaseType } from 'semver';
-import {
+import type { ReleaseType } from 'semver';
+import type {
   MatchStringsStrategy,
   UpdateType,
   ValidationMessage,
-} from '../config/common';
-import { RangeStrategy, SkipReason } from '../types';
-import { File } from '../util/git';
+} from '../config/types';
+import type { RangeStrategy, SkipReason } from '../types';
+import type { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 
@@ -27,6 +27,7 @@ export interface ExtractConfig extends ManagerConfig {
   yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
+  updateInternalDeps?: boolean;
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
@@ -74,13 +75,13 @@ export interface NpmLockFiles {
   pnpmShrinkwrap?: string;
   npmLock?: string;
   lernaDir?: string;
+  lockFiles?: string[];
 }
 
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
-  internalPackages?: string[]; // TODO: remove
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
@@ -200,6 +201,7 @@ export interface Upgrade<T = Record<string, any>>
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;
+  isRemediation?: boolean;
 }
 
 export interface ArtifactError {
@@ -226,6 +228,16 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
 
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
+}
+
+export interface UpdateLockedConfig {
+  packageFile?: string;
+  packageFileContent?: string;
+  lockFile?: string;
+  lockFileContent?: string;
+  depName?: string;
+  currentVersion?: string;
+  newVersion?: string;
 }
 
 export interface ManagerApi {
@@ -261,12 +273,16 @@ export interface ManagerApi {
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
+
+  updateLockedDependency?(
+    config: UpdateLockedConfig
+  ): Result<Record<string, string | null>>;
 }
 
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   cacheDir?: string;
-
+  updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
 

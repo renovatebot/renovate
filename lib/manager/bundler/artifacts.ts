@@ -12,7 +12,7 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { isValid } from '../../versioning/ruby';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,

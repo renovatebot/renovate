@@ -1,8 +1,9 @@
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import { DotnetToolsManifest } from './types';
+import { getSiblingFileName, localPathExists } from '../../util/fs';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { DotnetToolsManifest } from './types';
 import { getConfiguredRegistries } from './util';
 
 /**
@@ -109,9 +110,14 @@ export async function extractPackageFile(
       ...dep,
       ...(registryUrls && { registryUrls }),
     }));
-    return { deps };
   } catch (err) {
     logger.debug({ err }, `Failed to parse ${packageFile}`);
   }
-  return { deps };
+  const res: PackageFile = { deps };
+  const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
+  // istanbul ignore if
+  if (await localPathExists(lockFileName)) {
+    res.lockFiles = [lockFileName];
+  }
+  return res;
 }

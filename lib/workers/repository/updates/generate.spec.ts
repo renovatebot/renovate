@@ -1,7 +1,7 @@
 import { defaultConfig, partial } from '../../../../test/util';
-import { UpdateType } from '../../../config';
+import type { UpdateType } from '../../../config/types';
 import * as datasourceNpm from '../../../datasource/npm';
-import { BranchUpgradeConfig } from '../../common';
+import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
 beforeEach(() => {
@@ -408,6 +408,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           newValue: '0.6.0',
+          labels: ['a', 'c'],
           group: {},
         },
         {
@@ -418,6 +419,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-other-title',
           newValue: '1.0.0',
+          labels: ['a', 'b'],
           group: {},
         },
         {
@@ -426,6 +428,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           newValue: '0.5.7',
+          labels: ['a'],
           group: {},
         },
       ];

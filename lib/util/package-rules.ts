@@ -28,6 +28,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const {
     versioning,
     packageFile,
+    lockFiles,
     depType,
     depTypes,
     depName,
@@ -43,6 +44,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     datasource,
   } = inputConfig;
   // Setting empty arrays simplifies our logic later
+  const matchFiles = packageRule.matchFiles || [];
   const matchPaths = packageRule.matchPaths || [];
   const matchLanguages = packageRule.matchLanguages || [];
   const matchBaseBranches = packageRule.matchBaseBranches || [];
@@ -63,6 +65,15 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     !(matchPackageNames.length || matchPackagePatterns.length)
   ) {
     matchPackagePatterns = ['.*'];
+  }
+  if (matchFiles.length) {
+    const isMatch = matchFiles.some(
+      (fileName) => packageFile === fileName || lockFiles?.includes(fileName)
+    );
+    if (!isMatch) {
+      return false;
+    }
+    positiveMatch = true;
   }
   if (matchPaths.length) {
     const isMatch = matchPaths.some(

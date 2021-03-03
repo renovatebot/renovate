@@ -4,7 +4,7 @@ import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { add } from '../util/sanitize';
 import { getAdminConfig } from './admin';
-import { RenovateConfig } from './common';
+import type { RenovateConfig } from './types';
 
 export function decryptConfig(config: RenovateConfig): RenovateConfig {
   logger.trace({ config }, 'decryptConfig()');

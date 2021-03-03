@@ -1,4 +1,4 @@
-import url, { URLSearchParams } from 'url';
+import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import type { PartialDeep } from 'type-fest';
@@ -9,9 +9,9 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { GitProtocol } from '../../types/git';
-import { FileData } from '../../types/platform/bitbucket-server';
+import type { FileData } from '../../types/platform/bitbucket-server';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
@@ -21,8 +21,8 @@ import {
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
-import {
+import { ensureTrailingSlash, getQueryString } from '../../util/url';
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -37,10 +37,9 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
-import {
+import type {
   BbsConfig,
   BbsPr,
   BbsRestBranch,
@@ -326,7 +325,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }
-    const query = new URLSearchParams(searchParams).toString();
+    const query = getQueryString(searchParams);
     const values = await utils.accumulateValues(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
     );
@@ -527,17 +526,8 @@ export async function setBranchStatus({
 
 // Issue
 
-// function getIssueList() {
-//   logger.debug(`getIssueList()`);
-//   // TODO: Needs implementation
-//   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
-//   // BB Server doesnt have issues
-//   return [];
-// }
-
-export /* istanbul ignore next */ function findIssue(
-  title: string
-): Promise<Issue | null> {
+/* istanbul ignore next */
+export function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
@@ -545,7 +535,8 @@ export /* istanbul ignore next */ function findIssue(
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue({
+/* istanbul ignore next */
+export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.warn({ title }, 'Cannot ensure issue');
@@ -555,15 +546,15 @@ export /* istanbul ignore next */ function ensureIssue({
   return null;
 }
 
-export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
+/* istanbul ignore next */
+export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return Promise.resolve([]);
 }
 
-export /* istanbul ignore next */ function ensureIssueClosing(
-  title: string
-): Promise<void> {
+/* istanbul ignore next */
+export function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
@@ -985,8 +976,8 @@ export async function mergePr(
   return true;
 }
 
-export function getPrBody(input: string): string {
-  logger.debug(`getPrBody(${input.split('\n')[0]})`);
+export function massageMarkdown(input: string): string {
+  logger.debug(`massageMarkdown(${input.split('\n')[0]})`);
   // Remove any HTML we use
   return smartTruncate(input, 30000)
     .replace(

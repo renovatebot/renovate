@@ -1,7 +1,7 @@
 import * as datasourceDocker from '../datasource/docker';
 import * as cli from './cli';
 import getArgv from './config/__fixtures__/argv';
-import { RenovateOptions } from './definitions';
+import type { RenovateOptions } from './types';
 
 describe('config/cli', () => {
   let argv: string[];

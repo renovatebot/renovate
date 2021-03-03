@@ -1,6 +1,6 @@
 import * as datasourceRubyVersion from '../../datasource/ruby-version';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile {
   logger.trace('ruby-version.extractPackageFile()');

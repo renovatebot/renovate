@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/npm/update/locked-dependency/get-locked getLockedDependencies() finds direct dependency 1`] = `
+Array [
+  Object {
+    "integrity": "sha1-J03IKTPJ9XTMOKDOXqgXK+nGsJQ=",
+    "requires": Object {
+      "accepts": "1.0.0",
+      "buffer-crc32": "0.2.1",
+      "cookie": "0.1.0",
+      "cookie-signature": "1.0.3",
+      "debug": ">= 0.7.3 < 1",
+      "escape-html": "1.0.1",
+      "fresh": "0.2.2",
+      "merge-descriptors": "0.0.2",
+      "methods": "0.1.0",
+      "parseurl": "1.0.1",
+      "path-to-regexp": "0.1.2",
+      "qs": "0.6.6",
+      "range-parser": "1.0.0",
+      "send": "0.2.0",
+      "serve-static": "1.0.1",
+      "type-is": "1.0.0",
+      "utils-merge": "1.0.0",
+    },
+    "resolved": "https://registry.npmjs.org/express/-/express-4.0.0.tgz",
+    "version": "4.0.0",
+  },
+]
+`;
+
+exports[`manager/npm/update/locked-dependency/get-locked getLockedDependencies() finds indirect dependency 1`] = `
+Array [
+  Object {
+    "integrity": "sha1-Bnq/Rc/4v/spy9t0OXJbMjiKLFg=",
+    "requires": Object {
+      "debug": "*",
+      "fresh": "~0.2.1",
+      "mime": "~1.2.9",
+      "range-parser": "~1.0.0",
+    },
+    "resolved": "https://registry.npmjs.org/send/-/send-0.2.0.tgz",
+    "version": "0.2.0",
+  },
+]
+`;

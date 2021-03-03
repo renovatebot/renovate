@@ -8,6 +8,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() adds commit 
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
 Object {
+  "addLabels": Array [],
   "automerge": false,
   "blockedByPin": false,
   "branchName": "some-branch",
@@ -18,6 +19,11 @@ Object {
   "dependencyDashboardPrApproval": false,
   "displayFrom": "",
   "displayTo": "0.6.0",
+  "labels": Array [
+    "a",
+    "c",
+    "b",
+  ],
   "newValue": "0.6.0",
   "prTitle": "some-title",
   "prettyDepType": "dependency",
@@ -30,6 +36,10 @@ Object {
       "depName": "some-dep",
       "displayFrom": "",
       "displayTo": "0.6.0",
+      "labels": Array [
+        "a",
+        "c",
+      ],
       "newValue": "0.6.0",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
@@ -42,6 +52,10 @@ Object {
       "depName": "some-dep",
       "displayFrom": "",
       "displayTo": "1.0.0",
+      "labels": Array [
+        "a",
+        "b",
+      ],
       "newValue": "1.0.0",
       "prTitle": "some-other-title",
       "prettyDepType": "dependency",
@@ -52,6 +66,9 @@ Object {
       "depName": "@types/some-dep",
       "displayFrom": "",
       "displayTo": "0.5.7",
+      "labels": Array [
+        "a",
+      ],
       "newValue": "0.5.7",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
@@ -62,6 +79,7 @@ Object {
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially 1`] = `
 Object {
+  "addLabels": Array [],
   "automerge": false,
   "blockedByPin": false,
   "branchName": "some-branch",
@@ -81,6 +99,7 @@ Object {
   "displayTo": "0.6.0",
   "hasTypes": true,
   "isRange": false,
+  "labels": Array [],
   "newValue": "0.6.0",
   "prTitle": "some-title",
   "prettyDepType": "dependency",

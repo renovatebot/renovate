@@ -3,9 +3,13 @@ import { getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import { RenovateConfig, ValidationMessage } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
+import type {
+  RenovateConfig,
+  RenovateOptions,
+  ValidationMessage,
+} from './types';
 import * as managerValidator from './validation-helpers/managers';
 
 const options = getOptions();
@@ -59,6 +63,7 @@ export async function validateConfig(
       'repository',
       'vulnerabilityAlertsOnly',
       'vulnerabilityAlert',
+      'isVulnerabilityAlert',
       'copyLocalLibs', // deprecated - functionality is now enabled by default
       'prBody', // deprecated
     ];
@@ -217,6 +222,7 @@ export async function validateConfig(
             }
 
             const selectors = [
+              'matchPackageRules',
               'matchPaths',
               'matchLanguages',
               'matchBaseBranches',
