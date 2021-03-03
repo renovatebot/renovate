@@ -3,6 +3,7 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import { satisfies } from 'semver';
 import upath from 'upath';
+import * as pkg from '../../../package.json';
 import * as configParser from '../../config';
 import { GlobalConfig } from '../../config';
 import { getProblems, logger, setMeta } from '../../logger';
@@ -47,7 +48,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = '>=14.15.4';
+  const range = pkg['engines-next'].node;
   if (process.release?.name !== 'node') {
     logger.warn(
       { release: process.release },

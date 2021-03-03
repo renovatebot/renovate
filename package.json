@@ -109,8 +109,11 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^12.13.0 || >=14.15.0",
+    "node": "^12.13.0 || >=14.15.4",
     "yarn": "^1.17.0"
+  },
+  "engines-next": {
+    "node": ">=14.15.4"
   },
   "dependencies": {
     "@aws-sdk/client-ecr": "3.5.0",
@@ -210,7 +213,7 @@
     "@types/markdown-table": "2.0.0",
     "@types/moo": "0.5.4",
     "@types/nock": "10.0.3",
-    "@types/node": "12.20.4",
+    "@types/node": "14.14.31",
     "@types/node-emoji": "1.8.1",
     "@types/parse-link-header": "1.0.0",
     "@types/registry-auth-token": "4.2.0",
