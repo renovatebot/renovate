@@ -15,7 +15,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     config = require(configFile);
   } catch (err) {
     // istanbul ignore if
-    if (err instanceof SyntaxError) {
+    if (err instanceof SyntaxError || err instanceof TypeError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
       process.exit(1);
     }
