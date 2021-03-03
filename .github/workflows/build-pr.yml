@@ -119,6 +119,7 @@ jobs:
 
       - name: Lint
         run: |
+          yarn ls-lint
           yarn eslint
           yarn prettier
 

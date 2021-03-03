@@ -149,6 +149,7 @@ jobs:
 
       - name: Lint
         run: |
+          yarn ls-lint
           yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
           yarn prettier
 
