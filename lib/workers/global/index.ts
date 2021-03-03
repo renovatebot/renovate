@@ -48,15 +48,21 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg['engines-next'].node;
-  if (process.release?.name !== 'node') {
-    logger.warn(
-      { release: process.release },
+  const range = pkg.engines.node;
+  const rangeNext = pkg['engines-next'].node;
+  if (process.release?.name !== 'node' || !process.versions?.node) {
+    logger.error(
+      { release: process.release, versions: process.versions },
       'Unsuported node environment detected.'
     );
   } else if (!satisfies(process.versions?.node, range)) {
-    logger.warn(
+    logger.error(
       { versions: process.versions, range },
+      'Unsuported node environment detected. Please update node version.'
+    );
+  } else if (!satisfies(process.versions?.node, rangeNext)) {
+    logger.warn(
+      { versions: process.versions, range: rangeNext },
       'Unsuported node environment detected. Please update node version.'
     );
   }
