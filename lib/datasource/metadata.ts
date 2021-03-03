@@ -228,10 +228,10 @@ export function addMetaData(
   // Clean up any empty urls
   const urls = ['homepage', 'sourceUrl', 'changelogUrl', 'dependencyUrl'];
   for (const url of urls) {
-    if (!validateUrl(dep[url]?.trim())) {
-      delete dep[url];
-    } else {
+    if (validateUrl(dep[url]?.trim())) {
       dep[url] = dep[url].trim();
+    } else {
+      delete dep[url];
     }
   }
 }
