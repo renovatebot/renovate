@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: You've found a bug with Renovate
-labels: 'type:bug, status:requirements'
+labels: 'type:bug, status:requirements, priority-5-triage'
 ---
 
 <!--
