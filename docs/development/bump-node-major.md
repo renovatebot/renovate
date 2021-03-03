@@ -15,4 +15,6 @@
 ## Remove old NodeJS version
 
 - Update `package.json>engines>node`
-- Mark PR as `BREAKING`
+- Mark PR as `BREAKING` by:
+  - Adding the label `breaking` to the PR
+  - Putting the text `BREAKING CHANGE: <breaking cause>` in the PR content footer
