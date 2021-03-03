@@ -1530,15 +1530,14 @@
   resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.26.1.tgz#fc5ad97717e2356a2106e936f6c225cb11d79a4f"
   integrity sha512-VW+JT7SDiSKjQss7iX/3bB8CUwSqzhKuW8EcyhzFTb/mwbIkcm92cPmok5FDWYz5TskB/tWFK/mn2ByHCf44AQ==
 
-"@types/markdown-it@10.0.3":
-  version "10.0.3"
-  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-10.0.3.tgz#a9800d14b112c17f1de76ec33eff864a4815eec7"
-  integrity sha512-daHJk22isOUvNssVGF2zDnnSyxHhFYhtjeX4oQaKD6QzL3ZR1QSgiD1g+Q6/WSWYVogNXYDXODtbgW/WiFCtyw==
+"@types/markdown-it@12.0.1":
+  version "12.0.1"
+  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-12.0.1.tgz#8391e19fea4796ff863edda55800c7e669beb358"
+  integrity sha512-mHfT8j/XkPb1uLEfs0/C3se6nd+webC2kcqcy8tgcVr0GDEONv/xaQzAN+aQvkxQXk/jC0Q6mPS+0xhFwRF35g==
   dependencies:
     "@types/highlight.js" "^9.7.0"
     "@types/linkify-it" "*"
     "@types/mdurl" "*"
-    highlight.js "^9.7.0"
 
 "@types/markdown-table@2.0.0":
   version "2.0.0"
@@ -4850,11 +4849,6 @@ he@1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-highlight.js@^9.7.0:
-  version "9.18.5"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.18.5.tgz#d18a359867f378c138d6819edfc2a8acd5f29825"
-  integrity sha512-a5bFyofd/BHCX52/8i8uJkjr9DYwXIPnM/plwI6W7ezItLGqzt7X2G2nXuYSfsIJdkwwj/g9DG1LkcGJI/dDoA==
-
 hook-std@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/hook-std/-/hook-std-2.0.0.tgz#ff9aafdebb6a989a354f729bb6445cf4a3a7077c"
@@ -6700,10 +6694,10 @@ markdown-escapes@^1.0.0:
   resolved "https://registry.yarnpkg.com/markdown-escapes/-/markdown-escapes-1.0.4.tgz#c95415ef451499d7602b91095f3c8e8975f78535"
   integrity sha512-8z4efJYk43E0upd0NbVXwgSTQs6cT3T06etieCMEg7dRbzCbxUCK/GHlX8mhHRDcp+OLlHkPKsvqQTCvsRl2cg==
 
-markdown-it@12.0.3:
-  version "12.0.3"
-  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-12.0.3.tgz#8d1e47daf1d716d63610495eb93f6665573e4abe"
-  integrity sha512-M57RsMv+QQmJHz1yCu0gTJRMx/LlxRPtrrw+2kb/CpDVK/graCmWO0qfNnz/SE1FCNdyq3pkMMZ+itTnyT/YGA==
+markdown-it@12.0.4:
+  version "12.0.4"
+  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-12.0.4.tgz#eec8247d296327eac3ba9746bdeec9cfcc751e33"
+  integrity sha512-34RwOXZT8kyuOJy25oJNJoulO8L0bTHYWXcdZBYZqFnjIy3NgjeoM3FmPXIOFQ26/lSHYMr8oc62B6adxXcb3Q==
   dependencies:
     argparse "^2.0.1"
     entities "~2.1.0"
