@@ -43,10 +43,7 @@ export async function getNodeConstraint(
     lockfileVersion = JSON.parse(await readLocalFile(lockFileName, 'utf8'))
       .lockfileVersion;
   } catch (err) {
-    logger.debug(
-      { err },
-      'Could not read lockfileVersion from sibling lock file'
-    );
+    // do nothing
   }
   // Avoid using node 15 if node 14 also satisfies the same constraint
   // Remove this once node 16 is LTS
