@@ -1,16 +1,16 @@
-# How to bump Renovate to next NodeJS lts release
+# How to bump Renovate to next NodeJS LTS release
 
 ## Add new NodeJS version
 
 - Add new versions via `package.json>engines>node` and `package.json>engines-next>node`
-- Update node at [local-development](./local-development.md)
-- Update node versions at Github Actions
+- Update the node version in the [local-development](./local-development.md) docs
+- Update the node versions in the Github Actions workflow files
 
 ## Deprecate old NodeJS version
 
-- Deprecate old lts via `package.json>engines-next>node`
-- Update node [local-development](./local-development.md)
-- Remove node versions at Github Actions
+- Deprecate old LTS via `package.json>engines-next>node`
+- Update the node version in the [local-development](./local-development.md) docs
+- Remove the old node version in the Github Actions workflow files
 
 ## Remove old NodeJS version
 
