@@ -200,6 +200,12 @@ export async function getCurrentUser(
   return res.body;
 }
 
+export async function getVersion(options?: GiteaHttpOptions): Promise<string> {
+  const url = 'version';
+  const res = await giteaHttp.getJson<{ version: string }>(url, options);
+  return res.body.version;
+}
+
 export async function searchRepos(
   params: RepoSearchParams,
   options?: GiteaHttpOptions
