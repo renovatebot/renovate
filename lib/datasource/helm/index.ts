@@ -6,7 +6,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'helm';
 

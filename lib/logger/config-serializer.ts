@@ -1,5 +1,5 @@
 import traverse from 'traverse';
-import { RenovateConfig } from '../config/common';
+import type { RenovateConfig } from '../config/types';
 
 export default function configSerializer(
   config: RenovateConfig

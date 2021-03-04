@@ -1,8 +1,8 @@
-import { Release } from '../../../../datasource/common';
+import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
-import { LookupUpdate } from '../../../../manager/common';
+import type { LookupUpdate } from '../../../../manager/types';
 import * as allVersioning from '../../../../versioning';
-import { RollbackConfig } from './common';
+import type { RollbackConfig } from './types';
 
 export function getRollbackUpdate(
   config: RollbackConfig,

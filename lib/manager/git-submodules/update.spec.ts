@@ -1,7 +1,6 @@
 import _simpleGit from 'simple-git';
 import { dir } from 'tmp-promise';
-import { Upgrade } from '../common';
-
+import type { Upgrade } from '../types';
 import updateDependency from './update';
 
 jest.mock('simple-git');

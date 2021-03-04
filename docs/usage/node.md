@@ -55,3 +55,20 @@ We recommend that you define this support policy inside the `node` configuration
 This way, it is applied to all Node.js-related files.
 
 For additional language support see the [`supportPolicy` documentation](/configuration-options/#supportpolicy).
+
+## Configuring which version of npm Renovate uses
+
+When `binarySource=docker`, such as in the hosted WhiteSource Renovate App, Renovate will choose and install an `npm` version dynamically.
+
+To control which version or constraint is installed, you should use the `engines.npm` property in your `package.json` file.
+Renovate bot will then use that version constraint for npm when it creates a pull request.
+
+For example, if you want to use at least npm `6.14.11` and also allow newer versions of npm in the `6.x` range, you would put this in your `package.json` file:
+
+```json
+{
+  "engines": {
+    "npm": "^6.14.11"
+  }
+}
+```

@@ -4,8 +4,8 @@ import { SkipReason } from '../../types';
 import { exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { isSkipComment } from '../../util/ignore';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { dependencyPattern } from '../pip_requirements/extract';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { PythonSetup, getExtractFile, parseReport } from './util';
 
 export const pythonVersions = ['python', 'python3', 'python3.8', 'python3.9'];

@@ -11,11 +11,11 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
-import {
+import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../common';
+} from '../types';
 import {
   getConfiguredRegistries,
   getDefaultRegistries,

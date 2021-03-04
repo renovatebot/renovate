@@ -10,13 +10,13 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
-import {
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -31,8 +31,7 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 import { smartLinks } from './utils';
@@ -729,14 +728,14 @@ const platform: Platform = {
           { repository: config.repository, issue, comment: c.id },
           'Comment added'
         );
-      } else if (comment.body !== body) {
+      } else if (comment.body === body) {
+        logger.debug(`Comment #${comment.id} is already up-to-date`);
+      } else {
         const c = await helper.updateComment(config.repository, issue, body);
         logger.debug(
           { repository: config.repository, issue, comment: c.id },
           'Comment updated'
         );
-      } else {
-        logger.debug(`Comment #${comment.id} is already up-to-date`);
       }
 
       return true;
@@ -800,7 +799,7 @@ const platform: Platform = {
     }
   },
 
-  getPrBody(prBody: string): string {
+  massageMarkdown(prBody: string): string {
     return smartTruncate(smartLinks(prBody), 1000000);
   },
 
@@ -827,7 +826,7 @@ export const {
   getJsonFile,
   getIssueList,
   getPr,
-  getPrBody,
+  massageMarkdown,
   getPrList,
   getRepoForceRebase,
   getRepos,

@@ -5,7 +5,7 @@ import { parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import * as pep440 from '../../versioning/pep440';
-import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'pypi';
 export const defaultRegistryUrls = [
@@ -186,7 +186,7 @@ async function getSimpleDependency(
   if (response.authorization) {
     dependency.isPrivate = true;
   }
-  const root: HTMLElement = parse(cleanSimpleHtml(dep));
+  const root = parse(cleanSimpleHtml(dep));
   const links = root.querySelectorAll('a');
   const releases: Releases = {};
   for (const link of Array.from(links)) {

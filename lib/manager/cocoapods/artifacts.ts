@@ -8,7 +8,7 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { getCocoaPodsHome } from './utils';
 
 const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;

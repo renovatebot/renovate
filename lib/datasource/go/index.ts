@@ -1,11 +1,13 @@
 import URL from 'url';
+import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
+import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import * as bitbucket from '../bitbucket-tags';
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'go';
 
@@ -73,6 +75,27 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
         datasource: gitlab.id,
         registryUrl: gitlabRes[1],
         lookupName: gitlabRes[2].replace(/\/$/, ''),
+      };
+    }
+
+    const opts = hostRules.find({
+      hostType: PLATFORM_TYPE_GITLAB,
+      url: goSourceUrl,
+    });
+    if (opts.token) {
+      // get server base url from import url
+      const parsedUrl = URL.parse(goSourceUrl);
+
+      // split the go module from the URL: host/go/module -> go/module
+      const split = goModule.split('/');
+      const lookupName = split[1] + '/' + split[2];
+
+      const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+
+      return {
+        datasource: gitlab.id,
+        registryUrl,
+        lookupName,
       };
     }
   } else {

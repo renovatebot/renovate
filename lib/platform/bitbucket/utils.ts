@@ -2,7 +2,7 @@ import url from 'url';
 import { BranchStatus, PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
-import { Pr } from '../common';
+import type { Pr } from '../types';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -132,9 +132,7 @@ interface Files {
   }[];
 }
 
-export /* istanbul ignore next */ function isConflicted(
-  files: Files[]
-): boolean {
+export function isConflicted(files: Files[]): boolean {
   for (const file of files) {
     for (const chunk of file.chunks) {
       for (const change of chunk.changes) {

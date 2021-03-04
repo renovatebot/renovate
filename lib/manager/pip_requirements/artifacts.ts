@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
   packageFileName,
