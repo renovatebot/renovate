@@ -399,6 +399,20 @@ Array [
 ]
 `;
 
+exports[`datasource/crate getReleases returns null when git clone fails 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "raw.githubusercontent.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/no/n_/non_existent_crate",
+  },
+]
+`;
+
 exports[`datasource/crate getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
 
 exports[`datasource/crate getReleases throws for 5xx 2`] = `

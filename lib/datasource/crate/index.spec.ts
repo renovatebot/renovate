@@ -51,6 +51,21 @@ function setupGitMocks(delay?: number): { mockClone: jest.Mock<any, any> } {
   return { mockClone };
 }
 
+function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
+  const mockClone = jest
+    .fn()
+    .mockName('clone')
+    .mockImplementation((_registryUrl: string, _clonePath: string, _opts) =>
+      Promise.reject(new Error('mocked error'))
+    );
+
+  simpleGit.mockReturnValue({
+    clone: mockClone,
+  });
+
+  return { mockClone };
+}
+
 describe('datasource/crate', () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
@@ -284,6 +299,19 @@ describe('datasource/crate', () => {
       ]);
 
       expect(mockClone).toHaveBeenCalledTimes(1);
+    });
+    it('returns null when git clone fails', async () => {
+      setupErrorGitMock();
+      setAdminConfig({ trustLevel: 'high' });
+      const url = 'https://github.com/mcorbin/othertestregistry';
+
+      const result = await getPkgReleases({
+        datasource,
+        depName: 'mypkg',
+        registryUrls: [url],
+      });
+
+      expect(result).toBeNull();
     });
   });
 
