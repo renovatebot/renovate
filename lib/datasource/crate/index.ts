@@ -171,17 +171,45 @@ async function fetchRegistryInfo(
 
     const cacheKey = `crate-datasource/registry-clone-path/${registryUrl}`;
 
-    let clonePath: string = memCache.get(cacheKey);
-    if (!clonePath) {
+    // We need to ensure we don't run `git clone` in parallel. Therefore we store
+    // a promise of the running operation in the mem cache, which in the end resolves
+    // to the file path of the cloned repository.
+
+    const clonePathPromise: Promise<string> | null = memCache.get(cacheKey);
+    let clonePath: string;
+
+    let cloneRepo = false;
+    if (clonePathPromise === null || clonePathPromise === undefined) {
+      cloneRepo = true;
+    } else {
+      clonePath = await clonePathPromise;
+      cloneRepo = !clonePath;
+    }
+
+    if (cloneRepo) {
       clonePath = join(privateCacheDir(), cacheDirFromUrl(url));
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
-      {
-        const git = Git();
-        await git.clone(registryUrl, clonePath, {
-          '--depth': 1,
-        });
+
+      const git = Git();
+      const promise = git.clone(registryUrl, clonePath, {
+        '--depth': 1,
+      });
+
+      memCache.set(
+        cacheKey,
+        promise.then(() => clonePath).catch(() => null)
+      );
+
+      try {
+        await promise;
+      } catch (err) {
+        logger.error(
+          { err, registryUrl, lookupName: config.lookupName },
+          'failed cloning git registry'
+        );
+
+        return null;
       }
-      memCache.set(cacheKey, clonePath);
     }
 
     registry.clonePath = clonePath;

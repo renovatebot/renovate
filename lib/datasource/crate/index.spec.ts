@@ -28,15 +28,21 @@ const res3 = fs.readFileSync('lib/datasource/crate/__fixtures__/mypkg', 'utf8');
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
-function setupGitMocks(): { mockClone: jest.Mock<any, any> } {
+function setupGitMocks(delay?: number): { mockClone: jest.Mock<any, any> } {
   const mockClone = jest
     .fn()
     .mockName('clone')
-    .mockImplementation((_registryUrl: string, clonePath: string, _opts) => {
-      const path = `${clonePath}/my/pk/mypkg`;
-      fs.mkdirSync(dirname(path), { recursive: true });
-      fs.writeFileSync(path, res3, { encoding: 'utf8' });
-    });
+    .mockImplementation(
+      async (_registryUrl: string, clonePath: string, _opts) => {
+        const path = `${clonePath}/my/pk/mypkg`;
+        fs.mkdirSync(dirname(path), { recursive: true });
+        fs.writeFileSync(path, res3, { encoding: 'utf8' });
+
+        if (delay > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    );
 
   simpleGit.mockReturnValue({
     clone: mockClone,
@@ -257,6 +263,26 @@ describe('datasource/crate', () => {
         depName: 'mypkg',
         registryUrls: [url],
       });
+      expect(mockClone).toHaveBeenCalledTimes(1);
+    });
+    it('guards against race conditions while cloning', async () => {
+      const { mockClone } = setupGitMocks(250);
+      setAdminConfig({ trustLevel: 'high' });
+      const url = 'https://github.com/mcorbin/othertestregistry';
+
+      await Promise.all([
+        getPkgReleases({
+          datasource,
+          depName: 'mypkg',
+          registryUrls: [url],
+        }),
+        getPkgReleases({
+          datasource,
+          depName: 'mypkg',
+          registryUrls: [url],
+        }),
+      ]);
+
       expect(mockClone).toHaveBeenCalledTimes(1);
     });
   });
