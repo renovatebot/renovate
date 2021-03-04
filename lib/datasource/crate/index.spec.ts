@@ -1,3 +1,4 @@
+import delay from 'delay';
 import fs from 'fs-extra';
 import _simpleGit from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
@@ -28,19 +29,19 @@ const res3 = fs.readFileSync('lib/datasource/crate/__fixtures__/mypkg', 'utf8');
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
-function setupGitMocks(delay?: number): { mockClone: jest.Mock<any, any> } {
+function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
   const mockClone = jest
     .fn()
     .mockName('clone')
     .mockImplementation(
       async (_registryUrl: string, clonePath: string, _opts) => {
+        if (delayMs > 0) {
+          await delay(delayMs);
+        }
+
         const path = `${clonePath}/my/pk/mypkg`;
         fs.mkdirSync(dirname(path), { recursive: true });
         fs.writeFileSync(path, res3, { encoding: 'utf8' });
-
-        if (delay > 0) {
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
       }
     );
 
@@ -297,6 +298,12 @@ describe('datasource/crate', () => {
           registryUrls: [url],
         }),
       ]);
+
+      await getPkgReleases({
+        datasource,
+        depName: 'mypkg',
+        registryUrls: [url],
+      });
 
       expect(mockClone).toHaveBeenCalledTimes(1);
     });
