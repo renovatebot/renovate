@@ -23,7 +23,7 @@ If you do, then make them in your base branch (e.g. `master`) so that Renovate c
 
 ## Configuration location
 
-The Configure Renovate PR will include a `renovate.json` file in the root directory, with suggested default settings.
+The "Configure Renovate" PR will include a `renovate.json` file in the root directory, with suggested default settings.
 If you don't want a `renovate.json` file in your repository you can use one of the following files instead:
 
 - `renovate.json5`
