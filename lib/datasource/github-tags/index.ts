@@ -43,9 +43,9 @@ async function getTagCommit(
     registryUrl ?? 'https://github.com/'
   );
   const apiBaseUrl =
-    sourceUrlBase !== 'https://github.com/'
-      ? `${sourceUrlBase}api/v3/`
-      : `https://api.github.com/`;
+    sourceUrlBase === 'https://github.com/'
+      ? `https://api.github.com/`
+      : `${sourceUrlBase}api/v3/`;
   let digest: string;
   try {
     const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
@@ -103,9 +103,9 @@ export async function getDigest(
     registryUrl ?? 'https://github.com/'
   );
   const apiBaseUrl =
-    sourceUrlBase !== 'https://github.com/'
-      ? `${sourceUrlBase}api/v3/`
-      : `https://api.github.com/`;
+    sourceUrlBase === 'https://github.com/'
+      ? `https://api.github.com/`
+      : `${sourceUrlBase}api/v3/`;
   let digest: string;
   try {
     const url = `${apiBaseUrl}repos/${repo}/commits?per_page=1`;
@@ -148,10 +148,9 @@ async function getTags({
     registryUrl ?? 'https://github.com/'
   );
   const apiBaseUrl =
-    sourceUrlBase !== 'https://github.com/'
-      ? `${sourceUrlBase}api/v3/`
-      : `https://api.github.com/`;
-
+    sourceUrlBase === 'https://github.com/'
+      ? `https://api.github.com/`
+      : `${sourceUrlBase}api/v3/`;
   // tag
   const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
   type GitHubTag = {
