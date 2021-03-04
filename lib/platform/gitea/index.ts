@@ -728,14 +728,14 @@ const platform: Platform = {
           { repository: config.repository, issue, comment: c.id },
           'Comment added'
         );
-      } else if (comment.body !== body) {
+      } else if (comment.body === body) {
+        logger.debug(`Comment #${comment.id} is already up-to-date`);
+      } else {
         const c = await helper.updateComment(config.repository, issue, body);
         logger.debug(
           { repository: config.repository, issue, comment: c.id },
           'Comment updated'
         );
-      } else {
-        logger.debug(`Comment #${comment.id} is already up-to-date`);
       }
 
       return true;

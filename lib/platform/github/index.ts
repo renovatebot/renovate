@@ -628,11 +628,11 @@ async function getOpenPrs(): Promise<PrList> {
         if (hasNegativeReview) {
           pr.canMerge = false;
           pr.canMergeReason = `hasNegativeReview`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
+        } else if (canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.canMerge = true;
+        } else {
           pr.canMerge = false;
           pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
-        } else {
-          pr.canMerge = true;
         }
         // https://developer.github.com/v4/enum/mergestatestatus
         if (pr.mergeStateStatus === 'DIRTY') {
