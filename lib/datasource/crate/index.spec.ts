@@ -294,14 +294,14 @@ describe('datasource/crate', () => {
         }),
         getPkgReleases({
           datasource,
-          depName: 'mypkg',
+          depName: 'mypkg-2',
           registryUrls: [url],
         }),
       ]);
 
       await getPkgReleases({
         datasource,
-        depName: 'mypkg',
+        depName: 'mypkg-3',
         registryUrls: [url],
       });
 
