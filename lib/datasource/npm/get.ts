@@ -10,7 +10,7 @@ import * as packageCache from '../../util/cache/package';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import { Release, ReleaseResult } from '../common';
+import type { Release, ReleaseResult } from '../types';
 import { id } from './common';
 import { getNpmrc } from './npmrc';
 

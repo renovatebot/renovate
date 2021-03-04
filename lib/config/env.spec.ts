@@ -2,8 +2,8 @@ import {
   PLATFORM_TYPE_BITBUCKET,
   PLATFORM_TYPE_GITLAB,
 } from '../constants/platforms';
-import { RenovateOptions } from './definitions';
 import * as env from './env';
+import type { RenovateOptions } from './types';
 
 describe('config/env', () => {
   describe('.getConfig(env)', () => {

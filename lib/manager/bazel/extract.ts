@@ -9,7 +9,7 @@ import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 interface UrlParsedResult {
   datasource: string;

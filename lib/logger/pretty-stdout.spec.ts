@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import * as prettyStdout from './pretty-stdout';
-import { BunyanRecord } from './utils';
+import type { BunyanRecord } from './utils';
 
 jest.mock('chalk', () =>
   ['bgRed', 'blue', 'gray', 'green', 'magenta', 'red'].reduce(

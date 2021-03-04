@@ -4,7 +4,7 @@ import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import { PackageFile, PostUpdateConfig } from '../../common';
+import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import { optimizeCommand } from './yarn';
 
@@ -60,8 +60,8 @@ export async function generateLockFiles(
       const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
         installNpm += `@${quote(npmCompatibility)}`;
-        preCommands.push(installNpm, 'hash -d npm');
       }
+      preCommands.push(installNpm, 'hash -d npm');
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
@@ -79,7 +79,8 @@ export async function generateLockFiles(
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
     lernaCommand += cmdOptions;
-    const tagConstraint = await getNodeConstraint(config);
+    const allowUnstable = true; // lerna will pick the default installed npm@6 unless we use node@>=15
+    const tagConstraint = await getNodeConstraint(config, allowUnstable);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {

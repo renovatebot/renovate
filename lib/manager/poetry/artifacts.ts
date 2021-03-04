@@ -10,12 +10,12 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { find } from '../../util/host-rules';
-import {
+import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../common';
-import { PoetryFile, PoetrySource } from './types';
+} from '../types';
+import type { PoetryFile, PoetrySource } from './types';
 
 function getPythonConstraint(
   existingLockFileContent: string,

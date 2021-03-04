@@ -15,7 +15,7 @@ import {
   BranchConfig,
   BranchUpgradeConfig,
   ProcessBranchResult,
-} from '../common';
+} from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 
 type PrUpgrade = BranchUpgradeConfig;

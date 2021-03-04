@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is/dist';
-import { RenovateConfig } from '../../../../config';
 import { configFileNames } from '../../../../config/app-strings';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { PackageFile } from '../../../../manager/common';
+import type { PackageFile } from '../../../../manager/types';
 import { emojify } from '../../../../util/emoji';
 
 const defaultConfigFile = configFileNames[0];

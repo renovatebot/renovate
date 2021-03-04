@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import * as dockerVersioning from '../../versioning/docker';
-import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency, PackageFile } from '../types';
 
 export default function extractPackageFile(
   content: string

@@ -6,7 +6,7 @@ import { MAVEN_REPO } from '../../datasource/maven/common';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export function parsePom(raw: string): XmlDocument | null {
   let project: XmlDocument;

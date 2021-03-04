@@ -1,11 +1,11 @@
-import { ReleaseType } from 'semver';
-import {
+import type { ReleaseType } from 'semver';
+import type {
   MatchStringsStrategy,
   UpdateType,
   ValidationMessage,
-} from '../config/common';
-import { RangeStrategy, SkipReason } from '../types';
-import { File } from '../util/git';
+} from '../config/types';
+import type { RangeStrategy, SkipReason } from '../types';
+import type { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 
@@ -201,6 +201,7 @@ export interface Upgrade<T = Record<string, any>>
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;
+  isRemediation?: boolean;
 }
 
 export interface ArtifactError {
@@ -227,13 +228,6 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
 
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
-  // describes files that was changed instead of or in addition to the packageFile
-  bumpedFiles?: BumpedPackageFile[];
-}
-
-export interface BumpedPackageFile {
-  fileName: string;
-  newContent: string;
 }
 
 export interface UpdateLockedConfig {
@@ -254,8 +248,7 @@ export interface ManagerApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType | string,
-    packageFile?: string
+    bumpVersion: ReleaseType | string
   ): Result<BumpPackageVersionResult>;
 
   extractAllPackageFiles?(
@@ -289,7 +282,7 @@ export interface ManagerApi {
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   cacheDir?: string;
-
+  updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
 

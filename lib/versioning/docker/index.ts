@@ -1,5 +1,5 @@
-import { VersioningApi } from '../common';
 import * as generic from '../loose/generic';
+import type { VersioningApi } from '../types';
 
 export const id = 'docker';
 export const displayName = 'Docker';

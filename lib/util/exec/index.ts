@@ -1,7 +1,7 @@
-import { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
-import { RenovateConfig } from '../../config/common';
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import {
   BinarySource,
@@ -140,15 +140,8 @@ export async function exec(
   let res: ExecResult | null = null;
   for (const rawExecCommand of commands) {
     const startTime = Date.now();
-    let timer;
-    const { timeout } = rawExecOptions;
     if (useDocker) {
       await removeDockerContainer(docker.image);
-      // istanbul ignore next
-      timer = setTimeout(() => {
-        removeDockerContainer(docker.image); // eslint-disable-line
-        logger.info({ timeout, rawExecCommand }, 'Docker run timed out');
-      }, timeout);
     }
     logger.debug({ command: rawExecCommand }, 'Executing command');
     logger.trace({ commandOptions: rawExecOptions }, 'Command options');
@@ -156,7 +149,6 @@ export async function exec(
       res = await rawExec(rawExecCommand, rawExecOptions);
     } catch (err) {
       logger.trace({ err }, 'rawExec err');
-      clearTimeout(timer);
       if (useDocker) {
         await removeDockerContainer(docker.image).catch((removeErr: Error) => {
           const message: string = err.message;
@@ -167,7 +159,6 @@ export async function exec(
       }
       throw err;
     }
-    clearTimeout(timer);
     const durationMs = Math.round(Date.now() - startTime);
     if (res) {
       logger.debug(

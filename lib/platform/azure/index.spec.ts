@@ -8,7 +8,7 @@ import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
-import { Platform, RepoParams } from '../common';
+import type { Platform, RepoParams } from '../types';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
