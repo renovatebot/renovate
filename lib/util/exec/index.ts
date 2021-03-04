@@ -2,6 +2,7 @@ import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
+import { INTERRUPTED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import {
   BinarySource,
@@ -156,6 +157,10 @@ export async function exec(
             `Error: "${removeErr.message}" - Original Error: "${message}"`
           );
         });
+      }
+      if (err.signal === `SIGTERM`) {
+        logger.debug({ err }, 'exec interrupted by SIGTERM');
+        throw new Error(INTERRUPTED);
       }
       throw err;
     }
