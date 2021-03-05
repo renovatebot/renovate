@@ -8,6 +8,7 @@ import {
 import * as _npmPostExtract from '../../manager/npm/post-update';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
+import * as _sanitize from '../../util/sanitize';
 import { File, StatusResult } from '../../util/git';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import * as _limits from '../global/limits';
@@ -29,6 +30,7 @@ jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../../util/exec');
+jest.mock('../../util/sanitize');
 jest.mock('../../util/git');
 jest.mock('fs-extra');
 jest.mock('../global/limits');
@@ -42,6 +44,7 @@ const automerge = mocked(_automerge);
 const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
+const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
@@ -77,6 +80,7 @@ describe('workers/branch', () => {
         },
       });
       setAdminConfig();
+      sanitize.sanitize.mockImplementation((input) => input);
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
@@ -738,13 +742,15 @@ describe('workers/branch', () => {
       expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
       });
+      const errorMessage = expect.stringContaining(
+        "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
+      );
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
-          content: expect.stringContaining(
-            "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
-          ),
+          content: errorMessage,
         })
       );
+      expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
     });
 
     it('handles post-upgrade task exec errors', async () => {
@@ -808,11 +814,13 @@ describe('workers/branch', () => {
         ],
       });
 
+      const errorMessage = expect.stringContaining('Meh, this went wrong!');
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
-          content: expect.stringContaining('Meh, this went wrong!'),
+          content: errorMessage,
         })
       );
+      expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
     });
 
     it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {

@@ -30,6 +30,7 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { regEx } from '../../util/regex';
+import { sanitize } from '../../util/sanitize';
 import * as template from '../../util/template';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { Limit, isLimitReached } from '../global/limits';
@@ -383,11 +384,13 @@ export async function processBranch(
               );
               config.artifactErrors.push({
                 lockFile: upgrade.packageFile,
-                stderr: `Post-upgrade command '${cmd}' does not match allowed pattern${
-                  allowedPostUpgradeCommands.length === 1 ? '' : 's'
-                } ${allowedPostUpgradeCommands
-                  .map((x) => `'${x}'`)
-                  .join(', ')}`,
+                stderr: sanitize(
+                  `Post-upgrade command '${cmd}' does not match allowed pattern${
+                    allowedPostUpgradeCommands.length === 1 ? '' : 's'
+                  } ${allowedPostUpgradeCommands
+                    .map((x) => `'${x}'`)
+                    .join(', ')}`
+                ),
               });
             } else {
               try {
@@ -411,7 +414,7 @@ export async function processBranch(
                 config.artifactErrors.push({
                   lockFile: upgrade.packageFile,
                   stderr:
-                    error.message ||
+                    sanitize(error.message) ||
                     'Error when executing post upgrade command',
                 });
               }
