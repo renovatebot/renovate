@@ -5,7 +5,8 @@ import {
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
 import { setAdminConfig } from '../../config/admin';
-import { RepoAdminConfig } from '../../config/common';
+import type { RepoAdminConfig } from '../../config/types';
+import { INTERRUPTED } from '../../constants/error-messages';
 import {
   BinarySource,
   ExecConfig,
@@ -774,5 +775,22 @@ describe(`Child process execution wrapper`, () => {
       )
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
+  });
+  it('converts to INTERRUPTED', async () => {
+    cpExec.mockImplementation(() => {
+      class ErrorSignal extends Error {
+        signal?: string;
+      }
+      const error = new ErrorSignal();
+      error.signal = 'SIGTERM';
+      throw error;
+    });
+    const removeDockerContainerSpy = jest.spyOn(
+      dockerModule,
+      'removeDockerContainer'
+    );
+    const promise = exec('foobar', {});
+    await expect(promise).rejects.toThrow(INTERRUPTED);
+    expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
   });
 });

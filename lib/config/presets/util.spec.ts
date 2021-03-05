@@ -1,5 +1,5 @@
 import { getName } from '../../../test/util';
-import { Preset } from './common';
+import type { Preset } from './types';
 import {
   FetchPresetConfig,
   PRESET_DEP_NOT_FOUND,

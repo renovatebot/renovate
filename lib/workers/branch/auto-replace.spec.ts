@@ -3,7 +3,7 @@ import { resolve } from 'upath';
 import { defaultConfig } from '../../../test/util';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
-import { BranchUpgradeConfig } from '../common';
+import type { BranchUpgradeConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
 const sampleHtml = readFileSync(

@@ -2,10 +2,10 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
-import { GetReleasesConfig, ReleaseResult } from '../common';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import { parseIndexDir } from '../sbt-plugin/util';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'sbt-package';
 export const defaultRegistryUrls = [MAVEN_REPO];

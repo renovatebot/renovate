@@ -6,7 +6,7 @@ import {
   platform,
 } from '../../../../test/util';
 import { PrState } from '../../../types';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 import * as limits from './limits';
 
 jest.mock('../../../util/git');

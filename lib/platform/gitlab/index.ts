@@ -15,14 +15,14 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
-import {
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -37,10 +37,14 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
-import { GitlabComment, GitlabIssue, MergeMethod, RepoResponse } from './types';
+import type {
+  GitlabComment,
+  GitlabIssue,
+  MergeMethod,
+  RepoResponse,
+} from './types';
 
 const gitlabApi = new GitlabHttp();
 
@@ -596,7 +600,7 @@ export async function mergePr(iid: number): Promise<boolean> {
   }
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   return smartTruncate(
     input
       .replace(/Pull Request/g, 'Merge Request')
@@ -764,7 +768,7 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(sanitize(body));
+  const description = massageMarkdown(sanitize(body));
   try {
     const issueList = await getIssueList();
     let issue = issueList.find((i) => i.title === title);

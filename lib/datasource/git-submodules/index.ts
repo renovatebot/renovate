@@ -2,7 +2,7 @@ import { URL } from 'url';
 import Git from 'simple-git';
 
 import * as packageCache from '../../util/cache/package';
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'git-submodules';
 

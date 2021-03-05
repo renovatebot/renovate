@@ -1,4 +1,4 @@
-import { mocked } from '../../test/util';
+import { getName, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -10,6 +10,7 @@ import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
 import * as datasourceNpm from './npm';
 import * as datasourcePackagist from './packagist';
+import type { DatasourceApi } from './types';
 import * as datasource from '.';
 
 jest.mock('./docker');
@@ -22,7 +23,7 @@ const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe('datasource/index', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -31,10 +32,7 @@ describe('datasource/index', () => {
     expect(datasource.getDatasourceList()).toBeDefined();
   });
   it('validates dataource', () => {
-    function validateDatasource(
-      module: datasource.Datasource,
-      name: string
-    ): boolean {
+    function validateDatasource(module: DatasourceApi, name: string): boolean {
       if (!module.getReleases) {
         return false;
       }

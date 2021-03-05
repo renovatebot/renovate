@@ -32,3 +32,15 @@ export function getQueryString(params: Record<string, any>): string {
   const res = usp.toString();
   return res;
 }
+
+export function validateUrl(url?: string, httpOnly = true): boolean {
+  if (!url) {
+    return false;
+  }
+  try {
+    const { protocol } = new URL(url);
+    return httpOnly ? !!protocol.startsWith('http') : !!protocol;
+  } catch (err) {
+    return false;
+  }
+}

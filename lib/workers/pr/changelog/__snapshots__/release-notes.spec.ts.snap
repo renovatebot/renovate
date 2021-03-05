@@ -104,6 +104,39 @@ Array [
 ]
 `;
 
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for self hosted gitlab project 1`] = `
+Array [
+  Object {
+    "body": undefined,
+    "name": undefined,
+    "tag": "v1.0.0",
+    "url": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0",
+  },
+  Object {
+    "body": undefined,
+    "name": undefined,
+    "tag": "v1.0.1",
+    "url": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for self hosted gitlab project 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "my.custom.domain",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases?per_page=100",
+  },
+]
+`;
+
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 1`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
@@ -921,5 +954,47 @@ Object {
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
   "url": "https://github.com/nodeca/js-yaml/blob/master/CHANGELOG.md#3100--2017-09-10",
+}
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses self hosted gitlab 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "my.custom.domain",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://my.custom.domain/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "my.custom.domain",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://my.custom.domain/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses self hosted gitlab 2`] = `
+Object {
+  "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
+-   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
+    -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
+-   Fix \`/channel\` slash command name regex to accept hyphenated names, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1881>
+    -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
+-   Add GitLab branding to the left-menu, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1865>
+-   Fix left-menu search state showing all rooms, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1883>
+-   Update Polish translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1882>
+    -   Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution
+",
+  "url": "https://my.custom.domain/gitlab-org/gitter/webapp/blob/master/CHANGELOG.md#20260---2020-05-18",
 }
 `;

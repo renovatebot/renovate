@@ -1,7 +1,7 @@
-import { RenovateConfig } from '../../../config';
 import { getAdminConfig } from '../../../config/admin';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { PackageFile } from '../../../manager/common';
+import type { PackageFile } from '../../../manager/types';
 import { platform } from '../../../platform';
 
 export async function raiseDeprecationWarnings(

@@ -5,7 +5,7 @@ import { getAdminConfig } from '../../config/admin';
 import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
-import { BranchConfig, ProcessBranchResult } from '../common';
+import { BranchConfig, ProcessBranchResult } from '../types';
 
 function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   let item = ' - [ ] ';

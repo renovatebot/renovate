@@ -4,7 +4,7 @@ import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/bitbucket';
-import { Platform, RepoParams } from '../common';
+import type { Platform, RepoParams } from '../types';
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -549,6 +549,52 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  describe('getIssueList()', () => {
+    it('has no issues', async () => {
+      await initRepoMock();
+      await bitbucket.getIssueList();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('get issues', async () => {
+      const scope = await initRepoMock({}, { has_issues: true });
+      scope
+        .get('/2.0/repositories/some/repo/issues')
+        .query({
+          q: '(state = "new" OR state = "open") AND reporter.username="abc"',
+        })
+        .reply(200, {
+          values: [
+            {
+              id: 25,
+              title: 'title',
+              content: { raw: 'content' },
+            },
+            {
+              id: 26,
+              title: 'title',
+              content: { raw: 'content' },
+            },
+          ],
+        });
+      const issues = await bitbucket.getIssueList();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(issues).toHaveLength(2);
+      expect(issues).toMatchSnapshot();
+    });
+    it('does not throw', async () => {
+      const scope = await initRepoMock({}, { has_issues: true });
+      scope
+        .get('/2.0/repositories/some/repo/issues')
+        .query({
+          q: '(state = "new" OR state = "open") AND reporter.username="abc"',
+        })
+        .reply(500, {});
+      const issues = await bitbucket.getIssueList();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(issues).toHaveLength(0);
+    });
+  });
+
   describe('addAssignees()', () => {
     it('does not throw', async () => {
       expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
@@ -726,10 +772,10 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('getPrBody()', () => {
+  describe('massageMarkdown()', () => {
     it('returns diff files', () => {
       expect(
-        bitbucket.getPrBody(
+        bitbucket.massageMarkdown(
           '<details><summary>foo</summary>bar</details>text<details>'
         )
       ).toMatchSnapshot();

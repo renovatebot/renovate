@@ -1,6 +1,6 @@
 import * as datasourceCdnjs from '../../datasource/cdnjs';
 import { cloudflareUrlRegex } from '../cdnurl/extract';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 const regex = /<\s*(script|link)\s+[^>]*?\/?>/i;
 

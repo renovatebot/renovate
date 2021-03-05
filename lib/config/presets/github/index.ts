@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { GithubHttp } from '../../../util/http/github';
-import { Preset, PresetConfig } from '../common';
+import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
 
 export const Endpoint = 'https://api.github.com/';

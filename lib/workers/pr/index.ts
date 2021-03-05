@@ -16,10 +16,10 @@ import {
   isBranchModified,
 } from '../../util/git';
 import * as template from '../../util/template';
-import { BranchConfig, PrResult } from '../common';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
+import { BranchConfig, PrResult } from '../types';
 import { getPrBody } from './body';
-import { ChangeLogError } from './changelog';
+import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
 
 function noWhitespaceOrHeadings(input: string): string {
@@ -435,7 +435,7 @@ export async function ensurePr(
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }
-      content = platform.getPrBody(content);
+      content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
       if (getAdminConfig().dryRun) {

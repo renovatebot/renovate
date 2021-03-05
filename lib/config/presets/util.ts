@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { ensureTrailingSlash } from '../../util/url';
-import { Preset } from './common';
+import type { Preset } from './types';
 
 export const PRESET_DEP_NOT_FOUND = 'dep not found';
 export const PRESET_NOT_FOUND = 'preset not found';

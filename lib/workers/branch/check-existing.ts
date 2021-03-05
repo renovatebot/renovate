@@ -2,7 +2,7 @@ import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 
 export async function prAlreadyExisted(
   config: BranchConfig

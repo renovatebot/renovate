@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
+import { satisfies } from 'semver';
 import upath from 'upath';
+import * as pkg from '../../../package.json';
 import * as configParser from '../../config';
 import { GlobalConfig } from '../../config';
 import { getProblems, logger, setMeta } from '../../logger';
@@ -44,6 +46,28 @@ function haveReachedLimits(): boolean {
   return false;
 }
 
+/* istanbul ignore next */
+function checkEnv(): void {
+  const range = pkg.engines.node;
+  const rangeNext = pkg['engines-next']?.node;
+  if (process.release?.name !== 'node' || !process.versions?.node) {
+    logger.warn(
+      { release: process.release, versions: process.versions },
+      'Unknown node environment detected.'
+    );
+  } else if (!satisfies(process.versions?.node, range)) {
+    logger.error(
+      { versions: process.versions, range },
+      'Unsupported node environment detected. Please update your node version.'
+    );
+  } else if (rangeNext && !satisfies(process.versions?.node, rangeNext)) {
+    logger.warn(
+      { versions: process.versions },
+      `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`
+    );
+  }
+}
+
 export async function start(): Promise<number> {
   let config: GlobalConfig;
   try {
@@ -51,6 +75,9 @@ export async function start(): Promise<number> {
     config = await getGlobalConfig();
     // initialize all submodules
     config = await globalInitialize(config);
+
+    checkEnv();
+
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
     // Iterate through repositories sequentially

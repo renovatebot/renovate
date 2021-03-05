@@ -2,7 +2,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import * as gradleVersioning from '../../versioning/gradle';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'gradle-version';
 export const defaultRegistryUrls = ['https://services.gradle.org/versions/all'];
