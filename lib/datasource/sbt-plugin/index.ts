@@ -36,9 +36,9 @@ async function resolvePluginReleases(
     const scalaVersions = scalaVersionItems.map((x) =>
       x.replace(/^scala_/, '')
     );
-    const searchVersions = !scalaVersions.includes(scalaVersion)
-      ? scalaVersions
-      : [scalaVersion];
+    const searchVersions = scalaVersions.includes(scalaVersion)
+      ? [scalaVersion]
+      : scalaVersions;
     for (const searchVersion of searchVersions) {
       const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
       const subRootContent = await downloadHttpProtocol(

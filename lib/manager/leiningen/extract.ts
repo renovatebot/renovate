@@ -16,7 +16,7 @@ export function trimAtKey(str: string, kwName: string): string | null {
 }
 
 export function expandDepName(name: string): string {
-  return !name.includes('/') ? `${name}:${name}` : name.replace('/', ':');
+  return name.includes('/') ? name.replace('/', ':') : `${name}:${name}`;
 }
 
 export interface ExtractContext {

@@ -164,6 +164,7 @@ export async function updateLockedDependency(
       const parentUpdateConfig = {
         ...config,
         lockFileContent: newLockFileContent,
+        packageFileContent: newPackageJsonContent || packageFileContent,
         ...parentUpdate,
       };
       const parentUpdateResult = await updateLockedDependency(

@@ -65,6 +65,28 @@ describe(getName(__filename), () => {
         )
       ).toEqual('4.9.1');
     });
+    it('finds when a greater version is needed', async () => {
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/qs')
+        .reply(200, {
+          name: 'qs',
+          repository: {},
+          versions: {
+            '0.6.6': {},
+            '6.0.4': {},
+            '6.2.0': {},
+          },
+          'dist-tags': { latest: '6.2.0' },
+        });
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/express')
+        .reply(200, expressJson);
+      expect(
+        await findFirstParentVersion('express', '4.0.0', 'qs', '6.0.4')
+      ).toEqual('4.14.0');
+    });
     it('finds when a range matches greater versions', async () => {
       httpMock
         .scope('https://registry.npmjs.org')
