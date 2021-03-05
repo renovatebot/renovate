@@ -51,9 +51,9 @@ function checkEnv(): void {
   const range = pkg.engines.node;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
-    logger.error(
+    logger.warn(
       { release: process.release, versions: process.versions },
-      'Unsupported node environment detected.'
+      'Unknown node environment detected.'
     );
   } else if (!satisfies(process.versions?.node, range)) {
     logger.error(
