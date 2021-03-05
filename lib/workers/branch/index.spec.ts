@@ -729,6 +729,84 @@ describe('workers/branch', () => {
       });
     });
 
+    it('adds exec failure to artifact errors', async () => {
+      const updatedPackageFile: File = {
+        name: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [updatedPackageFile],
+        artifactErrors: [],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            name: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      } as never);
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        body: `- [x] <!-- rebase-check -->`,
+      } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce({
+        modified: ['modified_file'],
+        not_added: [],
+        deleted: ['deleted_file'],
+      } as StatusResult);
+
+      fs.outputFile.mockReturnValue();
+      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^exit 1$'],
+        allowPostUpgradeCommandTemplating: true,
+        trustLevel: 'high',
+      };
+      setAdminConfig(adminConfig);
+
+      exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
+      platform.getPrBody.mockImplementationOnce((prBody) => prBody);
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prResult: PrResult.Created,
+        pr: {
+          title: '',
+          sourceBranch: '',
+          state: '',
+          body: '',
+        },
+      });
+
+      await branchWorker.processBranch({
+        ...config,
+        localDir: '/localDir',
+        upgrades: [
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name',
+            postUpgradeTasks: {
+              commands: ['exit 1'],
+              fileFilters: ['modified_file', 'deleted_file'],
+            },
+          } as never,
+        ],
+      });
+
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.stringContaining('Meh, this went wrong!'),
+        })
+      );
+    });
+
     it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {
       const updatedPackageFile: File = {
         name: 'pom.xml',
