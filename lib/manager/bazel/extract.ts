@@ -133,10 +133,6 @@ function parseContent(content: string): string[] {
 
   let token = lexer.next();
   while (token) {
-    if (!token) {
-      break;
-    }
-
     const { type, value } = token;
 
     if (type === 'def') {
