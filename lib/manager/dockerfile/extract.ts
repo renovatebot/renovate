@@ -103,12 +103,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         { image: copyFromMatch.groups.image },
         'Skipping alias COPY --from'
       );
-    } else if (!Number.isNaN(Number(copyFromMatch.groups.image))) {
-      logger.debug(
-        { image: copyFromMatch.groups.image },
-        'Skipping index reference COPY --from'
-      );
-    } else {
+    } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
       const dep = getDep(copyFromMatch.groups.image);
       logger.debug(
         {
@@ -119,6 +114,11 @@ export function extractPackageFile(content: string): PackageFile | null {
         'Dockerfile COPY --from'
       );
       deps.push(dep);
+    } else {
+      logger.debug(
+        { image: copyFromMatch.groups.image },
+        'Skipping index reference COPY --from'
+      );
     }
   }
   if (!deps.length) {

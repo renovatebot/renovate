@@ -280,15 +280,15 @@ export async function lookupUpdates(
       }
       res.updates.push(update);
     }
-  } else if (!currentValue) {
-    res.skipReason = SkipReason.InvalidValue;
-  } else {
+  } else if (currentValue) {
     logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
     if (!pinDigests && !currentDigest) {
       res.skipReason = SkipReason.InvalidValue;
     } else {
       delete res.skipReason;
     }
+  } else {
+    res.skipReason = SkipReason.InvalidValue;
   }
 
   // Record if the dep is fixed to a version

@@ -157,6 +157,17 @@ describe('platform/gitea/gitea-helper', () => {
     });
   });
 
+  describe('getVersion', () => {
+    it('should call /api/v1/version endpoint', async () => {
+      const version = '1.13.01.14.0+dev-754-g5d2b7ba63';
+      httpMock.scope(baseUrl).get('/version').reply(200, { version });
+
+      const res = await ght.getVersion();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).toEqual(version);
+    });
+  });
+
   describe('searchRepos', () => {
     it('should call /api/v1/repos/search endpoint', async () => {
       httpMock

@@ -179,12 +179,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'array' && val) {
-          if (!is.array(val)) {
-            errors.push({
-              depName: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
-            });
-          } else {
+          if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await module.exports.validateConfig(
@@ -297,12 +292,7 @@ export async function validateConfig(
                       ', '
                     )}`,
                   });
-                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
-                  errors.push({
-                    depName: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
-                  });
-                } else {
+                } else if (is.nonEmptyArray(regexManager.fileMatch)) {
                   let validRegex = false;
                   for (const matchString of regexManager.matchStrings) {
                     try {
@@ -337,6 +327,11 @@ export async function validateConfig(
                       }
                     }
                   }
+                } else {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Each Regex Manager must contain a fileMatch array`,
+                  });
                 }
               }
             }
@@ -379,6 +374,11 @@ export async function validateConfig(
                 message: `${currentPath}: ${key} should be inside a \`packageRule\` only`,
               });
             }
+          } else {
+            errors.push({
+              depName: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
+            });
           }
         } else if (type === 'string') {
           if (!is.string(val)) {
