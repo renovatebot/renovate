@@ -2,6 +2,7 @@ import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
+import { INTERRUPTED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import type { PackageFile, PostUpdateConfig } from '../../types';
@@ -60,8 +61,8 @@ export async function generateLockFiles(
       const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
         installNpm += `@${quote(npmCompatibility)}`;
-        preCommands.push(installNpm, 'hash -d npm');
       }
+      preCommands.push(installNpm, 'hash -d npm');
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
@@ -79,7 +80,8 @@ export async function generateLockFiles(
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
     lernaCommand += cmdOptions;
-    const tagConstraint = await getNodeConstraint(config);
+    const allowUnstable = true; // lerna will pick the default installed npm@6 unless we use node@>=15
+    const tagConstraint = await getNodeConstraint(config, allowUnstable);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
@@ -112,6 +114,9 @@ export async function generateLockFiles(
     cmd.push(lernaCommand);
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === INTERRUPTED) {
+      throw err;
+    }
     logger.debug(
       {
         cmd,

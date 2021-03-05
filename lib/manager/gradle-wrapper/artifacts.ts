@@ -1,5 +1,6 @@
 import { stat } from 'fs-extra';
 import { resolve } from 'upath';
+import { INTERRUPTED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
@@ -92,6 +93,10 @@ export async function updateArtifacts({
     try {
       await exec(cmd, execOptions);
     } catch (err) {
+      // istanbul ignore if
+      if (err.message === INTERRUPTED) {
+        throw err;
+      }
       logger.warn(
         { err },
         'Error executing gradle wrapper update command. It can be not a critical one though.'

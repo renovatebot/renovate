@@ -1,6 +1,6 @@
 import { addStream, levels, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
-import { readFile } from '../util/fs';
+import { ensureDir, getSubDirectory, readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
 import * as cliParser from './cli';
 import * as defaultsParser from './defaults';
@@ -104,6 +104,7 @@ export async function parseConfigs(
     logger.debug(
       `Enabling ${config.logFileLevel} logging to ${config.logFile}`
     );
+    await ensureDir(getSubDirectory(config.logFile));
     addStream({
       name: 'logfile',
       path: config.logFile,

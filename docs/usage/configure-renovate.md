@@ -9,20 +9,21 @@ Once you have enabled Renovate on a repository, you will receive a "Configure Re
 
 ![Onboarding](assets/images/onboarding.png)
 
-## No Risk Onboarding
+## No risk onboarding
 
 Conveniently, Renovate will not make any changes to your repository or raise any further Pull Requests until after you _merge_ this initial Pull Request.
-If there is anything about the Pull Request that you don't like or understand, take your time to read the [documentation](https://docs.renovatebot.com) or ask questions in one of our support forums and merge the PR only once you're satisfied with the result.
+If there is anything about the Pull Request that you don't like or understand, take your time to read the [documentation](https://docs.renovatebot.com) or ask questions on the [discussions forum on GitHub](https://github.com/renovatebot/renovate/discussions) and merge the PR only once you're satisfied with the result.
+
 You can edit your Renovate configuration **within the `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can keep doing that until you're satisfied with the results.
 
-## Check for Warnings
+## Check for warnings
 
 If you have any Warnings or Errors listed, see if you need or want to make any changes to address them.
 If you do, then make them in your base branch (e.g. `master`) so that Renovate can recreate its Configure Renovate PR from it on its next cycle.
 
-## Configuration Location
+## Configuration location
 
-The Configure Renovate PR will include a `renovate.json` file in the root directory, with suggested default settings.
+The "Configure Renovate" PR will include a `renovate.json` file in the root directory, with suggested default settings.
 If you don't want a `renovate.json` file in your repository you can use one of the following files instead:
 
 - `renovate.json5`
@@ -41,14 +42,14 @@ The `package.json` file must be located at the root of your repository.
 This is handy if you are already using a `package.json` file anyway, e.g. when you're working on a JavaScript project.
 The configuration in your `package.json` will apply to the whole project (this includes other, nested `package.json` files).
 
-## Customised Defaults
+## Customised defaults
 
 Most of the settings in the `renovate.json` onboarding configuration are defaults, however usually this configuration file will have some default overrides in it, such as:
 
 - Automatically enabling Angular-style semantic commits if your repository uses them
 - Determining whether to use dependency range pinning depending on the detected project type (app vs library)
 
-## Common Overrides
+## Common overrides
 
 Please check the docs on this website for an exhaustive Configuration Reference.
 To help you get started, here are some of the most commonly changed (overridden) configuration settings:

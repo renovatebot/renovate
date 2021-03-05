@@ -123,11 +123,10 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
     const { body } = await bitbucketServerHttp.getJson<FileData>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/browse/${fileName}?limit=20000`
     );
-    if (!body.isLastPage) {
-      logger.warn({ size: body.size }, `The file is too big`);
-    } else {
+    if (body.isLastPage) {
       return JSON.parse(body.lines.map((l) => l.text).join(''));
     }
+    logger.warn({ size: body.size }, `The file is too big`);
   } catch (err) {
     // no-op
   }

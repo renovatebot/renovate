@@ -1,5 +1,6 @@
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
+import { INTERRUPTED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -154,6 +155,10 @@ export async function updateArtifacts({
     }
     return res;
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === INTERRUPTED) {
+      throw err;
+    }
     logger.debug({ err }, 'Failed to update go.sum');
     return [
       {
