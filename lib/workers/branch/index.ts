@@ -415,19 +415,16 @@ export async function processBranch(
               } catch (error) {
                 config.artifactErrors.push({
                   lockFile: upgrade.packageFile,
-                  stderr:
-                    sanitize(error.message) ||
-                    'Error when executing post upgrade command',
+                  stderr: sanitize(error.message),
                 });
               }
             } else {
-              const msg = 'Post-upgrade task did not match any on allowed list';
               logger.warn(
                 {
                   cmd,
                   allowedPostUpgradeCommands,
                 },
-                msg
+                'Post-upgrade task did not match any on allowed list'
               );
               config.artifactErrors.push({
                 lockFile: upgrade.packageFile,
