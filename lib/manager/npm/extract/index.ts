@@ -14,16 +14,16 @@ import {
 } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
-import {
+import type {
   ExtractConfig,
   NpmLockFiles,
   PackageDependency,
   PackageFile,
-} from '../../common';
-import { NpmPackage, NpmPackageDependency } from './common';
+} from '../../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
+import type { NpmPackage, NpmPackageDependency } from './types';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -318,7 +318,6 @@ export async function extractPackageFile(
           if (depName === 'node') {
             // This is a special case for Node.js to group it together with other managers
             dep.commitMessageTopic = 'Node.js';
-            dep.major = { enabled: false };
           }
           dep.prettyDepType = depTypes[depType];
           deps.push(dep);
@@ -376,8 +375,11 @@ export async function extractPackageFile(
   };
 }
 
-export async function postExtract(packageFiles: PackageFile[]): Promise<void> {
-  detectMonorepos(packageFiles);
+export async function postExtract(
+  packageFiles: PackageFile[],
+  updateInternalDeps: boolean
+): Promise<void> {
+  detectMonorepos(packageFiles, updateInternalDeps);
   await getLockedVersions(packageFiles);
 }
 
@@ -401,6 +403,6 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
-  await postExtract(npmFiles);
+  await postExtract(npmFiles, config.updateInternalDeps);
   return npmFiles;
 }

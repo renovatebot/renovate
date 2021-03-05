@@ -16,6 +16,9 @@ describe(getName(__filename), () => {
 
     setBaseUrl(baseUrl);
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {

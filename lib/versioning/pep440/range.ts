@@ -2,7 +2,7 @@ import { gte, lte, satisfies } from '@renovate/pep440';
 import { parse as parseRange } from '@renovate/pep440/lib/specifier';
 import { parse as parseVersion } from '@renovate/pep440/lib/version';
 import { logger } from '../../logger';
-import { NewValueConfig } from '../common';
+import type { NewValueConfig } from '../types';
 
 function getFutureVersion(
   baseVersion: string,

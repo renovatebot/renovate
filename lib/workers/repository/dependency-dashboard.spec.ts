@@ -15,7 +15,7 @@ import {
   BranchConfig,
   BranchUpgradeConfig,
   ProcessBranchResult,
-} from '../common';
+} from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 
 type PrUpgrade = BranchUpgradeConfig;
@@ -137,6 +137,29 @@ describe('workers/repository/master-issue', () => {
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
+      config.dependencyDashboardFooter = 'And this is a footer';
+      await dependencyDashboard.ensureMasterIssue(config, branches);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
+      expect(platform.findPr).toHaveBeenCalledTimes(0);
+
+      // same with dry run
+      await dryRun(branches, platform);
+    });
+
+    it('open or update Dependency Dashboard when rules contain approvals', async () => {
+      const branches: BranchConfig[] = [];
+      config.packageRules = [
+        {
+          dependencyDashboardApproval: true,
+        },
+        {},
+      ];
       config.dependencyDashboardFooter = 'And this is a footer';
       await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);

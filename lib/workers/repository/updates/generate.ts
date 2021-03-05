@@ -6,7 +6,7 @@ import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
-import { BranchConfig, BranchUpgradeConfig } from '../../common';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { formatCommitMessagePrefix } from '../util/commit-message';
 
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
@@ -305,6 +305,24 @@ export function generateBranchConfig(
     (upgrade) => upgrade.prCreation === 'approval'
   );
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
+  // combine all labels
+  config.labels = [
+    ...new Set(
+      config.upgrades
+        .map((upgrade) => upgrade.labels || [])
+        .reduce((a, b) => a.concat(b), [])
+    ),
+  ];
+  config.addLabels = [
+    ...new Set(
+      config.upgrades
+        .map((upgrade) => upgrade.addLabels || [])
+        .reduce((a, b) => a.concat(b), [])
+    ),
+  ];
+  if (config.upgrades.some((upgrade) => upgrade.updateType === 'major')) {
+    config.updateType = 'major';
+  }
   config.blockedByPin = config.upgrades.every(
     (upgrade) => upgrade.blockedByPin
   );

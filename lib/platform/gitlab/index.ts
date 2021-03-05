@@ -1,4 +1,4 @@
-import URL, { URLSearchParams } from 'url';
+import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import semver from 'semver';
@@ -15,14 +15,14 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
-import {
+import { ensureTrailingSlash, getQueryString } from '../../util/url';
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -37,10 +37,14 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
-import { GitlabComment, GitlabIssue, MergeMethod, RepoResponse } from './types';
+import type {
+  GitlabComment,
+  GitlabIssue,
+  MergeMethod,
+  RepoResponse,
+} from './types';
 
 const gitlabApi = new GitlabHttp();
 
@@ -384,7 +388,7 @@ async function fetchPrList(): Promise<Pr[]> {
     // default: `scope=created_by_me`
     searchParams.scope = 'all';
   }
-  const query = new URLSearchParams(searchParams).toString();
+  const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
     const res = await gitlabApi.getJson<
@@ -596,7 +600,7 @@ export async function mergePr(iid: number): Promise<boolean> {
   }
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   return smartTruncate(
     input
       .replace(/Pull Request/g, 'Merge Request')
@@ -684,6 +688,9 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
   try {
+    // give gitlab some time to create pipelines for the sha
+    await delay(1000);
+
     await gitlabApi.postJson(url, { body: options });
 
     // update status cache
@@ -707,11 +714,11 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
-    const query = new URLSearchParams({
+    const query = getQueryString({
       per_page: '100',
       author_id: `${authorId}`,
       state: 'opened',
-    }).toString();
+    });
     const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
       `projects/${config.repository}/issues?${query}`,
       {
@@ -761,7 +768,7 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(sanitize(body));
+  const description = massageMarkdown(sanitize(body));
   try {
     const issueList = await getIssueList();
     let issue = issueList.find((i) => i.title === title);

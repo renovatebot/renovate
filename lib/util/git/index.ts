@@ -72,6 +72,7 @@ function checkForPlatformFailure(err: Error): void {
     'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
     'Could not resolve host',
     ' is not a member of team',
+    'early EOF',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -297,7 +298,10 @@ export async function syncGit(): Promise<void> {
         logger.debug(`Cloning git submodule at ${submodule}`);
         await git.submoduleUpdate(['--init', submodule]);
       } catch (err) {
-        logger.warn(`Unable to initialise git submodule at ${submodule}`);
+        logger.warn(
+          { err },
+          `Unable to initialise git submodule at ${submodule}`
+        );
       }
     }
   }
@@ -652,6 +656,7 @@ export async function commitFiles({
     const commitRes = await git.commit(message, [], {
       '--no-verify': null,
     });
+    logger.debug({ result: commitRes }, `git commit`);
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
@@ -660,11 +665,13 @@ export async function commitFiles({
       );
       return null;
     }
-    await git.push('origin', `${branchName}:${branchName}`, {
+    const pushRes = await git.push('origin', `${branchName}:${branchName}`, {
       '--force': null,
       '-u': null,
       '--no-verify': null,
     });
+    delete pushRes.repo;
+    logger.debug({ result: pushRes }, 'git push');
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);

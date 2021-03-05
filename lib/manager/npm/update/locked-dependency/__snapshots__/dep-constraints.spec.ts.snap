@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/npm/update/locked-dependency/dep-constraints findDepConstraints() finds direct dependency 1`] = `
+Array [
+  Object {
+    "constraint": "4.0.0",
+    "depType": "dependencies",
+  },
+]
+`;
+
+exports[`manager/npm/update/locked-dependency/dep-constraints findDepConstraints() finds direct devDependency 1`] = `
+Array [
+  Object {
+    "constraint": "4.0.0",
+    "depType": "devDependencies",
+  },
+]
+`;
+
+exports[`manager/npm/update/locked-dependency/dep-constraints findDepConstraints() finds indirect dependency 1`] = `
+Array [
+  Object {
+    "constraint": "0.2.0",
+    "parentDepName": "express",
+    "parentVersion": "4.0.0",
+  },
+]
+`;

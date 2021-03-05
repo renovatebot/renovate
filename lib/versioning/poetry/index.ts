@@ -1,6 +1,6 @@
 import { parseRange } from 'semver-utils';
-import { NewValueConfig, VersioningApi } from '../common';
 import { api as npm } from '../npm';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'poetry';
 export const displayName = 'Poetry';
@@ -79,7 +79,7 @@ const isGreaterThan = (a: string, b: string): boolean =>
   npm.isGreaterThan(padZeroes(a), padZeroes(b));
 
 const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange(version, poetry2npm(range));
+  npm.isLessThanRange(padZeroes(version), poetry2npm(range));
 
 export const isValid = (input: string): string | boolean =>
   npm.isValid(poetry2npm(input));

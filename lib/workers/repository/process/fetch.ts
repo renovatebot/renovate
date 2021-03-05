@@ -8,12 +8,12 @@ import {
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
-import { PackageDependency, PackageFile } from '../../../manager/common';
+import type { PackageDependency, PackageFile } from '../../../manager/types';
 import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates } from './lookup';
-import { LookupUpdateConfig } from './lookup/common';
+import type { LookupUpdateConfig } from './lookup/types';
 
 async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,
@@ -34,9 +34,6 @@ async function fetchDepUpdates(
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
     dep.skipReason = SkipReason.Ignored;
-  } else if (depConfig.internalPackages?.includes(depName)) {
-    // istanbul ignore next
-    dep.skipReason = SkipReason.InternalPackage;
   } else if (depConfig.enabled === false) {
     logger.debug({ dependency: dep.depName }, 'Dependency is disabled');
     dep.skipReason = SkipReason.Disabled;

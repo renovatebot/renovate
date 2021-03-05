@@ -3,7 +3,8 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { getQueryString } from '../../util/url';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'repology';
 
@@ -46,13 +47,13 @@ async function queryPackagesViaResolver(
   packageName: string,
   packageType: RepologyPackageType
 ): Promise<RepologyPackage[]> {
-  const query = new URLSearchParams({
+  const query = getQueryString({
     repo: repoName,
     name_type: packageType,
     target_page: 'api_v1_project',
     noautoresolve: 'on',
     name: packageName,
-  }).toString();
+  });
 
   // Retrieve list of packages by looking up Repology project
   const packages = await queryPackages(

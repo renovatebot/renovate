@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
+import { INTERRUPTED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
   packageFileName,
@@ -52,6 +53,10 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === INTERRUPTED) {
+      throw err;
+    }
     logger.debug({ err }, `Failed to update ${packageFileName} file`);
     return [
       {

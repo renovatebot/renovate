@@ -1,6 +1,6 @@
-import { URLSearchParams } from 'url';
 import { BranchStatus, PrState } from '../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../util/http/gitea';
+import { getQueryString } from '../../util/url';
 import { PrReviewersParams } from './types';
 
 const giteaHttp = new GiteaHttp();
@@ -192,20 +192,6 @@ const commitStatusStates: CommitStatusType[] = [
   'error',
 ];
 
-function queryParams(params: Record<string, any>): URLSearchParams {
-  const usp = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (Array.isArray(v)) {
-      for (const item of v) {
-        usp.append(k, item.toString());
-      }
-    } else {
-      usp.append(k, v.toString());
-    }
-  }
-  return usp;
-}
-
 export async function getCurrentUser(
   options?: GiteaHttpOptions
 ): Promise<User> {
@@ -214,11 +200,17 @@ export async function getCurrentUser(
   return res.body;
 }
 
+export async function getVersion(options?: GiteaHttpOptions): Promise<string> {
+  const url = 'version';
+  const res = await giteaHttp.getJson<{ version: string }>(url, options);
+  return res.body.version;
+}
+
 export async function searchRepos(
   params: RepoSearchParams,
   options?: GiteaHttpOptions
 ): Promise<Repo[]> {
-  const query = queryParams(params).toString();
+  const query = getQueryString(params);
   const url = `repos/search?${query}`;
   const res = await giteaHttp.getJson<RepoSearchResults>(url, {
     ...options,
@@ -249,7 +241,7 @@ export async function getRepoContents(
   ref?: string,
   options?: GiteaHttpOptions
 ): Promise<RepoContents> {
-  const query = queryParams(ref ? { ref } : {}).toString();
+  const query = getQueryString(ref ? { ref } : {});
   const url = `repos/${repoPath}/contents/${urlEscape(filePath)}?${query}`;
   const res = await giteaHttp.getJson<RepoContents>(url, options);
 
@@ -342,7 +334,7 @@ export async function searchPRs(
   params: PRSearchParams,
   options?: GiteaHttpOptions
 ): Promise<PR[]> {
-  const query = queryParams(params).toString();
+  const query = getQueryString(params);
   const url = `repos/${repoPath}/pulls?${query}`;
   const res = await giteaHttp.getJson<PR[]>(url, {
     ...options,
@@ -397,7 +389,7 @@ export async function searchIssues(
   params: IssueSearchParams,
   options?: GiteaHttpOptions
 ): Promise<Issue[]> {
-  const query = queryParams({ ...params, type: 'issues' }).toString();
+  const query = getQueryString({ ...params, type: 'issues' });
   const url = `repos/${repoPath}/issues?${query}`;
   const res = await giteaHttp.getJson<Issue[]>(url, {
     ...options,

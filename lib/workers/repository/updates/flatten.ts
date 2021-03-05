@@ -8,10 +8,37 @@ import { LANGUAGE_DOCKER } from '../../../constants/languages';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
+import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
 
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substr(1);
+
+export function applyUpdateConfig(input: BranchUpgradeConfig): any {
+  const updateConfig = { ...input };
+  delete updateConfig.packageRules;
+  // TODO: Remove next line once #8075 is complete
+  updateConfig.depNameShort ||= updateConfig.depName;
+  updateConfig.depNameSanitized = updateConfig.depName
+    ? updateConfig.depName
+        .replace('@types/', '')
+        .replace('@', '')
+        .replace(/\//g, '-')
+        .replace(/\s+/g, '-')
+        .replace(/-+/, '-')
+        .toLowerCase()
+    : undefined;
+  if (
+    updateConfig.language === LANGUAGE_DOCKER &&
+    /(^|\/)node$/.exec(updateConfig.depName) &&
+    updateConfig.depName !== 'calico/node'
+  ) {
+    updateConfig.additionalBranchPrefix = '';
+    updateConfig.depNameSanitized = 'node';
+  }
+  generateBranchName(updateConfig);
+  return updateConfig;
+}
 
 export async function flattenUpdates(
   config: RenovateConfig,
@@ -75,30 +102,7 @@ export async function flattenUpdates(
             }
             // Apply again in case any were added by the updateType config
             updateConfig = applyPackageRules(updateConfig);
-            delete updateConfig.packageRules;
-            // TODO: Remove next line once #8075 is complete
-            updateConfig.depNameShort ||= updateConfig.depName;
-            updateConfig.depNameSanitized = updateConfig.depName
-              ? updateConfig.depName
-                  .replace('@types/', '')
-                  .replace('@', '')
-                  .replace(/\//g, '-')
-                  .replace(/\s+/g, '-')
-                  .replace(/-+/, '-')
-                  .toLowerCase()
-              : undefined;
-            if (
-              updateConfig.language === LANGUAGE_DOCKER &&
-              updateConfig.depName.match(/(^|\/)node$/) &&
-              updateConfig.depName !== 'calico/node'
-            ) {
-              updateConfig.additionalBranchPrefix = '';
-              updateConfig.depNameSanitized = 'node';
-            }
-            generateBranchName(updateConfig);
-            update.branchName = updateConfig.branchName; // for writing to cache
-            delete updateConfig.repoIsOnboarded;
-            delete updateConfig.renovateJsonPresent;
+            updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             updates.push(updateConfig);
           }
@@ -130,9 +134,34 @@ export async function flattenUpdates(
         generateBranchName(lockFileConfig);
         updates.push(lockFileConfig);
       }
+      if (get(manager, 'updateLockedDependency')) {
+        for (const lockFile of packageFileConfig.lockFiles || []) {
+          const remediations = config.remediations?.[lockFile];
+          if (remediations) {
+            for (const remediation of remediations) {
+              let updateConfig = mergeChildConfig(
+                packageFileConfig,
+                remediation
+              );
+              updateConfig = mergeChildConfig(
+                updateConfig,
+                config.vulnerabilityAlerts
+              );
+              updateConfig.isVulnerabilityAlert = true;
+              updateConfig.isRemediation = true;
+              updateConfig.lockFile = lockFile;
+              updateConfig.currentValue = updateConfig.currentVersion;
+              updateConfig.newValue = updateConfig.newVersion;
+              updateConfig = applyUpdateConfig(updateConfig);
+              updates.push(updateConfig);
+            }
+          }
+        }
+      }
     }
   }
   return updates
     .filter((update) => update.enabled)
+    .map(({ vulnerabilityAlerts, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
 }

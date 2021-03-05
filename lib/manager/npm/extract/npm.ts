@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { LockFile, LockFileEntry } from './common';
+import type { LockFile, LockFileEntry } from './types';
 
 export async function getNpmLock(filePath: string): Promise<LockFile> {
   const lockRaw = await readLocalFile(filePath, 'utf8');

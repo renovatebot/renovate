@@ -1,6 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
+labels: 'type:feature, status:requirements, priority-5-triage'
 ---
 
 **What would you like Renovate to be able to do?**

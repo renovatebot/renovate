@@ -41,7 +41,7 @@ The recommended approaches in order of preference are:
 
 All the various approaches are described below:
 
-### Commit .npmrc file into repository
+### Add hostRule to bots config
 
 Define `hostRules` like this:
 
@@ -51,7 +51,14 @@ module.exports = {
     {
       hostType: 'npm',
       hostName: 'registry.npmjs.org',
-      token: 'abc123',
+      token: process.env.NPM_TOKEN,
+    },
+    {
+      hostType: 'npm',
+      baseUrl:
+        'https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/npm/registry/',
+      username: 'VssSessionToken',
+      password: process.env.AZURE_NPM_TOKEN,
     },
   ],
 };
@@ -66,6 +73,8 @@ The good news is that this works for Renovate too.
 If Renovate detects a `.npmrc` or `.yarnrc` file then it will use it for its install.
 
 Does not work if using binarySource=docker.
+
+**This method will be deprecated soon**
 
 ### Add npmrc string to Renovate config
 

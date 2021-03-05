@@ -11,8 +11,8 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git
-- Node.js `^12.13.0 || >=14.15.0`
-- Yarn `^1.17.0`
+- Node.js `>=14.15.4`
+- Yarn `^1.22.5`
 - C++ compiler
 - Python `^3.8`
 - Java between `8` and `12`
@@ -47,23 +47,15 @@ If you already installed a component, skip the corresponding step.
 - Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
 - Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
 
-  Verify you're using the appropriate versions:
+  You can see what versions you're using like this:
 
-  ```
+  ```powershell
   PS C:\Windows\system32> git --version
-  git version 2.29.0.windows.1
   PS C:\Windows\system32> node --version
-  v14.15.0
   PS C:\Windows\system32> yarn --version
-  1.22.4
   PS C:\Windows\system32> python --version
-  Python 3.8.1
   PS C:\Windows\system32> python -c "from unittest import mock; print(mock.__version__)"
-  1.0
   PS C:\Windows\system32> java -version
-  openjdk version "11.0.6" 2020-01-14
-  OpenJDK Runtime Environment 18.9 (build 11.0.6+10)
-  OpenJDK 64-Bit Server VM 18.9 (build 11.0.6+10, mixed mode)
   ```
 
 _VS Code Remote Development_
@@ -74,7 +66,7 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 - Open the repository folder in VS Code
 - Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
-VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
+The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
 
 ## Fork and Clone
 
@@ -122,7 +114,7 @@ You are better off to instead export the Environment Variable `RENOVATE_TOKEN` f
 To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`.
 Now, add a file called `.nvmrc` with the content `8.13.0`.
 Now run against the test repo you created, e.g. `yarn start r4harry/testrepo1`.
-If your token is set up correctly, you should find that it added a "Configure Renovate" PR inside the repo.
+If your token is set up correctly, you should find that Renovate created a "Configure Renovate" PR in the `testrepo1`.
 
 If this is working then in future you can create other test repos to verify your code changes against.
 
@@ -157,15 +149,16 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 ## Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) for code formatting.
+We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again.
-You usually shouldn't need to fix any Prettier errors manually.
+You usually don't need to fix any Prettier errors by hand.
 
 ## Keeping your Renovate fork up to date
 
-First of all, never commit to `master` of your fork - always use a branch like `feat/1234-add-yarn-parsing`.
+First of all, never commit to the `master` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
 
-Then, make sure your fork is up to date with `master` each time before creating a new branch. To do this, see these GitHub guides:
+Make sure your fork is up to date with the Renovate `master` branch, check this each time before you create a new branch.
+To do this, see these GitHub guides:
 
 [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
 
@@ -179,8 +172,10 @@ Quite often, the quickest way for you to test or fix something is to fork an exi
 However, by default Renovate skips over repositories that are forked.
 To override this default, you need to specify the setting `includeForks` as `true`.
 
-Option 1: Add `"includeForks": true` to the `renovate.json` of the repository
-Option 2: Run Renovate with the CLI flag `--renovate-fork=true`
+Tell Renovate to run on your forked repository by doing one of the following:
+
+1. Add `"includeForks": true` to the `renovate.json` file in your forked repository
+1. Run Renovate with the CLI flag `--renovate-fork=true`
 
 ### Log files
 
@@ -197,23 +192,30 @@ The example command will delete any existing `debug.log` and then save Renovate'
 
 ### Adding configuration options
 
-We wish to keep backwards-compatibility as often as possible, as well as make the code configurable, so most new functionality should be controllable via configuration options.
+We want stay backwards-compatible as much as possible, as well as make the code configurable.
+So most new functionality should be controllable via configuration options.
 
-If you wish to add one, add it to `lib/config/definitions.ts` and then add documentation to `website/docs/configuration-options.md`.
+Create your new configuration option in the `lib/config/definitions.ts` file.
+Also create documentation for the option in the `website/docs/configuration-options.md` file.
 
 ## Debugging
 
-It's really easy to debug Renovate using Chrome's inspect tool.
-Try like this:
+### Chrome's inspect tool
+
+It's really easy to debug Renovate with the help of Chrome's inspect tool.
+Here's an example:
 
 1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
-2. Add a `debugger;` statement somewhere in the source code where you want to start debugging
-3. Run Renovate using `yarn debug ...` instead of `yarn start ...`
-4. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
+1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+1. Run Renovate using `yarn debug ...` instead of `yarn start ...`
+1. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
 
-If you are using VS Code, try like this:
+### VS Code
 
-1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your personal access token
+You can also debug with VS Code.
+Here's an example:
+
+1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your Personal Access Token
 2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
 
 ```javascript

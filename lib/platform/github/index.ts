@@ -16,7 +16,7 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
@@ -24,7 +24,7 @@ import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
-import {
+import type {
   AggregatedVulnerabilities,
   BranchStatusConfig,
   CreatePRConfig,
@@ -39,8 +39,7 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import {
   BranchProtection,
@@ -324,18 +323,31 @@ export async function initRepo({
         try {
           await githubApi.postJson(`repos/${config.repository}/git/refs`, {
             body,
-            token: forkToken || opts.token,
+            token: forkToken,
           });
           logger.debug('Created new default branch in fork');
         } catch (err) /* istanbul ignore next */ {
-          logger.warn({ err }, 'Could not create parent defaultBranch in fork');
+          if (err.response?.body?.message === 'Reference already exists') {
+            logger.debug(
+              `Branch ${config.defaultBranch} already exists in the fork`
+            );
+          } else {
+            logger.warn(
+              { err, body: err.response?.body },
+              'Could not create parent defaultBranch in fork'
+            );
+          }
         }
         logger.debug(
           `Setting ${config.defaultBranch} as default branch for ${config.repository}`
         );
         try {
           await githubApi.patchJson(`repos/${config.repository}`, {
-            body: { default_branch: config.defaultBranch },
+            body: {
+              name: config.repository.split('/')[1],
+              default_branch: config.defaultBranch,
+            },
+            token: forkToken,
           });
           logger.debug('Successfully changed default branch for fork');
         } catch (err) /* istanbul ignore next */ {
@@ -616,11 +628,11 @@ async function getOpenPrs(): Promise<PrList> {
         if (hasNegativeReview) {
           pr.canMerge = false;
           pr.canMergeReason = `hasNegativeReview`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
+        } else if (canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.canMerge = true;
+        } else {
           pr.canMerge = false;
           pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
-        } else {
-          pr.canMerge = true;
         }
         // https://developer.github.com/v4/enum/mergestatestatus
         if (pr.mergeStateStatus === 'DIRTY') {
@@ -837,11 +849,12 @@ export async function getBranchStatus(
   try {
     const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
       branchName
-    )}/check-runs`;
+    )}/check-runs?per_page=100`;
     const opts = {
       headers: {
         accept: 'application/vnd.github.antiope-preview+json',
       },
+      paginate: true,
     };
     const checkRunsRaw = (
       await githubApi.getJson<{
@@ -1560,7 +1573,7 @@ export async function mergePr(
   return true;
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   if (config.isGhe) {
     return smartTruncate(input, 60000);
   }

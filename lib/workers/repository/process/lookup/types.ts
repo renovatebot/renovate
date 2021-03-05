@@ -1,7 +1,10 @@
-import { RenovateConfig, ValidationMessage } from '../../../../config/common';
-import { Release } from '../../../../datasource';
-import { LookupUpdate, RangeConfig } from '../../../../manager/common';
-import { SkipReason } from '../../../../types';
+import type {
+  RenovateConfig,
+  ValidationMessage,
+} from '../../../../config/types';
+import type { Release } from '../../../../datasource/types';
+import type { LookupUpdate, RangeConfig } from '../../../../manager/types';
+import type { SkipReason } from '../../../../types';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -31,7 +34,7 @@ export interface LookupUpdateConfig
   rollbackPrs?: boolean;
   currentDigest?: string;
   lockedVersion?: string;
-  vulnerabilityAlert?: boolean;
+  isVulnerabilityAlert?: boolean;
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
   datasource: string;
