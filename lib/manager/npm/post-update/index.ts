@@ -466,6 +466,16 @@ export async function getAdditionalFiles(
           `//${hostRule.hostName}/:_authToken=${hostRule.token}`
         );
       }
+    } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
+      if (hostRule.baseUrl) {
+        const uri = hostRule.baseUrl.replace(/^https?:/, '');
+        additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
+        additionalNpmrcContent.push(`${uri}:_password=${hostRule.password}`);
+      } else if (hostRule.hostName) {
+        const uri = `//${hostRule.hostName}/`;
+        additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
+        additionalNpmrcContent.push(`${uri}:_password=${hostRule.password}`);
+      }
     }
   }
 

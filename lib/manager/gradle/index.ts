@@ -1,6 +1,7 @@
 import { Stats } from 'fs';
 import { stat } from 'fs-extra';
 import upath from 'upath';
+import { INTERRUPTED } from '../../constants/error-messages';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
 import { logger } from '../../logger';
@@ -72,6 +73,9 @@ export async function executeGradle(
     logger.debug({ cmd }, 'Start gradle command');
     ({ stdout, stderr } = await exec(cmd, execOptions));
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === INTERRUPTED) {
+      throw err;
+    }
     if (err.code === TIMEOUT_CODE) {
       throw new ExternalHostError(err, 'gradle');
     }
