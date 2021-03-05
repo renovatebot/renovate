@@ -383,7 +383,11 @@ export async function processBranch(
               );
               config.artifactErrors.push({
                 lockFile: upgrade.packageFile,
-                stderr: msg,
+                stderr: `Post-upgrade command '${cmd}' does not match allowed pattern${
+                  allowedPostUpgradeCommands.length === 1 ? '' : 's'
+                } ${allowedPostUpgradeCommands
+                  .map((x) => `'${x}'`)
+                  .join(', ')}`,
               });
             } else {
               try {

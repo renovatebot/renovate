@@ -65,6 +65,17 @@ describe('workers/branch', () => {
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('abc123');
+
+      platform.getPrBody.mockImplementation((prBody) => prBody);
+      prWorker.ensurePr.mockResolvedValue({
+        prResult: PrResult.Created,
+        pr: {
+          title: '',
+          sourceBranch: '',
+          state: '',
+          body: '',
+        },
+      });
       setAdminConfig();
     });
     afterEach(() => {
@@ -727,9 +738,16 @@ describe('workers/branch', () => {
       expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
       });
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.stringContaining(
+            "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
+          ),
+        })
+      );
     });
 
-    it('adds exec failure to artifact errors', async () => {
+    it('handles post-upgrade task exec errors', async () => {
       const updatedPackageFile: File = {
         name: 'pom.xml',
         contents: 'pom.xml file contents',
@@ -774,16 +792,6 @@ describe('workers/branch', () => {
       setAdminConfig(adminConfig);
 
       exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
-      platform.getPrBody.mockImplementationOnce((prBody) => prBody);
-      prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
-        pr: {
-          title: '',
-          sourceBranch: '',
-          state: '',
-          body: '',
-        },
-      });
 
       await branchWorker.processBranch({
         ...config,
