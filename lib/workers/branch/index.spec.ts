@@ -8,8 +8,8 @@ import {
 import * as _npmPostExtract from '../../manager/npm/post-update';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
-import * as _sanitize from '../../util/sanitize';
 import { File, StatusResult } from '../../util/git';
+import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../types';
