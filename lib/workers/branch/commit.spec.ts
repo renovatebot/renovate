@@ -1,6 +1,6 @@
 import { defaultConfig, git, partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 import { commitFilesToBranch } from './commit';
 
 jest.mock('../../util/git');

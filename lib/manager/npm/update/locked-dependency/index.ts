@@ -1,12 +1,12 @@
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../logger';
 import { api as semver } from '../../../../versioning/npm';
-import { UpdateLockedConfig } from '../../../common';
+import type { UpdateLockedConfig } from '../../../types';
 import { updateDependency } from '../dependency';
-import { PackageLockOrEntry } from './common';
 import { findDepConstraints } from './dep-constraints';
 import { getLockedDependencies } from './get-locked';
 import { findFirstParentVersion } from './parent-version';
+import type { PackageLockOrEntry } from './types';
 
 export function validateInputs(config: UpdateLockedConfig): boolean {
   const { currentVersion, newVersion, lockFile } = config;
@@ -70,10 +70,10 @@ export async function updateLockedDependency(
       // Don't return null if we're a parent update or else the whole update will fail
       // istanbul ignore if: too hard to replicate
       if (isParentUpdate) {
-        return {
-          packageFile: packageFileContent,
-          lockFile: lockFileContent,
-        };
+        const res = {};
+        res[packageFile] = packageFileContent;
+        res[lockFile] = lockFileContent;
+        return res;
       }
       return null;
     }
@@ -84,7 +84,8 @@ export async function updateLockedDependency(
       packageJson,
       packageLockJson,
       depName,
-      currentVersion
+      currentVersion,
+      newVersion
     );
     logger.trace({ deps: lockedDeps, constraints }, 'Matching details');
     if (!constraints.length) {
@@ -163,6 +164,7 @@ export async function updateLockedDependency(
       const parentUpdateConfig = {
         ...config,
         lockFileContent: newLockFileContent,
+        packageFileContent: newPackageJsonContent || packageFileContent,
         ...parentUpdate,
       };
       const parentUpdateResult = await updateLockedDependency(
@@ -178,10 +180,12 @@ export async function updateLockedDependency(
       }
       newPackageJsonContent =
         parentUpdateResult[packageFile] || newPackageJsonContent;
-      newLockFileContent = parentUpdateResult[lockFile];
+      newLockFileContent = parentUpdateResult[lockFile] || newLockFileContent;
     }
     const files = {};
-    files[lockFile] = newLockFileContent;
+    if (newLockFileContent) {
+      files[lockFile] = newLockFileContent;
+    }
     if (newPackageJsonContent) {
       files[packageFile] = newPackageJsonContent;
     }

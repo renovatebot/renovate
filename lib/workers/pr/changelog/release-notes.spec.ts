@@ -3,7 +3,6 @@ import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { getName, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
-import { ChangeLogNotes } from './common';
 import {
   addReleaseNotes,
   getReleaseList,
@@ -11,6 +10,7 @@ import {
   getReleaseNotesMd,
   releaseNotesCacheMinutes,
 } from './release-notes';
+import type { ChangeLogNotes } from './types';
 
 jest.mock('../../../util/host-rules');
 

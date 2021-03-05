@@ -72,6 +72,8 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 2
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
@@ -147,6 +149,7 @@ jobs:
 
       - name: Lint
         run: |
+          yarn ls-lint
           yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
           yarn prettier
 

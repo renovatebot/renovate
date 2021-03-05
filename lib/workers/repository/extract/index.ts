@@ -6,7 +6,7 @@ import {
 } from '../../../config';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
-import { PackageFile } from '../../../manager/common';
+import type { PackageFile } from '../../../manager/types';
 import { getFileList } from '../../../util/git';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';

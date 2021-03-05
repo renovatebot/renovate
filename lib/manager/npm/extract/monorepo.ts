@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import { PackageFile } from '../../common';
+import type { PackageFile } from '../../types';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
   const res = patterns.some(

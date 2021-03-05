@@ -1,5 +1,5 @@
 import minimatch from 'minimatch';
-import { RenovateConfig } from '../../../config/common';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 

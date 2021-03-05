@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { UpdateDependencyConfig } from '../common';
+import type { UpdateDependencyConfig } from '../types';
 
 function getDepNameWithNoVersion(depName: string): string {
   let depNameNoVersion = depName.split('/').slice(0, 3).join('/');

@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
 import { safeLoad } from 'js-yaml';
-
 import { logger } from '../../logger';
-import { PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageFile } from '../types';
 
 interface DockerComposeConfig {
   version?: string;

@@ -26,12 +26,12 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   if (!config.token && config.username && config.password) {
     authType = 'basic';
     authValue = toBase64(`${config.username}:${config.password}`);
-  } else if (config.token.length !== 52) {
-    authType = 'bearer';
-    authValue = config.token;
-  } else {
+  } else if (config.token.length === 52) {
     authType = 'basic';
     authValue = toBase64(`:${config.token}`);
+  } else {
+    authType = 'bearer';
+    authValue = config.token;
   }
   add(authValue);
   return {

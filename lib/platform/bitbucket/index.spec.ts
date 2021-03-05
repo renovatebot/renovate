@@ -4,7 +4,7 @@ import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/bitbucket';
-import { Platform, RepoParams } from '../common';
+import type { Platform, RepoParams } from '../types';
 
 const baseUrl = 'https://api.bitbucket.org';
 

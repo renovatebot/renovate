@@ -1,5 +1,4 @@
 import * as cargo from './cargo';
-import type { VersioningApi, VersioningApiConstructor } from './common';
 import * as composer from './composer';
 import * as docker from './docker';
 import * as git from './git';
@@ -18,6 +17,7 @@ import * as regex from './regex';
 import * as ruby from './ruby';
 import * as semver from './semver';
 import * as swift from './swift';
+import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as ubuntu from './ubuntu';
 
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();

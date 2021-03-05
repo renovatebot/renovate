@@ -3,15 +3,14 @@ import is from '@sindresorhus/is';
 import { linkify } from 'linkify-markdown';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
-
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
-import { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './common';
 import * as github from './github';
 import * as gitlab from './gitlab';
+import type { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './types';
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
@@ -118,9 +117,7 @@ export async function getReleaseNotes(
         ? `${baseUrl}${repository}/tags/${release.tag}`
         : `${baseUrl}${repository}/releases/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
-      if (!releaseNotes.body.length) {
-        releaseNotes = null;
-      } else {
+      if (releaseNotes.body.length) {
         try {
           if (baseUrl !== 'https://gitlab.com/') {
             releaseNotes.body = linkify(releaseNotes.body, {
@@ -130,6 +127,8 @@ export async function getReleaseNotes(
         } catch (err) /* istanbul ignore next */ {
           logger.warn({ err, baseUrl, repository }, 'Error linkifying');
         }
+      } else {
+        releaseNotes = null;
       }
     }
   });
@@ -318,10 +317,9 @@ export async function addReleaseNotes(
     return input;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
-  const repository =
-    input.project.github != null
-      ? input.project.github.replace(/\.git$/, '')
-      : input.project.gitlab;
+  const repository = input.project.github
+    ? input.project.github.replace(/\.git$/, '')
+    : input.project.gitlab;
   const cacheNamespace = input.project.github
     ? 'changelog-github-notes'
     : 'changelog-gitlab-notes';
