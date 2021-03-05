@@ -69,7 +69,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('abc123');
 
-      platform.getPrBody.mockImplementation((prBody) => prBody);
+      platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
         prResult: PrResult.Created,
         pr: {

@@ -395,25 +395,6 @@ export async function processBranch(
                 regEx(pattern).test(cmd)
               )
             ) {
-              const msg = 'Post-upgrade task did not match any on allowed list';
-              logger.warn(
-                {
-                  cmd,
-                  allowedPostUpgradeCommands,
-                },
-                msg
-              );
-              config.artifactErrors.push({
-                lockFile: upgrade.packageFile,
-                stderr: sanitize(
-                  `Post-upgrade command '${cmd}' does not match allowed pattern${
-                    allowedPostUpgradeCommands.length === 1 ? '' : 's'
-                  } ${allowedPostUpgradeCommands
-                    .map((x) => `'${x}'`)
-                    .join(', ')}`
-                ),
-              });
-            } else {
               try {
                 const compiledCmd = allowPostUpgradeCommandTemplating
                   ? template.compile(cmd, upgrade)
@@ -439,6 +420,25 @@ export async function processBranch(
                     'Error when executing post upgrade command',
                 });
               }
+            } else {
+              const msg = 'Post-upgrade task did not match any on allowed list';
+              logger.warn(
+                {
+                  cmd,
+                  allowedPostUpgradeCommands,
+                },
+                msg
+              );
+              config.artifactErrors.push({
+                lockFile: upgrade.packageFile,
+                stderr: sanitize(
+                  `Post-upgrade command '${cmd}' does not match allowed pattern${
+                    allowedPostUpgradeCommands.length === 1 ? '' : 's'
+                  } ${allowedPostUpgradeCommands
+                    .map((x) => `'${x}'`)
+                    .join(', ')}`
+                ),
+              });
             }
           }
 
