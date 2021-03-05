@@ -49,10 +49,9 @@ export async function getReleases({
     registryUrl ?? 'https://github.com/'
   );
   const apiBaseUrl =
-    sourceUrlBase !== 'https://github.com/'
-      ? `${sourceUrlBase}api/v3/`
-      : `https://api.github.com/`;
-
+    sourceUrlBase === 'https://github.com/'
+      ? `https://api.github.com/`
+      : `${sourceUrlBase}api/v3/`;
   const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
   const res = await http.getJson<GithubRelease[]>(url, {
     paginate: true,

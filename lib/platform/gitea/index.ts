@@ -1,5 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
+import { lt } from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -51,6 +52,7 @@ interface GiteaRepoConfig {
 const defaults = {
   hostType: PLATFORM_TYPE_GITEA,
   endpoint: 'https://gitea.com/api/v1/',
+  version: '0.0.0',
 };
 
 let config: GiteaRepoConfig = {} as any;
@@ -191,6 +193,7 @@ const platform: Platform = {
       gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
+      defaults.version = await helper.getVersion({ token });
     } catch (err) {
       logger.debug(
         { err },
@@ -728,14 +731,14 @@ const platform: Platform = {
           { repository: config.repository, issue, comment: c.id },
           'Comment added'
         );
-      } else if (comment.body !== body) {
+      } else if (comment.body === body) {
+        logger.debug(`Comment #${comment.id} is already up-to-date`);
+      } else {
         const c = await helper.updateComment(config.repository, issue, body);
         logger.debug(
           { repository: config.repository, issue, comment: c.id },
           'Comment updated'
         );
-      } else {
-        logger.debug(`Comment #${comment.id} is already up-to-date`);
       }
 
       return true;
@@ -792,6 +795,13 @@ const platform: Platform = {
 
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
+    if (lt(defaults.version, '1.14.0')) {
+      logger.debug(
+        { version: defaults.version },
+        'Adding reviewer not yet supported.'
+      );
+      return;
+    }
     try {
       await helper.requestPrReviewers(config.repository, number, { reviewers });
     } catch (err) {

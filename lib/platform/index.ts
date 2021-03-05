@@ -90,17 +90,18 @@ export async function initPlatform(
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };
   let gitAuthor: string;
+  // istanbul ignore else
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;
-  } else if (!platformInfo?.gitAuthor) {
+  } else if (platformInfo?.gitAuthor) {
+    logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
+    gitAuthor = platformInfo.gitAuthor;
+  } else {
     logger.debug(
       'Using default gitAuthor: Renovate Bot <renovate@whitesourcesoftware.com>'
     );
     gitAuthor = 'Renovate Bot <renovate@whitesourcesoftware.com>';
-  } /* istanbul ignore next */ else {
-    logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
-    gitAuthor = platformInfo.gitAuthor;
   }
   const gitAuthorParsed = parseGitAuthor(gitAuthor);
   // istanbul ignore if

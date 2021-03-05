@@ -465,11 +465,11 @@ export function migrateConfig(
         delete migratedConfig.node.enabled;
         migratedConfig.travis = migratedConfig.travis || {};
         migratedConfig.travis.enabled = true;
-        if (!Object.keys(migratedConfig.node).length) {
-          delete migratedConfig.node;
-        } else {
+        if (Object.keys(migratedConfig.node).length) {
           const subMigrate = migrateConfig(migratedConfig.node, key);
           migratedConfig.node = subMigrate.migratedConfig;
+        } else {
+          delete migratedConfig.node;
         }
       } else if (is.array(val)) {
         const newArray = [];
