@@ -556,6 +556,12 @@ exports[`config/presets resolvePreset throws if invalid preset file 2`] = `"Cann
 
 exports[`config/presets resolvePreset throws if invalid preset file 3`] = `undefined`;
 
+exports[`config/presets resolvePreset throws if path + invalid syntax 1`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if path + invalid syntax 2`] = `"Preset is invalid (github>user/repo//)"`;
+
+exports[`config/presets resolvePreset throws if path + invalid syntax 3`] = `undefined`;
+
 exports[`config/presets resolvePreset throws if path + sub-preset 1`] = `undefined`;
 
 exports[`config/presets resolvePreset throws if path + sub-preset 2`] = `"Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)"`;
