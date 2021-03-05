@@ -62,8 +62,8 @@ function checkEnv(): void {
     );
   } else if (rangeNext && !satisfies(process.versions?.node, rangeNext)) {
     logger.warn(
-      { versions: process.versions, range: rangeNext },
-      'Unsupported node environment detected. Please check your node version.'
+      { versions: process.versions },
+      `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`
     );
   }
 }
