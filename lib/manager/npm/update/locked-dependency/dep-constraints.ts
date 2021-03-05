@@ -1,7 +1,6 @@
 import type { PackageJson } from 'type-fest';
-
 import { api as semver } from '../../../../versioning/npm';
-import { PackageLockOrEntry, ParentDependency } from './common';
+import type { PackageLockOrEntry, ParentDependency } from './types';
 
 // Finds all parent dependencies for a given depName@currentVersion
 export function findDepConstraints(
@@ -9,6 +8,7 @@ export function findDepConstraints(
   lockEntry: PackageLockOrEntry,
   depName: string,
   currentVersion: string,
+  newVersion: string,
   parentDepName?: string
 ): ParentDependency[] {
   let parents: ParentDependency[] = [];
@@ -30,6 +30,10 @@ export function findDepConstraints(
   if (parentDepName && requires) {
     const constraint = requires[depName];
     if (constraint && semver.matches(currentVersion, constraint)) {
+      if (constraint === currentVersion) {
+        // Workaround for old versions of npm which wrote the exact version in requires instead of the constraint
+        requires[depName] = newVersion;
+      }
       parents.push({
         parentDepName,
         parentVersion: version,
@@ -45,6 +49,7 @@ export function findDepConstraints(
           dependency,
           depName,
           currentVersion,
+          newVersion,
           packageName
         )
       );

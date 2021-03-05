@@ -3,7 +3,7 @@ import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isVersion } from '../../versioning/semver';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 function getDep(
   lineNumber: number,
@@ -21,10 +21,10 @@ function getDep(
     depType: type,
     currentValue,
   };
-  if (!isVersion(currentValue)) {
-    dep.skipReason = SkipReason.UnsupportedVersion;
-  } else {
+  if (isVersion(currentValue)) {
     dep.datasource = datasourceGo.id;
+  } else {
+    dep.skipReason = SkipReason.UnsupportedVersion;
   }
   const digestMatch = /v0\.0.0-\d{14}-([a-f0-9]{12})/.exec(currentValue);
   if (digestMatch) {

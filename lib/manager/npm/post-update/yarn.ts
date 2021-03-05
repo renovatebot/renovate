@@ -3,13 +3,16 @@ import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
-import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import {
+  INTERRUPTED,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+} from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
 import { readFile, remove } from '../../../util/fs';
-import { PostUpdateConfig, Upgrade } from '../../common';
+import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
@@ -182,6 +185,9 @@ export async function generateLockFile(
     // Read the result
     lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === INTERRUPTED) {
+      throw err;
+    }
     logger.debug(
       {
         err,

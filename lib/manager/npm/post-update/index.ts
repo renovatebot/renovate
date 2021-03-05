@@ -17,7 +17,7 @@ import {
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
+import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
@@ -427,6 +427,13 @@ export async function getAdditionalFiles(
     logger.debug('Skipping lock file generation');
     return { artifactErrors, updatedArtifacts };
   }
+  if (
+    !config.updatedPackageFiles?.length &&
+    config.upgrades?.every((upgrade) => upgrade.isRemediation)
+  ) {
+    logger.debug('Skipping lock file generation for remediations');
+    return { artifactErrors, updatedArtifacts };
+  }
   logger.debug('Getting updated lock files');
   if (
     config.updateType === 'lockFileMaintenance' &&
@@ -458,6 +465,16 @@ export async function getAdditionalFiles(
         additionalNpmrcContent.push(
           `//${hostRule.hostName}/:_authToken=${hostRule.token}`
         );
+      }
+    } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
+      if (hostRule.baseUrl) {
+        const uri = hostRule.baseUrl.replace(/^https?:/, '');
+        additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
+        additionalNpmrcContent.push(`${uri}:_password=${hostRule.password}`);
+      } else if (hostRule.hostName) {
+        const uri = `//${hostRule.hostName}/`;
+        additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
+        additionalNpmrcContent.push(`${uri}:_password=${hostRule.password}`);
       }
     }
   }
@@ -538,14 +555,14 @@ export async function getAdditionalFiles(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
-      if (res.lockFile !== existingContent) {
+      if (res.lockFile === existingContent) {
+        logger.debug(`${lockFile} hasn't changed`);
+      } else {
         logger.debug(`${lockFile} needs updating`);
         updatedArtifacts.push({
           name: lockFile,
           contents: res.lockFile.replace(new RegExp(`${token}`, 'g'), ''),
         });
-      } else {
-        logger.debug(`${lockFile} hasn't changed`);
       }
     }
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
@@ -604,15 +621,15 @@ export async function getAdditionalFiles(
         lockFileName,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
-      if (res.lockFile !== existingContent) {
+      if (res.lockFile === existingContent) {
+        logger.debug("yarn.lock hasn't changed");
+      } else {
         logger.debug('yarn.lock needs updating');
         updatedArtifacts.push({
           name: lockFileName,
           contents: res.lockFile,
         });
         await updateYarnOffline(lockFileDir, config.localDir, updatedArtifacts);
-      } else {
-        logger.debug("yarn.lock hasn't changed");
       }
     }
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
@@ -668,14 +685,14 @@ export async function getAdditionalFiles(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
-      if (res.lockFile !== existingContent) {
+      if (res.lockFile === existingContent) {
+        logger.debug("pnpm-lock.yaml hasn't changed");
+      } else {
         logger.debug('pnpm-lock.yaml needs updating');
         updatedArtifacts.push({
           name: lockFile,
           contents: res.lockFile,
         });
-      } else {
-        logger.debug("pnpm-lock.yaml hasn't changed");
       }
     }
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
@@ -783,14 +800,14 @@ export async function getAdditionalFiles(
                 'utf8'
               );
             }
-            if (newContent !== existingContent) {
+            if (newContent === existingContent) {
+              logger.trace('File is unchanged');
+            } else {
               logger.debug('File is updated: ' + lockFilePath);
               updatedArtifacts.push({
                 name: filename,
                 contents: newContent,
               });
-            } else {
-              logger.trace('File is unchanged');
             }
           } catch (err) {
             if (config.updateType === 'lockFileMaintenance') {

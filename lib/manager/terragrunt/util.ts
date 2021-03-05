@@ -1,4 +1,4 @@
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 
 export const keyValueExtractionRegex = /^\s*source\s+=\s+"(?<value>[^"]+)"\s*$/;
 

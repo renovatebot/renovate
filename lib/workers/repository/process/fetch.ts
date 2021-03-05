@@ -8,12 +8,12 @@ import {
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
-import { PackageDependency, PackageFile } from '../../../manager/common';
+import type { PackageDependency, PackageFile } from '../../../manager/types';
 import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates } from './lookup';
-import { LookupUpdateConfig } from './lookup/common';
+import type { LookupUpdateConfig } from './lookup/types';
 
 async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,

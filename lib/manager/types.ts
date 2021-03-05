@@ -1,11 +1,11 @@
-import { ReleaseType } from 'semver';
-import {
+import type { ReleaseType } from 'semver';
+import type {
   MatchStringsStrategy,
   UpdateType,
   ValidationMessage,
-} from '../config/common';
-import { RangeStrategy, SkipReason } from '../types';
-import { File } from '../util/git';
+} from '../config/types';
+import type { RangeStrategy, SkipReason } from '../types';
+import type { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 

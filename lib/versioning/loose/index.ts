@@ -1,4 +1,4 @@
-import { VersioningApi } from '../common';
+import type { VersioningApi } from '../types';
 import * as generic from './generic';
 
 export const id = 'loose';

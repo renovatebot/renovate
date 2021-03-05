@@ -1,7 +1,6 @@
 import * as bitbucketTags from './bitbucket-tags';
 import * as cdnjs from './cdnjs';
 import * as clojure from './clojure';
-import type { DatasourceApi } from './common';
 import * as crate from './crate';
 import * as dart from './dart';
 import * as docker from './docker';
@@ -31,6 +30,7 @@ import * as sbtPackage from './sbt-package';
 import * as sbtPlugin from './sbt-plugin';
 import * as terraformModule from './terraform-module';
 import * as terraformProvider from './terraform-provider';
+import type { DatasourceApi } from './types';
 
 const api = new Map<string, DatasourceApi>();
 export default api;

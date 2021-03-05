@@ -3,9 +3,9 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import { ArtifactError } from '../../manager/common';
+import type { ArtifactError } from '../../manager/types';
 import { File, getFile } from '../../util/git';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {

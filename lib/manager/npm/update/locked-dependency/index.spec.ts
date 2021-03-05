@@ -3,7 +3,7 @@ import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
 import { getName } from '../../../../../test/util';
 import { clone } from '../../../../util/clone';
-import { UpdateLockedConfig } from '../../../common';
+import type { UpdateLockedConfig } from '../../../types';
 import { updateLockedDependency } from '.';
 
 const packageFileContent = readFileSync(

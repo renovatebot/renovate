@@ -5,12 +5,12 @@ import {
 } from '../constants/error-messages';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
-import type { Datasource } from './common';
 import * as datasourceDocker from './docker';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
 import * as datasourceNpm from './npm';
 import * as datasourcePackagist from './packagist';
+import type { DatasourceApi } from './types';
 import * as datasource from '.';
 
 jest.mock('./docker');
@@ -32,7 +32,7 @@ describe(getName(__filename), () => {
     expect(datasource.getDatasourceList()).toBeDefined();
   });
   it('validates dataource', () => {
-    function validateDatasource(module: Datasource, name: string): boolean {
+    function validateDatasource(module: DatasourceApi, name: string): boolean {
       if (!module.getReleases) {
         return false;
       }

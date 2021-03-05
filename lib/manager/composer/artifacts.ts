@@ -3,7 +3,10 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { getAdminConfig } from '../../config/admin';
-import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
+import {
+  INTERRUPTED,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+} from '../../constants/error-messages';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
@@ -23,7 +26,7 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { composerVersioningId, getConstraint } from './utils';
 
 interface UserPass {
@@ -193,6 +196,10 @@ export async function updateArtifacts({
 
     return res;
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === INTERRUPTED) {
+      throw err;
+    }
     if (
       err.message?.includes(
         'Your requirements could not be resolved to an installable set of packages.'

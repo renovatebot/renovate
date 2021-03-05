@@ -1,5 +1,5 @@
 import * as datasourceClojure from '../../datasource/clojure';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`);
@@ -16,7 +16,7 @@ export function trimAtKey(str: string, kwName: string): string | null {
 }
 
 export function expandDepName(name: string): string {
-  return !name.includes('/') ? `${name}:${name}` : name.replace('/', ':');
+  return name.includes('/') ? name.replace('/', ':') : `${name}:${name}`;
 }
 
 export interface ExtractContext {

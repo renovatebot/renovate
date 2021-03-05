@@ -9,9 +9,9 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { GitProtocol } from '../../types/git';
-import { FileData } from '../../types/platform/bitbucket-server';
+import type { FileData } from '../../types/platform/bitbucket-server';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
@@ -22,7 +22,7 @@ import {
 } from '../../util/http/bitbucket-server';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
-import {
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -37,8 +37,7 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
@@ -124,11 +123,10 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
     const { body } = await bitbucketServerHttp.getJson<FileData>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/browse/${fileName}?limit=20000`
     );
-    if (!body.isLastPage) {
-      logger.warn({ size: body.size }, `The file is too big`);
-    } else {
+    if (body.isLastPage) {
       return JSON.parse(body.lines.map((l) => l.text).join(''));
     }
+    logger.warn({ size: body.size }, `The file is too big`);
   } catch (err) {
     // no-op
   }

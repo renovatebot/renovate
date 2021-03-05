@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import { PackageLockDependency, PackageLockOrEntry } from './common';
+import type { PackageLockDependency, PackageLockOrEntry } from './types';
 
 // Finds matching dependencies withing a package lock file of sub-entry
 export function getLockedDependencies(

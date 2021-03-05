@@ -4,7 +4,7 @@ import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
 import * as _helmv3 from '../../manager/helmv3';
 import * as _npm from '../../manager/npm';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
 
