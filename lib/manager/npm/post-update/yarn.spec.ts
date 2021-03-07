@@ -45,7 +45,9 @@ describe(getName(__filename), () => {
       });
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
-          return new Promise<string>((resolve) => resolve(null));
+          return new Promise<string>((resolve) =>
+            resolve('yarn-path ./.yarn/cli.js\n')
+          );
         }
         return new Promise<string>((resolve) =>
           resolve('package-lock-contents')
