@@ -1,4 +1,4 @@
-import { resolveBaseUrl, validateUrl } from './url';
+import { parseUrl, resolveBaseUrl, validateUrl } from './url';
 
 describe('util/url', () => {
   test.each([
@@ -52,5 +52,14 @@ describe('util/url', () => {
     expect(validateUrl('ssh://github.com')).toBe(false);
     expect(validateUrl('http://github.com')).toBe(true);
     expect(validateUrl('https://github.com')).toBe(true);
+  });
+  it('parses URL', () => {
+    expect(parseUrl(null)).toBeNull();
+    expect(parseUrl(undefined)).toBeNull();
+
+    const url = parseUrl('https://github.com/renovatebot/renovate');
+    expect(url.protocol).toBe('https:');
+    expect(url.host).toBe('github.com');
+    expect(url.pathname).toBe('/renovatebot/renovate');
   });
 });
