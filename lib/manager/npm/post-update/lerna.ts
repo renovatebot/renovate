@@ -7,7 +7,7 @@ import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
-import { optimizeCommand } from './yarn';
+import { getOptimizeCommand } from './yarn';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -53,7 +53,7 @@ export async function generateLockFiles(
       }
       preCommands.push(installYarn);
       if (skipInstalls !== false) {
-        preCommands.push(optimizeCommand);
+        preCommands.push(getOptimizeCommand());
       }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
