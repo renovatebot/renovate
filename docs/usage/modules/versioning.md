@@ -12,12 +12,12 @@ It's impossible to automatically detect **all** versioning schemes, so sometimes
 You can manually configure/override the `versioning` value for a particular dependency.
 You generally won't need to override the defaults for ecosystems which enforce a strict version scheme like `npm`.
 
-Configuring or overriding the default `versioning` can be particularly helpful for ecosystems like Docker/Kubernetes/Helm, where versioning is barely a "convention".
+Configuring or overriding the default `versionScheme` can be particularly helpful for ecosystems like Docker/Kubernetes/Helm, where versioning is barely a "convention".
 
 ## General concepts behind overriding versioning
 
-- Although you can reconfigure versioning per-manager or per-datasource, you are unlikely to ever to need to do this
-- More commonly you would need to configure `versioning` for individual packages or potentially package patterns
+- Although you can reconfigure versioning per-manager or per-datasource, it's unlikely that such a broad change would ever be needed
+- More commonly you would need to configure `versionScheme` for individual packages or potentially package patterns
 - The best way to do this is with `packageRules`, with a combination of `matchManagers`, `matchDatasources`, `matchPackageNames` and `matchPackagePatterns`
 
 ## Examples of versioning overrides
