@@ -32,18 +32,18 @@ export function commitFilesToBranch(
   const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
   logger.debug(`${fileLength} file(s) to commit`);
   if (getAdminConfig().dryRun) {
-    logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
-    logger.info('DRY-RUN: Commit message would be:\n' + config.commitMessage);
     logger.info(
-      [
-        'DRY-RUN: Committed files would be:',
+      {
+        commitMessage: config.commitMessage,
+
         // Piping f.contents to
         // git diff -- ${f.name} -
         // would be much better, but this seems to be impossible with simple-git
-        ...updatedFiles.map(
-          (f) => `${f.name}\n<<<\n${String(f.contents)}\n>>>\n`
-        ),
-      ].join('\n')
+        updatedFiles: `\n${updatedFiles
+          .map((f) => `${f.name}\n<<<\n${String(f.contents)}\n>>>\n`)
+          .join('\n')}\n`,
+      },
+      'DRY-RUN: Would commit files to branch ' + config.branchName
     );
     return null;
   }
