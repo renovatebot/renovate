@@ -175,6 +175,7 @@ describe(getName(__filename), () => {
             resolve('yarn-path ./.yarn/cli.js')
           );
         }
+        return new Promise<string>((resolve) => resolve(''));
       });
       expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
     });
