@@ -24,6 +24,8 @@ Configuring or overriding the default `versionScheme` can be particularly helpfu
 
 ### Overriding Docker versioning to use a versioning specific for a package
 
+The below package rule overrides the default `docker` versioning to instead use `pep440` when the Docker image is `python`:
+
 ```json
 {
   "packageRules": [
