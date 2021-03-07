@@ -49,7 +49,7 @@ export async function checkYarnrc(
 export function getOptimizeCommand(
   fileName = '/home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js'
 ): string {
-  return `sed -i 's/ steps,/ steps.slice(0,1),/' ${fileName}`;
+  return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
 }
 
 export async function generateLockFile(
