@@ -90,7 +90,7 @@ describe('lib/manager/poetry/extract', () => {
     });
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
       const res = await extractPackageFile(pyproject2toml, filename);
-      expect(res.deps).toMatchSnapshot();
+      expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(7);
     });
     it('handles case with no dependencies', async () => {
@@ -99,7 +99,7 @@ describe('lib/manager/poetry/extract', () => {
     });
     it('handles multiple constraint dependencies', async () => {
       const res = await extractPackageFile(pyproject4toml, filename);
-      expect(res.deps).toMatchSnapshot();
+      expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('extracts registries', async () => {

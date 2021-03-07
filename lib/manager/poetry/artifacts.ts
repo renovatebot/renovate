@@ -122,7 +122,8 @@ export async function updateArtifacts({
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.constraints?.poetry || 'poetry';
-    const poetryInstall = 'pip install ' + quote(poetryRequirement);
+    const poetryInstall =
+      'pip install ' + poetryRequirement.split(' ').map(quote).join(' ');
     const extraEnv = getSourceCredentialVars(
       newPackageFileContent,
       packageFileName
