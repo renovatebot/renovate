@@ -115,8 +115,12 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       const parsedUrl = URL.parse(goImportURL);
 
       // split the go module from the URL: host/go/module -> go/module
-      const split = goModule.split('/');
-      const lookupName = split[1] + '/' + split[2];
+      const lookupName = parsedUrl.pathname
+        .replace(/\.git$/, '')
+        .replace(/\/$/, '')
+        .split('/')
+        .slice(-2)
+        .join('/');
 
       return {
         datasource: github.id,
