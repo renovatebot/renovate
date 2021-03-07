@@ -357,78 +357,82 @@ Object {
 `;
 
 exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies (with dep = {version = "1.2.3"} case) 1`] = `
-Array [
-  Object {
-    "currentValue": "*",
-    "datasource": "pypi",
-    "depName": "dep1",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
+Object {
+  "constraints": Object {},
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "datasource": "pypi",
+      "depName": "dep1",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": true,
+      },
+      "versioning": "poetry",
     },
-    "versioning": "poetry",
-  },
-  Object {
-    "currentValue": "^0.6.0",
-    "datasource": "pypi",
-    "depName": "dep2",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
+    Object {
+      "currentValue": "^0.6.0",
+      "datasource": "pypi",
+      "depName": "dep2",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": true,
+      },
+      "versioning": "poetry",
     },
-    "versioning": "poetry",
-  },
-  Object {
-    "currentValue": "^0.33.6",
-    "datasource": "pypi",
-    "depName": "dep3",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
+    Object {
+      "currentValue": "^0.33.6",
+      "datasource": "pypi",
+      "depName": "dep3",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": true,
+      },
+      "skipReason": "path-dependency",
     },
-    "skipReason": "path-dependency",
-  },
-  Object {
-    "currentValue": "",
-    "datasource": "pypi",
-    "depName": "dep4",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
+    Object {
+      "currentValue": "",
+      "datasource": "pypi",
+      "depName": "dep4",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "path-dependency",
     },
-    "skipReason": "path-dependency",
-  },
-  Object {
-    "currentValue": "^0.8.3",
-    "datasource": "pypi",
-    "depName": "extra_dep1",
-    "depType": "extras",
-    "managerData": Object {
-      "nestedVersion": false,
+    Object {
+      "currentValue": "^0.8.3",
+      "datasource": "pypi",
+      "depName": "extra_dep1",
+      "depType": "extras",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "versioning": "poetry",
     },
-    "versioning": "poetry",
-  },
-  Object {
-    "currentValue": "^0.9.4",
-    "datasource": "pypi",
-    "depName": "extra_dep2",
-    "depType": "extras",
-    "managerData": Object {
-      "nestedVersion": false,
+    Object {
+      "currentValue": "^0.9.4",
+      "datasource": "pypi",
+      "depName": "extra_dep2",
+      "depType": "extras",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "versioning": "poetry",
     },
-    "versioning": "poetry",
-  },
-  Object {
-    "currentValue": "^0.4.0",
-    "datasource": "pypi",
-    "depName": "extra_dep3",
-    "depType": "extras",
-    "managerData": Object {
-      "nestedVersion": false,
+    Object {
+      "currentValue": "^0.4.0",
+      "datasource": "pypi",
+      "depName": "extra_dep3",
+      "depType": "extras",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "versioning": "poetry",
     },
-    "versioning": "poetry",
-  },
-]
+  ],
+  "registryUrls": null,
+}
 `;
 
 exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies 1`] = `
@@ -535,18 +539,22 @@ Array [
 `;
 
 exports[`lib/manager/poetry/extract extractPackageFile() handles multiple constraint dependencies 1`] = `
-Array [
-  Object {
-    "currentValue": "",
-    "datasource": "pypi",
-    "depName": "foo",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
+Object {
+  "constraints": Object {},
+  "deps": Array [
+    Object {
+      "currentValue": "",
+      "datasource": "pypi",
+      "depName": "foo",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "multiple-constraint-dep",
     },
-    "skipReason": "multiple-constraint-dep",
-  },
-]
+  ],
+  "registryUrls": null,
+}
 `;
 
 exports[`lib/manager/poetry/extract extractPackageFile() resolves lockedVersions from the lockfile 1`] = `
