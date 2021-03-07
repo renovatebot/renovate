@@ -167,4 +167,16 @@ describe(getName(__filename), () => {
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
+  describe('checkYarnrc()', () => {
+    it('returns offline mirror and yarn path', async () => {
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) =>
+            resolve('yarn-path ./.yarn/cli.js')
+          );
+        }
+      });
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+    });
+  });
 });
