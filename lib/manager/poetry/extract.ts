@@ -151,7 +151,9 @@ export async function extractPackageFile(
 
   // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
   if (
-    pyprojectfile['build-system']?.['build-backend'] === 'poetry.masonry.api'
+    pyprojectfile['build-system']?.['build-backend'] === 'poetry.masonry.api' ||
+    pyprojectfile['build-system']?.['build-backend'] ===
+      'poetry.core.masonry.api'
   ) {
     constraints.poetry = pyprojectfile['build-system']?.requires.join(' ');
   }
