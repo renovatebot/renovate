@@ -95,6 +95,8 @@ export async function processBranch(
     config.rebaseRequested = rebaseCheck(config, branchPr);
     logger.debug(`Branch pr rebase requested: ${config.rebaseRequested}`);
   }
+  const artifactErrorTopic = emojify(':warning: Artifact update problem');
+  const ignoreTopic = `Renovate Ignore Notification`;
   try {
     logger.debug(`Branch has ${dependencies.length} upgrade(s)`);
 
@@ -106,7 +108,6 @@ export async function processBranch(
         'Closed PR already exists. Skipping branch.'
       );
       if (existingPr.state === PrState.Closed) {
-        const topic = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
           content = `As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then Renovate will then reenable updates for minor and patch updates automatically.`;
@@ -125,7 +126,7 @@ export async function processBranch(
           } else {
             await platform.ensureComment({
               number: existingPr.number,
-              topic,
+              topic: ignoreTopic,
               content,
             });
           }
@@ -636,7 +637,6 @@ export async function processBranch(
       return ProcessBranchResult.Pending;
     }
     if (pr) {
-      const topic = emojify(':warning: Artifact update problem');
       if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
@@ -676,7 +676,7 @@ export async function processBranch(
           } else {
             await platform.ensureComment({
               number: pr.number,
-              topic,
+              topic: artifactErrorTopic,
               content,
             });
           }
@@ -713,7 +713,10 @@ export async function processBranch(
             );
           } else {
             // Remove artifacts error comment only if this run has successfully updated artifacts
-            await platform.ensureCommentRemoval({ number: pr.number, topic });
+            await platform.ensureCommentRemoval({
+              number: pr.number,
+              topic: artifactErrorTopic,
+            });
           }
         }
         const prAutomerged = await checkAutoMerge(pr, config);
