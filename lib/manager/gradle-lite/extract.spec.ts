@@ -99,4 +99,43 @@ describe('manager/gradle-lite/extract', () => {
       { packageFile: 'aaa/bbb/build.gradle', deps: [] },
     ]);
   });
+
+  it('deduplicates registry urls', async () => {
+    const fsMock = {
+      'build.gradle': [
+        'url "https://repo.maven.apache.org/maven2"',
+        'url "https://repo.maven.apache.org/maven2"',
+        'url "https://example.com"',
+        'url "https://example.com"',
+        'id "foo.bar" version "1.2.3"',
+        '"foo:bar:1.2.3"',
+      ].join(';\n'),
+    };
+
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'build.gradle',
+        deps: [
+          {
+            depType: 'plugin',
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+              'https://example.com',
+            ],
+          },
+          {
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://example.com',
+            ],
+          },
+        ],
+      },
+    ]);
+  });
 });
