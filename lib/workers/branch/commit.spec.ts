@@ -1,5 +1,6 @@
 import { defaultConfig, git, partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import { logger } from '../../logger';
 import type { BranchConfig } from '../types';
 import { commitFilesToBranch } from './commit';
 
@@ -42,8 +43,10 @@ describe('workers/branch/automerge', () => {
         name: 'package.json',
         contents: 'some contents',
       });
+      const infoLog = jest.spyOn(logger, 'info');
       await commitFilesToBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(infoLog.mock.calls).toMatchSnapshot();
     });
   });
 });
