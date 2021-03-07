@@ -4,26 +4,36 @@ Once Managers have extracted dependencies, and Datasources have located availabl
 The "versioning" is different for each package manager, because different package managers use different versioning schemes.
 For example, `npm` uses`1.0.0-beta.1` and `pip` uses `1.0.0b1`.
 
-## Why you might need to tinker with the versioning
+## Why you might need to manually configure versioning
 
-Renovate tries to do the right thing out-of-the-box most of the time.
-It's impossible to support **all** versioning schemes, so sometimes you need to tell the bot what versioning scheme it should use.
+Renovate interprets versions correctly out-of-the-box most of the time.
+It's impossible to automatically detect **all** versioning schemes, so sometimes you need to tell the bot what versioning scheme it should use.
 
 You can manually configure/override the `versioning` value for a particular dependency.
 You generally won't need to override the defaults for ecosystems which enforce a strict version scheme like `npm`.
 
-Configuring or overriding the default `versioning` can be helpful for ecosystems like Docker or helm-values, where versioning is barely a "convention".
+Configuring or overriding the default `versioning` can be particularly helpful for ecosystems like Docker/Kubernetes/Helm, where versioning is barely a "convention".
 
 ## General concepts behind overriding versioning
 
-TODO:
+- Although you can reconfigure versioning per-manager or per-datasource, you are unlikely to ever to need to do this
+- More commonly you would need to configure `versioning` for individual packages or potentially package patterns
+- The best way to do this is with `packageRules`, with a combination of `matchManagers`, `matchDatasources`, `matchPackageNames` and `matchPackagePatterns`
 
-- Explain how/why to use `packageRules`
-- Explain what kind of things you can set with `packageRules`
-- Explain what are the most common proporties you will need in `packageRules` to get what you want
+## Examples of versioning overrides
 
-## Examples of commonly needed versioning overrides
+### Overriding Docker versioning to use a versioning specific for a package
 
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
+      "versionScheme": "pep440"
+    }
+  ]
+}
 ### Docker versioning
 
 The configuration below overrides Renovate's default `docker` versioning for the `python` Docker image and instead uses the `pep440` versioning scheme to evaluate versions.
