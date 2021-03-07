@@ -24,7 +24,7 @@ Configuring or overriding the default `versioning` can be particularly helpful f
 
 ### Overriding Docker versioning to use a versioning specific for a package
 
-```json
+````json
 {
   "packageRules": [
     {
@@ -34,6 +34,8 @@ Configuring or overriding the default `versioning` can be particularly helpful f
     }
   ]
 }
+```
+
 ### Docker versioning
 
 The configuration below overrides Renovate's default `docker` versioning for the `python` Docker image and instead uses the `pep440` versioning scheme to evaluate versions.
@@ -48,38 +50,20 @@ The configuration below overrides Renovate's default `docker` versioning for the
     }
   ]
 }
-```
+````
 
-### Linuxserver.io helm-values versioning
-
-If you're using [linuxserver.io](https://www.linuxserver.io/) and want to use their versioning, do the following:
-
-```json
-{
-  "packagePatterns": ["(^|/)linuxserver\\/ddclient$"],
-  "packageNames": ["ddclient"],
-  "versioning": "loose",
-  "allowedVersions": "/^(?<version>v\\d+\\.\\d+\\.\\d+-ls\\d+)$/"
-}
-```
-
-ALTERNATIVE:
-
-If you're using [linuxserver.io](https://www.linuxserver.io/) and want to use their versioning, you can use the config below.
+### Using a custom regex versioning scheme
 
 ```json
 {
   "packageRules": [
     {
-      "packagePatterns": ["^linuxserver\\/"],
+      "matchPackageNames": ["foo/bar"],
       "versionScheme": "regex:^(?<compatibility>.*)-v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)?$"
     }
   ]
 }
 ```
-
-It will work for all "three dot" tags with any prefix like: `version-v4.0.681`.
-Renovate will track the prefix and only update the three part versions.
 
 ## Supported Versioning
 
