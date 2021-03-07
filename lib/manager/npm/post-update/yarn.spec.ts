@@ -172,7 +172,20 @@ describe(getName(__filename), () => {
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) =>
-            resolve('yarn-path ./.yarn/cli.js')
+            resolve(
+              'yarn-offline-mirror "./packages-cache"\nyarn-path "./.yarn/cli.js"\n'
+            )
+          );
+        }
+        return new Promise<string>((resolve) => resolve(''));
+      });
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+    });
+    it('returns no offline mirror and unquoted yarn path', async () => {
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) =>
+            resolve('yarn-path ./.yarn/cli.js\n')
           );
         }
         return new Promise<string>((resolve) => resolve(''));

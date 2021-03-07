@@ -37,7 +37,7 @@ export async function checkYarnrc(
         .split('\n')
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace('yarn-path ', '');
+        yarnPath = pathLine.replace(/^yarn-path\s+"?(.*?)"?$/, '$1');
       }
     }
   } catch (err) /* istanbul ignore next */ {
