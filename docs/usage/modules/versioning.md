@@ -24,7 +24,7 @@ Configuring or overriding the default `versioning` can be particularly helpful f
 
 ### Overriding Docker versioning to use a versioning specific for a package
 
-````json
+```json
 {
   "packageRules": [
     {
@@ -50,7 +50,7 @@ The configuration below overrides Renovate's default `docker` versioning for the
     }
   ]
 }
-````
+```
 
 ### Using a custom regex versioning scheme
 
