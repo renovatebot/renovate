@@ -13,18 +13,4 @@ coreImage:
   tag: 2.1.3-debian-10-r38
 ```
 
-If you need to change the versioning format, use a custom `packageRules` configuration:
-
-```json
-{
-  "packageRules": [
-    {
-      "packagePatterns": ["^linuxserver\\/"],
-      "versionScheme": "regex:^(?<compatibility>.*)-v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)?$"
-    }
-  ]
-}
-```
-
-The config given above will work for all "three dot" tags with any prefix like: `version-v4.0.681`.
-Renovate will track the prefix and only update the three part versions.
+If you need to change the versioning format, go to: INSERT PROPER INTERNAL LINK to `docs/usage/modules/versioning.md` HERE.

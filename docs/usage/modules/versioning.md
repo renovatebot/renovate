@@ -4,11 +4,29 @@ Once Managers have extracted dependencies, and Datasources have located availabl
 The "versioning" is different for each package manager, because different package managers use different versioning schemes.
 For example, `npm` uses`1.0.0-beta.1` and `pip` uses `1.0.0b1`.
 
-## Configuring Versioning
+## Why you might need to tinker with the versioning
+
+Renovate tries to do the right thing out-of-the-box most of the time.
+It's impossible to support **all** versioning schemes, so sometimes you need to tell the bot what versioning scheme it should use.
 
 You can manually configure/override the `versioning` value for a particular dependency.
 You generally won't need to override the defaults for ecosystems which enforce a strict version scheme like `npm`.
-Configuring or overriding the default `versioning` can be helpful for ecosystems like Docker, where versioning is barely a "convention". e.g.
+
+Configuring or overriding the default `versioning` can be helpful for ecosystems like Docker or helm-values, where versioning is barely a "convention".
+
+## General concepts behind overriding versioning
+
+TODO:
+
+- Explain how/why to use `packageRules`
+- Explain what kind of things you can set with `packageRules`
+- Explain what are the most common proporties you will need in `packageRules` to get what you want
+
+## Examples of commonly needed versioning overrides
+
+### Docker versioning
+
+The configuration below overrides Renovate's default `docker` versioning for the `python` Docker image and instead uses the `pep440` versioning scheme to evaluate versions.
 
 ```json
 {
@@ -22,7 +40,36 @@ Configuring or overriding the default `versioning` can be helpful for ecosystems
 }
 ```
 
-The above will override Renovate's default of `docker` versioning for the `python` Docker image and instead use `pep440` versioning to evaluate versions.
+### Linuxserver.io helm-values versioning
+
+If you're using [linuxserver.io](https://www.linuxserver.io/) and want to use their versioning, do the following:
+
+```json
+{
+  "packagePatterns": ["(^|/)linuxserver\\/ddclient$"],
+  "packageNames": ["ddclient"],
+  "versioning": "loose",
+  "allowedVersions": "/^(?<version>v\\d+\\.\\d+\\.\\d+-ls\\d+)$/"
+}
+```
+
+ALTERNATIVE:
+
+If you're using [linuxserver.io](https://www.linuxserver.io/) and want to use their versioning, you can use the config below.
+
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["^linuxserver\\/"],
+      "versionScheme": "regex:^(?<compatibility>.*)-v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)?$"
+    }
+  ]
+}
+```
+
+It will work for all "three dot" tags with any prefix like: `version-v4.0.681`.
+Renovate will track the prefix and only update the three part versions.
 
 ## Supported Versioning
 
