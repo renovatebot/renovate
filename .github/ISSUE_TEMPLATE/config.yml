@@ -2,4 +2,4 @@ blank_issues_enabled: false
 contact_links:
   - name: Start a discussion
     url: https://github.com/renovatebot/renovate/discussions
-    about: If you have any questions about config or doubts about whether you should create a feature request or bug report, please click here to create a Discussion instead of an Issue.
+    about: If you have any questions about bot configuration or doubts about whether you should create a feature request or bug report, please click here to create a Discussion instead of an Issue.
