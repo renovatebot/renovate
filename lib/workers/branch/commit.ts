@@ -31,7 +31,6 @@ export function commitFilesToBranch(
   }
   const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
   logger.debug(`${fileLength} file(s) to commit`);
-  // istanbul ignore if
   if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     logger.info('DRY-RUN: Commit message would be:\n' + config.commitMessage);
