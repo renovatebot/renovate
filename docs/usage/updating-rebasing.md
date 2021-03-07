@@ -16,7 +16,7 @@ Here is a list of the most common cases where Renovate must update/rebase the br
 - When you request a manual rebase from the Renovate bot
 
 Renovate uses its own version of "rebasing", which is _not the same_ as doing a `git rebase` with Git.
-Instead of doing a `git rebase`, Renovate manually recreates the PR commit based off of the latest commit in the base branch.
+Instead, Renovate reapplies all updates into a new commit based off of the head of the base branch.
 
 ## No rebasing if you have made edits
 
