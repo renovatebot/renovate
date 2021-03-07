@@ -21,21 +21,22 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
-export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
+export async function checkYarnrc(
+  cwd: string
+): Promise<{ offlineMirror: boolean }> {
+  let offlineMirror = false;
   try {
     const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
         .find((line) => line.startsWith('yarn-offline-mirror '));
-      if (mirrorLine) {
-        return true;
-      }
+      offlineMirror = !!mirrorLine;
     }
   } catch (err) /* istanbul ignore next */ {
     // not found
   }
-  return false;
+  return { offlineMirror };
 }
 
 export function getOptimizeCommand(
@@ -74,14 +75,13 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    if (
-      isYarn1 &&
-      config.skipInstalls !== false &&
-      (await hasYarnOfflineMirror(cwd)) === false
-    ) {
-      logger.debug('Updating yarn.lock only - skipping node_modules');
-      // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-      preCommands.push(getOptimizeCommand());
+    if (isYarn1 && config.skipInstalls !== false) {
+      const { offlineMirror } = await checkYarnrc(cwd);
+      if (!offlineMirror) {
+        logger.debug('Updating yarn.lock only - skipping node_modules');
+        // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+        preCommands.push(getOptimizeCommand());
+      }
     }
     const commands = [];
     let cmdOptions = '';
