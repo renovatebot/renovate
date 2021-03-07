@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Renovate bot config help
+  - name: Start a discussion
     url: https://github.com/renovatebot/renovate/discussions
-    about: Please ask questions on how to configure Renovate here.
+    about: If you have any questions about config or doubts about whether you should create a feature request or bug report, please click here to create a Discussion instead of an Issue.
