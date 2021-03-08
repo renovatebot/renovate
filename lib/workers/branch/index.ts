@@ -494,6 +494,20 @@ export async function processBranch(
       } else {
         logger.debug('PR has no releaseTimestamp');
       }
+    } else if (config.updatedArtifacts?.length && branchPr) {
+      // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
+      // istanbul ignore if
+      if (getAdminConfig().dryRun) {
+        logger.info(
+          `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`
+        );
+      } else {
+        // Remove artifacts error comment only if this run has successfully updated artifacts
+        await platform.ensureCommentRemoval({
+          number: branchPr.number,
+          topic: artifactErrorTopic,
+        });
+      }
     }
     config.forceCommit =
       !!dependencyDashboardCheck ||
@@ -705,20 +719,6 @@ export async function processBranch(
           }
         }
       } else {
-        if (config.updatedArtifacts?.length) {
-          // istanbul ignore if
-          if (getAdminConfig().dryRun) {
-            logger.info(
-              `DRY-RUN: Would ensure comment removal in PR #${pr.number}`
-            );
-          } else {
-            // Remove artifacts error comment only if this run has successfully updated artifacts
-            await platform.ensureCommentRemoval({
-              number: pr.number,
-              topic: artifactErrorTopic,
-            });
-          }
-        }
         const prAutomerged = await checkAutoMerge(pr, config);
         if (prAutomerged && config.automergeType !== 'pr-comment') {
           await deleteBranchSilently(config.branchName);
