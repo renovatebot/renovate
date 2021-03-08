@@ -195,7 +195,7 @@ async function fetchRegistryInfo(
       try {
         await clonePromise;
       } catch (err) {
-        logger.error(
+        logger.warn(
           { err, lookupName: config.lookupName, registryUrl },
           'failed cloning git registry'
         );
