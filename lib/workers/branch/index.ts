@@ -560,6 +560,7 @@ export async function processBranch(
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
+      logger.debug({ err }, 'Received a 404 error - aborting run');
       throw new Error(REPOSITORY_CHANGED);
     }
     if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
