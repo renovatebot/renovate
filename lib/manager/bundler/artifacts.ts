@@ -1,7 +1,7 @@
 import { quote } from 'shlex';
 import {
   BUNDLER_INVALID_CREDENTIALS,
-  INTERRUPTED,
+  TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
@@ -161,7 +161,7 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     const output = `${String(err.stdout)}\n${String(err.stderr)}`;

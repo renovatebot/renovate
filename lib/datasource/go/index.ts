@@ -185,7 +185,7 @@ export async function getReleases({
    * and that tag should be used instead of just va.b.c, although for compatibility
    * the old behaviour stays the same.
    */
-  const nameParts = lookupName.split('/');
+  const nameParts = lookupName.replace(/\/v\d+$/, '').split('/');
   logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
   if (nameParts.length > 3) {
     const prefix = nameParts.slice(3, nameParts.length).join('/');

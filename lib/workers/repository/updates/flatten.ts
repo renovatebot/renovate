@@ -104,6 +104,7 @@ export async function flattenUpdates(
             updateConfig = applyPackageRules(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
+            update.branchName = updateConfig.branchName;
             updates.push(updateConfig);
           }
         }

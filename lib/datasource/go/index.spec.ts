@@ -418,6 +418,33 @@ describe('datasource/go', () => {
         httpMock.reset();
       }
     });
+    it('works for nested modules on github v2+ major upgrades', async () => {
+      const pkg = { datasource, depName: 'github.com/x/text/b/v2' };
+      const tags = [
+        { name: 'a/v1.0.0' },
+        { name: 'v5.0.0' },
+        { name: 'b/v2.0.0' },
+        { name: 'b/v3.0.0' },
+      ];
+
+      httpMock.setup();
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/x/text/tags?per_page=100')
+        .reply(200, tags)
+        .get('/repos/x/text/releases?per_page=100')
+        .reply(200, []);
+
+      const result = await getPkgReleases(pkg);
+      expect(result.releases).toEqual([
+        { gitRef: 'b/v2.0.0', version: 'v2.0.0' },
+        { gitRef: 'b/v3.0.0', version: 'v3.0.0' },
+      ]);
+
+      const httpCalls = httpMock.getTrace();
+      expect(httpCalls).toMatchSnapshot();
+      httpMock.reset();
+    });
     it('handles fyne.io', async () => {
       httpMock
         .scope('https://fyne.io/')
