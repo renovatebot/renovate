@@ -3,8 +3,8 @@ import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
 import {
-  INTERRUPTED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
@@ -138,7 +138,7 @@ export async function generateLockFile(
     // Read the result
     lockFile = await readFile(join(cwd, filename), 'utf8');
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug(

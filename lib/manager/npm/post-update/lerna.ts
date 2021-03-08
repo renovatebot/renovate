@@ -2,7 +2,7 @@ import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
-import { INTERRUPTED } from '../../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import type { PackageFile, PostUpdateConfig } from '../../types';
@@ -114,7 +114,7 @@ export async function generateLockFiles(
     cmd.push(lernaCommand);
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug(
