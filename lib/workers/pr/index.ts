@@ -16,10 +16,10 @@ import {
   isBranchModified,
 } from '../../util/git';
 import * as template from '../../util/template';
-import { BranchConfig, PrResult } from '../common';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
+import { BranchConfig, PrResult } from '../types';
 import { getPrBody } from './body';
-import { ChangeLogError } from './changelog';
+import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
 
 function noWhitespaceOrHeadings(input: string): string {

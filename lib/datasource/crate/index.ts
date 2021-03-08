@@ -9,7 +9,7 @@ import * as packageCache from '../../util/cache/package';
 import { privateCacheDir, readFile } from '../../util/fs';
 import { Http } from '../../util/http';
 import * as cargoVersioning from '../../versioning/cargo';
-import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'crate';
 export const defaultRegistryUrls = ['https://crates.io'];

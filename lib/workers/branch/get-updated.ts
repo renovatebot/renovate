@@ -3,9 +3,9 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import { ArtifactError, BumpedPackageFile } from '../../manager/common';
+import type { ArtifactError } from '../../manager/types';
 import { File, getFile } from '../../util/git';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
@@ -102,18 +102,14 @@ export async function getUpdatedPackageFiles(
           packageFileContent,
           reuseExistingBranch
         );
-
         if (res) {
-          let bumpedPackageFiles: BumpedPackageFile[];
           if (bumpPackageVersion && upgrade.bumpVersion) {
-            const bumpResult = await bumpPackageVersion(
+            const { bumpedContent } = await bumpPackageVersion(
               res,
               upgrade.packageFileVersion,
-              upgrade.bumpVersion,
-              packageFile
+              upgrade.bumpVersion
             );
-            res = bumpResult.bumpedContent;
-            bumpedPackageFiles = bumpResult.bumpedFiles;
+            res = bumpedContent;
           }
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
@@ -124,18 +120,6 @@ export async function getUpdatedPackageFiles(
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
-          }
-          // indicates that the version was bumped in one or more files in
-          // addition to or instead of the packageFile
-          if (bumpedPackageFiles) {
-            for (const bumpedPackageFile of bumpedPackageFiles) {
-              logger.debug(
-                { bumpedPackageFile, depName },
-                'Updating bumpedPackageFile content'
-              );
-              updatedFileContents[bumpedPackageFile.fileName] =
-                bumpedPackageFile.newContent;
-            }
           }
           continue; // eslint-disable-line no-continue
         } else if (reuseExistingBranch) {
@@ -155,8 +139,7 @@ export async function getUpdatedPackageFiles(
         const { bumpedContent } = await bumpPackageVersion(
           newContent,
           upgrade.packageFileVersion,
-          upgrade.bumpVersion,
-          packageFile
+          upgrade.bumpVersion
         );
         newContent = bumpedContent;
       }

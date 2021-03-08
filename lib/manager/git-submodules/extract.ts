@@ -1,12 +1,11 @@
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
-
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { getHttpUrl } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { resolveBaseUrl } from '../../util/url';
-import { ManagerConfig, PackageFile } from '../common';
+import type { ManagerConfig, PackageFile } from '../types';
 
 type GitModule = {
   name: string;

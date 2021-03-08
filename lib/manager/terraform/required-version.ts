@@ -1,6 +1,6 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import {
   ExtractionResult,
   TerraformDependencyTypes,

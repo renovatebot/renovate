@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const http = new Http('batect-wrapper');
 

@@ -1,15 +1,15 @@
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
-import { Release } from '../../../datasource';
+import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import { parseUrl } from '../../../util/url';
 import * as allVersioning from '../../../versioning';
-import { BranchUpgradeConfig } from '../../common';
-import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
+import type { BranchUpgradeConfig } from '../../types';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
 
 function getCachedTags(
   endpoint: string,
@@ -82,7 +82,7 @@ export async function getChangeLogJSON({
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   if (validReleases.length < 2) {
-    logger.debug('Not enough valid releases');
+    logger.debug(`Not enough valid releases for dep ${depName}`);
     return null;
   }
 

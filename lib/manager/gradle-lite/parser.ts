@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { parseUrl } from '../../util/url';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import {
   GOOGLE_REPO,
   JCENTER_REPO,

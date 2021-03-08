@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { regEx } from '../../util/regex';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import {
   ManagerData,
   PackageVariables,

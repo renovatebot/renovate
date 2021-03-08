@@ -23,14 +23,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12, 14]
+        node-version: [14]
         python-version: [3.8]
         java-version: [11]
-        exclude:
-          - os: windows-latest
-            node-version: 12
-          - os: macos-latest
-            node-version: 12
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
@@ -72,6 +67,8 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 2
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
@@ -149,6 +146,7 @@ jobs:
 
       - name: Lint
         run: |
+          yarn ls-lint
           yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
           yarn prettier
 

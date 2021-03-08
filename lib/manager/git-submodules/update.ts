@@ -1,7 +1,6 @@
 import Git from 'simple-git';
 import upath from 'upath';
-
-import { UpdateDependencyConfig } from '../common';
+import type { UpdateDependencyConfig } from '../types';
 
 export default async function updateDependency({
   fileContent,

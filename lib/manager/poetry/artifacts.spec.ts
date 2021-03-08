@@ -150,7 +150,10 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          constraints: { python: '~2.7 || ^3.4' },
+          constraints: {
+            python: '~2.7 || ^3.4',
+            poetry: 'poetry>=1.1.2 setuptools poetry-dynamic-versioning>1',
+          },
         },
       })
     ).not.toBeNull();

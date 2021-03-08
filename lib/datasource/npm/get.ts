@@ -10,7 +10,7 @@ import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
 import { parseUrl, resolveBaseUrl } from '../../util/url';
-import { Release, ReleaseResult } from '../common';
+import type { Release, ReleaseResult } from '../types';
 import { id } from './common';
 import { getNpmrc } from './npmrc';
 

@@ -7,7 +7,7 @@ import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { resolveBaseUrl } from '../../util/url';
 import * as composerVersioning from '../../versioning/composer';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'packagist';
 export const defaultRegistryUrls = ['https://packagist.org'];

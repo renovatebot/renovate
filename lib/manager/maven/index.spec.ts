@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { fs } from '../../../test/util';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
 

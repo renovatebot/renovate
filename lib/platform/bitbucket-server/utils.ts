@@ -3,7 +3,7 @@ import { PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
 import { parseUrl } from '../../util/url';
-import { BbsPr, BbsRestPr } from './types';
+import type { BbsPr, BbsRestPr } from './types';
 
 const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';

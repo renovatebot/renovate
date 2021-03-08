@@ -1,9 +1,9 @@
-import { RenovateConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { branchExists } from '../../../util/git';
 import { processBranch } from '../../branch';
-import { BranchConfig, ProcessBranchResult } from '../../common';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
+import { BranchConfig, ProcessBranchResult } from '../../types';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
@@ -15,7 +15,7 @@ export async function writeUpdates(
   let branches = allBranches;
   logger.debug(
     `Processing ${branches.length} branch${
-      branches.length !== 1 ? 'es' : ''
+      branches.length === 1 ? '' : 'es'
     }: ${branches
       .map((b) => b.branchName)
       .sort()

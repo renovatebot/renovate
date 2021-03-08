@@ -1,7 +1,7 @@
 import { platform } from '../../../platform';
 import * as template from '../../../util/template';
 import { get } from '../../../versioning';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';

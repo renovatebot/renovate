@@ -257,7 +257,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `helm-values`, `npm` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -1686,7 +1686,10 @@ Possible values and meanings:
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
-Note: this field replaces the previous fields of `rebaseConflictedPrs` and `rebaseStalePrs`.
+`rebaseWhen=conflicted` is not recommended if you have enabled Renovate automerge, because:
+
+- It could result in a broken base branch if two updates are merged one after another without testing the new versions together
+- If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 ## recreateClosed
 

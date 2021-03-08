@@ -1,4 +1,4 @@
-import { Preset } from '../common';
+import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   enableRenovate: {
@@ -588,5 +588,20 @@ export const presets: Record<string, Preset> = {
     description: 'Remove the checkbox controls from PRs',
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
+  },
+  enableGradleLite: {
+    description: 'Enable the gradle-lite manager',
+    'gradle-lite': {
+      enabled: true,
+    },
+  },
+  switchToGradleLite: {
+    description: 'Enable the gradle-lite manager and disable gradle',
+    gradle: {
+      enabled: false,
+    },
+    'gradle-lite': {
+      enabled: true,
+    },
   },
 };

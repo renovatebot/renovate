@@ -9,7 +9,7 @@ import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { parseUrl as _parse } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 interface UrlParsedResult {
   datasource: string;

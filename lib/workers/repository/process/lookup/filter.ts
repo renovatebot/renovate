@@ -1,13 +1,13 @@
 import * as semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import { Release } from '../../../../datasource';
+import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
 import { configRegexPredicate, isConfigRegex } from '../../../../util/regex';
 import * as allVersioning from '../../../../versioning';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440 from '../../../../versioning/pep440';
 import * as poetryVersioning from '../../../../versioning/poetry';
-import { FilterConfig } from './common';
+import type { FilterConfig } from './types';
 
 export function filterVersions(
   config: FilterConfig,

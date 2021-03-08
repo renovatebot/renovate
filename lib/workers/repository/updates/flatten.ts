@@ -8,7 +8,7 @@ import { LANGUAGE_DOCKER } from '../../../constants/languages';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
-import { BranchUpgradeConfig } from '../../common';
+import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
 
 const upper = (str: string): string =>
@@ -104,6 +104,7 @@ export async function flattenUpdates(
             updateConfig = applyPackageRules(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
+            update.branchName = updateConfig.branchName;
             updates.push(updateConfig);
           }
         }
@@ -153,6 +154,7 @@ export async function flattenUpdates(
               updateConfig.currentValue = updateConfig.currentVersion;
               updateConfig.newValue = updateConfig.newVersion;
               updateConfig = applyUpdateConfig(updateConfig);
+              updateConfig.enabled = true;
               updates.push(updateConfig);
             }
           }

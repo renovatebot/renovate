@@ -1,7 +1,7 @@
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
 import { resolveBaseUrl } from '../../util/url';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 const gitlabApi = new GitlabHttp();
 

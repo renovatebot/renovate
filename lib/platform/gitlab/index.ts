@@ -14,14 +14,14 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
-import {
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -36,10 +36,14 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
-import { GitlabComment, GitlabIssue, MergeMethod, RepoResponse } from './types';
+import type {
+  GitlabComment,
+  GitlabIssue,
+  MergeMethod,
+  RepoResponse,
+} from './types';
 
 const gitlabApi = new GitlabHttp();
 
