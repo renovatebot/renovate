@@ -317,8 +317,14 @@ describe('datasource/crate', () => {
         depName: 'mypkg',
         registryUrls: [url],
       });
+      const result2 = await getPkgReleases({
+        datasource,
+        depName: 'mypkg-2',
+        registryUrls: [url],
+      });
 
       expect(result).toBeNull();
+      expect(result2).toBeNull();
     });
   });
 

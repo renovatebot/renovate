@@ -178,15 +178,7 @@ async function fetchRegistryInfo(
     const clonePathPromise: Promise<string> | null = memCache.get(cacheKey);
     let clonePath: string;
 
-    let cloneRepo = false;
     if (clonePathPromise === null || clonePathPromise === undefined) {
-      cloneRepo = true;
-    } else {
-      clonePath = await clonePathPromise;
-      cloneRepo = !clonePath;
-    }
-
-    if (cloneRepo) {
       clonePath = join(privateCacheDir(), cacheDirFromUrl(url));
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
 
@@ -204,12 +196,23 @@ async function fetchRegistryInfo(
         await promise;
       } catch (err) {
         logger.error(
-          { err, registryUrl, lookupName: config.lookupName },
+          { err, lookupName: config.lookupName, registryUrl },
           'failed cloning git registry'
         );
 
         return null;
       }
+    } else {
+      clonePath = await clonePathPromise;
+    }
+
+    if (!clonePath) {
+      logger.warn(
+        { lookupName: config.lookupName, registryUrl },
+        'Previous git clone failed, bailing out.'
+      );
+
+      return null;
     }
 
     registry.clonePath = clonePath;
