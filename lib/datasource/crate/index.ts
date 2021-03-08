@@ -183,17 +183,17 @@ async function fetchRegistryInfo(
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
 
       const git = Git();
-      const promise = git.clone(registryUrl, clonePath, {
+      const clonePromise = git.clone(registryUrl, clonePath, {
         '--depth': 1,
       });
 
       memCache.set(
         cacheKey,
-        promise.then(() => clonePath).catch(() => null)
+        clonePromise.then(() => clonePath).catch(() => null)
       );
 
       try {
-        await promise;
+        await clonePromise;
       } catch (err) {
         logger.error(
           { err, lookupName: config.lookupName, registryUrl },
