@@ -1683,13 +1683,13 @@ Possible values and meanings:
 
 - `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
 - `never`: Renovate will never rebase the branch
-- `conflicted`: Renovate will rebase only if the branch is conflicted.
+- `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
 `rebaseWhen=conflicted` is not recommended if you have enabled Renovate automerge, because:
 
-- It could result in a broken base branch if two updates are merged one after another without testing them combined
-- If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out of date but remains non-conflicted
+- It could result in a broken base branch if two updates are merged one after another without testing the new versions together
+- If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 ## recreateClosed
 
