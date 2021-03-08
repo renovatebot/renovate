@@ -4,8 +4,8 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import {
-  INTERRUPTED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import {
   PLATFORM_TYPE_GITHUB,
@@ -197,7 +197,7 @@ export async function updateArtifacts({
     return res;
   } catch (err) {
     // istanbul ignore if
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     if (

@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { INTERRUPTED } from '../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { id } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -139,7 +139,7 @@ export async function updateArtifacts({
     ];
   } catch (err) {
     // istanbul ignore if
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug({ err }, 'Failed to generate lock file');
