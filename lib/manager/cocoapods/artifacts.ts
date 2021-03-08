@@ -1,5 +1,6 @@
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -82,6 +83,10 @@ export async function updateArtifacts({
   try {
     await exec(cmd, execOptions);
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     return [
       {
         artifactError: {

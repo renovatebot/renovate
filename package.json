@@ -112,6 +112,10 @@
     "node": "^12.13.0 || >=14.15.0",
     "yarn": "^1.17.0"
   },
+  "engines-next": {
+    "description": "Versions other than the below are deprecated and a warning will be logged",
+    "node": ">=14.15.0"
+  },
   "dependencies": {
     "@aws-sdk/client-ecr": "3.5.0",
     "@breejs/later": "4.0.2",
@@ -210,7 +214,7 @@
     "@types/markdown-table": "2.0.0",
     "@types/moo": "0.5.4",
     "@types/nock": "10.0.3",
-    "@types/node": "12.20.4",
+    "@types/node": "14.14.31",
     "@types/node-emoji": "1.8.1",
     "@types/parse-link-header": "1.0.0",
     "@types/registry-auth-token": "4.2.0",

@@ -1,5 +1,8 @@
 import { quote } from 'shlex';
-import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
+import {
+  BUNDLER_INVALID_CREDENTIALS,
+  TEMPORARY_ERROR,
+} from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
@@ -158,6 +161,9 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
       err.message.includes('fatal: Could not parse object') ||

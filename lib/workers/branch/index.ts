@@ -12,6 +12,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
   WORKER_FILE_UPDATE_FAILED,
 } from '../../constants/error-messages';
 import { addMeta, logger, removeMeta } from '../../logger';
@@ -604,6 +605,9 @@ export async function processBranch(
       throw new Error(REPOSITORY_CHANGED);
     } else if (err.message === CONFIG_VALIDATION) {
       logger.debug('Passing config validation error up');
+      throw err;
+    } else if (err.message === TEMPORARY_ERROR) {
+      logger.debug('Passing TEMPORARY_ERROR error up');
       throw err;
     } else if (!(err instanceof ExternalHostError)) {
       logger.error({ err }, `Error updating branch: ${String(err.message)}`);

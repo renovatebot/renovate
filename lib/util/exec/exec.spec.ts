@@ -6,6 +6,7 @@ import {
 import { envMock } from '../../../test/exec-util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import {
   BinarySource,
   ExecConfig,
@@ -774,5 +775,22 @@ describe(`Child process execution wrapper`, () => {
       )
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
+  });
+  it('converts to TEMPORARY_ERROR', async () => {
+    cpExec.mockImplementation(() => {
+      class ErrorSignal extends Error {
+        signal?: string;
+      }
+      const error = new ErrorSignal();
+      error.signal = 'SIGTERM';
+      throw error;
+    });
+    const removeDockerContainerSpy = jest.spyOn(
+      dockerModule,
+      'removeDockerContainer'
+    );
+    const promise = exec('foobar', {});
+    await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
+    expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
   });
 });

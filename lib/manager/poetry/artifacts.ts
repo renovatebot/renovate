@@ -1,6 +1,7 @@
 import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -121,7 +122,8 @@ export async function updateArtifacts({
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.constraints?.poetry || 'poetry';
-    const poetryInstall = 'pip install ' + quote(poetryRequirement);
+    const poetryInstall =
+      'pip install ' + poetryRequirement.split(' ').map(quote).join(' ');
     const extraEnv = getSourceCredentialVars(
       newPackageFileContent,
       packageFileName
@@ -153,6 +155,10 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug({ err }, `Failed to update ${lockFileName} file`);
     return [
       {
