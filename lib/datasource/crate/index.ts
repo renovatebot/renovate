@@ -178,7 +178,9 @@ async function fetchRegistryInfo(
     const clonePathPromise: Promise<string> | null = memCache.get(cacheKey);
     let clonePath: string;
 
-    if (clonePathPromise === null || clonePathPromise === undefined) {
+    if (clonePathPromise) {
+      clonePath = await clonePathPromise;
+    } else {
       clonePath = join(privateCacheDir(), cacheDirFromUrl(url));
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
 
@@ -202,8 +204,6 @@ async function fetchRegistryInfo(
 
         return null;
       }
-    } else {
-      clonePath = await clonePathPromise;
     }
 
     if (!clonePath) {
