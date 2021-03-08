@@ -626,7 +626,7 @@ export async function processBranch(
       logger.debug('Passing TEMPORARY_ERROR error up');
       throw err;
     } else if (!(err instanceof ExternalHostError)) {
-      logger.error({ err }, `Error updating branch: ${String(err.message)}`);
+      logger.warn({ err }, `Error updating branch`);
     }
     // Don't throw here - we don't want to stop the other renovations
     return ProcessBranchResult.Error;
