@@ -154,6 +154,7 @@ export async function flattenUpdates(
               updateConfig.currentValue = updateConfig.currentVersion;
               updateConfig.newValue = updateConfig.newVersion;
               updateConfig = applyUpdateConfig(updateConfig);
+              updateConfig.enabled = true;
               updates.push(updateConfig);
             }
           }
