@@ -596,7 +596,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   switchToGradleLite: {
-    description: 'Enable the gradle-lite manager and disablee gradle',
+    description: 'Enable the gradle-lite manager and disable gradle',
     gradle: {
       enabled: false,
     },
