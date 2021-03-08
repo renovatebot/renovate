@@ -170,6 +170,7 @@ async function fetchRegistryInfo(
     }
 
     const cacheKey = `crate-datasource/registry-clone-path/${registryUrl}`;
+    const cacheKeyForError = `crate-datasource/registry-clone-path/${registryUrl}/error`;
 
     // We need to ensure we don't run `git clone` in parallel. Therefore we store
     // a promise of the running operation in the mem cache, which in the end resolves
@@ -202,14 +203,16 @@ async function fetchRegistryInfo(
           { err, lookupName: config.lookupName, registryUrl },
           'failed cloning git registry'
         );
+        memCache.set(cacheKeyForError, err);
 
         return null;
       }
     }
 
     if (!clonePath) {
+      const err = memCache.get(cacheKeyForError);
       logger.warn(
-        { lookupName: config.lookupName, registryUrl },
+        { err, lookupName: config.lookupName, registryUrl },
         'Previous git clone failed, bailing out.'
       );
 
