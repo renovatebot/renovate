@@ -178,6 +178,7 @@ async function fetchRegistryInfo(
     const clonePathPromise: Promise<string> | null = memCache.get(cacheKey);
     let clonePath: string;
 
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     if (clonePathPromise) {
       clonePath = await clonePathPromise;
     } else {
