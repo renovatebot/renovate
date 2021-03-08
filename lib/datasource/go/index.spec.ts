@@ -445,5 +445,28 @@ describe('datasource/go', () => {
       expect(httpCalls).toMatchSnapshot();
       httpMock.reset();
     });
+    it('handles fyne.io', async () => {
+      httpMock
+        .scope('https://fyne.io/')
+        .get('/fyne?go-get=1')
+        .reply(
+          200,
+          '<meta name="go-import" content="fyne.io/fyne git https://github.com/fyne-io/fyne">'
+        );
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/fyne-io/fyne/tags?per_page=100')
+        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }])
+        .get('/repos/fyne-io/fyne/releases?per_page=100')
+        .reply(200, []);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'fyne.io/fyne',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
 });
