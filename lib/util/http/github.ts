@@ -109,6 +109,7 @@ function handleGotError(
     ) {
       throw err;
     } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
+      logger.debug({ err }, 'Received invalid response - aborting');
       throw new Error(REPOSITORY_CHANGED);
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
