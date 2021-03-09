@@ -815,6 +815,26 @@ To abort Renovate for errors for a specific `docker` host:
 
 When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) receives a response _not_ matching any of the configured `abortIgnoreStatusCodes` (e.g. `500 Internal Error`);
 
+### authType
+
+This can be used with `token` to create a custom http `authorization` header.
+
+An example for npm basic auth with token:
+
+```json
+{
+  "hostRules": [
+    {
+      "domainName": "npm.custom.org",
+      "token": "<some-token>",
+      "authType": "Basic"
+    }
+  ]
+}
+```
+
+This will generate the following header: `authorization: Basic <some-token>`.
+
 ### baseUrl
 
 Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host.
