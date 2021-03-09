@@ -153,6 +153,28 @@ describe(getName(__filename), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
+  it('uses hostRules basic token auth', async () => {
+    expect.assertions(1);
+    const npmrc = ``;
+    hostRules.add({
+      baseUrl: 'https://registry.npmjs.org',
+      token: 'XXX',
+      authType: 'Basic',
+    });
+
+    httpMock
+      .scope('https://registry.npmjs.org', {
+        reqheaders: {
+          authorization: 'Basic XXX',
+        },
+      })
+      .get('/renovate')
+      .reply(200, { name: 'renovate' });
+    setNpmrc(npmrc);
+    await getDependency('renovate', 0);
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
   it('cover all paths', async () => {
     expect.assertions(10);
 
