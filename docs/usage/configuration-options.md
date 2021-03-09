@@ -1605,11 +1605,11 @@ Therefore you can customise this setting if you wish to be notified a little lat
 
 This setting - if enabled - helps slow down Renovate, particularly during the onboarding phase. What may happen without this setting is:
 
-1.  Onboarding PR is created
-2.  User merges onboarding PR to activate Renovate
-3.  Renovate creates a "Pin Dependencies" PR (if necessary)
-4.  User merges Pin PR
-5.  Renovate then creates every single upgrade PR necessary - potentially dozens
+1. Onboarding PR is created
+2. User merges onboarding PR to activate Renovate
+3. Renovate creates a "Pin Dependencies" PR (if necessary)
+4. User merges Pin PR
+5. Renovate then creates every single upgrade PR necessary - potentially dozens
 
 The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged.
 Instead, if `prHourlyLimit` is configure to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59).
@@ -1676,11 +1676,11 @@ Behavior:
 
 Renovate's `"auto"` strategy works like this for npm:
 
-1.  Always pin `devDependencies`
-2.  Pin `dependencies` if we detect that it's an app and not a library
-3.  Widen `peerDependencies`
-4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-5.  Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+1. Always pin `devDependencies`
+2. Pin `dependencies` if we detect that it's an app and not a library
+3. Widen `peerDependencies`
+4. If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
+5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 **bump**
 
