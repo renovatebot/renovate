@@ -39,7 +39,7 @@ function getMavenUrl(
 
 interface MavenXml {
   authorization?: boolean;
-  xml: XmlDocument;
+  xml?: XmlDocument;
 }
 
 async function downloadMavenXml(
@@ -47,7 +47,7 @@ async function downloadMavenXml(
 ): Promise<MavenXml | null> {
   /* istanbul ignore if */
   if (!pkgUrl) {
-    return null;
+    return {};
   }
   let rawContent: string;
   let authorization: boolean;
@@ -63,15 +63,15 @@ async function downloadMavenXml(
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
-      return null;
+      return {};
     default:
       logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
-      return null;
+      return {};
   }
 
   if (!rawContent) {
     logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
-    return null;
+    return {};
   }
 
   return { authorization, xml: new XmlDocument(rawContent) };
@@ -86,7 +86,7 @@ async function getDependencyInfo(
   const path = `${version}/${dependency.name}-${version}.pom`;
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
-  const { xml: pomContent } = (await downloadMavenXml(pomUrl)) || {};
+  const { xml: pomContent } = await downloadMavenXml(pomUrl);
   if (!pomContent) {
     return result;
   }
@@ -164,8 +164,9 @@ async function getVersionsFromMetadata(
     return cachedVersions;
   }
 
-  const { authorization, xml: mavenMetadata } =
-    (await downloadMavenXml(metadataUrl)) || {};
+  const { authorization, xml: mavenMetadata } = await downloadMavenXml(
+    metadataUrl
+  );
   if (!mavenMetadata) {
     return null;
   }
