@@ -37,7 +37,11 @@ describe(getName(__filename), () => {
     it.each(configs)('%p', async (npmrc) => {
       expect.assertions(2);
       httpMock
-        .scope('https://test.org')
+        .scope('https://test.org', {
+          reqheaders: {
+            authorization: 'Bearer XXX',
+          },
+        })
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
 
@@ -66,7 +70,11 @@ describe(getName(__filename), () => {
     it.each(configs)('%p', async (npmrc) => {
       expect.assertions(2);
       httpMock
-        .scope('https://test.org')
+        .scope('https://test.org', {
+          reqheaders: {
+            authorization: 'Basic dGVzdDp0ZXN0',
+          },
+        })
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
@@ -90,7 +98,7 @@ describe(getName(__filename), () => {
     it.each(configs)('%p', async (npmrc) => {
       expect.assertions(2);
       httpMock
-        .scope('https://test.org')
+        .scope('https://test.org', { badheaders: ['authorization'] })
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
