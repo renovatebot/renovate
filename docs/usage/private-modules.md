@@ -103,7 +103,7 @@ If you are using the main npmjs registry then you can configure just the npmToke
 
 If you don't wish for all users of the repository to be able to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Go to https://renovatebot.com/encrypt, paste in your npm token, click "Encrypt", then copy the encrypted result.
+Go to <https://renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
 
 Add the encrypted result inside an `encrypted` object like this:
 
