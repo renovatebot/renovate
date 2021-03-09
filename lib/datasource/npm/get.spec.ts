@@ -1,6 +1,7 @@
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as hostRules from '../../util/host-rules';
 import { getDependency, resetMemCache } from './get';
 import { setNpmrc } from './npmrc';
 
@@ -15,6 +16,7 @@ describe(getName(__filename), () => {
     jest.clearAllMocks();
     resetMemCache();
     httpMock.setup();
+    hostRules.clear();
   });
 
   afterEach(() => {
@@ -98,6 +100,49 @@ describe(getName(__filename), () => {
       expect(trace[0].headers.authorization).toBeUndefined();
       expect(trace).toMatchSnapshot();
     });
+  });
+
+  it('uses hostRules basic auth', async () => {
+    expect.assertions(1);
+    const npmrc = `registry=https://test.org`;
+    hostRules.add({
+      baseUrl: 'https://test.org',
+      username: 'test',
+      password: 'test',
+    });
+
+    httpMock
+      .scope('https://test.org', {
+        reqheaders: {
+          authorization: 'Basic dGVzdDp0ZXN0',
+        },
+      })
+      .get(getPath(npmrc))
+      .reply(200, { name: '@myco/test' });
+    setNpmrc(npmrc);
+    await getDependency('@myco/test', 0);
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('uses hostRules token auth', async () => {
+    expect.assertions(1);
+    const npmrc = ``;
+    hostRules.add({
+      baseUrl: 'https://registry.npmjs.org',
+      token: 'XXX',
+    });
+
+    httpMock
+      .scope('https://registry.npmjs.org', {
+        reqheaders: {
+          authorization: 'Bearer XXX',
+        },
+      })
+      .get('/renovate')
+      .reply(200, { name: 'renovate' });
+    setNpmrc(npmrc);
+    await getDependency('renovate', 0);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('cover all paths', async () => {
