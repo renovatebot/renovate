@@ -224,8 +224,8 @@ export async function getDependency(
       '@typescript-eslint',
     ];
     if (
-      whitelistedPublicScopes.includes(scope) ||
-      !packageName.startsWith('@')
+      !raw.authorization &&
+      (whitelistedPublicScopes.includes(scope) || !packageName.startsWith('@'))
     ) {
       await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
