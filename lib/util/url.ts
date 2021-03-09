@@ -5,7 +5,7 @@ export function ensureTrailingSlash(url: string): string {
 }
 
 export function trimTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '');
+  return url.replace(/\/+$/, '');
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {

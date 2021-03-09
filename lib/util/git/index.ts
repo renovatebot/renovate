@@ -11,7 +11,6 @@ import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import {
   CONFIG_VALIDATION,
-  REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -72,6 +71,7 @@ function checkForPlatformFailure(err: Error): void {
     'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
     'Could not resolve host',
     ' is not a member of team',
+    'early EOF',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -696,8 +696,9 @@ export async function commitFiles({
       logger.error({ err }, 'Error committing files.');
       return null;
     }
-    logger.debug({ err }, 'Error committing files');
-    throw new Error(REPOSITORY_CHANGED);
+    logger.debug({ err }, 'Unknown error committing files');
+    // We don't know why this happened, so this will cause bubble up to a branch error
+    throw err;
   }
 }
 

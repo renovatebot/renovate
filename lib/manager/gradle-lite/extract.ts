@@ -91,9 +91,11 @@ export async function extractAllPackageFiles(
     deps.push({
       ...dep,
       registryUrls: [
-        ...defaultRegistryUrls,
-        ...(dep.registryUrls || []),
-        ...registryUrls,
+        ...new Set([
+          ...defaultRegistryUrls,
+          ...(dep.registryUrls || []),
+          ...registryUrls,
+        ]),
       ],
     });
     packageFilesByName[key] = pkgFile;
