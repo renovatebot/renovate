@@ -130,6 +130,7 @@ describe('datasource/maven', () => {
 
   afterEach(() => {
     nock.enableNetConnect();
+    delete process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK;
   });
 
   describe('getReleases', () => {
@@ -198,7 +199,6 @@ describe('datasource/maven', () => {
         depName: 'mysql:mysql-connector-java',
         registryUrls: ['https://custom.registry.renovatebot.com'],
       });
-      delete process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK;
       expect(releases).toMatchSnapshot();
     });
 
