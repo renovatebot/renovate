@@ -1702,6 +1702,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
+    default: 'Bearer',
     cli: false,
     env: false,
   },
