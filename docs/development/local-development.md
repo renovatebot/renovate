@@ -185,7 +185,7 @@ It's usually easier to have the logs in a file that you can open with a text edi
 You can use a command like this to put the log messages in a file:
 
 ```
-$ rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
+rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
 ```
 
 The example command will delete any existing `debug.log` and then save Renovate's output to a new `debug.log` file.

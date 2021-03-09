@@ -5,14 +5,14 @@
 ### npmjs
 
 ```sh
-$ npm install -g renovate
+npm install -g renovate
 ```
 
 Renovate does not embed `npm`, `pnpm` and `yarn` as its own dependencies.
 If you want to use these package managers to update your lockfiles, you must ensure that the correct versions are already installed globally.
 
 ```sh
-$ npm install -g yarn pnpm
+npm install -g yarn pnpm
 ```
 
 The same goes for any other third party binary tool like `gradle` or `poetry` - you need to make sure they are installed and the appropriate version before running Renovate.
@@ -24,10 +24,10 @@ It builds `latest` based on the `master` branch and all semver tags are publishe
 For example, all the following are valid tags:
 
 ```sh
-$ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:24.53.0
-$ docker run --rm renovate/renovate:24.53
-$ docker run --rm renovate/renovate:24
+docker run --rm renovate/renovate
+docker run --rm renovate/renovate:24.53.0
+docker run --rm renovate/renovate:24.53
+docker run --rm renovate/renovate:24
 ```
 
 Do not use the example tags listed above, as they will be out-of-date.
@@ -37,7 +37,7 @@ If you want to configure Renovate using a `config.js` file then map it to `/usr/
 For example:
 
 ```sh
-$ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
+docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
 ```
 
 ### Kubernetes
