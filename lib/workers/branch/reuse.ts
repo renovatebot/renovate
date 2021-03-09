@@ -48,8 +48,8 @@ export async function shouldReuseExistingBranch(
 
   if (
     config.rebaseWhen === 'behind-base-branch' ||
-    (config.rebaseWhen !== 'never' && config.automerge === true) ||
-    (config.rebaseWhen === 'auto' && (await platform.getRepoForceRebase()))
+    (config.rebaseWhen === 'auto' &&
+      (config.automerge || (await platform.getRepoForceRebase())))
   ) {
     if (await isBranchStale(branchName)) {
       logger.debug(`Branch is stale and needs rebasing`);
@@ -63,7 +63,9 @@ export async function shouldReuseExistingBranch(
     }
     logger.debug('Branch is up-to-date');
   } else {
-    logger.debug('Skipping stale branch check');
+    logger.debug(
+      `Skipping stale branch check due to rebaseWhen=${config.rebaseWhen}`
+    );
   }
 
   // Now check if PR is unmergeable. If so then we also rebase

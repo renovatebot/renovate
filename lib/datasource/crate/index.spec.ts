@@ -1,3 +1,4 @@
+import delay from 'delay';
 import fs from 'fs-extra';
 import _simpleGit from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
@@ -28,15 +29,36 @@ const res3 = fs.readFileSync('lib/datasource/crate/__fixtures__/mypkg', 'utf8');
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
-function setupGitMocks(): { mockClone: jest.Mock<any, any> } {
+function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
   const mockClone = jest
     .fn()
     .mockName('clone')
-    .mockImplementation((_registryUrl: string, clonePath: string, _opts) => {
-      const path = `${clonePath}/my/pk/mypkg`;
-      fs.mkdirSync(dirname(path), { recursive: true });
-      fs.writeFileSync(path, res3, { encoding: 'utf8' });
-    });
+    .mockImplementation(
+      async (_registryUrl: string, clonePath: string, _opts) => {
+        if (delayMs > 0) {
+          await delay(delayMs);
+        }
+
+        const path = `${clonePath}/my/pk/mypkg`;
+        fs.mkdirSync(dirname(path), { recursive: true });
+        fs.writeFileSync(path, res3, { encoding: 'utf8' });
+      }
+    );
+
+  simpleGit.mockReturnValue({
+    clone: mockClone,
+  });
+
+  return { mockClone };
+}
+
+function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
+  const mockClone = jest
+    .fn()
+    .mockName('clone')
+    .mockImplementation((_registryUrl: string, _clonePath: string, _opts) =>
+      Promise.reject(new Error('mocked error'))
+    );
 
   simpleGit.mockReturnValue({
     clone: mockClone,
@@ -258,6 +280,51 @@ describe('datasource/crate', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalledTimes(1);
+    });
+    it('guards against race conditions while cloning', async () => {
+      const { mockClone } = setupGitMocks(250);
+      setAdminConfig({ trustLevel: 'high' });
+      const url = 'https://github.com/mcorbin/othertestregistry';
+
+      await Promise.all([
+        getPkgReleases({
+          datasource,
+          depName: 'mypkg',
+          registryUrls: [url],
+        }),
+        getPkgReleases({
+          datasource,
+          depName: 'mypkg-2',
+          registryUrls: [url],
+        }),
+      ]);
+
+      await getPkgReleases({
+        datasource,
+        depName: 'mypkg-3',
+        registryUrls: [url],
+      });
+
+      expect(mockClone).toHaveBeenCalledTimes(1);
+    });
+    it('returns null when git clone fails', async () => {
+      setupErrorGitMock();
+      setAdminConfig({ trustLevel: 'high' });
+      const url = 'https://github.com/mcorbin/othertestregistry';
+
+      const result = await getPkgReleases({
+        datasource,
+        depName: 'mypkg',
+        registryUrls: [url],
+      });
+      const result2 = await getPkgReleases({
+        datasource,
+        depName: 'mypkg-2',
+        registryUrls: [url],
+      });
+
+      expect(result).toBeNull();
+      expect(result2).toBeNull();
     });
   });
 

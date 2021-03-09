@@ -815,6 +815,26 @@ To abort Renovate for errors for a specific `docker` host:
 
 When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) receives a response _not_ matching any of the configured `abortIgnoreStatusCodes` (e.g. `500 Internal Error`);
 
+### authType
+
+This can be used with `token` to create a custom http `authorization` header.
+
+An example for npm basic auth with token:
+
+```json
+{
+  "hostRules": [
+    {
+      "domainName": "npm.custom.org",
+      "token": "<some-token>",
+      "authType": "Basic"
+    }
+  ]
+}
+```
+
+This will generate the following header: `authorization: Basic <some-token>`.
+
 ### baseUrl
 
 Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host.
@@ -1686,7 +1706,10 @@ Possible values and meanings:
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
-Note: this field replaces the previous fields of `rebaseConflictedPrs` and `rebaseStalePrs`.
+`rebaseWhen=conflicted` is not recommended if you have enabled Renovate automerge, because:
+
+- It could result in a broken base branch if two updates are merged one after another without testing the new versions together
+- If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 ## recreateClosed
 

@@ -1,4 +1,4 @@
-import { resolveBaseUrl, validateUrl } from './url';
+import { resolveBaseUrl, trimTrailingSlash, validateUrl } from './url';
 
 describe('util/url', () => {
   test.each([
@@ -52,5 +52,11 @@ describe('util/url', () => {
     expect(validateUrl('ssh://github.com')).toBe(false);
     expect(validateUrl('http://github.com')).toBe(true);
     expect(validateUrl('https://github.com')).toBe(true);
+  });
+  it('trimTrailingSlash', () => {
+    expect(trimTrailingSlash('foo')).toBe('foo');
+    expect(trimTrailingSlash('/foo/bar')).toBe('/foo/bar');
+    expect(trimTrailingSlash('foo/')).toBe('foo');
+    expect(trimTrailingSlash('foo//////')).toBe('foo');
   });
 });
