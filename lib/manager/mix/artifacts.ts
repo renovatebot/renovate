@@ -1,5 +1,5 @@
 import { quote } from 'shlex';
-import { INTERRUPTED } from '../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
@@ -64,7 +64,7 @@ export async function updateArtifacts({
     await exec(command, { cwd });
   } catch (err) {
     // istanbul ignore if
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.warn(
