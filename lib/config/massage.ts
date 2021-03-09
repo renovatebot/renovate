@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { clone } from '../util/clone';
-import { PackageRule, RenovateConfig, UpdateType } from './common';
 import { getOptions } from './definitions';
+import type { PackageRule, RenovateConfig, UpdateType } from './types';
 
 const options = getOptions();
 
@@ -58,8 +58,8 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       ][]) {
         if (updateTypes.includes(key)) {
           const newRule = clone(rule);
-          newRule.updateTypes = rule.updateTypes || [];
-          newRule.updateTypes.push(key);
+          newRule.matchUpdateTypes = rule.matchUpdateTypes || [];
+          newRule.matchUpdateTypes.push(key);
           Object.assign(newRule, val);
           newRules.push(newRule);
         }

@@ -1,17 +1,21 @@
 import { addStream, levels, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
-import { readFile } from '../util/fs';
+import { ensureDir, getSubDirectory, readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
 import * as cliParser from './cli';
-import { RenovateConfig, RenovateConfigStage } from './common';
 import * as defaultsParser from './defaults';
 import * as definitions from './definitions';
 import * as envParser from './env';
 import * as fileParser from './file';
 import { resolveConfigPresets } from './presets';
+import type {
+  GlobalConfig,
+  RenovateConfig,
+  RenovateConfigStage,
+} from './types';
 import { mergeChildConfig } from './utils';
 
-export * from './common';
+export * from './types';
 export { mergeChildConfig };
 
 export interface ManagerConfig extends RenovateConfig {
@@ -44,7 +48,7 @@ export function getManagerConfig(
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
   argv: string[]
-): Promise<RenovateConfig> {
+): Promise<GlobalConfig> {
   logger.debug('Parsing configs');
 
   // Get configs
@@ -80,8 +84,14 @@ export async function parseConfigs(
     delete config.privateKeyPath;
   }
 
-  // Set log level
-  levels('stdout', config.logLevel);
+  // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
+  // istanbul ignore if
+  if (config.logLevel) {
+    logger.warn(
+      'Configuring logLevel in CLI or file is deprecated. Use LOG_LEVEL environment variable instead'
+    );
+    levels('stdout', config.logLevel);
+  }
 
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
@@ -94,6 +104,7 @@ export async function parseConfigs(
     logger.debug(
       `Enabling ${config.logFileLevel} logging to ${config.logFile}`
     );
+    await ensureDir(getSubDirectory(config.logFile));
     addStream({
       name: 'logfile',
       path: config.logFile,
@@ -123,18 +134,13 @@ export async function parseConfigs(
   delete config.logFile;
   delete config.logFileLevel;
 
-  // Move global variables that we need to use later
-  global.trustLevel =
-    config.trustLevel || /* istanbul ignore next: never happen? */ 'low';
-  delete config.trustLevel;
-
   return config;
 }
 
 export function filterConfig(
-  inputConfig: RenovateConfig,
+  inputConfig: GlobalConfig,
   targetStage: RenovateConfigStage
-): RenovateConfig {
+): GlobalConfig {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
   const outputConfig: RenovateConfig = { ...inputConfig };
   const stages = ['global', 'repository', 'package', 'branch', 'pr'];

@@ -31,13 +31,38 @@ It's therefore better to provide Renovate with all the credentials it needs to l
 
 The recommended approaches in order of preference are:
 
-**If you are running your own Renovate bot**: copy an `.npmrc` file to the home dir of the bot and it will work for all repositories
+**Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `hostName` and `token` specified
+
+**Self-hosted .npmrc**: copy an `.npmrc` file to the home dir of the bot.
 
 **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
 
 **Renovate App with a private registry**: Add an unencrypted `npmrc` plus an encrypted `npmToken` in config
 
 All the various approaches are described below:
+
+### Add hostRule to bots config
+
+Define `hostRules` like this:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      hostType: 'npm',
+      hostName: 'registry.npmjs.org',
+      token: process.env.NPM_TOKEN,
+    },
+    {
+      hostType: 'npm',
+      baseUrl:
+        'https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/npm/registry/',
+      username: 'VssSessionToken',
+      password: process.env.AZURE_NPM_TOKEN,
+    },
+  ],
+};
+```
 
 ### Commit .npmrc file into repository
 
@@ -46,6 +71,10 @@ Therefore anyone running `npm install` or `yarn install` from the project root w
 
 The good news is that this works for Renovate too.
 If Renovate detects a `.npmrc` or `.yarnrc` file then it will use it for its install.
+
+Does not work if using binarySource=docker.
+
+**This method will be deprecated soon**
 
 ### Add npmrc string to Renovate config
 

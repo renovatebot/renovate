@@ -3,14 +3,13 @@ import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { add } from '../util/sanitize';
-import { RenovateConfig } from './common';
+import { getAdminConfig } from './admin';
+import type { RenovateConfig } from './types';
 
-export function decryptConfig(
-  config: RenovateConfig,
-  privateKey?: string | Buffer
-): RenovateConfig {
+export function decryptConfig(config: RenovateConfig): RenovateConfig {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
+  const { privateKey } = getAdminConfig();
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');
@@ -90,14 +89,14 @@ export function decryptConfig(
       val.forEach((item) => {
         if (is.object(item) && !is.array(item)) {
           (decryptedConfig[key] as RenovateConfig[]).push(
-            decryptConfig(item as RenovateConfig, privateKey)
+            decryptConfig(item as RenovateConfig)
           );
         } else {
           (decryptedConfig[key] as unknown[]).push(item);
         }
       });
     } else if (is.object(val) && key !== 'content') {
-      decryptedConfig[key] = decryptConfig(val as RenovateConfig, privateKey);
+      decryptedConfig[key] = decryptConfig(val as RenovateConfig);
     }
   }
   delete decryptedConfig.encrypted;

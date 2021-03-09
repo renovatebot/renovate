@@ -3,9 +3,13 @@ import { getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import { RenovateConfig, ValidationMessage } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
+import type {
+  RenovateConfig,
+  RenovateOptions,
+  ValidationMessage,
+} from './types';
 import * as managerValidator from './validation-helpers/managers';
 
 const options = getOptions();
@@ -59,6 +63,7 @@ export async function validateConfig(
       'repository',
       'vulnerabilityAlertsOnly',
       'vulnerabilityAlert',
+      'isVulnerabilityAlert',
       'copyLocalLibs', // deprecated - functionality is now enabled by default
       'prBody', // deprecated
     ];
@@ -121,9 +126,9 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = template.compile(val.toString(), config);
-          res = template.compile(res, config);
-          template.compile(res, config);
+          let res = template.compile(val.toString(), config, false);
+          res = template.compile(res, config, false);
+          template.compile(res, config, false);
         } catch (err) {
           errors.push({
             depName: 'Configuration Error',
@@ -174,12 +179,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'array' && val) {
-          if (!is.array(val)) {
-            errors.push({
-              depName: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
-            });
-          } else {
+          if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await module.exports.validateConfig(
@@ -217,19 +217,20 @@ export async function validateConfig(
             }
 
             const selectors = [
-              'paths',
-              'languages',
-              'baseBranchList',
-              'managers',
-              'datasources',
-              'depTypeList',
-              'packageNames',
-              'packagePatterns',
+              'matchPackageRules',
+              'matchPaths',
+              'matchLanguages',
+              'matchBaseBranches',
+              'matchManagers',
+              'matchDatasources',
+              'matchDepTypes',
+              'matchPackageNames',
+              'matchPackagePatterns',
               'excludePackageNames',
               'excludePackagePatterns',
-              'sourceUrlPrefixes',
-              'updateTypes',
               'matchCurrentVersion',
+              'matchSourceUrlPrefixes',
+              'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
               for (const packageRule of val) {
@@ -266,6 +267,7 @@ export async function validateConfig(
             }
             if (key === 'regexManagers') {
               const allowedKeys = [
+                'description',
                 'fileMatch',
                 'matchStrings',
                 'matchStringsStrategy',
@@ -290,12 +292,7 @@ export async function validateConfig(
                       ', '
                     )}`,
                   });
-                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
-                  errors.push({
-                    depName: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
-                  });
-                } else {
+                } else if (is.nonEmptyArray(regexManager.fileMatch)) {
                   let validRegex = false;
                   for (const matchString of regexManager.matchStrings) {
                     try {
@@ -330,10 +327,18 @@ export async function validateConfig(
                       }
                     }
                   }
+                } else {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Each Regex Manager must contain a fileMatch array`,
+                  });
                 }
               }
             }
-            if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
+            if (
+              key === 'matchPackagePatterns' ||
+              key === 'excludePackagePatterns'
+            ) {
               for (const pattern of val as string[]) {
                 if (pattern !== '*') {
                   try {
@@ -369,6 +374,11 @@ export async function validateConfig(
                 message: `${currentPath}: ${key} should be inside a \`packageRule\` only`,
               });
             }
+          } else {
+            errors.push({
+              depName: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
+            });
           }
         } else if (type === 'string') {
           if (!is.string(val)) {

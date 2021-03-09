@@ -17,20 +17,32 @@ describe('workers/repository/updates/flatten', () => {
       config.lockFileMaintenance.enabled = true;
       config.packageRules = [
         {
-          updateTypes: ['minor'],
+          matchUpdateTypes: ['minor'],
           automerge: true,
         },
         {
-          paths: ['frontend/package.json'],
+          matchPaths: ['frontend/package.json'],
           lockFileMaintenance: {
             enabled: false,
           },
         },
       ];
+      config.remediations = {
+        'package-lock.json': [
+          {
+            datasoource: 'npm',
+            depName: 'foo',
+            currentVersion: '1.2.0',
+            newVersion: '1.3.0',
+            prBodyNotes: '',
+          },
+        ],
+      };
       const packageFiles = {
         npm: [
           {
             packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
             deps: [
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
@@ -71,12 +83,37 @@ describe('workers/repository/updates/flatten', () => {
             ],
           },
         ],
+        gomod: [
+          {
+            packageFile: 'go.mod',
+            deps: [
+              {
+                depName: 'github.com/Parallels/docker-machine-parallels',
+                updates: [{ newValue: '1.3.0' }],
+              },
+              {
+                depName: 'gopkg.in/yaml.v2',
+                updates: [{ newValue: '2.2.8', updateType: 'minor' }],
+              },
+              {
+                depName: 'gopkg.in/warnings.v0',
+                updates: [{ newValue: '0.1.3' }],
+              },
+              {
+                depName: 'github.com/blang/semver',
+                updates: [],
+              },
+            ],
+          },
+        ],
       };
       const res = await flattenUpdates(config, packageFiles);
-      expect(res).toHaveLength(9);
+      expect(res).toHaveLength(13);
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
+      expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
+      expect(res.filter((r) => r.depNameShort)).toHaveLength(10); // lockFileMaintenance has no depName
     });
   });
 });

@@ -1,7 +1,7 @@
 import { defaultConfig, partial } from '../../../../test/util';
-import { UpdateType } from '../../../config';
+import type { UpdateType } from '../../../config/types';
 import * as datasourceNpm from '../../../datasource/npm';
-import { BranchUpgradeConfig } from '../../common';
+import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
 beforeEach(() => {
@@ -67,7 +67,7 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
-          toVersion: '5.1.2',
+          newVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -86,7 +86,7 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
-          toVersion: '5.1.2',
+          newVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -106,7 +106,7 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
-          toVersion: '5.1.2',
+          newVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -135,7 +135,7 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
-          toVersion: '5.1.2',
+          newVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -150,7 +150,7 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '1.1.0',
-          toVersion: '1.1.0',
+          newVersion: '1.1.0',
           group: {
             foo: 2,
           },
@@ -212,7 +212,7 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '>= 5.1.2',
-          toVersion: '5.1.2',
+          newVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -227,7 +227,7 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^5,1,2',
-          toVersion: '5.1.2',
+          newVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -248,7 +248,7 @@ describe('workers/repository/updates/generate', () => {
           semanticCommitScope: 'package',
           newValue: '1.2.0',
           isSingleVersion: true,
-          toVersion: '1.2.0',
+          newVersion: '1.2.0',
           foo: 1,
           group: {
             foo: 2,
@@ -272,7 +272,7 @@ describe('workers/repository/updates/generate', () => {
           semanticCommitScope: '{{baseDir}}',
           newValue: '1.2.0',
           isSingleVersion: true,
-          toVersion: '1.2.0',
+          newVersion: '1.2.0',
           foo: 1,
           group: {
             foo: 2,
@@ -297,7 +297,7 @@ describe('workers/repository/updates/generate', () => {
           semanticCommitScope: '{{parentDir}}',
           newValue: '1.2.0',
           isSingleVersion: true,
-          toVersion: '1.2.0',
+          newVersion: '1.2.0',
           foo: 1,
           group: {
             foo: 2,
@@ -315,13 +315,13 @@ describe('workers/repository/updates/generate', () => {
           ...defaultConfig,
           depName: 'some-dep',
           packageFile: 'foo/bar/package.json',
-          baseDir: 'foo/bar',
+          packageFileDir: 'foo/bar',
           semanticCommits: 'enabled',
           semanticCommitType: 'chore',
-          semanticCommitScope: '{{baseDir}}',
+          semanticCommitScope: '{{packageFileDir}}',
           newValue: '1.2.0',
           isSingleVersion: true,
-          toVersion: '1.2.0',
+          newVersion: '1.2.0',
           foo: 1,
           group: {
             foo: 2,
@@ -341,7 +341,7 @@ describe('workers/repository/updates/generate', () => {
           commitBody: '[skip-ci]',
           newValue: '1.2.0',
           isSingleVersion: true,
-          toVersion: '1.2.0',
+          newVersion: '1.2.0',
         }),
       ];
       const res = generateBranchConfig(branch);
@@ -370,8 +370,8 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           currentValue: '0.5.7',
-          fromVersion: '0.5.7',
-          toVersion: '0.5.8',
+          currentVersion: '0.5.7',
+          newVersion: '0.5.8',
           group: {},
         },
         {
@@ -408,6 +408,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           newValue: '0.6.0',
+          labels: ['a', 'c'],
           group: {},
         },
         {
@@ -418,6 +419,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-other-title',
           newValue: '1.0.0',
+          labels: ['a', 'b'],
           group: {},
         },
         {
@@ -426,6 +428,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           newValue: '0.5.7',
+          labels: ['a'],
           group: {},
         },
       ];

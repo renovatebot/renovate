@@ -1,14 +1,8 @@
-import { Release } from '../../../../datasource/common';
+import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
-import { LookupUpdate } from '../../../../manager/common';
+import type { LookupUpdate } from '../../../../manager/types';
 import * as allVersioning from '../../../../versioning';
-
-export interface RollbackConfig {
-  currentValue?: string;
-  depName?: string;
-  packageFile?: string;
-  versioning: string;
-}
+import type { RollbackConfig } from './types';
 
 export function getRollbackUpdate(
   config: RollbackConfig,
@@ -44,16 +38,16 @@ export function getRollbackUpdate(
     'Versions found before rolling back'
   );
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
-  const toVersion = lessThanVersions.pop()?.version;
+  const newVersion = lessThanVersions.pop()?.version;
   // istanbul ignore if
-  if (!toVersion) {
-    logger.debug('No toVersion to roll back to');
+  if (!newVersion) {
+    logger.debug('No newVersion to roll back to');
     return null;
   }
   const newValue = version.getNewValue({
     currentValue,
     rangeStrategy: 'replace',
-    toVersion,
+    newVersion,
   });
   return {
     updateType: 'rollback',
@@ -62,7 +56,7 @@ export function getRollbackUpdate(
     commitMessageAction: 'Roll back',
     isRollback: true,
     newValue,
-    newMajor: version.getMajor(toVersion),
+    newMajor: version.getMajor(newVersion),
     semanticCommitType: 'fix',
   };
 }

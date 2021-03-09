@@ -5,7 +5,7 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { NodeJsPolicies, getPolicies } from '../../versioning/node/schedule';
 import { getSatisfyingVersion, isVersion } from '../../versioning/semver';
-import { LookupUpdate, PackageUpdateConfig } from '../common';
+import type { LookupUpdate, PackageUpdateConfig } from '../types';
 
 export async function getPackageUpdates(
   config: PackageUpdateConfig

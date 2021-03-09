@@ -1,3 +1,4 @@
+import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
@@ -81,8 +82,8 @@ async function getDockerTag(
   }
 
   logger.debug(
-    { constraint },
-    `Found ${scheme} version constraint - checking for a compatible ${depName} image to use`
+    { depName, scheme, constraint },
+    `Found version constraint - checking for a compatible image to use`
   );
   const imageReleases = await getPkgReleases({
     datasource: 'docker',
@@ -98,8 +99,8 @@ async function getDockerTag(
     if (versions.length) {
       const version = versions.pop();
       logger.debug(
-        { constraint, version },
-        `Found compatible ${scheme} version`
+        { depName, scheme, constraint, version },
+        `Found compatible image version`
       );
       return version;
     }
@@ -137,9 +138,8 @@ export async function removeDockerContainer(image: string): Promise<void> {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.trace({ err }, 'removeDockerContainer err');
-    logger.info(
-      { image, containerName, cmd },
+    logger.warn(
+      { image, containerName, cmd, err },
       'Could not remove Docker container'
     );
   }
@@ -186,8 +186,8 @@ export async function generateDockerCommand(
   const volumes = options.volumes || [];
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
-  const { localDir, cacheDir, dockerUser } = config;
-
+  const { localDir, cacheDir } = config;
+  const { dockerUser, dockerImagePrefix } = getAdminConfig();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image);
   result.push(`--name=${containerName}`);
@@ -210,10 +210,10 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  if (config.dockerImagePrefix) {
+  if (dockerImagePrefix) {
     image = image.replace(
       /^renovate\//,
-      ensureTrailingSlash(config.dockerImagePrefix)
+      ensureTrailingSlash(dockerImagePrefix)
     );
   }
 

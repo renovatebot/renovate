@@ -1,12 +1,14 @@
 import urlApi from 'url';
 import { logger } from '../../logger';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import * as nugetVersioning from '../../versioning/nuget';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as v2 from './v2';
 import * as v3 from './v3';
 
 export { id } from './common';
 
 export const defaultRegistryUrls = [v3.getDefaultFeed()];
+export const defaultVersioning = nugetVersioning.id;
 export const registryStrategy = 'merge';
 
 function parseRegistryUrl(

@@ -50,7 +50,8 @@ function handleGotError(
     err.name === 'RequestError' &&
     (err.code === 'ENOTFOUND' ||
       err.code === 'ETIMEDOUT' ||
-      err.code === 'EAI_AGAIN')
+      err.code === 'EAI_AGAIN' ||
+      err.code === 'ECONNRESET')
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
@@ -108,6 +109,7 @@ function handleGotError(
     ) {
       throw err;
     } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
+      logger.debug({ err }, 'Received invalid response - aborting');
       throw new Error(REPOSITORY_CHANGED);
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
@@ -235,8 +237,23 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         opts
       );
       result = res?.body?.data?.repository;
-    } catch (gotErr) {
-      handleGotError(gotErr, path, opts);
+    } catch (err) {
+      if (err instanceof ExternalHostError) {
+        const gotError = err.err as GotLegacyError;
+        const statusCode = gotError?.statusCode;
+        const count = options.count;
+        if (
+          count &&
+          count > 10 &&
+          statusCode &&
+          statusCode >= 500 &&
+          statusCode < 600
+        ) {
+          logger.info('Reducing pagination count to workaround graphql 5xx');
+          return null;
+        }
+      }
+      handleGotError(err, path, opts);
     }
     return result;
   }
@@ -263,7 +280,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         replacement += cursor ? `, after: "${cursor}", ` : ', ';
         query = query.replace(regex, replacement);
       }
-      const gqlRes = await this.queryRepo<T>(query, options);
+      const gqlRes = await this.queryRepo<T>(query, { ...options, count });
       if (gqlRes?.[fieldName]) {
         const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
         result.push(...nodes);

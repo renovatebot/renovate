@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { regEx } from '../../util/regex';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import {
   ManagerData,
   PackageVariables,
@@ -10,7 +10,7 @@ import {
 } from './common';
 
 const artifactRegex = regEx(
-  '^[a-zA-Z][-_a-zA-Z0-9]*(?:.[a-zA-Z][-_a-zA-Z0-9]*)*$'
+  '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$'
 );
 
 const versionLikeRegex = regEx('^(?<version>[-.\\[\\](),a-zA-Z0-9+]+)');

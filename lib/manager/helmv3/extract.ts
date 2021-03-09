@@ -3,13 +3,14 @@ import yaml from 'js-yaml';
 import * as datasourceHelm from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import { getSiblingFileName, localPathExists } from '../../util/fs';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): Promise<PackageFile | null> {
   let chart: {
     apiVersion: string;
     name: string;
@@ -82,10 +83,15 @@ export function extractPackageFile(
     }
     return res;
   });
-  const res = {
+  const res: PackageFile = {
     deps,
     datasource: datasourceHelm.id,
     packageFileVersion,
   };
+  const lockFileName = getSiblingFileName(fileName, 'Chart.lock');
+  // istanbul ignore if
+  if (await localPathExists(lockFileName)) {
+    res.lockFiles = [lockFileName];
+  }
   return res;
 }

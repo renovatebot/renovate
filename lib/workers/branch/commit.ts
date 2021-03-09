@@ -1,10 +1,11 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
+import { getAdminConfig } from '../../config/admin';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { commitFiles } from '../../util/git';
 import { sanitize } from '../../util/sanitize';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 
 export function commitFilesToBranch(
   config: BranchConfig
@@ -31,7 +32,7 @@ export function commitFilesToBranch(
   const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
-  if (config.dryRun) {
+  if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     return null;
   }

@@ -1,16 +1,17 @@
 import { getName } from '../../test/util';
-import { parse } from './html';
+import { HTMLElement, parse } from './html';
 
 describe(getName(__filename), () => {
   it('parses HTML', () => {
     const body = parse('<div>Hello, world!</div>');
-    expect(body.childElementCount).toBe(1);
-    const div = body.children[0];
+    expect(body.childNodes).toHaveLength(1);
+    const div = body.childNodes[0] as HTMLElement;
     expect(div.tagName).toBe('DIV');
     expect(div.textContent).toBe('Hello, world!');
+    expect(div instanceof HTMLElement).toBe(true);
   });
   it('returns empty', () => {
     const body = parse('');
-    expect(body.childElementCount).toBe(0);
+    expect(body.childNodes).toHaveLength(0);
   });
 });

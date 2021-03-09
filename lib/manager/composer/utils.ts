@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { api, id as composerVersioningId } from '../../versioning/composer';
-import { UpdateArtifactsConfig } from '../common';
+import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };

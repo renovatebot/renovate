@@ -2,7 +2,7 @@ import * as url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import {
   GOOGLE_REPO,
   JCENTER_REPO,
@@ -260,6 +260,19 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: handleAssignment,
   },
   {
+    // set('foo', 'bar')
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'set' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
+  {
     // 'foo.bar:baz:1.2.3'
     matchers: [
       {
@@ -364,6 +377,26 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processLongFormDep,
   },
   {
+    // (group: "com.example", name: "my.dependency", version: "1.2.3")
+    matchers: [
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'group' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'name' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
     // ("com.example", "my.dependency", "1.2.3")
     matchers: [
       { matchType: TokenType.LeftParen },
@@ -425,12 +458,18 @@ function tryMatch({
   return null;
 }
 
+interface ParseGradleResult {
+  deps: PackageDependency<ManagerData>[];
+  urls: string[];
+  vars: PackageVariables;
+}
+
 export function parseGradle(
   input: string,
   initVars: PackageVariables = {},
   packageFile?: string
-): { deps: PackageDependency<ManagerData>[]; urls: string[] } {
-  const vars = { ...initVars };
+): ParseGradleResult {
+  const vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<ManagerData>[] = [];
   const urls = [];
 
@@ -460,7 +499,7 @@ export function parseGradle(
     prevTokensLength = tokens.length;
   }
 
-  return { deps, urls };
+  return { deps, urls, vars };
 }
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';

@@ -1,7 +1,7 @@
 import * as datasourceHelm from '../../datasource/helm';
 import { SkipReason } from '../../types';
-import { PackageDependency } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency } from '../types';
 import {
   ExtractionResult,
   ResourceManagerData,
@@ -71,26 +71,26 @@ export function analyseTerraformResource(
 
   switch (dep.managerData.resourceType) {
     case TerraformResourceTypes.docker_container:
-      if (!dep.managerData.image) {
-        dep.skipReason = SkipReason.InvalidDependencySpecification;
-      } else {
+      if (dep.managerData.image) {
         applyDockerDependency(dep, dep.managerData.image);
+      } else {
+        dep.skipReason = SkipReason.InvalidDependencySpecification;
       }
       break;
 
     case TerraformResourceTypes.docker_image:
-      if (!dep.managerData.name) {
-        dep.skipReason = SkipReason.InvalidDependencySpecification;
-      } else {
+      if (dep.managerData.name) {
         applyDockerDependency(dep, dep.managerData.name);
+      } else {
+        dep.skipReason = SkipReason.InvalidDependencySpecification;
       }
       break;
 
     case TerraformResourceTypes.docker_service:
-      if (!dep.managerData.image) {
-        dep.skipReason = SkipReason.InvalidDependencySpecification;
-      } else {
+      if (dep.managerData.image) {
         applyDockerDependency(dep, dep.managerData.image);
+      } else {
+        dep.skipReason = SkipReason.InvalidDependencySpecification;
       }
       break;
 
@@ -103,12 +103,11 @@ export function analyseTerraformResource(
       dep.depType = 'helm';
       dep.registryUrls = [dep.managerData.repository];
       dep.depName = dep.managerData.chart;
-      dep.depNameShort = dep.managerData.chart;
       dep.datasource = datasourceHelm.id;
       break;
 
     default:
-      dep.skipReason = SkipReason.UnsupportedValue;
+      dep.skipReason = SkipReason.InvalidValue;
       break;
   }
   /* eslint-enable no-param-reassign */

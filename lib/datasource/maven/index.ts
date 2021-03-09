@@ -5,14 +5,16 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import mavenVersion from '../../versioning/maven';
+import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
-import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import { downloadHttpProtocol, isHttpResourceExists } from './util';
 
 export { id } from './common';
 
 export const defaultRegistryUrls = [MAVEN_REPO];
+export const defaultVersioning = mavenVersioning.id;
 export const registryStrategy = 'merge';
 
 function containsPlaceholder(str: string): boolean {

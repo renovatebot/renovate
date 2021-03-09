@@ -6,7 +6,7 @@ import {
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { add } from '../util/sanitize';
-import { RenovateAdminConfig, RenovateConfig } from './common';
+import { GlobalConfig, RenovateConfig } from './types';
 
 const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
 
@@ -40,7 +40,7 @@ function validateSecrets(secrets_: unknown): void {
   }
 }
 
-export function validateConfigSecrets(config: RenovateAdminConfig): void {
+export function validateConfigSecrets(config: GlobalConfig): void {
   validateSecrets(config.secrets);
   if (config.repositories) {
     for (const repository of config.repositories) {

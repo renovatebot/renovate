@@ -3,8 +3,8 @@ import is from '@sindresorhus/is';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import * as datasourceDocker from '../datasource/docker';
 import { logger } from '../logger';
-import { RenovateConfig } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
+import type { GlobalConfig, RenovateOptions } from './types';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
@@ -17,10 +17,10 @@ export function getEnvName(option: Partial<RenovateOptions>): string {
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }
 
-export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
+export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
   const options = getOptions();
 
-  const config: RenovateConfig = { hostRules: [] };
+  const config: GlobalConfig = { hostRules: [] };
 
   const coersions = {
     boolean: (val: string): boolean => val === 'true',

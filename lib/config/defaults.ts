@@ -1,5 +1,5 @@
-import { RenovateConfig } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
+import type { GlobalConfig, RenovateOptions } from './types';
 
 const defaultValues = {
   boolean: true,
@@ -14,9 +14,9 @@ export function getDefault(option: RenovateOptions): any {
     : option.default;
 }
 
-export function getConfig(): RenovateConfig {
+export function getConfig(): GlobalConfig {
   const options = getOptions();
-  const config: RenovateConfig = {};
+  const config: GlobalConfig = {};
   options.forEach((option) => {
     if (!option.parent) {
       config[option.name] = getDefault(option);

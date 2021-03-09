@@ -1,4 +1,4 @@
-import { NewValueConfig, VersioningApi } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
@@ -107,7 +107,7 @@ function minSatisfyingVersion(
 }
 
 function getNewValue(newValueConfig: NewValueConfig): string {
-  return newValueConfig.toVersion;
+  return newValueConfig.newVersion;
 }
 
 function sortVersions(version: string, other: string): number {

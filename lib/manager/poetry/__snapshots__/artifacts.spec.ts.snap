@@ -100,7 +100,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:2.7.5 bash -l -c \\"pip install 'poetry>=1.0' && poetry update --lock --no-interaction dep1\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:2.7.5 bash -l -c \\"pip install 'poetry>=1.0' && poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -135,7 +135,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:3.4.2 bash -l -c \\"pip install poetry && poetry update --lock --no-interaction dep1\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:3.4.2 bash -l -c \\"pip install 'poetry>=1.1.2' setuptools 'poetry-dynamic-versioning>1' && poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

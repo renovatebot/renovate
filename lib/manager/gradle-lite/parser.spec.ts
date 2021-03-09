@@ -16,7 +16,25 @@ describe('manager/gradle-lite/parser', () => {
     let deps;
 
     ({ deps } = parseGradle(
-      '\nversion = "1.2.3"\n"foo:bar:$version"\nversion = "3.2.1"'
+      [
+        'version = "1.2.3"',
+        '"foo:bar_$version:$version"',
+        'version = "3.2.1"',
+      ].join('\n')
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'foo:bar_1.2.3',
+        currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
+      [
+        'set("version", "1.2.3")',
+        '"foo:bar:$version"',
+        'set("version", "3.2.1")',
+      ].join('\n')
     ));
     expect(deps).toMatchObject([
       {
@@ -64,6 +82,16 @@ describe('manager/gradle-lite/parser', () => {
     expect(deps).toMatchObject([
       {
         depName: 'com.example:my.dependency',
+        currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
+      "implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'foo:bar',
         currentValue: '1.2.3',
       },
     ]);

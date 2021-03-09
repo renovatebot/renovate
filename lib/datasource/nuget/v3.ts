@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
-import { Release, ReleaseResult } from '../common';
+import type { Release, ReleaseResult } from '../types';
 
 import { id, removeBuildMeta } from './common';
 
@@ -165,8 +165,14 @@ export async function getReleases(
     return null;
   }
 
+  // istanbul ignore if: only happens when no stable version exists
+  if (latestStable === null) {
+    const last = catalogEntries.pop();
+    latestStable = removeBuildMeta(last.version);
+    homepage ??= last.projectUrl;
+  }
+
   const dep: ReleaseResult = {
-    pkgName,
     releases,
   };
 

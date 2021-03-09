@@ -1,8 +1,11 @@
 import { clean as cleanGitRef } from 'clean-git-ref';
+import hasha from 'hasha';
 import slugify from 'slugify';
-import { RenovateConfig } from '../../../config/common';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
+
+const MIN_HASH_LENGTH = 6;
 
 /**
  * Clean git branch name
@@ -42,16 +45,44 @@ export function generateBranchName(update: RenovateConfig): void {
       update.groupSlug = `patch-${update.groupSlug}`;
     }
     update.branchTopic = update.group.branchTopic || update.branchTopic;
-    update.branchName = template.compile(
-      update.group.branchName || update.branchName,
+    update.branchName = update.group.branchName || update.branchName;
+  }
+
+  if (update.hashedBranchLength) {
+    let hashLength = update.hashedBranchLength - update.branchPrefix.length;
+    if (hashLength <= MIN_HASH_LENGTH) {
+      logger.warn(
+        `\`hashedBranchLength\` must allow for at least ${MIN_HASH_LENGTH} characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`
+      );
+      hashLength = MIN_HASH_LENGTH;
+    }
+
+    const additionalBranchPrefix = template.compile(
+      String(update.additionalBranchPrefix || ''),
       update
     );
+
+    const branchTopic = template.compile(
+      String(update.branchTopic || ''),
+      update
+    );
+
+    let hashInput = additionalBranchPrefix + branchTopic;
+
+    // Compile extra times in case of nested templates
+    hashInput = template.compile(hashInput, update);
+    hashInput = template.compile(hashInput, update);
+
+    const hash = hasha(hashInput);
+
+    update.branchName = update.branchPrefix + hash.slice(0, hashLength);
   } else {
     update.branchName = template.compile(update.branchName, update);
+
+    // Compile extra times in case of nested templates
+    update.branchName = template.compile(update.branchName, update);
+    update.branchName = template.compile(update.branchName, update);
   }
-  // Compile extra times in case of nested templates
-  update.branchName = template.compile(update.branchName, update);
-  update.branchName = cleanBranchName(
-    template.compile(update.branchName, update)
-  );
+
+  update.branchName = cleanBranchName(update.branchName);
 }

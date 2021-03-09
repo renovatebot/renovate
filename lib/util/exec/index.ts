@@ -1,6 +1,8 @@
-import { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
-import { RenovateConfig } from '../../config/common';
+import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import {
   BinarySource,
@@ -20,8 +22,6 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
-  dockerImagePrefix: null,
-  dockerUser: null,
   localDir: null,
   cacheDir: null,
 };
@@ -61,14 +61,11 @@ function createChildEnv(
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
 
-  const childEnv =
-    env || extraEnv
-      ? {
-          ...extraEnv,
-          ...getChildProcessEnv(extraEnvKeys),
-          ...env,
-        }
-      : getChildProcessEnv();
+  const childEnv = {
+    ...extraEnv,
+    ...getChildProcessEnv(extraEnvKeys),
+    ...env,
+  };
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {
@@ -97,7 +94,8 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker, cwdFile } = opts;
+  const { env, docker, cwdFile } = opts;
+  const extraEnv = { ...opts.extraEnv, ...getAdminConfig().customEnvVariables };
   let cwd;
   // istanbul ignore if
   if (cwdFile) {
@@ -143,15 +141,8 @@ export async function exec(
   let res: ExecResult | null = null;
   for (const rawExecCommand of commands) {
     const startTime = Date.now();
-    let timer;
-    const { timeout } = rawExecOptions;
     if (useDocker) {
       await removeDockerContainer(docker.image);
-      // istanbul ignore next
-      timer = setTimeout(() => {
-        removeDockerContainer(docker.image); // eslint-disable-line
-        logger.info({ timeout, rawExecCommand }, 'Docker run timed out');
-      }, timeout);
     }
     logger.debug({ command: rawExecCommand }, 'Executing command');
     logger.trace({ commandOptions: rawExecOptions }, 'Command options');
@@ -159,7 +150,6 @@ export async function exec(
       res = await rawExec(rawExecCommand, rawExecOptions);
     } catch (err) {
       logger.trace({ err }, 'rawExec err');
-      clearTimeout(timer);
       if (useDocker) {
         await removeDockerContainer(docker.image).catch((removeErr: Error) => {
           const message: string = err.message;
@@ -168,9 +158,15 @@ export async function exec(
           );
         });
       }
+      if (err.signal === `SIGTERM`) {
+        logger.debug(
+          { err },
+          'exec interrupted by SIGTERM - run needs to be aborted'
+        );
+        throw new Error(TEMPORARY_ERROR);
+      }
       throw err;
     }
-    clearTimeout(timer);
     const durationMs = Math.round(Date.now() - startTime);
     if (res) {
       logger.debug(

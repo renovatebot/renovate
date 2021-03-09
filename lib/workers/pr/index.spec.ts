@@ -3,8 +3,8 @@ import { getConfig } from '../../config/defaults';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { BranchConfig, PrResult } from '../common';
 import * as _limits from '../global/limits';
+import { BranchConfig, PrResult } from '../types';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
 import * as codeOwners from './code-owners';
@@ -201,7 +201,7 @@ describe('workers/pr', () => {
         displayNumber: 'New Pull Request',
       } as never);
       config.upgrades = [config];
-      platform.getPrBody = jest.fn((input) => input);
+      platform.massageMarkdown = jest.fn((input) => input);
       platform.getBranchPr = jest.fn();
       platform.getBranchStatus = jest.fn();
     });
@@ -508,6 +508,15 @@ describe('workers/pr', () => {
     it('should add and deduplicate additionalReviewers on new PR', async () => {
       config.reviewers = ['@foo', 'bar'];
       config.additionalReviewers = ['bar', 'baz', '@boo'];
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+      expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
+    it('should add and deduplicate additionalReviewers to empty reviewers on new PR', async () => {
+      config.reviewers = [];
+      config.additionalReviewers = ['bar', 'baz', '@boo', '@foo', 'bar'];
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });

@@ -16,7 +16,7 @@ Let's look at an example of configuring packages with existing Angular migration
 Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`
 
 ```javascript
-module.export = {
+module.exports = {
   allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
@@ -30,11 +30,11 @@ The command to install dependencies is necessary because, by default, the instal
 {
   "packageRules": [
     {
-      "packageNames": ["@angular/core"],
+      "matchPackageNames": ["@angular/core"],
       "postUpgradeTasks": {
         "commands": [
           "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{fromVersion}}} --to={{{toVersion}}} --migrateOnly --allowDirty --force"
+          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrateOnly --allowDirty --force"
         ],
         "fileFilters": ["**/**"]
       }
@@ -54,12 +54,14 @@ npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty 
 
 A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed.
 If this list is empty then no tasks will be executed.
+Also you need to have `"trustLevel": "high"`, otherwise these tasks will be ignored.
 
 e.g.
 
 ```json
 {
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"],
+  "trustLevel": "high"
 }
 ```
 
@@ -91,6 +93,10 @@ If you configure this to be different to the `baseDir`, it means you can have on
 ## composerIgnorePlatformReqs
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
+
+## customEnvVariables
+
+This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
 ## dockerImagePrefix
 
@@ -167,6 +173,8 @@ It's recommended to run at debug level if you can, and configure it using the en
 By configuring using the environment it means that debug logging starts from the beginning of the app, while if you configure it using file config then the debug logging can only start after the file config is parsed.
 
 Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
+
+Warning: Configuring `logLevel` config option or `--log-level` cli option is deprecated and will be removed in a major version.
 
 ## onboarding
 

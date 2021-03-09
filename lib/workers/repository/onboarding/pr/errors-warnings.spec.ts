@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-import { PackageFile } from '../../../../manager/common';
+import type { PackageFile } from '../../../../manager/types';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 
 describe('workers/repository/onboarding/pr/errors-warnings', () => {

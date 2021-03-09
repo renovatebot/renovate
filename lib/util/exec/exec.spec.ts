@@ -4,6 +4,9 @@ import {
   exec as _cpExec,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import {
   BinarySource,
   ExecConfig,
@@ -24,12 +27,11 @@ interface TestInput {
   inOpts: ExecOptions;
   outCmd: string[];
   outOpts: RawExecOptions[];
-  trustLevel?: 'high' | 'low';
+  adminConfig?: RepoAdminConfig;
 }
 
 describe(`Child process execution wrapper`, () => {
   let processEnvOrig;
-  let trustLevelOrig;
 
   const cacheDir = '/tmp/renovate/cache/';
   const cwd = '/tmp/renovate/github/some/repo/';
@@ -48,12 +50,12 @@ describe(`Child process execution wrapper`, () => {
     jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
-    trustLevelOrig = global.trustLevel;
+    setAdminConfig();
   });
 
   afterEach(() => {
     process.env = processEnvOrig;
-    global.trustLevel = trustLevelOrig;
+    setAdminConfig();
   });
 
   const image = 'renovate/image';
@@ -190,7 +192,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
-        trustLevel: 'high',
+        adminConfig: { trustLevel: 'high' },
       },
     ],
 
@@ -390,7 +392,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          dockerUser: 'foobar',
         },
         processEnv,
         inCmd,
@@ -411,6 +412,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { dockerUser: 'foobar' },
       },
     ],
 
@@ -420,7 +422,6 @@ describe(`Child process execution wrapper`, () => {
         execConfig: {
           ...execConfig,
           binarySource: BinarySource.Docker,
-          dockerImagePrefix: 'ghcr.io/renovatebot',
         },
         processEnv,
         inCmd,
@@ -441,6 +442,7 @@ describe(`Child process execution wrapper`, () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { dockerImagePrefix: 'ghcr.io/renovatebot' },
       },
     ],
 
@@ -535,6 +537,128 @@ describe(`Child process execution wrapper`, () => {
         ],
       },
     ],
+
+    [
+      'Custom environment variables for child',
+      {
+        execConfig: {
+          ...execConfig,
+        },
+        processEnv: envMock.basic,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_VALUE',
+          },
+        },
+      },
+    ],
+
+    [
+      'Custom environment variables for child should override',
+      {
+        execConfig: {
+          ...execConfig,
+        },
+        processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+        },
+      },
+    ],
+
+    [
+      'Custom environment variables for child (Docker)',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+        },
+        processEnv,
+        inCmd,
+        inOpts: { docker, cwd },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_VALUE',
+          },
+        },
+      },
+    ],
+
+    [
+      'Custom environment variables for child should override (Docker)',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+        },
+        processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
+        inCmd,
+        inOpts: { docker, cwd },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+        },
+      },
+    ],
   ];
 
   test.each(testInputs)('%s', async (_msg, testOpts) => {
@@ -545,13 +669,10 @@ describe(`Child process execution wrapper`, () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      trustLevel,
+      adminConfig = {} as any,
     } = testOpts;
 
     process.env = procEnv;
-    if (trustLevel) {
-      global.trustLevel = trustLevel;
-    }
 
     if (config) {
       jest
@@ -568,7 +689,7 @@ describe(`Child process execution wrapper`, () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-
+    setAdminConfig(adminConfig);
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
@@ -654,5 +775,22 @@ describe(`Child process execution wrapper`, () => {
       )
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
+  });
+  it('converts to TEMPORARY_ERROR', async () => {
+    cpExec.mockImplementation(() => {
+      class ErrorSignal extends Error {
+        signal?: string;
+      }
+      const error = new ErrorSignal();
+      error.signal = 'SIGTERM';
+      throw error;
+    });
+    const removeDockerContainerSpy = jest.spyOn(
+      dockerModule,
+      'removeDockerContainer'
+    );
+    const promise = exec('foobar', {});
+    await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
+    expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
   });
 });

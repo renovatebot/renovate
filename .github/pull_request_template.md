@@ -3,7 +3,7 @@
 
 ## Changes:
 
-<!-- Describe what this pull request changes. -->
+<!-- Describe what behavior is changed by this PR. -->
 
 ## Context:
 
@@ -21,9 +21,10 @@ I have verified these changes via:
 
 - [ ] Code inspection only, or
 - [ ] Newly added unit tests, or
-- [ ] Unit tests + ran on a real repository
+- [ ] No new tests but ran on a real repository, or
+- [ ] Both unit tests + ran on a real repository
 
 <!-- Do you have any suggestions about this PR template? Edit it here: https://github.com/renovatebot/renovate/edit/master/.github/pull_request_template.md -->
 
-<!-- Please do not force push to this PR's branch after you have created this PR, as doing so makes it harder for us to review your work. -->
+<!-- Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again. This makes it harder for us to review your work because we don't know what has changed. -->
 <!-- PRs will always be squashed by us when we merge your work. Commit as many times as you need in this branch. -->

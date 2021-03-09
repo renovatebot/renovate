@@ -41,11 +41,11 @@ Consider this example:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "packagePatterns": ["eslint"],
+      "matchPackagePatterns": ["eslint"],
       "labels": ["linting"]
     },
     {
-      "depTypeList": ["optionalDependencies"],
+      "matchDepTypes": ["optionalDependencies"],
       "addLabels": ["optional"]
     }
   ]
@@ -123,7 +123,7 @@ You could configure Renovate to automerge all but major this way:
 {
   "packageRules": [
     {
-      "updateTypes": ["minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
     }
   ]
@@ -137,7 +137,7 @@ So for example you could elect to automerge all (passing) `devDependencies` only
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
+      "matchDepTypes": ["devDependencies"],
       "automerge": true
     }
   ]
@@ -145,6 +145,10 @@ So for example you could elect to automerge all (passing) `devDependencies` only
 ```
 
 Important: Renovate won't automerge on GitHub if a PR has a negative review outstanding.
+
+Note: on Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
+Renovate will try to delay until Azure is in the expected state, however if it takes too long it will continue.
+In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
 ## automergeComment
 
@@ -165,7 +169,9 @@ Example use:
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
 
 Automerging defaults to using Pull Requests (`automergeType="pr"`).
-In that case Renovate first creates a branch, then an associated Pull Request, and then automerges the first time it detects that the Pull Requests status checks are "green".
+In that case Renovate first creates a branch and associated Pull Request, and then automerges the PR on a subsequent run once it detects the PR's status checks are "green".
+If by the next run the PR is already behind master branch then it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
+If Renovate is scheduled for hourly runs on the repository but commits are made every 15 minutes to the main branch, then an automerge like this will keep getting deferred with every rebase.
 
 Note: if you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
 
@@ -251,7 +257,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3` and `npm` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -365,13 +371,50 @@ The Dependency Dashboard therefore provides visibility as well as additional con
 
 ## dependencyDashboardApproval
 
-Setting `dependencyDashboardApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Dependency Dashboard.
+This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
 
-In this case, the Dependency Dashboard _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue.
-Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc.
-i.e. it is possible to require approval for only certain types of updates only.
+By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
+You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
 
-Note: Enabling Dependency Dashboard Approval implicitly enables `dependencyDashboard` too, so it is not necessary to configure both to `true`.
+Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explictly.
+
+You can configure Renovate to wait for approval for:
+
+- all package upgrades
+- major, minor, patch level upgrades
+- specific package upgrades
+- upgrades coming from specific package managers
+
+If you want to approve _all_ upgrades, set `dependencyDashboardApproval` to `true`:
+
+```json
+{
+  "dependencyDashboardApproval": true
+}
+```
+
+If you want to require approval for _major_ updates, set `dependencyDashboardApproval` to `true` within a `major` object:
+
+```json
+{
+  "major": {
+    "dependencyDashboardApproval": true
+  }
+}
+```
+
+If you want to approve _specific_ packages, set `dependencyDashboardApproval` to `true` within a `packageRules` entry where you have defined a specific package or pattern.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^@package-name"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
 
 ## dependencyDashboardAutoclose
 
@@ -403,7 +446,7 @@ If instead you mean to apply settings to any package manager that updates using 
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "labels": ["docker-update"]
     }
   ]
@@ -445,7 +488,7 @@ To disable Renovate for all `eslint` packages, you can configure a package rule 
 {
   "packageRules": [
     {
-      "packagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["^eslint"],
       "enabled": false
     }
   ]
@@ -458,8 +501,8 @@ To disable Renovate for npm `devDependencies` but keep it for `dependencies` you
 {
   "packageRules": [
     {
-      "managers": ["npm"],
-      "depTypeList": ["devDependencies"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
       "enabled": false
     }
   ]
@@ -515,7 +558,7 @@ For example, to extract only the major.minor precision from a GitHub release, th
 {
   "packageRules": [
     {
-      "packageNames": ["foo"],
+      "matchPackageNames": ["foo"],
       "extractVersion": "^(?<version>v\\d+\\.\\d+)"
     }
   ]
@@ -530,7 +573,7 @@ Alternatively, to strip a `release-` prefix:
 {
   "packageRules": [
     {
-      "packageNames": ["bar"],
+      "matchPackageNames": ["bar"],
       "extractVersion": "^release-(?<version>.*)$"
     }
   ]
@@ -544,7 +587,7 @@ A similar one could strip leading `v` prefixes:
 {
   "packageRules": [
     {
-      "packageNames": ["baz"],
+      "matchPackageNames": ["baz"],
       "extractVersion": "^v(?<version>.*)$"
     }
   ]
@@ -623,8 +666,8 @@ For example, to group all non-major devDependencies updates together into a sing
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
-      "updateTypes": ["patch", "minor"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
       "groupName": "devDependencies (non-major)"
     }
   ]
@@ -641,8 +684,8 @@ If you wished to override this then you could configure like this:
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
-      "updateTypes": ["patch", "minor"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
       "groupName": "devDependencies (non-major)",
       "groupSlug": "dev-dependencies"
     }
@@ -653,6 +696,13 @@ If you wished to override this then you could configure like this:
 As a result of the above, the branchName would be `renovate/dev-dependencies` instead.
 
 Note: you shouldn't usually need to configure this unless you really care about your branch names.
+
+## hashedBranchLength
+
+Some code hosting systems have restrictions on the branch name lengths, this option lets you get around these restrictions.
+You can set the `hashedBranchLength` option to a number of characters that works for your system and then Renovate will generate branch names with the appropriate length by hashing `additionalBranchPrefix` and `branchTopic`, and then truncating the hash so that the full branch name (including `branchPrefix`) has the right number of characters.
+
+Example: If you have set `branchPrefix: "deps-"` and `hashedBranchLength: 12` it will result in a branch name like `deps-5bf36ec` instead of the traditional pretty branch name like `deps-react-17.x`.
 
 ## hostRules
 
@@ -868,7 +918,7 @@ The above is the same as if you wrote this package rule:
 {
   "packageRules": [
     {
-      "packageNames": ["eslint", "eslint-config-base"],
+      "matchPackageNames": ["eslint", "eslint-config-base"],
       "enabled": false
     }
   ]
@@ -957,7 +1007,7 @@ Consider this example:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "packagePatterns": ["eslint"],
+      "matchPackagePatterns": ["eslint"],
       "labels": ["linting"]
     }
   ]
@@ -1018,14 +1068,14 @@ Here is an example if you want to group together all packages starting with `esl
 {
   "packageRules": [
     {
-      "packagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["^eslint"],
       "groupName": "eslint packages"
     }
   ]
 }
 ```
 
-Note how the above uses `packagePatterns` with a regex value.
+Note how the above uses `matchPackagePatterns` with a regex value.
 
 Here is an example where you might want to limit the "noisy" package `aws-sdk` to updates just once per week:
 
@@ -1033,26 +1083,26 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
 {
   "packageRules": [
     {
-      "packageNames": ["aws-sdk"],
+      "matchPackageNames": ["aws-sdk"],
       "schedule": ["after 9pm on sunday"]
     }
   ]
 }
 ```
 
-For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"packageNames": ["com.thoughtworks.xstream:xstream"]`
+For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
 
-Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name.
-This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler.
-However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if _either_ match.
+Note how the above uses `matchPackageNames` instead of `matchPackagePatterns` because it is an exact match package name.
+This is the equivalent of defining `"matchPackagePatterns": ["^aws\-sdk$"]` and hence much simpler.
+However you can mix together both `matchPackageNames` and `matchPackagePatterns` in the same package rule and the rule will be applied if _either_ match.
 Example:
 
 ```json
 {
   "packageRules": [
     {
-      "packageNames": ["neutrino"],
-      "packagePatterns": ["^@neutrino/"],
+      "matchPackageNames": ["neutrino"],
+      "matchPackagePatterns": ["^@neutrino/"],
       "groupName": "neutrino monorepo"
     }
   ]
@@ -1068,21 +1118,21 @@ For example, if you have an `examples` directory and you want all updates to tho
 {
   "packageRules": [
     {
-      "paths": ["examples/**"],
+      "matchPaths": ["examples/**"],
       "extends": [":semanticCommitTypeAll(chore)"]
     }
   ]
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern.
+If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "paths": ["+(package.json)"],
+      "matchPaths": ["+(package.json)"],
       "dependencyDashboardApproval": true
     }
   ]
@@ -1101,7 +1151,7 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 {
   "packageRules": [
     {
-      "packageNames": ["angular"],
+      "matchPackageNames": ["angular"],
       "allowedVersions": "<=1.5"
     }
   ]
@@ -1117,7 +1167,7 @@ For example, the following will enforce that only 3 or 4-section versions are su
 {
   "packageRules": [
     {
-      "packageNames": ["com.thoughtworks.xstream:xstream"],
+      "matchPackageNames": ["com.thoughtworks.xstream:xstream"],
       "allowedVersions": "/^[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)?$/"
     }
   ]
@@ -1131,14 +1181,14 @@ Use the syntax `!/ /` like the following:
 {
   "packageRules": [
     {
-      "packageNames": ["chalk"],
+      "matchPackageNames": ["chalk"],
       "allowedVersions": "!/java$/"
     }
   ]
 }
 ```
 
-### depTypeList
+### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
@@ -1149,13 +1199,13 @@ Invalid if used outside of a `packageRule`.
 Use `ignoreDeps` instead if all you want to do is have a list of package names for Renovate to ignore.
 
 Use `excludePackageNames` if you want to have one or more exact name matches excluded in your package rule.
-See also `packageNames`.
+See also `matchPackageNames`.
 
 ```json
 {
   "packageRules": [
     {
-      "packagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["^eslint"],
       "excludePackageNames": ["eslint-foo"]
     }
   ]
@@ -1167,13 +1217,13 @@ The above will match all package names starting with `eslint` but exclude the sp
 ### excludePackagePatterns
 
 Use this field if you want to have one or more package name patterns excluded in your package rule.
-See also `packagePatterns`.
+See also `matchPackagePatterns`.
 
 ```json
 {
   "packageRules": [
     {
-      "packagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["^eslint"],
       "excludePackagePatterns": ["^eslint-foo"]
     }
   ]
@@ -1182,7 +1232,7 @@ See also `packagePatterns`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
-### languages
+### matchLanguages
 
 Use this field to restrict rules to a particular language. e.g.
 
@@ -1190,15 +1240,15 @@ Use this field to restrict rules to a particular language. e.g.
 {
   "packageRules": [
     {
-      "packageNames": ["request"],
-      "languages": ["python"],
+      "matchPackageNames": ["request"],
+      "matchLanguages": ["python"],
       "enabled": false
     }
   ]
 }
 ```
 
-### baseBranchList
+### matchBaseBranches
 
 Use this field to restrict rules to a particular branch. e.g.
 
@@ -1206,7 +1256,7 @@ Use this field to restrict rules to a particular branch. e.g.
 {
   "packageRules": [
     {
-      "baseBranchList": ["master"],
+      "matchBaseBranches": ["master"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
@@ -1214,7 +1264,7 @@ Use this field to restrict rules to a particular branch. e.g.
 }
 ```
 
-### managers
+### matchManagers
 
 Use this field to restrict rules to a particular package manager. e.g.
 
@@ -1222,15 +1272,15 @@ Use this field to restrict rules to a particular package manager. e.g.
 {
   "packageRules": [
     {
-      "packageNames": ["node"],
-      "managers": ["dockerfile"],
+      "matchPackageNames": ["node"],
+      "matchManagers": ["dockerfile"],
       "enabled": false
     }
   ]
 }
 ```
 
-### datasources
+### matchDatasources
 
 Use this field to restrict rules to a particular datasource. e.g.
 
@@ -1238,7 +1288,7 @@ Use this field to restrict rules to a particular datasource. e.g.
 {
   "packageRules": [
     {
-      "datasources": ["orb"],
+      "matchDatasources": ["orb"],
       "labels": ["circleci-orb!!"]
     }
   ]
@@ -1256,7 +1306,7 @@ For example, the following will enforce that only `1.*` versions:
 {
   "packageRules": [
     {
-      "packagePatterns": ["io.github.resilience4j"],
+      "matchPackagePatterns": ["io.github.resilience4j"],
       "matchCurrentVersion": "/^1\\./"
     }
   ]
@@ -1270,23 +1320,35 @@ Use the syntax `!/ /` like the following:
 {
   "packageRules": [
     {
-      "packagePatterns": ["io.github.resilience4j"],
-      "allowedVersions": "!/^0\\./"
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentVersion": "!/^0\\./"
     }
   ]
 }
 ```
 
-### packageNames
+### matchFiles
+
+Renovate will compare `matchFiles` for an exact match against the dependency's package file or lock file.
+
+For example the following would match `package.json` but not `package/frontend/package.json`:
+
+```
+  "matchFiles": ["package.json"],
+```
+
+Use `matchPaths` instead if you need more flexible matching.
+
+### matchPackageNames
 
 Use this field if you want to have one or more exact name matches in your package rule.
-See also `excludedPackageNames`.
+See also `excludePackageNames`.
 
 ```json
 {
   "packageRules": [
     {
-      "packageNames": ["angular"],
+      "matchPackageNames": ["angular"],
       "rangeStrategy": "pin"
     }
   ]
@@ -1295,7 +1357,7 @@ See also `excludedPackageNames`.
 
 The above will configure `rangeStrategy` to `pin` only for the package `angular`.
 
-### packagePatterns
+### matchPackagePatterns
 
 Use this field if you want to have one or more package names patterns in your package rule.
 See also `excludePackagePatterns`.
@@ -1304,7 +1366,7 @@ See also `excludePackagePatterns`.
 {
   "packageRules": [
     {
-      "packagePatterns": ["^angular"],
+      "matchPackagePatterns": ["^angular"],
       "rangeStrategy": "replace"
     }
   ]
@@ -1313,22 +1375,22 @@ See also `excludePackagePatterns`.
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-### paths
+### matchPaths
 
-Renovate will match `paths` against both a partial string match or a minimatch glob pattern.
+Renovate will match `matchPaths` against both a partial string match or a minimatch glob pattern.
 If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
 
 ```
-  "paths": ["+(package.json)"],
+  "matchPaths": ["+(package.json)"],
 ```
 
 The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
 
 ```
-  "paths": ["package.json"],
+  "matchPaths": ["package.json"],
 ```
 
-### sourceUrlPrefixes
+### matchSourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the Vue monorepo:
 
@@ -1336,7 +1398,7 @@ Here's an example of where you use this to group together all packages from the 
 {
   "packageRules": [
     {
-      "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+      "matchSourceUrlPrefixes": ["https://github.com/vuejs/vue"],
       "groupName": "Vue monorepo packages"
     }
   ]
@@ -1349,14 +1411,14 @@ Here's an example of where you use this to group together all packages from the 
 {
   "packageRules": [
     {
-      "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+      "matchSourceUrlPrefixes": ["https://github.com/renovatebot/"],
       "groupName": "All renovate packages"
     }
   ]
 }
 ```
 
-### updateTypes
+### matchUpdateTypes
 
 Use this field to match rules against types of updates.
 For example to apply a special label for Major updates:
@@ -1365,7 +1427,7 @@ For example to apply a special label for Major updates:
 {
   "packageRules": [
     {
-      "updateTypes": ["major"],
+      "matchUpdateTypes": ["major"],
       "labels": ["UPDATE-MAJOR"]
     }
   ]
@@ -1557,11 +1619,11 @@ Here's an example of how you would define PR priority so that devDependencies ar
 {
   "packageRules": [
     {
-      "depTypeList": ["devDependencies"],
+      "matchDepTypes": ["devDependencies"],
       "prPriority": -1
     },
     {
-      "packageNames": ["react"],
+      "matchPackageNames": ["react"],
       "prPriority": 5
     }
   ]
@@ -1590,7 +1652,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, and `yarn`, so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn` and `poetry` so far
 
 Renovate's `"auto"` strategy works like this for npm:
 
@@ -1624,7 +1686,10 @@ Possible values and meanings:
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
-Note: this field replaces the previous fields of `rebaseConflictedPrs` and `rebaseStalePrs`.
+`rebaseWhen=conflicted` is not recommended if you have enabled Renovate automerge, because:
+
+- It could result in a broken base branch if two updates are merged one after another without testing the new versions together
+- If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 ## recreateClosed
 
@@ -1654,7 +1719,7 @@ It's not recommended to do both, due to the potential for confusion.
 It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
 
 For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
-For template fields, use the triple brace `{{{ }}}` notation to avoid `handlebars` escaping any special characters.
+For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 ### matchStrings
 
@@ -1825,23 +1890,28 @@ In the above example, each regex manager will match a single dependency each.
 ### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ### lookupNameTemplate
 
 `lookupName` is used for looking up dependency versions.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
 ### datasourceTemplate
 
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ### versioningTemplate
 
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using `handlebars` and the regex `groups` result.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### registryUrlTemplate
+
+If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ## registryUrls
 
@@ -1852,7 +1922,7 @@ In case there is a need to configure them manually, it can be done using this `r
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "registryUrls": ["https://docker.mycompany.domain"]
     }
   ]
@@ -1940,7 +2010,7 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 {
   "packageRules": [
     {
-      "packageNames": ["aws-sdk"],
+      "matchPackageNames": ["aws-sdk"],
       "extends": ["schedule:monthly"]
     }
   ]
@@ -1964,7 +2034,7 @@ If you wish to change it to something else like "ci" then it will look like `"ci
 
 If you are using a semantic prefix for your commits, then you will want to enable this setting.
 Although it's configurable to a package-level, it makes most sense to configure it at a repository level.
-If configured to `true`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
+If configured to `enabled`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 
@@ -2037,9 +2107,23 @@ The above config will suppress the comment which is added to a PR whenever you c
 It is only recommended to configure this field if you wish to use the `schedules` feature and want to write them in your local timezone.
 Please see the above link for valid timezone names.
 
+## transitiveRemediation
+
+When enabled, Renovate will attempt to remediate vulnerabilities even if they exist only in transitive dependencies.
+
+Applicable only for GitHub platform (with vulnerability alerts enabled), `npm` manager, and when a `package-lock.json` v1 format is present.
+This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
+
 ## unicodeEmoji
 
 If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
+
+## updateInternalDeps
+
+Renovate defaults to skipping any internal package dependencies within monorepos.
+In such case dependency versions won't be updated by Renovate.
+
+To opt in to letting Renovate update internal package versions normally, set this configuration option to true.
 
 ## updateLockFiles
 

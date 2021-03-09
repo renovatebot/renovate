@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { RenovateConfig, ValidationMessage } from './common';
 import * as configMassage from './massage';
 import * as configMigration from './migration';
+import type { RenovateConfig, ValidationMessage } from './types';
 import * as configValidation from './validation';
 
 export async function migrateAndValidate(
@@ -31,14 +31,13 @@ export async function migrateAndValidate(
     } = await configValidation.validateConfig(massagedConfig);
     // istanbul ignore if
     if (is.nonEmptyArray(warnings)) {
-      logger.info({ warnings }, 'Found renovate config warnings');
+      logger.warn({ warnings }, 'Found renovate config warnings');
     }
     if (is.nonEmptyArray(errors)) {
       logger.info({ errors }, 'Found renovate config errors');
     }
     massagedConfig.errors = (config.errors || []).concat(errors);
     if (!config.repoIsOnboarded) {
-      // TODO #556 - enable warnings in real PRs
       massagedConfig.warnings = (config.warnings || []).concat(warnings);
     }
     return massagedConfig;

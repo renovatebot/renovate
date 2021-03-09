@@ -1,6 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import { NewValueConfig, VersioningApi } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'semver';
 export const displayName = 'Semantic';
@@ -28,8 +28,8 @@ export const isVersion = (input: string): string => valid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 
-function getNewValue({ toVersion }: NewValueConfig): string {
-  return toVersion;
+function getNewValue({ newVersion }: NewValueConfig): string {
+  return newVersion;
 }
 
 export const api: VersioningApi = {

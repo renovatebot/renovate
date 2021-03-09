@@ -1,7 +1,7 @@
 import { platform } from '../../../platform';
 import * as template from '../../../util/template';
 import { get } from '../../../versioning';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -54,12 +54,12 @@ function massageUpdateMetadata(config: BranchConfig): void {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
-    const { fromVersion, toVersion, updateType, versioning } = upgrade;
+    const { currentVersion, newVersion, updateType, versioning } = upgrade;
     // istanbul ignore if
     if (updateType === 'minor') {
       try {
         const version = get(versioning);
-        if (version.getMinor(fromVersion) === version.getMinor(toVersion)) {
+        if (version.getMinor(currentVersion) === version.getMinor(newVersion)) {
           upgrade.updateType = 'patch';
         }
       } catch (err) {
@@ -85,6 +85,6 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
   let prBody = template.compile(prBodyTemplate, content, false);
   prBody = prBody.trim();
   prBody = prBody.replace(/\n\n\n+/g, '\n\n');
-  prBody = platform.getPrBody(prBody);
+  prBody = platform.massageMarkdown(prBody);
   return prBody;
 }

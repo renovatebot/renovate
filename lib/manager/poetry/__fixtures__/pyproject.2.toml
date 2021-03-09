@@ -14,3 +14,7 @@ dep4 = { path = "/some/path/" }
 extra_dep1 = "^0.8.3"
 extra_dep2 = "^0.9.4"
 extra_dep3 = '^0.4.0'
+
+[build-system]
+requires = ["poetry>=1.0", "wheel"]
+build-backend = "poetry.core.masonry.api"

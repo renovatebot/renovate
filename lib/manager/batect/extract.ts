@@ -6,9 +6,9 @@ import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
-import {
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
   BatectConfig,
   BatectFileInclude,
   BatectGitInclude,
@@ -121,7 +121,7 @@ interface ExtractionResult {
   referencedConfigFiles: string[];
 }
 
-function extractPackageFile(
+export function extractPackageFile(
   content: string,
   fileName: string
 ): ExtractionResult | null {

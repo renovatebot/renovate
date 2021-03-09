@@ -2,10 +2,10 @@ import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { clone } from '../util/clone';
-import { PackageRule, RenovateConfig } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
+import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
 
 const options = getOptions();
 
@@ -164,6 +164,8 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.rangeStrategy = 'replace';
         }
+      } else if (is.string(val) && val.includes('{{baseDir}}')) {
+        migratedConfig[key] = val.replace(/{{baseDir}}/g, '{{packageFileDir}}');
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
       } else if (key === 'rebaseStalePrs') {
@@ -191,6 +193,15 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.trustLevel = 'low';
         }
+      } else if (
+        key === 'branchName' &&
+        is.string(val) &&
+        val?.includes('{{managerBranchPrefix}}')
+      ) {
+        migratedConfig.branchName = val.replace(
+          '{{managerBranchPrefix}}',
+          '{{additionalBranchPrefix}}'
+        );
       } else if (key === 'managerBranchPrefix') {
         delete migratedConfig.managerBranchPrefix;
         migratedConfig.additionalBranchPrefix = val;
@@ -454,11 +465,11 @@ export function migrateConfig(
         delete migratedConfig.node.enabled;
         migratedConfig.travis = migratedConfig.travis || {};
         migratedConfig.travis.enabled = true;
-        if (!Object.keys(migratedConfig.node).length) {
-          delete migratedConfig.node;
-        } else {
+        if (Object.keys(migratedConfig.node).length) {
           const subMigrate = migrateConfig(migratedConfig.node, key);
           migratedConfig.node = subMigrate.migratedConfig;
+        } else {
+          delete migratedConfig.node;
         }
       } else if (is.array(val)) {
         const newArray = [];
@@ -482,16 +493,6 @@ export function migrateConfig(
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (
-        key.startsWith('commitMessage') &&
-        is.string(val) &&
-        (val.includes('currentVersion') || val.includes('newVersion'))
-      ) {
-        migratedConfig[key] = val
-          .replace(/currentVersion/g, 'currentValue')
-          .replace(/newVersion/g, 'newValue')
-          .replace(/newValueMajor/g, 'newMajor')
-          .replace(/newValueMinor/g, 'newMinor');
       } else if (key === 'raiseDeprecationWarnings') {
         delete migratedConfig.raiseDeprecationWarnings;
         if (val === false) {
@@ -499,11 +500,52 @@ export function migrateConfig(
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
         }
+      } else if (key === 'binarySource' && val === 'auto') {
+        migratedConfig.binarySource = 'global';
+      }
+      const migratedTemplates = {
+        fromVersion: 'currentVersion',
+        newValueMajor: 'newMajor',
+        newValueMinor: 'newMinor',
+        newVersionMajor: 'newMajor',
+        newVersionMinor: 'newMinor',
+        toVersion: 'newVersion',
+      };
+      if (is.string(migratedConfig[key])) {
+        for (const [from, to] of Object.entries(migratedTemplates)) {
+          migratedConfig[key] = (migratedConfig[key] as string).replace(
+            new RegExp(from, 'g'),
+            to
+          );
+        }
       }
     }
     if (migratedConfig.endpoints) {
       migratedConfig.hostRules = migratedConfig.endpoints;
       delete migratedConfig.endpoints;
+    }
+    if (is.array(migratedConfig.packageRules)) {
+      const renameMap = {
+        paths: 'matchPaths',
+        languages: 'matchLanguages',
+        baseBranchList: 'matchBaseBranches',
+        managers: 'matchManagers',
+        datasources: 'matchDatasources',
+        depTypeList: 'matchDepTypes',
+        packageNames: 'matchPackageNames',
+        packagePatterns: 'matchPackagePatterns',
+        sourceUrlPrefixes: 'matchSourceUrlPrefixes',
+        updateTypes: 'matchUpdateTypes',
+      };
+      for (const packageRule of migratedConfig.packageRules) {
+        for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
+          const newKey = renameMap[oldKey];
+          if (newKey) {
+            packageRule[newKey] = ruleVal;
+            delete packageRule[oldKey];
+          }
+        }
+      }
     }
     const isMigrated = !equal(config, migratedConfig);
     if (isMigrated) {

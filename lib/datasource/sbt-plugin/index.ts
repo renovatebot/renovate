@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
+import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
-import { GetReleasesConfig, ReleaseResult } from '../common';
 import { downloadHttpProtocol } from '../maven/util';
 import {
   getArtifactSubdirs,
@@ -8,11 +8,12 @@ import {
   getPackageReleases,
   getUrls,
 } from '../sbt-package';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { SBT_PLUGINS_REPO, parseIndexDir } from './util';
 
 export const id = 'sbt-plugin';
-
 export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
+export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
@@ -35,9 +36,9 @@ async function resolvePluginReleases(
     const scalaVersions = scalaVersionItems.map((x) =>
       x.replace(/^scala_/, '')
     );
-    const searchVersions = !scalaVersions.includes(scalaVersion)
-      ? scalaVersions
-      : [scalaVersion];
+    const searchVersions = scalaVersions.includes(scalaVersion)
+      ? [scalaVersion]
+      : scalaVersions;
     for (const searchVersion of searchVersions) {
       const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
       const subRootContent = await downloadHttpProtocol(
@@ -106,9 +107,6 @@ export async function getReleases({
     if (versions) {
       return {
         ...urls,
-        display: lookupName,
-        group: groupId,
-        name: artifactId,
         dependencyUrl,
         releases: versions.map((v) => ({ version: v })),
       };

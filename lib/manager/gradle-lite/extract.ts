@@ -1,9 +1,9 @@
 import * as upath from 'upath';
-import * as datasourceMaven from '../../datasource/maven';
+import { id as datasource, defaultRegistryUrls } from '../../datasource/maven';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import { ManagerData, VariableRegistry } from './common';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { ManagerData, PackageVariables, VariableRegistry } from './common';
 import { parseGradle, parseProps } from './parser';
 import {
   getVars,
@@ -39,25 +39,37 @@ export async function extractAllPackageFiles(
   for (const packageFile of reorderFiles(packageFiles)) {
     packageFilesByName[packageFile] = {
       packageFile,
-      datasource: datasourceMaven.id,
+      datasource,
       deps: [],
     };
 
     try {
       const content = await readLocalFile(packageFile, 'utf8');
       const dir = upath.dirname(toAbsolutePath(packageFile));
+
+      const updateVars = (newVars: PackageVariables): void => {
+        const oldVars = registry[dir] || {};
+        registry[dir] = { ...oldVars, ...newVars };
+      };
+
       if (isPropsFile(packageFile)) {
         const { vars, deps } = parseProps(content, packageFile);
-        registry[dir] = vars;
+        updateVars(vars);
         extractedDeps.push(...deps);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
-        const { deps, urls } = parseGradle(content, vars, packageFile);
+        const { deps, urls, vars: gradleVars } = parseGradle(
+          content,
+          vars,
+          packageFile
+        );
         urls.forEach((url) => {
           if (!registryUrls.includes(url)) {
             registryUrls.push(url);
           }
         });
+        registry[dir] = { ...registry[dir], ...gradleVars };
+        updateVars(gradleVars);
         extractedDeps.push(...deps);
       }
     } catch (e) {
@@ -78,7 +90,13 @@ export async function extractAllPackageFiles(
     const { deps } = pkgFile;
     deps.push({
       ...dep,
-      registryUrls: [...(dep.registryUrls || []), ...registryUrls],
+      registryUrls: [
+        ...new Set([
+          ...defaultRegistryUrls,
+          ...(dep.registryUrls || []),
+          ...registryUrls,
+        ]),
+      ],
     });
     packageFilesByName[key] = pkgFile;
   });

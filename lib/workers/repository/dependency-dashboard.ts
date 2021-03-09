@@ -1,10 +1,11 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
 import { RenovateConfig } from '../../config';
+import { getAdminConfig } from '../../config/admin';
 import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
-import { BranchConfig, ProcessBranchResult } from '../common';
+import { BranchConfig, ProcessBranchResult } from '../types';
 
 function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   let item = ' - [ ] ';
@@ -57,6 +58,8 @@ export async function ensureMasterIssue(
   if (
     !(
       config.dependencyDashboard ||
+      config.dependencyDashboardApproval ||
+      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
       branches.some(
         (branch) =>
           branch.dependencyDashboardApproval ||
@@ -76,7 +79,7 @@ export async function ensureMasterIssue(
     is.nonEmptyArray(branches) &&
     branches.some((branch) => branch.res !== ProcessBranchResult.Automerged);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
-    if (config.dryRun) {
+    if (getAdminConfig().dryRun) {
       logger.info(
         'DRY-RUN: Would close Dependency Dashboard ' +
           config.dependencyDashboardTitle
@@ -239,7 +242,7 @@ export async function ensureMasterIssue(
     issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 
-  if (config.dryRun) {
+  if (getAdminConfig().dryRun) {
     logger.info(
       'DRY-RUN: Would ensure Dependency Dashboard ' +
         config.dependencyDashboardTitle

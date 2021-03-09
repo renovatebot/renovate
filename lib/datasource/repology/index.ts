@@ -3,12 +3,13 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { getQueryString } from '../../util/url';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'repology';
 
 const http = new Http(id);
-const cacheNamespace = `datasource-${id}`;
+const cacheNamespace = `datasource-${id}-list`;
 const cacheMinutes = 60;
 
 export type RepologyPackageType = 'binname' | 'srcname';
@@ -46,13 +47,13 @@ async function queryPackagesViaResolver(
   packageName: string,
   packageType: RepologyPackageType
 ): Promise<RepologyPackage[]> {
-  const query = new URLSearchParams({
+  const query = getQueryString({
     repo: repoName,
     name_type: packageType,
     target_page: 'api_v1_project',
     noautoresolve: 'on',
     name: packageName,
-  }).toString();
+  });
 
   // Retrieve list of packages by looking up Repology project
   const packages = await queryPackages(
@@ -79,42 +80,41 @@ function findPackageInResponse(
   repoName: string,
   pkgName: string,
   types: RepologyPackageType[]
-): RepologyPackage | undefined {
-  let pkgs = response.filter((pkg) => pkg.repo === repoName);
+): RepologyPackage[] | undefined {
+  const repoPackages = response.filter((pkg) => pkg.repo === repoName);
 
-  // In some cases Repology bundles multiple packages into a single project,
-  // which would result in ambiguous results. If we have more than one result
-  // left, we should try to determine the correct package by comparing either
-  // binname or srcname (depending on `types`) to the given dependency name.
-  if (pkgs.length > 1) {
-    for (const pkgType of types) {
-      pkgs = pkgs.filter((pkg) => !pkg[pkgType] || pkg[pkgType] === pkgName);
-      if (pkgs.length === 1) {
-        break;
-      }
-    }
-  }
-
-  // Abort if there is still more than one package left, as the result would
-  // be ambiguous and unreliable. This should usually not happen...
-  if (pkgs.length > 1) {
-    logger.warn(
-      { repoName, pkgName, packageTypes, pkgs },
-      'Repology lookup returned ambiguous results, ignoring...'
-    );
+  if (repoPackages.length === 0) {
+    // no packages associated with repoName
     return null;
   }
 
-  // pkgs might be an empty array here and in that case we return undefined
-  return pkgs[0];
+  if (repoPackages.length === 1) {
+    // repo contains exactly one package, so we can return them safely
+    return repoPackages;
+  }
+
+  // In some cases Repology bundles multiple packages into a single project, which might result in ambiguous results.
+  // We need to do additional filtering by matching allowed package types passed as params with package description.
+  // Remaining packages are the one we are looking for
+  let packagesWithType;
+  for (const pkgType of types) {
+    packagesWithType = repoPackages.filter(
+      (pkg) => !pkg[pkgType] || pkg[pkgType] === pkgName
+    );
+    if (packagesWithType.length === 1) {
+      break;
+    }
+  }
+
+  return packagesWithType.length > 0 ? packagesWithType : null;
 }
 
 async function queryPackage(
   repoName: string,
   pkgName: string
-): Promise<RepologyPackage> {
+): Promise<RepologyPackage[]> {
   let response: RepologyPackage[];
-  let pkg: RepologyPackage;
+  let pkg: RepologyPackage[];
   // Try getting the packages from tools/project-by first for type binname and
   // afterwards for srcname. This needs to be done first, because some packages
   // resolve to repology projects which have a different name than the package
@@ -125,10 +125,12 @@ async function queryPackage(
     for (const pkgType of packageTypes) {
       response = await queryPackagesViaResolver(repoName, pkgName, pkgType);
 
-      pkg = findPackageInResponse(response, repoName, pkgName, [pkgType]);
-      if (pkg) {
-        // exit immediately if package found
-        return pkg;
+      if (response) {
+        pkg = findPackageInResponse(response, repoName, pkgName, [pkgType]);
+        if (pkg) {
+          // exit immediately if package found
+          return pkg;
+        }
       }
     }
   } catch (err) {
@@ -163,10 +165,10 @@ async function queryPackage(
 async function getCachedPackage(
   repoName: string,
   pkgName: string
-): Promise<RepologyPackage> {
+): Promise<RepologyPackage[]> {
   // Fetch previous result from cache if available
   const cacheKey = `${repoName}/${pkgName}`;
-  const cachedResult = await packageCache.get<RepologyPackage>(
+  const cachedResult = await packageCache.get<RepologyPackage[]>(
     cacheNamespace,
     cacheKey
   );
@@ -175,9 +177,9 @@ async function getCachedPackage(
     return cachedResult;
   }
 
-  // Attempt a package lookup and return if successfully
+  // Attempt a package lookup and return if found non empty list
   const pkg = await queryPackage(repoName, pkgName);
-  if (pkg) {
+  if (pkg && pkg.length > 0) {
     await packageCache.set(cacheNamespace, cacheKey, pkg, cacheMinutes);
     return pkg;
   }
@@ -209,8 +211,10 @@ export async function getReleases({
 
     // Always prefer origversion if available, otherwise default to version
     // This is required as source packages usually have no origversion
-    const version = pkg.origversion ?? pkg.version;
-    return { releases: [{ version }] };
+    const releases = pkg.map((item) => ({
+      version: item.origversion ?? item.version,
+    }));
+    return { releases };
   } catch (err) {
     if (err.message === HOST_DISABLED) {
       // istanbul ignore next

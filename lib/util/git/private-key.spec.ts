@@ -1,6 +1,10 @@
 import { getName, mocked } from '../../../test/util';
 import * as exec_ from '../exec';
-import { setPrivateKey, writePrivateKey } from './private-key';
+import {
+  configSigningKey,
+  setPrivateKey,
+  writePrivateKey,
+} from './private-key';
 
 jest.mock('fs-extra');
 jest.mock('../exec');
@@ -10,7 +14,8 @@ const exec = mocked(exec_);
 describe(getName(__filename), () => {
   describe('writePrivateKey()', () => {
     it('returns if no private key', async () => {
-      await expect(writePrivateKey('/tmp/some-repo')).resolves.not.toThrow();
+      await expect(writePrivateKey()).resolves.not.toThrow();
+      await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });
     it('throws error if failing', async () => {
       setPrivateKey('some-key');
@@ -18,7 +23,7 @@ describe(getName(__filename), () => {
         stderr: `something wrong`,
         stdout: '',
       });
-      await expect(writePrivateKey('/tmp/some-repo')).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow();
     });
     it('imports the private key', async () => {
       setPrivateKey('some-key');
@@ -26,10 +31,12 @@ describe(getName(__filename), () => {
         stderr: `gpg: key BADC0FFEE: secret key imported\nfoo\n`,
         stdout: '',
       });
-      await expect(writePrivateKey('/tmp/some-repo')).resolves.not.toThrow();
+      await expect(writePrivateKey()).resolves.not.toThrow();
+      await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });
     it('does not import the key again', async () => {
-      await expect(writePrivateKey('/tmp/some-repo')).resolves.not.toThrow();
+      await expect(writePrivateKey()).resolves.not.toThrow();
+      await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });
   });
 });

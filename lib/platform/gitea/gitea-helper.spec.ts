@@ -143,6 +143,9 @@ describe('platform/gitea/gitea-helper', () => {
     httpMock.setup();
     setBaseUrl(baseUrl);
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
 
   describe('getCurrentUser', () => {
     it('should call /api/v1/user endpoint', async () => {
@@ -151,6 +154,17 @@ describe('platform/gitea/gitea-helper', () => {
       const res = await ght.getCurrentUser();
       expect(res).toEqual(mockUser);
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('getVersion', () => {
+    it('should call /api/v1/version endpoint', async () => {
+      const version = '1.13.01.14.0+dev-754-g5d2b7ba63';
+      httpMock.scope(baseUrl).get('/version').reply(200, { version });
+
+      const res = await ght.getVersion();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).toEqual(version);
     });
   });
 

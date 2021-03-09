@@ -12,7 +12,7 @@ export interface Config extends Record<string, any> {
   depTypes?: string[];
   depName?: string;
   currentValue?: string;
-  fromVersion?: string;
+  currentVersion?: string;
   lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
@@ -28,11 +28,12 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const {
     versioning,
     packageFile,
+    lockFiles,
     depType,
     depTypes,
     depName,
     currentValue,
-    fromVersion,
+    currentVersion,
     lockedVersion,
     updateType,
     isBump,
@@ -42,45 +43,40 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     manager,
     datasource,
   } = inputConfig;
-  let {
-    paths,
-    languages,
-    baseBranchList,
-    managers,
-    datasources,
-    depTypeList,
-    packageNames,
-    packagePatterns,
-    excludePackageNames,
-    excludePackagePatterns,
-    matchCurrentVersion,
-    sourceUrlPrefixes,
-    updateTypes,
-  } = packageRule;
   // Setting empty arrays simplifies our logic later
-  paths = paths || [];
-  languages = languages || [];
-  baseBranchList = baseBranchList || [];
-  managers = managers || [];
-  datasources = datasources || [];
-  depTypeList = depTypeList || [];
-  packageNames = packageNames || [];
-  packagePatterns = packagePatterns || [];
-  excludePackageNames = excludePackageNames || [];
-  excludePackagePatterns = excludePackagePatterns || [];
-  sourceUrlPrefixes = sourceUrlPrefixes || [];
-  matchCurrentVersion = matchCurrentVersion || null;
-  updateTypes = updateTypes || [];
+  const matchFiles = packageRule.matchFiles || [];
+  const matchPaths = packageRule.matchPaths || [];
+  const matchLanguages = packageRule.matchLanguages || [];
+  const matchBaseBranches = packageRule.matchBaseBranches || [];
+  const matchManagers = packageRule.matchManagers || [];
+  const matchDatasources = packageRule.matchDatasources || [];
+  const matchDepTypes = packageRule.matchDepTypes || [];
+  const matchPackageNames = packageRule.matchPackageNames || [];
+  let matchPackagePatterns = packageRule.matchPackagePatterns || [];
+  const excludePackageNames = packageRule.excludePackageNames || [];
+  const excludePackagePatterns = packageRule.excludePackagePatterns || [];
+  const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes || [];
+  const matchCurrentVersion = packageRule.matchCurrentVersion || null;
+  const matchUpdateTypes = packageRule.matchUpdateTypes || [];
   let positiveMatch = false;
   // Massage a positive patterns patch if an exclude one is present
   if (
     (excludePackageNames.length || excludePackagePatterns.length) &&
-    !(packageNames.length || packagePatterns.length)
+    !(matchPackageNames.length || matchPackagePatterns.length)
   ) {
-    packagePatterns = ['.*'];
+    matchPackagePatterns = ['.*'];
   }
-  if (paths.length) {
-    const isMatch = paths.some(
+  if (matchFiles.length) {
+    const isMatch = matchFiles.some(
+      (fileName) => packageFile === fileName || lockFiles?.includes(fileName)
+    );
+    if (!isMatch) {
+      return false;
+    }
+    positiveMatch = true;
+  }
+  if (matchPaths.length) {
+    const isMatch = matchPaths.some(
       (rulePath) =>
         packageFile.includes(rulePath) ||
         minimatch(packageFile, rulePath, { dot: true })
@@ -90,57 +86,57 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (depTypeList.length) {
+  if (matchDepTypes.length) {
     const isMatch =
-      depTypeList.includes(depType) ||
-      depTypes?.some((dt) => depTypeList.includes(dt));
+      matchDepTypes.includes(depType) ||
+      depTypes?.some((dt) => matchDepTypes.includes(dt));
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (languages.length) {
-    const isMatch = languages.includes(language);
+  if (matchLanguages.length) {
+    const isMatch = matchLanguages.includes(language);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (baseBranchList.length) {
-    const isMatch = baseBranchList.includes(baseBranch);
+  if (matchBaseBranches.length) {
+    const isMatch = matchBaseBranches.includes(baseBranch);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (managers.length) {
-    const isMatch = managers.includes(manager);
+  if (matchManagers.length) {
+    const isMatch = matchManagers.includes(manager);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (datasources.length) {
-    const isMatch = datasources.includes(datasource);
+  if (matchDatasources.length) {
+    const isMatch = matchDatasources.includes(datasource);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (updateTypes.length) {
+  if (matchUpdateTypes.length) {
     const isMatch =
-      updateTypes.includes(updateType) ||
-      (isBump && updateTypes.includes('bump'));
+      matchUpdateTypes.includes(updateType) ||
+      (isBump && matchUpdateTypes.includes('bump'));
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (depName && (packageNames.length || packagePatterns.length)) {
-    let isMatch = packageNames.includes(depName);
+  if (depName && (matchPackageNames.length || matchPackagePatterns.length)) {
+    let isMatch = matchPackageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
-      for (const packagePattern of packagePatterns) {
+      for (const packagePattern of matchPackagePatterns) {
         const packageRegex = regEx(
           packagePattern === '^*$' || packagePattern === '*'
             ? '.*'
@@ -180,8 +176,8 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (sourceUrlPrefixes.length) {
-    const isMatch = sourceUrlPrefixes.some((prefix) =>
+  if (matchSourceUrlPrefixes.length) {
+    const isMatch = matchSourceUrlPrefixes.some((prefix) =>
       sourceUrl?.startsWith(prefix)
     );
     if (!isMatch) {
@@ -213,7 +209,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
       const compareVersion =
         currentValue && version.isVersion(currentValue)
           ? currentValue // it's a version so we can match against it
-          : lockedVersion || fromVersion; // need to match against this fromVersion, if available
+          : lockedVersion || currentVersion; // need to match against this currentVersion, if available
       if (compareVersion) {
         // istanbul ignore next
         if (version.isVersion(compareVersion)) {
@@ -250,11 +246,11 @@ export function applyPackageRules<T extends Config>(inputConfig: T): T {
     if (matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
       config = mergeChildConfig(config, packageRule);
-      delete config.packageNames;
-      delete config.packagePatterns;
+      delete config.matchPackageNames;
+      delete config.matchPackagePatterns;
       delete config.excludePackageNames;
       delete config.excludePackagePatterns;
-      delete config.depTypeList;
+      delete config.matchDepTypes;
       delete config.matchCurrentVersion;
     }
   });
