@@ -9,7 +9,7 @@ description: How to support private npm  modules when using Renovate
 
 Private npm modules are used at two times during Renovate's process.
 
-#### 1. Module lookup
+### 1. Module lookup
 
 If a private npm module is listed as a dependency in a `package.json`, then Renovate will attempt to keep it up-to-date by querying the npm registry like it would for any other package.
 Hence, by default with no configuration a private package lookup will fail, because of lack of credentials.
@@ -18,7 +18,7 @@ These failures don't affect Renovate's ability to look up _other_ modules in the
 
 Assuming the private module lookup succeeds (solutions for that are described later in this document) then private package versions will be kept up-to-date like public package versions are.
 
-#### 2. Lock file generation
+### 2. Lock file generation
 
 If you are using a lock file (e.g. Yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to update that lock file whenever _any_ package listed in your package file is updated to a new version.
 
@@ -73,8 +73,7 @@ The good news is that this works for Renovate too.
 If Renovate detects a `.npmrc` or `.yarnrc` file then it will use it for its install.
 
 Does not work if using binarySource=docker.
-
-**This method will be deprecated soon**
+_This method will be deprecated soon_
 
 ### Add npmrc string to Renovate config
 

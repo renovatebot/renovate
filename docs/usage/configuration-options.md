@@ -1682,8 +1682,6 @@ Renovate's `"auto"` strategy works like this for npm:
 4. If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
 5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
-**bump**
-
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 As such, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
 
@@ -2093,6 +2091,8 @@ If enough days have passed then a passing status check will be added.
 
 There are a couple of uses for this:
 
+<!-- markdownlint-disable MD001 -->
+
 #### Suppress branch/PR creation for X days
 
 If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
@@ -2102,6 +2102,8 @@ It's recommended that you enable `dependencyDashboard=true` so you don't lose vi
 
 If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed.
 This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
+
+<!-- markdownlint-enable MD001 -->
 
 ## supportPolicy
 
