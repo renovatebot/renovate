@@ -57,7 +57,7 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 export async function downloadHttpProtocol(
   pkgUrl: url.URL | string,
   hostType = id
-): Promise<HttpResponse | null> {
+): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
     const httpClient = httpByHostType(hostType);
@@ -92,7 +92,7 @@ export async function downloadHttpProtocol(
     } else {
       logger.info({ failedUrl, err }, 'Unknown error');
     }
-    return null;
+    return {};
   }
 }
 

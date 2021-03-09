@@ -19,8 +19,10 @@ export async function getArtifactSubdirs(
   artifact: string,
   scalaVersion: string
 ): Promise<string[]> {
-  const { body: indexContent } =
-    (await downloadHttpProtocol(ensureTrailingSlash(searchRoot), 'sbt')) || {};
+  const { body: indexContent } = await downloadHttpProtocol(
+    ensureTrailingSlash(searchRoot),
+    'sbt'
+  );
   if (indexContent) {
     const parseSubdirs = (content: string): string[] =>
       parseIndexDir(content, (x) => {
@@ -57,11 +59,10 @@ export async function getPackageReleases(
     const parseReleases = (content: string): string[] =>
       parseIndexDir(content, (x) => !/^\.+$/.test(x));
     for (const searchSubdir of artifactSubdirs) {
-      const { body: content } =
-        (await downloadHttpProtocol(
-          ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
-          'sbt'
-        )) || {};
+      const { body: content } = await downloadHttpProtocol(
+        ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
+        'sbt'
+      );
       if (content) {
         const subdirReleases = parseReleases(content);
         subdirReleases.forEach((x) => releases.push(x));
@@ -108,8 +109,7 @@ export async function getUrls(
 
     for (const pomFileName of pomFileNames) {
       const pomUrl = `${searchRoot}/${artifactDir}/${version}/${pomFileName}`;
-      const { body: content } =
-        (await downloadHttpProtocol(pomUrl, 'sbt')) || {};
+      const { body: content } = await downloadHttpProtocol(pomUrl, 'sbt');
 
       if (content) {
         const pomXml = new XmlDocument(content);

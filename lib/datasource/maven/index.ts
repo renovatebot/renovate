@@ -57,8 +57,9 @@ async function downloadMavenXml(
       break;
     case 'http:':
     case 'https:':
-      ({ authorization, body: rawContent } =
-        (await downloadHttpProtocol(pkgUrl)) || {});
+      ({ authorization, body: rawContent } = await downloadHttpProtocol(
+        pkgUrl
+      ));
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
