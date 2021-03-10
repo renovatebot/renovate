@@ -66,6 +66,9 @@ spec:
               args:
                 - user/repo
               # Environment Variables
+              env:
+                - name: LOG_LEVEL
+                  value: debug
               envFrom:
                 - secretRef:
                     name: renovate-env
@@ -131,6 +134,8 @@ spec:
                   value: '/tmp/renovate/'
                 - name: RENOVATE_CONFIG_FILE
                   value: '/opt/renovate/config.json'
+                - name: LOG_LEVEL
+                  value: debug
               volumeMounts:
                 - name: config-volume
                   mountPath: /opt/renovate/
