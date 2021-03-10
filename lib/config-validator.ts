@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // istanbul ignore file
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { readFileSync } from 'fs-extra';
 import JSON5 from 'json5';
 import { configFileNames } from './config/app-strings';
@@ -89,7 +89,7 @@ type PackageJson = {
   }
   try {
     const fileConfig = getFileConfig(process.env);
-    if (!equal(fileConfig, {})) {
+    if (!dequal(fileConfig, {})) {
       const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
       logger.info(`Validating ${file}`);
       try {
