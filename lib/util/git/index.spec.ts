@@ -64,7 +64,7 @@ describe('platform/git', () => {
   beforeEach(async () => {
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(origin.path);
-    await repo.klona(base.path, '.', ['--bare']);
+    await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
     await git.initRepo({

@@ -51,7 +51,7 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
     statusCode: response.statusCode,
-    body: clone<T>(response.body),
+    body: klona<T>(response.body),
     headers: klona(response.headers),
     authorization: !!response.authorization,
   };
