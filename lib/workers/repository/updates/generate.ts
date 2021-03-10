@@ -4,6 +4,7 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { clone } from '../../../util/clone';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
@@ -326,10 +327,12 @@ export function generateBranchConfig(
   config.blockedByPin = config.upgrades.every(
     (upgrade) => upgrade.blockedByPin
   );
-  config.constraints = Object.assign(
-    {},
-    ...config.upgrades.map((upgrade) => upgrade.constraints)
-  );
+  config.constraints = {};
+  for (const upgrade of config.upgrades || []) {
+    if (upgrade.constraints) {
+      config.constraints = { ...config.constraints, ...upgrade.constraints };
+    }
+  }
   const tableRows = config.upgrades
     .map((upgrade) => getTableValues(upgrade))
     .filter(Boolean);

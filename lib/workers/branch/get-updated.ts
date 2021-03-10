@@ -23,7 +23,7 @@ export async function getUpdatedPackageFiles(
   logger.debug(
     `manager.getUpdatedPackageFiles() reuseExistinbranch=${reuseExistingBranch}`
   );
-  const updatedFileContents: Record<string, string> = {};
+  let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
   const packageFileManagers: Record<string, string> = {};
   const packageFileUpdatedDeps: Record<string, string[]> = {};
@@ -91,7 +91,7 @@ export async function getUpdatedPackageFiles(
             reuseExistingBranch: false,
           });
         }
-        Object.assign(updatedFileContents, files);
+        updatedFileContents = { ...updatedFileContents, ...files };
       }
     } else {
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
