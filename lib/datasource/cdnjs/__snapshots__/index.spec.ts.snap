@@ -5,6 +5,7 @@ Object {
   "homepage": "http://bulma.io",
   "releases": Array [
     Object {
+      "newDigest": undefined,
       "version": "0.7.5",
     },
   ],

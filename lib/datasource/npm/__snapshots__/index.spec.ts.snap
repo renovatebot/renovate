@@ -21,10 +21,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -59,10 +65,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -97,10 +109,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -135,10 +153,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "version": "0.0.2",
     },
   ],
@@ -172,10 +196,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -210,6 +240,9 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
@@ -243,6 +276,9 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
@@ -292,10 +328,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -336,10 +378,16 @@ Marking the latest version of an npm package as deprecated results in the entire
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "isDeprecated": true,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
@@ -430,10 +478,16 @@ Object {
   "name": "@foobar/core",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -582,10 +636,16 @@ Object {
   "name": "@foobar/core",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -621,10 +681,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -659,10 +725,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
@@ -698,10 +770,16 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
