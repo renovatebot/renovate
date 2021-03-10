@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
+import { klona } from 'klona';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import * as memCache from '../util/cache/memory';
 import * as packageCache from '../util/cache/package';
-import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
 import * as allVersioning from '../versioning';
 import datasources from './api';
@@ -269,7 +269,7 @@ export async function getPkgReleases(
   }
   let res: ReleaseResult;
   try {
-    res = clone(
+    res = klona(
       await getRawReleases({
         ...config,
         lookupName,

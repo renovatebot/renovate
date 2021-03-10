@@ -1,6 +1,6 @@
+import { klona } from 'klona';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { clone } from '../../util/clone';
 import { Http } from '../../util/http';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { id } from './common';
@@ -182,9 +182,9 @@ export async function getJenkinsPluginDependency(
     return null;
   }
 
-  const result = clone(plugin);
+  const result = klona(plugin);
   const releases = pluginVersionsCache.cache[lookupName];
-  result.releases = releases ? clone(releases) : [];
+  result.releases = releases ? klona(releases) : [];
   return result;
 }
 

@@ -187,7 +187,7 @@ async function fetchRegistryInfo(
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
 
       const git = Git();
-      const clonePromise = git.clone(registryUrl, clonePath, {
+      const clonePromise = git.klona(registryUrl, clonePath, {
         '--depth': 1,
       });
 

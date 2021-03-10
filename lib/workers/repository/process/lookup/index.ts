@@ -1,3 +1,4 @@
+import { klona } from 'klona';
 import type { ValidationMessage } from '../../../../config/types';
 import {
   Release,
@@ -12,7 +13,6 @@ import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
 import type { LookupUpdate } from '../../../../manager/types';
 import { SkipReason } from '../../../../types';
-import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
@@ -52,7 +52,7 @@ export async function lookupUpdates(
   }
   const isValid = currentValue && versioning.isValid(currentValue);
   if (isValid) {
-    const dependency = clone(await getPkgReleases(config));
+    const dependency = klona(await getPkgReleases(config));
     if (!dependency) {
       // If dependency lookup fails then warn and return
       const warning: ValidationMessage = {
@@ -317,7 +317,7 @@ export async function lookupUpdates(
         });
       }
     } else if (datasource === datasourceGitSubmodules.id) {
-      const dependency = clone(await getPkgReleases(config));
+      const dependency = klona(await getPkgReleases(config));
       if (dependency?.releases[0]?.version) {
         res.updates.push({
           updateType: 'digest',

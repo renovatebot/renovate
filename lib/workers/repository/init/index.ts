@@ -1,6 +1,6 @@
+import { klona } from 'klona';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { clone } from '../../../util/clone';
 import { setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { initApis } from './apis';
@@ -9,7 +9,7 @@ import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
-  return { ...clone(config), errors: [], warnings: [], branchList: [] };
+  return { ...klona(config), errors: [], warnings: [], branchList: [] };
 }
 
 export async function initRepo(

@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import * as handlebars from 'handlebars';
+import { klona } from 'klona';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
-import { clone } from '../clone';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
@@ -116,7 +116,7 @@ const allowedFieldsList = Object.keys(allowedFields)
 type CompileInput = Record<string, unknown>;
 
 function getFilteredObject(input: CompileInput): any {
-  const obj = clone(input);
+  const obj = klona(input);
   const res = {};
   const allAllowed = [
     ...Object.keys(allowedFields),

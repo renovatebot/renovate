@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
+import { klona } from 'klona';
 import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
 import { getName } from '../../../../../test/util';
-import { clone } from '../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 import { updateLockedDependency } from '.';
 
@@ -109,7 +109,7 @@ describe(getName(__filename), () => {
       ).toEqual('1.2.12');
     });
     it('fails to remediate if parent dep cannot support', async () => {
-      const acceptsModified = clone(acceptsJson);
+      const acceptsModified = klona(acceptsJson);
       acceptsModified.versions['2.0.0'] = {};
       httpMock
         .scope('https://registry.npmjs.org')

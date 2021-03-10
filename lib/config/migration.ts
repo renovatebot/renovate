@@ -1,9 +1,9 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
+import { klona } from 'klona';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
-import { clone } from '../util/clone';
 import { getOptions } from './definitions';
 import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
 
@@ -54,7 +54,7 @@ export function migrateConfig(
         optionTypes[option.name] = option.type;
       });
     }
-    const migratedConfig = clone(config) as MigratedRenovateConfig;
+    const migratedConfig = klona(config) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',
       'devDependencies',

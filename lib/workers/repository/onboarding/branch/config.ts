@@ -1,13 +1,13 @@
+import { klona } from 'klona';
 import { RenovateConfig } from '../../../../config';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { logger } from '../../../../logger';
-import { clone } from '../../../../util/clone';
 
 export async function getOnboardingConfig(
   config: RenovateConfig
 ): Promise<string> {
-  let onboardingConfig = clone(config.onboardingConfig);
+  let onboardingConfig = klona(config.onboardingConfig);
 
   let orgPreset: string;
 

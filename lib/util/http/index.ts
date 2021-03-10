@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 import got, { Options, Response } from 'got';
+import { klona } from 'klona';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
-import { clone } from '../clone';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
@@ -52,7 +52,7 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
   return {
     statusCode: response.statusCode,
     body: clone<T>(response.body),
-    headers: clone(response.headers),
+    headers: klona(response.headers),
     authorization: !!response.authorization,
   };
 }

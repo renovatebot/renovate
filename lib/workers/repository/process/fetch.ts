@@ -1,3 +1,4 @@
+import { klona } from 'klona';
 import pAll from 'p-all';
 import {
   ManagerConfig,
@@ -10,7 +11,6 @@ import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
 import type { PackageDependency, PackageFile } from '../../../manager/types';
 import { SkipReason } from '../../../types';
-import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
@@ -19,7 +19,7 @@ async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
-  const dep = clone(indep);
+  const dep = klona(indep);
   dep.updates = [];
   if (dep.skipReason) {
     return dep;

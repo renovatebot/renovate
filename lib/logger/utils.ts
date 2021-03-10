@@ -2,7 +2,7 @@ import { Stream } from 'stream';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError } from 'got';
-import { clone } from '../util/clone';
+import { klona } from 'klona';
 import { redactedFields, sanitize } from '../util/sanitize';
 
 export interface BunyanRecord extends Record<string, any> {
@@ -69,7 +69,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
   // handle got error
   if (err instanceof RequestError) {
     const options: Record<string, unknown> = {
-      headers: clone(err.options.headers),
+      headers: klona(err.options.headers),
       url: err.options.url?.toString(),
     };
     response.options = options;
@@ -83,8 +83,8 @@ export default function prepareError(err: Error): Record<string, unknown> {
       response.response = {
         statusCode: err.response?.statusCode,
         statusMessage: err.response?.statusMessage,
-        body: clone(err.response.body),
-        headers: clone(err.response.headers),
+        body: klona(err.response.body),
+        headers: klona(err.response.headers),
         httpVersion: err.response.httpVersion,
       };
     }

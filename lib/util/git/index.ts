@@ -275,7 +275,7 @@ export async function syncGit(): Promise<void> {
           opts.push(e[0], `${e[1]}`)
         );
       }
-      await git.clone(config.url, '.', opts);
+      await git.klona(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {

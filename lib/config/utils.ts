@@ -1,5 +1,5 @@
+import { klona } from 'klona';
 import { logger } from '../logger';
-import { clone } from '../util/clone';
 import * as definitions from './definitions';
 import type { RenovateConfig } from './types';
 
@@ -11,8 +11,8 @@ export function mergeChildConfig<T, TChild>(
   if (!child) {
     return parent as never;
   }
-  const parentConfig = clone(parent);
-  const childConfig = clone(child);
+  const parentConfig = klona(parent);
+  const childConfig = klona(child);
   const config: Record<string, any> = { ...parentConfig, ...childConfig };
   for (const option of definitions.getOptions()) {
     if (

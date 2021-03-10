@@ -157,6 +157,7 @@
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "2.0.0",
     "json5": "2.2.0",
+    "klona": "2.0.4",
     "linkify-markdown": "1.0.0",
     "luxon": "1.26.0",
     "markdown-it": "12.0.4",

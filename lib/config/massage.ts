@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { clone } from '../util/clone';
+import { klona } from 'klona';
 import { getOptions } from './definitions';
 import type { PackageRule, RenovateConfig, UpdateType } from './types';
 
@@ -17,7 +17,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       }
     });
   }
-  const massagedConfig = clone(config);
+  const massagedConfig = klona(config);
   for (const [key, val] of Object.entries(config)) {
     if (allowedStrings.includes(key) && is.string(val)) {
       massagedConfig[key] = [val];
@@ -57,7 +57,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
         PackageRule
       ][]) {
         if (updateTypes.includes(key)) {
-          const newRule = clone(rule);
+          const newRule = klona(rule);
           newRule.matchUpdateTypes = rule.matchUpdateTypes || [];
           newRule.matchUpdateTypes.push(key);
           Object.assign(newRule, val);
