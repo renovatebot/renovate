@@ -3,7 +3,7 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import * as _hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
-import { id as datasource } from '.';
+import { id as datasource, parseRegistryUrl } from '.';
 
 const hostRules: any = _hostRules;
 
@@ -129,6 +129,44 @@ const configV3Multiple = {
 };
 
 describe('datasource/nuget', () => {
+  describe('parseRegistryUrl', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('extracts feed version from registry URL hash (v3)', () => {
+      const parsed = parseRegistryUrl('https://my-registry#protocolVersion=3');
+
+      expect(parsed.feedUrl).toEqual('https://my-registry/');
+      expect(parsed.protocolVersion).toEqual(3);
+    });
+
+    it('extracts feed version from registry URL hash (v2)', () => {
+      const parsed = parseRegistryUrl('https://my-registry#protocolVersion=2');
+
+      expect(parsed.feedUrl).toEqual('https://my-registry/');
+      expect(parsed.protocolVersion).toEqual(2);
+    });
+
+    it('defaults to v2', () => {
+      const parsed = parseRegistryUrl('https://my-registry');
+
+      expect(parsed.feedUrl).toEqual('https://my-registry/');
+      expect(parsed.protocolVersion).toEqual(2);
+    });
+
+    it('returns null for unparseable', () => {
+      const parsed = parseRegistryUrl(
+        'https://test:malfor%5Med@test.example.com'
+      );
+
+      expect(parsed.feedUrl).toEqual(
+        'https://test:malfor%5Med@test.example.com'
+      );
+      expect(parsed.protocolVersion).toBeNull();
+    });
+  });
+
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
