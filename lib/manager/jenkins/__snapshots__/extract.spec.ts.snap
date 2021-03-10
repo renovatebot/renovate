@@ -1,6 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/jenkins/extract extractPackageFile() extracts multiple image lines 1`] = `
+exports[`manager/jenkins/extract extractPackageFile() extracts multiple image lines in text format 1`] = `
+Array [
+  Object {
+    "currentValue": "1.2.3",
+    "datasource": "jenkins-plugins",
+    "depName": "email-ext",
+    "versioning": "docker",
+  },
+  Object {
+    "currentValue": "4.4.10-2.0",
+    "datasource": "jenkins-plugins",
+    "depName": "apache-httpcomponents-client-4-api",
+    "versioning": "docker",
+  },
+  Object {
+    "currentValue": "1.2",
+    "datasource": "jenkins-plugins",
+    "depName": "authentication-tokens",
+    "versioning": "docker",
+  },
+  Object {
+    "currentValue": "1.21.0",
+    "datasource": "jenkins-plugins",
+    "depName": "blueocean",
+    "versioning": "docker",
+  },
+  Object {
+    "currentValue": "4.2.0",
+    "datasource": "jenkins-plugins",
+    "depName": "git",
+    "skipReason": "ignored",
+    "versioning": "docker",
+  },
+  Object {
+    "currentValue": "3.3.1",
+    "datasource": "jenkins-plugins",
+    "depName": "git-client",
+    "skipReason": "ignored",
+    "versioning": "docker",
+  },
+]
+`;
+
+exports[`manager/jenkins/extract extractPackageFile() extracts multiple image lines in yaml format 1`] = `
 Array [
   Object {
     "currentValue": "1.2.3",

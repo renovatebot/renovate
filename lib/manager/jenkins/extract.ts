@@ -8,7 +8,7 @@ import type { PackageDependency, PackageFile } from '../types';
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('jenkins.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  const regex = /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/;
+  const regex = /^(-)?\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/;
 
   for (const line of content.split('\n')) {
     const match = regex.exec(line);

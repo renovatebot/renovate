@@ -2,8 +2,12 @@ import { readFileSync } from 'fs';
 import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const pluginsFile = readFileSync(
+const pluginsTextFile = readFileSync(
   'lib/manager/jenkins/__fixtures__/plugins.txt',
+  'utf8'
+);
+const pluginsYamlFile = readFileSync(
+  'lib/manager/jenkins/__fixtures__/plugins.yaml',
   'utf8'
 );
 
@@ -19,8 +23,14 @@ describe(getName(__filename), () => {
       expect(res.deps).toHaveLength(0);
     });
 
-    it('extracts multiple image lines', () => {
-      const res = extractPackageFile(pluginsFile);
+    it('extracts multiple image lines in text format', () => {
+      const res = extractPackageFile(pluginsTextFile);
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(6);
+    });
+
+    it('extracts multiple image lines in yaml format', () => {
+      const res = extractPackageFile(pluginsYamlFile);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
     });
