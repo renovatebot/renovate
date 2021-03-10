@@ -51,7 +51,7 @@ module.exports = {
     {
       hostType: 'npm',
       hostName: 'registry.npmjs.org',
-      token: process.env.NPM_TOKEN,
+      token: process.env.NPMJS_TOKEN,
     },
     {
       hostType: 'npm',
@@ -63,6 +63,8 @@ module.exports = {
   ],
 };
 ```
+
+**NOTE:** Do not use `NPM_TOKEN` as an environment variable, it's incompatible with `hostRules` and will be deprecated soon.
 
 ### Commit .npmrc file into repository
 
