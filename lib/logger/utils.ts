@@ -2,7 +2,7 @@ import { Stream } from 'stream';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError } from 'got';
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { redactedFields, sanitize } from '../util/sanitize';
 
 export interface BunyanRecord extends Record<string, any> {

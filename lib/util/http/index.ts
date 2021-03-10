@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import got, { Options, Response } from 'got';
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';

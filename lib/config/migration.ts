@@ -1,7 +1,7 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { getOptions } from './definitions';

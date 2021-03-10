@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as handlebars from 'handlebars';
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 

@@ -1,4 +1,4 @@
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { logger } from '../logger';
 import * as definitions from './definitions';
 import type { RenovateConfig } from './types';

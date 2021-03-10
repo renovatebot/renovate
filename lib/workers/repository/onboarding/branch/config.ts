@@ -1,4 +1,4 @@
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { RenovateConfig } from '../../../../config';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { getOptions } from './definitions';
 import type { PackageRule, RenovateConfig, UpdateType } from './types';
 

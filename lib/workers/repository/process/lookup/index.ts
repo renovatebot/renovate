@@ -1,4 +1,4 @@
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import type { ValidationMessage } from '../../../../config/types';
 import {
   Release,

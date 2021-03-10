@@ -1,4 +1,4 @@
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { setBranchPrefix } from '../../../util/git';

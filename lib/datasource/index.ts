@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
-import { klona } from 'klona';
+import { klona } from 'klona/json';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
