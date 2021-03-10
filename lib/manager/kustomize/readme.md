@@ -5,10 +5,10 @@ This package will manage two parts of the `kustomization.yaml` file:
 
 **How It Works**
 
-1.  Renovate will search each repository for any `kustomization.yaml` files.
-2.  Existing dependencies will be extracted from remote bases & image tags
-3.  Renovate will resolve the dependency's source repository and check for SemVer tags if found.
-4.  If an update was found, Renovate will update `kustomization.yaml`
+1. Renovate will search each repository for any `kustomization.yaml` files.
+2. Existing dependencies will be extracted from remote bases & image tags
+3. Renovate will resolve the dependency's source repository and check for SemVer tags if found.
+4. If an update was found, Renovate will update `kustomization.yaml`
 
 **Limitations**
 

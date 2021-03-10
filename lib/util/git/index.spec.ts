@@ -291,21 +291,19 @@ describe('platform/git', () => {
         files,
         message: 'Update something',
       });
-      expect(commit).not.toBeNull();
+      expect(commit).toBeNull();
     });
     it('does not push when no diff', async () => {
-      const branchName = 'renovate/something';
-      const local = Git(tmpDir.path);
-      await local.push('origin', `${defaultBranch}:${branchName}`);
-      await local.fetch([
-        'origin',
-        `refs/heads/${branchName}:refs/remotes/origin/${branchName}`,
-      ]);
-      const files = [];
+      const files = [
+        {
+          name: 'future_file',
+          contents: 'future',
+        },
+      ];
       const commit = await git.commitFiles({
-        branchName,
+        branchName: 'renovate/future_branch',
         files,
-        message: 'Update something',
+        message: 'No change update',
       });
       expect(commit).toBeNull();
     });

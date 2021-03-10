@@ -5,7 +5,7 @@ For example, if you want to reference a tag like `module-v1.2.5`, a block like t
 
 ```json
 "terraform": {
-	"versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+ "versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
 }
 ```
 
