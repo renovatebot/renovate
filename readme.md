@@ -53,7 +53,7 @@ For Bitbucket Cloud, Bitbucket Server, Gitea and GitLab, use our self-hosting op
 
 ## Configuration
 
-Visit https://docs.renovatebot.com/ for documentation, and in particular https://docs.renovatebot.com/configuration-options/ for a list of configuration options.
+Visit <https://docs.renovatebot.com/> for documentation, and in particular <https://docs.renovatebot.com/configuration-options/> for a list of configuration options.
 
 To get help and/or a review for your config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and open a new "config help" discussion post.
 
