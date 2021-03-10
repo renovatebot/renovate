@@ -11,7 +11,6 @@ import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import {
   CONFIG_VALIDATION,
-  REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -656,6 +655,15 @@ export async function commitFiles({
     const commitRes = await git.commit(message, [], {
       '--no-verify': null,
     });
+    if (
+      commitRes.summary &&
+      commitRes.summary.changes === 0 &&
+      commitRes.summary.insertions === 0 &&
+      commitRes.summary.deletions === 0
+    ) {
+      logger.warn({ commitRes }, 'Detected empty commit - aborting git push');
+      return null;
+    }
     logger.debug({ result: commitRes }, `git commit`);
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
@@ -697,8 +705,9 @@ export async function commitFiles({
       logger.error({ err }, 'Error committing files.');
       return null;
     }
-    logger.debug({ err }, 'Error committing files');
-    throw new Error(REPOSITORY_CHANGED);
+    logger.debug({ err }, 'Unknown error committing files');
+    // We don't know why this happened, so this will cause bubble up to a branch error
+    throw err;
   }
 }
 

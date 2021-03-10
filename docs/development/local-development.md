@@ -22,7 +22,7 @@ We support Node.js versions according to the [Node.js release schedule](https://
 You need Java to execute Gradle tests.
 If you don’t have Java installed, the Gradle tests will be skipped.
 
-_Linux_
+#### Linux
 
 You can use the following commands on Ubuntu.
 
@@ -36,7 +36,7 @@ sudo apt-get install -y git python-minimal build-essential nodejs yarn default-j
 
 You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 
-_Windows_
+#### Windows
 
 Follow these steps to set up your development environment on Windows 10.
 If you already installed a component, skip the corresponding step.
@@ -58,7 +58,7 @@ If you already installed a component, skip the corresponding step.
   PS C:\Windows\system32> java -version
   ```
 
-_VS Code Remote Development_
+#### VS Code Remote Development
 
 If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
 
@@ -124,11 +124,6 @@ You can run `yarn test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
 `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
-### Prerequisites
-
-You need to have Python with `mock` installed for all tests to pass.
-Python 3 includes `mock` so that approach is recommended.
-
 ### Jest
 
 You can run just the Jest unit tests by running `yarn jest`.
@@ -185,7 +180,7 @@ It's usually easier to have the logs in a file that you can open with a text edi
 You can use a command like this to put the log messages in a file:
 
 ```
-$ rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
+rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
 ```
 
 The example command will delete any existing `debug.log` and then save Renovate's output to a new `debug.log` file.
@@ -224,6 +219,8 @@ module.exports = {
   repositories: ['r4harry/testrepo1'],
 };
 ```
+
+<!-- markdownlint-disable MD029 -->
 
 3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`
 4. Wait for your breakpoint to be triggered

@@ -12,7 +12,7 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
       hostType: options.hostType,
       url,
     }) || /* istanbul ignore next: can only happen in tests */ {};
-  const { username, password, token, enabled } = foundRules;
+  const { username, password, token, enabled, authType } = foundRules;
   if (options.headers?.authorization || options.password || options.token) {
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {
@@ -22,6 +22,7 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   } else if (token) {
     logger.trace({ url }, `Applying Bearer authentication`);
     options.token = token;
+    options.context = { ...options.context, authType };
   } else if (enabled === false) {
     options.enabled = false;
   }

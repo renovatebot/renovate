@@ -2,7 +2,7 @@ import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
-import { INTERRUPTED } from '../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import {
   BinarySource,
@@ -159,8 +159,11 @@ export async function exec(
         });
       }
       if (err.signal === `SIGTERM`) {
-        logger.debug({ err }, 'exec interrupted by SIGTERM');
-        throw new Error(INTERRUPTED);
+        logger.debug(
+          { err },
+          'exec interrupted by SIGTERM - run needs to be aborted'
+        );
+        throw new Error(TEMPORARY_ERROR);
       }
       throw err;
     }
