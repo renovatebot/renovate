@@ -1,13 +1,18 @@
----
-- email-ext:1.2.3
-
-- apache-httpcomponents-client-4-api:4.4.10-2.0 # comment
-- authentication-tokens:1.2
-- blueocean:1.21.0 # another comment
-# - blueocean:1.22.0
-
-# this line is completely ignored
-
-# these deps will be ignored:
-- git:4.2.0         # renovate:ignore
-- git-client:3.3.1  # renovate:ignore
+plugins:
+  - artifactId: git
+    source:
+      version: latest
+  - artifactId: job-import-plugin
+    source:
+      version: 2.1
+  - artifactId: docker
+  - artifactId: cloudbees-bitbucket-branch-source
+    source:
+      version: experimental
+  - artifactId: script-security
+    source:
+      url: http://ftp-chi.osuosl.org/pub/jenkins/plugins/script-security/1.56/script-security.hpi
+  - artifactId: workflow-step-api
+    groupId: org.jenkins-ci.plugins.workflow
+    source:
+      version: 2.19-rc289.d09828a05a74

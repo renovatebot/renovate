@@ -11,26 +11,35 @@ const pluginsYamlFile = readFileSync(
   'utf8'
 );
 
-const pluginsEmptyFile = readFileSync(
+const pluginsEmptyTextFile = readFileSync(
   'lib/manager/jenkins/__fixtures__/empty.txt',
+  'utf8'
+);
+const pluginsEmptyYamlFile = readFileSync(
+  'lib/manager/jenkins/__fixtures__/empty.yaml',
   'utf8'
 );
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
-    it('returns empty list for an empty file', () => {
-      const res = extractPackageFile(pluginsEmptyFile);
+    it('returns empty list for an empty text file', () => {
+      const res = extractPackageFile(pluginsEmptyTextFile, 'path/file.txt');
+      expect(res.deps).toHaveLength(0);
+    });
+
+    it('returns empty list for an empty yaml file', () => {
+      const res = extractPackageFile(pluginsEmptyYamlFile, 'path/file.yaml');
       expect(res.deps).toHaveLength(0);
     });
 
     it('extracts multiple image lines in text format', () => {
-      const res = extractPackageFile(pluginsTextFile);
+      const res = extractPackageFile(pluginsTextFile, 'path/file.txt');
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
     });
 
     it('extracts multiple image lines in yaml format', () => {
-      const res = extractPackageFile(pluginsYamlFile);
+      const res = extractPackageFile(pluginsYamlFile, 'path/file.yml');
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
     });
