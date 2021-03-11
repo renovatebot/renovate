@@ -4,7 +4,6 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { clone } from '../../../util/clone';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
