@@ -354,8 +354,14 @@ export async function processBranch(
       getAdminConfig().trustLevel === 'high' &&
       is.nonEmptyArray(allowedPostUpgradeCommands)
     ) {
-      postUpgradeCommandExecutor('update', config);
-      postUpgradeCommandExecutor('branch', config);
+      config.updatedArtifacts = await postUpgradeCommandExecutor(
+        'update',
+        config
+      );
+      config.updatedArtifacts = await postUpgradeCommandExecutor(
+        'branch',
+        config
+      );
     }
 
     removeMeta(['dep']);

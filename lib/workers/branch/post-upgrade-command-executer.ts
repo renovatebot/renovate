@@ -1,18 +1,19 @@
+import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { getAdminConfig } from '../../config/admin';
 import { addMeta, logger } from '../../logger';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { getRepoStatus } from '../../util/git';
+import { File, getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
-import { BranchUpgradeConfig } from '../types';
 import * as template from '../../util/template';
-import is from '@sindresorhus/is';
+import { BranchConfig, BranchUpgradeConfig } from '../types';
 
 export default async function postUpgradeCommandExecutor(
   executionMode = 'update',
-  config
-) {
+  config: BranchConfig
+): Promise<File[]> {
+  let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const adminConfig = getAdminConfig();
   const allowedPostUpgradeCommands = adminConfig.allowedPostUpgradeCommands;
   const allowPostUpgradeCommandTemplating =
@@ -22,7 +23,7 @@ export default async function postUpgradeCommandExecutor(
     ({ postUpgradeTasks }) =>
       !postUpgradeTasks ||
       !postUpgradeTasks.executionMode ||
-      postUpgradeTasks.executionMode == executionMode
+      postUpgradeTasks.executionMode === executionMode
   );
 
   for (const upgrade of filteredUpgradeCommands) {
@@ -39,9 +40,7 @@ export default async function postUpgradeCommandExecutor(
 
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
-      for (const file of config.updatedPackageFiles.concat(
-        config.updatedArtifacts
-      )) {
+      for (const file of config.updatedPackageFiles.concat(updatedArtifacts)) {
         if (file.name !== '|delete|') {
           let contents;
           if (typeof file.contents === 'string') {
@@ -92,19 +91,19 @@ export default async function postUpgradeCommandExecutor(
               'Post-upgrade file saved'
             );
             const existingContent = await readLocalFile(relativePath);
-            const existingUpdatedArtifacts = config.updatedArtifacts.find(
+            const existingUpdatedArtifacts = updatedArtifacts.find(
               (ua) => ua.name === relativePath
             );
             if (existingUpdatedArtifacts) {
               existingUpdatedArtifacts.contents = existingContent;
             } else {
-              config.updatedArtifacts.push({
+              updatedArtifacts.push({
                 name: relativePath,
                 contents: existingContent,
               });
             }
             // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
-            config.updatedArtifacts = config.updatedArtifacts.filter(
+            updatedArtifacts = updatedArtifacts.filter(
               (ua) => ua.name !== '|delete|' || ua.contents !== relativePath
             );
           }
@@ -118,12 +117,12 @@ export default async function postUpgradeCommandExecutor(
               { file: relativePath, pattern },
               'Post-upgrade file removed'
             );
-            config.updatedArtifacts.push({
+            updatedArtifacts.push({
               name: '|delete|',
               contents: relativePath,
             });
             // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
-            config.updatedArtifacts = config.updatedArtifacts.filter(
+            updatedArtifacts = updatedArtifacts.filter(
               (ua) => ua.name !== relativePath
             );
           }
@@ -131,4 +130,5 @@ export default async function postUpgradeCommandExecutor(
       }
     }
   }
+  return updatedArtifacts;
 }
