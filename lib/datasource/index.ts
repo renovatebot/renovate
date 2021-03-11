@@ -7,7 +7,7 @@ import * as memCache from '../util/cache/memory';
 import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
-import { validateUrl } from '../util/url';
+import { massageUrlProtocol } from '../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -181,9 +181,7 @@ function resolveRegistryUrls(
     registryUrls = [...defaultRegistryUrls];
   }
 
-  return registryUrls
-    .filter(Boolean)
-    .map((url) => (validateUrl(url, false) ? url : `https://${url}`));
+  return registryUrls.map((x) => massageUrlProtocol(x)).filter(Boolean);
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
