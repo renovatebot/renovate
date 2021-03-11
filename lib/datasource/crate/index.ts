@@ -138,14 +138,7 @@ async function fetchRegistryInfo(
   config: GetReleasesConfig,
   registryUrl: string
 ): Promise<RegistryInfo | null> {
-  let url: URL;
-  try {
-    url = new URL(registryUrl);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ registryUrl }, 'could not parse registry URL');
-    return null;
-  }
-
+  const url = new URL(registryUrl);
   let flavor: RegistryFlavor;
   if (url.hostname === 'crates.io') {
     flavor = RegistryFlavor.CratesIo;
