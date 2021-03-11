@@ -24,22 +24,6 @@ Configuring or overriding the default `versionScheme` can be particularly helpfu
 
 ### Overriding Docker versioning to use a versioning specific for a package
 
-The below package rule overrides the default `docker` versioning to instead use `pep440` when the Docker image is `python`:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["python"],
-      "versionScheme": "pep440"
-    }
-  ]
-}
-```
-
-### Docker versioning
-
 The configuration below overrides Renovate's default `docker` versioning for the `python` Docker image and instead uses the `pep440` versioning scheme to evaluate versions.
 
 ```json
