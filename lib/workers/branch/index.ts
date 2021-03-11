@@ -35,7 +35,12 @@ import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
-import { BranchConfig, PrResult, ProcessBranchResult, BranchUpgradeConfig } from '../types';
+import {
+  BranchConfig,
+  PrResult,
+  ProcessBranchResult,
+  BranchUpgradeConfig,
+} from '../types';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
@@ -362,8 +367,7 @@ export async function processBranch(
       getAdminConfig().trustLevel === 'high' &&
       is.nonEmptyArray(allowedPostUpgradeCommands)
     ) {
-      const executionMode =
-        config.postUpgradeTasks.executionMode || 'dependency';
+      const executionMode = config.postUpgradeTasks.executionMode || 'update';
 
       if (executionMode === 'branch') {
         logger.trace(

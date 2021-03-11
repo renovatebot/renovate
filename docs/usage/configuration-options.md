@@ -1492,7 +1492,7 @@ e.g.
   "postUpgradeTasks": {
     "commands": ["tslint --fix"],
     "fileFilters": ["yarn.lock", "**/*.js"],
-    "executionMode": "dependency"
+    "executionMode": "update"
   }
 }
 ```
@@ -1509,7 +1509,7 @@ A list of glob-style matchers that determine which files will be included in the
 
 ### executionMode
 
-Defaults to `dependency`, but can also be set to `branch`. This sets the level the postUpgradeTask runs on, if set to `dependency` the postUpgradeTask
+Defaults to `update`, but can also be set to `branch`. This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask
 will be executed for every dependency on the branch. If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 ## prBodyColumns
