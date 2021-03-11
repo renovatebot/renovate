@@ -86,16 +86,12 @@ export function extractPackageFile(
   fileName: string
 ): PackageFile | null {
   logger.trace('jenkins.extractPackageFile()');
-  let deps: PackageDependency[] = [];
+  const deps: PackageDependency[] = [];
 
   if (/\.ya?ml$/.test(fileName)) {
-    deps = extractYaml(content);
+    deps.push(...extractYaml(content));
   } else {
-    deps = extractText(content);
-  }
-
-  if (deps == null) {
-    return null;
+    deps.push(...extractText(content));
   }
 
   return { deps };
