@@ -145,11 +145,15 @@ describe('platform/git', () => {
     it('should return false when branch is not found', async () => {
       expect(await git.isBranchModified('renovate/not_found')).toBe(false);
     });
-    it('should return true when author matches', async () => {
+    it('should return false when author matches', async () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
     });
-    it('should return false when custom author', async () => {
+    it('should return false when author is ignored', async () => {
+      git.setIgnoredAuthors(['custom@example.com']);
+      expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
+    });
+    it('should return true when custom author is unknown', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
     });
   });

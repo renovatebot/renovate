@@ -1,7 +1,7 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { clone } from '../../../util/clone';
-import { setBranchPrefix } from '../../../util/git';
+import { setBranchPrefix, setIgnoredAuthors } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { initApis } from './apis';
 import { initializeCaches } from './cache';
@@ -21,6 +21,7 @@ export async function initRepo(
   config = await getRepoConfig(config);
   checkIfConfigured(config);
   await setBranchPrefix(config.branchPrefix);
+  setIgnoredAuthors(config.gitIgnoredAuthors);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {

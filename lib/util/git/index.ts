@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import GitUrlParse from 'git-url-parse';
 import Git, {
@@ -51,6 +52,7 @@ interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
+  ignoredAuthors: string[];
 }
 
 // istanbul ignore next
@@ -165,6 +167,7 @@ async function fetchBranchCommits(): Promise<void> {
 
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
+  config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
   git = Git(config.localDir);
@@ -212,6 +215,13 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
       checkForPlatformFailure(err);
       throw err;
     }
+  }
+}
+
+export function setIgnoredAuthors(ignoredAuthors?: string[]): void {
+  config.ignoredAuthors = [];
+  if (is.array(ignoredAuthors)) {
+    config.ignoredAuthors = ignoredAuthors;
   }
 }
 
@@ -478,7 +488,8 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   const { gitAuthorEmail } = config;
   if (
     lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
-    lastAuthor === gitAuthorEmail
+    lastAuthor === gitAuthorEmail ||
+    config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
     // author matches - branch has not been modified
     config.branchIsModified[branchName] = false;
