@@ -589,4 +589,19 @@ export const presets: Record<string, Preset> = {
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
   },
+  enableGradleLite: {
+    description: 'Enable the gradle-lite manager',
+    'gradle-lite': {
+      enabled: true,
+    },
+  },
+  switchToGradleLite: {
+    description: 'Enable the gradle-lite manager and disable gradle',
+    gradle: {
+      enabled: false,
+    },
+    'gradle-lite': {
+      enabled: true,
+    },
+  },
 };

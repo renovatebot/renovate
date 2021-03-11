@@ -815,6 +815,26 @@ To abort Renovate for errors for a specific `docker` host:
 
 When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) receives a response _not_ matching any of the configured `abortIgnoreStatusCodes` (e.g. `500 Internal Error`);
 
+### authType
+
+This can be used with `token` to create a custom http `authorization` header.
+
+An example for npm basic auth with token:
+
+```json
+{
+  "hostRules": [
+    {
+      "domainName": "npm.custom.org",
+      "token": "<some-token>",
+      "authType": "Basic"
+    }
+  ]
+}
+```
+
+This will generate the following header: `authorization: Basic <some-token>`.
+
 ### baseUrl
 
 Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host.
@@ -1585,11 +1605,11 @@ Therefore you can customise this setting if you wish to be notified a little lat
 
 This setting - if enabled - helps slow down Renovate, particularly during the onboarding phase. What may happen without this setting is:
 
-1.  Onboarding PR is created
-2.  User merges onboarding PR to activate Renovate
-3.  Renovate creates a "Pin Dependencies" PR (if necessary)
-4.  User merges Pin PR
-5.  Renovate then creates every single upgrade PR necessary - potentially dozens
+1. Onboarding PR is created
+2. User merges onboarding PR to activate Renovate
+3. Renovate creates a "Pin Dependencies" PR (if necessary)
+4. User merges Pin PR
+5. Renovate then creates every single upgrade PR necessary - potentially dozens
 
 The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged.
 Instead, if `prHourlyLimit` is configure to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59).
@@ -1656,13 +1676,11 @@ Behavior:
 
 Renovate's `"auto"` strategy works like this for npm:
 
-1.  Always pin `devDependencies`
-2.  Pin `dependencies` if we detect that it's an app and not a library
-3.  Widen `peerDependencies`
-4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-5.  Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
-
-**bump**
+1. Always pin `devDependencies`
+2. Pin `dependencies` if we detect that it's an app and not a library
+3. Widen `peerDependencies`
+4. If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
+5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 As such, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
@@ -1686,7 +1704,10 @@ Possible values and meanings:
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
-Note: this field replaces the previous fields of `rebaseConflictedPrs` and `rebaseStalePrs`.
+`rebaseWhen=conflicted` is not recommended if you have enabled Renovate automerge, because:
+
+- It could result in a broken base branch if two updates are merged one after another without testing the new versions together
+- If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 ## recreateClosed
 
@@ -2070,6 +2091,8 @@ If enough days have passed then a passing status check will be added.
 
 There are a couple of uses for this:
 
+<!-- markdownlint-disable MD001 -->
+
 #### Suppress branch/PR creation for X days
 
 If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
@@ -2079,6 +2102,8 @@ It's recommended that you enable `dependencyDashboard=true` so you don't lose vi
 
 If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed.
 This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
+
+<!-- markdownlint-enable MD001 -->
 
 ## supportPolicy
 

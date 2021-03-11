@@ -1696,6 +1696,17 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'authType',
+    description:
+      'Authentication type for http header. e.g. "Bearer" or "Basic".',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: 'Bearer',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables.',
     type: 'object',

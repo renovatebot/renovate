@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
@@ -230,7 +230,7 @@ async function fetchReleases(
     }
     logError(datasource.id, config.lookupName, err);
   }
-  if (!dep || equal(dep, { releases: [] })) {
+  if (!dep || dequal(dep, { releases: [] })) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);

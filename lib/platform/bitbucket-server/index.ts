@@ -408,6 +408,7 @@ export async function getBranchStatus(
   }
 
   if (!git.branchExists(branchName)) {
+    logger.debug('Branch does not exist - cannot fetch status');
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -604,6 +605,9 @@ export async function addReviewers(
       err.statusCode === 409 &&
       !utils.isInvalidReviewersResponse(err)
     ) {
+      logger.debug(
+        '409 response to adding reviewers - has repository changed?'
+      );
       throw new Error(REPOSITORY_CHANGED);
     } else {
       throw err;
