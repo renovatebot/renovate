@@ -187,6 +187,14 @@ describe(getName(__filename), () => {
           'Review cannot be requested from pull request author.'
         );
       });
+      it('should throw original error when pull requests aleady existed', async () => {
+        await expect(
+          fail(422, {
+            message: 'Validation error',
+            errors: [{ message: 'A pull request already exists' }],
+          })
+        ).rejects.toThrow('Validation error');
+      });
       it('should throw original error of unknown type', async () => {
         await expect(
           fail(418, {
