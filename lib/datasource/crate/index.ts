@@ -141,7 +141,7 @@ async function fetchRegistryInfo(
   let url: URL;
   try {
     url = new URL(registryUrl);
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.debug({ registryUrl }, 'could not parse registry URL');
     return null;
   }

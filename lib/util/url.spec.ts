@@ -49,6 +49,7 @@ describe('util/url', () => {
     expect(validateUrl()).toBe(false);
     expect(validateUrl(null)).toBe(false);
     expect(validateUrl('foo')).toBe(false);
+    expect(validateUrl('github.com')).toBe(false);
     expect(validateUrl('ssh://github.com')).toBe(false);
     expect(validateUrl('http://github.com')).toBe(true);
     expect(validateUrl('https://github.com')).toBe(true);
