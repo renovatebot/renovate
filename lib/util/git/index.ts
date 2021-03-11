@@ -1,5 +1,4 @@
 import URL from 'url';
-import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import GitUrlParse from 'git-url-parse';
 import Git, {
@@ -219,10 +218,7 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
 }
 
 export function setIgnoredAuthors(ignoredAuthors?: string[]): void {
-  config.ignoredAuthors = [];
-  if (is.array(ignoredAuthors)) {
-    config.ignoredAuthors = ignoredAuthors;
-  }
+  config.ignoredAuthors = ignoredAuthors ?? [];
 }
 
 export async function getSubmodules(): Promise<string[]> {
