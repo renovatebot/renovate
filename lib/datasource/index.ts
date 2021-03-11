@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
@@ -7,6 +7,7 @@ import * as memCache from '../util/cache/memory';
 import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
+import { massageUrlProtocol } from '../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -179,7 +180,8 @@ function resolveRegistryUrls(
   } else {
     registryUrls = [...defaultRegistryUrls];
   }
-  return registryUrls.filter(Boolean);
+
+  return registryUrls.map((x) => massageUrlProtocol(x)).filter(Boolean);
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
@@ -230,7 +232,7 @@ async function fetchReleases(
     }
     logError(datasource.id, config.lookupName, err);
   }
-  if (!dep || equal(dep, { releases: [] })) {
+  if (!dep || dequal(dep, { releases: [] })) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
