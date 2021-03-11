@@ -1,5 +1,6 @@
 import { join } from 'path';
-import { id } from '../../datasource/nuget';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
+import { id, parseRegistryUrl } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -11,11 +12,11 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
-import {
+import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../common';
+} from '../types';
 import {
   getConfiguredRegistries,
   getDefaultRegistries,
@@ -36,7 +37,8 @@ async function addSourceCmds(
       hostType: id,
       url: registry.url,
     });
-    let addSourceCmd = `dotnet nuget add source ${registry.url} --configfile ${nugetConfigFile}`;
+    const registryInfo = parseRegistryUrl(registry.url);
+    let addSourceCmd = `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile}`;
     if (registry.name) {
       // Add name for registry, if known.
       addSourceCmd += ` --name ${registry.name}`;
@@ -137,6 +139,10 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug({ err }, 'Failed to generate lock file');
     return [
       {

@@ -1,22 +1,21 @@
 import * as httpMock from '../../../test/http-mock';
-
-import { UpdateArtifact } from '../common';
+import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
-const newVersion = '1.2.3';
-const newUnixWrapperContent = `Unix wrapper script for ${newVersion}`;
-const newWindowsWrapperContent = `Windows wrapper script for ${newVersion}`;
+const defaultTo = '1.2.3';
+const newUnixWrapperContent = `Unix wrapper script for ${defaultTo}`;
+const newWindowsWrapperContent = `Windows wrapper script for ${defaultTo}`;
 
 function artifactForPath(
   path: string,
-  toVersion: string = newVersion
+  newVersion: string = defaultTo
 ): UpdateArtifact {
   return {
     packageFileName: path,
     updatedDeps: ['batect/batect'],
     newPackageFileContent: 'not used',
     config: {
-      toVersion,
+      newVersion,
     },
   };
 }

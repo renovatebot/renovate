@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr/changelog/releases getReleaseNotes() should contain both fromVersion toVersion unstable 1`] = `
+exports[`workers/pr/changelog/releases getReleaseNotes() should contain both currentVersion newVersion unstable 1`] = `
 Array [
   Object {
     "version": "1.0.1-rc0",
@@ -23,7 +23,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/releases getReleaseNotes() should contain fromVersion unstable 1`] = `
+exports[`workers/pr/changelog/releases getReleaseNotes() should contain currentVersion unstable 1`] = `
 Array [
   Object {
     "version": "1.0.1-rc0",
@@ -54,7 +54,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/releases getReleaseNotes() should contain toVersion unstable 1`] = `
+exports[`workers/pr/changelog/releases getReleaseNotes() should contain newVersion unstable 1`] = `
 Array [
   Object {
     "version": "1.0.1",

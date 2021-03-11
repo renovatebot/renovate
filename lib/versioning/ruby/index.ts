@@ -7,7 +7,7 @@ import {
   valid,
 } from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
-import { NewValueConfig, VersioningApi } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
 import { ltr, parse as parseRange } from './range';
 import { bump, pin, replace } from './strategies';
@@ -81,38 +81,38 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 const getNewValue = ({
   currentValue,
   rangeStrategy,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string => {
   let newValue = null;
   if (isVersion(currentValue)) {
-    newValue = currentValue.startsWith('v') ? 'v' + toVersion : toVersion;
-  } else if (currentValue.replace(/^=\s*/, '') === fromVersion) {
-    newValue = currentValue.replace(fromVersion, toVersion);
+    newValue = currentValue.startsWith('v') ? 'v' + newVersion : newVersion;
+  } else if (currentValue.replace(/^=\s*/, '') === currentVersion) {
+    newValue = currentValue.replace(currentVersion, newVersion);
   } else {
     switch (rangeStrategy) {
       case 'update-lockfile':
-        if (satisfies(toVersion, currentValue)) {
+        if (satisfies(newVersion, currentValue)) {
           newValue = currentValue;
         } else {
           newValue = getNewValue({
             currentValue,
             rangeStrategy: 'replace',
-            fromVersion,
-            toVersion,
+            currentVersion,
+            newVersion,
           });
         }
         break;
       case 'pin':
-        newValue = pin({ to: vtrim(toVersion) });
+        newValue = pin({ to: vtrim(newVersion) });
         break;
       case 'bump':
-        newValue = bump({ range: vtrim(currentValue), to: vtrim(toVersion) });
+        newValue = bump({ range: vtrim(currentValue), to: vtrim(newVersion) });
         break;
       case 'replace':
         newValue = replace({
           range: vtrim(currentValue),
-          to: vtrim(toVersion),
+          to: vtrim(newVersion),
         });
         break;
       // istanbul ignore next

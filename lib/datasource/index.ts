@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
@@ -8,25 +8,26 @@ import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
 import * as allVersioning from '../versioning';
-import datasources from './api.generated';
-import {
-  Datasource,
+import datasources from './api';
+import { addMetaData } from './metadata';
+import type {
+  DatasourceApi,
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
   Release,
   ReleaseResult,
-} from './common';
-import { addMetaData } from './metadata';
+} from './types';
 
-export * from './common';
+export * from './types';
+export { isGetPkgReleasesConfig } from './common';
 
-export const getDatasources = (): Map<string, Datasource> => datasources;
+export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function load(datasource: string): Datasource {
+function load(datasource: string): DatasourceApi {
   return datasources.get(datasource);
 }
 
@@ -49,7 +50,7 @@ function logError(datasource, lookupName, err): void {
 }
 
 async function getRegistryReleases(
-  datasource: Datasource,
+  datasource: DatasourceApi,
   config: GetReleasesConfig,
   registryUrl: string
 ): Promise<ReleaseResult> {
@@ -77,7 +78,7 @@ async function getRegistryReleases(
 
 function firstRegistry(
   config: GetReleasesInternalConfig,
-  datasource: Datasource,
+  datasource: DatasourceApi,
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   if (registryUrls.length > 1) {
@@ -92,7 +93,7 @@ function firstRegistry(
 
 async function huntRegistries(
   config: GetReleasesInternalConfig,
-  datasource: Datasource,
+  datasource: DatasourceApi,
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let res: ReleaseResult;
@@ -123,7 +124,7 @@ async function huntRegistries(
 
 async function mergeRegistries(
   config: GetReleasesInternalConfig,
-  datasource: Datasource,
+  datasource: DatasourceApi,
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let combinedRes: ReleaseResult;
@@ -167,7 +168,7 @@ async function mergeRegistries(
 }
 
 function resolveRegistryUrls(
-  datasource: Datasource,
+  datasource: DatasourceApi,
   extractedUrls: string[]
 ): string[] {
   const { defaultRegistryUrls = [] } = datasource;
@@ -229,7 +230,7 @@ async function fetchReleases(
     }
     logError(datasource.id, config.lookupName, err);
   }
-  if (!dep || equal(dep, { releases: [] })) {
+  if (!dep || dequal(dep, { releases: [] })) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);

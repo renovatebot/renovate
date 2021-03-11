@@ -1,8 +1,11 @@
-import { Release, getPkgReleases } from '../../../datasource';
-import { isGetPkgReleasesConfig } from '../../../datasource/common';
+import {
+  Release,
+  getPkgReleases,
+  isGetPkgReleasesConfig,
+} from '../../../datasource';
 import { logger } from '../../../logger';
 import { VersioningApi, get } from '../../../versioning';
-import { BranchUpgradeConfig } from '../../common';
+import type { BranchUpgradeConfig } from '../../types';
 
 function matchesMMP(version: VersioningApi, v1: string, v2: string): boolean {
   return (
@@ -23,7 +26,13 @@ function matchesUnstable(
 export async function getInRangeReleases(
   config: BranchUpgradeConfig
 ): Promise<Release[] | null> {
-  const { versioning, fromVersion, toVersion, depName, datasource } = config;
+  const {
+    versioning,
+    currentVersion,
+    newVersion,
+    depName,
+    datasource,
+  } = config;
   // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
     return null;
@@ -33,18 +42,20 @@ export async function getInRangeReleases(
     const version = get(versioning);
 
     const releases = pkgReleases
-      .filter((release) => version.isCompatible(release.version, fromVersion))
+      .filter((release) =>
+        version.isCompatible(release.version, currentVersion)
+      )
       .filter(
         (release) =>
-          version.equals(release.version, fromVersion) ||
-          version.isGreaterThan(release.version, fromVersion)
+          version.equals(release.version, currentVersion) ||
+          version.isGreaterThan(release.version, currentVersion)
       )
-      .filter((release) => !version.isGreaterThan(release.version, toVersion))
+      .filter((release) => !version.isGreaterThan(release.version, newVersion))
       .filter(
         (release) =>
           version.isStable(release.version) ||
-          matchesUnstable(version, fromVersion, release.version) ||
-          matchesUnstable(version, toVersion, release.version)
+          matchesUnstable(version, currentVersion, release.version) ||
+          matchesUnstable(version, newVersion, release.version)
       );
     if (version.valueToVersion) {
       for (const release of releases || []) {

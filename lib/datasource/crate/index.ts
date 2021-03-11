@@ -9,7 +9,7 @@ import * as packageCache from '../../util/cache/package';
 import { privateCacheDir, readFile } from '../../util/fs';
 import { Http } from '../../util/http';
 import * as cargoVersioning from '../../versioning/cargo';
-import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'crate';
 export const defaultRegistryUrls = ['https://crates.io'];
@@ -170,18 +170,53 @@ async function fetchRegistryInfo(
     }
 
     const cacheKey = `crate-datasource/registry-clone-path/${registryUrl}`;
+    const cacheKeyForError = `crate-datasource/registry-clone-path/${registryUrl}/error`;
 
-    let clonePath: string = memCache.get(cacheKey);
-    if (!clonePath) {
+    // We need to ensure we don't run `git clone` in parallel. Therefore we store
+    // a promise of the running operation in the mem cache, which in the end resolves
+    // to the file path of the cloned repository.
+
+    const clonePathPromise: Promise<string> | null = memCache.get(cacheKey);
+    let clonePath: string;
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    if (clonePathPromise) {
+      clonePath = await clonePathPromise;
+    } else {
       clonePath = join(privateCacheDir(), cacheDirFromUrl(url));
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
-      {
-        const git = Git();
-        await git.clone(registryUrl, clonePath, {
-          '--depth': 1,
-        });
+
+      const git = Git();
+      const clonePromise = git.clone(registryUrl, clonePath, {
+        '--depth': 1,
+      });
+
+      memCache.set(
+        cacheKey,
+        clonePromise.then(() => clonePath).catch(() => null)
+      );
+
+      try {
+        await clonePromise;
+      } catch (err) {
+        logger.warn(
+          { err, lookupName: config.lookupName, registryUrl },
+          'failed cloning git registry'
+        );
+        memCache.set(cacheKeyForError, err);
+
+        return null;
       }
-      memCache.set(cacheKey, clonePath);
+    }
+
+    if (!clonePath) {
+      const err = memCache.get(cacheKeyForError);
+      logger.warn(
+        { err, lookupName: config.lookupName, registryUrl },
+        'Previous git clone failed, bailing out.'
+      );
+
+      return null;
     }
 
     registry.clonePath = clonePath;

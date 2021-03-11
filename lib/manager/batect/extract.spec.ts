@@ -1,8 +1,8 @@
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
-import { PackageDependency } from '../common';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
 const fixturesDir = 'lib/manager/batect/__fixtures__';

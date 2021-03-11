@@ -5,14 +5,14 @@
 ### npmjs
 
 ```sh
-$ npm install -g renovate
+npm install -g renovate
 ```
 
 Renovate does not embed `npm`, `pnpm` and `yarn` as its own dependencies.
 If you want to use these package managers to update your lockfiles, you must ensure that the correct versions are already installed globally.
 
 ```sh
-$ npm install -g yarn pnpm
+npm install -g yarn pnpm
 ```
 
 The same goes for any other third party binary tool like `gradle` or `poetry` - you need to make sure they are installed and the appropriate version before running Renovate.
@@ -24,10 +24,10 @@ It builds `latest` based on the `master` branch and all semver tags are publishe
 For example, all the following are valid tags:
 
 ```sh
-$ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:24.42.1
-$ docker run --rm renovate/renovate:24.42
-$ docker run --rm renovate/renovate:24
+docker run --rm renovate/renovate
+docker run --rm renovate/renovate:24.53.0
+docker run --rm renovate/renovate:24.53
+docker run --rm renovate/renovate:24
 ```
 
 Do not use the example tags listed above, as they will be out-of-date.
@@ -37,7 +37,7 @@ If you want to configure Renovate using a `config.js` file then map it to `/usr/
 For example:
 
 ```sh
-$ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
+docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
 ```
 
 ### Kubernetes
@@ -62,10 +62,13 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:24.42.1
+              image: renovate/renovate:24.53.0
               args:
                 - user/repo
               # Environment Variables
+              env:
+                - name: LOG_LEVEL
+                  value: debug
               envFrom:
                 - secretRef:
                     name: renovate-env
@@ -118,7 +121,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:24.42.1
+            - image: renovate/renovate:24.53.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -131,6 +134,8 @@ spec:
                   value: '/tmp/renovate/'
                 - name: RENOVATE_CONFIG_FILE
                   value: '/opt/renovate/config.json'
+                - name: LOG_LEVEL
+                  value: debug
               volumeMounts:
                 - name: config-volume
                   mountPath: /opt/renovate/
@@ -403,7 +408,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:24.42.1
+              image: renovate/renovate:24.53.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -421,3 +426,18 @@ spec:
 
 It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system.
 Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.
+
+### About the log level numbers
+
+When you use `LOG_LEVEL=debug` and `LOG_FORMAT=json`, Renovate uses numbers in the `level` field.
+
+The logging level output is controlled by the Bunyan logging library.
+
+| Level | Meaning |
+| ----: | ------- |
+|    10 | trace   |
+|    20 | debug   |
+|    30 | info    |
+|    40 | warn    |
+|    50 | error   |
+|    60 | fatal   |

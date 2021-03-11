@@ -1,21 +1,21 @@
 import type { Merge } from 'type-fest';
-import {
+import type {
   GroupConfig,
   LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
-} from '../config';
-import { Release } from '../datasource';
-import {
+} from '../config/types';
+import type { Release } from '../datasource/types';
+import type {
   ArtifactError,
   LookupUpdate,
   PackageDependency,
   PackageFile,
-} from '../manager/common';
-import { PlatformPrOptions } from '../platform';
-import { File } from '../util/git';
-import { ChangeLogResult } from './pr/changelog/common';
+} from '../manager/types';
+import type { PlatformPrOptions } from '../platform/types';
+import type { File } from '../util/git';
+import type { ChangeLogResult } from './pr/changelog/types';
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
@@ -31,18 +31,17 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
-  currentVersion?: string;
   endpoint?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
-
+  constraints?: Record<string, string>;
   groupName?: string;
   groupSlug?: string;
   language?: string;
   manager?: string;
   packageFile?: string;
-
+  lockFile?: string;
   reuseExistingBranch?: boolean;
   prHeader?: string;
   prFooter?: string;
@@ -111,7 +110,6 @@ export interface BranchConfig
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;
-
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;

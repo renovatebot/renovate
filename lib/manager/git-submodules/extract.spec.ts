@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { partial } from '../../../test/util';
-import { PackageFile } from '../common';
+import type { PackageFile } from '../types';
 import extractPackageFile from './extract';
 
 jest.mock('simple-git');
@@ -11,6 +11,9 @@ const Git: typeof _simpleGit = jest.requireActual('simple-git');
 const localDir = `${__dirname}/__fixtures__`;
 
 describe('lib/manager/gitsubmodules/extract', () => {
+  // flaky ci tests
+  jest.setTimeout(10 * 1000);
+
   beforeAll(() => {
     simpleGit.mockImplementation((basePath: string) => {
       const git = Git(basePath);

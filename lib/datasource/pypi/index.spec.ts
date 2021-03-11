@@ -53,7 +53,7 @@ describe('datasource/pypi', () => {
     });
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/something/json').reply(404);
-      httpMock.scope(baseUrl).get('/something').reply(404);
+      httpMock.scope(baseUrl).get('/something/').reply(404);
       expect(
         await getPkgReleases({
           datasource,
@@ -134,7 +134,7 @@ describe('datasource/pypi', () => {
       });
       expect(res.releases.pop()).toMatchObject({
         version: '0.2.15',
-        releaseTimestamp: '2019-06-18T13:58:55',
+        releaseTimestamp: '2019-06-18T13:58:55.000Z',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -233,7 +233,7 @@ describe('datasource/pypi', () => {
     it('process data from simple endpoint', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
-        .get('/dj-database-url')
+        .get('/dj-database-url/')
         .reply(200, htmlResponse);
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
@@ -251,7 +251,7 @@ describe('datasource/pypi', () => {
     it('process data from +simple endpoint', async () => {
       httpMock
         .scope('https://some.registry.org/+simple/')
-        .get('/dj-database-url')
+        .get('/dj-database-url/')
         .reply(200, htmlResponse);
       const config = {
         registryUrls: ['https://some.registry.org/+simple/'],
@@ -270,7 +270,7 @@ describe('datasource/pypi', () => {
       hostRules.add({ hostName: 'some.private.registry.org', token: 'abc123' });
       httpMock
         .scope('https://some.private.registry.org/+simple/')
-        .get('/dj-database-url')
+        .get('/dj-database-url/')
         .reply(200, htmlResponse);
       const config = {
         registryUrls: ['https://some.private.registry.org/+simple/'],
@@ -286,7 +286,7 @@ describe('datasource/pypi', () => {
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
-        .get('/image-collector')
+        .get('/image-collector/')
         .reply(200, mixedHyphensResponse);
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
@@ -304,7 +304,7 @@ describe('datasource/pypi', () => {
     it('returns null for empty response', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
-        .get('/dj-database-url')
+        .get('/dj-database-url/')
         .reply(200);
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
@@ -322,7 +322,7 @@ describe('datasource/pypi', () => {
     it('returns null for 404 response from simple endpoint', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
-        .get('/dj-database-url')
+        .get('/dj-database-url/')
         .replyWithError('error');
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
@@ -340,7 +340,7 @@ describe('datasource/pypi', () => {
     it('returns null for response with no versions', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
-        .get('/dj-database-url')
+        .get('/dj-database-url/')
         .reply(200, badResponse);
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
@@ -361,7 +361,7 @@ describe('datasource/pypi', () => {
         .reply(404);
       httpMock
         .scope('https://custom.pypi.net/foo')
-        .get('/dj-database-url')
+        .get('/dj-database-url/')
         .reply(200, htmlResponse);
       const config = {
         registryUrls: ['https://custom.pypi.net/foo'],
@@ -377,7 +377,7 @@ describe('datasource/pypi', () => {
     it('parses data-requires-python and respects constraints from simple endpoint', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
-        .get('/dj-database-url')
+        .get('/dj-database-url/')
         .reply(200, dataRequiresPythonResponse);
       const config = {
         registryUrls: ['https://pypi.org/simple/'],

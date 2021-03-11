@@ -50,7 +50,8 @@ function handleGotError(
     err.name === 'RequestError' &&
     (err.code === 'ENOTFOUND' ||
       err.code === 'ETIMEDOUT' ||
-      err.code === 'EAI_AGAIN')
+      err.code === 'EAI_AGAIN' ||
+      err.code === 'ECONNRESET')
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
@@ -108,7 +109,14 @@ function handleGotError(
     ) {
       throw err;
     } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
+      logger.debug({ err }, 'Received invalid response - aborting');
       throw new Error(REPOSITORY_CHANGED);
+    } else if (
+      err.body?.errors?.find((e: any) =>
+        e.message?.startsWith('A pull request already exists')
+      )
+    ) {
+      throw err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);

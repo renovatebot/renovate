@@ -1,6 +1,6 @@
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
-import { BumpPackageVersionResult } from '../common';
+import type { BumpPackageVersionResult } from '../types';
 
 export function bumpPackageVersion(
   content: string,
@@ -12,20 +12,20 @@ export function bumpPackageVersion(
     'Checking if we should bump build.sbt version'
   );
   let bumpedContent = content;
-  const newVersion = inc(currentValue, bumpVersion as ReleaseType);
-  if (!newVersion) {
+  const bumpedVersion = inc(currentValue, bumpVersion as ReleaseType);
+  if (!bumpedVersion) {
     logger.warn('Version incremental failed');
     return { bumpedContent };
   }
   bumpedContent = content.replace(
     /^(version\s*:=\s*).*$/m,
-    `$1"${newVersion}"`
+    `$1"${bumpedVersion}"`
   );
 
   if (bumpedContent === content) {
     logger.debug('Version was already bumped');
   } else {
-    logger.debug({ newVersion }, 'Bumped build.sbt version');
+    logger.debug({ bumpedVersion }, 'Bumped build.sbt version');
   }
 
   return { bumpedContent };

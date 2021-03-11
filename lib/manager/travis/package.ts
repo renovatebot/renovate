@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { getPkgReleases } from '../../datasource';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { NodeJsPolicies, getPolicies } from '../../versioning/node/schedule';
 import { getSatisfyingVersion, isVersion } from '../../versioning/semver';
-import { LookupUpdate, PackageUpdateConfig } from '../common';
+import type { LookupUpdate, PackageUpdateConfig } from '../types';
 
 export async function getPackageUpdates(
   config: PackageUpdateConfig
@@ -47,7 +47,7 @@ export async function getPackageUpdates(
 
   // TODO: `config.currentValue` is a string!
   (config.currentValue as any).sort((a, b) => a - b);
-  if (equal(config.currentValue, newValue)) {
+  if (dequal(config.currentValue, newValue)) {
     return [];
   }
   return [

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { Preset } from '../common';
+import type { Preset } from '../types';
 
 const repoGroups = {
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
@@ -117,6 +117,7 @@ const repoGroups = {
   openfeign: 'https://github.com/OpenFeign/feign',
   opentelemetry: 'https://github.com/open-telemetry/opentelemetry-js',
   picasso: 'https://github.com/qlik-oss/picasso.js',
+  pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',

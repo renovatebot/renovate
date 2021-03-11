@@ -163,10 +163,9 @@ describe(getName(__filename), () => {
       config.rebaseWhen = 'conflicted';
       config.automerge = true;
       git.branchExists.mockReturnValueOnce(true);
+      git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);
-      expect(git.isBranchStale).not.toHaveBeenCalled();
-      expect(git.isBranchModified).not.toHaveBeenCalled();
     });
   });
 });

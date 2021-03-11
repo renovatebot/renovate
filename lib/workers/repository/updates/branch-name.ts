@@ -1,7 +1,7 @@
 import { clean as cleanGitRef } from 'clean-git-ref';
 import hasha from 'hasha';
 import slugify from 'slugify';
-import { RenovateConfig } from '../../../config/common';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
 
@@ -57,13 +57,15 @@ export function generateBranchName(update: RenovateConfig): void {
       hashLength = MIN_HASH_LENGTH;
     }
 
-    const additionalBranchPrefix = update.additionalBranchPrefix
-      ? template.compile(String(update.additionalBranchPrefix), update)
-      : '';
+    const additionalBranchPrefix = template.compile(
+      String(update.additionalBranchPrefix || ''),
+      update
+    );
 
-    const branchTopic = update.branchTopic
-      ? template.compile(String(update.branchTopic), update)
-      : '';
+    const branchTopic = template.compile(
+      String(update.branchTopic || ''),
+      update
+    );
 
     let hashInput = additionalBranchPrefix + branchTopic;
 

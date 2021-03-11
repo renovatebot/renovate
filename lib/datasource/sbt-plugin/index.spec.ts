@@ -157,9 +157,6 @@ describe('datasource/sbt', () => {
       ).toEqual({
         dependencyUrl:
           'https://dl.bintray.com/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        display: 'org.foundweekends:sbt-bintray',
-        group: 'org.foundweekends',
-        name: 'sbt-bintray',
         releases: [{ version: '0.5.5' }],
       });
       expect(
@@ -172,9 +169,6 @@ describe('datasource/sbt', () => {
       ).toEqual({
         dependencyUrl:
           'https://dl.bintray.com/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        display: 'org.foundweekends:sbt-bintray_2.12',
-        group: 'org.foundweekends',
-        name: 'sbt-bintray_2.12',
         releases: [{ version: '0.5.5' }],
       });
     });
@@ -190,9 +184,6 @@ describe('datasource/sbt', () => {
       ).toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier',
-        display: 'io.get-coursier:sbt-coursier',
-        group: 'io.get-coursier',
-        name: 'sbt-coursier',
         releases: [
           { version: '2.0.0-RC2' },
           { version: '2.0.0-RC6-1' },

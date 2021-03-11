@@ -116,13 +116,13 @@ function combineReposOnDuplicatedDependencies(
   const existingDependency = accumulator.find(
     (dep) => dep.name === currentValue.name && dep.group === currentValue.group
   );
-  if (!existingDependency) {
-    accumulator.push(currentValue);
-  } else {
+  if (existingDependency) {
     const nonExistingRepos = currentValue.repos.filter(
       (repo) => !existingDependency.repos.includes(repo)
     );
     existingDependency.repos.push(...nonExistingRepos);
+  } else {
+    accumulator.push(currentValue);
   }
   return accumulator;
 }

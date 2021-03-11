@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { NewValueConfig, VersioningApi } from '../common';
 import npm, { isValid, isVersion } from '../npm';
+import type { NewValueConfig, VersioningApi } from '../types';
 import { nodeSchedule } from './schedule';
 
 export const id = 'node';
@@ -11,14 +11,14 @@ export const supportsRanges = false;
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string {
   const res = npm.getNewValue({
     currentValue,
     rangeStrategy,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
   });
   if (isVersion(res)) {
     // normalize out any 'v' prefix

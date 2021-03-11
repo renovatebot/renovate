@@ -6,17 +6,18 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
-import { GlobalConfig, RenovateConfig } from '../common';
 import * as massage from '../massage';
 import * as migration from '../migration';
+import type { GlobalConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
-import { PresetApi } from './common';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
+import type { PresetApi } from './types';
+import { PRESET_DEP_NOT_FOUND } from './util';
 
 const presetSources: Record<string, PresetApi> = {
   github,
@@ -151,6 +152,9 @@ export async function getPreset(
     presetName,
     baseConfig,
   });
+  if (!presetConfig) {
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
     const argMapping = {};
@@ -227,7 +231,7 @@ export async function resolveConfigPresets(
             throw err;
           }
           const error = new Error(CONFIG_VALIDATION);
-          if (err.message === 'dep not found') {
+          if (err.message === PRESET_DEP_NOT_FOUND) {
             error.validationError = `Cannot find preset's package (${preset})`;
           } else if (err.message === 'preset renovate-config not found') {
             error.validationError = `Preset package is missing a renovate-config entry (${preset})`;

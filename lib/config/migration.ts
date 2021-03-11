@@ -1,11 +1,11 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { clone } from '../util/clone';
-import { PackageRule, RenovateConfig } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
+import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
 
 const options = getOptions();
 
@@ -465,11 +465,11 @@ export function migrateConfig(
         delete migratedConfig.node.enabled;
         migratedConfig.travis = migratedConfig.travis || {};
         migratedConfig.travis.enabled = true;
-        if (!Object.keys(migratedConfig.node).length) {
-          delete migratedConfig.node;
-        } else {
+        if (Object.keys(migratedConfig.node).length) {
           const subMigrate = migrateConfig(migratedConfig.node, key);
           migratedConfig.node = subMigrate.migratedConfig;
+        } else {
+          delete migratedConfig.node;
         }
       } else if (is.array(val)) {
         const newArray = [];
@@ -493,17 +493,6 @@ export function migrateConfig(
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (
-        (key.startsWith('commitMessage') || key.startsWith('prTitle')) &&
-        is.string(val)
-      ) {
-        migratedConfig[key] = val
-          .replace(/currentVersion/g, 'currentValue')
-          .replace(/newVersion/g, 'newValue')
-          .replace(/newValueMajor/g, 'newMajor')
-          .replace(/newValueMinor/g, 'newMinor')
-          .replace(/newVersionMajor/g, 'newMajor')
-          .replace(/newVersionMinor/g, 'newMinor');
       } else if (key === 'raiseDeprecationWarnings') {
         delete migratedConfig.raiseDeprecationWarnings;
         if (val === false) {
@@ -513,6 +502,22 @@ export function migrateConfig(
         }
       } else if (key === 'binarySource' && val === 'auto') {
         migratedConfig.binarySource = 'global';
+      }
+      const migratedTemplates = {
+        fromVersion: 'currentVersion',
+        newValueMajor: 'newMajor',
+        newValueMinor: 'newMinor',
+        newVersionMajor: 'newMajor',
+        newVersionMinor: 'newMinor',
+        toVersion: 'newVersion',
+      };
+      if (is.string(migratedConfig[key])) {
+        for (const [from, to] of Object.entries(migratedTemplates)) {
+          migratedConfig[key] = (migratedConfig[key] as string).replace(
+            new RegExp(from, 'g'),
+            to
+          );
+        }
       }
     }
     if (migratedConfig.endpoints) {
@@ -542,7 +547,7 @@ export function migrateConfig(
         }
       }
     }
-    const isMigrated = !equal(config, migratedConfig);
+    const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
       // recursive call in case any migrated configs need further migrating
       return {

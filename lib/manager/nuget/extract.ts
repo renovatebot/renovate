@@ -1,8 +1,10 @@
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import { DotnetToolsManifest } from './types';
+import { getSiblingFileName, localPathExists } from '../../util/fs';
+import { hasKey } from '../../util/object';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { DotnetToolsManifest } from './types';
 import { getConfiguredRegistries } from './util';
 
 /**
@@ -17,19 +19,25 @@ import { getConfiguredRegistries } from './util';
  * so we don't include it in the extracting regexp
  */
 const checkVersion = /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
+const elemNames = new Set([
+  'PackageReference',
+  'PackageVersion',
+  'DotNetCliToolReference',
+  'GlobalPackageReference',
+]);
+
+function isXmlElem(node: XmlNode): boolean {
+  return hasKey('name', node);
+}
 
 function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
-  const results = [];
-  const itemGroups = xmlNode.childrenNamed('ItemGroup');
-  for (const itemGroup of itemGroups) {
-    const relevantChildren = [
-      ...itemGroup.childrenNamed('PackageReference'),
-      ...itemGroup.childrenNamed('PackageVersion'),
-      ...itemGroup.childrenNamed('DotNetCliToolReference'),
-      ...itemGroup.childrenNamed('GlobalPackageReference'),
-    ];
-    for (const child of relevantChildren) {
-      const { attr } = child;
+  const results: PackageDependency[] = [];
+  const todo: XmlElement[] = [xmlNode];
+  while (todo.length) {
+    const child = todo.pop();
+    const { name, attr } = child;
+
+    if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
       const version =
         attr?.Version ||
@@ -47,6 +55,8 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
           currentValue,
         });
       }
+    } else {
+      todo.push(...(child.children.filter(isXmlElem) as XmlElement[]));
     }
   }
   return results;
@@ -109,9 +119,14 @@ export async function extractPackageFile(
       ...dep,
       ...(registryUrls && { registryUrls }),
     }));
-    return { deps };
   } catch (err) {
     logger.debug({ err }, `Failed to parse ${packageFile}`);
   }
-  return { deps };
+  const res: PackageFile = { deps };
+  const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
+  // istanbul ignore if
+  if (await localPathExists(lockFileName)) {
+    res.lockFiles = [lockFileName];
+  }
+  return res;
 }

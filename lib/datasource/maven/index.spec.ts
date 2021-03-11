@@ -30,6 +30,21 @@ const config = {
   datasource,
 };
 
+function timestamp(version: string): string {
+  const millis = (version.replace(/[^1-9]/g, '') + '000').slice(0, 3);
+  return `2020-01-01T00:00:00.${millis}Z`;
+}
+
+function generateReleases(versions: string[], ts = false): Release[] {
+  return versions.map((version) => {
+    if (ts) {
+      const releaseTimestamp = timestamp(version);
+      return { version, releaseTimestamp };
+    }
+    return { version };
+  });
+}
+
 describe('datasource/maven', () => {
   beforeEach(() => {
     hostRules.add({
@@ -38,6 +53,11 @@ describe('datasource/maven', () => {
       username: 'username',
       password: 'password',
       timeout: 20000,
+    });
+    hostRules.add({
+      hostType: datasource,
+      hostName: 'custom.registry.renovatebot.com',
+      token: 'abc123',
     });
     jest.resetAllMocks();
     nock.cleanAll();
@@ -49,6 +69,12 @@ describe('datasource/maven', () => {
       .get(
         '/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
       )
+      .reply(200, MYSQL_MAVEN_MYSQL_POM);
+    nock('https://custom.registry.renovatebot.com')
+      .get('/mysql/mysql-connector-java/maven-metadata.xml')
+      .reply(200, MYSQL_MAVEN_METADATA);
+    nock('https://custom.registry.renovatebot.com')
+      .get('/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom')
       .reply(200, MYSQL_MAVEN_MYSQL_POM);
     nock('http://failed_repo')
       .get('/mysql/mysql-connector-java/maven-metadata.xml')
@@ -95,20 +121,17 @@ describe('datasource/maven', () => {
       const path = `/maven2/mysql/mysql-connector-java/${v}/mysql-connector-java-${v}.pom`;
       nock('https://repo.maven.apache.org')
         .head(path)
-        .reply(status, '', { 'Last-Modified': `good timestamp for ${v}` });
+        .reply(status, '', { 'Last-Modified': timestamp(v) });
       nock('http://frontend_for_private_s3_repository')
         .head(path)
-        .reply(status, '', { 'Last-Modified': `bad timestamp for ${v}` });
+        .reply(status, '', { 'Last-Modified': timestamp(v) });
     });
   });
 
   afterEach(() => {
     nock.enableNetConnect();
+    delete process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK;
   });
-
-  function generateReleases(versions: string[]): Release[] {
-    return versions.map((v) => ({ version: v }));
-  }
 
   describe('getReleases', () => {
     it('should return empty if library is not found', async () => {
@@ -166,12 +189,17 @@ describe('datasource/maven', () => {
         depName: 'mysql:mysql-connector-java',
         registryUrls: ['https://repo.maven.apache.org/maven2/'],
       });
-      expect(releases.releases).toEqual(
-        generateReleases(MYSQL_VERSIONS).map(({ version }) => ({
-          version,
-          releaseTimestamp: `good timestamp for ${version}`,
-        }))
-      );
+      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
+    });
+
+    it('should return all versions from a custom repository', async () => {
+      process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK = 'true';
+      const releases = await getPkgReleases({
+        ...config,
+        depName: 'mysql:mysql-connector-java',
+        registryUrls: ['https://custom.registry.renovatebot.com'],
+      });
+      expect(releases).toMatchSnapshot();
     });
 
     it('should return all versions of a specific library if a repository fails', async () => {
@@ -186,12 +214,7 @@ describe('datasource/maven', () => {
           'http://empty_repo',
         ],
       });
-      expect(releases.releases).toEqual(
-        generateReleases(MYSQL_VERSIONS).map(({ version }) => ({
-          version,
-          releaseTimestamp: `good timestamp for ${version}`,
-        }))
-      );
+      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
     });
 
     it('should throw external-host-error if default maven repo fails', async () => {
@@ -220,12 +243,7 @@ describe('datasource/maven', () => {
           'ftp://protocol_error_repo',
         ],
       });
-      expect(releases.releases).toEqual(
-        generateReleases(MYSQL_VERSIONS).map(({ version }) => ({
-          version,
-          releaseTimestamp: `good timestamp for ${version}`,
-        }))
-      );
+      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
     });
 
     it('should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository', async () => {
@@ -250,12 +268,7 @@ describe('datasource/maven', () => {
           'http://invalid_metadata_repo/maven2/',
         ],
       });
-      expect(releases.releases).toEqual(
-        generateReleases(MYSQL_VERSIONS).map(({ version }) => ({
-          version,
-          releaseTimestamp: `good timestamp for ${version}`,
-        }))
-      );
+      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
     });
 
     it('should return all versions of a specific library if a repository fails because a metadata file is not xml', async () => {
@@ -273,12 +286,7 @@ describe('datasource/maven', () => {
           'http://invalid_metadata_repo/maven2/',
         ],
       });
-      expect(releases.releases).toEqual(
-        generateReleases(MYSQL_VERSIONS).map(({ version }) => ({
-          version,
-          releaseTimestamp: `good timestamp for ${version}`,
-        }))
-      );
+      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
     });
 
     it('should return all versions of a specific library if a repository does not end with /', async () => {

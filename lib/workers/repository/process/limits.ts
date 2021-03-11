@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon';
-import { RenovateConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { Pr, platform } from '../../../platform';
 import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 
 export async function getPrHourlyRemaining(
   config: RenovateConfig
@@ -98,15 +98,21 @@ export function getConcurrentBranchesRemaining(
   if (typeof limit === 'number' && limit) {
     logger.debug(`Calculating branchConcurrentLimit (${limit})`);
     try {
-      let currentlyOpen = 0;
+      const existingBranches: string[] = [];
       for (const branch of branches) {
         if (branchExists(branch.branchName)) {
-          currentlyOpen += 1;
+          existingBranches.push(branch.branchName);
         }
       }
-      logger.debug(`${currentlyOpen} branches are currently open`);
-      const concurrentRemaining = Math.max(0, limit - currentlyOpen);
+
+      const existingCount = existingBranches.length;
+      logger.debug(
+        `${existingCount} already existing branches found: ${existingBranches.join()}`
+      );
+
+      const concurrentRemaining = Math.max(0, limit - existingCount);
       logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
+
       return concurrentRemaining;
     } catch (err) {
       logger.error({ err }, 'Error checking concurrent branches');
