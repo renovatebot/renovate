@@ -1,28 +1,38 @@
-import * as datasourceJenkins from '../../datasource/jenkins-plugins';
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
+import * as datasourceJenkins from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 
-export function extractPackageFile(
-  content: string,
-  fileName: string
-): PackageFile | null {
-  logger.trace('jenkins.extractPackageFile()');
-  let deps: PackageDependency[] = [];
+function getDependency(
+  name: string,
+  version: string,
+  url: string,
+  groupId: string
+): PackageDependency {
+  const dep: PackageDependency = {
+    datasource: datasourceJenkins.id,
+    versioning: dockerVersioning.id, // Not so sure about this, how can we instruct renovate to replace a specifc property for yaml ?
+    depName: name,
+    currentValue: version,
+  };
 
-  if (/\.ya?ml$/.test(fileName)) {
-    deps = extractYaml(content);
-  } else {
-    deps = extractText(content);
+  if (!version) {
+    dep.skipReason = SkipReason.NoVersion;
   }
 
-  if (deps == null) return null;
+  if (version === 'latest' || version === 'experimental' || groupId) {
+    dep.skipReason = SkipReason.UnsupportedVersion;
+  }
 
-  return { deps };
+  if (url) {
+    dep.skipReason = SkipReason.InternalPackage;
+  }
+
+  return dep;
 }
 
 function extractYaml(content: string): PackageDependency[] {
@@ -33,7 +43,7 @@ function extractYaml(content: string): PackageDependency[] {
     if (doc?.plugins && is.array(doc.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
-          //TODO: how can we specify if a dependency should be ignored with yaml ?
+          // TODO: how can we specify if a dependency should be ignored with yaml ?
           const dep = getDependency(
             plugin.artifactId,
             plugin.source?.version,
@@ -71,30 +81,22 @@ function extractText(content: string): PackageDependency[] {
   return deps;
 }
 
-function getDependency(
-  name: string,
-  version: string,
-  url: string,
-  groupId: string
-): PackageDependency {
-  const dep: PackageDependency = {
-    datasource: datasourceJenkins.id,
-    versioning: dockerVersioning.id, // Not so sure about this, how can we instruct renovate to replace a specifc property for yaml ?
-    depName: name,
-    currentValue: version,
-  };
+export function extractPackageFile(
+  content: string,
+  fileName: string
+): PackageFile | null {
+  logger.trace('jenkins.extractPackageFile()');
+  let deps: PackageDependency[] = [];
 
-  if (!version) {
-    dep.skipReason = SkipReason.NoVersion;
+  if (/\.ya?ml$/.test(fileName)) {
+    deps = extractYaml(content);
+  } else {
+    deps = extractText(content);
   }
 
-  if (version == 'latest' || version == 'experimental' || groupId) {
-    dep.skipReason = SkipReason.UnsupportedVersion;
+  if (deps == null) {
+    return null;
   }
 
-  if (url) {
-    dep.skipReason = SkipReason.InternalPackage;
-  }
-
-  return dep;
+  return { deps };
 }
