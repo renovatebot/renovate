@@ -9,6 +9,8 @@ const basicEnvVars = [
   'LC_ALL',
   'LANG',
   'DOCKER_HOST',
+  'DOCKER_TLS_VERIFY',
+  'DOCKER_CERT_PATH',
 ];
 
 export function getChildProcessEnv(
