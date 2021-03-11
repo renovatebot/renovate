@@ -307,14 +307,14 @@ export async function extractPackageFile(
           packageJson[depType] as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
-          const dep: PackageDependency = {
+          let dep: PackageDependency = {
             depType,
             depName,
           };
           if (depName !== key) {
             dep.managerData = { key };
           }
-          Object.assign(dep, extractDependency(depType, depName, val));
+          dep = { ...dep, ...extractDependency(depType, depName, val) };
           if (depName === 'node') {
             // This is a special case for Node.js to group it together with other managers
             dep.commitMessageTopic = 'Node.js';

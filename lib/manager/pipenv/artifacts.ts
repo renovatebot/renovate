@@ -1,5 +1,5 @@
 import { quote } from 'shlex';
-import { INTERRUPTED } from '../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -129,7 +129,7 @@ export async function updateArtifacts({
     ];
   } catch (err) {
     // istanbul ignore if
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug({ err }, 'Failed to update Pipfile.lock');

@@ -8,9 +8,9 @@ description: How Renovate Updates and Rebases Branches
 There are many cases where Renovate will need to update a branch/PR after its initial creation, and this document will attempt to describe them.
 
 Note: Renovate doesn't technically do "rebasing" in the Git sense.
-Instead, it manually recreates the same commit based off of the latest commit in base branch.
+Instead, it reapplies all updates into a new commit based off of the head of the base branch.
 
-## If you have made edits
+## No rebasing if you have made edits
 
 First of all, here is the one time when Renovate _won't_ update branches.
 If you have edited a Renovate branch directly (e.g. to make a code fix to allow tests to pass again) then Renovate will stop all updates of that branch.
@@ -27,10 +27,10 @@ You can disable this functionality by configuring `"rebaseWhen": "never"` (not r
 
 There are two cases where Renovate will rebase its branches off the base branch every time they are out of date:
 
-1.  If you manually configure `"rebaseWhen": "behind-base-branch"`
-2.  If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings, and `rebaseWhen` has default value `"auto"`
+1. If you configure `"rebaseWhen": "behind-base-branch"`
+2. If you use the default configuration `"rebaseWhen": "auto"` and the repository has a requirement that branches must be up-to-date before merging (e.g. "Require branches to be up to date before merging" on GitHub, or FF-only settings on Bitbucket Server or GitLab)
 
-In that case Renovate PRs will be continuously rebased off the repository's base branch whenever necessary, even if the PRs are not conflicted.
+In that case Renovate PRs will be rebased off the repository's base branch whenever they are behind the base branch, even if the PRs are not conflicted.
 
 ## Newer Dependency Versions
 
