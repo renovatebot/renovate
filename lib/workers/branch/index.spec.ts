@@ -723,6 +723,7 @@ describe('workers/branch', () => {
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
+          executionMode: 'update',
           commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
@@ -732,6 +733,7 @@ describe('workers/branch', () => {
             ...defaultConfig,
             depName: 'some-dep-name',
             postUpgradeTasks: {
+              executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
               fileFilters: ['modified_file', 'deleted_file'],
             },
@@ -790,6 +792,7 @@ describe('workers/branch', () => {
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
+          executionMode: 'update',
           commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
@@ -799,6 +802,7 @@ describe('workers/branch', () => {
             ...defaultConfig,
             depName: 'some-dep-name',
             postUpgradeTasks: {
+              executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
               fileFilters: ['modified_file', 'deleted_file'],
             },
@@ -869,6 +873,7 @@ describe('workers/branch', () => {
       const inconfig = {
         ...config,
         postUpgradeTasks: {
+          executionMode: 'update',
           commands: ['echo {{{depName}}}', 'disallowed task'],
           fileFilters: [
             'modified_file',
@@ -883,6 +888,7 @@ describe('workers/branch', () => {
             ...defaultConfig,
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
+              executionMode: 'update',
               commands: ['echo {{{depName}}}', 'disallowed task'],
               fileFilters: [
                 'modified_file',
@@ -896,6 +902,7 @@ describe('workers/branch', () => {
             ...defaultConfig,
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
+              executionMode: 'update',
               commands: ['echo {{{depName}}}', 'disallowed task'],
               fileFilters: [
                 'modified_file',
