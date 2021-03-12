@@ -2,17 +2,16 @@ import URL from 'url';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
-import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
 import * as bitbucket from '../bitbucket-tags';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { http } from './common';
 
-export const id = 'go';
+export { id } from './common';
 
-const http = new Http(id);
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
 
 interface DataSource {
