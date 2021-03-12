@@ -954,7 +954,7 @@ describe('workers/branch', () => {
       ).not.toBeUndefined();
     });
 
-    it.only('executes post-upgrade tasks once when set to branch mode', async () => {
+    it('executes post-upgrade tasks once when set to branch mode', async () => {
       const updatedPackageFile: File = {
         name: 'pom.xml',
         contents: 'pom.xml file contents',
