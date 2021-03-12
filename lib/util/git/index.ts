@@ -202,7 +202,7 @@ async function cleanLocalBranches(): Promise<void> {
  * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
  * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
  */
-export async function setBranchPrefix(branchPrefix: string): Promise<void> {
+async function setBranchPrefix(branchPrefix: string): Promise<void> {
   config.branchPrefix = branchPrefix;
   // If the repo is already cloned then set branchPrefix now, otherwise it will be called again during syncGit()
   if (gitInitialized) {
@@ -217,8 +217,21 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
   }
 }
 
-export function setIgnoredAuthors(ignoredAuthors?: string[]): void {
+function setIgnoredAuthors(ignoredAuthors?: string[]): void {
   config.ignoredAuthors = ignoredAuthors ?? [];
+}
+
+export interface UserRepoConfig {
+  branchPrefix: string;
+  gitIgnoredAuthors: string[];
+}
+
+export async function setUserRepoConfig({
+  branchPrefix,
+  gitIgnoredAuthors,
+}: Partial<UserRepoConfig>): Promise<void> {
+  await setBranchPrefix(branchPrefix);
+  setIgnoredAuthors(gitIgnoredAuthors);
 }
 
 export async function getSubmodules(): Promise<string[]> {
