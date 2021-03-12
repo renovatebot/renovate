@@ -655,6 +655,15 @@ export async function commitFiles({
     const commitRes = await git.commit(message, [], {
       '--no-verify': null,
     });
+    if (
+      commitRes.summary &&
+      commitRes.summary.changes === 0 &&
+      commitRes.summary.insertions === 0 &&
+      commitRes.summary.deletions === 0
+    ) {
+      logger.warn({ commitRes }, 'Detected empty commit - aborting git push');
+      return null;
+    }
     logger.debug({ result: commitRes }, `git commit`);
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {

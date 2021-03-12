@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { getPkgReleases } from '../../datasource';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
@@ -47,7 +47,7 @@ export async function getPackageUpdates(
 
   // TODO: `config.currentValue` is a string!
   (config.currentValue as any).sort((a, b) => a - b);
-  if (equal(config.currentValue, newValue)) {
+  if (dequal(config.currentValue, newValue)) {
     return [];
   }
   return [

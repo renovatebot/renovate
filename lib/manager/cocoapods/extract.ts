@@ -27,14 +27,14 @@ export interface ParsedLine {
 }
 
 export function parseLine(line: string): ParsedLine {
-  const result: ParsedLine = {};
+  let result: ParsedLine = {};
   if (!line) {
     return result;
   }
   for (const regex of Object.values(regexMappings)) {
     const match = regex.exec(line.replace(/#.*$/, ''));
     if (match?.groups) {
-      Object.assign(result, match.groups);
+      result = { ...result, ...match.groups };
     }
   }
 

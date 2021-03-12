@@ -26,17 +26,17 @@ To install Renovate Bot itself, either enable the [Renovate App](https://github.
 
 ## Technical Details
 
-#### Module Tidying
+### Module Tidying
 
 Go Modules tidying is not enabled by default, and is opt-in via the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) config option.
 The reason for this is that a `go mod tidy` command may make changes to `go.mod` and `go.sum` that are completely unrelated to the updated module(s) in the PR, and so may be confusing to some users.
 
-#### Module Vendoring
+### Module Vendoring
 
 Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present.
 Renovate will commit all files changed within the `vendor/` folder.
 
-#### Go binary version
+### Go binary version
 
 By default, Renovate will keep up with the very latest version of `go`.
 

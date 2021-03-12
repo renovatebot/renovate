@@ -227,4 +227,26 @@ describe('updateArtifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('strips protocol version from feed url', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json' as any);
+    getConfiguredRegistries.mockResolvedValueOnce([
+      {
+        name: 'myRegistry',
+        url: 'https://my-registry.example.org#protocolVersion=3',
+      },
+    ] as never);
+    hostRules.find.mockImplementationOnce(() => ({}));
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: ['dep'],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });
