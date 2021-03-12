@@ -42,9 +42,8 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
     return oldValue;
   }
 
-  newTuple.splice(idx);
   while (idx < 3) {
-    newTuple.push(0);
+    newTuple[idx] = 0;
     idx += 1;
   }
 
