@@ -34,7 +34,7 @@ You can disable this functionality by configuring `"rebaseWhen": "never"` (not r
 
 ## Rebasing out-of-date branches
 
-There are two cases where Renovate will rebase its branches off the base branch every time they are out of date:
+There are multiple cases where Renovate will rebase its branches off the base branch every time they are out of date:
 
 1. If you configure `"rebaseWhen": "behind-base-branch"`
 1. If you use the default configuration `"rebaseWhen": "auto"` and the repository has a requirement that branches must be up-to-date before merging (e.g. "Require branches to be up to date before merging" on GitHub, or fast-forward-only settings on Bitbucket Server or GitLab)
