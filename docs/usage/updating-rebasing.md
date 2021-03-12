@@ -14,6 +14,7 @@ Here is a list of the most common cases where Renovate must update/rebase the br
 - When you have manually told Renovate to rebase when behind the base branch with `"rebaseWhen": "behind-base-branch"`
 - When a newer version of the dependency is released
 - When you request a manual rebase from the Renovate bot
+- When you use `automerge` on a branch / pr
 
 Renovate uses its own version of "rebasing", which is _not the same_ as doing a `git rebase` with Git.
 Instead, Renovate reapplies all updates into a new commit based off of the head of the base branch.
