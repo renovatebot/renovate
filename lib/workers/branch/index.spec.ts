@@ -953,5 +953,109 @@ describe('workers/branch', () => {
         )
       ).not.toBeUndefined();
     });
+
+    it.only('executes post-upgrade tasks once when set to branch mode', async () => {
+      const updatedPackageFile: File = {
+        name: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [updatedPackageFile],
+        artifactErrors: [],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            name: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      } as never);
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        body: `- [x] <!-- rebase-check -->`,
+      } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce({
+        modified: ['modified_file', 'modified_then_deleted_file'],
+        not_added: [],
+        deleted: ['deleted_file', 'deleted_then_created_file'],
+      } as StatusResult);
+
+      fs.outputFile.mockReturnValue();
+      fs.readFile
+        .mockResolvedValueOnce(Buffer.from('modified file content'))
+        .mockResolvedValueOnce(Buffer.from('this file will not exists'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
+        allowPostUpgradeCommandTemplating: true,
+        trustLevel: 'high',
+      };
+      setAdminConfig(adminConfig);
+
+      const inconfig = {
+        ...config,
+        postUpgradeTasks: {
+          executionMode: 'branch',
+          commands: ['echo hardcoded-string', 'disallowed task'],
+          fileFilters: [
+            'modified_file',
+            'deleted_file',
+            'deleted_then_created_file',
+            'modified_then_deleted_file',
+          ],
+        },
+        localDir: '/localDir',
+        upgrades: [
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name-1',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo hardcoded-string', 'disallowed task'],
+              fileFilters: [
+                'modified_file',
+                'deleted_file',
+                'deleted_then_created_file',
+                'modified_then_deleted_file',
+              ],
+            },
+          } as never,
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name-2',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo hardcoded-string', 'disallowed task'],
+              fileFilters: [
+                'modified_file',
+                'deleted_file',
+                'deleted_then_created_file',
+                'modified_then_deleted_file',
+              ],
+            },
+          } as never,
+        ],
+      };
+
+      const result = await branchWorker.processBranch(inconfig);
+      expect(result).toEqual(ProcessBranchResult.Done);
+      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
+        cwd: '/localDir',
+      });
+      expect(exec.exec).toHaveBeenCalledTimes(1);
+      expect(
+        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+          (f) => f.name === 'modified_file'
+        ).contents as Buffer).toString()
+      ).toBe('modified file content');
+    });
   });
 });

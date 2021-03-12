@@ -18,13 +18,28 @@ export default async function postUpgradeCommandExecutor(
   const allowedPostUpgradeCommands = adminConfig.allowedPostUpgradeCommands;
   const allowPostUpgradeCommandTemplating =
     executionMode === 'update' && adminConfig.allowPostUpgradeCommandTemplating;
+  let filteredUpgradeCommands: BranchUpgradeConfig[];
 
-  const filteredUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
-    ({ postUpgradeTasks }) =>
-      !postUpgradeTasks ||
-      !postUpgradeTasks.executionMode ||
-      postUpgradeTasks.executionMode === executionMode
-  );
+  if (executionMode === 'branch') {
+    filteredUpgradeCommands = [
+      {
+        depName: config.upgrades.map(({ depName }) => depName).join(' '),
+        branchName: config.branchName,
+        postUpgradeTasks:
+          config.postUpgradeTasks.executionMode === 'branch'
+            ? config.postUpgradeTasks
+            : undefined,
+        fileFilters: config.fileFilters,
+      },
+    ];
+  } else {
+    filteredUpgradeCommands = config.upgrades.filter(
+      ({ postUpgradeTasks }) =>
+        !postUpgradeTasks ||
+        !postUpgradeTasks.executionMode ||
+        postUpgradeTasks.executionMode === executionMode
+    );
+  }
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -35,8 +50,9 @@ export default async function postUpgradeCommandExecutor(
       },
       `Checking for ${executionMode} level post-upgrade tasks`
     );
-    const commands = upgrade.postUpgradeTasks.commands || [];
-    const fileFilters = upgrade.postUpgradeTasks.fileFilters || [];
+    const commands = upgrade.postUpgradeTasks?.commands || [];
+
+    const fileFilters = upgrade.postUpgradeTasks?.fileFilters || [];
 
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
