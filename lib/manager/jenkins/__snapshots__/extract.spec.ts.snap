@@ -53,13 +53,12 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "currentValue": 2.1,
+    "currentValue": "2.1",
     "datasource": "jenkins-plugins",
     "depName": "job-import-plugin",
     "versioning": "docker",
   },
   Object {
-    "currentValue": undefined,
     "datasource": "jenkins-plugins",
     "depName": "docker",
     "skipReason": "no-version",
@@ -73,7 +72,6 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "currentValue": undefined,
     "datasource": "jenkins-plugins",
     "depName": "script-security",
     "skipReason": "internal-package",

@@ -15,12 +15,13 @@ function getDependency(
 ): PackageDependency {
   const dep: PackageDependency = {
     datasource: datasourceJenkins.id,
-    versioning: dockerVersioning.id, // Not so sure about this, how can we instruct renovate to replace a specifc property for yaml ?
+    versioning: dockerVersioning.id,
     depName: name,
-    currentValue: version,
   };
 
-  if (!version) {
+  if (version) {
+    dep.currentValue = version.toString();
+  } else {
     dep.skipReason = SkipReason.NoVersion;
   }
 
@@ -32,6 +33,7 @@ function getDependency(
     dep.skipReason = SkipReason.InternalPackage;
   }
 
+  logger.debug({ dep }, 'Jenkins plugin dependency');
   return dep;
 }
 
