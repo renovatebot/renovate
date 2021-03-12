@@ -38,7 +38,7 @@ There are multiple cases where Renovate will rebase its branches off the base br
 
 1. If you configure `"rebaseWhen": "behind-base-branch"`
 1. If you use the default configuration `"rebaseWhen": "auto"` and the repository has a requirement that branches must be up-to-date before merging (e.g. "Require branches to be up to date before merging" on GitHub, or fast-forward-only settings on Bitbucket Server or GitLab)
-1. If you configure `automerge=true` ...
+1. If you use the default configuration `"rebaseWhen" : "auto"` and configure `"automerge" : true`
 
 In that case Renovate PRs will be rebased off the repository's base branch whenever they are behind the base branch, even if the PRs are not conflicted.
 
