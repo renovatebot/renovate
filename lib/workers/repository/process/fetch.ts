@@ -19,7 +19,7 @@ async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
-  const dep = clone(indep);
+  let dep = clone(indep);
   dep.updates = [];
   if (dep.skipReason) {
     return dep;
@@ -39,7 +39,10 @@ async function fetchDepUpdates(
     dep.skipReason = SkipReason.Disabled;
   } else {
     if (depConfig.datasource) {
-      Object.assign(dep, await lookupUpdates(depConfig as LookupUpdateConfig));
+      dep = {
+        ...dep,
+        ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
+      };
     } else {
       dep.updates = await getPackageUpdates(manager, depConfig);
     }
