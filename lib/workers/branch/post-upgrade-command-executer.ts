@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { getAdminConfig } from '../../config/admin';
+import { ExecutionMode } from '../../config/types';
 import { addMeta, logger } from '../../logger';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
@@ -10,7 +11,7 @@ import * as template from '../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../types';
 
 export default async function postUpgradeCommandExecutor(
-  executionMode = 'update',
+  executionMode: ExecutionMode,
   config: BranchConfig
 ): Promise<File[]> {
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
