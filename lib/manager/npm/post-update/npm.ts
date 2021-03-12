@@ -100,6 +100,11 @@ export async function generateLockFile(
       commands.push(updateCmd);
     }
 
+    if (upgrades.some((upgrade) => upgrade.isRemediation)) {
+      // We need to run twice to get the correct lock file
+      commands.push(`npm install ${cmdOptions}`.trim());
+    }
+
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('npmDedupe')) {
       logger.debug('Performing npm dedupe');
