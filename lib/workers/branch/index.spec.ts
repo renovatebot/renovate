@@ -870,7 +870,7 @@ describe('workers/branch', () => {
       };
       setAdminConfig(adminConfig);
 
-      const inconfig = {
+      const inconfig: BranchConfig = {
         ...config,
         postUpgradeTasks: {
           executionMode: 'update',
