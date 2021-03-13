@@ -263,6 +263,7 @@ Object {
       "currentValue": ">= 0.13",
       "datasource": "github-tags",
       "depName": "hashicorp/terraform",
+      "depType": "required_version",
       "extractVersion": "v(?<version>.*)$",
       "lineNumber": 205,
     },
