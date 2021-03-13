@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { parseUrl } from '../../util/url';
+import { parseUrl, parseUrlLegacy } from '../../util/url';
 import * as nugetVersioning from '../../versioning/nuget';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as v2 from './v2';
@@ -15,7 +15,8 @@ export function parseRegistryUrl(
   registryUrl: string
 ): { feedUrl: string; protocolVersion: number } {
   try {
-    const parsedUrl = parseUrl(registryUrl);
+    // TODO: check why test is failing with whatwg url api
+    const parsedUrl = parseUrlLegacy(registryUrl);
     let protocolVersion = 2;
     const protocolVersionRegExp = /#protocolVersion=(2|3)/;
     const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
