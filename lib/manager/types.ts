@@ -94,7 +94,6 @@ export interface PackageFile<T = Record<string, any>>
   parent?: string;
   skipInstalls?: boolean;
   yarnrc?: string;
-  yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }

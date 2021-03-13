@@ -18,6 +18,7 @@ Object {
   "managerData": Object {
     "packageJsonName": undefined,
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -25,7 +26,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -142,6 +142,7 @@ Object {
   "managerData": Object {
     "packageJsonName": undefined,
     "packageJsonType": "library",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -149,7 +150,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": false,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -306,6 +306,7 @@ Object {
   "managerData": Object {
     "packageJsonName": undefined,
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -313,7 +314,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -356,6 +356,7 @@ Object {
   "managerData": Object {
     "packageJsonName": undefined,
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -363,7 +364,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -417,6 +417,7 @@ Object {
   "managerData": Object {
     "packageJsonName": undefined,
     "packageJsonType": "library",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -424,7 +425,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -472,6 +472,7 @@ Object {
   "managerData": Object {
     "packageJsonName": undefined,
     "packageJsonType": "library",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -479,7 +480,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -609,6 +609,7 @@ Object {
   "managerData": Object {
     "packageJsonName": "renovate",
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -616,7 +617,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -746,6 +746,7 @@ Object {
   "managerData": Object {
     "packageJsonName": "renovate",
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -753,7 +754,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -883,6 +883,7 @@ Object {
   "managerData": Object {
     "packageJsonName": "renovate",
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -890,7 +891,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": "yarn.lock",
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -906,6 +906,9 @@ Object {
   "managerData": Object {
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": Array [
+      "packages/*",
+    ],
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -913,9 +916,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": Array [
-    "packages/*",
-  ],
   "yarnrc": undefined,
 }
 `;
@@ -1045,6 +1045,7 @@ Object {
   "managerData": Object {
     "packageJsonName": "renovate",
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1052,7 +1053,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
@@ -1068,6 +1068,9 @@ Object {
   "managerData": Object {
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": Array [
+      "packages/*",
+    ],
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1075,9 +1078,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": Array [
-    "packages/*",
-  ],
   "yarnrc": undefined,
 }
 `;
@@ -1093,6 +1093,9 @@ Object {
   "managerData": Object {
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": Array [
+      "packages/*",
+    ],
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1100,9 +1103,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": Array [
-    "packages/*",
-  ],
   "yarnrc": undefined,
 }
 `;
@@ -1232,6 +1232,7 @@ Object {
   "managerData": Object {
     "packageJsonName": "renovate",
     "packageJsonType": "app",
+    "yarnWorkspacesPackages": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1239,7 +1240,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;

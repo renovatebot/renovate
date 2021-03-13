@@ -4,6 +4,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import type { PackageFile } from '../../types';
+import { NpmManagerData } from '../types';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
   const res = patterns.some(
@@ -26,8 +27,9 @@ export function detectMonorepos(
       lernaDir,
       lernaClient,
       lernaPackages,
-      yarnWorkspacesPackages,
+      managerData = {},
     } = p;
+    const { yarnWorkspacesPackages } = managerData as NpmManagerData;
     const basePath = upath.dirname(packageFile);
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {

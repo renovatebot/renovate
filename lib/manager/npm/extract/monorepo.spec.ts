@@ -111,7 +111,7 @@ describe('manager/npm/extract', () => {
           lernaDir: '.',
           lernaPackages: ['oldpackages/*'],
           lernaClient: 'yarn',
-          yarnWorkspacesPackages: ['packages/*'],
+          managerData: { yarnWorkspacesPackages: ['packages/*'] },
         },
         {
           packageFile: 'packages/a/package.json',
@@ -130,7 +130,7 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          yarnWorkspacesPackages: 'packages/*',
+          managerData: { yarnWorkspacesPackages: 'packages/*' },
         },
         {
           packageFile: 'packages/a/package.json',

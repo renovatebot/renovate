@@ -21,6 +21,7 @@ Array [
     "managerData": Object {
       "packageJsonName": undefined,
       "packageJsonType": "app",
+      "yarnWorkspacesPackages": undefined,
     },
     "npmLock": undefined,
     "npmrc": undefined,
@@ -29,7 +30,6 @@ Array [
     "pnpmShrinkwrap": undefined,
     "skipInstalls": undefined,
     "yarnLock": undefined,
-    "yarnWorkspacesPackages": undefined,
     "yarnrc": undefined,
   },
 ]

@@ -131,10 +131,12 @@ Array [
     "lernaPackages": Array [
       "oldpackages/*",
     ],
+    "managerData": Object {
+      "yarnWorkspacesPackages": Array [
+        "packages/*",
+      ],
+    },
     "packageFile": "package.json",
-    "yarnWorkspacesPackages": Array [
-      "packages/*",
-    ],
   },
   Object {
     "lernaClient": "yarn",
@@ -162,8 +164,10 @@ Array [
 exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings without lerna 1`] = `
 Array [
   Object {
+    "managerData": Object {
+      "yarnWorkspacesPackages": "packages/*",
+    },
     "packageFile": "package.json",
-    "yarnWorkspacesPackages": "packages/*",
   },
   Object {
     "hasYarnWorkspaces": true,
