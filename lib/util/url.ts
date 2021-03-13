@@ -52,7 +52,7 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
 export function parseUrl(url: string): URL | null {
   try {
     return new URL(url);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }
