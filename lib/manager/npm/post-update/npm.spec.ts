@@ -26,7 +26,7 @@ describe('generateLockFile', () => {
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const skipInstalls = true;
+    const artifactUpdateApproach = 'deep';
     const dockerMapDotfiles = true;
     const postUpdateOptions = ['npmDedupe'];
     const updates = [
@@ -36,7 +36,7 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { dockerMapDotfiles, skipInstalls, postUpdateOptions },
+      { dockerMapDotfiles, artifactUpdateApproach, postUpdateOptions },
       updates
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -47,7 +47,7 @@ describe('generateLockFile', () => {
   it('performs lock file updates', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const skipInstalls = true;
+    const artifactUpdateApproach = 'shallow';
     const updates = [
       { depName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
     ];
@@ -55,7 +55,7 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls },
+      { artifactUpdateApproach },
       updates
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -68,12 +68,12 @@ describe('generateLockFile', () => {
     fs.pathExists.mockResolvedValueOnce(true);
     fs.move = jest.fn();
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const skipInstalls = true;
+    const artifactUpdateApproach = 'shallow';
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { skipInstalls }
+      { artifactUpdateApproach }
     );
     expect(fs.pathExists).toHaveBeenCalledWith(
       upath.join('some-dir', 'package-lock.json')
@@ -97,12 +97,12 @@ describe('generateLockFile', () => {
     fs.pathExists.mockResolvedValueOnce(false);
     fs.move = jest.fn();
     fs.readFile = jest.fn((_, _1) => 'package-lock-contents') as never;
-    const skipInstalls = true;
+    const artifactUpdateApproach = 'shallow';
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { skipInstalls }
+      { artifactUpdateApproach }
     );
     expect(fs.pathExists).toHaveBeenCalledWith(
       upath.join('some-dir', 'package-lock.json')
@@ -120,13 +120,13 @@ describe('generateLockFile', () => {
   it('performs full install', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const skipInstalls = false;
+    const artifactUpdateApproach = 'deep';
     const binarySource = BinarySource.Global;
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, binarySource }
+      { artifactUpdateApproach, binarySource }
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();

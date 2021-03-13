@@ -24,7 +24,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option)
+The command to install dependencies is necessary because, by default, the installation of dependencies is skipped (see the `artifactUpdateApproach` admin option)
 
 ```json
 {
@@ -64,6 +64,12 @@ e.g.
   "trustLevel": "high"
 }
 ```
+
+## artifactUpdateApproach
+
+By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
+If this is set to 'deep', then a full install of modules will be done.
+This is currently applicable to `npm` and `yarn` only, and automatically set to `deep` when a full installis detected as necessary.
 
 ## autodiscover
 
@@ -262,12 +268,6 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
-
-## skipInstalls
-
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 

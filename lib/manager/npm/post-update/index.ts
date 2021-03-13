@@ -714,8 +714,15 @@ export async function getAdditionalFiles(
     } else {
       lockFile = config.yarnLock || 'yarn.lock';
     }
-    const skipInstalls =
-      lockFile === 'npm-shrinkwrap.json' ? false : config.skipInstalls;
+    let { artifactUpdateApproach } = config;
+    if (
+      artifactUpdateApproach === 'auto' &&
+      (lockFile === 'npm-shrinkwrap.json' ||
+        config.managerData?.hasFileRefs ||
+        config.postUpdateOptions?.includes('npmDedupe'))
+    ) {
+      artifactUpdateApproach = 'deep';
+    }
     const fullLearnaFileDir = upath.join(config.localDir, lernaDir);
     const npmrcContent = await getNpmrcContent(fullLearnaFileDir);
     await updateNpmrcContent(
@@ -728,7 +735,7 @@ export async function getAdditionalFiles(
       fullLearnaFileDir,
       config,
       env,
-      skipInstalls
+      artifactUpdateApproach
     );
     // istanbul ignore else
     if (res.stderr) {

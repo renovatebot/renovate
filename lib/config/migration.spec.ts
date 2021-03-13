@@ -42,6 +42,7 @@ describe('config/migration', () => {
         binarySource: 'auto',
         automergeMinor: true,
         automergePatch: true,
+        skipInstalls: true,
         masterIssue: 'true',
         masterIssueTitle: 'foo',
         gomodTidy: true,

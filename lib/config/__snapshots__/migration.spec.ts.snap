@@ -78,6 +78,7 @@ Array [
 exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`] = `
 Object {
   "additionalBranchPrefix": "{{parentDir}}-",
+  "artifactUpdateApproach": "shallow",
   "autodiscover": true,
   "automerge": false,
   "automergeType": "branch",
