@@ -215,7 +215,7 @@ For example:
 }
 ```
 
-Then in each of your repositories you can add your renovate config like:
+Then in each of your repositories you can add your Renovate config like:
 
 ```json
   "extends": ["fastcore"]
