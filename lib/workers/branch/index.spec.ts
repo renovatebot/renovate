@@ -9,9 +9,9 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
-import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
+import { BranchConfig, PrResult, ProcessBranchResult } from '../types';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
@@ -219,6 +219,22 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.PrEdited);
     });
+    it('continues branch if branch edited and but PR found', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('abc123');
+      platform.findPr.mockResolvedValueOnce({ sha: 'abc123' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual(ProcessBranchResult.Error);
+    });
+    it('skips branch if branch edited and and PR found with sha mismatch', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('abc123');
+      platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual(ProcessBranchResult.PrEdited);
+    });
     it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -404,7 +420,7 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
-      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
     it('ensures PR and adds lock file error comment if no releaseTimestamp', async () => {

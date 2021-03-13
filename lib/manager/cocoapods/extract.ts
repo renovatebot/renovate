@@ -3,7 +3,7 @@ import * as datasourcePod from '../../datasource/pod';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
@@ -27,14 +27,14 @@ export interface ParsedLine {
 }
 
 export function parseLine(line: string): ParsedLine {
-  const result: ParsedLine = {};
+  let result: ParsedLine = {};
   if (!line) {
     return result;
   }
   for (const regex of Object.values(regexMappings)) {
     const match = regex.exec(line.replace(/#.*$/, ''));
     if (match?.groups) {
-      Object.assign(result, match.groups);
+      result = { ...result, ...match.groups };
     }
   }
 

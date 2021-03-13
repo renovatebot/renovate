@@ -27,10 +27,22 @@ describe('workers/repository/updates/flatten', () => {
           },
         },
       ];
+      config.remediations = {
+        'package-lock.json': [
+          {
+            datasoource: 'npm',
+            depName: 'foo',
+            currentVersion: '1.2.0',
+            newVersion: '1.3.0',
+            prBodyNotes: '',
+          },
+        ],
+      };
       const packageFiles = {
         npm: [
           {
             packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
             deps: [
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
@@ -96,11 +108,12 @@ describe('workers/repository/updates/flatten', () => {
         ],
       };
       const res = await flattenUpdates(config, packageFiles);
-      expect(res).toHaveLength(12);
+      expect(res).toHaveLength(13);
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
-      expect(res.filter((r) => r.depNameShort)).toHaveLength(9); // lockFileMaintenance has no depName
+      expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
+      expect(res.filter((r) => r.depNameShort)).toHaveLength(10); // lockFileMaintenance has no depName
     });
   });
 });

@@ -5,7 +5,7 @@ import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';

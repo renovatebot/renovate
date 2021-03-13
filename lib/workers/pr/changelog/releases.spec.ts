@@ -1,18 +1,14 @@
-import { getName, mocked, partial } from '../../../../test/util';
+import { getName, partial } from '../../../../test/util';
 import * as datasource from '../../../datasource';
 import * as dockerVersioning from '../../../versioning/docker';
 import * as npmVersioning from '../../../versioning/npm';
-import { BranchUpgradeConfig } from '../../common';
+import type { BranchUpgradeConfig } from '../../types';
 import * as releases from './releases';
-
-jest.mock('../../../datasource');
-
-const ds = mocked(datasource);
 
 describe(getName(__filename), () => {
   describe('getReleaseNotes()', () => {
     beforeEach(() => {
-      ds.getPkgReleases.mockResolvedValueOnce({
+      jest.spyOn(datasource, 'getPkgReleases').mockResolvedValueOnce({
         releases: [
           {
             version: '1.0.0',

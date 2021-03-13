@@ -1,9 +1,10 @@
 import { readFileSync } from 'fs';
 import * as upath from 'upath';
-import { ExtractConfig } from '../common';
+import { getName } from '../../../test/util';
+import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
 
-describe('lib/manager/nuget/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     let config: ExtractConfig;
     beforeEach(() => {
@@ -25,6 +26,7 @@ describe('lib/manager/nuget/extract', () => {
       );
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(1);
     });
     it('extracts all dependencies', async () => {
       const packageFile = 'sample.csproj';
@@ -34,6 +36,7 @@ describe('lib/manager/nuget/extract', () => {
       );
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(17);
     });
     it('extracts all dependencies from global packages file', async () => {
       const packageFile = 'packages.props';
@@ -43,6 +46,7 @@ describe('lib/manager/nuget/extract', () => {
       );
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(17);
     });
     it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';

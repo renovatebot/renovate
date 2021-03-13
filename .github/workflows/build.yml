@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - master
-      - 'renovate/**'
 
-  pull_request:
+  workflow_dispatch:
 
 env:
   YARN_MODULES_CACHE_KEY: v1
@@ -24,14 +23,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12, 14]
+        node-version: [14]
         python-version: [3.8]
         java-version: [11]
-        exclude:
-          - os: windows-latest
-            node-version: 12
-          - os: macos-latest
-            node-version: 12
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
@@ -73,6 +67,8 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 2
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
@@ -91,26 +87,16 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build
-        run: yarn build
-
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
-
-      - name: Upload coverage
-        uses: actions/upload-artifact@v2.2.2
-        if: always() && env.coverage == 'true'
-        with:
-          name: coverage
-          path: coverage
+        run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        shell: bash
+        uses: codecov/codecov-action@v1.2.2
         if: always() && env.coverage == 'true'
-        continue-on-error: true
-        run: bash <(curl -s https://codecov.io/bash)
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      # build after tests to exclude files
+      - name: Build
+        run: yarn build
 
       - name: E2E Test
         run: yarn test-e2e
@@ -158,6 +144,7 @@ jobs:
 
       - name: Lint
         run: |
+          yarn ls-lint
           yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
           yarn prettier
 

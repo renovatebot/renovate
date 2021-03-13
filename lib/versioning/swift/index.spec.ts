@@ -1,4 +1,4 @@
-import { RangeStrategy } from '..';
+import type { RangeStrategy } from '../../types';
 import swift from '.';
 
 const {

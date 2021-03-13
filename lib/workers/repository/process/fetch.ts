@@ -8,18 +8,18 @@ import {
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
-import { PackageDependency, PackageFile } from '../../../manager/common';
+import type { PackageDependency, PackageFile } from '../../../manager/types';
 import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates } from './lookup';
-import { LookupUpdateConfig } from './lookup/common';
+import type { LookupUpdateConfig } from './lookup/types';
 
 async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
-  const dep = clone(indep);
+  let dep = clone(indep);
   dep.updates = [];
   if (dep.skipReason) {
     return dep;
@@ -39,7 +39,10 @@ async function fetchDepUpdates(
     dep.skipReason = SkipReason.Disabled;
   } else {
     if (depConfig.datasource) {
-      Object.assign(dep, await lookupUpdates(depConfig as LookupUpdateConfig));
+      dep = {
+        ...dep,
+        ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
+      };
     } else {
       dep.updates = await getPackageUpdates(manager, depConfig);
     }

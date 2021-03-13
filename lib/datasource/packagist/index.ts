@@ -8,7 +8,7 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import * as composerVersioning from '../../versioning/composer';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'packagist';
 export const defaultRegistryUrls = ['https://packagist.org'];
@@ -19,13 +19,13 @@ const http = new Http(id);
 
 // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
 function getHostOpts(url: string): HttpOptions {
-  const opts: HttpOptions = {};
+  let opts: HttpOptions = {};
   const { username, password } = hostRules.find({
     hostType: id,
     url,
   });
   if (username && password) {
-    Object.assign(opts, { username, password });
+    opts = { ...opts, username, password };
   }
   return opts;
 }

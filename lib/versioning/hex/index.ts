@@ -1,5 +1,5 @@
-import { NewValueConfig, VersioningApi } from '../common';
 import { api as npm } from '../npm';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'hex';
 export const displayName = 'Hex';
@@ -32,10 +32,10 @@ function npm2hex(input: string): string {
     if (i < res.length - 1 && res[i + 1].includes('||')) {
       output += res[i] + ' or ';
       i += 1;
-    } else if (!operators.includes(res[i])) {
-      output += res[i] + ' and ';
-    } else {
+    } else if (operators.includes(res[i])) {
       output += res[i] + ' ';
+    } else {
+      output += res[i] + ' and ';
     }
   }
   return output;
@@ -78,7 +78,7 @@ const getNewValue = ({
     newSemver = newSemver.replace(
       /\^\s*(\d+\.\d+)/,
       (_str, p1: string) =>
-        `~> ${rangeStrategy !== 'bump' ? p1.slice(0, -2) : p1}`
+        `~> ${rangeStrategy === 'bump' ? p1 : p1.slice(0, -2)}`
     );
   } else {
     newSemver = newSemver.replace(/~\s*(\d+\.\d+\.\d)/, '~> $1');

@@ -1,6 +1,6 @@
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as template from '../../../util/template';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 import releaseNotesHbs from '../changelog/hbs-template';
 
 export function getChangelogs(config: BranchConfig): string {

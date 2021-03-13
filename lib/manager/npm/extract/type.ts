@@ -1,4 +1,4 @@
-import { NpmPackage } from './common';
+import type { NpmPackage } from './types';
 
 export function mightBeABrowserLibrary(packageJson: NpmPackage): boolean {
   // return true unless we're sure it's not a browser library

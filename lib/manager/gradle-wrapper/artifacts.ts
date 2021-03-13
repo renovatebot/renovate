@@ -1,16 +1,17 @@
 import { stat } from 'fs-extra';
 import { resolve } from 'upath';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { StatusResult, getRepoStatus } from '../../util/git';
 import { Http } from '../../util/http';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
   extraEnv,
   gradleWrapperFileName,
   prepareGradleCommand,
 } from '../gradle/utils';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const http = new Http('gradle-wrapper');
 
@@ -92,6 +93,10 @@ export async function updateArtifacts({
     try {
       await exec(cmd, execOptions);
     } catch (err) {
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
       logger.warn(
         { err },
         'Error executing gradle wrapper update command. It can be not a critical one though.'

@@ -145,9 +145,8 @@ export async function removeDockerContainer(
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.trace({ err }, 'removeDockerContainer err');
-    logger.info(
-      { image, containerName, cmd },
+    logger.warn(
+      { image, containerName, cmd, err },
       'Could not remove Docker container'
     );
   }

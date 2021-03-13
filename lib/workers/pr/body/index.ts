@@ -1,7 +1,7 @@
 import { platform } from '../../../platform';
 import * as template from '../../../util/template';
 import { get } from '../../../versioning';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -85,6 +85,6 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
   let prBody = template.compile(prBodyTemplate, content, false);
   prBody = prBody.trim();
   prBody = prBody.replace(/\n\n\n+/g, '\n\n');
-  prBody = platform.getPrBody(prBody);
+  prBody = platform.massageMarkdown(prBody);
   return prBody;
 }
