@@ -16,11 +16,15 @@ import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
   ExtractConfig,
-  NpmLockFiles,
   PackageDependency,
   PackageFile,
 } from '../../types';
-import { LernaClient, NpmManagerData, PackageJsonType } from '../types';
+import {
+  LernaClient,
+  NpmLockFiles,
+  NpmManagerData,
+  PackageJsonType,
+} from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -80,19 +84,19 @@ export async function extractPackageFile(
     ? 'library'
     : 'app';
 
-  const lockFiles: NpmLockFiles = {
+  const lockFileNames: NpmLockFiles = {
     yarnLock: 'yarn.lock',
     packageLock: 'package-lock.json',
     shrinkwrapJson: 'npm-shrinkwrap.json',
     pnpmShrinkwrap: 'pnpm-lock.yaml',
   };
 
-  for (const [key, val] of Object.entries(lockFiles)) {
+  const lockFiles: NpmLockFiles = {};
+
+  for (const [key, val] of Object.entries(lockFileNames)) {
     const filePath = getSiblingFileName(fileName, val);
     if (await readLocalFile(filePath, 'utf8')) {
       lockFiles[key] = filePath;
-    } else {
-      lockFiles[key] = undefined;
     }
   }
   lockFiles.npmLock = lockFiles.packageLock || lockFiles.shrinkwrapJson;
@@ -368,6 +372,7 @@ export async function extractPackageFile(
     packageJsonName,
     packageJsonType,
     yarnWorkspacesPackages,
+    ...lockFiles,
   };
 
   return {
@@ -376,7 +381,6 @@ export async function extractPackageFile(
     npmrc,
     ignoreNpmrcFile,
     yarnrc,
-    ...lockFiles,
     skipInstalls,
     constraints,
     managerData,

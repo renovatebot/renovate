@@ -66,18 +66,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   rangeStrategy: RangeStrategy;
 }
 
-export interface NpmLockFiles {
-  yarnLock?: string;
-  packageLock?: string;
-  shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
-  npmLock?: string;
-  lockFiles?: string[];
-}
-
-export interface PackageFile<T = Record<string, any>>
-  extends NpmLockFiles,
-    ManagerData<T> {
+export interface PackageFile<T = Record<string, any>> extends ManagerData<T> {
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
@@ -92,6 +81,7 @@ export interface PackageFile<T = Record<string, any>>
   yarnrc?: string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+  lockFiles?: string[];
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -173,9 +163,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   extractVersion?: string;
 }
 
-export interface Upgrade<T = Record<string, any>>
-  extends Package<T>,
-    NpmLockFiles {
+export interface Upgrade<T = Record<string, any>> extends Package<T> {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;

@@ -106,8 +106,8 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          lernaClient: 'yarn',
           managerData: {
+            lernaClient: 'yarn',
             lernaDir: '.',
             lernaPackages: ['oldpackages/*'],
             yarnWorkspacesPackages: ['packages/*'],
@@ -134,8 +134,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          managerData: { packageJsonName: '@org/a' },
-          yarnLock: 'yarn.lock',
+          managerData: { packageJsonName: '@org/a', yarnLock: 'yarn.lock' },
         },
         {
           packageFile: 'packages/b/package.json',

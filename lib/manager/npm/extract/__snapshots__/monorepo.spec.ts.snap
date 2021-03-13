@@ -43,21 +43,21 @@ Array [
     "managerData": Object {
       "lernaClient": undefined,
       "lernaDir": ".",
+      "npmLock": undefined,
       "packageJsonName": "@org/a",
+      "yarnLock": undefined,
     },
-    "npmLock": undefined,
     "packageFile": "packages/a/package.json",
-    "yarnLock": undefined,
   },
   Object {
     "managerData": Object {
       "lernaClient": undefined,
       "lernaDir": ".",
+      "npmLock": undefined,
       "packageJsonName": "@org/b",
+      "yarnLock": undefined,
     },
-    "npmLock": undefined,
     "packageFile": "packages/b/package.json",
-    "yarnLock": undefined,
   },
 ]
 `;
@@ -108,21 +108,21 @@ Array [
     "managerData": Object {
       "lernaClient": undefined,
       "lernaDir": ".",
+      "npmLock": undefined,
       "packageJsonName": "@org/a",
+      "yarnLock": undefined,
     },
-    "npmLock": undefined,
     "packageFile": "packages/a/package.json",
-    "yarnLock": undefined,
   },
   Object {
     "managerData": Object {
       "lernaClient": undefined,
       "lernaDir": ".",
+      "npmLock": undefined,
       "packageJsonName": "@org/b",
+      "yarnLock": undefined,
     },
-    "npmLock": undefined,
     "packageFile": "packages/b/package.json",
-    "yarnLock": undefined,
   },
 ]
 `;
@@ -130,8 +130,8 @@ Array [
 exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings with lerna 1`] = `
 Array [
   Object {
-    "lernaClient": "yarn",
     "managerData": Object {
+      "lernaClient": "yarn",
       "lernaDir": ".",
       "lernaPackages": Array [
         "oldpackages/*",
@@ -144,23 +144,23 @@ Array [
   },
   Object {
     "managerData": Object {
-      "lernaClient": undefined,
+      "lernaClient": "yarn",
       "lernaDir": ".",
+      "npmLock": undefined,
       "packageJsonName": "@org/a",
+      "yarnLock": undefined,
     },
-    "npmLock": undefined,
     "packageFile": "packages/a/package.json",
-    "yarnLock": undefined,
   },
   Object {
     "managerData": Object {
-      "lernaClient": undefined,
+      "lernaClient": "yarn",
       "lernaDir": ".",
+      "npmLock": undefined,
       "packageJsonName": "@org/b",
+      "yarnLock": undefined,
     },
-    "npmLock": undefined,
     "packageFile": "packages/b/package.json",
-    "yarnLock": undefined,
   },
 ]
 `;
@@ -178,21 +178,21 @@ Array [
       "hasYarnWorkspaces": true,
       "lernaClient": undefined,
       "lernaDir": undefined,
+      "npmLock": undefined,
       "packageJsonName": "@org/a",
+      "yarnLock": "yarn.lock",
     },
-    "npmLock": undefined,
     "packageFile": "packages/a/package.json",
-    "yarnLock": "yarn.lock",
   },
   Object {
     "managerData": Object {
       "lernaClient": undefined,
       "lernaDir": undefined,
+      "npmLock": undefined,
       "packageJsonName": "@org/b",
+      "yarnLock": undefined,
     },
-    "npmLock": undefined,
     "packageFile": "packages/b/package.json",
-    "yarnLock": undefined,
   },
 ]
 `;
