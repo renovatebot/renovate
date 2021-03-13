@@ -3,16 +3,6 @@ import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import * as git from '.';
 
-function userConfig(
-  config: Partial<git.UserRepoConfig> = {}
-): git.UserRepoConfig {
-  return {
-    branchPrefix: 'renovate/',
-    gitIgnoredAuthors: [],
-    ...config,
-  };
-}
-
 describe('platform/git', () => {
   jest.setTimeout(15000);
 
@@ -83,7 +73,7 @@ describe('platform/git', () => {
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
     });
-    await git.setUserRepoConfig(userConfig());
+    await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     await git.syncGit();
   });
 
@@ -160,9 +150,9 @@ describe('platform/git', () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
     });
     it('should return false when author is ignored', async () => {
-      await git.setUserRepoConfig(
-        userConfig({ gitIgnoredAuthors: ['custom@example.com'] })
-      );
+      await git.setUserRepoConfig({
+        gitIgnoredAuthors: ['custom@example.com'],
+      });
       expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
     });
     it('should return true when custom author is unknown', async () => {
@@ -405,7 +395,7 @@ describe('platform/git', () => {
         url: base.path,
       });
 
-      await git.setUserRepoConfig(userConfig({ branchPrefix: 'renovate/' }));
+      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
 
       await git.initRepo({
@@ -416,7 +406,7 @@ describe('platform/git', () => {
       await repo.checkout('renovate/test');
       await repo.commit('past message3', ['--amend']);
 
-      await git.setUserRepoConfig(userConfig({ branchPrefix: 'renovate/' }));
+      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
     });
 
