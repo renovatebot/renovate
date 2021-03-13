@@ -17,11 +17,11 @@ Array [
         "depName": "foo",
       },
     ],
-    "lernaPackages": Array [
-      "packages/*",
-    ],
     "managerData": Object {
       "lernaDir": ".",
+      "lernaPackages": Array [
+        "packages/*",
+      ],
     },
     "packageFile": "package.json",
     "packages": Array [
@@ -81,11 +81,11 @@ Array [
         "depName": "foo",
       },
     ],
-    "lernaPackages": Array [
-      "packages/*",
-    ],
     "managerData": Object {
       "lernaDir": ".",
+      "lernaPackages": Array [
+        "packages/*",
+      ],
     },
     "packageFile": "package.json",
     "packages": Array [
@@ -131,11 +131,11 @@ exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package 
 Array [
   Object {
     "lernaClient": "yarn",
-    "lernaPackages": Array [
-      "oldpackages/*",
-    ],
     "managerData": Object {
       "lernaDir": ".",
+      "lernaPackages": Array [
+        "oldpackages/*",
+      ],
       "yarnWorkspacesPackages": Array [
         "packages/*",
       ],

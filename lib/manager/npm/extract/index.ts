@@ -364,6 +364,7 @@ export async function extractPackageFile(
   const managerData: NpmManagerData = {
     lernaClient,
     lernaDir,
+    lernaPackages,
     packageJsonName,
     packageJsonType,
     yarnWorkspacesPackages,
@@ -376,7 +377,6 @@ export async function extractPackageFile(
     ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
-    lernaPackages,
     skipInstalls,
     constraints,
     managerData,

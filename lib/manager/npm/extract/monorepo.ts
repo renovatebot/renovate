@@ -20,16 +20,11 @@ export function detectMonorepos(
 ): void {
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
-    const {
-      packageFile,
-      npmLock,
-      yarnLock,
-      lernaPackages,
-      managerData = {},
-    } = p;
+    const { packageFile, npmLock, yarnLock, managerData = {} } = p;
     const {
       lernaClient,
       lernaDir,
+      lernaPackages,
       yarnWorkspacesPackages,
     } = managerData as NpmManagerData;
     const basePath = upath.dirname(packageFile);

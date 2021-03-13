@@ -83,7 +83,6 @@ export interface PackageFile<T = Record<string, any>>
   registryUrls?: string[];
   deps: PackageDependency[];
   ignoreNpmrcFile?: boolean;
-  lernaPackages?: string[];
   mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string;

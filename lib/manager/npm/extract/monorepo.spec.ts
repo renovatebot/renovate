@@ -6,8 +6,7 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          managerData: { lernaDir: '.' },
-          lernaPackages: ['packages/*'],
+          managerData: { lernaDir: '.', lernaPackages: ['packages/*'] },
           packages: ['packages/*'],
           deps: [
             {
@@ -57,8 +56,7 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          managerData: { lernaDir: '.' },
-          lernaPackages: ['packages/*'],
+          managerData: { lernaDir: '.', lernaPackages: ['packages/*'] },
           packages: ['packages/*'],
           deps: [
             {
@@ -108,10 +106,10 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          lernaPackages: ['oldpackages/*'],
           lernaClient: 'yarn',
           managerData: {
             lernaDir: '.',
+            lernaPackages: ['oldpackages/*'],
             yarnWorkspacesPackages: ['packages/*'],
           },
         },

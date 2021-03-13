@@ -15,10 +15,10 @@ Array [
       },
     ],
     "ignoreNpmrcFile": undefined,
-    "lernaPackages": undefined,
     "managerData": Object {
       "lernaClient": undefined,
       "lernaDir": undefined,
+      "lernaPackages": undefined,
       "packageJsonName": undefined,
       "packageJsonType": "app",
       "yarnWorkspacesPackages": undefined,

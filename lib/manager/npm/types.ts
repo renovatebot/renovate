@@ -5,6 +5,7 @@ export interface NpmManagerData {
   hasYarnWorkspaces?: boolean;
   lernaClient?: LernaClient;
   lernaDir?: string;
+  lernaPackages?: string[];
   packageJsonName?: string;
   packageJsonType?: PackageJsonType;
   yarnWorkspacesPackages?: string[] | string;
