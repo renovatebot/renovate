@@ -25,7 +25,7 @@ export function updateDependency({
       );
     }
   }
-  if (upgrade.npmPackageAlias) {
+  if (upgrade.isPackageAlias) {
     newValue = `npm:${upgrade.lookupName}@${newValue}`;
   }
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);

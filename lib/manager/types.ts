@@ -97,7 +97,7 @@ export interface Package<T> extends ManagerData<T> {
 
   // npm manager
   bumpVersion?: ReleaseType | string;
-  npmPackageAlias?: boolean;
+  isPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string;

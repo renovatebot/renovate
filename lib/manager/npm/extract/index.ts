@@ -232,7 +232,7 @@ export async function extractPackageFile(
     }
 
     if (dep.currentValue.startsWith('npm:')) {
-      dep.npmPackageAlias = true;
+      dep.isPackageAlias = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
         dep.lookupName = valSplit[0];
