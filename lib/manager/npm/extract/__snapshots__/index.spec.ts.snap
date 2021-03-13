@@ -11,20 +11,10 @@ Object {
       "skipReason": "invalid-name",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
-    "packageJsonName": undefined,
     "packageJsonType": "app",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
-  "packageFileVersion": undefined,
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -133,20 +123,10 @@ Object {
       "prettyDepType": "engine",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
-    "packageJsonName": undefined,
     "packageJsonType": "library",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
-  "packageFileVersion": undefined,
   "skipInstalls": false,
-  "yarnrc": undefined,
 }
 `;
 
@@ -295,20 +275,10 @@ Object {
       "sourceUrl": "https://github.com/owner/n",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
-    "packageJsonName": undefined,
     "packageJsonType": "app",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
-  "packageFileVersion": undefined,
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -343,20 +313,10 @@ Object {
       "skipReason": "unknown-version",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
-    "packageJsonName": undefined,
     "packageJsonType": "app",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
-  "packageFileVersion": undefined,
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -402,20 +362,10 @@ Object {
       "skipReason": "unknown-volta",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
-    "packageJsonName": undefined,
     "packageJsonType": "library",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
-  "packageFileVersion": undefined,
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -455,20 +405,10 @@ Object {
       "skipReason": "unknown-version",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
-    "packageJsonName": undefined,
     "packageJsonType": "library",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
-  "packageFileVersion": undefined,
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -590,20 +530,14 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
     "lernaClient": "npm",
     "lernaDir": ".",
-    "lernaPackages": undefined,
-    "npmLock": undefined,
     "packageJsonName": "renovate",
     "packageJsonType": "app",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
   "packageFileVersion": "1.0.0",
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -725,20 +659,14 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
     "lernaClient": "yarn",
     "lernaDir": ".",
-    "lernaPackages": undefined,
-    "npmLock": undefined,
     "packageJsonName": "renovate",
     "packageJsonType": "app",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
   "packageFileVersion": "1.0.0",
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -860,21 +788,13 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
     "packageJsonName": "renovate",
     "packageJsonType": "app",
     "yarnLock": "yarn.lock",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
   "packageFileVersion": "1.0.0",
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -882,22 +802,17 @@ exports[`manager/npm/extract .extractPackageFile() finds complex yarn workspaces
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
     "lernaClient": "npm",
     "lernaDir": ".",
-    "lernaPackages": undefined,
-    "npmLock": undefined,
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": Array [
       "packages/*",
     ],
   },
-  "npmrc": undefined,
   "packageFileVersion": "0.0.8",
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -1019,20 +934,14 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
     "lernaClient": "npm",
     "lernaDir": ".",
-    "lernaPackages": undefined,
-    "npmLock": undefined,
     "packageJsonName": "renovate",
     "packageJsonType": "app",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
   "packageFileVersion": "1.0.0",
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -1040,22 +949,17 @@ exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces 
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
     "lernaClient": "npm",
     "lernaDir": ".",
-    "lernaPackages": undefined,
-    "npmLock": undefined,
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": Array [
       "packages/*",
     ],
   },
-  "npmrc": undefined,
   "packageFileVersion": "0.0.8",
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -1063,22 +967,15 @@ exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces 
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": Array [
       "packages/*",
     ],
   },
-  "npmrc": undefined,
   "packageFileVersion": "0.0.8",
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;
 
@@ -1200,19 +1097,11 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "managerData": Object {
-    "lernaClient": undefined,
-    "lernaDir": undefined,
-    "lernaPackages": undefined,
-    "npmLock": undefined,
     "packageJsonName": "renovate",
     "packageJsonType": "app",
-    "yarnWorkspacesPackages": undefined,
   },
-  "npmrc": undefined,
   "packageFileVersion": "1.0.0",
   "skipInstalls": true,
-  "yarnrc": undefined,
 }
 `;

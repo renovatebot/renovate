@@ -11,3 +11,11 @@ export function hasKey<K extends string, T>(
 ): o is T & Record<K, unknown> {
   return typeof o === 'object' && k in o;
 }
+
+export function filterUndefined(input: unknown): void {
+  for (const [key, val] of Object.entries(input)) {
+    if (val === undefined) {
+      delete input[key]; // eslint-disable-line no-param-reassign
+    }
+  }
+}

@@ -14,23 +14,10 @@ Array [
         "prettyDepType": "dependency",
       },
     ],
-    "ignoreNpmrcFile": undefined,
     "managerData": Object {
-      "lernaClient": undefined,
-      "lernaDir": undefined,
-      "lernaPackages": undefined,
-      "npmLock": undefined,
-      "packageJsonName": undefined,
       "packageJsonType": "app",
-      "pnpmShrinkwrap": undefined,
-      "yarnLock": undefined,
-      "yarnWorkspacesPackages": undefined,
     },
-    "npmrc": undefined,
     "packageFile": "package.json",
-    "packageFileVersion": undefined,
-    "skipInstalls": undefined,
-    "yarnrc": undefined,
   },
 ]
 `;

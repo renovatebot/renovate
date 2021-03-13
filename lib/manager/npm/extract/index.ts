@@ -12,6 +12,7 @@ import {
   getSiblingFileName,
   readLocalFile,
 } from '../../../util/fs';
+import { filterUndefined } from '../../../util/object';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -374,8 +375,8 @@ export async function extractPackageFile(
     yarnWorkspacesPackages,
     ...lockFiles,
   };
-
-  return {
+  filterUndefined(managerData);
+  const packageFile: PackageFile = {
     deps,
     packageFileVersion,
     npmrc,
@@ -385,6 +386,8 @@ export async function extractPackageFile(
     constraints,
     managerData,
   };
+  filterUndefined(packageFile);
+  return packageFile;
 }
 
 export async function postExtract(
