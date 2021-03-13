@@ -43,6 +43,7 @@ interface MavenProp {
 
 interface MavenPackageFile extends PackageFile {
   mavenProps?: Record<string, any>;
+  parent?: string;
 }
 
 function depFromNode(node: XmlElement): PackageDependency | null {
@@ -303,6 +304,7 @@ function cleanResult(
 ): PackageFile<Record<string, any>>[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps; // eslint-disable-line no-param-reassign
+    delete packageFile.parent; // eslint-disable-line no-param-reassign
     packageFile.deps.forEach((dep) => {
       delete dep.propSource; // eslint-disable-line no-param-reassign
     });

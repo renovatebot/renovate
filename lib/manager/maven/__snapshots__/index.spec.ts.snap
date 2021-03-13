@@ -153,7 +153,6 @@ Array [
       },
     ],
     "packageFile": "random.pom.xml",
-    "parent": "../pom.xml",
   },
 ]
 `;
@@ -189,7 +188,6 @@ Array [
       },
     ],
     "packageFile": "parent.pom.xml",
-    "parent": "child.pom.xml",
   },
   Object {
     "datasource": "maven",
@@ -331,7 +329,6 @@ Array [
       },
     ],
     "packageFile": "child.pom.xml",
-    "parent": "parent.pom.xml",
   },
 ]
 `;

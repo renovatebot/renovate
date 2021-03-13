@@ -75,7 +75,6 @@ export interface PackageFile<T = Record<string, any>> extends ManagerData<T> {
   npmrc?: string;
   packageFile?: string;
   packageFileVersion?: string;
-  parent?: string;
   skipInstalls?: boolean;
   yarnrc?: string;
   matchStrings?: string[];
