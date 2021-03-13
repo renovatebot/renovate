@@ -1,7 +1,7 @@
 import { BranchStatus, PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
-import { parseUrl } from '../../util/url';
+import { formatUrl, parseUrlLegacy } from '../../util/url';
 import type { Pr } from '../types';
 
 const bitbucketHttp = new BitbucketHttp();
@@ -71,9 +71,12 @@ export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
 };
 
 const addMaxLength = (inputUrl: string, pagelen = 100): string => {
-  const url = parseUrl(inputUrl);
-  url.searchParams.set('pagelen', `${pagelen}`);
-  return url.toString();
+  const { search, ...parsedUrl } = parseUrlLegacy(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const maxedUrl = formatUrl({
+    ...parsedUrl,
+    query: { ...parsedUrl.query, pagelen },
+  });
+  return maxedUrl;
 };
 
 function callApi<T>(

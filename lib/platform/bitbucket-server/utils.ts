@@ -2,7 +2,7 @@ import { HTTPError, Response } from 'got';
 import { PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
-import { parseUrl } from '../../util/url';
+import { formatUrl, parseUrlLegacy } from '../../util/url';
 import type { BbsPr, BbsRestPr } from './types';
 
 const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
@@ -31,9 +31,12 @@ export function prInfo(pr: BbsRestPr): BbsPr {
 }
 
 const addMaxLength = (inputUrl: string, limit = 100): string => {
-  const url = parseUrl(inputUrl);
-  url.searchParams.set('limit', `${limit}`);
-  return url.toString();
+  const { search, ...parsedUrl } = parseUrlLegacy(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const maxedUrl = formatUrl({
+    ...parsedUrl,
+    query: { ...parsedUrl.query, limit },
+  });
+  return maxedUrl;
 };
 
 function callApi<T>(
@@ -89,9 +92,14 @@ export async function accumulateValues<T = any>(
       break;
     }
 
-    const url = parseUrl(nextUrl);
-    url.searchParams.set('start', body.nextPageStart);
-    nextUrl = url.toString();
+    const { search, ...parsedUrl } = parseUrlLegacy(nextUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+    nextUrl = formatUrl({
+      ...parsedUrl,
+      query: {
+        ...parsedUrl.query,
+        start: body.nextPageStart,
+      },
+    });
   }
 
   return accumulator;
