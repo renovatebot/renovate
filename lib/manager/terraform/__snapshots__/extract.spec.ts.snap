@@ -319,6 +319,7 @@ Object {
       "currentValue": "1.7.8",
       "datasource": "docker",
       "depName": "nginx",
+      "depType": "docker_image",
       "replaceString": "nginx:1.7.8",
     },
     Object {
@@ -327,6 +328,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "datasource": "docker",
+      "depType": "docker_image",
       "replaceString": "\${data.docker_registry_image.ubuntu.name}",
       "skipReason": "contains-variable",
     },
@@ -336,6 +338,7 @@ Object {
       "currentValue": "1.7.8",
       "datasource": "docker",
       "depName": "nginx",
+      "depType": "docker_container",
       "replaceString": "nginx:1.7.8",
     },
     Object {
@@ -347,6 +350,7 @@ Object {
       "currentValue": "v1",
       "datasource": "docker",
       "depName": "repo.mycompany.com:8080/foo-service",
+      "depType": "docker_service",
       "replaceString": "repo.mycompany.com:8080/foo-service:v1",
     },
     Object {
