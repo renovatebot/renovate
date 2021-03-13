@@ -20,7 +20,7 @@ Terraform range constraints are supported:
 - `<= 1.2.0`: version 1.2.0 or older
 - `~> 1.2.0`: any non-beta version >= 1.2.0 and < 1.3.0, e.g. 1.2.X
 - `~> 1.2`: any non-beta version >= 1.2.0 and < 2.0.0, e.g. 1.X.Y
-- `>= 1.0.0`, <= 2.0.0`: any version between 1.0.0 and 2.0.0 inclusive
+- `>= 1.0.0`, `<= 2.0.0`: any version between 1.0.0 and 2.0.0 inclusive
 
 For fine-grained control, e.g. to turn off only parts of this manager, there are following `depTypes` provided:
 
