@@ -1,6 +1,9 @@
+import is from '@sindresorhus/is';
+import yaml from 'js-yaml';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import { readLocalFile } from '../../util/fs';
 import { getDep } from '../dockerfile/extract';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 function skipCommentLines(
   lines: string[],
@@ -78,4 +81,50 @@ export function extractPackageFile(content: string): PackageFile | null {
     return null;
   }
   return { deps };
+}
+
+export async function extractAllPackageFiles(
+  config: ExtractConfig,
+  packageFiles: string[]
+): Promise<PackageFile[] | null> {
+  const filesToExamine = new Set<string>(packageFiles);
+  const results: PackageFile[] = [];
+
+  // extract all includes from the files
+  while (filesToExamine.size > 0) {
+    const file = filesToExamine.values().next().value;
+    filesToExamine.delete(file);
+
+    const content = await readLocalFile(file, 'utf8');
+    const doc = yaml.safeLoad(content, { json: true }) as any;
+    if (doc?.include && is.array(doc.include)) {
+      for (const includeObj of doc.include) {
+        if (includeObj.local) {
+          const fileObj = (includeObj.local as string).replace(/^\//, '');
+          if (!filesToExamine.has(fileObj)) {
+            filesToExamine.add(fileObj);
+          }
+        }
+      }
+    }
+
+    const result = extractPackageFile(content);
+    if (result !== null) {
+      results.push({
+        packageFile: file,
+        deps: result.deps,
+      });
+    }
+  }
+
+  logger.trace(
+    { packageFiles, files: filesToExamine.entries() },
+    'extracted all GitLab CI files'
+  );
+
+  if (!results.length) {
+    return null;
+  }
+
+  return results;
 }

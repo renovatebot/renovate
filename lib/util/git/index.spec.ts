@@ -20,6 +20,7 @@ describe('platform/git', () => {
     await repo.addConfig('user.email', 'Jest@example.com');
     await repo.addConfig('user.name', 'Jest');
     await fs.writeFile(base.path + '/past_file', 'past');
+    await repo.addConfig('commit.gpgsign', 'false');
     await repo.add(['past_file']);
     await repo.commit('past message');
 
@@ -64,6 +65,7 @@ describe('platform/git', () => {
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
+    await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
     await git.initRepo({
       localDir: tmpDir.path,
@@ -289,21 +291,19 @@ describe('platform/git', () => {
         files,
         message: 'Update something',
       });
-      expect(commit).not.toBeNull();
+      expect(commit).toBeNull();
     });
     it('does not push when no diff', async () => {
-      const branchName = 'renovate/something';
-      const local = Git(tmpDir.path);
-      await local.push('origin', `${defaultBranch}:${branchName}`);
-      await local.fetch([
-        'origin',
-        `refs/heads/${branchName}:refs/remotes/origin/${branchName}`,
-      ]);
-      const files = [];
+      const files = [
+        {
+          name: 'future_file',
+          contents: 'future',
+        },
+      ];
       const commit = await git.commitFiles({
-        branchName,
+        branchName: 'renovate/future_branch',
         files,
-        message: 'Update something',
+        message: 'No change update',
       });
       expect(commit).toBeNull();
     });

@@ -1,11 +1,11 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { clone } from '../util/clone';
-import { PackageRule, RenovateConfig } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
+import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
 
 const options = getOptions();
 
@@ -465,11 +465,11 @@ export function migrateConfig(
         delete migratedConfig.node.enabled;
         migratedConfig.travis = migratedConfig.travis || {};
         migratedConfig.travis.enabled = true;
-        if (!Object.keys(migratedConfig.node).length) {
-          delete migratedConfig.node;
-        } else {
+        if (Object.keys(migratedConfig.node).length) {
           const subMigrate = migrateConfig(migratedConfig.node, key);
           migratedConfig.node = subMigrate.migratedConfig;
+        } else {
+          delete migratedConfig.node;
         }
       } else if (is.array(val)) {
         const newArray = [];
@@ -547,7 +547,7 @@ export function migrateConfig(
         }
       }
     }
-    const isMigrated = !equal(config, migratedConfig);
+    const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
       // recursive call in case any migrated configs need further migrating
       return {

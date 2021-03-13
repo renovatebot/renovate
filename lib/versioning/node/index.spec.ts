@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { isStable, api as nodever } from '.';
+import { isStable, isValid, api as nodever } from '.';
 
 describe('semver.getNewValue()', () => {
   let dtLocal: any;
@@ -53,5 +53,9 @@ describe('semver.getNewValue()', () => {
         args.length ? dtLocal.apply(DateTime, args) : time;
       expect(isStable(version as string)).toBe(result);
     });
+  });
+
+  it('isValid', () => {
+    expect(isValid === nodever.isValid).toBe(true);
   });
 });

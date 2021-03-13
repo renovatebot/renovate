@@ -7,10 +7,9 @@ import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import { Release, ReleaseResult } from '../common';
+import type { Release, ReleaseResult } from '../types';
 import { id } from './common';
 import { getNpmrc } from './npmrc';
 
@@ -42,7 +41,7 @@ export interface NpmDependency extends ReleaseResult {
   sourceDirectory?: string;
 }
 
-interface NpmResponse {
+export interface NpmResponse {
   _id: string;
   name?: string;
   versions?: Record<
@@ -55,6 +54,8 @@ interface NpmResponse {
       homepage?: string;
       deprecated?: boolean;
       gitHead?: string;
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
     }
   >;
   repository?: {
@@ -123,18 +124,6 @@ export async function getDependency(
       'Using auth (via process.env.NPM_TOKEN) for npm lookup'
     );
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
-  } else {
-    const opts = find({
-      hostType: 'npm',
-      url: regUrl,
-    });
-    if (opts.token) {
-      logger.trace(
-        { token: maskToken(opts.token), npmName: packageName },
-        'Using auth (via hostRules) for npm lookup'
-      );
-      headers.authorization = `Bearer ${opts.token}`;
-    }
   }
 
   const uri = url.parse(pkgUrl);
@@ -210,6 +199,8 @@ export async function getDependency(
       const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,
+        dependencies: res.versions[version].dependencies,
+        devDependencies: res.versions[version].devDependencies,
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
@@ -233,8 +224,8 @@ export async function getDependency(
       '@typescript-eslint',
     ];
     if (
-      whitelistedPublicScopes.includes(scope) ||
-      !packageName.startsWith('@')
+      !raw.authorization &&
+      (whitelistedPublicScopes.includes(scope) || !packageName.startsWith('@'))
     ) {
       await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }

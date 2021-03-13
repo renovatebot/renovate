@@ -12,6 +12,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
   WORKER_FILE_UPDATE_FAILED,
 } from '../../constants/error-messages';
 import { addMeta, logger, removeMeta } from '../../logger';
@@ -25,15 +26,16 @@ import { readLocalFile, writeLocalFile } from '../../util/fs';
 import {
   checkoutBranch,
   deleteBranch,
+  getBranchCommit,
   getRepoStatus,
   branchExists as gitBranchExists,
   isBranchModified,
 } from '../../util/git';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
-import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
+import { BranchConfig, PrResult, ProcessBranchResult } from '../types';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
@@ -65,7 +67,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 export async function processBranch(
   branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
-  const config: BranchConfig = { ...branchConfig };
+  let config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
     .map((upgrade) => upgrade.depName)
     .filter((v) => v) // remove nulls (happens for lock file maintenance)
@@ -93,6 +95,8 @@ export async function processBranch(
     config.rebaseRequested = rebaseCheck(config, branchPr);
     logger.debug(`Branch pr rebase requested: ${config.rebaseRequested}`);
   }
+  const artifactErrorTopic = emojify(':warning: Artifact update problem');
+  const ignoreTopic = `Renovate Ignore Notification`;
   try {
     logger.debug(`Branch has ${dependencies.length} upgrade(s)`);
 
@@ -104,7 +108,6 @@ export async function processBranch(
         'Closed PR already exists. Skipping branch.'
       );
       if (existingPr.state === PrState.Closed) {
-        const topic = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
           content = `As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then Renovate will then reenable updates for minor and patch updates automatically.`;
@@ -123,7 +126,7 @@ export async function processBranch(
           } else {
             await platform.ensureComment({
               number: existingPr.number,
-              topic,
+              topic: ignoreTopic,
               content,
             });
           }
@@ -156,7 +159,7 @@ export async function processBranch(
       !branchExists &&
       isLimitReached(Limit.Branches) &&
       !dependencyDashboardCheck &&
-      !config.vulnerabilityAlert
+      !config.isVulnerabilityAlert
     ) {
       logger.debug('Reached branch limit - skipping branch creation');
       return ProcessBranchResult.BranchLimitReached;
@@ -164,7 +167,7 @@ export async function processBranch(
     if (
       isLimitReached(Limit.Commits) &&
       !dependencyDashboardCheck &&
-      !config.vulnerabilityAlert
+      !config.isVulnerabilityAlert
     ) {
       logger.debug('Reached commits limit - skipping branch');
       return ProcessBranchResult.CommitLimitReached;
@@ -208,8 +211,28 @@ export async function processBranch(
           }
         }
       } else if (branchIsModified) {
-        logger.debug('Branch has been edited');
-        return ProcessBranchResult.PrEdited;
+        const oldPr = await platform.findPr({
+          branchName: config.branchName,
+          state: PrState.NotOpen,
+        });
+        if (!oldPr) {
+          logger.debug('Branch has been edited but found no PR - skipping');
+          return ProcessBranchResult.PrEdited;
+        }
+        const branchSha = getBranchCommit(config.branchName);
+        const oldPrSha = oldPr?.sha;
+        if (!oldPrSha || oldPrSha === branchSha) {
+          logger.debug(
+            { oldPrNumber: oldPr.number, oldPrSha, branchSha },
+            'Found old PR matching this branch - will override it'
+          );
+        } else {
+          logger.debug(
+            { oldPrNumber: oldPr.number, oldPrSha, branchSha },
+            'Found old PR but the SHA is different'
+          );
+          return ProcessBranchResult.PrEdited;
+        }
       }
     }
 
@@ -287,7 +310,7 @@ export async function processBranch(
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
     } else {
-      Object.assign(config, await shouldReuseExistingBranch(config));
+      config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
     const res = await getUpdatedPackageFiles(config);
@@ -295,7 +318,7 @@ export async function processBranch(
     if (res.artifactErrors && config.artifactErrors) {
       res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
     }
-    Object.assign(config, res);
+    config = { ...config, ...res };
     if (config.updatedPackageFiles?.length) {
       logger.debug(
         `Updated ${config.updatedPackageFiles.length} package files`
@@ -369,18 +392,10 @@ export async function processBranch(
 
           for (const cmd of commands) {
             if (
-              !allowedPostUpgradeCommands.some((pattern) =>
+              allowedPostUpgradeCommands.some((pattern) =>
                 regEx(pattern).test(cmd)
               )
             ) {
-              logger.warn(
-                {
-                  cmd,
-                  allowedPostUpgradeCommands,
-                },
-                'Post-upgrade task did not match any on allowed list'
-              );
-            } else {
               const compiledCmd = allowPostUpgradeCommandTemplating
                 ? template.compile(cmd, upgrade)
                 : cmd;
@@ -394,6 +409,14 @@ export async function processBranch(
               logger.debug(
                 { cmd: compiledCmd, ...execResult },
                 'Executed post-upgrade task'
+              );
+            } else {
+              logger.warn(
+                {
+                  cmd,
+                  allowedPostUpgradeCommands,
+                },
+                'Post-upgrade task did not match any on allowed list'
               );
             }
           }
@@ -471,6 +494,20 @@ export async function processBranch(
       } else {
         logger.debug('PR has no releaseTimestamp');
       }
+    } else if (config.updatedArtifacts?.length && branchPr) {
+      // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
+      // istanbul ignore if
+      if (getAdminConfig().dryRun) {
+        logger.info(
+          `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`
+        );
+      } else {
+        // Remove artifacts error comment only if this run has successfully updated artifacts
+        await platform.ensureCommentRemoval({
+          number: branchPr.number,
+          topic: artifactErrorTopic,
+        });
+      }
     }
     config.forceCommit =
       !!dependencyDashboardCheck ||
@@ -523,6 +560,7 @@ export async function processBranch(
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
+      logger.debug({ err }, 'Received a 404 error - aborting run');
       throw new Error(REPOSITORY_CHANGED);
     }
     if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
@@ -584,8 +622,11 @@ export async function processBranch(
     } else if (err.message === CONFIG_VALIDATION) {
       logger.debug('Passing config validation error up');
       throw err;
+    } else if (err.message === TEMPORARY_ERROR) {
+      logger.debug('Passing TEMPORARY_ERROR error up');
+      throw err;
     } else if (!(err instanceof ExternalHostError)) {
-      logger.error({ err }, `Error updating branch: ${String(err.message)}`);
+      logger.warn({ err }, `Error updating branch`);
     }
     // Don't throw here - we don't want to stop the other renovations
     return ProcessBranchResult.Error;
@@ -596,7 +637,7 @@ export async function processBranch(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
     const { prResult: result, pr } = await ensurePr(config);
-    if (result === PrResult.LimitReached && !config.vulnerabilityAlert) {
+    if (result === PrResult.LimitReached && !config.isVulnerabilityAlert) {
       logger.debug('Reached PR limit - skipping PR creation');
       return ProcessBranchResult.PrLimitReached;
     }
@@ -611,7 +652,6 @@ export async function processBranch(
       return ProcessBranchResult.Pending;
     }
     if (pr) {
-      const topic = emojify(':warning: Artifact update problem');
       if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
@@ -637,7 +677,7 @@ export async function processBranch(
           content += `##### File name: ${error.lockFile}\n\n`;
           content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
         });
-        content = platform.getPrBody(content);
+        content = platform.massageMarkdown(content);
         if (
           !(
             config.suppressNotifications.includes('artifactErrors') ||
@@ -651,7 +691,7 @@ export async function processBranch(
           } else {
             await platform.ensureComment({
               number: pr.number,
-              topic,
+              topic: artifactErrorTopic,
               content,
             });
           }
@@ -680,17 +720,6 @@ export async function processBranch(
           }
         }
       } else {
-        if (config.updatedArtifacts?.length) {
-          // istanbul ignore if
-          if (getAdminConfig().dryRun) {
-            logger.info(
-              `DRY-RUN: Would ensure comment removal in PR #${pr.number}`
-            );
-          } else {
-            // Remove artifacts error comment only if this run has successfully updated artifacts
-            await platform.ensureCommentRemoval({ number: pr.number, topic });
-          }
-        }
         const prAutomerged = await checkAutoMerge(pr, config);
         if (prAutomerged && config.automergeType !== 'pr-comment') {
           await deleteBranchSilently(config.branchName);

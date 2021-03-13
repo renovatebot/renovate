@@ -22,7 +22,7 @@ import { id as gitVersioningId } from '../../../../versioning/git';
 import { id as npmVersioningId } from '../../../../versioning/npm';
 import { id as pep440VersioningId } from '../../../../versioning/pep440';
 import { id as poetryVersioningId } from '../../../../versioning/poetry';
-import { LookupUpdateConfig } from './common';
+import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
@@ -249,7 +249,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('uses minimum version for vulnerabilityAlerts', async () => {
       config.currentValue = '1.0.0';
-      config.vulnerabilityAlert = true;
+      config.isVulnerabilityAlert = true;
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);

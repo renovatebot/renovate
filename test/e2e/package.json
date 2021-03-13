@@ -6,7 +6,7 @@
     "test": "renovate --version && renovate-config-validator"
   },
   "dependencies": {
-    "renovate": "../../renovate-0.0.0-semantic-release.tgz"
+    "renovate": "file:../../renovate-0.0.0-semantic-release.tgz"
   },
   "renovate-config": {
     "default": {

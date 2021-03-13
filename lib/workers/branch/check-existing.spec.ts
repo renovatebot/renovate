@@ -1,6 +1,6 @@
 import { defaultConfig, partial, platform } from '../../../test/util';
 import { PrState } from '../../types';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 import { prAlreadyExisted } from './check-existing';
 
 describe('workers/branch/check-existing', () => {

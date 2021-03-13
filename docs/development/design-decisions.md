@@ -90,7 +90,7 @@ String templates (e.g. commit or PR name) are not configurable via CLI options, 
 If you must configure via CLI, use an environment variable instead. e.g.
 
 ```sh
-$ RENOVATE_BRANCH_NAME=foo renovate
+RENOVATE_BRANCH_NAME=foo renovate
 ```
 
 Alternatively, consider using a Configuration File.

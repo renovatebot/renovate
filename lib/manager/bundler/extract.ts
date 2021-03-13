@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 
 export async function extractPackageFile(

@@ -2,8 +2,8 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as githubReleases from '../github-releases';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'github-tags';
 export const defaultRegistryUrls = ['https://github.com'];
@@ -43,9 +43,9 @@ async function getTagCommit(
     registryUrl ?? 'https://github.com/'
   );
   const apiBaseUrl =
-    sourceUrlBase !== 'https://github.com/'
-      ? `${sourceUrlBase}api/v3/`
-      : `https://api.github.com/`;
+    sourceUrlBase === 'https://github.com/'
+      ? `https://api.github.com/`
+      : `${sourceUrlBase}api/v3/`;
   let digest: string;
   try {
     const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
@@ -103,9 +103,9 @@ export async function getDigest(
     registryUrl ?? 'https://github.com/'
   );
   const apiBaseUrl =
-    sourceUrlBase !== 'https://github.com/'
-      ? `${sourceUrlBase}api/v3/`
-      : `https://api.github.com/`;
+    sourceUrlBase === 'https://github.com/'
+      ? `https://api.github.com/`
+      : `${sourceUrlBase}api/v3/`;
   let digest: string;
   try {
     const url = `${apiBaseUrl}repos/${repo}/commits?per_page=1`;
@@ -148,10 +148,9 @@ async function getTags({
     registryUrl ?? 'https://github.com/'
   );
   const apiBaseUrl =
-    sourceUrlBase !== 'https://github.com/'
-      ? `${sourceUrlBase}api/v3/`
-      : `https://api.github.com/`;
-
+    sourceUrlBase === 'https://github.com/'
+      ? `https://api.github.com/`
+      : `${sourceUrlBase}api/v3/`;
   // tag
   const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
   type GitHubTag = {

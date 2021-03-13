@@ -1,6 +1,6 @@
 import * as datasourceGitHubRelease from '../../datasource/github-releases';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile {
   logger.trace('terraform-version.extractPackageFile()');

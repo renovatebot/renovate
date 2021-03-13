@@ -392,7 +392,21 @@ Object {
 
 exports[`datasource/docker/index getRegistryRepository supports registryUrls 1`] = `
 Object {
-  "registry": "my.local.registry/prefix/",
+  "registry": "https://my.local.registry/prefix",
+  "repository": "image",
+}
+`;
+
+exports[`datasource/docker/index getRegistryRepository supports http registryUrls 1`] = `
+Object {
+  "registry": "http://my.local.registry/prefix",
+  "repository": "image",
+}
+`;
+
+exports[`datasource/docker/index getRegistryRepository supports schemeless registryUrls 1`] = `
+Object {
+  "registry": "https://my.local.registry/prefix",
   "repository": "image",
 }
 `;

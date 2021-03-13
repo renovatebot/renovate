@@ -1,17 +1,21 @@
 import { addStream, levels, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
-import { readFile } from '../util/fs';
+import { ensureDir, getSubDirectory, readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
 import * as cliParser from './cli';
-import { GlobalConfig, RenovateConfig, RenovateConfigStage } from './common';
 import * as defaultsParser from './defaults';
 import * as definitions from './definitions';
 import * as envParser from './env';
 import * as fileParser from './file';
 import { resolveConfigPresets } from './presets';
+import type {
+  GlobalConfig,
+  RenovateConfig,
+  RenovateConfigStage,
+} from './types';
 import { mergeChildConfig } from './utils';
 
-export * from './common';
+export * from './types';
 export { mergeChildConfig };
 
 export interface ManagerConfig extends RenovateConfig {
@@ -53,7 +57,7 @@ export async function parseConfigs(
   const cliConfig = await resolveConfigPresets(cliParser.getConfig(argv));
   const envConfig = await resolveConfigPresets(envParser.getConfig(env));
 
-  let config = mergeChildConfig(fileConfig, envConfig);
+  let config: GlobalConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
   const combinedConfig = config;
@@ -69,7 +73,7 @@ export async function parseConfigs(
     delete forcedCli.token;
     delete forcedCli.hostRules;
     if (config.force) {
-      config.force = Object.assign(config.force, forcedCli);
+      config.force = { ...config.force, ...forcedCli };
     } else {
       config.force = forcedCli;
     }
@@ -100,6 +104,7 @@ export async function parseConfigs(
     logger.debug(
       `Enabling ${config.logFileLevel} logging to ${config.logFile}`
     );
+    await ensureDir(getSubDirectory(config.logFile));
     addStream({
       name: 'logfile',
       path: config.logFile,

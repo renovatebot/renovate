@@ -2,7 +2,7 @@ import * as url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-import { PackageDependency } from '../common';
+import type { PackageDependency } from '../types';
 import {
   GOOGLE_REPO,
   JCENTER_REPO,
@@ -469,7 +469,7 @@ export function parseGradle(
   initVars: PackageVariables = {},
   packageFile?: string
 ): ParseGradleResult {
-  const vars: PackageVariables = { ...initVars };
+  let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<ManagerData>[] = [];
   const urls = [];
 
@@ -481,7 +481,7 @@ export function parseGradle(
       deps.push(...matchResult.deps);
     }
     if (matchResult?.vars) {
-      Object.assign(vars, matchResult.vars);
+      vars = { ...vars, ...matchResult.vars };
     }
     if (matchResult?.urls) {
       urls.push(...matchResult.urls);

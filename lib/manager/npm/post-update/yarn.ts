@@ -3,13 +3,16 @@ import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
-import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import {
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
+} from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
 import { readFile, remove } from '../../../util/fs';
-import { PostUpdateConfig, Upgrade } from '../../common';
+import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
@@ -18,25 +21,36 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
-export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
+export async function checkYarnrc(
+  cwd: string
+): Promise<{ offlineMirror: boolean; yarnPath: string | null }> {
+  let offlineMirror = false;
+  let yarnPath: string = null;
   try {
     const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
         .find((line) => line.startsWith('yarn-offline-mirror '));
-      if (mirrorLine) {
-        return true;
+      offlineMirror = !!mirrorLine;
+      const pathLine = yarnrc
+        .split('\n')
+        .find((line) => line.startsWith('yarn-path '));
+      if (pathLine) {
+        yarnPath = pathLine.replace(/^yarn-path\s+"?(.+?)"?$/, '$1');
       }
     }
   } catch (err) /* istanbul ignore next */ {
     // not found
   }
-  return false;
+  return { offlineMirror, yarnPath };
 }
 
-export const optimizeCommand =
-  "sed -i 's/ steps,/ steps.slice(0,1),/' /home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js";
+export function getOptimizeCommand(
+  fileName = '/home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js'
+): string {
+  return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
+}
 
 export async function generateLockFile(
   cwd: string,
@@ -68,14 +82,16 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    if (
-      isYarn1 &&
-      config.skipInstalls !== false &&
-      (await hasYarnOfflineMirror(cwd)) === false
-    ) {
-      logger.debug('Updating yarn.lock only - skipping node_modules');
-      // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-      preCommands.push(optimizeCommand);
+    if (isYarn1 && config.skipInstalls !== false) {
+      const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
+      if (!offlineMirror) {
+        logger.debug('Updating yarn.lock only - skipping node_modules');
+        // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+        preCommands.push(getOptimizeCommand());
+        if (yarnPath) {
+          preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
+        }
+      }
     }
     const commands = [];
     let cmdOptions = '';
@@ -182,6 +198,9 @@ export async function generateLockFile(
     // Read the result
     lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug(
       {
         err,

@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { NewValueConfig } from '../common';
+import type { NewValueConfig } from '../types';
 
 const fromParam = /^\s*from\s*:\s*"([^"]+)"\s*$/;
 const fromRange = /^\s*"([^"]+)"\s*\.\.\.\s*$/;

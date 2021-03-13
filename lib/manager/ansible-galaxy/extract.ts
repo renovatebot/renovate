@@ -2,7 +2,7 @@ import * as datasourceGalaxy from '../../datasource/galaxy';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 const galaxyRoleRegex = /.+\..+/;
 

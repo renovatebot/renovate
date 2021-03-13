@@ -3,8 +3,8 @@ import * as datasourceCrate from '../../datasource/crate';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../util/fs';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import {
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
   CargoConfig,
   CargoManifest,
   CargoRegistries,

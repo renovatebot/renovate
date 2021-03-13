@@ -2,7 +2,7 @@ import { fromStream } from 'hasha';
 import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import { UpdateDependencyConfig } from '../common';
+import type { UpdateDependencyConfig } from '../types';
 import { parseUrlPath } from './extract';
 import { isSpace, removeComments, skip } from './util';
 

@@ -1,7 +1,7 @@
 import { join } from 'upath';
 import { logger } from '../../logger';
 import { ensureDir } from '../../util/fs';
-import { UpdateArtifactsConfig } from '../common';
+import type { UpdateArtifactsConfig } from '../types';
 
 export async function getCocoaPodsHome(
   config: UpdateArtifactsConfig

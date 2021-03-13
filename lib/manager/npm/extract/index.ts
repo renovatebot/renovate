@@ -14,16 +14,16 @@ import {
 } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
-import {
+import type {
   ExtractConfig,
   NpmLockFiles,
   PackageDependency,
   PackageFile,
-} from '../../common';
-import { NpmPackage, NpmPackageDependency } from './common';
+} from '../../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
+import type { NpmPackage, NpmPackageDependency } from './types';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -307,14 +307,14 @@ export async function extractPackageFile(
           packageJson[depType] as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
-          const dep: PackageDependency = {
+          let dep: PackageDependency = {
             depType,
             depName,
           };
           if (depName !== key) {
             dep.managerData = { key };
           }
-          Object.assign(dep, extractDependency(depType, depName, val));
+          dep = { ...dep, ...extractDependency(depType, depName, val) };
           if (depName === 'node') {
             // This is a special case for Node.js to group it together with other managers
             dep.commitMessageTopic = 'Node.js';
