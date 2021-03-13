@@ -151,7 +151,7 @@ export interface RenovateConfig
   defaultBranch?: string;
   branchList?: string[];
   description?: string | string[];
-
+  force?: RenovateConfig;
   errors?: ValidationMessage[];
 
   gitAuthor?: string;

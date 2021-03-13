@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { id } from '../../datasource/nuget';
+import { id, parseRegistryUrl } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -37,7 +37,8 @@ async function addSourceCmds(
       hostType: id,
       url: registry.url,
     });
-    let addSourceCmd = `dotnet nuget add source ${registry.url} --configfile ${nugetConfigFile}`;
+    const registryInfo = parseRegistryUrl(registry.url);
+    let addSourceCmd = `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile}`;
     if (registry.name) {
       // Add name for registry, if known.
       addSourceCmd += ` --name ${registry.name}`;

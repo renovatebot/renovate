@@ -67,7 +67,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 export async function processBranch(
   branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
-  const config: BranchConfig = { ...branchConfig };
+  let config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
     .map((upgrade) => upgrade.depName)
     .filter((v) => v) // remove nulls (happens for lock file maintenance)
@@ -310,7 +310,7 @@ export async function processBranch(
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
     } else {
-      Object.assign(config, await shouldReuseExistingBranch(config));
+      config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
     const res = await getUpdatedPackageFiles(config);
@@ -318,7 +318,7 @@ export async function processBranch(
     if (res.artifactErrors && config.artifactErrors) {
       res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
     }
-    Object.assign(config, res);
+    config = { ...config, ...res };
     if (config.updatedPackageFiles?.length) {
       logger.debug(
         `Updated ${config.updatedPackageFiles.length} package files`
@@ -626,7 +626,7 @@ export async function processBranch(
       logger.debug('Passing TEMPORARY_ERROR error up');
       throw err;
     } else if (!(err instanceof ExternalHostError)) {
-      logger.error({ err }, `Error updating branch: ${String(err.message)}`);
+      logger.warn({ err }, `Error updating branch`);
     }
     // Don't throw here - we don't want to stop the other renovations
     return ProcessBranchResult.Error;

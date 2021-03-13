@@ -326,10 +326,12 @@ export function generateBranchConfig(
   config.blockedByPin = config.upgrades.every(
     (upgrade) => upgrade.blockedByPin
   );
-  config.constraints = Object.assign(
-    {},
-    ...config.upgrades.map((upgrade) => upgrade.constraints)
-  );
+  config.constraints = {};
+  for (const upgrade of config.upgrades || []) {
+    if (upgrade.constraints) {
+      config.constraints = { ...config.constraints, ...upgrade.constraints };
+    }
+  }
   const tableRows = config.upgrades
     .map((upgrade) => getTableValues(upgrade))
     .filter(Boolean);

@@ -35,7 +35,7 @@ export interface BranchUpgradeConfig
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
-
+  constraints?: Record<string, string>;
   groupName?: string;
   groupSlug?: string;
   language?: string;
@@ -110,7 +110,6 @@ export interface BranchConfig
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;
-
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;
