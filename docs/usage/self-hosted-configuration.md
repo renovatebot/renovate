@@ -24,7 +24,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies is necessary because, by default, the installation of dependencies is skipped (see the `artifactUpdateApproach` admin option)
+The command to install dependencies is necessary because, by default, the installation of dependencies is skipped (see the `artifactUpdateApproach` admin option).
 
 ```json
 {
