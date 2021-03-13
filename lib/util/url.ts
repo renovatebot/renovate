@@ -53,9 +53,9 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
   }
 }
 
-export function parseUrl(url: string): URL | null {
+export function parseUrl(url: string, base?: string | URL): URL | null {
   try {
-    return new URL(url);
+    return new URL(url, base);
   } catch (err) {
     return null;
   }
