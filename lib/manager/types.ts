@@ -90,7 +90,6 @@ export interface PackageFile<T = Record<string, any>>
   mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string;
-  packageJsonName?: string;
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;

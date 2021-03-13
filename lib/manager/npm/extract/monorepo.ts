@@ -46,7 +46,7 @@ export function detectMonorepos(
         )
       );
       const internalPackageNames = internalPackageFiles
-        .map((sp) => sp.packageJsonName)
+        .map((sp) => sp.managerData?.packageJsonName)
         .filter(Boolean);
       if (!updateInternalDeps) {
         p.deps?.forEach((dep) => {

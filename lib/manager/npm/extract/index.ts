@@ -62,8 +62,11 @@ export async function extractPackageFile(
       'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
   }
-  const packageJsonName = packageJson.name;
-  logger.debug(
+  let packageJsonName: string;
+  if (is.string(packageJson.name)) {
+    packageJsonName = packageJson.name;
+  }
+  logger.trace(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageFileVersion = packageJson.version;
@@ -359,12 +362,12 @@ export async function extractPackageFile(
   }
 
   const managerData: NpmManagerData = {
+    packageJsonName,
     packageJsonType,
   };
 
   return {
     deps,
-    packageJsonName,
     packageFileVersion,
     npmrc,
     ignoreNpmrcFile,

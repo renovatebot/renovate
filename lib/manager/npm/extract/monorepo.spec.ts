@@ -26,7 +26,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
           deps: [
             {
               depName: '@org/b',
@@ -41,7 +41,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ] as any;
       detectMonorepos(packageFiles, false);
@@ -77,7 +77,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
           deps: [
             {
               depName: '@org/b',
@@ -92,7 +92,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ] as any;
       detectMonorepos(packageFiles, true);
@@ -115,11 +115,11 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ];
       detectMonorepos(packageFiles, false);
@@ -134,12 +134,12 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
           yarnLock: 'yarn.lock',
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ];
       detectMonorepos(packageFiles, false);
