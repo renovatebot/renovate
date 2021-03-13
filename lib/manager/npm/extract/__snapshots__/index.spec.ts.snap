@@ -13,9 +13,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": undefined,
     "packageJsonType": "app",
     "yarnWorkspacesPackages": undefined,
@@ -137,9 +137,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": undefined,
     "packageJsonType": "library",
     "yarnWorkspacesPackages": undefined,
@@ -301,9 +301,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": undefined,
     "packageJsonType": "app",
     "yarnWorkspacesPackages": undefined,
@@ -351,9 +351,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": undefined,
     "packageJsonType": "app",
     "yarnWorkspacesPackages": undefined,
@@ -412,9 +412,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": undefined,
     "packageJsonType": "library",
     "yarnWorkspacesPackages": undefined,
@@ -467,9 +467,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": undefined,
     "packageJsonType": "library",
     "yarnWorkspacesPackages": undefined,
@@ -604,9 +604,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
-  "lernaDir": ".",
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": ".",
     "packageJsonName": "renovate",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": undefined,
@@ -741,9 +741,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": "yarn",
-  "lernaDir": ".",
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": ".",
     "packageJsonName": "renovate",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": undefined,
@@ -878,9 +878,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": "renovate",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": undefined,
@@ -901,9 +901,9 @@ Object {
   "deps": Array [],
   "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
-  "lernaDir": ".",
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": ".",
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": Array [
@@ -1040,9 +1040,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
-  "lernaDir": ".",
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": ".",
     "packageJsonName": "renovate",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": undefined,
@@ -1063,9 +1063,9 @@ Object {
   "deps": Array [],
   "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
-  "lernaDir": ".",
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": ".",
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": Array [
@@ -1088,9 +1088,9 @@ Object {
   "deps": Array [],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": Array [
@@ -1227,9 +1227,9 @@ Object {
   ],
   "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "lernaDir": undefined,
     "packageJsonName": "renovate",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": undefined,

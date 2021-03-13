@@ -16,9 +16,9 @@ Array [
     ],
     "ignoreNpmrcFile": undefined,
     "lernaClient": undefined,
-    "lernaDir": undefined,
     "lernaPackages": undefined,
     "managerData": Object {
+      "lernaDir": undefined,
       "packageJsonName": undefined,
       "packageJsonType": "app",
       "yarnWorkspacesPackages": undefined,

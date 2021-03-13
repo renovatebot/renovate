@@ -47,8 +47,8 @@ export function determineLockFileDirs(
   for (const upgrade of config.upgrades) {
     if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
       // Return every directory that contains a lockfile
-      if (upgrade.lernaDir && upgrade.npmLock) {
-        lernaDirs.push(upgrade.lernaDir);
+      if (upgrade.managerData?.lernaDir && upgrade.npmLock) {
+        lernaDirs.push(upgrade.managerData.lernaDir);
       } else {
         yarnLockDirs.push(upgrade.yarnLock);
         npmLockDirs.push(upgrade.npmLock);
@@ -92,15 +92,15 @@ export function determineLockFileDirs(
     logger.trace(`Checking ${String(p.name)} for lock files`);
     const packageFile = getPackageFile(p.name);
     // lerna first
-    if (packageFile.lernaDir && packageFile.npmLock) {
+    if (packageFile.managerData?.lernaDir && packageFile.npmLock) {
       logger.debug(`${packageFile.packageFile} has lerna lock file`);
-      lernaDirs.push(packageFile.lernaDir);
+      lernaDirs.push(packageFile.managerData.lernaDir);
     } else if (
-      packageFile.lernaDir &&
+      packageFile.managerData?.lernaDir &&
       packageFile.yarnLock &&
       !packageFile.managerData.hasYarnWorkspaces
     ) {
-      lernaDirs.push(packageFile.lernaDir);
+      lernaDirs.push(packageFile.managerData.lernaDir);
     } else {
       // push full lock file names and convert them later
       yarnLockDirs.push(packageFile.yarnLock);
