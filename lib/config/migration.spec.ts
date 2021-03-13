@@ -73,7 +73,7 @@ describe('config/migration', () => {
         meteor: true,
         autodiscover: 'true' as never,
         schedule: 'on the last day of the month' as never,
-        commitMessage: '{{semanticPrefix}}some commit message',
+        commitMessage: '{{semanticPrefix}}some commit message {{depNameShort}}',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
         pathRules: [
