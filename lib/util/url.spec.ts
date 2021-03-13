@@ -1,4 +1,9 @@
-import { parseUrl, resolveBaseUrl, trimTrailingSlash, validateUrl } from './url';
+import {
+  parseUrl,
+  resolveBaseUrl,
+  trimTrailingSlash,
+  validateUrl,
+} from './url';
 
 describe('util/url', () => {
   test.each([
@@ -45,7 +50,7 @@ describe('util/url', () => {
   ])('%s + %s => %s', (baseUrl, x, result) => {
     expect(resolveBaseUrl(baseUrl, x)).toBe(result);
   });
-  
+
   it('validates URLs', () => {
     expect(validateUrl()).toBe(false);
     expect(validateUrl(null)).toBe(false);
