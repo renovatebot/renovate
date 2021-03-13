@@ -139,11 +139,12 @@ export async function initRepo({
     );
     config.defaultBranch = info.mainbranch;
 
-    Object.assign(config, {
+    config = {
+      ...config,
       owner: info.owner,
       mergeMethod: info.mergeMethod,
       has_issues: info.has_issues,
-    });
+    };
 
     logger.debug(`${repository} owner = ${config.owner}`);
   } catch (err) /* istanbul ignore next */ {

@@ -305,14 +305,14 @@ export async function syncGit(): Promise<void> {
     }
   }
   try {
-    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
-    logger.debug({ latestCommitDate }, 'latest commit');
+    const latestCommit = (await git.log({ n: 1 })).latest;
+    logger.debug({ latestCommit }, 'latest repository commit');
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (err.message.includes('does not have any commits yet')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    logger.warn({ err }, 'Cannot retrieve latest commit date');
+    logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   try {
     const { gitAuthorName, gitAuthorEmail } = config;
@@ -655,6 +655,15 @@ export async function commitFiles({
     const commitRes = await git.commit(message, [], {
       '--no-verify': null,
     });
+    if (
+      commitRes.summary &&
+      commitRes.summary.changes === 0 &&
+      commitRes.summary.insertions === 0 &&
+      commitRes.summary.deletions === 0
+    ) {
+      logger.warn({ commitRes }, 'Detected empty commit - aborting git push');
+      return null;
+    }
     logger.debug({ result: commitRes }, `git commit`);
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {

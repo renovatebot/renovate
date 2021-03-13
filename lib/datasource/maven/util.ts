@@ -1,9 +1,8 @@
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http } from '../../util/http';
+import { Http, HttpResponse } from '../../util/http';
 import { parseUrl } from '../../util/url';
-
 import { MAVEN_REPO, id } from './common';
 
 const http: Record<string, Http> = {};
@@ -57,12 +56,12 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 export async function downloadHttpProtocol(
   pkgUrl: URL | string,
   hostType = id
-): Promise<string | null> {
-  let raw: { body: string };
+): Promise<Partial<HttpResponse>> {
+  let raw: HttpResponse;
   try {
     const httpClient = httpByHostType(hostType);
     raw = await httpClient.get(pkgUrl.toString());
-    return raw.body;
+    return raw;
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.message === HOST_DISABLED) {
@@ -92,7 +91,7 @@ export async function downloadHttpProtocol(
     } else {
       logger.info({ failedUrl, err }, 'Unknown error');
     }
-    return null;
+    return {};
   }
 }
 

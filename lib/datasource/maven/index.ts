@@ -21,7 +21,7 @@ function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
 }
 
-async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
+async function downloadFileProtocol(pkgUrl: URL): Promise<string | null> {
   const pkgPath = pkgUrl.toString().replace('file://', '');
   if (!(await fs.exists(pkgPath))) {
     return null;
@@ -37,36 +37,42 @@ function getMavenUrl(
   return parseUrl(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
-async function downloadMavenXml(
-  pkgUrl: URL | null
-): Promise<XmlDocument | null> {
+interface MavenXml {
+  authorization?: boolean;
+  xml?: XmlDocument;
+}
+
+async function downloadMavenXml(pkgUrl: URL | null): Promise<MavenXml | null> {
   /* istanbul ignore if */
   if (!pkgUrl) {
-    return null;
+    return {};
   }
   let rawContent: string;
+  let authorization: boolean;
   switch (pkgUrl.protocol) {
     case 'file:':
       rawContent = await downloadFileProtocol(pkgUrl);
       break;
     case 'http:':
     case 'https:':
-      rawContent = await downloadHttpProtocol(pkgUrl);
+      ({ authorization, body: rawContent } = await downloadHttpProtocol(
+        pkgUrl
+      ));
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
-      return null;
+      return {};
     default:
       logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
-      return null;
+      return {};
   }
 
   if (!rawContent) {
     logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
-    return null;
+    return {};
   }
 
-  return new XmlDocument(rawContent);
+  return { authorization, xml: new XmlDocument(rawContent) };
 }
 
 async function getDependencyInfo(
@@ -78,7 +84,7 @@ async function getDependencyInfo(
   const path = `${version}/${dependency.name}-${version}.pom`;
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
-  const pomContent = await downloadMavenXml(pomUrl);
+  const { xml: pomContent } = await downloadMavenXml(pomUrl);
   if (!pomContent) {
     return result;
   }
@@ -156,13 +162,17 @@ async function getVersionsFromMetadata(
     return cachedVersions;
   }
 
-  const mavenMetadata = await downloadMavenXml(metadataUrl);
+  const { authorization, xml: mavenMetadata } = await downloadMavenXml(
+    metadataUrl
+  );
   if (!mavenMetadata) {
     return null;
   }
 
   const versions = extractVersions(mavenMetadata);
-  await packageCache.set(cacheNamespace, cacheKey, versions, 30);
+  if (!authorization) {
+    await packageCache.set(cacheNamespace, cacheKey, versions, 30);
+  }
   return versions;
 }
 
@@ -183,7 +193,7 @@ type ArtifactInfoResult = [string, boolean | string | null];
 
 async function getArtifactInfo(
   version: string,
-  artifactUrl: url.URL
+  artifactUrl: URL
 ): Promise<ArtifactInfoResult> {
   const proto = artifactUrl.protocol;
   if (proto === 'http:' || proto === 'https:') {
@@ -207,7 +217,7 @@ async function filterMissingArtifacts(
 
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
     const queue = versions
-      .map((version): [string, url.URL | null] => {
+      .map((version): [string, URL | null] => {
         const artifactUrl = getMavenUrl(
           dependency,
           repoUrl,

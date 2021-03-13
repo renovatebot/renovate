@@ -636,7 +636,9 @@ Closes PH-41334
 See merge request itentialopensource/adapter-utils!105
 
 ---
+
 ## 4.9.4 [07-31-2019]
+
 * Update actionSchema.json
 
 See merge request itentialopensource/adapter-utils!104
@@ -644,6 +646,7 @@ See merge request itentialopensource/adapter-utils!104
 ---
 
 ## 4.9.3 [07-29-2019]
+
 * add filter to response after field is found, based on respFilter in schema
 
 See merge request itentialopensource/adapter-utils!103
@@ -651,6 +654,7 @@ See merge request itentialopensource/adapter-utils!103
 ---
 
 ## 4.9.2 [07-26-2019]
+
 * fix for query path changes
 
 See merge request itentialopensource/adapter-utils!102
@@ -658,6 +662,7 @@ See merge request itentialopensource/adapter-utils!102
 ---
 
 ## 4.9.1 [07-26-2019]
+
 * patch for uriPath issue
 
 See merge request itentialopensource/adapter-utils!101
@@ -665,6 +670,7 @@ See merge request itentialopensource/adapter-utils!101
 ---
 
 ## 4.9.0 [07-24-2019]
+
 * Resolve PH-25577 "Minor/"
 
 Closes PH-25577
@@ -674,6 +680,7 @@ See merge request itentialopensource/adapter-utils!100
 ---
 
 ## 4.8.4 [07-15-2019]
+
 * try pinning async-lock to remove vulnerability
 
 See merge request itentialopensource/adapter-utils!99
@@ -681,6 +688,7 @@ See merge request itentialopensource/adapter-utils!99
 ---
 
 ## 4.8.3 [07-11-2019]
+
 * fix action schema validation and no type data in schema
 
 See merge request itentialopensource/adapter-utils!98
@@ -688,6 +696,7 @@ See merge request itentialopensource/adapter-utils!98
 ---
 
 ## 4.8.2 [07-02-2019]
+
 * mockdata fields with value false now included during translations
 
 See merge request itentialopensource/adapter-utils!97
@@ -695,6 +704,7 @@ See merge request itentialopensource/adapter-utils!97
 ---
 
 ## 4.8.1 [07-01-2019]
+
 * fixes so that xml or pain text do not break mockdata return
 
 See merge request itentialopensource/adapter-utils!96
@@ -702,6 +712,7 @@ See merge request itentialopensource/adapter-utils!96
 ---
 
 ## 4.8.0 [06-30-2019]
+
 * Resolves PH-34761 - Accept Call Properties which can override adapter properties
 
 Closes PH-34761
@@ -711,6 +722,7 @@ See merge request itentialopensource/adapter-utils!95
 ---
 
 ## 4.7.0 [06-27-2019]
+
 * Resolves - PH-34823 - Ability to have multiple mock data files based on data
 
 Closes PH-34823
@@ -720,6 +732,7 @@ See merge request itentialopensource/adapter-utils!94
 ---
 
 ## 4.6.10 [06-21-2019]
+
 * Patch/healthcheckerrorlog
 
 See merge request itentialopensource/adapter-utils!93
@@ -727,6 +740,7 @@ See merge request itentialopensource/adapter-utils!93
 ---
 
 ## 4.6.9 [06-21-2019]
+
 * resolve socks proxy repair
 
 See merge request itentialopensource/adapter-utils!92
@@ -734,6 +748,7 @@ See merge request itentialopensource/adapter-utils!92
 ---
 
 ## 4.6.8 [06-21-2019]
+
 * Resolves PH-34472 - changes to fix http to https proxy
 
 Closes PH-34472
@@ -743,6 +758,7 @@ See merge request itentialopensource/adapter-utils!91
 ---
 
 ## 4.6.7 [06-04-2019]
+
 * Resolves PH_33846: fix to missing content-length on token, fix to request timeout error
 
 Closes PH-33846
@@ -752,6 +768,7 @@ See merge request itentialopensource/adapter-utils!90
 ---
 
 ## 4.6.6 [05-20-2019]
+
 * Resolves PH-33337 - fix the default error code
 
 Closes PH-33337
@@ -761,6 +778,7 @@ See merge request itentialopensource/adapter-utils!89
 ---
 
 ## 4.6.5 [05-13-2019]
+
 * Update contribution guidelines when external contributers in mind.
 
 See merge request itentialopensource/adapter-utils!77
@@ -768,6 +786,7 @@ See merge request itentialopensource/adapter-utils!77
 ---
 
 ## 4.6.4 [05-08-2019]
+
 * Resolves PH-32961 - fixes for handling error responses
 
 Closes PH-32961
@@ -777,6 +796,7 @@ See merge request itentialopensource/adapter-utils!88
 ---
 
 ## 4.6.3 [04-24-2019]
+
 * Resolves PH-32428 - change handling of response in mockdata
 
 Closes PH-32428
@@ -786,6 +806,7 @@ See merge request itentialopensource/adapter-utils!87
 ---
 
 ## 4.6.2 [04-23-2019]
+
 * Resolves PH-32254 - fix entitypath check
 
 Closes PH-32254
@@ -795,6 +816,7 @@ See merge request itentialopensource/adapter-utils!86
 ---
 
 ## 4.6.1 [04-22-2019]
+
 * patch/schema changes to schema?
 
 See merge request itentialopensource/adapter-utils!85
@@ -802,6 +824,7 @@ See merge request itentialopensource/adapter-utils!85
 ---
 
 ## 4.6.0 [04-22-2019]
+
 * Resolve PH-32062 "Minor/" - Add ability for token on url or in body
 
 Closes PH-32062
@@ -811,6 +834,7 @@ See merge request itentialopensource/adapter-utils!84
 ---
 
 ## 4.5.2 [04-17-2019]
+
 * :memo: Removes Pronghorn readme reference
 
 Closes #2
@@ -820,6 +844,7 @@ See merge request itentialopensource/adapter-utils!82
 ---
 
 ## 4.5.1 [04-16-2019]
+
 * Patch/security - update for security vulnerability
 
 See merge request itentialopensource/adapter-utils!81
@@ -827,6 +852,7 @@ See merge request itentialopensource/adapter-utils!81
 ---
 
 ## 4.5.0 [04-11-2019]
+
 * Resolves PH-31341: changes for setting variables in auth field and for adding request data to stored tokens
 
 Closes PH-31341
@@ -836,6 +862,7 @@ See merge request itentialopensource/adapter-utils!75
 ---
 
 ## 4.4.6 [04-08-2019]
+
 * removeBundled
 
 See merge request itentialopensource/adapter-utils!74
@@ -843,6 +870,7 @@ See merge request itentialopensource/adapter-utils!74
 ---
 
 ## 4.4.5 [04-08-2019]
+
 * patch/updatelicense
 
 See merge request itentialopensource/adapter-utils!73
@@ -850,6 +878,7 @@ See merge request itentialopensource/adapter-utils!73
 ---
 
 ## 4.4.4 [04-08-2019]
+
 * patch/FixLicense
 
 See merge request itentialopensource/adapter-utils!72
@@ -857,6 +886,7 @@ See merge request itentialopensource/adapter-utils!72
 ---
 
 ## 4.4.3 [04-08-2019]
+
 * Update package.json
 
 See merge request itentialopensource/adapter-utils!71
@@ -864,6 +894,7 @@ See merge request itentialopensource/adapter-utils!71
 ---
 
 ## 4.4.2 [04-08-2019]
+
 * Update package.json
 
 See merge request itentialopensource/adapter-utils!70
@@ -871,6 +902,7 @@ See merge request itentialopensource/adapter-utils!70
 ---
 
 ## 4.4.1 [04-08-2019]
+
 * change publish for opensource
 
 See merge request itentialopensource/adapter-utils!69
@@ -878,6 +910,7 @@ See merge request itentialopensource/adapter-utils!69
 ---
 
 ## 4.4.0 [04-08-2019]
+
 * Resolved minor/PH-31206: make adapter-utils opensource
 
 Closes PH-31206
@@ -886,16 +919,17 @@ See merge request itentialopensource/adapter-utils!68
 
 ---
 
-##  [09-06-2018]
+## [09-06-2018]
+
 ### Improvement
+
 * Changes to add functionality, and allow multiple path variables, to the URI path as well as make it simpler.  [PH-16970](http://itential.atlassian.net/browse/PH-16970)
 
 # Current Version: 4.3.1 [03-26-2019]
 
 ## New Features
+
 * __3.10.0 [12-05-2018]__ - New methods have been add to:
-
-
 
 support failover - there is a method (setFailover) that can be called by adapters to get the proper failover code.
 
@@ -904,13 +938,15 @@ support verifying capabilities - there is a method (verifyCapability) which will
 support caching entities - the verifyCapability used a cache of entities. This cache can be 'local' memory or in 'redis' based on the cache_location property. You can add entity lists into the cache using the addEntityCache method.
 
  [PH-21980](http://itential.atlassian.net/browse/PH-21980)
-* __3.9.0 [12-04-2018]__ - The external name on schemas can now be at the same level or lower -- 
+
+* __3.9.0 [12-04-2018]__ - The external name on schemas can now be at the same level or lower --
 
 It can still be sys_id or it can be something like ticket.sys_id this allows translation to be done at different levels. [PH-20788](http://itential.atlassian.net/browse/PH-20788)
+
 * __3.6.0 [11-16-2018]__ - The process to check the action files for validity has been moved into adapter-utils to reduce the code in the adapter-template. This also moves the actionSchema.json into the adapter-utils. [PH-20797](http://itential.atlassian.net/browse/PH-20797)
 * __3.5.0 [11-16-2018]__ - Removed the requirement for the properties -authentication.token_URI_path, healthcheck.URI_path and healthcheck.protocol. These can now be taken care of in the .system entity. [PH-20778](http://itential.atlassian.net/browse/PH-20778)
 * __2.1.0 [08-17-2018]__ - These libraries now support token re-use and expiration during the calls to the external system. [PH-14296](http://itential.atlassian.net/browse/PH-14296)
-* __2.0.0 [08-13-2018]__ - The following issues are in this Sprint Branch 
+* __2.0.0 [08-13-2018]__ - The following issues are in this Sprint Branch
 
 PH-16044 -- Add Generic call that is protocol and method independent
 
@@ -933,10 +969,12 @@ PH-16268 -- Change the type in the action.json response as single and multiple a
 PH-15718 -- Consistent returns that include status and code [PH-16131](http://itential.atlassian.net/browse/PH-16131)
 
 ## Improvements
+
 * __4.2.1 [03-19-2019]__ - Updated calls to support MongoDB driver 3.1.7. [PH-28266](http://itential.atlassian.net/browse/PH-28266)
 * __4.2.0 [02-25-2019]__ - Added getAllCapability call for IAP
 
 Added refreshProperties so the adapter can take in new properties without having to restart it. [PH-24808](http://itential.atlassian.net/browse/PH-24808)
+
 * __4.0.0 [02-08-2019]__ - Adapter-utils changed error and response objects to match the new standard. This is a breaking change so when using this with your adapter, make sure you handle these new objects. [PH-25372](http://itential.atlassian.net/browse/PH-25372)
 * __3.13.2 [01-16-2019]__ - Added other REST Methods that were not available - OPTIONS, HEAD, TRACE, CONNECT. [PH-24158](http://itential.atlassian.net/browse/PH-24158)
 * __3.12.0 [01-02-2019]__ - Added a base_path property and the ability to set {basePath} on the entitypath in the action files. [PH-23339](http://itential.atlassian.net/browse/PH-23339)
@@ -948,19 +986,20 @@ Added refreshProperties so the adapter can take in new properties without having
 * __3.1.0 [09-26-2018]__ - Added the ability to bypass translation on the returned data. [PH-17702](http://itential.atlassian.net/browse/PH-17702)
 
 ## Bug Fixes
+
 * __4.3.1 [03-26-2019]__ - Fixed healthcheck headers [PH-29729](http://itential.atlassian.net/browse/PH-29729)
 * __4.3.0 [03-22-2019]__ - Bug fixes and performance improvements [PH-29177](http://itential.atlassian.net/browse/PH-29177)
-* __4.2.3 [03-20-2019]__ - Bug fixes and performance improvements 
-* __4.2.2 [03-19-2019]__ - Bug fixes and performance improvements 
-* __4.1.1 [02-21-2019]__ - Bug fixes and performance improvements 
-* __4.1.0 [02-21-2019]__ - Bug fixes and performance improvements 
-* __3.13.5 [02-08-2019]__ - Bug fixes and performance improvements 
-* __3.13.4 [01-31-2019]__ - Bug fixes and performance improvements 
+* __4.2.3 [03-20-2019]__ - Bug fixes and performance improvements
+* __4.2.2 [03-19-2019]__ - Bug fixes and performance improvements
+* __4.1.1 [02-21-2019]__ - Bug fixes and performance improvements
+* __4.1.0 [02-21-2019]__ - Bug fixes and performance improvements
+* __3.13.5 [02-08-2019]__ - Bug fixes and performance improvements
+* __3.13.4 [01-31-2019]__ - Bug fixes and performance improvements
 * __3.13.3 [01-31-2019]__ - Added the ability to say whether you want the adapter to send an empty body with the request or not (default). [PH-24874](http://itential.atlassian.net/browse/PH-24874)
-* __3.13.1 [01-10-2019]__ - Bug fixes and performance improvements 
-* __3.13.0 [01-10-2019]__ - Bug fixes and performance improvements 
-* __3.12.2 [01-03-2019]__ - Bug fixes and performance improvements 
-* __3.12.1 [01-02-2019]__ - Bug fixes and performance improvements 
+* __3.13.1 [01-10-2019]__ - Bug fixes and performance improvements
+* __3.13.0 [01-10-2019]__ - Bug fixes and performance improvements
+* __3.12.2 [01-03-2019]__ - Bug fixes and performance improvements
+* __3.12.1 [01-02-2019]__ - Bug fixes and performance improvements
 * __3.11.1 [01-02-2019]__ - Added the ability to set ecdhCurve to auto through a property. [PH-23297](http://itential.atlassian.net/browse/PH-23297)
 * __3.7.1 [11-27-2018]__ - Fixed encoding of the path variables. [PH-21440](http://itential.atlassian.net/browse/PH-21440)
 * __3.2.1 [10-03-2018]__ - Healthcheck has been fixed so that errors are returned. [PH-18662](http://itential.atlassian.net/browse/PH-18662)
@@ -970,28 +1009,28 @@ Added refreshProperties so the adapter can take in new properties without having
 
 ## Security
 
-
 ---
 
 # Previous Version: 1.3.2 [08-03-2018]
 
 ## New Features
+
 * 1.2.0 [07-03-2018] Added the ability to define separate request and response schemas for an action. Three potential fields on each action in the action.json:
-  - schema - this remains the best way to define a single schema for the action
-  - requestSchema - this supersedes schema for requests going to the external sytem
-  - responseSchema - this supersedes schema for requests coming from the external system. [PH-12811](http://itential.atlassian.net/browse/PH-12811)
+  * schema - this remains the best way to define a single schema for the action
+  * requestSchema - this supersedes schema for requests going to the external sytem
+  * responseSchema - this supersedes schema for requests coming from the external system. [PH-12811](http://itential.atlassian.net/browse/PH-12811)
 * 1.1.0 [06-25-2018] Added the ability for the data translator utility to handle objects with dynamic fields. [PH-12808](http://itential.atlassian.net/browse/PH-12808)
 * 1.0.19 [06-08-2018] Update CHANGELOG to reflect new format [PH-11323](http://itential.atlassian.net/browse/PH-11323)
 
 ## Improvements
+
 * __1.3.1 [07-30-2018]__ - Added unit test setup. [PH-11880](http://itential.atlassian.net/browse/PH-11880)
 * 1.3.0 [07-10-2018] Changes how the mock data files are defined to remove redundancy in the action.json. They are now defined on the responseObject in the mockFile field and the mockFiles Array is gone. [PH-13483](http://itential.atlassian.net/browse/PH-13483)
 
 ## Bug Fixes
 
-
 ## Security
-* __1.3.2 [08-03-2018]__ - Removed jshint from dependencies. [PH-13789](http://itential.atlassian.net/browse/PH-13789)
 
+* __1.3.2 [08-03-2018]__ - Removed jshint from dependencies. [PH-13789](http://itential.atlassian.net/browse/PH-13789)
 
 ---

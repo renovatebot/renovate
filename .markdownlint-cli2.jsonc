@@ -1,0 +1,17 @@
+{
+  // Disable some built-in rules
+  "config": {
+    "fenced-code-language": false,
+    "first-line-heading": false,
+    "line-length": false,
+    "no-emphasis-as-header": false,
+    "no-inline-html": false,
+    "single-h1": false
+  },
+
+  // Define glob expressions to use (only valid at root)
+  "globs": ["**/*.md"],
+
+  // Define glob expressions to ignore
+  "ignores": ["**/__fixtures__/*", "**/node_modules/**"]
+}
