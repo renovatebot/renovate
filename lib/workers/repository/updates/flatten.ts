@@ -18,7 +18,6 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   const updateConfig = { ...input };
   delete updateConfig.packageRules;
   // TODO: Remove next line once #8075 is complete
-  updateConfig.depNameShort ||= updateConfig.depName;
   updateConfig.depNameSanitized = updateConfig.depName
     ? updateConfig.depName
         .replace('@types/', '')
