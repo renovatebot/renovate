@@ -100,7 +100,7 @@ export function analyseTerraformResource(
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
         dep.skipReason = SkipReason.LocalChart;
       }
-      dep.depType = 'helm';
+      dep.depType = 'helm_release';
       dep.registryUrls = [dep.managerData.repository];
       dep.depName = dep.managerData.chart;
       dep.datasource = datasourceHelm.id;

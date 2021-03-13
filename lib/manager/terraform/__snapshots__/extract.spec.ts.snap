@@ -7,7 +7,7 @@ Object {
       "currentValue": "1.0.1",
       "datasource": "helm",
       "depName": "redis",
-      "depType": "helm",
+      "depType": "helm_release",
       "registryUrls": Array [
         "https://charts.helm.sh/stable",
       ],
@@ -15,7 +15,7 @@ Object {
     Object {
       "datasource": "helm",
       "depName": "redis",
-      "depType": "helm",
+      "depType": "helm_release",
       "registryUrls": Array [
         "https://charts.helm.sh/stable",
       ],
@@ -23,7 +23,7 @@ Object {
     Object {
       "datasource": "helm",
       "depName": "./charts/example",
-      "depType": "helm",
+      "depType": "helm_release",
       "registryUrls": Array [
         undefined,
       ],
@@ -33,7 +33,7 @@ Object {
       "currentValue": "4.0.1",
       "datasource": "helm",
       "depName": undefined,
-      "depType": "helm",
+      "depType": "helm_release",
       "registryUrls": Array [
         "https://charts.helm.sh/stable",
       ],
@@ -43,7 +43,7 @@ Object {
       "currentValue": "5.0.1",
       "datasource": "helm",
       "depName": "redis",
-      "depType": "helm",
+      "depType": "helm_release",
       "registryUrls": Array [
         "https://charts.helm.sh/stable",
       ],
@@ -52,7 +52,7 @@ Object {
       "currentValue": "6.0.1",
       "datasource": "helm",
       "depName": "redis",
-      "depType": "helm",
+      "depType": "helm_release",
       "registryUrls": Array [
         undefined,
       ],
