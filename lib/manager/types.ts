@@ -102,7 +102,6 @@ export interface Package<T> extends ManagerData<T> {
   githubRepo?: string;
   pinDigests?: boolean;
   currentRawValue?: string;
-  major?: { enabled?: boolean };
   prettyDepType?: any;
 }
 
