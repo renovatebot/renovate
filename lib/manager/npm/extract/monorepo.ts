@@ -24,11 +24,14 @@ export function detectMonorepos(
       packageFile,
       npmLock,
       yarnLock,
-      lernaClient,
       lernaPackages,
       managerData = {},
     } = p;
-    const { lernaDir, yarnWorkspacesPackages } = managerData as NpmManagerData;
+    const {
+      lernaClient,
+      lernaDir,
+      yarnWorkspacesPackages,
+    } = managerData as NpmManagerData;
     const basePath = upath.dirname(packageFile);
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
@@ -58,7 +61,7 @@ export function detectMonorepos(
       }
       for (const subPackage of internalPackageFiles) {
         subPackage.managerData.lernaDir = lernaDir;
-        subPackage.lernaClient = lernaClient;
+        subPackage.managerData.lernaClient = lernaClient;
         subPackage.yarnLock = subPackage.yarnLock || yarnLock;
         subPackage.npmLock = subPackage.npmLock || npmLock;
         if (subPackage.yarnLock) {

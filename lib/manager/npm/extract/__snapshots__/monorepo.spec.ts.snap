@@ -40,8 +40,8 @@ Array [
         "depName": "bar",
       },
     ],
-    "lernaClient": undefined,
     "managerData": Object {
+      "lernaClient": undefined,
       "lernaDir": ".",
       "packageJsonName": "@org/a",
     },
@@ -50,8 +50,8 @@ Array [
     "yarnLock": undefined,
   },
   Object {
-    "lernaClient": undefined,
     "managerData": Object {
+      "lernaClient": undefined,
       "lernaDir": ".",
       "packageJsonName": "@org/b",
     },
@@ -105,8 +105,8 @@ Array [
         "depName": "bar",
       },
     ],
-    "lernaClient": undefined,
     "managerData": Object {
+      "lernaClient": undefined,
       "lernaDir": ".",
       "packageJsonName": "@org/a",
     },
@@ -115,8 +115,8 @@ Array [
     "yarnLock": undefined,
   },
   Object {
-    "lernaClient": undefined,
     "managerData": Object {
+      "lernaClient": undefined,
       "lernaDir": ".",
       "packageJsonName": "@org/b",
     },
@@ -143,8 +143,8 @@ Array [
     "packageFile": "package.json",
   },
   Object {
-    "lernaClient": "yarn",
     "managerData": Object {
+      "lernaClient": undefined,
       "lernaDir": ".",
       "packageJsonName": "@org/a",
     },
@@ -153,8 +153,8 @@ Array [
     "yarnLock": undefined,
   },
   Object {
-    "lernaClient": "yarn",
     "managerData": Object {
+      "lernaClient": undefined,
       "lernaDir": ".",
       "packageJsonName": "@org/b",
     },
@@ -174,9 +174,9 @@ Array [
     "packageFile": "package.json",
   },
   Object {
-    "lernaClient": undefined,
     "managerData": Object {
       "hasYarnWorkspaces": true,
+      "lernaClient": undefined,
       "lernaDir": undefined,
       "packageJsonName": "@org/a",
     },
@@ -185,8 +185,8 @@ Array [
     "yarnLock": "yarn.lock",
   },
   Object {
-    "lernaClient": undefined,
     "managerData": Object {
+      "lernaClient": undefined,
       "lernaDir": undefined,
       "packageJsonName": "@org/b",
     },

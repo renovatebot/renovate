@@ -20,7 +20,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../types';
-import { NpmManagerData, PackageJsonType } from '../types';
+import { LernaClient, NpmManagerData, PackageJsonType } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -130,7 +130,7 @@ export async function extractPackageFile(
 
   let lernaDir: string;
   let lernaPackages: string[];
-  let lernaClient: 'yarn' | 'npm';
+  let lernaClient: LernaClient;
   let hasFileRefs = false;
   let lernaJson: {
     packages: string[];
@@ -362,6 +362,7 @@ export async function extractPackageFile(
   }
 
   const managerData: NpmManagerData = {
+    lernaClient,
     lernaDir,
     packageJsonName,
     packageJsonType,
@@ -375,7 +376,6 @@ export async function extractPackageFile(
     ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
-    lernaClient,
     lernaPackages,
     skipInstalls,
     constraints,

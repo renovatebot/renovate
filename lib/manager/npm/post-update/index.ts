@@ -709,7 +709,7 @@ export async function getAdditionalFiles(
       logger.debug('No matching package.json found');
       throw new Error('lerna-no-lockfile');
     }
-    if (lernaPackageFile.lernaClient === 'npm') {
+    if (lernaPackageFile.managerData?.lernaClient === 'npm') {
       lockFile = config.npmLock || 'package-lock.json';
     } else {
       lockFile = config.yarnLock || 'yarn.lock';
