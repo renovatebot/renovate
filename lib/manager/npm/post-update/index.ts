@@ -98,7 +98,7 @@ export function determineLockFileDirs(
     } else if (
       packageFile.lernaDir &&
       packageFile.yarnLock &&
-      !packageFile.hasYarnWorkspaces
+      !packageFile.managerData.hasYarnWorkspaces
     ) {
       lernaDirs.push(packageFile.lernaDir);
     } else {

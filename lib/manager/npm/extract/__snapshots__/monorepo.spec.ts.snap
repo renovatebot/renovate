@@ -170,10 +170,10 @@ Array [
     "packageFile": "package.json",
   },
   Object {
-    "hasYarnWorkspaces": true,
     "lernaClient": undefined,
     "lernaDir": undefined,
     "managerData": Object {
+      "hasYarnWorkspaces": true,
       "packageJsonName": "@org/a",
     },
     "npmLock": undefined,

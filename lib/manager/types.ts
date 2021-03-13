@@ -79,7 +79,6 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
-  hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];

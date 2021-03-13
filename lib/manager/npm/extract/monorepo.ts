@@ -63,7 +63,7 @@ export function detectMonorepos(
         subPackage.yarnLock = subPackage.yarnLock || yarnLock;
         subPackage.npmLock = subPackage.npmLock || npmLock;
         if (subPackage.yarnLock) {
-          subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
+          subPackage.managerData.hasYarnWorkspaces = !!yarnWorkspacesPackages;
         }
         if (!updateInternalDeps) {
           subPackage.deps?.forEach((dep) => {
