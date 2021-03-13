@@ -116,11 +116,11 @@ async function getDockerTag(
 }
 
 function getContainerName(image: string, prefix: string): string {
-  return (prefix || '') + image.replace(/\//g, '_');
+  return (prefix || 'renovate_') + image.replace(/\//g, '_');
 }
 
 function getContainerLabel(prefix: string): string {
-  return (prefix || '') + 'renovate_child';
+  return `${prefix || 'renovate_'}child`;
 }
 
 export async function removeDockerContainer(
@@ -222,12 +222,7 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  if (dockerImagePrefix) {
-    image = image.replace(
-      /^renovate\//,
-      ensureTrailingSlash(dockerImagePrefix)
-    );
-  }
+  image = `${ensureTrailingSlash(dockerImagePrefix ?? 'renovate')}${image}`;
 
   let tag: string;
   if (options.tag) {

@@ -68,7 +68,7 @@ export async function updateArtifacts({
         CGO_ENABLED: config.binarySource === BinarySource.Docker ? '0' : null,
       },
       docker: {
-        image: 'renovate/go',
+        image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
         volumes: [goPath],

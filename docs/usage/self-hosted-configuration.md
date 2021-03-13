@@ -102,7 +102,7 @@ This configuration will be applied after all other environment variables so that
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_renovate_node` instead of currently used `renovate_node` and be labeled `myprefix_renovate_child` instead of `renovate_child`.
+If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_renovate_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
 
 Note that dangling containers will not be removed until Renovate is run with the same prefix again.
 

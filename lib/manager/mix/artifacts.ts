@@ -47,14 +47,7 @@ export async function updateArtifacts({
 
   const cmdParts =
     config.binarySource === BinarySource.Docker
-      ? [
-          'docker',
-          'run',
-          '--rm',
-          `-v ${cwd}:${cwd}`,
-          `-w ${cwd}`,
-          'renovate/elixir mix',
-        ]
+      ? ['docker', 'run', '--rm', `-v ${cwd}:${cwd}`, `-w ${cwd}`, 'elixir mix']
       : ['mix'];
   cmdParts.push('deps.update');
 

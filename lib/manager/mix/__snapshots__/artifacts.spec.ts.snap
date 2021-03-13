@@ -48,7 +48,7 @@ Array [
 exports[`.updateArtifacts() returns updated mix.lock 2`] = `
 Array [
   Object {
-    "cmd": "docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo renovate/elixir mix deps.update plug",
+    "cmd": "docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo elixir mix deps.update plug",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
