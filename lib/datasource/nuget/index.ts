@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { parseUrl, parseUrlLegacy } from '../../util/url';
+import { formatUrl, parseUrlLegacy } from '../../util/url';
 import * as nugetVersioning from '../../versioning/nuget';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as v2 from './v2';
@@ -26,7 +26,7 @@ export function parseRegistryUrl(
     } else if (parsedUrl.pathname.endsWith('.json')) {
       protocolVersion = 3;
     }
-    return { feedUrl: parsedUrl.toString(), protocolVersion };
+    return { feedUrl: formatUrl(parsedUrl), protocolVersion };
   } catch (err) {
     logger.debug({ err }, `nuget registry failure: can't parse ${registryUrl}`);
     return { feedUrl: registryUrl, protocolVersion: null };
