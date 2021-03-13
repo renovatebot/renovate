@@ -1,4 +1,4 @@
-Currently, Terraform supports renovating following dependencies, where sub points represent hosting options of the dependencies:
+Currently, Terraform supports renovating the following dependencies, where sub points represent hosting options of the dependencies:
 
 - modules
   - GitTags
