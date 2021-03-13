@@ -218,7 +218,7 @@ export async function initRepo({
     let url: string;
     if (
       process.env.GITLAB_IGNORE_REPO_URL ||
-      res.body.http_url_to_repo === null
+      !is.string(res.body.http_url_to_repo)
     ) {
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
       const { host, protocol } = parseUrl(defaults.endpoint);
