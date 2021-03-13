@@ -1,4 +1,16 @@
+// eslint-disable-next-line no-restricted-imports
+import { UrlWithStringQuery, parse as _parseUrlLegacy } from 'url';
 import urlJoin from 'url-join';
+
+/**
+ * Parses url with deprecated url module
+ * @param url url to parse
+ * @returns legacy `UrlWithStringQuery`
+ * @deprecated
+ */
+export function parseUrlLegacy(url: string): UrlWithStringQuery {
+  return _parseUrlLegacy(url);
+}
 
 export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
@@ -11,8 +23,8 @@ export function trimTrailingSlash(url: string): string {
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   const inputString = input.toString();
 
-  let host;
-  let pathname;
+  let host: string | undefined;
+  let pathname: string;
   try {
     ({ host, pathname } = new URL(inputString));
   } catch (e) {
@@ -35,10 +47,6 @@ export function getQueryString(params: Record<string, any>): string {
   }
   const res = usp.toString();
   return res;
-}
-
-export function parseUrl(url: string, base?: string | URL): URL {
-  return new URL(url, base);
 }
 
 export function validateUrl(url?: string, httpOnly = true): boolean {
