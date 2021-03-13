@@ -69,7 +69,7 @@ e.g.
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
 If this is set to 'deep', then a full install of modules will be done.
-This is currently applicable to `npm` and `yarn` only, and automatically set to `deep` when a full installis detected as necessary.
+This is currently applicable to `npm` and `yarn` only, and automatically set to `deep` when a full install is detected as necessary.
 
 ## autodiscover
 
