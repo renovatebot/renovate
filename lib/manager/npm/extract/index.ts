@@ -20,6 +20,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../types';
+import { NpmManagerData, PackageJsonType } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -72,7 +73,7 @@ export async function extractPackageFile(
   } else {
     yarnWorkspacesPackages = packageJson.workspaces?.packages;
   }
-  const packageJsonType = mightBeABrowserLibrary(packageJson)
+  const packageJsonType: PackageJsonType = mightBeABrowserLibrary(packageJson)
     ? 'library'
     : 'app';
 
@@ -357,11 +358,14 @@ export async function extractPackageFile(
     }
   }
 
+  const managerData: NpmManagerData = {
+    packageJsonType,
+  };
+
   return {
     deps,
     packageJsonName,
     packageFileVersion,
-    packageJsonType,
     npmrc,
     ignoreNpmrcFile,
     yarnrc,
@@ -372,6 +376,7 @@ export async function extractPackageFile(
     skipInstalls,
     yarnWorkspacesPackages,
     constraints,
+    managerData,
   };
 }
 
