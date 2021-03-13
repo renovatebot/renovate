@@ -1,16 +1,8 @@
 // eslint-disable-next-line no-restricted-imports
-import { UrlWithStringQuery, parse as _parseUrlLegacy } from 'url';
+import { Url, format as formatUrl, parse as parseUrlLegacy } from 'url';
 import urlJoin from 'url-join';
 
-/**
- * Parses url with deprecated url module
- * @param url url to parse
- * @returns legacy `UrlWithStringQuery`
- * @deprecated
- */
-export function parseUrlLegacy(url: string): UrlWithStringQuery {
-  return _parseUrlLegacy(url);
-}
+export { formatUrl, parseUrlLegacy, Url };
 
 export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
