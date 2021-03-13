@@ -639,7 +639,9 @@ For example, if you are following a tag like `next` and then that stream is rele
 
 Specify commit authors ignored by Renovate.
 
-If you have other bots which commit on top of Renovate PRs, you probably want Renovate to rebase those PRs instead of treating them as modified.
+By default, Renovate will treat any PR as modified if another git author has added to the branch.
+When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
+If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other git author(s) to `gitIgnoredAuthors`.
 
 Example:
 
