@@ -24,7 +24,7 @@ Terraform range constraints are supported:
 
 For fine-grained control, e.g. to turn off only parts of this manager, there are following `depTypes` provided:
 
-| ressource                   |      depType      |
+| resource                   |      depType      |
 | --------------------------- | :---------------: |
 | terraform provider          |     provider      |
 | required terraform provider | required_provider |
