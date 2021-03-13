@@ -1,8 +1,8 @@
 // eslint-disable-next-line no-restricted-imports
-import { Url, format as formatUrl, parse as parseUrlLegacy } from 'url';
+import { format as formatUrl, parse as parseUrlLegacy } from 'url';
 import urlJoin from 'url-join';
 
-export { formatUrl, parseUrlLegacy, Url };
+export { formatUrl, parseUrlLegacy };
 
 export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
