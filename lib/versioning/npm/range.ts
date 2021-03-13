@@ -18,36 +18,38 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
 
   const currentMajor = major(oldValue);
   const currentMinor = minor(oldValue);
-  const currentPatch = major(oldValue);
+  const currentPatch = patch(oldValue);
 
-  let needReplace = false;
   const oldTuple = [currentMajor, currentMinor, currentPatch];
   const newTuple = [toVersionMajor, toVersionMinor, toVersionPatch];
-  let idx = 0;
-  while (idx < 3) {
+  const resultTuple = [];
+
+  let leadingZero = true;
+  let needReplace = false;
+  for (let idx = 0; idx < 3; idx += 1) {
     const oldVal = oldTuple[idx];
     const newVal = newTuple[idx];
-    idx += 1;
 
-    if (oldVal !== newVal) {
-      if (newVal > oldVal) {
-        needReplace = true;
+    let leadingDigit = false;
+    if (oldVal !== 0 || newVal !== 0) {
+      if (leadingZero) {
+        leadingZero = false;
+        leadingDigit = true;
       }
-
-      break;
     }
+
+    if (leadingDigit && newVal > oldVal) {
+      needReplace = true;
+    }
+
+    if (!needReplace && newVal < oldVal) {
+      return newValue;
+    }
+
+    resultTuple.push(leadingDigit ? newVal : 0);
   }
 
-  if (!needReplace) {
-    return oldValue;
-  }
-
-  while (idx < 3) {
-    newTuple[idx] = 0;
-    idx += 1;
-  }
-
-  return newTuple.join('.');
+  return needReplace ? resultTuple.join('.') : oldValue;
 }
 
 export function getNewValue({
