@@ -107,7 +107,6 @@ export interface Package<T> extends ManagerData<T> {
   currentValue?: string;
   currentDigest?: string;
   depName?: string;
-  depNameShort?: string;
   depType?: string;
   fileReplacePosition?: number;
   groupName?: string;
