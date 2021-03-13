@@ -20,7 +20,7 @@ describe('lib/workers/global/autodiscover', () => {
     await platform.initPlatform({
       platform: PLATFORM_TYPE_GITHUB,
       token: 'abc123',
-      endpoint: 'endpoint',
+      endpoint: 'https://api.github.com/',
     });
   });
   it('returns if not autodiscovering', async () => {
