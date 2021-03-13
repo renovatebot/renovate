@@ -9,6 +9,7 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
+import { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_DISABLED,
@@ -217,21 +218,12 @@ async function setBranchPrefix(branchPrefix: string): Promise<void> {
   }
 }
 
-function setIgnoredAuthors(ignoredAuthors?: string[]): void {
-  config.ignoredAuthors = ignoredAuthors ?? [];
-}
-
-export interface UserRepoConfig {
-  branchPrefix: string;
-  gitIgnoredAuthors: string[];
-}
-
 export async function setUserRepoConfig({
   branchPrefix,
   gitIgnoredAuthors,
-}: Partial<UserRepoConfig>): Promise<void> {
+}: RenovateConfig): Promise<void> {
   await setBranchPrefix(branchPrefix);
-  setIgnoredAuthors(gitIgnoredAuthors);
+  config.ignoredAuthors = gitIgnoredAuthors ?? [];
 }
 
 export async function getSubmodules(): Promise<string[]> {
