@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
-import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import type { ArtifactError } from '../../manager/types';
@@ -177,7 +176,7 @@ export async function getUpdatedPackageFiles(
       }
       if (newContent === packageFileContent) {
         // istanbul ignore else
-        if (upgrade.datasource === datasourceGitSubmodules.id) {
+        if (upgrade.manager === 'git-submodules') {
           updatedFileContents[packageFile] = newContent;
         } else if (upgrade.rangeStrategy === 'update-lockfile') {
           nonUpdatedFileContents[packageFile] = newContent;
