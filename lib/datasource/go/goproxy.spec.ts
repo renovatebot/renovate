@@ -1,5 +1,10 @@
 import * as httpMock from '../../../test/http-mock';
-import { encodeCase, listVersions, versionInfo } from './goproxy';
+import {
+  encodeCase,
+  listVersions,
+  parseGoproxyString,
+  versionInfo,
+} from './goproxy';
 
 describe('datasource/go/utils', () => {
   it('encodeCase', () => {
@@ -57,6 +62,22 @@ describe('datasource/go/utils', () => {
         releaseTimestamp: '2017-06-08T17:28:36Z',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('parseGoproxyString', () => {
+    it('parses single url', () => {
+      const result = parseGoproxyString('foo');
+      expect(result).toMatchObject([{ url: 'foo' }]);
+    });
+    it('parses multiple urls', () => {
+      const result = parseGoproxyString('foo,bar|baz,qux');
+      expect(result).toMatchObject([
+        { url: 'foo', fallback: ',' },
+        { url: 'bar', fallback: '|' },
+        { url: 'baz', fallback: ',' },
+        { url: 'qux' },
+      ]);
     });
   });
 });

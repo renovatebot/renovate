@@ -67,3 +67,32 @@ export async function getReleases(
   }
   return null;
 }
+
+enum GoproxyFallback {
+  WhenNotFoundOrGone = ',',
+  Always = '|',
+}
+
+interface GoproxyHost {
+  url: string;
+  fallback: GoproxyFallback;
+}
+
+export function parseGoproxyString(input: unknown): GoproxyHost[] | null {
+  if (!input || typeof input !== 'string') {
+    return null;
+  }
+
+  const split = input.split(/(,|\|)/);
+  const result: GoproxyHost[] = [];
+  while (split.length) {
+    const [url, separator] = split.splice(0, 2);
+    const fallback =
+      separator === ','
+        ? GoproxyFallback.WhenNotFoundOrGone
+        : GoproxyFallback.Always;
+    result.push({ url, fallback });
+  }
+
+  return result.length ? result : null;
+}
