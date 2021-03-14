@@ -46,6 +46,8 @@ An additional benefit of using source code hosting is that the same token/authen
 | Local default           | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |
 | Local with preset path  | `local>abc/foo//path/xyz`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json`                   |
 
+Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported. One workaround is to use distinct files instead of sub-presets.
+
 ## Example configs
 
 An example of a small rule is `:preserveSemverRanges`, which has the description "Preserve (but continue to upgrade) any existing semver ranges".
