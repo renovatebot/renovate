@@ -63,7 +63,17 @@ export interface DatasourceApi {
   defaultRegistryUrls?: string[];
   defaultVersioning?: string;
   defaultConfig?: Record<string, unknown>;
+
+  // registryStrategy=first means only the first registryUrl will be tried and others ignored
+  // registryStrategy=hunt means registryUrls will be tried in order until one returns a result
+  // registryStrategy=merge means all registryUrls will be tried and the results merged if more than one returns a result
   registryStrategy?: 'first' | 'hunt' | 'merge';
-  registryUrlRestriction?: 'fixed' | 'none';
+
+  // registryUrlRestriction=fixed means the default registryUrl settings can't be overridden
+  // registryUrlRestriction=disallowed means that registryUrls are not applicable to this datasource
+  // If registryUrlRestriction is unspecified, it means custom registryUrls are allowed (no retriction)
+  registryUrlRestriction?: 'fixed' | 'disallowed';
+
+  // caching=true means caching will be performed by the datasource index instead of the datasource implementation
   caching?: boolean;
 }
