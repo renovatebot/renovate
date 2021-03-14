@@ -7,6 +7,8 @@ import { getQueryString } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'repology';
+export const defaultRegistryUrls = ['https://repology.org/'];
+export const registryStrategy = 'hunt';
 
 const http = new Http(id);
 const cacheNamespace = `datasource-${id}-list`;
@@ -43,6 +45,7 @@ async function queryPackages(url: string): Promise<RepologyPackage[]> {
 }
 
 async function queryPackagesViaResolver(
+  registryUrl: string,
   repoName: string,
   packageName: string,
   packageType: RepologyPackageType
@@ -57,19 +60,20 @@ async function queryPackagesViaResolver(
 
   // Retrieve list of packages by looking up Repology project
   const packages = await queryPackages(
-    `https://repology.org/tools/project-by?${query}`
+    `${registryUrl}tools/project-by?${query}`
   );
 
   return packages;
 }
 
 async function queryPackagesViaAPI(
+  registryUrl: string,
   packageName: string
 ): Promise<RepologyPackage[]> {
   // Directly query the package via the API. This will only work if `packageName` has the
   // same name as the repology project
   const packages = await queryPackages(
-    `https://repology.org/api/v1/project/${packageName}`
+    `${registryUrl}api/v1/project/${packageName}`
   );
 
   return packages;
@@ -110,6 +114,7 @@ function findPackageInResponse(
 }
 
 async function queryPackage(
+  registryUrl: string,
   repoName: string,
   pkgName: string
 ): Promise<RepologyPackage[]> {
@@ -123,7 +128,12 @@ async function queryPackage(
   // are looking for.
   try {
     for (const pkgType of packageTypes) {
-      response = await queryPackagesViaResolver(repoName, pkgName, pkgType);
+      response = await queryPackagesViaResolver(
+        registryUrl,
+        repoName,
+        pkgName,
+        pkgType
+      );
 
       if (response) {
         pkg = findPackageInResponse(response, repoName, pkgName, [pkgType]);
@@ -144,7 +154,7 @@ async function queryPackage(
       // API. This will support all repositories but requires that the project name is equal to the
       // package name. This won't be always the case but for a good portion we might be able to resolve
       // the package this way.
-      response = await queryPackagesViaAPI(pkgName);
+      response = await queryPackagesViaAPI(registryUrl, pkgName);
       pkg = findPackageInResponse(response, repoName, pkgName, packageTypes);
       if (pkg) {
         // exit immediately if package found
@@ -163,11 +173,12 @@ async function queryPackage(
 }
 
 async function getCachedPackage(
+  registryUrl: string,
   repoName: string,
   pkgName: string
 ): Promise<RepologyPackage[]> {
   // Fetch previous result from cache if available
-  const cacheKey = `${repoName}/${pkgName}`;
+  const cacheKey = `${registryUrl}${repoName}/${pkgName}`;
   const cachedResult = await packageCache.get<RepologyPackage[]>(
     cacheNamespace,
     cacheKey
@@ -178,7 +189,7 @@ async function getCachedPackage(
   }
 
   // Attempt a package lookup and return if found non empty list
-  const pkg = await queryPackage(repoName, pkgName);
+  const pkg = await queryPackage(registryUrl, repoName, pkgName);
   if (pkg && pkg.length > 0) {
     await packageCache.set(cacheNamespace, cacheKey, pkg, cacheMinutes);
     return pkg;
@@ -190,6 +201,7 @@ async function getCachedPackage(
 
 export async function getReleases({
   lookupName,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   // Ensure lookup name contains both repository and package
   const [repoName, pkgName] = lookupName.split('/', 2);
@@ -204,7 +216,7 @@ export async function getReleases({
   logger.trace(`repology.getReleases(${repoName}, ${pkgName})`);
   try {
     // Attempt to retrieve (cached) package information from Repology
-    const pkg = await getCachedPackage(repoName, pkgName);
+    const pkg = await getCachedPackage(registryUrl, repoName, pkgName);
     if (!pkg) {
       return null;
     }
