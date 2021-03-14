@@ -85,6 +85,7 @@ describe('config/migration', () => {
         ],
         peerDependencies: {
           versionStrategy: 'widen',
+          skipInstalls: false,
         },
         packageRules: [
           {
