@@ -6,7 +6,7 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'galaxy';
 export const defaultRegistryUrls = ['https://galaxy.ansible.com/'];
-export const fixedRegistries = true;
+export const registryUrlRestriction = 'fixed';
 
 const http = new Http(id);
 

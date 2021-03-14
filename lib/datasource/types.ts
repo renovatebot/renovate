@@ -64,6 +64,6 @@ export interface DatasourceApi {
   defaultVersioning?: string;
   defaultConfig?: Record<string, unknown>;
   registryStrategy?: 'first' | 'hunt' | 'merge';
-  fixedRegistries?: boolean; // true = registryUrls are fixed to defaults and cannot be overridden
+  registryUrlRestriction?: 'fixed' | 'none';
   caching?: boolean;
 }

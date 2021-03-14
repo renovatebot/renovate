@@ -6,7 +6,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'hex';
 export const defaultRegistryUrls = ['https://hex.pm/'];
-export const fixedRegistries = true;
+export const registryUrlRestriction = 'fixed';
 export const defaultVersioning = hexVersioning.id;
 
 const http = new Http(id);

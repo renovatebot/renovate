@@ -5,7 +5,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'orb';
 export const defaultRegistryUrls = ['https://circleci.com/'];
-export const fixedRegistries = true;
+export const registryUrlRestriction = 'fixed';
 
 const http = new Http(id);
 

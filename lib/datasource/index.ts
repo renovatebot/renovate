@@ -171,9 +171,9 @@ function resolveRegistryUrls(
   datasource: DatasourceApi,
   extractedUrls: string[]
 ): string[] {
-  const { defaultRegistryUrls = [], fixedRegistries } = datasource;
+  const { defaultRegistryUrls = [], registryUrlRestriction } = datasource;
   const customUrls = extractedUrls?.filter(Boolean);
-  if (fixedRegistries) {
+  if (registryUrlRestriction) {
     if (is.nonEmptyArray(customUrls)) {
       logger.warn(
         { datasource: datasource.id, customUrls },
@@ -208,7 +208,10 @@ async function fetchReleases(
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult = null;
   try {
-    if (datasource.registryStrategy || datasource.fixedRegistries) {
+    if (
+      datasource.registryStrategy ||
+      datasource.registryUrlRestriction === 'fixed'
+    ) {
       // istanbul ignore if
       if (!registryUrls.length) {
         logger.warn(
@@ -223,7 +226,7 @@ async function fetchReleases(
         dep = await huntRegistries(config, datasource, registryUrls);
       } else if (datasource.registryStrategy === 'merge') {
         dep = await mergeRegistries(config, datasource, registryUrls);
-      } else if (datasource.fixedRegistries) {
+      } else {
         // Default to hunting default registries if no rangeStrategy provided
         dep = await huntRegistries(config, datasource, registryUrls);
       }
