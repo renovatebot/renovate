@@ -89,18 +89,6 @@ describe('datasource/galaxy', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('ignores and warns for registryUrls', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/api/v1/roles/?owner__username=yatesr2&name=timezone')
-        .reply(200, res1);
-      const res = await getPkgReleases({
-        datasource,
-        depName: 'yatesr2.timezone',
-        registryUrls: ['https://google.com/'],
-      });
-      expect(res).not.toBeNull();
-    });
     it('return null if searching random username and project name', async () => {
       httpMock
         .scope(baseUrl)
