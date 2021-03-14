@@ -18,7 +18,6 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   const updateConfig = { ...input };
   delete updateConfig.packageRules;
   // TODO: Remove next line once #8075 is complete
-  updateConfig.depNameShort ||= updateConfig.depName;
   updateConfig.depNameSanitized = updateConfig.depName
     ? updateConfig.depName
         .replace('@types/', '')
@@ -148,6 +147,7 @@ export async function flattenUpdates(
                 updateConfig,
                 config.vulnerabilityAlerts
               );
+              delete updateConfig.vulnerabilityAlerts;
               updateConfig.isVulnerabilityAlert = true;
               updateConfig.isRemediation = true;
               updateConfig.lockFile = lockFile;
