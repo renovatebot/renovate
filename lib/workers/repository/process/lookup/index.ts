@@ -7,7 +7,6 @@ import {
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../datasource';
-import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
 import type { LookupUpdate } from '../../../../manager/types';
@@ -299,7 +298,7 @@ export async function lookupUpdates(
   }
   // Add digests if necessary
   if (supportsDigests(config)) {
-    if (currentDigest && datasource !== datasourceGitSubmodules.id) {
+    if (currentDigest) {
       if (!digestOneAndOnly || !res.updates.length) {
         // digest update
         res.updates.push({
@@ -314,14 +313,6 @@ export async function lookupUpdates(
         res.updates.push({
           updateType: 'pin',
           newValue: currentValue,
-        });
-      }
-    } else if (datasource === datasourceGitSubmodules.id) {
-      const dependency = clone(await getPkgReleases(config));
-      if (dependency?.releases[0]?.version) {
-        res.updates.push({
-          updateType: 'digest',
-          newValue: dependency.releases[0].version,
         });
       }
     }
