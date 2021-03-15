@@ -8,7 +8,12 @@ import { BinarySource } from '../../util/exec/common';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { find } from '../../util/host-rules';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { isValid } from '../../versioning/semver';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
 
 function getPreCommands(): string[] | null {
   const credentials = find({
@@ -25,9 +30,47 @@ function getPreCommands(): string[] | null {
   return preCommands;
 }
 
+function getUpdateImportPathCmds(
+  updatedDeps: string[],
+  { constraints, newMajor }: UpdateArtifactsConfig
+): string[] {
+  const updateImportCommands = updatedDeps
+    .filter((x) => !x.startsWith('gopkg.in'))
+    .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
+
+  if (updateImportCommands.length > 0) {
+    let installMarwanModArgs =
+      'install github.com/marwan-at-work/mod/cmd/mod@latest';
+    const gomodModCompatibility = constraints?.gomodMod;
+    if (gomodModCompatibility) {
+      if (
+        gomodModCompatibility.startsWith('v') &&
+        isValid(gomodModCompatibility.replace(/^v/, ''))
+      ) {
+        installMarwanModArgs = installMarwanModArgs.replace(
+          /@latest$/,
+          `@${gomodModCompatibility}`
+        );
+      } else {
+        logger.debug(
+          { gomodModCompatibility },
+          'marwan-at-work/mod compatibility range is not valid - skipping'
+        );
+      }
+    } else {
+      logger.debug(
+        'No marwan-at-work/mod compatibility range found - installing marwan-at-work/mod latest'
+      );
+    }
+    updateImportCommands.unshift(`go ${installMarwanModArgs}`);
+  }
+
+  return updateImportCommands;
+}
+
 export async function updateArtifacts({
   packageFileName: goModFileName,
-  updatedDeps: _updatedDeps,
+  updatedDeps,
   newPackageFileContent: newGoModContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -75,9 +118,25 @@ export async function updateArtifacts({
         preCommands: getPreCommands(),
       },
     };
+
+    const execCommands = [];
+
     let args = 'get -d ./...';
     logger.debug({ cmd, args }, 'go get command included');
-    const execCommands = [`${cmd} ${args}`];
+    execCommands.push(`${cmd} ${args}`);
+
+    // Update import paths on major updates
+    const isImportPathUpdateRequired =
+      config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
+      config.updateType === 'major';
+    if (isImportPathUpdateRequired) {
+      const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
+      if (updateImportCmds.length > 0) {
+        logger.debug(updateImportCmds, 'update import path commands included');
+        // The updates
+        execCommands.push(...updateImportCmds);
+      }
+    }
 
     if (config.postUpdateOptions?.includes('gomodTidy')) {
       args = 'mod tidy';
@@ -119,6 +178,21 @@ export async function updateArtifacts({
         },
       },
     ];
+
+    // Include all the .go file import changes
+    if (isImportPathUpdateRequired) {
+      logger.debug('Returning updated go source files for import path changes');
+      for (const f of status.modified) {
+        if (f.endsWith('.go')) {
+          res.push({
+            file: {
+              name: f,
+              contents: await readLocalFile(f),
+            },
+          });
+        }
+      }
+    }
 
     if (useVendor) {
       for (const f of status.modified.concat(status.not_added)) {

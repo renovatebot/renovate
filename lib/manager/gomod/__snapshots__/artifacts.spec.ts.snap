@@ -69,6 +69,50 @@ Array [
 ]
 `;
 
+exports[`.updateArtifacts() skips updating import paths for gopkg.in dependencies 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New go.sum",
+      "name": "go.sum",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "New go.mod",
+      "name": "go.mod",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() skips updating import paths for gopkg.in dependencies 2`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`.updateArtifacts() supports docker mode with credentials 1`] = `
 Array [
   Object {
@@ -305,6 +349,288 @@ Array [
   },
   Object {
     "cmd": "go mod tidy",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() updates import paths with gomodUpdateImportPaths 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New go.sum",
+      "name": "go.sum",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "New main.go",
+      "name": "main.go",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "New go.mod",
+      "name": "go.mod",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() updates import paths with gomodUpdateImportPaths 2`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@latest",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() updates import paths with latest tool version on invalid version constraint 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New go.sum",
+      "name": "go.sum",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "New main.go",
+      "name": "main.go",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "New go.mod",
+      "name": "go.mod",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() updates import paths with latest tool version on invalid version constraint 2`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@latest",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() updates import paths with specific tool version from constraint 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New go.sum",
+      "name": "go.sum",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "New main.go",
+      "name": "main.go",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "New go.mod",
+      "name": "go.mod",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() updates import paths with specific tool version from constraint 2`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
