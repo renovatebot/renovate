@@ -7,6 +7,6 @@ FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:0.157.0-14@sha256:98
 # The backports repository contains newer versions of git, which we'll use instead.
 RUN echo 'deb http://deb.debian.org/debian buster-backports main' > /etc/apt/sources.list.d/backports.list \
    && DEBIAN_FRONTEND=noninteractive apt-get update \
-   && apt-get -y install --no-install-recommends --no-upgrade build-essential git/buster-backports \
+   && apt-get -y install --no-install-recommends build-essential git/buster-backports \
    && apt-get -y install --no-install-recommends --no-upgrade build-essential \
    && rm -rf /var/lib/apt/lists/*
