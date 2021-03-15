@@ -9,6 +9,7 @@ import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { http } from './common';
+import * as goproxy from './goproxy';
 
 export const id = 'go';
 export const registryUrlRestriction = 'disallowed';
@@ -145,12 +146,21 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  *  - Call the respective getReleases in github/gitlab to retrieve the tags
  *  - Filter module tags according to the module path
  */
-export async function getReleases({
-  lookupName,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { lookupName } = config;
+
+  let res = null;
+
+  logger.trace(`goproxy.getReleases(${lookupName})`);
+  res = await goproxy.getReleases(config);
+  if (res) {
+    return res;
+  }
+
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
-  let res = null;
 
   if (!source) {
     logger.warn({ lookupName }, 'Unsupported dependency.');

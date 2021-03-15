@@ -13,7 +13,10 @@ export async function listVersions(
 ): Promise<string[]> {
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/list`;
   const { body } = await http.get(url);
-  return body.split(/\s+/).filter(Boolean);
+  return body
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((x) => x.indexOf('+') === -1);
 }
 
 interface VersionInfo {
@@ -60,8 +63,9 @@ export async function getReleases(
       return { version };
     });
     const releases = await pAll(queue, { concurrency: 5 });
-    const result = { releases };
-    return result;
+    if (releases.length) {
+      return { releases };
+    }
   } catch (err) {
     logger.debug({ err }, 'Goproxy error');
   }
