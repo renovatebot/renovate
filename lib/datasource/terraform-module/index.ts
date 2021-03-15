@@ -6,6 +6,7 @@ import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'terraform-module';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://registry.terraform.io'];
 export const defaultVersioning = hashicorpVersioning.id;
 export const registryStrategy = 'first';

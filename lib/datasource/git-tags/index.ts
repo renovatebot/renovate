@@ -3,7 +3,7 @@ import * as gitRefs from '../git-refs';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'git-tags';
-export const registryUrlRestriction = 'disallowed';
+export const customRegistrySupport = false;
 
 export async function getReleases({
   lookupName,

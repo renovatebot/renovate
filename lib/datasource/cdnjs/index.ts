@@ -3,7 +3,7 @@ import { Http } from '../../util/http';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'cdnjs';
-export const registryUrlRestriction = 'fixed';
+export const customRegistrySupport = false;
 export const defaultRegistryUrls = ['https://api.cdnjs.com/'];
 export const caching = true;
 

@@ -7,6 +7,7 @@ import { getQueryString } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'repology';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://repology.org/'];
 export const registryStrategy = 'hunt';
 

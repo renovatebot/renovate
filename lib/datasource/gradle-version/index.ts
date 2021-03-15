@@ -5,6 +5,7 @@ import * as gradleVersioning from '../../versioning/gradle';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'gradle-version';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://services.gradle.org/versions/all'];
 export const defaultVersioning = gradleVersioning.id;
 export const registryStrategy = 'merge';
