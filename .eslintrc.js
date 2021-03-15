@@ -59,6 +59,7 @@ module.exports = {
         },
       },
     ],
+    // disallow `url` module as most stuff is deprecated and `URL` is available globally.
     'no-restricted-imports': [2, { paths: ['url'] }],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
