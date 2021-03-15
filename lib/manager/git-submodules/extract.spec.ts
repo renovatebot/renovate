@@ -11,6 +11,9 @@ const Git: typeof _simpleGit = jest.requireActual('simple-git');
 const localDir = `${__dirname}/__fixtures__`;
 
 describe('lib/manager/gitsubmodules/extract', () => {
+  // flaky ci tests
+  jest.setTimeout(10 * 1000);
+
   beforeAll(() => {
     simpleGit.mockImplementation((basePath: string) => {
       const git = Git(basePath);
@@ -47,14 +50,14 @@ describe('lib/manager/gitsubmodules/extract', () => {
       ).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', { localDir });
       expect(res.deps).toHaveLength(1);
-      expect(res.deps[0].registryUrls[1]).toEqual('main');
+      expect(res.deps[0].currentValue).toEqual('main');
       res = await extractPackageFile('', '.gitmodules.3', { localDir });
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.4', { localDir });
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.5', { localDir });
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[2].registryUrls[0]).toEqual(
+      expect(res.deps[2].lookupName).toEqual(
         'https://github.com/renovatebot/renovate-config.git'
       );
     });

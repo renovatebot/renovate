@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
@@ -171,8 +171,17 @@ function resolveRegistryUrls(
   datasource: DatasourceApi,
   extractedUrls: string[]
 ): string[] {
-  const { defaultRegistryUrls = [] } = datasource;
+  const { defaultRegistryUrls = [], registryUrlRestriction } = datasource;
   const customUrls = extractedUrls?.filter(Boolean);
+  if (registryUrlRestriction) {
+    if (is.nonEmptyArray(customUrls)) {
+      logger.warn(
+        { datasource: datasource.id, customUrls },
+        'Ignoring custom registryUrls as they cannot be overridden'
+      );
+    }
+    return defaultRegistryUrls;
+  }
   let registryUrls: string[];
   if (is.nonEmptyArray(customUrls)) {
     registryUrls = [...customUrls];
@@ -199,7 +208,10 @@ async function fetchReleases(
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult = null;
   try {
-    if (datasource.registryStrategy) {
+    if (
+      datasource.registryStrategy ||
+      datasource.registryUrlRestriction === 'fixed'
+    ) {
       // istanbul ignore if
       if (!registryUrls.length) {
         logger.warn(
@@ -214,6 +226,9 @@ async function fetchReleases(
         dep = await huntRegistries(config, datasource, registryUrls);
       } else if (datasource.registryStrategy === 'merge') {
         dep = await mergeRegistries(config, datasource, registryUrls);
+      } else {
+        // Default to hunting default registries if no rangeStrategy provided
+        dep = await huntRegistries(config, datasource, registryUrls);
       }
     } else {
       dep = await datasource.getReleases({
@@ -230,7 +245,7 @@ async function fetchReleases(
     }
     logError(datasource.id, config.lookupName, err);
   }
-  if (!dep || equal(dep, { releases: [] })) {
+  if (!dep || dequal(dep, { releases: [] })) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);

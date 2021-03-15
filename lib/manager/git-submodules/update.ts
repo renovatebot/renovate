@@ -11,7 +11,7 @@ export default async function updateDependency({
 
   try {
     await git.submoduleUpdate(['--init', upgrade.depName]);
-    await submoduleGit.checkout([upgrade.newVersion]);
+    await submoduleGit.checkout([upgrade.newDigest]);
     return fileContent;
   } catch (err) {
     return null;

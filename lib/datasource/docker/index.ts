@@ -11,6 +11,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { Image, ImageList, MediaType } from './types';
@@ -66,9 +67,14 @@ export function getRegistryRepository(
   registryUrl: string
 ): RegistryRepository {
   if (registryUrl !== defaultRegistryUrls[0]) {
-    const registry = registryUrl.replace('https://', '');
-    const registryEndingWithSlash = registry.replace(/\/?$/, '/');
+    const registryEndingWithSlash = ensureTrailingSlash(
+      registryUrl.replace(/^https?:\/\//, '')
+    );
     if (lookupName.startsWith(registryEndingWithSlash)) {
+      let registry = trimTrailingSlash(registryUrl);
+      if (!/^https?:\/\//.test(registry)) {
+        registry = `https://${registry}`;
+      }
       return {
         registry,
         repository: lookupName.replace(registryEndingWithSlash, ''),
