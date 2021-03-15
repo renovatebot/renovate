@@ -10,7 +10,8 @@ import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { http } from './common';
 
-export { id } from './common';
+export const id = 'go';
+export const registryUrlRestriction = 'disallowed';
 
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
 

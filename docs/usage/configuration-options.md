@@ -635,6 +635,22 @@ If configured, Renovate bypasses its normal major/minor/patch upgrade logic and 
 Beware that Renovate follows tags strictly.
 For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
 
+## gitIgnoredAuthors
+
+Specify commit authors ignored by Renovate.
+
+By default, Renovate will treat any PR as modified if another git author has added to the branch.
+When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
+If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other git author(s) to `gitIgnoredAuthors`.
+
+Example:
+
+```json
+{
+  "gitIgnoredAuthors": ["some-bot@example.org"]
+}
+```
+
 ## gitLabAutomerge
 
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
