@@ -9,7 +9,10 @@ The following options are "experimental" because:
 
 Experimental options which are commonly used and for which there is no external solution in sight should be replaced with official options ("Who is doing the replacing here? Renovate bot team or end-user?").
 
-Use experimental options at your own risk - they may be removed or behavior changed in any release, not just major, however all attempts will be made not to inconvenience anyone. (Aren't we breaking our "We always follow SemVer promise here?")
+Use experimental options at your own risk.
+We do not follow Semantic Versioning for any experimental option.
+These options may be removed or have their behavior changed in **any** version.
+We will try to keep breakage to a minimum, but make no guarantees that a experimental option will keep working.
 
 ## GITLAB_IGNORE_REPO_URL
 
