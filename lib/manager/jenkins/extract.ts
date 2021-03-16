@@ -7,6 +7,8 @@ import { isSkipComment } from '../../util/ignore';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 
+const YamlExtension: RegExp = /\.ya?ml$/;
+
 function getDependency(
   name: string,
   version: string,
@@ -90,7 +92,7 @@ export function extractPackageFile(
   logger.trace('jenkins.extractPackageFile()');
   const deps: PackageDependency[] = [];
 
-  if (/\.ya?ml$/.test(fileName)) {
+  if (YamlExtension.test(fileName)) {
     deps.push(...extractYaml(content));
   } else {
     deps.push(...extractText(content));
