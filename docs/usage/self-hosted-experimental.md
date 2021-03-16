@@ -1,22 +1,26 @@
-# Self-Hosted Experimental Options
+# Self-hosted experimental environment variables
 
-The following options are considered "experimental" in that:
+The following environment variables are "experimental" because:
 
-- They should not commonly be needed
-- They are typically an effort to work around some other service or platform's problem
-- We hope they can each be removed one day, or we are waiting to be sure they work as intended
+- They are not commonly needed
+- They are typically an effort to work around some other service's or platform's problem
+- They can be removed at any time
+- They are variables for Renovate's internal use to validate they work as intended
 
-Experimental options which are commonly used and for which there is no external solution in sight should be replaced with official options.
+Experimental variables which are commonly used and for which there is no external solution in sight can be converted to a official configuration option by the Renovate bot developers.
 
-Please use experimental options at your own risk - they may be removed or behavior changed in any release, not just major, however all attempts will be made not to inconvenience anyone.
+Use these experimental variables at your own risk.
+We do not follow Semantic Versioning for any experimental variables.
+These variables may be removed or have their behavior changed in **any** version.
+We will try to keep breakage to a minimum, but make no guarantees that a experimental variable will keep working.
 
 ## GITLAB_IGNORE_REPO_URL
 
-If set to any value, Renovate will ignore the Project's `http_url_to_repo` value and instead construct the git URL manually.
+If set to any value, Renovate will ignore the Project's `http_url_to_repo` value and instead construct the Git URL manually.
 
 ## RENOVATE_CACHE_NPM_MINUTES
 
-This must be a number, and would override Renovate's default npm cache time of 15 minutes for the npm datasource.
+If set to any integer, Renovate will use this integer instead of the default npm cache time (15 minutes) for the npm datasource.
 
 ## RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK
 
@@ -26,7 +30,7 @@ Skiping the check will speed things up, but may result in versions being returne
 ## RENOVATE_LEGACY_GIT_AUTHOR_EMAIL
 
 An additional `gitAuthor` email to ignore.
-Deprecated: use `ignoredAuthors` instead.
+This variable is deprecated: use `ignoredAuthors` instead.
 
 ## RENOVATE_PAGINATE_ALL
 
@@ -38,7 +42,7 @@ If set to "false" (string), Renovate will remove any existing `package-lock.json
 
 ## RENOVATE_USER_AGENT
 
-Configures the `user-agent` string to be sent with HTTP requests.
+If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
 
 ## RENOVATE_X_HARD_EXIT
 
