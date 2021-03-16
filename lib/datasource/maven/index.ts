@@ -13,6 +13,7 @@ import { downloadHttpProtocol, isHttpResourceExists } from './util';
 
 export { id } from './common';
 
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = mavenVersioning.id;
 export const registryStrategy = 'merge';

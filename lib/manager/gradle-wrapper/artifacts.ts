@@ -86,7 +86,7 @@ export async function updateArtifacts({
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
-        image: 'renovate/gradle',
+        image: 'gradle',
       },
       extraEnv,
     };

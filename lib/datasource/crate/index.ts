@@ -12,6 +12,7 @@ import * as cargoVersioning from '../../versioning/cargo';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'crate';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://crates.io'];
 export const defaultVersioning = cargoVersioning.id;
 export const registryStrategy = 'first';

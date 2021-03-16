@@ -4,6 +4,7 @@ import * as semver from '../../versioning/semver';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'git-refs';
+export const customRegistrySupport = false;
 
 const cacheMinutes = 10;
 
