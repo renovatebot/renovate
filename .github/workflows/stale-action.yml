@@ -1,6 +1,6 @@
 # Go to https://github.com/actions/stale for the full documentation of these options.
 
-name: 'Stale bot'
+name: 'Close stale bug reports that lack reproduction'
 on:
   schedule:
     - cron: '30 1 * * *'
