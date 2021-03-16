@@ -5,7 +5,7 @@ import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
-import type { JenkinsPlugins, JenkinsPlugin } from './types';
+import type { JenkinsPlugin, JenkinsPlugins } from './types';
 
 const YamlExtension = /\.ya?ml$/;
 
