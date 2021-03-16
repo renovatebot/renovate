@@ -8,8 +8,8 @@ import * as datasourceNpm from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import {
-  deleteLocalFile,
   getSiblingFileName,
+  localPathExists,
   readLocalFile,
 } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
@@ -95,27 +95,27 @@ export async function extractPackageFile(
   delete lockFiles.packageLock;
   delete lockFiles.shrinkwrapJson;
 
-  let npmrc: string;
-  let ignoreNpmrcFile: boolean;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  // istanbul ignore if
-  if (config.ignoreNpmrcFile) {
-    await deleteLocalFile(npmrcFileName);
-  } else {
-    npmrc = await readLocalFile(npmrcFileName, 'utf8');
-    if (npmrc?.includes('package-lock')) {
-      logger.debug('Stripping package-lock setting from npmrc');
-      npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
-    }
-    if (npmrc) {
-      if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
-        logger.debug('Discarding .npmrc file with variables');
-        ignoreNpmrcFile = true;
-        npmrc = undefined;
-        await deleteLocalFile(npmrcFileName);
-      }
+  const npmrcFileContent = await readLocalFile(npmrcFileName, 'utf8');
+  let { npmrc } = config;
+  if (is.string(npmrcFileContent)) {
+    if (is.string(config.npmrc)) {
+      // This could include an empty string used to blank the .npmrc
+      logger.debug(
+        { npmrcFileName },
+        'Overriding and ignoring .npmrc file content and using configured npmrc instead'
+      );
     } else {
-      npmrc = undefined;
+      npmrc = npmrcFileContent;
+      if (npmrc.includes('package-lock')) {
+        logger.debug('Stripping package-lock setting from npmrc');
+        npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
+      }
+      if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
+        // TODO: strip lines with templates, but leave the rest
+        logger.debug('Discarding .npmrc file with variables');
+        npmrc = '';
+      }
     }
   }
   const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
@@ -363,7 +363,6 @@ export async function extractPackageFile(
     packageFileVersion,
     packageJsonType,
     npmrc,
-    ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
     lernaDir,

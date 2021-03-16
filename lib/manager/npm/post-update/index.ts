@@ -9,11 +9,13 @@ import { getChildProcessEnv } from '../../../util/exec/env';
 import {
   deleteLocalFile,
   ensureDir,
+  getSiblingFileName,
   outputFile,
   readFile,
   remove,
   unlink,
   writeFile,
+  writeLocalFile,
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -122,18 +124,6 @@ export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
 ): Promise<void> {
-  const npmrcFile = upath.join(config.localDir, '.npmrc');
-  if (config.npmrc) {
-    logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await outputFile(npmrcFile, `${String(config.npmrc)}\n`);
-  } else if (config.ignoreNpmrcFile) {
-    logger.debug('Removing ignored .npmrc file before artifact generation');
-    await remove(npmrcFile);
-  }
-  if (is.string(config.yarnrc)) {
-    logger.debug(`Writing repo .yarnrc (${config.localDir})`);
-    await outputFile(upath.join(config.localDir, '.yarnrc'), config.yarnrc);
-  }
   if (!packageFiles.npm) {
     return;
   }
@@ -143,32 +133,21 @@ export async function writeExistingFiles(
     'Writing package.json files'
   );
   for (const packageFile of npmFiles) {
-    const basedir = upath.join(
-      config.localDir,
-      upath.dirname(packageFile.packageFile)
-    );
-    const npmrc: string = packageFile.npmrc || config.npmrc;
-    const npmrcFilename = upath.join(basedir, '.npmrc');
-    if (npmrc) {
-      try {
-        await outputFile(npmrcFilename, `${npmrc}\n`);
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
-      }
+    if (is.string(packageFile.npmrc)) {
+      const packageFileNpmrc = getSiblingFileName(
+        packageFile.packageFile,
+        '.npmrc'
+      );
+      logger.debug(`Writing ${packageFileNpmrc}`);
+      await writeLocalFile(packageFileNpmrc, packageFile.npmrc);
     }
-    if (packageFile.yarnrc) {
-      logger.debug(`Writing .yarnrc to ${basedir}`);
-      const yarnrcFilename = upath.join(basedir, '.yarnrc');
-      try {
-        await outputFile(
-          yarnrcFilename,
-          packageFile.yarnrc
-            .replace('--install.pure-lockfile true', '')
-            .replace('--install.frozen-lockfile true', '')
-        );
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
-      }
+    if (is.string(packageFile.yarnrc)) {
+      const packageFileYarnrc = getSiblingFileName(
+        packageFile.packageFile,
+        '.yarnrc'
+      );
+      logger.debug(`Writing ${packageFileYarnrc}`);
+      await writeLocalFile(packageFileYarnrc, packageFile.yarnrc); // TODO: wriote local?
     }
     const { npmLock } = packageFile;
     if (npmLock) {
