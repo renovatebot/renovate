@@ -2,6 +2,11 @@ import { readFileSync } from 'fs';
 import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
+const invalidYamlFile = readFileSync(
+  'lib/manager/jenkins/__fixtures__/invalid.yaml',
+  'utf8'
+);
+
 const pluginsTextFile = readFileSync(
   'lib/manager/jenkins/__fixtures__/plugins.txt',
   'utf8'
@@ -33,7 +38,7 @@ describe(getName(__filename), () => {
     });
 
     it('returns empty list for an invalid yaml file', () => {
-      const res = extractPackageFile(pluginsEmptyYamlFile, 'path/file.yaml');
+      const res = extractPackageFile(invalidYamlFile, 'path/file.yaml');
       expect(res.deps).toHaveLength(0);
     });
 
