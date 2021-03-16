@@ -25,7 +25,7 @@ jobs:
 
           # Wait 14 days until making issue stale and posting a message.
           days-before-issue-stale: 14
-          stale-issue-message: 'When a bug has been marked as needing a reproduction, it means nobody can work on it until one is provided. In cases where no reproduction is possible, or the issue creator does not have the time to reproduce, we unfortunately need to close such issues as they are non-actionable and serve no benefit by remaining open.'
+          stale-issue-message: 'When a bug has been marked as needing a reproduction, it means nobody can work on it until one is provided. In cases where no reproduction is possible, or the issue creator does not have the time to reproduce, we unfortunately need to close such issues as they are non-actionable and serve no benefit by remaining open. This issue will be closed after 7 days.'
           stale-issue-label: 'stale'
 
           # We can set a grace period for contributors to provide the reproduction, and then finaly close it.
