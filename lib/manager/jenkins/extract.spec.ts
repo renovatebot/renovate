@@ -32,6 +32,11 @@ describe(getName(__filename), () => {
       expect(res.deps).toHaveLength(0);
     });
 
+    it('returns empty list for an invalid yaml file', () => {
+      const res = extractPackageFile(pluginsEmptyYamlFile, 'path/file.yaml');
+      expect(res.deps).toHaveLength(0);
+    });
+
     it('extracts multiple image lines in text format', () => {
       const res = extractPackageFile(pluginsTextFile, 'path/file.txt');
       expect(res.deps).toMatchSnapshot();
