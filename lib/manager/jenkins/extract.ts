@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import * as datasourceJenkins from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
@@ -6,33 +5,37 @@ import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
+import type { JenkinsPlugins, JenkinsPlugin } from './types';
 
-const YamlExtension: RegExp = /\.ya?ml$/;
+const YamlExtension = /\.ya?ml$/;
 
-function getDependency(
-  name: string,
-  version: string,
-  url: string,
-  groupId: string
-): PackageDependency {
+function getDependency(plugin: JenkinsPlugin): PackageDependency {
   const dep: PackageDependency = {
     datasource: datasourceJenkins.id,
     versioning: dockerVersioning.id,
-    depName: name,
+    depName: plugin.artifactId,
   };
 
-  if (version) {
-    dep.currentValue = version.toString();
+  if (plugin.source?.version) {
+    dep.currentValue = plugin.source.version.toString();
   } else {
     dep.skipReason = SkipReason.NoVersion;
   }
 
-  if (version === 'latest' || version === 'experimental' || groupId) {
+  if (
+    plugin.source?.version === 'latest' ||
+    plugin.source?.version === 'experimental' ||
+    plugin.groupId
+  ) {
     dep.skipReason = SkipReason.UnsupportedVersion;
   }
 
-  if (url) {
+  if (plugin.source?.url) {
     dep.skipReason = SkipReason.InternalPackage;
+  }
+
+  if (!dep.skipReason && plugin.renovate?.ignore) {
+    dep.skipReason = SkipReason.Ignored;
   }
 
   logger.debug({ dep }, 'Jenkins plugin dependency');
@@ -43,17 +46,11 @@ function extractYaml(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   try {
-    const doc = yaml.safeLoad(content, { json: true }) as any;
-    if (doc?.plugins && is.array(doc.plugins)) {
+    const doc = yaml.safeLoad(content, { json: true }) as JenkinsPlugins;
+    if (doc?.plugins) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
-          // TODO: how can we specify if a dependency should be ignored with yaml ?
-          const dep = getDependency(
-            plugin.artifactId,
-            plugin.source?.version,
-            plugin.source?.url,
-            plugin.groupId
-          );
+          const dep = getDependency(plugin);
           deps.push(dep);
         }
       }
@@ -71,14 +68,18 @@ function extractText(content: string): PackageDependency[] {
 
   for (const line of content.split('\n')) {
     const match = regex.exec(line);
-
     if (match) {
       const { depName, currentValue, comment } = match.groups;
-      const dep = getDependency(depName, currentValue, null, null);
-
-      if (!dep.skipReason && isSkipComment(comment)) {
-        dep.skipReason = SkipReason.Ignored;
-      }
+      const plugin: JenkinsPlugin = {
+        artifactId: depName,
+        source: {
+          version: currentValue,
+        },
+        renovate: {
+          ignore: isSkipComment(comment),
+        },
+      };
+      const dep = getDependency(plugin);
       deps.push(dep);
     }
   }
