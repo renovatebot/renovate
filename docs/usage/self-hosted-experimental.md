@@ -1,6 +1,6 @@
 # Self-hosted experimental environment variables
 
-The following enironment variables are "experimental" because:
+The following environment variables are "experimental" because:
 
 - They are not commonly needed
 - They are typically an effort to work around some other service's or platform's problem
