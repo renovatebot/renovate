@@ -99,6 +99,7 @@ export async function extractPackageFile(
   const npmrcFileContent = await readLocalFile(npmrcFileName, 'utf8');
   let npmrc = is.string(config.npmrc) ? config.npmrc : undefined;
   if (is.string(npmrcFileContent)) {
+    // configured npmrc takes precedence over repository .npmrc
     if (is.string(config.npmrc)) {
       // This could include an empty string used to blank the .npmrc
       logger.debug(
