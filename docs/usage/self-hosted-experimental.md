@@ -1,18 +1,18 @@
-# Self-hosted experimental options
+# Self-hosted experimental environment variables
 
-The following options are "experimental" because:
+The following enironment variables are "experimental" because:
 
 - They are not commonly needed
 - They are typically an effort to work around some other service's or platform's problem
 - They can be removed at any time
-- They are options for Renovate's internal use to validate they work as intended
+- They are variables for Renovate's internal use to validate they work as intended
 
-Experimental options which are commonly used and for which there is no external solution in sight can be converted to a official configuration option by the Renovate bot developers.
+Experimental variables which are commonly used and for which there is no external solution in sight can be converted to a official configuration option by the Renovate bot developers.
 
-Use experimental options at your own risk.
-We do not follow Semantic Versioning for any experimental option.
-These options may be removed or have their behavior changed in **any** version.
-We will try to keep breakage to a minimum, but make no guarantees that a experimental option will keep working.
+Use these experimental variables at your own risk.
+We do not follow Semantic Versioning for any experimental variables.
+These variables may be removed or have their behavior changed in **any** version.
+We will try to keep breakage to a minimum, but make no guarantees that a experimental variable will keep working.
 
 ## GITLAB_IGNORE_REPO_URL
 
@@ -30,7 +30,7 @@ Skiping the check will speed things up, but may result in versions being returne
 ## RENOVATE_LEGACY_GIT_AUTHOR_EMAIL
 
 An additional `gitAuthor` email to ignore.
-This option is deprecated: use `ignoredAuthors` instead.
+This variable is deprecated: use `ignoredAuthors` instead.
 
 ## RENOVATE_PAGINATE_ALL
 
