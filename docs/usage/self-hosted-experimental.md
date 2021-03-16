@@ -7,7 +7,7 @@ The following options are "experimental" because:
 - They can be removed at any time
 - They are options for Renovate's internal use to validate they work as intended
 
-Experimental options which are commonly used and for which there is no external solution in sight should be replaced with official options ("Who is doing the replacing here? Renovate bot team or end-user?").
+Experimental options which are commonly used and for which there is no external solution in sight can be converted to a official configuration option by the Renovate bot developers.
 
 Use experimental options at your own risk.
 We do not follow Semantic Versioning for any experimental option.
