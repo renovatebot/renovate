@@ -8,6 +8,7 @@ import { parseIndexDir } from '../sbt-plugin/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'sbt-package';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';

@@ -65,7 +65,7 @@ export async function executeGradle(
     timeout,
     cwd,
     docker: {
-      image: 'renovate/gradle',
+      image: 'gradle',
     },
     extraEnv,
   };

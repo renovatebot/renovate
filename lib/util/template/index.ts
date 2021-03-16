@@ -48,7 +48,6 @@ export const allowedFields = {
     'The dependency name already linked to its home page using markdown',
   depNameSanitized:
     'The depName field sanitized for use in branches after removing spaces and special characters',
-  depNameShort: 'Shortened depName',
   depType: 'The dependency type (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
   displayTo: 'The to value, formatted for display',

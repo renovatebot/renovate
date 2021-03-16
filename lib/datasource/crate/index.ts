@@ -12,6 +12,7 @@ import * as cargoVersioning from '../../versioning/cargo';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'crate';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://crates.io'];
 export const defaultVersioning = cargoVersioning.id;
 export const registryStrategy = 'first';
@@ -138,7 +139,14 @@ async function fetchRegistryInfo(
   config: GetReleasesConfig,
   registryUrl: string
 ): Promise<RegistryInfo | null> {
-  const url = new URL(registryUrl);
+  let url: URL;
+  try {
+    url = new URL(registryUrl);
+  } catch (err) {
+    logger.debug({ registryUrl }, 'could not parse registry URL');
+    return null;
+  }
+
   let flavor: RegistryFlavor;
   if (url.hostname === 'crates.io') {
     flavor = RegistryFlavor.CratesIo;
