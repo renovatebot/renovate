@@ -53,9 +53,23 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "currentValue": "2.1",
+    "currentValue": "2.10",
     "datasource": "jenkins-plugins",
     "depName": "job-import-plugin",
+    "versioning": "docker",
+  },
+  Object {
+    "currentValue": "2.1",
+    "datasource": "jenkins-plugins",
+    "depName": "invalid-version-plugin",
+    "skipReason": "invalid-version",
+    "versioning": "docker",
+  },
+  Object {
+    "currentValue": "2.10",
+    "datasource": "jenkins-plugins",
+    "depName": "ignore-plugin",
+    "skipReason": "ignored",
     "versioning": "docker",
   },
   Object {

@@ -4,7 +4,15 @@ plugins:
       version: latest
   - artifactId: job-import-plugin
     source:
-      version: 2.1
+      version: '2.10'
+  - artifactId: invalid-version-plugin
+    source:
+      version: 2.10 # Float will cause the version to be 2.1 and will be ignored with a warning
+  - artifactId: ignore-plugin
+    source:
+      version: '2.10'
+    renovate:
+      ignore: true
   - artifactId: docker
   - artifactId: cloudbees-bitbucket-branch-source
     source:

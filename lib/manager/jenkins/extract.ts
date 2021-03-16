@@ -18,6 +18,13 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
 
   if (plugin.source?.version) {
     dep.currentValue = plugin.source.version.toString();
+    if (typeof plugin.source.version !== 'string') {
+      dep.skipReason = SkipReason.InvalidVersion;
+      logger.warn(
+        { dep },
+        'Jenkins plugin dependency version is not a string and will be ignored'
+      );
+    }
   } else {
     dep.skipReason = SkipReason.NoVersion;
   }

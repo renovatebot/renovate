@@ -41,7 +41,7 @@ describe(getName(__filename), () => {
     it('extracts multiple image lines in yaml format', () => {
       const res = extractPackageFile(pluginsYamlFile, 'path/file.yml');
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
+      expect(res.deps).toHaveLength(8);
     });
   });
 });
