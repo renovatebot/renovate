@@ -40,3 +40,8 @@ If set to "false" (string), Renovate will remove any existing `package-lock.json
 ## RENOVATE_USER_AGENT
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
+
+## RENOVATE_X_HARD_EXIT
+
+If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
+See https://github.com/renovatebot/renovate/issues/8660 for background on why this was created.
