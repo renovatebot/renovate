@@ -29,17 +29,17 @@ describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns empty list for an empty text file', () => {
       const res = extractPackageFile(pluginsEmptyTextFile, 'path/file.txt');
-      expect(res.deps).toHaveLength(0);
+      expect(res).toBeNull();
     });
 
     it('returns empty list for an empty yaml file', () => {
       const res = extractPackageFile(pluginsEmptyYamlFile, 'path/file.yaml');
-      expect(res.deps).toHaveLength(0);
+      expect(res).toBeNull();
     });
 
     it('returns empty list for an invalid yaml file', () => {
       const res = extractPackageFile(invalidYamlFile, 'path/file.yaml');
-      expect(res.deps).toHaveLength(0);
+      expect(res).toBeNull();
     });
 
     it('extracts multiple image lines in text format', () => {

@@ -62,9 +62,8 @@ function extractYaml(content: string): PackageDependency[] {
         }
       }
     }
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error parsing Jenkins plugins');
-    return null;
   }
   return deps;
 }
@@ -106,5 +105,8 @@ export function extractPackageFile(
     deps.push(...extractText(content));
   }
 
+  if (deps.length === 0) {
+    return null;
+  }
   return { deps };
 }
