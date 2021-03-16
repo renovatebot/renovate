@@ -1,8 +1,7 @@
-// !reference [.setup, script]
 const re = /!reference \[\.\w+?(?:, \w+?)\]/g;
 
 /**
- * Replaces GitLab reference tags before parsing, because our yaml parser doesn't support that.
+ * Replaces GitLab reference tags before parsing, because our yaml parser cannot process them anyway.
  * @param content pipeline yaml
  * @returns replaced pipeline content
  * https://docs.gitlab.com/ee/ci/yaml/#reference-tags
