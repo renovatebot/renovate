@@ -5,6 +5,8 @@ import * as hexVersioning from '../../versioning/hex';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'hex';
+export const defaultRegistryUrls = ['https://hex.pm/'];
+export const customRegistrySupport = false;
 export const defaultVersioning = hexVersioning.id;
 
 const http = new Http(id);
@@ -20,6 +22,7 @@ interface HexRelease {
 
 export async function getReleases({
   lookupName,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   // Get dependency name from lookupName.
   // If the dependency is private lookupName contains organization name as following:
@@ -27,7 +30,7 @@ export async function getReleases({
   // hexPackageName is used to pass it in hex dep url
   // organizationName is used for accessing to private deps
   const hexPackageName = lookupName.split(':')[0];
-  const hexUrl = `https://hex.pm/api/packages/${hexPackageName}`;
+  const hexUrl = `${registryUrl}api/packages/${hexPackageName}`;
   try {
     const response = await http.getJson<HexRelease>(hexUrl);
 

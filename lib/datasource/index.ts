@@ -7,7 +7,6 @@ import * as memCache from '../util/cache/memory';
 import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
-import { massageUrlProtocol } from '../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -173,6 +172,15 @@ function resolveRegistryUrls(
   extractedUrls: string[]
 ): string[] {
   const { defaultRegistryUrls = [] } = datasource;
+  if (!datasource.customRegistrySupport) {
+    if (is.nonEmptyArray(extractedUrls)) {
+      logger.warn(
+        { datasource: datasource.id, registryUrls: extractedUrls },
+        'Custom datasources are not allowed for this datasource and will be ignored'
+      );
+    }
+    return defaultRegistryUrls;
+  }
   const customUrls = extractedUrls?.filter(Boolean);
   let registryUrls: string[];
   if (is.nonEmptyArray(customUrls)) {
@@ -180,8 +188,7 @@ function resolveRegistryUrls(
   } else {
     registryUrls = [...defaultRegistryUrls];
   }
-
-  return registryUrls.map((x) => massageUrlProtocol(x)).filter(Boolean);
+  return registryUrls.filter(Boolean);
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
@@ -200,28 +207,18 @@ async function fetchReleases(
   const datasource = load(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult = null;
+  const registryStrategy = datasource.registryStrategy || 'hunt';
   try {
-    if (datasource.registryStrategy) {
-      // istanbul ignore if
-      if (!registryUrls.length) {
-        logger.warn(
-          { datasource: datasourceName, depName: config.depName },
-          'Missing registryUrls for registryStrategy'
-        );
-        return null;
-      }
-      if (datasource.registryStrategy === 'first') {
+    if (is.nonEmptyArray(registryUrls)) {
+      if (registryStrategy === 'first') {
         dep = await firstRegistry(config, datasource, registryUrls);
-      } else if (datasource.registryStrategy === 'hunt') {
+      } else if (registryStrategy === 'hunt') {
         dep = await huntRegistries(config, datasource, registryUrls);
-      } else if (datasource.registryStrategy === 'merge') {
+      } else if (registryStrategy === 'merge') {
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
-      dep = await datasource.getReleases({
-        ...config,
-        registryUrls,
-      });
+      dep = await datasource.getReleases(config);
     }
   } catch (err) {
     if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {

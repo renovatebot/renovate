@@ -63,6 +63,24 @@ export interface DatasourceApi {
   defaultRegistryUrls?: string[];
   defaultVersioning?: string;
   defaultConfig?: Record<string, unknown>;
+
+  /**
+   * Strategy to use when multiple registryUrls are available to the datasource.
+   * first: only the first registryUrl will be tried and others ignored
+   * hunt: registryUrls will be tried in order until one returns a result
+   * merge: all registryUrls will be tried and the results merged if more than one returns a result
+   */
   registryStrategy?: 'first' | 'hunt' | 'merge';
+
+  /**
+   * Whether custom registryUrls are allowed.
+   */
+  customRegistrySupport: boolean;
+
+  /**
+   * Whether to perform caching in the datasource index/wrapper or not.
+   * true: datasoure index wrapper should cache all results (based on registryUrl/lookupName)
+   * false: caching is not performed, or performed within the datasource implementation
+   */
   caching?: boolean;
 }

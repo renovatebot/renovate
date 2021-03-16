@@ -3,6 +3,8 @@ import { Http } from '../../util/http';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'cdnjs';
+export const customRegistrySupport = false;
+export const defaultRegistryUrls = ['https://api.cdnjs.com/'];
 export const caching = true;
 
 const http = new Http(id);
@@ -24,10 +26,11 @@ interface CdnjsResponse {
 
 export async function getReleases({
   lookupName,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   // Each library contains multiple assets, so we cache at the library level instead of per-asset
   const library = lookupName.split('/')[0];
-  const url = `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
+  const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
   try {
     const { assets, homepage, repository } = (
       await http.getJson<CdnjsResponse>(url)

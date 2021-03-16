@@ -139,7 +139,7 @@ export async function updateArtifacts(
         GEM_HOME: await getGemHome(config),
       },
       docker: {
-        image: 'renovate/ruby',
+        image: 'ruby',
         tagScheme: 'ruby',
         tagConstraint: await getRubyConstraint(updateArtifact),
         preCommands,

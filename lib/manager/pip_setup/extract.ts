@@ -57,7 +57,7 @@ export async function extractSetupFile(
     cwdFile: packageFile,
     timeout: 30000,
     docker: {
-      image: 'renovate/python',
+      image: 'python',
     },
   });
   if (res.stderr) {
