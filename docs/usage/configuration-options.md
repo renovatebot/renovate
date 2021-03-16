@@ -961,13 +961,6 @@ The above is the same as if you wrote this package rule:
 }
 ```
 
-## ignoreNpmrcFile
-
-By default, Renovate will look for and use any `.npmrc` file it finds in a repository.
-Additionally, it will be read in by `npm` or `yarn` at the time of lock file generation.
-Sometimes this causes problems, for example if the file contains placeholder values, so you can configure this to `true` and Renovate will ignore any `.npmrc` files it finds and temporarily remove the file before running `npm install` or `yarn install`.
-Renovate will try to configure this to `true` also if you have configured any `npmrc` string within your config file.
-
 ## ignorePaths
 
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering.

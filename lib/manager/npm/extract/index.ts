@@ -97,7 +97,7 @@ export async function extractPackageFile(
 
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
   const npmrcFileContent = await readLocalFile(npmrcFileName, 'utf8');
-  let { npmrc } = config;
+  let npmrc = is.string(config.npmrc) ? config.npmrc : undefined;
   if (is.string(npmrcFileContent)) {
     if (is.string(config.npmrc)) {
       // This could include an empty string used to blank the .npmrc
