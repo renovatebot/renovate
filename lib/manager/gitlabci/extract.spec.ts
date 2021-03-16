@@ -3,10 +3,6 @@ import type { PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
 describe(getName(__filename), () => {
-  jest
-    .spyOn(logger.logger, 'warn')
-    .mockImplementation((...args) => console.warn(...args));
-
   describe('extractAllPackageFiles()', () => {
     it('returns null for empty', async () => {
       expect(
