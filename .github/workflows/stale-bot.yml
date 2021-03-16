@@ -30,4 +30,4 @@ jobs:
 
           # We can set a grace period for contributors to provide the reproduction, and then finaly close it.
           days-before-issue-close: 7
-          close-issue-message: 'This issue is closed because it has no reproduction.'
+          close-issue-message: 'This bug report has been closed as we need a reproduction to work on this. If the original poster or anybody else with the same problem discovers that they can reproduce it, please create a new issue, and reference this issue.'
