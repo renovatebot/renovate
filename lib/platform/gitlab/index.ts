@@ -432,8 +432,9 @@ async function tryPrAutomerge(
   if (platformOptions?.gitLabAutomerge) {
     try {
       const desiredStatus = 'can_be_merged';
-      const cannotBeMerged = `cannot_be_merged`;
-      const retryTimes = 100;
+      const cantMerged = `cannot_be_merged`;
+      const retryTimes = 5;
+      const initDelay = 15000;
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
@@ -441,7 +442,7 @@ async function tryPrAutomerge(
           merge_status: string;
           pipeline: string;
         }>(`projects/${config.repository}/merge_requests/${pr}`, { useCache: false });
-        if (body.merge_status === cannotBeMerged) {
+        if (body.merge_status === cantMerged) {
           logger.debug('MR cannot be merged');
           return;
         }
@@ -451,7 +452,7 @@ async function tryPrAutomerge(
           break;
         }
         logger.debug(`Wait for pipeline. Sleep 500 * ${attempt}`);
-        await delay(500 * attempt);
+        await delay(initDelay * attempt);
       }
 
       await gitlabApi.putJson(

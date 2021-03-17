@@ -1136,6 +1136,34 @@ describe('platform/gitlab', () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('auto-accepts the MR when requested with conflicts', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'cannot_be_merged',
+          pipeline: null,
+        });
+      await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: [],
+        platformOptions: {
+          azureAutoComplete: false,
+          gitLabAutomerge: true,
+        },
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {
