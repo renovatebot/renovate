@@ -46,7 +46,7 @@ describe(getName(__filename), () => {
         .reply(200, { name: '@myco/test' });
 
       setNpmrc(npmrc);
-      await getDependency('@myco/test', 0);
+      await getDependency('@myco/test');
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toEqual('Bearer XXX');
@@ -78,7 +78,7 @@ describe(getName(__filename), () => {
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
-      await getDependency('@myco/test', 0);
+      await getDependency('@myco/test');
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toEqual('Basic dGVzdDp0ZXN0');
@@ -102,7 +102,7 @@ describe(getName(__filename), () => {
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
-      await getDependency('@myco/test', 0);
+      await getDependency('@myco/test');
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBeUndefined();
@@ -128,7 +128,7 @@ describe(getName(__filename), () => {
       .get(getPath(npmrc))
       .reply(200, { name: '@myco/test' });
     setNpmrc(npmrc);
-    await getDependency('@myco/test', 0);
+    await getDependency('@myco/test');
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
@@ -149,7 +149,7 @@ describe(getName(__filename), () => {
       .get('/renovate')
       .reply(200, { name: 'renovate' });
     setNpmrc(npmrc);
-    await getDependency('renovate', 0);
+    await getDependency('renovate');
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
@@ -171,7 +171,7 @@ describe(getName(__filename), () => {
       .get('/renovate')
       .reply(200, { name: 'renovate' });
     setNpmrc(npmrc);
-    await getDependency('renovate', 0);
+    await getDependency('renovate');
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
@@ -184,7 +184,7 @@ describe(getName(__filename), () => {
       .scope('https://test.org')
       .get('/none')
       .reply(200, { name: '@myco/test' });
-    expect(await getDependency('none', 0)).toBeNull();
+    expect(await getDependency('none')).toBeNull();
 
     httpMock
       .scope('https://test.org')
@@ -195,7 +195,7 @@ describe(getName(__filename), () => {
         versions: { '1.0.0': {} },
         'dist-tags': { latest: '1.0.0' },
       });
-    expect(await getDependency('@myco/test', 0)).toBeDefined();
+    expect(await getDependency('@myco/test')).toBeDefined();
 
     httpMock
       .scope('https://test.org')
@@ -205,26 +205,26 @@ describe(getName(__filename), () => {
         versions: { '1.0.0': {} },
         'dist-tags': { latest: '1.0.0' },
       });
-    expect(await getDependency('@myco/test2', 0)).toBeDefined();
+    expect(await getDependency('@myco/test2')).toBeDefined();
 
     httpMock.scope('https://test.org').get('/error-401').reply(401);
-    expect(await getDependency('error-401', 0)).toBeNull();
+    expect(await getDependency('error-401')).toBeNull();
 
     httpMock.scope('https://test.org').get('/error-402').reply(402);
-    expect(await getDependency('error-402', 0)).toBeNull();
+    expect(await getDependency('error-402')).toBeNull();
 
     httpMock.scope('https://test.org').get('/error-404').reply(404);
-    expect(await getDependency('error-404', 0)).toBeNull();
+    expect(await getDependency('error-404')).toBeNull();
 
     httpMock.scope('https://test.org').get('/error4').reply(200, null);
-    expect(await getDependency('error4', 0)).toBeNull();
+    expect(await getDependency('error4')).toBeNull();
 
     setNpmrc();
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
-    await expect(getDependency('npm-parse-error', 0)).rejects.toThrow(
+    await expect(getDependency('npm-parse-error')).rejects.toThrow(
       ExternalHostError
     );
 
@@ -232,7 +232,7 @@ describe(getName(__filename), () => {
       .scope('https://registry.npmjs.org')
       .get('/npm-error-402')
       .reply(402);
-    expect(await getDependency('npm-error-402', 0)).toBeNull();
+    expect(await getDependency('npm-error-402')).toBeNull();
 
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
