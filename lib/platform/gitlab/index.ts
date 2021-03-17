@@ -432,18 +432,25 @@ async function tryPrAutomerge(
   if (platformOptions?.gitLabAutomerge) {
     try {
       const desiredStatus = 'can_be_merged';
-      const retryTimes = 5;
+      const cannotBeMerged = `cannot_be_merged`;
+      const retryTimes = 100;
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJson<{
           merge_status: string;
           pipeline: string;
-        }>(`projects/${config.repository}/merge_requests/${pr}`);
+        }>(`projects/${config.repository}/merge_requests/${pr}`, { useCache: false });
+        if (body.merge_status === cannotBeMerged) {
+          logger.debug('MR cannot be merged');
+          return;
+        }
         // Only continue if the merge request can be merged and has a pipeline.
         if (body.merge_status === desiredStatus && body.pipeline !== null) {
+          logger.debug(`MR is ready to merge`);
           break;
         }
+        logger.debug(`Wait for pipeline. Sleep 500 * ${attempt}`);
         await delay(500 * attempt);
       }
 
