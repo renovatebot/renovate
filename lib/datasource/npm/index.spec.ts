@@ -169,16 +169,6 @@ describe(getName(__filename), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('should reject name mismatch', async () => {
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/different')
-      .reply(200, npmResponse);
-    const res = await getPkgReleases({ datasource, depName: 'different' });
-    expect(res).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
-  });
-
   it('should handle no time', async () => {
     delete npmResponse.time['0.0.2'];
     httpMock
@@ -208,7 +198,6 @@ describe(getName(__filename), () => {
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/foobar')
-      .times(4)
       .reply(200, 'oops');
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
