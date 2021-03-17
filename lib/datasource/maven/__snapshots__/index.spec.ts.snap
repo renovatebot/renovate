@@ -32,3 +32,69 @@ Object {
   "sourceUrl": "https://github.com/mysql/mysql-connector-j",
 }
 `;
+
+exports[`datasource/maven getReleases should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository 1`] = `
+Object {
+  "display": "mysql:mysql-connector-java",
+  "group": "mysql",
+  "name": "mysql-connector-java",
+  "releases": Array [
+    Object {
+      "releaseTimestamp": "2020-01-01T00:00:00.650Z",
+      "version": "6.0.5",
+    },
+    Object {
+      "releaseTimestamp": "2020-01-01T00:00:00.660Z",
+      "version": "6.0.6",
+    },
+    Object {
+      "releaseTimestamp": "2020-01-01T00:00:00.870Z",
+      "version": "8.0.7",
+    },
+    Object {
+      "releaseTimestamp": "2020-01-01T00:00:00.880Z",
+      "version": "8.0.8",
+    },
+    Object {
+      "releaseTimestamp": "2020-01-01T00:00:00.890Z",
+      "version": "8.0.9",
+    },
+  ],
+}
+`;
+
+exports[`datasource/maven getReleases should return versions in all repositories for a specific library 1`] = `
+Object {
+  "display": "mysql:mysql-connector-java",
+  "group": "mysql",
+  "homepage": "http://dev.mysql.com/doc/connector-j/en/",
+  "name": "mysql-connector-java",
+  "releases": Array [
+    Object {
+      "version": "6.0.4",
+    },
+    Object {
+      "version": "6.0.5",
+    },
+    Object {
+      "version": "6.0.6",
+    },
+    Object {
+      "version": "8.0.7",
+    },
+    Object {
+      "version": "8.0.8",
+    },
+    Object {
+      "version": "8.0.9",
+    },
+    Object {
+      "version": "8.0.11",
+    },
+    Object {
+      "version": "8.0.12",
+    },
+  ],
+  "sourceUrl": "https://github.com/mysql/mysql-connector-j",
+}
+`;
