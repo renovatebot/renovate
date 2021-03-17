@@ -198,7 +198,6 @@ describe(getName(__filename), () => {
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/foobar')
-      .times(4)
       .reply(200, 'oops');
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
