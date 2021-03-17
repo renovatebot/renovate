@@ -2,7 +2,7 @@ import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
-import { INTERRUPTED } from '../../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { readFile, remove } from '../../../util/fs';
@@ -43,7 +43,7 @@ export async function generateLockFile(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
@@ -86,7 +86,7 @@ export async function generateLockFile(
     await exec(`${cmd} ${args}`, execOptions);
     lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug(

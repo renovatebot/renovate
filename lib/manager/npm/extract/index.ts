@@ -4,7 +4,7 @@ import validateNpmPackageName from 'validate-npm-package-name';
 import { getAdminConfig } from '../../../config/admin';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
-import * as datasourceNpm from '../../../datasource/npm';
+import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import {
@@ -180,15 +180,15 @@ export async function extractPackageFile(
         dep.versioning = nodeVersioning.id;
         constraints.node = dep.currentValue;
       } else if (depName === 'yarn') {
-        dep.datasource = datasourceNpm.id;
+        dep.datasource = npmId;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
       } else if (depName === 'npm') {
-        dep.datasource = datasourceNpm.id;
+        dep.datasource = npmId;
         dep.commitMessageTopic = 'npm';
         constraints.npm = dep.currentValue;
       } else if (depName === 'pnpm') {
-        dep.datasource = datasourceNpm.id;
+        dep.datasource = npmId;
         dep.commitMessageTopic = 'pnpm';
         constraints.pnpm = dep.currentValue;
       } else if (depName === 'vscode') {
@@ -211,7 +211,7 @@ export async function extractPackageFile(
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
-        dep.datasource = datasourceNpm.id;
+        dep.datasource = npmId;
         dep.commitMessageTopic = 'Yarn';
       } else {
         dep.skipReason = SkipReason.UnknownVolta;
@@ -241,7 +241,7 @@ export async function extractPackageFile(
       return dep;
     }
     if (isValid(dep.currentValue)) {
-      dep.datasource = datasourceNpm.id;
+      dep.datasource = npmId;
       if (dep.currentValue === '*') {
         dep.skipReason = SkipReason.AnyVersion;
       }
@@ -307,14 +307,14 @@ export async function extractPackageFile(
           packageJson[depType] as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
-          const dep: PackageDependency = {
+          let dep: PackageDependency = {
             depType,
             depName,
           };
           if (depName !== key) {
             dep.managerData = { key };
           }
-          Object.assign(dep, extractDependency(depType, depName, val));
+          dep = { ...dep, ...extractDependency(depType, depName, val) };
           if (depName === 'node') {
             // This is a special case for Node.js to group it together with other managers
             dep.commitMessageTopic = 'Node.js';

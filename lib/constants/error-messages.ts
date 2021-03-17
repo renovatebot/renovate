@@ -35,7 +35,6 @@ export const REPOSITORY_UNINITIATED = 'uninitiated';
 export const REPOSITORY_CHANGED = 'repository-changed';
 export const TEMPORARY_ERROR = 'temporary-error';
 export const NO_VULNERABILITY_ALERTS = 'no-vulnerability-alerts';
-export const INTERRUPTED = 'interrupted';
 
 // Manager Error
 export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';

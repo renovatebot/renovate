@@ -123,9 +123,9 @@ export async function writeExistingFiles(
   packageFiles: AdditionalPackageFiles
 ): Promise<void> {
   const npmrcFile = upath.join(config.localDir, '.npmrc');
-  if (config.npmrc) {
+  if (is.string(config.npmrc)) {
     logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await outputFile(npmrcFile, `${String(config.npmrc)}\n`);
+    await outputFile(npmrcFile, `${config.npmrc}\n`);
   } else if (config.ignoreNpmrcFile) {
     logger.debug('Removing ignored .npmrc file before artifact generation');
     await remove(npmrcFile);
@@ -467,14 +467,15 @@ export async function getAdditionalFiles(
         );
       }
     } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
+      const password = Buffer.from(hostRule.password).toString('base64');
       if (hostRule.baseUrl) {
         const uri = hostRule.baseUrl.replace(/^https?:/, '');
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
-        additionalNpmrcContent.push(`${uri}:_password=${hostRule.password}`);
+        additionalNpmrcContent.push(`${uri}:_password=${password}`);
       } else if (hostRule.hostName) {
         const uri = `//${hostRule.hostName}/`;
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
-        additionalNpmrcContent.push(`${uri}:_password=${hostRule.password}`);
+        additionalNpmrcContent.push(`${uri}:_password=${password}`);
       }
     }
   }

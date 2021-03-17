@@ -590,6 +590,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
   },
   {
+    name: 'gitIgnoredAuthors',
+    description:
+      'Additional git authors which are ignored by Renovate. Must conform to RFC5322.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+  },
+  {
     name: 'enabledManagers',
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
@@ -1692,6 +1700,17 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     parent: 'hostRules',
     default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'authType',
+    description:
+      'Authentication type for http header. e.g. "Bearer" or "Basic".',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: 'Bearer',
     cli: false,
     env: false,
   },

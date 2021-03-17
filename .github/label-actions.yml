@@ -4,8 +4,8 @@
 
 
     The Renovate team needs your help!
-    To fix the problem, we first need to know exactly what's causing the bug.
-    A minimal reproduction help us to pinpoint the exact cause of the bug.
+    Before we can start work on your issue we first need to know exactly what's causing the current behavior.
+    A minimal reproduction helps us with this.
 
 
     To get started, please read our guide on [minimal reproductions](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to understand what is needed.

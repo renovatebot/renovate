@@ -57,7 +57,7 @@ export async function parseConfigs(
   const cliConfig = await resolveConfigPresets(cliParser.getConfig(argv));
   const envConfig = await resolveConfigPresets(envParser.getConfig(env));
 
-  let config = mergeChildConfig(fileConfig, envConfig);
+  let config: GlobalConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
   const combinedConfig = config;
@@ -73,7 +73,7 @@ export async function parseConfigs(
     delete forcedCli.token;
     delete forcedCli.hostRules;
     if (config.force) {
-      config.force = Object.assign(config.force, forcedCli);
+      config.force = { ...config.force, ...forcedCli };
     } else {
       config.force = forcedCli;
     }

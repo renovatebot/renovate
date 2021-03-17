@@ -3,6 +3,7 @@
 exports[`datasource/cdnjs getReleases filters releases by asset presence 1`] = `
 Object {
   "homepage": "http://bulma.io",
+  "registryUrl": "https://api.cdnjs.com/",
   "releases": Array [
     Object {
       "version": "0.7.5",
@@ -30,6 +31,7 @@ Array [
 exports[`datasource/cdnjs getReleases processes real data 1`] = `
 Object {
   "homepage": "https://d3js.org/d3-force/",
+  "registryUrl": "https://api.cdnjs.com/",
   "releases": Array [
     Object {
       "newDigest": "sha256-DNKhvPNPQByxMloPGL2GfmxYsbWDcrznYp+/r4eXs+o=",

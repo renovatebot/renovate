@@ -2,12 +2,12 @@ import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
-import { INTERRUPTED } from '../../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
-import { optimizeCommand } from './yarn';
+import { getOptimizeCommand } from './yarn';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -53,7 +53,7 @@ export async function generateLockFiles(
       }
       preCommands.push(installYarn);
       if (skipInstalls !== false) {
-        preCommands.push(optimizeCommand);
+        preCommands.push(getOptimizeCommand());
       }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
@@ -89,7 +89,7 @@ export async function generateLockFiles(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
@@ -114,7 +114,7 @@ export async function generateLockFiles(
     cmd.push(lernaCommand);
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug(

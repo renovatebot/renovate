@@ -133,6 +133,22 @@ describe('generateLockFile', () => {
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('runs twice if remediating', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    const binarySource = BinarySource.Global;
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { binarySource },
+      [{ isRemediation: true }]
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execSnapshots).toHaveLength(2);
+  });
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => {

@@ -1,6 +1,6 @@
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
-import { INTERRUPTED } from '../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -64,11 +64,12 @@ export async function updateArtifacts({
         GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
         GOPRIVATE: process.env.GOPRIVATE,
+        GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         CGO_ENABLED: config.binarySource === BinarySource.Docker ? '0' : null,
       },
       docker: {
-        image: 'renovate/go',
+        image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
         volumes: [goPath],
@@ -156,7 +157,7 @@ export async function updateArtifacts({
     return res;
   } catch (err) {
     // istanbul ignore if
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug({ err }, 'Failed to update go.sum');

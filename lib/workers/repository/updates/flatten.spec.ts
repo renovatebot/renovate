@@ -113,7 +113,6 @@ describe('workers/repository/updates/flatten', () => {
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
       expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
-      expect(res.filter((r) => r.depNameShort)).toHaveLength(10); // lockFileMaintenance has no depName
     });
   });
 });

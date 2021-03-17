@@ -4,9 +4,10 @@ import {
   exec as _cpExec,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
+import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
-import { INTERRUPTED } from '../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import {
   BinarySource,
   ExecConfig,
@@ -30,8 +31,8 @@ interface TestInput {
   adminConfig?: RepoAdminConfig;
 }
 
-describe(`Child process execution wrapper`, () => {
-  let processEnvOrig;
+describe(getName(__filename), () => {
+  let processEnvOrig: NodeJS.ProcessEnv;
 
   const cacheDir = '/tmp/renovate/cache/';
   const cwd = '/tmp/renovate/github/some/repo/';
@@ -58,8 +59,9 @@ describe(`Child process execution wrapper`, () => {
     setAdminConfig();
   });
 
-  const image = 'renovate/image';
-  const name = image.replace(/\//g, '_');
+  const image = 'image';
+  const fullImage = `renovate/${image}`;
+  const name = `renovate_${image}`;
   const tag = '1.2.3';
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
@@ -75,7 +77,7 @@ describe(`Child process execution wrapper`, () => {
   const encoding = 'utf-8';
   const docker = { image };
   const processEnv = envMock.full;
-  const dockerPullCmd = `docker pull ${image}`;
+  const dockerPullCmd = `docker pull ${fullImage}`;
   const dockerRemoveCmd = `docker ps --filter name=${name} -aq`;
   const dockerPullOpts = { encoding };
   const dockerRemoveOpts = dockerPullOpts;
@@ -206,7 +208,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -268,7 +270,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -318,7 +320,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -344,7 +346,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           `${dockerPullCmd}:${tag}`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} ${defaultCwd} ${image}:${tag} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} ${defaultCwd} ${fullImage}:${tag} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -370,7 +372,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -399,7 +401,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -465,7 +467,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -500,7 +502,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -605,7 +607,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -639,7 +641,7 @@ describe(`Child process execution wrapper`, () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -776,7 +778,7 @@ describe(`Child process execution wrapper`, () => {
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
-  it('converts to INTERRUPTED', async () => {
+  it('converts to TEMPORARY_ERROR', async () => {
     cpExec.mockImplementation(() => {
       class ErrorSignal extends Error {
         signal?: string;
@@ -790,7 +792,7 @@ describe(`Child process execution wrapper`, () => {
       'removeDockerContainer'
     );
     const promise = exec('foobar', {});
-    await expect(promise).rejects.toThrow(INTERRUPTED);
+    await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
   });
 });
