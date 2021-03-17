@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { release } from 'node:os';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
