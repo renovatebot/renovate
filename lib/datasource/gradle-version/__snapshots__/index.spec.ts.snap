@@ -3,6 +3,7 @@
 exports[`datasource/gradle-version getReleases calls configured registryUrls 1`] = `
 Object {
   "homepage": "https://gradle.org",
+  "registryUrl": "https://foo.bar",
   "releases": Array [
     Object {
       "releaseTimestamp": "2009-07-20T06:50:13.000Z",
@@ -299,6 +300,7 @@ Array [
 exports[`datasource/gradle-version getReleases processes real data 1`] = `
 Object {
   "homepage": "https://gradle.org",
+  "registryUrl": "https://services.gradle.org/versions/all",
   "releases": Array [
     Object {
       "releaseTimestamp": "2009-07-20T06:50:13.000Z",

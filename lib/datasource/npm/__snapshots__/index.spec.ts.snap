@@ -19,6 +19,7 @@ Array [
 exports[`datasource/npm/index should fetch package info from custom registry 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://npm.mycustomregistry.com/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -57,6 +58,7 @@ Array [
 exports[`datasource/npm/index should fetch package info from npm 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -95,6 +97,7 @@ Array [
 exports[`datasource/npm/index should handle foobar 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -133,6 +136,7 @@ Array [
 exports[`datasource/npm/index should handle no time 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -170,6 +174,7 @@ Array [
 exports[`datasource/npm/index should not send an authorization header if public package 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -208,6 +213,7 @@ Array [
 exports[`datasource/npm/index should parse repo url (string) 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -241,6 +247,7 @@ Array [
 exports[`datasource/npm/index should parse repo url 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -290,6 +297,7 @@ Array [
 exports[`datasource/npm/index should replace any environment variable in npmrc 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://registry.from-env.com/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -334,6 +342,7 @@ Object {
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "deprecationSource": "npm",
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -428,6 +437,7 @@ Array [
 exports[`datasource/npm/index should send an authorization header if provided 1`] = `
 Object {
   "name": "@foobar/core",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -580,6 +590,7 @@ Array [
 exports[`datasource/npm/index should use NPM_TOKEN if provided 1`] = `
 Object {
   "name": "@foobar/core",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -619,6 +630,7 @@ Array [
 exports[`datasource/npm/index should use default registry if missing from npmrc 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -657,6 +669,7 @@ Array [
 exports[`datasource/npm/index should use host rules by baseUrl if provided 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -696,6 +709,7 @@ Array [
 exports[`datasource/npm/index should use host rules by hostName if provided 1`] = `
 Object {
   "name": "foobar",
+  "registryUrl": "https://npm.mycustomregistry.com/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",

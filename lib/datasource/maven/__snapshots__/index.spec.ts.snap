@@ -6,6 +6,7 @@ Object {
   "group": "mysql",
   "homepage": "http://dev.mysql.com/doc/connector-j/en/",
   "name": "mysql-connector-java",
+  "registryUrl": "https://custom.registry.renovatebot.com",
   "releases": Array [
     Object {
       "version": "6.0.5",

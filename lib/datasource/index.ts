@@ -67,6 +67,9 @@ async function getRegistryReleases(
     }
   }
   const res = await datasource.getReleases({ ...config, registryUrl });
+  if (res?.releases.length) {
+    res.registryUrl ||= registryUrl;
+  }
   // cache non-null responses unless marked as private
   if (datasource.caching && res && !res.isPrivate) {
     logger.trace({ cacheKey }, 'Caching datasource response');

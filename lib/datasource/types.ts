@@ -54,6 +54,7 @@ export interface ReleaseResult {
   homepage?: string;
   sourceUrl?: string;
   sourceDirectory?: string;
+  registryUrl?: string;
 }
 
 export interface DatasourceApi {
