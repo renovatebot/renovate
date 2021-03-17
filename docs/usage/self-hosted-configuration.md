@@ -7,6 +7,8 @@ description: Self-Hosted Configuration usable in renovate.json or package.json
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
+Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
+
 ## allowPostUpgradeCommandTemplating
 
 If true allow templating for post-upgrade commands.

@@ -39,7 +39,7 @@ export async function updateArtifacts({
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    docker: { image: 'renovate/elixir' },
+    docker: { image: 'elixir' },
   };
   const command = ['mix', 'deps.update', ...updatedDeps.map(quote)].join(' ');
 

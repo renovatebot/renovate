@@ -20,6 +20,7 @@ import { Image, ImageList, MediaType } from './types';
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
 export const id = 'docker';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://index.docker.io'];
 export const defaultVersioning = dockerVersioning.id;
 export const registryStrategy = 'first';
