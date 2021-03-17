@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { getName, logger } from '../../../test/util';
 import type { PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
@@ -11,6 +11,7 @@ describe(getName(__filename), () => {
         ])
       ).toBeNull();
     });
+
     it('extracts multiple included image lines', async () => {
       const res = await extractAllPackageFiles({}, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml',
@@ -26,6 +27,7 @@ describe(getName(__filename), () => {
       });
       expect(deps).toHaveLength(5);
     });
+
     it('extracts multiple image lines', async () => {
       const res = await extractAllPackageFiles({}, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.yaml',
@@ -43,6 +45,7 @@ describe(getName(__filename), () => {
 
       expect(deps.some((dep) => dep.currentValue.includes("'"))).toBe(false);
     });
+
     it('extracts multiple image lines with comments', async () => {
       const res = await extractAllPackageFiles({}, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.1.yaml',
@@ -57,6 +60,14 @@ describe(getName(__filename), () => {
         });
       });
       expect(deps).toHaveLength(3);
+    });
+
+    it('catches errors', async () => {
+      const res = await extractAllPackageFiles({}, [
+        'lib/manager/gitlabci/__fixtures__/gitlab-ci.4.yaml',
+      ]);
+      expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalled();
     });
   });
 });
