@@ -178,9 +178,7 @@ describe('datasource/maven', () => {
           'file://lib/datasource/maven/__fixtures__/custom_maven_repo/maven2/',
         ],
       });
-      expect(releases.releases).toEqual(
-        generateReleases(['6.0.4', ...MYSQL_VERSIONS, '8.0.11', '8.0.12'])
-      );
+      expect(releases).toMatchSnapshot();
     });
 
     it('should return all versions of a specific library for http repositories', async () => {
@@ -268,7 +266,7 @@ describe('datasource/maven', () => {
           'http://invalid_metadata_repo/maven2/',
         ],
       });
-      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
+      expect(releases).toMatchSnapshot();
     });
 
     it('should return all versions of a specific library if a repository fails because a metadata file is not xml', async () => {
