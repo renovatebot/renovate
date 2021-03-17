@@ -2154,7 +2154,7 @@ This is considered a feature flag with the aim to remove it and default to this 
 
 ## unicodeEmoji
 
-If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
+If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
 
 ## updateInternalDeps
 
