@@ -64,6 +64,7 @@ Object {
   "display": "mysql:mysql-connector-java",
   "group": "mysql",
   "name": "mysql-connector-java",
+  "registryUrl": "https://repo.maven.apache.org/maven2/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2020-01-01T00:00:00.650Z",
@@ -122,27 +123,35 @@ Object {
   "name": "mysql-connector-java",
   "releases": Array [
     Object {
+      "registryUrl": "file://lib/datasource/maven/__fixtures__/custom_maven_repo/maven2/",
       "version": "6.0.4",
     },
     Object {
+      "registryUrl": "file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/",
       "version": "6.0.5",
     },
     Object {
+      "registryUrl": "file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/",
       "version": "6.0.6",
     },
     Object {
+      "registryUrl": "file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/",
       "version": "8.0.7",
     },
     Object {
+      "registryUrl": "file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/",
       "version": "8.0.8",
     },
     Object {
+      "registryUrl": "file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/",
       "version": "8.0.9",
     },
     Object {
+      "registryUrl": "file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/",
       "version": "8.0.11",
     },
     Object {
+      "registryUrl": "file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/",
       "version": "8.0.12",
     },
   ],

@@ -25,12 +25,13 @@ Object {
 
 exports[`datasource/index merges registries and returns success 1`] = `
 Object {
-  "registryUrl": "https://reg1.com",
   "releases": Array [
     Object {
+      "registryUrl": "https://reg1.com",
       "version": "1.0.0",
     },
     Object {
+      "registryUrl": "https://reg1.com",
       "version": "1.1.0",
     },
   ],
