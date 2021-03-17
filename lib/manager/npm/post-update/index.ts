@@ -123,9 +123,9 @@ export async function writeExistingFiles(
   packageFiles: AdditionalPackageFiles
 ): Promise<void> {
   const npmrcFile = upath.join(config.localDir, '.npmrc');
-  if (config.npmrc) {
+  if (is.string(config.npmrc)) {
     logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await outputFile(npmrcFile, `${String(config.npmrc)}\n`);
+    await outputFile(npmrcFile, `${config.npmrc}\n`);
   } else if (config.ignoreNpmrcFile) {
     logger.debug('Removing ignored .npmrc file before artifact generation');
     await remove(npmrcFile);

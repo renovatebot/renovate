@@ -3,6 +3,7 @@
 exports[`datasource/galaxy getReleases processes real data 1`] = `
 Object {
   "dependencyUrl": "https://galaxy.ansible.com/yatesr/timezone",
+  "registryUrl": "https://galaxy.ansible.com/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2015-11-17T00:43:42.000Z",
