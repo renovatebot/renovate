@@ -74,7 +74,7 @@ export async function updateArtifacts({
       CP_HOME_DIR: await getCocoaPodsHome(config),
     },
     docker: {
-      image: 'renovate/cocoapods',
+      image: 'cocoapods',
       tagScheme: 'ruby',
       tagConstraint,
     },

@@ -1,3 +1,6 @@
+# not existing
+include: 'lib/manager/gitlabci/__fixtures__/include.2.yml'
+
 test:
   stage: test
   image: node:12
