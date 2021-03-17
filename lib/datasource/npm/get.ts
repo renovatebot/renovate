@@ -171,6 +171,7 @@ export async function getDependency(
       releases: null,
       'dist-tags': res['dist-tags'],
       'renovate-config': latestVersion['renovate-config'],
+      registryUrl: regUrl,
     };
     if (res.repository?.directory) {
       dep.sourceDirectory = res.repository.directory;
