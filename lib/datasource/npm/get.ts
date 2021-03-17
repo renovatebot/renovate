@@ -133,9 +133,6 @@ export async function getDependency(
     delete headers.authorization;
   }
 
-  // This tells our http layer not to serve responses directly from the cache and instead to revalidate them every time
-  headers['Cache-Control'] = 'no-cache';
-
   try {
     const opts: HttpOptions = {
       headers,
