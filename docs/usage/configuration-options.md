@@ -1487,7 +1487,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 ## postUpdateOptions
 
-- `gomodTidy`: Run `go mod tidy` after Go module updates
+- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
