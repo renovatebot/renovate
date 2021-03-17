@@ -454,14 +454,12 @@ async function getTags(
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
     do {
       const res = await http.getJson<{ tags: string[] }>(url, { headers });
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link as string);
       url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
-      page += 1;
-    } while (url && page < 20);
+    } while (url);
     const cacheMinutes = 30;
     await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
