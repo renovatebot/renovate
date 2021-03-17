@@ -149,15 +149,6 @@ export async function getDependency(
       logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
     }
     const res = raw.body;
-    // eslint-disable-next-line no-underscore-dangle
-    const returnedName = res.name ? res.name : res._id || '';
-    if (returnedName.toLowerCase() !== packageName.toLowerCase()) {
-      logger.warn(
-        { lookupName: packageName, returnedName: res.name, regUrl },
-        'Returned name does not match with requested name'
-      );
-      return null;
-    }
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
       logger.debug({ dependency: packageName }, 'No versions returned');
