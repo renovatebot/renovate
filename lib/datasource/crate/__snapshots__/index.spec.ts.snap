@@ -3,6 +3,7 @@
 exports[`datasource/crate getReleases clones cloudsmith private registry 1`] = `
 Object {
   "dependencyUrl": "https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg",
+  "registryUrl": "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -17,6 +18,7 @@ Object {
 exports[`datasource/crate getReleases clones other private registry 1`] = `
 Object {
   "dependencyUrl": "https://github.com/mcorbin/testregistry/mypkg",
+  "registryUrl": "https://github.com/mcorbin/testregistry",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -31,6 +33,7 @@ Object {
 exports[`datasource/crate getReleases processes real data: amethyst 1`] = `
 Object {
   "dependencyUrl": "https://crates.io/crates/amethyst",
+  "registryUrl": "https://crates.io",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -111,6 +114,7 @@ Array [
 exports[`datasource/crate getReleases processes real data: libc 1`] = `
 Object {
   "dependencyUrl": "https://crates.io/crates/libc",
+  "registryUrl": "https://crates.io",
   "releases": Array [
     Object {
       "version": "0.1.0",

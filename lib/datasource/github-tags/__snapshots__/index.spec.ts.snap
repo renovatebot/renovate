@@ -136,6 +136,7 @@ Array [
 
 exports[`datasource/github-tags getReleases returns tags 1`] = `
 Object {
+  "registryUrl": "https://github.com",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
