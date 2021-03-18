@@ -22,7 +22,7 @@ The config contains:
 
 ## getDigest
 
-Datasources that support the concept of digests (e.g. docker digests and Git commit hashes) also can export a `getDigest` function.
+Datasources that support the concept of digests (e.g. Docker digests and Git commit hashes) also can export a `getDigest` function.
 
 The `getDigest` function has two inputs:
 
