@@ -1441,7 +1441,7 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
-Here's an example of where you use this to group together all packages from the `renovatebot` github org:
+Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
 
 ```json
 {
