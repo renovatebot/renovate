@@ -441,17 +441,19 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJson<{
           merge_status: string;
           pipeline: string;
-        }>(`projects/${config.repository}/merge_requests/${pr}`, { useCache: false });
+        }>(`projects/${config.repository}/merge_requests/${pr}`, {
+          useCache: false,
+        });
         if (body.merge_status === cantMerged) {
           logger.debug('MR cannot be merged');
           return;
         }
         // Only continue if the merge request can be merged and has a pipeline.
         if (body.merge_status === desiredStatus && body.pipeline !== null) {
-          logger.debug(`MR is ready to merge`);
+          logger.debug('MR is ready to merge');
           break;
         }
-        logger.debug(`Wait for pipeline. Sleep 500 * ${attempt}`);
+        logger.debug('Wait for pipeline...');
         await delay(initDelay * attempt);
       }
 

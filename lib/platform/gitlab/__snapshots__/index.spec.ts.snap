@@ -220,6 +220,69 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested when conflict 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/user",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/version",
+  },
+  Object {
+    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "content-length": "142",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+  },
+]
+`;
+
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
@@ -1714,19 +1777,6 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab massageMarkdown(input) returns updated pr body 1`] = `
-"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
-
-  Merge Requests are the best, here are some MRs.
-
-  ## Open
-
-These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
-
- - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
-"
-`;
-
 exports[`platform/gitlab getRepoForceRebase should return false 1`] = `
 Array [
   Object {
@@ -2024,6 +2074,19 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
 ]
+`;
+
+exports[`platform/gitlab massageMarkdown(input) returns updated pr body 1`] = `
+"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
+
+  Merge Requests are the best, here are some MRs.
+
+  ## Open
+
+These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+
+ - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
+"
 `;
 
 exports[`platform/gitlab mergePr(pr) merges the PR 1`] = `
