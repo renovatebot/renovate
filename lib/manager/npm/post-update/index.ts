@@ -133,17 +133,12 @@ export async function writeExistingFiles(
     'Writing package.json files'
   );
   for (const packageFile of npmFiles) {
-    const basedir = upath.join(
-      config.localDir,
-      upath.dirname(packageFile.packageFile)
-    );
     const npmrc: string = packageFile.npmrc || config.npmrc;
     const npmrcFilename = getSiblingFileName(packageFile.packageFile, '.npmrc');
     if (npmrc) {
       await writeLocalFile(npmrcFilename, `${npmrc}\n`);
     }
     if (packageFile.yarnrc) {
-      logger.debug(`Writing .yarnrc to ${basedir}`);
       const yarnrcFilename = getSiblingFileName(
         packageFile.packageFile,
         '.yarnrc'
