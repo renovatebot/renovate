@@ -503,18 +503,10 @@ export async function getAdditionalFiles(
       npmrcContent,
       additionalNpmrcContent
     );
-    const fileName = upath.basename(lockFile);
-    logger.debug(`Generating ${fileName} for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.npmLock === lockFile
     );
-    const res = await npm.generateLockFile(
-      fullLockFileDir,
-      env,
-      fileName,
-      config,
-      upgrades
-    );
+    const res = await npm.generateLockFile(env, lockFile, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stderr?.includes('No matching version found for')) {
@@ -571,12 +563,7 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.yarnLock === lockFile
     );
-    const res = await yarn.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
-      env,
-      config,
-      upgrades
-    );
+    const res = await yarn.generateLockFile(env, lockFile, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
