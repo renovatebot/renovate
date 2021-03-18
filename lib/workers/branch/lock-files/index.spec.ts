@@ -1,4 +1,4 @@
-import { git, mocked } from '../../../../test/util';
+import { fs, git, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _lockFiles from '../../../manager/npm/post-update';
 import * as _lerna from '../../../manager/npm/post-update/lerna';
@@ -6,12 +6,10 @@ import * as _npm from '../../../manager/npm/post-update/npm';
 import * as _pnpm from '../../../manager/npm/post-update/pnpm';
 import * as _yarn from '../../../manager/npm/post-update/yarn';
 import type { PostUpdateConfig } from '../../../manager/types';
-import * as _fs from '../../../util/fs/proxies';
 import * as _hostRules from '../../../util/host-rules';
 
 const defaultConfig = getConfig();
 
-const fs = mocked(_fs);
 const lockFiles = mocked(_lockFiles);
 const npm = mocked(_npm);
 const yarn = mocked(_yarn);
@@ -20,6 +18,7 @@ const lerna = mocked(_lerna);
 const hostRules = mocked(_hostRules);
 
 jest.mock('../../../util/git');
+jest.mock('fs');
 
 hostRules.find = jest.fn((_) => ({
   token: 'abc',
@@ -35,12 +34,12 @@ describe('manager/npm/post-update', () => {
         ...defaultConfig,
         localDir: 'some-tmp-dir',
       };
-      fs.outputFile = jest.fn();
+      fs.writeLocalFile = jest.fn();
     });
     it('returns if no updated packageFiles', async () => {
       delete config.updatedPackageFiles;
       await writeUpdatedPackageFiles(config);
-      expect(fs.outputFile).toHaveBeenCalledTimes(0);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(0);
     });
     it('returns if no updated packageFiles are package.json', async () => {
       config.updatedPackageFiles = [
@@ -50,7 +49,7 @@ describe('manager/npm/post-update', () => {
         },
       ];
       await writeUpdatedPackageFiles(config);
-      expect(fs.outputFile).toHaveBeenCalledTimes(0);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(0);
     });
     it('writes updated packageFiles', async () => {
       config.updatedPackageFiles = [
@@ -66,7 +65,7 @@ describe('manager/npm/post-update', () => {
       ];
       config.upgrades = [];
       await writeUpdatedPackageFiles(config);
-      expect(fs.outputFile).toHaveBeenCalledTimes(2);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
     });
   });
   describe('getAdditionalFiles', () => {
