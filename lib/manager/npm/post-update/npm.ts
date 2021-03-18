@@ -64,7 +64,7 @@ export async function generateLockFile(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
@@ -98,6 +98,11 @@ export async function generateLockFile(
           .map((update) => ` ${update.depName}@${update.newVersion}`)
           .join('');
       commands.push(updateCmd);
+    }
+
+    if (upgrades.some((upgrade) => upgrade.isRemediation)) {
+      // We need to run twice to get the correct lock file
+      commands.push(`npm install ${cmdOptions}`.trim());
     }
 
     // postUpdateOptions

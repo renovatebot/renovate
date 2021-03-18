@@ -2,6 +2,7 @@
 
 exports[`datasource/gitlab-tags getReleases returns tags from custom registry 1`] = `
 Object {
+  "registryUrl": "https://gitlab.company.com/api/v4/",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
@@ -38,6 +39,7 @@ Array [
 
 exports[`datasource/gitlab-tags getReleases returns tags with default registry 1`] = `
 Object {
+  "registryUrl": "https://gitlab.com",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",

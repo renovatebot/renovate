@@ -1,7 +1,6 @@
 import { OutgoingHttpHeaders } from 'http';
 import url from 'url';
 import is from '@sindresorhus/is';
-import delay from 'delay';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
@@ -67,8 +66,7 @@ export interface NpmResponse {
 }
 
 export async function getDependency(
-  packageName: string,
-  retries = 3
+  packageName: string
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${packageName})`);
 
@@ -135,29 +133,12 @@ export async function getDependency(
     delete headers.authorization;
   }
 
-  // This tells our http layer not to serve responses directly from the cache and instead to revalidate them every time
-  headers['Cache-Control'] = 'no-cache';
-
   try {
-    const useCache = retries === 3; // Disable cache if we're retrying
     const opts: HttpOptions = {
       headers,
-      useCache,
     };
     const raw = await http.getJson<NpmResponse>(pkgUrl, opts);
-    if (retries < 3) {
-      logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
-    }
     const res = raw.body;
-    // eslint-disable-next-line no-underscore-dangle
-    const returnedName = res.name ? res.name : res._id || '';
-    if (returnedName.toLowerCase() !== packageName.toLowerCase()) {
-      logger.warn(
-        { lookupName: packageName, returnedName: res.name, regUrl },
-        'Returned name does not match with requested name'
-      );
-      return null;
-    }
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
       logger.debug({ dependency: packageName }, 'No versions returned');
@@ -187,6 +168,7 @@ export async function getDependency(
       releases: null,
       'dist-tags': res['dist-tags'],
       'renovate-config': latestVersion['renovate-config'],
+      registryUrl: regUrl,
     };
     if (res.repository?.directory) {
       dep.sourceDirectory = res.repository.directory;
@@ -268,22 +250,6 @@ export async function getDependency(
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {
-      // istanbul ignore if
-      if (
-        (err.name === 'ParseError' ||
-          err.code === 'ECONNRESET' ||
-          err.code === 'ETIMEDOUT') &&
-        retries > 0
-      ) {
-        // Delay a random time to avoid contention
-        const delaySeconds = 5 + Math.round(Math.random() * 25);
-        logger.warn(
-          { pkgUrl, errName: err.name, delaySeconds },
-          'Retrying npm error'
-        );
-        await delay(1000 * delaySeconds);
-        return getDependency(packageName, retries - 1);
-      }
       // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';

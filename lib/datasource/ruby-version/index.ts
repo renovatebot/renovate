@@ -6,15 +6,15 @@ import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'ruby-version';
+export const defaultRegistryUrls = ['https://www.ruby-lang.org/'];
+export const customRegistrySupport = false;
 export const defaultVersioning = rubyVersioningId;
 
 const http = new Http(id);
 
-const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
-
-export async function getReleases(
-  _config?: GetReleasesConfig
-): Promise<ReleaseResult> {
+export async function getReleases({
+  registryUrl,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   // First check the persistent cache
   const cacheNamespace = 'datasource-ruby-version';
   const cachedResult = await packageCache.get<ReleaseResult>(
@@ -31,6 +31,7 @@ export async function getReleases(
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
     };
+    const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
     const response = await http.get(rubyVersionsUrl);
     const root = parse(response.body);
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
