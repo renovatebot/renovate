@@ -9,11 +9,13 @@ import { getChildProcessEnv } from '../../../util/exec/env';
 import {
   deleteLocalFile,
   ensureDir,
+  getSiblingFileName,
   outputFile,
   readFile,
   remove,
   unlink,
   writeFile,
+  writeLocalFile,
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -148,27 +150,22 @@ export async function writeExistingFiles(
       upath.dirname(packageFile.packageFile)
     );
     const npmrc: string = packageFile.npmrc || config.npmrc;
-    const npmrcFilename = upath.join(basedir, '.npmrc');
+    const npmrcFilename = getSiblingFileName(packageFile.packageFile, '.npmrc');
     if (npmrc) {
-      try {
-        await outputFile(npmrcFilename, `${npmrc}\n`);
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
-      }
+      await writeLocalFile(npmrcFilename, `${npmrc}\n`);
     }
     if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);
-      const yarnrcFilename = upath.join(basedir, '.yarnrc');
-      try {
-        await outputFile(
-          yarnrcFilename,
-          packageFile.yarnrc
-            .replace('--install.pure-lockfile true', '')
-            .replace('--install.frozen-lockfile true', '')
-        );
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
-      }
+      const yarnrcFilename = getSiblingFileName(
+        packageFile.packageFile,
+        '.yarnrc'
+      );
+      await writeLocalFile(
+        yarnrcFilename,
+        packageFile.yarnrc
+          .replace('--install.pure-lockfile true', '')
+          .replace('--install.frozen-lockfile true', '')
+      );
     }
     const { npmLock } = packageFile;
     if (npmLock) {
