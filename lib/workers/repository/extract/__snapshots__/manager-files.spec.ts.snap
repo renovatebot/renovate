@@ -16,8 +16,10 @@ Array [
     ],
     "ignoreNpmrcFile": undefined,
     "lernaClient": undefined,
-    "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "managerData": Object {
+      "lernaJsonFile": undefined,
+    },
     "npmLock": undefined,
     "npmrc": undefined,
     "packageFile": "package.json",

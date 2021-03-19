@@ -366,7 +366,9 @@ export async function extractPackageFile(
     ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
-    lernaJsonFile,
+    managerData: {
+      lernaJsonFile,
+    },
     lernaClient,
     lernaPackages,
     skipInstalls,
