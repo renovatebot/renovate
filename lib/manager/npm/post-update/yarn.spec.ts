@@ -68,7 +68,7 @@ describe(getName(__filename), () => {
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
-      const res = await yarnHelper.generateLockFile({}, 'yarn.lock', config);
+      const res = await yarnHelper.generateLockFile('yarn.lock', {}, config);
       expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.deleteLocalFile).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
@@ -95,7 +95,7 @@ describe(getName(__filename), () => {
           yarn: yarnVersion === '1.22.0' ? '^1.10.0' : '>= 2.0.0',
         },
       };
-      const res = await yarnHelper.generateLockFile({}, 'yarn.lock', config, [
+      const res = await yarnHelper.generateLockFile('yarn.lock', {}, config, [
         {
           depName: 'some-dep',
           newValue: '^1.0.0',
@@ -118,7 +118,7 @@ describe(getName(__filename), () => {
           'yarn-offline-mirror ./npm-packages-offline-cache'
         )
         .mockResolvedValueOnce('package-lock-contents');
-      const res = await yarnHelper.generateLockFile({}, 'yarn.lock', {}, [
+      const res = await yarnHelper.generateLockFile('yarn.lock', {}, {}, [
         {
           depName: 'some-dep',
           isLockfileUpdate: true,
@@ -154,7 +154,7 @@ describe(getName(__filename), () => {
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
-      const res = await yarnHelper.generateLockFile({}, 'yarn.lock', config, [
+      const res = await yarnHelper.generateLockFile('yarn.lock', {}, config, [
         { isLockFileMaintenance: true },
       ]);
       expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
@@ -171,7 +171,7 @@ describe(getName(__filename), () => {
     fs.readLocalFile.mockResolvedValueOnce(null).mockRejectedValueOnce(() => {
       throw new Error('not-found');
     });
-    const res = await yarnHelper.generateLockFile({}, 'yarn.lock');
+    const res = await yarnHelper.generateLockFile('yarn.lock', {});
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
