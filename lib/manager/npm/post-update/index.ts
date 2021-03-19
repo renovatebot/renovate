@@ -9,6 +9,7 @@ import { getChildProcessEnv } from '../../../util/exec/env';
 import {
   deleteLocalFile,
   ensureDir,
+  getSubDirectory,
   outputFile,
   readFile,
   remove,
@@ -32,7 +33,7 @@ export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
   npmLockDirs: string[];
   pnpmShrinkwrapDirs: string[];
-  lernaDirs: string[];
+  lernaJsonFiles: string[];
 }
 // istanbul ignore next
 export function determineLockFileDirs(
@@ -42,13 +43,13 @@ export function determineLockFileDirs(
   const npmLockDirs = [];
   const yarnLockDirs = [];
   const pnpmShrinkwrapDirs = [];
-  const lernaDirs = [];
+  const lernaJsonFiles = [];
 
   for (const upgrade of config.upgrades) {
     if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
       // Return every directory that contains a lockfile
-      if (upgrade.lernaDir && upgrade.npmLock) {
-        lernaDirs.push(upgrade.lernaDir);
+      if (upgrade.lernaJsonFile && upgrade.npmLock) {
+        lernaJsonFiles.push(upgrade.lernaJsonFile);
       } else {
         yarnLockDirs.push(upgrade.yarnLock);
         npmLockDirs.push(upgrade.npmLock);
@@ -72,7 +73,7 @@ export function determineLockFileDirs(
       yarnLockDirs: getDirs(yarnLockDirs),
       npmLockDirs: getDirs(npmLockDirs),
       pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
-      lernaDirs: getDirs(lernaDirs),
+      lernaJsonFiles: getDirs(lernaJsonFiles),
     };
   }
 
@@ -92,15 +93,15 @@ export function determineLockFileDirs(
     logger.trace(`Checking ${String(p.name)} for lock files`);
     const packageFile = getPackageFile(p.name);
     // lerna first
-    if (packageFile.lernaDir && packageFile.npmLock) {
+    if (packageFile.lernaJsonFile && packageFile.npmLock) {
       logger.debug(`${packageFile.packageFile} has lerna lock file`);
-      lernaDirs.push(packageFile.lernaDir);
+      lernaJsonFiles.push(packageFile.lernaJsonFile);
     } else if (
-      packageFile.lernaDir &&
+      packageFile.lernaJsonFile &&
       packageFile.yarnLock &&
       !packageFile.hasYarnWorkspaces
     ) {
-      lernaDirs.push(packageFile.lernaDir);
+      lernaJsonFiles.push(packageFile.lernaJsonFile);
     } else {
       // push full lock file names and convert them later
       yarnLockDirs.push(packageFile.yarnLock);
@@ -113,7 +114,7 @@ export function determineLockFileDirs(
     yarnLockDirs: getDirs(yarnLockDirs),
     npmLockDirs: getDirs(npmLockDirs),
     pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
-    lernaDirs: getDirs(lernaDirs),
+    lernaJsonFiles: getDirs(lernaJsonFiles),
   };
 }
 
@@ -687,11 +688,11 @@ export async function getAdditionalFiles(
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
-  for (const lernaDir of dirs.lernaDirs) {
+  for (const lernaJsonFile of dirs.lernaJsonFiles) {
     let lockFile: string;
-    logger.debug(`Finding package.json for lerna directory "${lernaDir}"`);
+    logger.debug(`Finding package.json for lerna location "${lernaJsonFile}"`);
     const lernaPackageFile = packageFiles.npm.find(
-      (p) => upath.dirname(p.packageFile) === lernaDir
+      (p) => getSubDirectory(p.packageFile) === getSubDirectory(lernaJsonFile)
     );
     if (!lernaPackageFile) {
       logger.debug('No matching package.json found');
@@ -704,7 +705,10 @@ export async function getAdditionalFiles(
     }
     const skipInstalls =
       lockFile === 'npm-shrinkwrap.json' ? false : config.skipInstalls;
-    const fullLearnaFileDir = upath.join(config.localDir, lernaDir);
+    const fullLearnaFileDir = upath.join(
+      config.localDir,
+      getSubDirectory(lernaJsonFile)
+    );
     const npmrcContent = await getNpmrcContent(fullLearnaFileDir);
     await updateNpmrcContent(
       fullLearnaFileDir,

@@ -16,7 +16,7 @@ Array [
     ],
     "ignoreNpmrcFile": undefined,
     "lernaClient": undefined,
-    "lernaDir": undefined,
+    "lernaJsonFile": undefined,
     "lernaPackages": undefined,
     "npmLock": undefined,
     "npmrc": undefined,

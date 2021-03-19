@@ -74,7 +74,7 @@ export interface NpmLockFiles {
   shrinkwrapJson?: string;
   pnpmShrinkwrap?: string;
   npmLock?: string;
-  lernaDir?: string;
+  lernaJsonFile?: string;
   lockFiles?: string[];
 }
 
