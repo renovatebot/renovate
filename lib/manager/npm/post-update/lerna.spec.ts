@@ -1,7 +1,9 @@
 import { exec as _exec } from 'child_process';
+import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { getName, mocked } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
+import { setExecConfig } from '../../../util/exec';
 import * as _env from '../../../util/exec/env';
 import * as _lernaHelper from './lerna';
 
@@ -20,6 +22,11 @@ function lernaPkgFile(lernaClient: string) {
   };
 }
 
+const execConfig = {
+  localDir: join(''),
+  cacheDir: join('/tmp/cache'),
+};
+
 function lernaPkgFileWithoutLernaDep(lernaClient: string) {
   return {
     lernaClient,
@@ -27,10 +34,11 @@ function lernaPkgFileWithoutLernaDep(lernaClient: string) {
 }
 describe(getName(__filename), () => {
   describe('generateLockFiles()', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.resetAllMocks();
       jest.resetModules();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
+      await setExecConfig(execConfig);
     });
     it('returns if no lernaClient', async () => {
       const res = await lernaHelper.generateLockFiles({}, 'some-dir', {}, {});
