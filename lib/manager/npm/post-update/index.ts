@@ -10,6 +10,7 @@ import {
   deleteLocalFile,
   ensureDir,
   getSiblingFileName,
+  getSubDirectory,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -471,7 +472,7 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.npmLock === npmLock
     );
-    const res = await npm.generateLockFile(env, lockFile, config, upgrades);
+    const res = await npm.generateLockFile(env, npmLock, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stderr?.includes('No matching version found for')) {
@@ -515,7 +516,7 @@ export async function getAdditionalFiles(
   }
 
   for (const yarnLock of dirs.yarnLockDirs) {
-    const lockFileDir = upath.dirname(lockFile);
+    const lockFileDir = upath.dirname(yarnLock);
     const npmrcContent = await readLocalFile(
       getSiblingFileName(yarnLock, '.npmrc'),
       'utf8'
@@ -526,7 +527,7 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.yarnLock === yarnLock
     );
-    const res = await yarn.generateLockFile(env, lockFile, config, upgrades);
+    const res = await yarn.generateLockFile(env, yarnLock, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
@@ -585,7 +586,12 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.pnpmShrinkwrap === pnpmShrinkwrap
     );
-    const res = await pnpm.generateLockFile(lockFile, env, config, upgrades);
+    const res = await pnpm.generateLockFile(
+      pnpmShrinkwrap,
+      env,
+      config,
+      upgrades
+    );
     if (res.error) {
       // istanbul ignore if
       if (res.stdout?.includes(`No compatible version found:`)) {
@@ -634,7 +640,7 @@ export async function getAdditionalFiles(
     let lockFile: string;
     logger.debug(`Finding package.json for lerna location "${lernaJsonFile}"`);
     const lernaPackageFile = packageFiles.npm.find(
-      (p) => getSubDirectory(p.packageFile) === getSubDirectory(lernaJsonFile)
+      (p) => p.packageFile === getSiblingFileName(lernaJsonFile, 'package.json')
     );
     if (!lernaPackageFile) {
       logger.debug('No matching package.json found');
@@ -651,7 +657,7 @@ export async function getAdditionalFiles(
       getSiblingFileName(lernaJsonFile, '.npmrc'),
       'utf8'
     );
-    const lernaDir = getSubdirectory(lernaDir);
+    const lernaDir = getSubDirectory(lernaJsonFile);
     await updateNpmrcContent(lernaDir, npmrcContent, additionalNpmrcContent);
     const res = await lerna.generateLockFiles(
       lernaPackageFile,

@@ -3,6 +3,7 @@ import minimatch from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
+import { getSiblingFileName } from '../../../util/fs';
 import type { PackageFile } from '../../types';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
