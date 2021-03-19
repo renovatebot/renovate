@@ -257,21 +257,6 @@ interface UpdatedArtifacts {
 }
 
 // istanbul ignore next
-async function getNpmrcContent(dir: string): Promise<string | null> {
-  const npmrcFilePath = upath.join(dir, '.npmrc');
-  let originalNpmrcContent = null;
-  try {
-    originalNpmrcContent = await readLocalFile(npmrcFilePath, 'utf8');
-    logger.debug('npmrc file found in repository');
-  } catch {
-    logger.debug('No npmrc file found in repository');
-    originalNpmrcContent = null;
-  }
-
-  return originalNpmrcContent;
-}
-
-// istanbul ignore next
 async function updateNpmrcContent(
   dir: string,
   originalContent: string,
@@ -476,7 +461,10 @@ export async function getAdditionalFiles(
   }
   for (const lockFile of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(lockFile);
-    const npmrcContent = await getNpmrcContent(lockFileDir);
+    const npmrcContent = await readLocalFile(
+      getSiblingFileName(lockFile, '.npmrc'),
+      'utf8'
+    );
     await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     const fileName = upath.basename(lockFile);
     logger.debug(`Generating ${fileName} for ${lockFileDir}`);
@@ -528,7 +516,10 @@ export async function getAdditionalFiles(
 
   for (const lockFile of dirs.yarnLockDirs) {
     const lockFileDir = upath.dirname(lockFile);
-    const npmrcContent = await getNpmrcContent(lockFileDir);
+    const npmrcContent = await readLocalFile(
+      getSiblingFileName(lockFile, '.npmrc'),
+      'utf8'
+    );
     await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     logger.debug(`Generating yarn.lock for ${lockFileDir}`);
     const lockFileName = upath.join(lockFileDir, 'yarn.lock');
@@ -585,7 +576,10 @@ export async function getAdditionalFiles(
 
   for (const lockFile of dirs.pnpmShrinkwrapDirs) {
     const lockFileDir = upath.dirname(lockFile);
-    const npmrcContent = await getNpmrcContent(lockFileDir);
+    const npmrcContent = await readLocalFile(
+      getSiblingFileName(lockFile, '.npmrc'),
+      'utf8'
+    );
     await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
@@ -653,7 +647,10 @@ export async function getAdditionalFiles(
     }
     const skipInstalls =
       lockFile === 'npm-shrinkwrap.json' ? false : config.skipInstalls;
-    const npmrcContent = await getNpmrcContent(lernaDir);
+    const npmrcContent = await readLocalFile(
+      getSiblingFileName(lockFile, '.npmrc'),
+      'utf8'
+    );
     await updateNpmrcContent(lernaDir, npmrcContent, additionalNpmrcContent);
     const res = await lerna.generateLockFiles(
       lernaPackageFile,
