@@ -495,8 +495,8 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
-  for (const lockFile of dirs.npmLockDirs) {
-    const lockFileDir = upath.dirname(lockFile);
+  for (const npmLock of dirs.npmLockDirs) {
+    const lockFileDir = upath.dirname(npmLock);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -504,10 +504,10 @@ export async function getAdditionalFiles(
       npmrcContent,
       additionalNpmrcContent
     );
-    const fileName = upath.basename(lockFile);
+    const fileName = upath.basename(npmLock);
     logger.debug(`Generating ${fileName} for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.npmLock === lockFile
+      (upgrade) => upgrade.npmLock === npmLock
     );
     const res = await npm.generateLockFile(
       fullLockFileDir,
@@ -537,20 +537,20 @@ export async function getAdditionalFiles(
         }
       }
       artifactErrors.push({
-        lockFile,
+        lockFile: npmLock,
         stderr: res.stderr,
       });
     } else {
       const existingContent = await getFile(
-        lockFile,
+        npmLock,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
       if (res.lockFile === existingContent) {
-        logger.debug(`${lockFile} hasn't changed`);
+        logger.debug(`${npmLock} hasn't changed`);
       } else {
-        logger.debug(`${lockFile} needs updating`);
+        logger.debug(`${npmLock} needs updating`);
         updatedArtifacts.push({
-          name: lockFile,
+          name: npmLock,
           contents: res.lockFile.replace(new RegExp(`${token}`, 'g'), ''),
         });
       }
@@ -558,8 +558,8 @@ export async function getAdditionalFiles(
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
-  for (const lockFile of dirs.yarnLockDirs) {
-    const lockFileDir = upath.dirname(lockFile);
+  for (const yarnLock of dirs.yarnLockDirs) {
+    const lockFileDir = upath.dirname(yarnLock);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -570,7 +570,7 @@ export async function getAdditionalFiles(
     logger.debug(`Generating yarn.lock for ${lockFileDir}`);
     const lockFileName = upath.join(lockFileDir, 'yarn.lock');
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.yarnLock === lockFile
+      (upgrade) => upgrade.yarnLock === yarnLock
     );
     const res = await yarn.generateLockFile(
       upath.join(config.localDir, lockFileDir),
@@ -603,7 +603,7 @@ export async function getAdditionalFiles(
         }
       }
       artifactErrors.push({
-        lockFile,
+        lockFile: yarnLock,
         stderr: res.stderr,
       });
     } else {
@@ -625,8 +625,8 @@ export async function getAdditionalFiles(
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
-  for (const lockFile of dirs.pnpmShrinkwrapDirs) {
-    const lockFileDir = upath.dirname(lockFile);
+  for (const pnpmShrinkwrap of dirs.pnpmShrinkwrapDirs) {
+    const lockFileDir = upath.dirname(pnpmShrinkwrap);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -636,7 +636,7 @@ export async function getAdditionalFiles(
     );
     logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.pnpmShrinkwrap === lockFile
+      (upgrade) => upgrade.pnpmShrinkwrap === pnpmShrinkwrap
     );
     const res = await pnpm.generateLockFile(
       upath.join(config.localDir, lockFileDir),
@@ -667,12 +667,12 @@ export async function getAdditionalFiles(
         }
       }
       artifactErrors.push({
-        lockFile,
+        lockFile: pnpmShrinkwrap,
         stderr: res.stderr,
       });
     } else {
       const existingContent = await getFile(
-        lockFile,
+        pnpmShrinkwrap,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
       if (res.lockFile === existingContent) {
@@ -680,7 +680,7 @@ export async function getAdditionalFiles(
       } else {
         logger.debug('pnpm-lock.yaml needs updating');
         updatedArtifacts.push({
-          name: lockFile,
+          name: pnpmShrinkwrap,
           contents: res.lockFile,
         });
       }
