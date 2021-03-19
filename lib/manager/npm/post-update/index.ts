@@ -483,13 +483,7 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.npmLock === lockFile
     );
-    const res = await npm.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
-      env,
-      fileName,
-      config,
-      upgrades
-    );
+    const res = await npm.generateLockFile(env, lockFile, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stderr?.includes('No matching version found for')) {
@@ -541,12 +535,7 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.yarnLock === lockFile
     );
-    const res = await yarn.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
-      env,
-      config,
-      upgrades
-    );
+    const res = await yarn.generateLockFile(env, lockFile, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
@@ -602,12 +591,7 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.pnpmShrinkwrap === lockFile
     );
-    const res = await pnpm.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
-      env,
-      config,
-      upgrades
-    );
+    const res = await pnpm.generateLockFile(lockFile, env, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stdout?.includes(`No compatible version found:`)) {
@@ -673,7 +657,7 @@ export async function getAdditionalFiles(
     await updateNpmrcContent(lernaDir, npmrcContent, additionalNpmrcContent);
     const res = await lerna.generateLockFiles(
       lernaPackageFile,
-      upath.join(config.localDir, lernaDir),
+      lernaDir,
       config,
       env,
       skipInstalls

@@ -11,7 +11,11 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readFile, remove } from '../../../util/fs';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 
@@ -22,12 +26,12 @@ export interface GenerateLockFileResult {
 }
 
 export async function checkYarnrc(
-  cwd: string
+  yarnrcFileName: string
 ): Promise<{ offlineMirror: boolean; yarnPath: string | null }> {
   let offlineMirror = false;
   let yarnPath: string = null;
   try {
-    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await readLocalFile(yarnrcFileName, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
@@ -53,13 +57,12 @@ export function getOptimizeCommand(
 }
 
 export async function generateLockFile(
-  cwd: string,
   env: NodeJS.ProcessEnv,
+  yarnLock: string,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = join(cwd, 'yarn.lock');
-  logger.debug(`Spawning yarn install to create ${lockFileName}`);
+  logger.debug(`Spawning yarn install to create ${yarnLock}`);
   let lockFile = null;
   try {
     const yarnCompatibility = config.constraints?.yarn;
@@ -83,7 +86,9 @@ export async function generateLockFile(
     };
 
     if (isYarn1 && config.skipInstalls !== false) {
-      const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
+      const { offlineMirror, yarnPath } = await checkYarnrc(
+        getSiblingFileName(yarnLock, '.yarnrc')
+      );
       if (!offlineMirror) {
         logger.debug('Updating yarn.lock only - skipping node_modules');
         // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
@@ -110,7 +115,7 @@ export async function generateLockFile(
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: yarnLock,
       extraEnv,
       docker: {
         image: 'node',
@@ -180,13 +185,13 @@ export async function generateLockFile(
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
-        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+        `Removing ${yarnLock} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(yarnLock);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
-          { err, lockFileName },
+          { err, yarnLock },
           'Error removing yarn.lock for lock file maintenance'
         );
       }
@@ -196,7 +201,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(yarnLock, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

@@ -5,7 +5,7 @@ import { getAdminConfig } from '../../../config/admin';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readFile, remove } from '../../../util/fs';
+import { deleteLocalFile, readLocalFile } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 
@@ -17,13 +17,12 @@ export interface GenerateLockFileResult {
 }
 
 export async function generateLockFile(
-  cwd: string,
+  pnpmShrinkwrap: string,
   env: NodeJS.ProcessEnv,
   config: PostUpdateConfig,
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = join(cwd, 'pnpm-lock.yaml');
-  logger.debug(`Spawning pnpm install to create ${lockFileName}`);
+  logger.debug(`Spawning pnpm install to create ${pnpmShrinkwrap}`);
   let lockFile = null;
   let stdout: string;
   let stderr: string;
@@ -37,7 +36,7 @@ export async function generateLockFile(
     const preCommands = [installPnpm];
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: pnpmShrinkwrap,
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
@@ -71,20 +70,20 @@ export async function generateLockFile(
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
-        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+        `Removing ${pnpmShrinkwrap} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(pnpmShrinkwrap);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
-          { err, lockFileName },
+          { err, lockFileName: pnpmShrinkwrap },
           'Error removing yarn.lock for lock file maintenance'
         );
       }
     }
 
     await exec(`${cmd} ${args}`, execOptions);
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(pnpmShrinkwrap, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

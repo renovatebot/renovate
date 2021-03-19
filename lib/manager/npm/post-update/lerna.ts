@@ -30,7 +30,7 @@ export function getLernaVersion(
 
 export async function generateLockFiles(
   lernaPackageFile: Partial<PackageFile>,
-  cwd: string,
+  lernaDir: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
@@ -83,7 +83,7 @@ export async function generateLockFiles(
     const allowUnstable = true; // lerna will pick the default installed npm@6 unless we use node@>=15
     const tagConstraint = await getNodeConstraint(config, allowUnstable);
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: lernaDir + '/lerna.json',
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,

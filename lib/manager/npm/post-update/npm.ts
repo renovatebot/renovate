@@ -8,7 +8,13 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import { move, pathExists, readFile, remove } from '../../../util/fs';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+  renameLocalFile,
+} from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 
@@ -19,13 +25,12 @@ export interface GenerateLockFileResult {
 }
 
 export async function generateLockFile(
-  cwd: string,
   env: NodeJS.ProcessEnv,
-  filename: string,
+  npmLock: string,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
+  logger.debug(`Spawning npm install to create ${npmLock}`);
   const { skipInstalls, postUpdateOptions } = config;
 
   let lockFile = null;
@@ -58,7 +63,7 @@ export async function generateLockFile(
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: npmLock,
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
@@ -112,15 +117,14 @@ export async function generateLockFile(
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
-      const lockFileName = join(cwd, filename);
       logger.debug(
-        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+        `Removing ${npmLock} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(npmLock);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
-          { err, lockFileName },
+          { err, npmLock },
           'Error removing yarn.lock for lock file maintenance'
         );
       }
@@ -130,18 +134,14 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // massage to shrinkwrap if necessary
-    if (
-      filename === 'npm-shrinkwrap.json' &&
-      (await pathExists(join(cwd, 'package-lock.json')))
-    ) {
-      await move(
-        join(cwd, 'package-lock.json'),
-        join(cwd, 'npm-shrinkwrap.json')
-      );
+    if (npmLock.endsWith('npm-shrinkwrap.json')) {
+      const packageLock = getSiblingFileName(npmLock, 'package-lock.json');
+      if (await localPathExists(packageLock)) {
+        await renameLocalFile(packageLock, npmLock);
+      }
     }
-
     // Read the result
-    lockFile = await readFile(join(cwd, filename), 'utf8');
+    lockFile = await readLocalFile(join(npmLock), 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
