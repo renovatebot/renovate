@@ -3,7 +3,6 @@ import minimatch from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import { getSiblingFileName } from '../../../util/fs';
 import type { PackageFile } from '../../types';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
@@ -24,11 +23,12 @@ export function detectMonorepos(
       packageFile,
       npmLock,
       yarnLock,
-      lernaDir,
+      managerData = {},
       lernaClient,
       lernaPackages,
       yarnWorkspacesPackages,
     } = p;
+    const { lernaJsonFile } = managerData;
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
       const internalPackagePatterns = (is.array(packages)
@@ -52,7 +52,8 @@ export function detectMonorepos(
         });
       }
       for (const subPackage of internalPackageFiles) {
-        subPackage.lernaDir = lernaDir;
+        subPackage.managerData = subPackage.managerData || {};
+        subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.lernaClient = lernaClient;
         subPackage.yarnLock = subPackage.yarnLock || yarnLock;
         subPackage.npmLock = subPackage.npmLock || npmLock;

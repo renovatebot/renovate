@@ -253,7 +253,7 @@
     "prettier": "2.2.1",
     "pretty-quick": "3.1.0",
     "rimraf": "3.0.2",
-    "semantic-release": "17.4.1",
+    "semantic-release": "17.4.2",
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0",
     "tmp-promise": "3.0.2",
