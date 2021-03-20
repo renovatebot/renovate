@@ -60,6 +60,7 @@ export function replaceArgs(
 export function parsePreset(input: string): ParsedPreset {
   let str = input;
   let presetSource: string;
+  let presetPath: string;
   let packageName: string;
   let presetName: string;
   let params: string[];
@@ -127,6 +128,18 @@ export function parsePreset(input: string): ParsedPreset {
     } else {
       presetName = str.slice(1);
     }
+  } else if (str.includes('//')) {
+    // non-scoped namespace with a subdirectory preset
+    const re = /^([\w./]+?)\/\/(?:([\w./]+)\/)?([\w.]+)$/;
+
+    // Validation
+    if (str.includes(':')) {
+      throw new Error('prohibited sub-preset');
+    }
+    if (!re.test(str)) {
+      throw new Error('invalid preset');
+    }
+    [, packageName, presetPath, presetName] = re.exec(str);
   } else {
     // non-scoped namespace
     [, packageName] = /(.*?)(:|$)/.exec(str);
@@ -138,7 +151,7 @@ export function parsePreset(input: string): ParsedPreset {
       presetName = 'default';
     }
   }
-  return { presetSource, packageName, presetName, params };
+  return { presetSource, presetPath, packageName, presetName, params };
 }
 
 export async function getPreset(
@@ -146,9 +159,16 @@ export async function getPreset(
   baseConfig?: RenovateConfig
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
-  const { presetSource, packageName, presetName, params } = parsePreset(preset);
+  const {
+    presetSource,
+    packageName,
+    presetPath,
+    presetName,
+    params,
+  } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
     packageName,
+    presetPath,
     presetName,
     baseConfig,
   });
@@ -237,6 +257,10 @@ export async function resolveConfigPresets(
             error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
           } else if (err.message === 'preset not found') {
             error.validationError = `Preset name not found within published preset config (${preset})`;
+          } else if (err.message === 'invalid preset') {
+            error.validationError = `Preset is invalid (${preset})`;
+          } else if (err.message === 'prohibited sub-preset') {
+            error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
           }
           // istanbul ignore if
           if (existingPresets.length) {
@@ -307,6 +331,7 @@ export async function resolveConfigPresets(
 export interface ParsedPreset {
   presetSource: string;
   packageName: string;
+  presetPath?: string;
   presetName: string;
   params?: string[];
 }
