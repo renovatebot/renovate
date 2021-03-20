@@ -8,8 +8,8 @@ describe('manager/npm/extract', () => {
           packageFile: 'package.json',
           managerData: {
             lernaJsonFile: 'lerna.json',
+            lernaPackages: ['packages/*'],
           },
-          lernaPackages: ['packages/*'],
           packages: ['packages/*'],
           deps: [
             {
@@ -28,7 +28,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
           deps: [
             {
               depName: '@org/b',
@@ -43,7 +43,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ] as any;
       detectMonorepos(packageFiles, false);
@@ -61,8 +61,8 @@ describe('manager/npm/extract', () => {
           packageFile: 'package.json',
           managerData: {
             lernaJsonFile: 'lerna.json',
+            lernaPackages: ['packages/*'],
           },
-          lernaPackages: ['packages/*'],
           packages: ['packages/*'],
           deps: [
             {
@@ -81,7 +81,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
           deps: [
             {
               depName: '@org/b',
@@ -96,7 +96,7 @@ describe('manager/npm/extract', () => {
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ] as any;
       detectMonorepos(packageFiles, true);
@@ -113,19 +113,19 @@ describe('manager/npm/extract', () => {
         {
           packageFile: 'package.json',
           managerData: {
+            lernaClient: 'yarn',
             lernaJsonFile: 'lerna.json',
+            lernaPackages: ['oldpackages/*'],
+            yarnWorkspacesPackages: ['packages/*'],
           },
-          lernaPackages: ['oldpackages/*'],
-          lernaClient: 'yarn',
-          yarnWorkspacesPackages: ['packages/*'],
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ];
       detectMonorepos(packageFiles, false);
@@ -136,16 +136,15 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          yarnWorkspacesPackages: 'packages/*',
+          managerData: { yarnWorkspacesPackages: 'packages/*' },
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
-          yarnLock: 'yarn.lock',
+          managerData: { packageJsonName: '@org/a', yarnLock: 'yarn.lock' },
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ];
       detectMonorepos(packageFiles, false);

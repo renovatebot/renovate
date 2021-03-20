@@ -1,6 +1,7 @@
 import { valid } from 'semver';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../types';
+import { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
@@ -11,7 +12,8 @@ export async function getLockedVersions(
   const lockFileCache: Record<string, LockFile> = {};
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
-    const { yarnLock, npmLock, pnpmShrinkwrap } = packageFile;
+    const { managerData = {} } = packageFile;
+    const { yarnLock, npmLock, pnpmShrinkwrap } = managerData as NpmManagerData;
     const lockFiles = [];
     if (yarnLock) {
       logger.trace('Found yarnLock');

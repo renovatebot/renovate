@@ -4,6 +4,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import type { PackageFile } from '../../types';
+import { NpmManagerData } from '../types';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
   const res = patterns.some(
@@ -19,16 +20,15 @@ export function detectMonorepos(
 ): void {
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
+    const { packageFile, managerData = {} } = p;
     const {
-      packageFile,
+      lernaClient,
+      lernaJsonFile,
+      lernaPackages,
       npmLock,
       yarnLock,
-      managerData = {},
-      lernaClient,
-      lernaPackages,
       yarnWorkspacesPackages,
-    } = p;
-    const { lernaJsonFile } = managerData;
+    } = managerData as NpmManagerData;
     const basePath = upath.dirname(packageFile);
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
@@ -47,7 +47,7 @@ export function detectMonorepos(
         )
       );
       const internalPackageNames = internalPackageFiles
-        .map((sp) => sp.packageJsonName)
+        .map((sp) => sp.managerData?.packageJsonName)
         .filter(Boolean);
       if (!updateInternalDeps) {
         p.deps?.forEach((dep) => {
@@ -57,13 +57,14 @@ export function detectMonorepos(
         });
       }
       for (const subPackage of internalPackageFiles) {
-        subPackage.managerData = subPackage.managerData || {};
         subPackage.managerData.lernaJsonFile = lernaJsonFile;
-        subPackage.lernaClient = lernaClient;
-        subPackage.yarnLock = subPackage.yarnLock || yarnLock;
-        subPackage.npmLock = subPackage.npmLock || npmLock;
-        if (subPackage.yarnLock) {
-          subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
+        subPackage.managerData.lernaClient = lernaClient;
+        subPackage.managerData.yarnLock =
+          subPackage.managerData.yarnLock || yarnLock;
+        subPackage.managerData.npmLock =
+          subPackage.managerData.npmLock || npmLock;
+        if (subPackage.managerData.yarnLock) {
+          subPackage.managerData.hasYarnWorkspaces = !!yarnWorkspacesPackages;
         }
         if (!updateInternalDeps) {
           subPackage.deps?.forEach((dep) => {

@@ -19,6 +19,7 @@ import {
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
+import { NpmManagerData } from '../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
@@ -46,20 +47,21 @@ export function determineLockFileDirs(
   const lernaJsonFiles = [];
 
   for (const upgrade of config.upgrades) {
+    const managerData: NpmManagerData = upgrade.managerData || {};
     if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
       // Return every directory that contains a lockfile
-      if (upgrade.managerData?.lernaJsonFile && upgrade.npmLock) {
-        lernaJsonFiles.push(upgrade.managerData.lernaJsonFile);
+      if (managerData.lernaJsonFile && managerData.npmLock) {
+        lernaJsonFiles.push(managerData.lernaJsonFile);
       } else {
-        yarnLockDirs.push(upgrade.yarnLock);
-        npmLockDirs.push(upgrade.npmLock);
-        pnpmShrinkwrapDirs.push(upgrade.pnpmShrinkwrap);
+        yarnLockDirs.push(managerData.yarnLock);
+        npmLockDirs.push(managerData.npmLock);
+        pnpmShrinkwrapDirs.push(managerData.pnpmShrinkwrap);
       }
       continue; // eslint-disable-line no-continue
     }
     if (upgrade.isLockfileUpdate) {
-      yarnLockDirs.push(upgrade.yarnLock);
-      npmLockDirs.push(upgrade.npmLock);
+      yarnLockDirs.push(managerData.yarnLock);
+      npmLockDirs.push(managerData.npmLock);
     }
   }
 
@@ -92,21 +94,22 @@ export function determineLockFileDirs(
   for (const p of config.updatedPackageFiles) {
     logger.trace(`Checking ${String(p.name)} for lock files`);
     const packageFile = getPackageFile(p.name);
+    const managerData: NpmManagerData = packageFile.managerData || {};
     // lerna first
-    if (packageFile.managerData?.lernaJsonFile && packageFile.npmLock) {
+    if (managerData.lernaJsonFile && managerData.npmLock) {
       logger.debug(`${packageFile.packageFile} has lerna lock file`);
       lernaJsonFiles.push(packageFile.managerData.lernaJsonFile);
     } else if (
-      packageFile.managerData?.lernaJsonFile &&
-      packageFile.yarnLock &&
-      !packageFile.hasYarnWorkspaces
+      managerData.lernaJsonFile &&
+      managerData.yarnLock &&
+      !managerData.hasYarnWorkspaces
     ) {
       lernaJsonFiles.push(packageFile.managerData.lernaJsonFile);
     } else {
       // push full lock file names and convert them later
-      yarnLockDirs.push(packageFile.yarnLock);
-      npmLockDirs.push(packageFile.npmLock);
-      pnpmShrinkwrapDirs.push(packageFile.pnpmShrinkwrap);
+      yarnLockDirs.push(managerData.yarnLock);
+      npmLockDirs.push(managerData.npmLock);
+      pnpmShrinkwrapDirs.push(managerData.pnpmShrinkwrap);
     }
   }
 
@@ -145,7 +148,7 @@ export async function writeExistingFiles(
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
-    if (packageFile.yarnrc) {
+    if (packageFile.managerData?.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);
       const yarnrcFilename = upath.join(basedir, '.yarnrc');
       try {
@@ -159,7 +162,7 @@ export async function writeExistingFiles(
         logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
       }
     }
-    const { npmLock } = packageFile;
+    const { npmLock } = (packageFile.managerData || {}) as NpmManagerData;
     if (npmLock) {
       const npmLockPath = upath.join(config.localDir, npmLock);
       if (
@@ -175,7 +178,7 @@ export async function writeExistingFiles(
         for (const upgrade of config.upgrades) {
           if (
             upgrade.rangeStrategy === 'widen' &&
-            upgrade.npmLock === npmLock
+            upgrade.managerData.npmLock === npmLock
           ) {
             widens.push(upgrade.depName);
           }
@@ -202,13 +205,16 @@ export async function writeExistingFiles(
         await outputFile(npmLockPath, existingNpmLock);
       }
     }
-    const { yarnLock } = packageFile;
+    const { yarnLock } = packageFile?.managerData;
     if (yarnLock && config.reuseLockFiles === false) {
       await deleteLocalFile(yarnLock);
     }
     // istanbul ignore next
-    if (packageFile.pnpmShrinkwrap && config.reuseLockFiles === false) {
-      await deleteLocalFile(packageFile.pnpmShrinkwrap);
+    if (
+      packageFile.managerData.pnpmShrinkwrap &&
+      config.reuseLockFiles === false
+    ) {
+      await deleteLocalFile(packageFile.managerData.pnpmShrinkwrap);
     }
   }
 }
@@ -507,7 +513,7 @@ export async function getAdditionalFiles(
     const fileName = upath.basename(npmLock);
     logger.debug(`Generating ${fileName} for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.npmLock === npmLock
+      (upgrade) => upgrade.managerData?.npmLock === npmLock
     );
     const res = await npm.generateLockFile(
       fullLockFileDir,
@@ -570,7 +576,7 @@ export async function getAdditionalFiles(
     logger.debug(`Generating yarn.lock for ${lockFileDir}`);
     const lockFileName = upath.join(lockFileDir, 'yarn.lock');
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.yarnLock === yarnLock
+      (upgrade) => upgrade.managerData?.yarnLock === yarnLock
     );
     const res = await yarn.generateLockFile(
       upath.join(config.localDir, lockFileDir),
@@ -636,7 +642,7 @@ export async function getAdditionalFiles(
     );
     logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.pnpmShrinkwrap === pnpmShrinkwrap
+      (upgrade) => upgrade.managerData?.pnpmShrinkwrap === pnpmShrinkwrap
     );
     const res = await pnpm.generateLockFile(
       upath.join(config.localDir, lockFileDir),
@@ -698,7 +704,7 @@ export async function getAdditionalFiles(
       logger.debug('No matching package.json found');
       throw new Error('lerna-no-lockfile');
     }
-    if (lernaPackageFile.lernaClient === 'npm') {
+    if (lernaPackageFile.managerData?.lernaClient === 'npm') {
       lockFile = config.npmLock || 'package-lock.json';
     } else {
       lockFile = config.yarnLock || 'yarn.lock';
@@ -770,7 +776,8 @@ export async function getAdditionalFiles(
       });
     } else {
       for (const packageFile of packageFiles.npm) {
-        const filename = packageFile.npmLock || packageFile.yarnLock;
+        const managerData: NpmManagerData = packageFile.managerData || {};
+        const filename = managerData.npmLock || managerData.yarnLock;
         logger.trace('Checking for ' + filename);
         const existingContent = await getFile(
           filename,

@@ -21,7 +21,9 @@ Array [
     "lockFiles": Array [
       "package-lock.json",
     ],
-    "npmLock": "package-lock.json",
+    "managerData": Object {
+      "npmLock": "package-lock.json",
+    },
   },
 ]
 `;
@@ -42,7 +44,9 @@ Array [
     "lockFiles": Array [
       "pnpm-lock.yaml",
     ],
-    "pnpmShrinkwrap": "pnpm-lock.yaml",
+    "managerData": Object {
+      "pnpmShrinkwrap": "pnpm-lock.yaml",
+    },
   },
 ]
 `;
@@ -68,7 +72,9 @@ Array [
     "lockFiles": Array [
       "package-lock.json",
     ],
-    "npmLock": "package-lock.json",
+    "managerData": Object {
+      "npmLock": "package-lock.json",
+    },
   },
 ]
 `;
@@ -92,7 +98,9 @@ Array [
     "lockFiles": Array [
       "package-lock.json",
     ],
-    "npmLock": "package-lock.json",
+    "managerData": Object {
+      "npmLock": "package-lock.json",
+    },
   },
 ]
 `;
@@ -116,8 +124,10 @@ Array [
     "lockFiles": Array [
       "yarn.lock",
     ],
-    "npmLock": "package-lock.json",
-    "yarnLock": "yarn.lock",
+    "managerData": Object {
+      "npmLock": "package-lock.json",
+      "yarnLock": "yarn.lock",
+    },
   },
 ]
 `;
@@ -143,8 +153,10 @@ Array [
     "lockFiles": Array [
       "yarn.lock",
     ],
-    "npmLock": "package-lock.json",
-    "yarnLock": "yarn.lock",
+    "managerData": Object {
+      "npmLock": "package-lock.json",
+      "yarnLock": "yarn.lock",
+    },
   },
 ]
 `;
@@ -170,8 +182,10 @@ Array [
     "lockFiles": Array [
       "yarn.lock",
     ],
-    "npmLock": "package-lock.json",
-    "yarnLock": "yarn.lock",
+    "managerData": Object {
+      "npmLock": "package-lock.json",
+      "yarnLock": "yarn.lock",
+    },
   },
 ]
 `;

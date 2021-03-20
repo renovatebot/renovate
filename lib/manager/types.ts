@@ -63,40 +63,23 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string;
-  packageJsonType?: 'app' | 'library';
   rangeStrategy: RangeStrategy;
 }
 
-export interface NpmLockFiles {
-  yarnLock?: string;
-  packageLock?: string;
-  shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
-  npmLock?: string;
-  lockFiles?: string[];
-}
-
-export interface PackageFile<T = Record<string, any>>
-  extends NpmLockFiles,
-    ManagerData<T> {
-  hasYarnWorkspaces?: boolean;
+export interface PackageFile<T = Record<string, any>> extends ManagerData<T> {
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
   deps: PackageDependency[];
   ignoreNpmrcFile?: boolean;
-  lernaClient?: string;
-  lernaPackages?: string[];
   npmrc?: string;
   packageFile?: string;
-  packageJsonName?: string;
-  packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
   skipInstalls?: boolean;
   yarnrc?: string;
-  yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+  lockFiles?: string[];
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -111,17 +94,14 @@ export interface Package<T> extends ManagerData<T> {
   repo?: string;
   target?: string;
   versioning?: string;
-
-  // npm manager
   bumpVersion?: ReleaseType | string;
-  npmPackageAlias?: boolean;
+  isPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string;
   githubRepo?: string;
   pinDigests?: boolean;
   currentRawValue?: string;
-  major?: { enabled?: boolean };
   prettyDepType?: any;
 }
 
@@ -178,9 +158,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   extractVersion?: string;
 }
 
-export interface Upgrade<T = Record<string, any>>
-  extends Package<T>,
-    NpmLockFiles {
+export interface Upgrade<T = Record<string, any>> extends Package<T> {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;

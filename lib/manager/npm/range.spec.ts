@@ -17,7 +17,9 @@ describe('getRangeStrategy', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       depType: 'dependencies',
-      packageJsonType: 'app',
+      managerData: {
+        packageJsonType: 'app',
+      },
     };
     expect(getRangeStrategy(config)).toEqual('pin');
   });

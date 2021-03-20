@@ -11,14 +11,20 @@ import {
   getSiblingFileName,
   readLocalFile,
 } from '../../../util/fs';
+import { filterUndefined } from '../../../util/object';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
   ExtractConfig,
-  NpmLockFiles,
   PackageDependency,
   PackageFile,
 } from '../../types';
+import {
+  LernaClient,
+  NpmLockFiles,
+  NpmManagerData,
+  PackageJsonType,
+} from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -60,8 +66,11 @@ export async function extractPackageFile(
       'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
   }
-  const packageJsonName = packageJson.name;
-  logger.debug(
+  let packageJsonName: string;
+  if (is.string(packageJson.name)) {
+    packageJsonName = packageJson.name;
+  }
+  logger.trace(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageFileVersion = packageJson.version;
@@ -71,23 +80,23 @@ export async function extractPackageFile(
   } else {
     yarnWorkspacesPackages = packageJson.workspaces?.packages;
   }
-  const packageJsonType = mightBeABrowserLibrary(packageJson)
+  const packageJsonType: PackageJsonType = mightBeABrowserLibrary(packageJson)
     ? 'library'
     : 'app';
 
-  const lockFiles: NpmLockFiles = {
+  const lockFileNames: NpmLockFiles = {
     yarnLock: 'yarn.lock',
     packageLock: 'package-lock.json',
     shrinkwrapJson: 'npm-shrinkwrap.json',
     pnpmShrinkwrap: 'pnpm-lock.yaml',
   };
 
-  for (const [key, val] of Object.entries(lockFiles)) {
+  const lockFiles: NpmLockFiles = {};
+
+  for (const [key, val] of Object.entries(lockFileNames)) {
     const filePath = getSiblingFileName(fileName, val);
     if (await readLocalFile(filePath, 'utf8')) {
       lockFiles[key] = filePath;
-    } else {
-      lockFiles[key] = undefined;
     }
   }
   lockFiles.npmLock = lockFiles.packageLock || lockFiles.shrinkwrapJson;
@@ -125,7 +134,7 @@ export async function extractPackageFile(
 
   let lernaJsonFile: string;
   let lernaPackages: string[];
-  let lernaClient: 'yarn' | 'npm';
+  let lernaClient: LernaClient;
   let hasFileRefs = false;
   let lernaJson: {
     packages: string[];
@@ -223,7 +232,7 @@ export async function extractPackageFile(
     }
 
     if (dep.currentValue.startsWith('npm:')) {
-      dep.npmPackageAlias = true;
+      dep.isPackageAlias = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
         dep.lookupName = valSplit[0];
@@ -357,24 +366,28 @@ export async function extractPackageFile(
     }
   }
 
-  return {
-    deps,
+  const managerData: NpmManagerData = {
+    lernaClient,
+    lernaJsonFile,
+    lernaPackages,
     packageJsonName,
-    packageFileVersion,
     packageJsonType,
+    yarnWorkspacesPackages,
+    ...lockFiles,
+  };
+  filterUndefined(managerData);
+  const packageFile: PackageFile = {
+    deps,
+    packageFileVersion,
     npmrc,
     ignoreNpmrcFile,
     yarnrc,
-    ...lockFiles,
-    managerData: {
-      lernaJsonFile,
-    },
-    lernaClient,
-    lernaPackages,
     skipInstalls,
-    yarnWorkspacesPackages,
     constraints,
+    managerData,
   };
+  filterUndefined(packageFile);
+  return packageFile;
 }
 
 export async function postExtract(
