@@ -149,7 +149,7 @@ export async function writeExistingFiles(
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
-    if (packageFile.managerData?.yarnrc) {
+    if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);
       const yarnrcFilename = upath.join(basedir, '.yarnrc');
       try {

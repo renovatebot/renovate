@@ -13,7 +13,7 @@ export function getRangeStrategy(
     currentValue,
     rangeStrategy,
   } = config;
-  const { composerJsonType } = managerData as ComposerManagerData;
+  const { composerJsonType } = managerData;
   const isComplexRange = currentValue?.includes(' || ');
   if (rangeStrategy === 'bump' && isComplexRange) {
     logger.debug(

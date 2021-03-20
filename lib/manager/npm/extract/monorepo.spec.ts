@@ -1,3 +1,4 @@
+import { LernaClient } from '../types';
 import { detectMonorepos } from './monorepo';
 
 describe('manager/npm/extract', () => {
@@ -113,7 +114,7 @@ describe('manager/npm/extract', () => {
         {
           packageFile: 'package.json',
           managerData: {
-            lernaClient: 'yarn',
+            lernaClient: 'yarn' as LernaClient,
             lernaJsonFile: 'lerna.json',
             lernaPackages: ['oldpackages/*'],
             yarnWorkspacesPackages: ['packages/*'],
