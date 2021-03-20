@@ -95,7 +95,6 @@ export interface Package<T> extends ManagerData<T> {
   target?: string;
   versioning?: string;
   bumpVersion?: ReleaseType | string;
-  isPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string;

@@ -11,6 +11,7 @@ export interface NpmLockFiles {
 
 export interface NpmManagerData extends NpmLockFiles {
   hasYarnWorkspaces?: boolean;
+  isPackageAlias?: boolean;
   lernaClient?: LernaClient;
   lernaJsonFile?: string;
   lernaPackages?: string[];

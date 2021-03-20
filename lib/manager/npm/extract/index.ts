@@ -132,6 +132,7 @@ export async function extractPackageFile(
     yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
   }
 
+  let isPackageAlias: boolean;
   let lernaJsonFile: string;
   let lernaPackages: string[];
   let lernaClient: LernaClient;
@@ -230,9 +231,8 @@ export async function extractPackageFile(
       }
       return dep;
     }
-
     if (dep.currentValue.startsWith('npm:')) {
-      dep.isPackageAlias = true;
+      isPackageAlias = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
         dep.lookupName = valSplit[0];
@@ -367,6 +367,7 @@ export async function extractPackageFile(
   }
 
   const managerData: NpmManagerData = {
+    isPackageAlias,
     lernaClient,
     lernaJsonFile,
     lernaPackages,
