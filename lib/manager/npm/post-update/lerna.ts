@@ -60,7 +60,7 @@ export async function generateLockFiles(
       let installNpm = 'npm i -g npm';
       const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
-        installNpm += `@${quote(npmCompatibility)}`;
+        installNpm += `@${quote(npmCompatibility)} || true`;
       }
       preCommands.push(installNpm, 'hash -d npm');
       cmdOptions = '--ignore-scripts  --no-audit';

@@ -41,7 +41,7 @@ export async function generateLockFile(
     if (npmCompatibility) {
       // istanbul ignore else
       if (validRange(npmCompatibility)) {
-        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)}`;
+        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)} || true`;
       } else {
         logger.debug(
           { npmCompatibility },
