@@ -52,7 +52,7 @@ describe(getName(__filename), () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'hapi',
-        managerData: { isPackageAlias: true },
+        isPackageAlias: true,
         lookupName: '@hapi/hapi',
         currentValue: '18.3.0',
         newValue: '18.3.1',
