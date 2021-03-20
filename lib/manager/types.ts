@@ -87,13 +87,11 @@ export interface PackageFile<T = Record<string, any>>
   ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
-  mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string;
   packageJsonName?: string;
   packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
-  parent?: string;
   skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;

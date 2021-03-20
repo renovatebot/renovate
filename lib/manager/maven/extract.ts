@@ -41,6 +41,11 @@ interface MavenProp {
   packageFile: string;
 }
 
+interface MavenPackageFile extends PackageFile {
+  mavenProps?: Record<string, any>;
+  parent?: string;
+}
+
 function depFromNode(node: XmlElement): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
@@ -177,7 +182,7 @@ export function extractPackage(
     return null;
   }
 
-  const result: PackageFile = {
+  const result: MavenPackageFile = {
     datasource: datasourceMaven.id,
     packageFile,
     deps: [],
@@ -224,9 +229,9 @@ export function extractPackage(
   return result;
 }
 
-export function resolveParents(packages: PackageFile[]): PackageFile[] {
+export function resolveParents(packages: MavenPackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
-  const extractedPackages: Record<string, PackageFile> = {};
+  const extractedPackages: Record<string, MavenPackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
@@ -295,10 +300,11 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
 }
 
 function cleanResult(
-  packageFiles: PackageFile<Record<string, any>>[]
+  packageFiles: MavenPackageFile[]
 ): PackageFile<Record<string, any>>[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps; // eslint-disable-line no-param-reassign
+    delete packageFile.parent; // eslint-disable-line no-param-reassign
     packageFile.deps.forEach((dep) => {
       delete dep.propSource; // eslint-disable-line no-param-reassign
     });
