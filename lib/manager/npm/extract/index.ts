@@ -117,11 +117,6 @@ export async function extractPackageFile(
       npmrc = undefined;
     }
   }
-  const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
-  let yarnrc;
-  if (!is.string(config.yarnrc)) {
-    yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
-  }
 
   let lernaJsonFile: string;
   let lernaPackages: string[];
@@ -364,7 +359,6 @@ export async function extractPackageFile(
     packageJsonType,
     npmrc,
     ignoreNpmrcFile,
-    yarnrc,
     ...lockFiles,
     managerData: {
       lernaJsonFile,

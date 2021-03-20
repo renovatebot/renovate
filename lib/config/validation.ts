@@ -49,8 +49,6 @@ export async function validateConfig(
       branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
       commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
       prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
-      yarnrc:
-        'Use of `yarnrc` in config is deprecated. Please commit it to your repository instead.',
     };
     return deprecatedOptions[option];
   }

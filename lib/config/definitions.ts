@@ -514,12 +514,6 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
-    name: 'yarnrc',
-    description: 'String copy of yarnrc file. Use \\n instead of line breaks.',
-    stage: 'branch',
-    type: 'string',
-  },
-  {
     name: 'updateLockFiles',
     description: 'Set to false to disable lock file updating.',
     type: 'boolean',

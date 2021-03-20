@@ -25,6 +25,7 @@ const removedOptions = [
   'groupPrBody',
   'statusCheckVerify',
   'lazyGrouping',
+  'yarnrc',
 ];
 
 export interface MigratedConfig {

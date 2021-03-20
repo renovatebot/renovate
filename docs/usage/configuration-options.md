@@ -2205,5 +2205,3 @@ To disable vulnerability alerts completely, configure like this:
   }
 }
 ```
-
-## yarnrc

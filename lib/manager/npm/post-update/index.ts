@@ -145,20 +145,6 @@ export async function writeExistingFiles(
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
-    if (packageFile.yarnrc) {
-      logger.debug(`Writing .yarnrc to ${basedir}`);
-      const yarnrcFilename = upath.join(basedir, '.yarnrc');
-      try {
-        await outputFile(
-          yarnrcFilename,
-          packageFile.yarnrc
-            .replace('--install.pure-lockfile true', '')
-            .replace('--install.frozen-lockfile true', '')
-        );
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
-      }
-    }
     const { npmLock } = packageFile;
     if (npmLock) {
       const npmLockPath = upath.join(config.localDir, npmLock);

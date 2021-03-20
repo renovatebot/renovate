@@ -30,7 +30,6 @@ Array [
     "skipInstalls": undefined,
     "yarnLock": undefined,
     "yarnWorkspacesPackages": undefined,
-    "yarnrc": undefined,
   },
 ]
 `;
