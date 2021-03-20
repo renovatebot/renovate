@@ -1161,7 +1161,7 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
@@ -1441,7 +1441,7 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
-Here's an example of where you use this to group together all packages from the `renovatebot` github org:
+Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
 
 ```json
 {
@@ -1970,11 +1970,12 @@ The field supports multiple URLs however it is datasource-dependent on whether o
 
 Currently Renovate's default behavior is to only automerge if every status check has succeeded.
 
-Setting this option to `null` means that Renovate will ignore all status checks.
-You need to set this if you don't have any status checks but still want Renovate to automerge PRs.
+Setting this option to `null` means that Renovate will ignore _all_ status checks.
+You can set this if you don't have any status checks but still want Renovate to automerge PRs.
+Beware: configuring Renovate to automerge without any tests can lead to broken builds on your default branch, please think again before enabling this!
 
 In future, this might be configurable to allow certain status checks to be ignored/required.
-See [issue 1853 at the renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
+See [issue 1853 at the Renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
 
 ## respectLatest
 
@@ -2155,7 +2156,7 @@ This is considered a feature flag with the aim to remove it and default to this 
 
 ## unicodeEmoji
 
-If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
+If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
 
 ## updateInternalDeps
 

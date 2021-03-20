@@ -139,7 +139,7 @@ For example:
 }
 ```
 
-Then in each of your repositories you can add your renovate config like:
+Then in each of your repositories you can add your Renovate config like:
 
 ```json
   "extends": ["fastcore"]
@@ -168,7 +168,7 @@ To host your preset config on GitHub:
   "extends": ["github>rarkins/renovate-config"]
 ```
 
-From then on Renovate will use the renovate config from the preset repo's default branch.
+From then on Renovate will use the Renovate config from the preset repo's default branch.
 You do not need to add it as a devDependency or add any other files to the preset repo.
 
 ## GitLab-hosted Presets

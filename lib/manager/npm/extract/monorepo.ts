@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import upath from 'upath';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
+import { getSiblingFileName, getSubDirectory } from '../../../util/fs';
 import type { PackageFile } from '../../types';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
@@ -23,25 +23,21 @@ export function detectMonorepos(
       packageFile,
       npmLock,
       yarnLock,
-      lernaDir,
+      managerData = {},
       lernaClient,
       lernaPackages,
       yarnWorkspacesPackages,
     } = p;
-    const basePath = upath.dirname(packageFile);
+    const { lernaJsonFile } = managerData;
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
-      logger.debug(
-        { packageFile, yarnWorkspacesPackages, lernaPackages },
-        'Found monorepo packages with base path ' + JSON.stringify(basePath)
-      );
       const internalPackagePatterns = (is.array(packages)
         ? packages
         : [packages]
-      ).map((pattern) => upath.join(basePath, pattern));
+      ).map((pattern) => getSiblingFileName(packageFile, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
-          upath.dirname(sp.packageFile),
+          getSubDirectory(sp.packageFile),
           internalPackagePatterns
         )
       );
@@ -56,7 +52,8 @@ export function detectMonorepos(
         });
       }
       for (const subPackage of internalPackageFiles) {
-        subPackage.lernaDir = lernaDir;
+        subPackage.managerData = subPackage.managerData || {};
+        subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.lernaClient = lernaClient;
         subPackage.yarnLock = subPackage.yarnLock || yarnLock;
         subPackage.npmLock = subPackage.npmLock || npmLock;

@@ -390,16 +390,16 @@ Object {
 }
 `;
 
-exports[`datasource/docker/index getRegistryRepository supports registryUrls 1`] = `
+exports[`datasource/docker/index getRegistryRepository supports http registryUrls 1`] = `
 Object {
-  "registry": "https://my.local.registry/prefix",
+  "registry": "http://my.local.registry/prefix",
   "repository": "image",
 }
 `;
 
-exports[`datasource/docker/index getRegistryRepository supports http registryUrls 1`] = `
+exports[`datasource/docker/index getRegistryRepository supports registryUrls 1`] = `
 Object {
-  "registry": "http://my.local.registry/prefix",
+  "registry": "https://my.local.registry/prefix",
   "repository": "image",
 }
 `;
@@ -581,6 +581,7 @@ Array [
 
 exports[`datasource/docker/index getReleases ignores unsupported manifest 1`] = `
 Object {
+  "registryUrl": "https://index.docker.io",
   "releases": Array [],
 }
 `;
@@ -634,6 +635,7 @@ Array [
 
 exports[`datasource/docker/index getReleases ignores unsupported schema version 1`] = `
 Object {
+  "registryUrl": "https://index.docker.io",
   "releases": Array [],
 }
 `;
@@ -762,6 +764,7 @@ Array [
 
 exports[`datasource/docker/index getReleases supports labels 1`] = `
 Object {
+  "registryUrl": "https://index.docker.io",
   "releases": Array [],
   "sourceUrl": "https://github.com/renovatebot/renovate",
 }
@@ -836,6 +839,7 @@ Array [
 
 exports[`datasource/docker/index getReleases supports manifest lists 1`] = `
 Object {
+  "registryUrl": "https://index.docker.io",
   "releases": Array [],
   "sourceUrl": "https://github.com/renovatebot/renovate",
 }
@@ -931,6 +935,7 @@ Array [
 
 exports[`datasource/docker/index getReleases supports redirect 1`] = `
 Object {
+  "registryUrl": "https://index.docker.io",
   "releases": Array [],
 }
 `;
