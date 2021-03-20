@@ -8,6 +8,7 @@ import * as pep440 from '../../versioning/pep440';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'pypi';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [
   process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/',
 ];

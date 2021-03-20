@@ -2,6 +2,7 @@
 
 exports[`datasource/packagist getReleases adds packagist source implicitly 1`] = `
 Object {
+  "registryUrl": "https://packagist.org",
   "releases": Array [
     Object {
       "gitRef": "v1.0",
@@ -235,6 +236,7 @@ Array [
 
 exports[`datasource/packagist getReleases processes real versioned data 1`] = `
 Object {
+  "registryUrl": "https://packagist.org",
   "releases": Array [
     Object {
       "gitRef": "v1.0",
@@ -334,6 +336,7 @@ Array [
 exports[`datasource/packagist getReleases supports includes packages 1`] = `
 Object {
   "homepage": "http://guzzlephp.org/",
+  "registryUrl": "https://composer.renovatebot.com",
   "releases": Array [
     Object {
       "gitRef": "v3.0.0",
@@ -504,6 +507,7 @@ Array [
 
 exports[`datasource/packagist getReleases supports lazy repositories 1`] = `
 Object {
+  "registryUrl": "https://composer.renovatebot.com/composer/lazy",
   "releases": Array [
     Object {
       "gitRef": "5.3.4",
@@ -544,6 +548,7 @@ Array [
 
 exports[`datasource/packagist getReleases supports plain packages 1`] = `
 Object {
+  "registryUrl": "https://composer.renovatebot.com",
   "releases": Array [
     Object {
       "gitRef": "0.0.1",
@@ -579,6 +584,7 @@ Array [
 exports[`datasource/packagist getReleases supports provider-includes 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
+  "registryUrl": "https://composer.renovatebot.com",
   "releases": Array [
     Object {
       "gitRef": "1.0",
@@ -643,6 +649,7 @@ Array [
 exports[`datasource/packagist getReleases supports providers 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
+  "registryUrl": "https://composer.renovatebot.com",
   "releases": Array [
     Object {
       "gitRef": "1.0",

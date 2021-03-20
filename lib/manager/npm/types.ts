@@ -12,7 +12,7 @@ export interface NpmLockFiles {
 export interface NpmManagerData extends NpmLockFiles {
   hasYarnWorkspaces?: boolean;
   lernaClient?: LernaClient;
-  lernaDir?: string;
+  lernaJsonFile?: string;
   lernaPackages?: string[];
   packageJsonName?: string;
   packageJsonType?: PackageJsonType;

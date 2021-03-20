@@ -23,7 +23,7 @@ export function detectMonorepos(
     const { packageFile, managerData = {} } = p;
     const {
       lernaClient,
-      lernaDir,
+      lernaJsonFile,
       lernaPackages,
       npmLock,
       yarnLock,
@@ -57,7 +57,7 @@ export function detectMonorepos(
         });
       }
       for (const subPackage of internalPackageFiles) {
-        subPackage.managerData.lernaDir = lernaDir;
+        subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.managerData.lernaClient = lernaClient;
         subPackage.managerData.yarnLock =
           subPackage.managerData.yarnLock || yarnLock;

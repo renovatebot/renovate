@@ -532,7 +532,7 @@ Object {
   ],
   "managerData": Object {
     "lernaClient": "npm",
-    "lernaDir": ".",
+    "lernaJsonFile": "lerna.json",
     "packageJsonName": "renovate",
     "packageJsonType": "app",
   },
@@ -661,7 +661,7 @@ Object {
   ],
   "managerData": Object {
     "lernaClient": "yarn",
-    "lernaDir": ".",
+    "lernaJsonFile": "lerna.json",
     "packageJsonName": "renovate",
     "packageJsonType": "app",
   },
@@ -804,7 +804,7 @@ Object {
   "deps": Array [],
   "managerData": Object {
     "lernaClient": "npm",
-    "lernaDir": ".",
+    "lernaJsonFile": "lerna.json",
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": Array [
@@ -936,7 +936,7 @@ Object {
   ],
   "managerData": Object {
     "lernaClient": "npm",
-    "lernaDir": ".",
+    "lernaJsonFile": "lerna.json",
     "packageJsonName": "renovate",
     "packageJsonType": "app",
   },
@@ -951,7 +951,7 @@ Object {
   "deps": Array [],
   "managerData": Object {
     "lernaClient": "npm",
-    "lernaDir": ".",
+    "lernaJsonFile": "lerna.json",
     "packageJsonName": "@a/b",
     "packageJsonType": "app",
     "yarnWorkspacesPackages": Array [
