@@ -41,6 +41,7 @@ export interface Release {
   constraints?: Record<string, string[]>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  registryUrl?: string;
 }
 
 export interface ReleaseResult {
@@ -54,6 +55,7 @@ export interface ReleaseResult {
   homepage?: string;
   sourceUrl?: string;
   sourceDirectory?: string;
+  registryUrl?: string;
 }
 
 export interface DatasourceApi {
@@ -73,11 +75,9 @@ export interface DatasourceApi {
   registryStrategy?: 'first' | 'hunt' | 'merge';
 
   /**
-   * Whether restrictions apply on custom registryUrls. If unspecified, it means custom registryUrls are allowed (no retriction).
-   * fixed: the default registryUrl settings can't be overridden
-   * disallowed: registryUrls are not applicable to this datasource
+   * Whether custom registryUrls are allowed.
    */
-  registryUrlRestriction?: 'fixed' | 'disallowed';
+  customRegistrySupport: boolean;
 
   /**
    * Whether to perform caching in the datasource index/wrapper or not.

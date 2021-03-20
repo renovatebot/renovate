@@ -60,6 +60,14 @@ export async function deleteLocalFile(fileName: string): Promise<void> {
 }
 
 // istanbul ignore next
+export async function renameLocalFile(
+  fromFile: string,
+  toFile: string
+): Promise<void> {
+  await fs.move(join(localDir, fromFile), join(localDir, toFile));
+}
+
+// istanbul ignore next
 export async function ensureDir(dirName: string): Promise<void> {
   await fs.ensureDir(dirName);
 }

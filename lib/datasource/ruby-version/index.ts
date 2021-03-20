@@ -7,7 +7,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'ruby-version';
 export const defaultRegistryUrls = ['https://www.ruby-lang.org/'];
-export const registryUrlRestriction = 'fixed';
+export const customRegistrySupport = false;
 export const defaultVersioning = rubyVersioningId;
 
 const http = new Http(id);

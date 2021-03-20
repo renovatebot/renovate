@@ -32,7 +32,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {
-        image: 'renovate/python',
+        image: 'python',
         tagScheme: 'pip_requirements',
         preCommands: ['pip install hashin'],
       },
