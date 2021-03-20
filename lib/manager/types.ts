@@ -59,7 +59,6 @@ export interface PackageUpdateConfig {
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
-  composerJsonType?: 'composer-plugin' | 'library' | 'metapackage' | 'project';
   currentValue?: string;
   depName?: string;
   depType?: string;
@@ -74,7 +73,6 @@ export interface NpmLockFiles {
   shrinkwrapJson?: string;
   pnpmShrinkwrap?: string;
   npmLock?: string;
-  lernaDir?: string;
   lockFiles?: string[];
 }
 

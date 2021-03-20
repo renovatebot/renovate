@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/stale@v3.0.18
         with:
-          # Rate limit per run, defaults to 30.
-          operations-per-run: 30
+          # Rate limit per run, (defaults to 30, but we've increased it to 40 for now).
+          operations-per-run: 40
 
           # Only issues with both `reproduction:needed` and `type:bug` will be touched by the stale bot.
           only-issue-labels: 'reproduction:needed,type:bug'

@@ -3,6 +3,7 @@
 exports[`datasource/terraform-module getReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
+  "registryUrl": "https://registry.terraform.io",
   "releases": Array [
     Object {
       "version": "0.0.1",
@@ -131,6 +132,7 @@ Array [
 
 exports[`datasource/terraform-module getReleases processes real data on changed subpath 2`] = `
 Object {
+  "registryUrl": "https://terraform.foo.bar",
   "releases": Array [
     Object {
       "version": "0.0.1",
@@ -210,6 +212,7 @@ Object {
 exports[`datasource/terraform-module getReleases processes with registry in name 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
+  "registryUrl": "https://registry.terraform.io",
   "releases": Array [
     Object {
       "version": "0.0.1",
