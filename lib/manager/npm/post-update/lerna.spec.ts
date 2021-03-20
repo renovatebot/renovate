@@ -15,14 +15,16 @@ const lernaHelper = mocked(_lernaHelper);
 
 function lernaPkgFile(lernaClient: string) {
   return {
-    lernaClient,
+    managerData: { lernaClient },
     deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
   };
 }
 
 function lernaPkgFileWithoutLernaDep(lernaClient: string) {
   return {
-    lernaClient,
+    managerData: {
+      lernaClient,
+    },
   };
 }
 describe(getName(__filename), () => {

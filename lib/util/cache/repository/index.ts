@@ -9,7 +9,7 @@ import type { PackageFile } from '../../../manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/common';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
-export const CACHE_REVISION = 6;
+export const CACHE_REVISION = 7;
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha

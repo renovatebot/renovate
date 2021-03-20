@@ -24,8 +24,10 @@ describe('manager/npm/extract/locked-versions', () => {
         });
         const packageFiles = [
           {
-            npmLock: 'package-lock.json',
-            yarnLock: 'yarn.lock',
+            managerData: {
+              npmLock: 'package-lock.json',
+              yarnLock: 'yarn.lock',
+            },
             constraints: {},
             deps: [
               {
@@ -57,7 +59,7 @@ describe('manager/npm/extract/locked-versions', () => {
         });
         const packageFiles = [
           {
-            npmLock: 'package-lock.json',
+            managerData: { npmLock: 'package-lock.json' },
             constraints: {},
             deps: [
               {
@@ -86,7 +88,7 @@ describe('manager/npm/extract/locked-versions', () => {
       });
       const packageFiles = [
         {
-          npmLock: 'package-lock.json',
+          managerData: { npmLock: 'package-lock.json' },
           constraints: {
             npm: '>=6.0.0',
           },
@@ -108,7 +110,7 @@ describe('manager/npm/extract/locked-versions', () => {
     it('ignores pnpm', async () => {
       const packageFiles = [
         {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
           deps: [
             {
               depName: 'a',

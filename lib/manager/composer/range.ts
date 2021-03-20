@@ -3,7 +3,9 @@ import type { RangeStrategy } from '../../types';
 import type { RangeConfig } from '../types';
 import { ComposerManagerData } from './types';
 
-export function getRangeStrategy(config: RangeConfig): RangeStrategy {
+export function getRangeStrategy(
+  config: RangeConfig<ComposerManagerData>
+): RangeStrategy {
   const {
     managerData = {},
     depType,
@@ -11,7 +13,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
     currentValue,
     rangeStrategy,
   } = config;
-  const { composerJsonType } = managerData as ComposerManagerData;
+  const { composerJsonType } = managerData;
   const isComplexRange = currentValue?.includes(' || ');
   if (rangeStrategy === 'bump' && isComplexRange) {
     logger.debug(

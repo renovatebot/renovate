@@ -7,10 +7,11 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const {
     depType,
     depName,
-    packageJsonType,
+    managerData = {},
     currentValue,
     rangeStrategy,
   } = config;
+  const { packageJsonType } = managerData;
   const isComplexRange = parseRange(currentValue).length > 1;
   if (rangeStrategy === 'bump' && isComplexRange) {
     logger.debug(
