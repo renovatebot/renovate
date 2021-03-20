@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import upath from 'upath';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import { getSiblingFileName } from '../../../util/fs';
+import { getSiblingFileName, getSubDirectory } from '../../../util/fs';
 import type { PackageFile } from '../../types';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
@@ -38,7 +37,7 @@ export function detectMonorepos(
       ).map((pattern) => getSiblingFileName(packageFile, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
-          upath.dirname(sp.packageFile),
+          getSubDirectory(sp.packageFile),
           internalPackagePatterns
         )
       );
