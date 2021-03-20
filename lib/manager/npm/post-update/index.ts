@@ -36,6 +36,7 @@ export interface DetermineLockFileDirsResult {
   pnpmShrinkwrapDirs: string[];
   lernaJsonFiles: string[];
 }
+
 // istanbul ignore next
 export function determineLockFileDirs(
   config: PostUpdateConfig,
@@ -162,7 +163,7 @@ export async function writeExistingFiles(
         logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
       }
     }
-    const { npmLock } = (packageFile.managerData || {}) as NpmManagerData;
+    const { npmLock } = packageFile.managerData || {};
     if (npmLock) {
       const npmLockPath = upath.join(config.localDir, npmLock);
       if (
@@ -267,9 +268,8 @@ export async function writeUpdatedPackageFiles(
     );
   }
 }
-
 export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFile>[];
+  npm?: Partial<PackageFile<NpmManagerData>>[];
 }
 
 interface ArtifactError {

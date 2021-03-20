@@ -3,7 +3,9 @@ import type { RangeStrategy } from '../../types';
 import type { RangeConfig } from '../types';
 import { ComposerManagerData } from './types';
 
-export function getRangeStrategy(config: RangeConfig): RangeStrategy {
+export function getRangeStrategy(
+  config: RangeConfig<ComposerManagerData>
+): RangeStrategy {
   const {
     managerData = {},
     depType,

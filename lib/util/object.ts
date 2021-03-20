@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+
 /**
  * This is a workaround helper to allow the usage of 'unknown' in
  * a type-guard function while checking that keys exist.
@@ -12,10 +14,19 @@ export function hasKey<K extends string, T>(
   return typeof o === 'object' && k in o;
 }
 
-export function filterUndefined(input: unknown): void {
-  for (const [key, val] of Object.entries(input)) {
-    if (val === undefined) {
-      delete input[key]; // eslint-disable-line no-param-reassign
-    }
+export function filterUndefined(input: unknown): any {
+  if (is.array(input)) {
+    return input.filter((x) => x !== undefined).map((x) => filterUndefined(x));
   }
+
+  if (is.object(input)) {
+    const ret: any = {};
+    for (const [key, value] of Object.entries(input)) {
+      if (value !== undefined) {
+        ret[key] = filterUndefined(value);
+      }
+    }
+    return ret;
+  }
+  return input;
 }

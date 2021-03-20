@@ -15,7 +15,7 @@ function matchesAnyPattern(val: string, patterns: string[]): boolean {
 }
 
 export function detectMonorepos(
-  packageFiles: Partial<PackageFile>[],
+  packageFiles: Partial<PackageFile<NpmManagerData>>[],
   updateInternalDeps: boolean
 ): void {
   logger.debug('Detecting Lerna and Yarn Workspaces');
@@ -28,7 +28,7 @@ export function detectMonorepos(
       npmLock,
       yarnLock,
       yarnWorkspacesPackages,
-    } = managerData as NpmManagerData;
+    } = managerData;
     const basePath = upath.dirname(packageFile);
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {

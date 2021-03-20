@@ -7,13 +7,13 @@ import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
 
 export async function getLockedVersions(
-  packageFiles: PackageFile[]
+  packageFiles: PackageFile<NpmManagerData>[]
 ): Promise<void> {
   const lockFileCache: Record<string, LockFile> = {};
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
     const { managerData = {} } = packageFile;
-    const { yarnLock, npmLock, pnpmShrinkwrap } = managerData as NpmManagerData;
+    const { yarnLock, npmLock, pnpmShrinkwrap } = managerData;
     const lockFiles = [];
     if (yarnLock) {
       logger.trace('Found yarnLock');
