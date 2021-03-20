@@ -366,7 +366,7 @@ export async function extractPackageFile(
     }
   }
 
-  const managerData: NpmManagerData = {
+  const managerData: NpmManagerData = filterUndefined({
     isPackageAlias,
     lernaClient,
     lernaJsonFile,
@@ -375,9 +375,8 @@ export async function extractPackageFile(
     packageJsonType,
     yarnWorkspacesPackages,
     ...lockFiles,
-  };
-  filterUndefined(managerData);
-  const packageFile: PackageFile = {
+  });
+  const packageFile: PackageFile = filterUndefined({
     deps,
     packageFileVersion,
     npmrc,
@@ -386,8 +385,7 @@ export async function extractPackageFile(
     skipInstalls,
     constraints,
     managerData,
-  };
-  filterUndefined(packageFile);
+  });
   return packageFile;
 }
 
