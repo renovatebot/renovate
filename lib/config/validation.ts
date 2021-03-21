@@ -277,6 +277,7 @@ export async function validateConfig(
                 'lookupNameTemplate',
                 'datasourceTemplate',
                 'versioningTemplate',
+                'registryUrlTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
