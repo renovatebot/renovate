@@ -6,7 +6,9 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          lernaDir: '.',
+          managerData: {
+            lernaJsonFile: 'lerna.json',
+          },
           lernaPackages: ['packages/*'],
           packages: ['packages/*'],
           deps: [
@@ -46,7 +48,7 @@ describe('manager/npm/extract', () => {
       ] as any;
       detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].lernaDir).toEqual('.');
+      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.skipReason)
@@ -57,7 +59,9 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          lernaDir: '.',
+          managerData: {
+            lernaJsonFile: 'lerna.json',
+          },
           lernaPackages: ['packages/*'],
           packages: ['packages/*'],
           deps: [
@@ -97,7 +101,7 @@ describe('manager/npm/extract', () => {
       ] as any;
       detectMonorepos(packageFiles, true);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].lernaDir).toEqual('.');
+      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.skipReason)
@@ -108,7 +112,9 @@ describe('manager/npm/extract', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          lernaDir: '.',
+          managerData: {
+            lernaJsonFile: 'lerna.json',
+          },
           lernaPackages: ['oldpackages/*'],
           lernaClient: 'yarn',
           yarnWorkspacesPackages: ['packages/*'],
@@ -124,7 +130,7 @@ describe('manager/npm/extract', () => {
       ];
       detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].lernaDir).toEqual('.');
+      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
     });
     it('uses yarn workspaces package settings without lerna', () => {
       const packageFiles = [

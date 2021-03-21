@@ -32,6 +32,7 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { regEx } from '../../util/regex';
+import { sanitize } from '../../util/sanitize';
 import * as template from '../../util/template';
 import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
@@ -67,7 +68,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 export async function processBranch(
   branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
-  const config: BranchConfig = { ...branchConfig };
+  let config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
     .map((upgrade) => upgrade.depName)
     .filter((v) => v) // remove nulls (happens for lock file maintenance)
@@ -310,7 +311,7 @@ export async function processBranch(
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
     } else {
-      Object.assign(config, await shouldReuseExistingBranch(config));
+      config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
     const res = await getUpdatedPackageFiles(config);
@@ -318,7 +319,7 @@ export async function processBranch(
     if (res.artifactErrors && config.artifactErrors) {
       res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
     }
-    Object.assign(config, res);
+    config = { ...config, ...res };
     if (config.updatedPackageFiles?.length) {
       logger.debug(
         `Updated ${config.updatedPackageFiles.length} package files`
@@ -396,20 +397,29 @@ export async function processBranch(
                 regEx(pattern).test(cmd)
               )
             ) {
-              const compiledCmd = allowPostUpgradeCommandTemplating
-                ? template.compile(cmd, upgrade)
-                : cmd;
+              try {
+                const compiledCmd = allowPostUpgradeCommandTemplating
+                  ? template.compile(cmd, upgrade)
+                  : cmd;
 
-              logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
+                logger.debug(
+                  { cmd: compiledCmd },
+                  'Executing post-upgrade task'
+                );
+                const execResult = await exec(compiledCmd, {
+                  cwd: config.localDir,
+                });
 
-              const execResult = await exec(compiledCmd, {
-                cwd: config.localDir,
-              });
-
-              logger.debug(
-                { cmd: compiledCmd, ...execResult },
-                'Executed post-upgrade task'
-              );
+                logger.debug(
+                  { cmd: compiledCmd, ...execResult },
+                  'Executed post-upgrade task'
+                );
+              } catch (error) {
+                config.artifactErrors.push({
+                  lockFile: upgrade.packageFile,
+                  stderr: sanitize(error.message),
+                });
+              }
             } else {
               logger.warn(
                 {
@@ -418,6 +428,16 @@ export async function processBranch(
                 },
                 'Post-upgrade task did not match any on allowed list'
               );
+              config.artifactErrors.push({
+                lockFile: upgrade.packageFile,
+                stderr: sanitize(
+                  `Post-upgrade command '${cmd}' does not match allowed pattern${
+                    allowedPostUpgradeCommands.length === 1 ? '' : 's'
+                  } ${allowedPostUpgradeCommands
+                    .map((x) => `'${x}'`)
+                    .join(', ')}`
+                ),
+              });
             }
           }
 

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
@@ -67,6 +67,9 @@ async function getRegistryReleases(
     }
   }
   const res = await datasource.getReleases({ ...config, registryUrl });
+  if (res?.releases.length) {
+    res.registryUrl ??= registryUrl;
+  }
   // cache non-null responses unless marked as private
   if (datasource.caching && res && !res.isPrivate) {
     logger.trace({ cacheKey }, 'Caching datasource response');
@@ -132,11 +135,20 @@ async function mergeRegistries(
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
-      if (combinedRes) {
-        combinedRes = { ...res, ...combinedRes };
-        combinedRes.releases = [...combinedRes.releases, ...res.releases];
-      } else {
-        combinedRes = res;
+      if (res) {
+        if (combinedRes) {
+          for (const existingRelease of combinedRes.releases || []) {
+            existingRelease.registryUrl = combinedRes.registryUrl;
+          }
+          for (const additionalRelease of res.releases || []) {
+            additionalRelease.registryUrl = res.registryUrl;
+          }
+          combinedRes = { ...res, ...combinedRes };
+          delete combinedRes.registryUrl;
+          combinedRes.releases = [...combinedRes.releases, ...res.releases];
+        } else {
+          combinedRes = res;
+        }
       }
     } catch (err) {
       if (err instanceof ExternalHostError) {
@@ -172,6 +184,15 @@ function resolveRegistryUrls(
   extractedUrls: string[]
 ): string[] {
   const { defaultRegistryUrls = [] } = datasource;
+  if (!datasource.customRegistrySupport) {
+    if (is.nonEmptyArray(extractedUrls)) {
+      logger.warn(
+        { datasource: datasource.id, registryUrls: extractedUrls },
+        'Custom datasources are not allowed for this datasource and will be ignored'
+      );
+    }
+    return defaultRegistryUrls;
+  }
   const customUrls = extractedUrls?.filter(Boolean);
   let registryUrls: string[];
   if (is.nonEmptyArray(customUrls)) {
@@ -198,28 +219,18 @@ async function fetchReleases(
   const datasource = load(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult = null;
+  const registryStrategy = datasource.registryStrategy || 'hunt';
   try {
-    if (datasource.registryStrategy) {
-      // istanbul ignore if
-      if (!registryUrls.length) {
-        logger.warn(
-          { datasource: datasourceName, depName: config.depName },
-          'Missing registryUrls for registryStrategy'
-        );
-        return null;
-      }
-      if (datasource.registryStrategy === 'first') {
+    if (is.nonEmptyArray(registryUrls)) {
+      if (registryStrategy === 'first') {
         dep = await firstRegistry(config, datasource, registryUrls);
-      } else if (datasource.registryStrategy === 'hunt') {
+      } else if (registryStrategy === 'hunt') {
         dep = await huntRegistries(config, datasource, registryUrls);
-      } else if (datasource.registryStrategy === 'merge') {
+      } else if (registryStrategy === 'merge') {
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
-      dep = await datasource.getReleases({
-        ...config,
-        registryUrls,
-      });
+      dep = await datasource.getReleases(config);
     }
   } catch (err) {
     if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
@@ -230,7 +241,7 @@ async function fetchReleases(
     }
     logError(datasource.id, config.lookupName, err);
   }
-  if (!dep || equal(dep, { releases: [] })) {
+  if (!dep || dequal(dep, { releases: [] })) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);

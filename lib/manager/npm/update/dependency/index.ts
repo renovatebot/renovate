@@ -1,4 +1,4 @@
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { logger } from '../../../../logger';
 import { matchAt, replaceAt } from '../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
@@ -59,7 +59,7 @@ export function updateDependency({
           newString
         );
         // Compare the parsed JSON structure of old and new
-        if (equal(parsedContents, JSON.parse(testContent))) {
+        if (dequal(parsedContents, JSON.parse(testContent))) {
           newFileContent = testContent;
           break;
         }
@@ -114,7 +114,7 @@ export function updateDependency({
               newResolution
             );
             // Compare the parsed JSON structure of old and new
-            if (equal(parsedContents, JSON.parse(testContent))) {
+            if (dequal(parsedContents, JSON.parse(testContent))) {
               newFileContent = testContent;
               break;
             }

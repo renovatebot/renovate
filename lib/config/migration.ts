@@ -1,6 +1,6 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { clone } from '../util/clone';
@@ -166,6 +166,8 @@ export function migrateConfig(
         }
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(/{{baseDir}}/g, '{{packageFileDir}}');
+      } else if (is.string(val) && val.includes('{{depNameShort}}')) {
+        migratedConfig[key] = val.replace(/{{depNameShort}}/g, '{{depName}}');
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
       } else if (key === 'rebaseStalePrs') {
@@ -547,7 +549,7 @@ export function migrateConfig(
         }
       }
     }
-    const isMigrated = !equal(config, migratedConfig);
+    const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
       // recursive call in case any migrated configs need further migrating
       return {

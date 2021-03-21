@@ -7,11 +7,12 @@ import * as v3 from './v3';
 
 export { id } from './common';
 
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [v3.getDefaultFeed()];
 export const defaultVersioning = nugetVersioning.id;
 export const registryStrategy = 'merge';
 
-function parseRegistryUrl(
+export function parseRegistryUrl(
   registryUrl: string
 ): { feedUrl: string; protocolVersion: number } {
   try {

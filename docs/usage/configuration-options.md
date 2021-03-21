@@ -635,6 +635,22 @@ If configured, Renovate bypasses its normal major/minor/patch upgrade logic and 
 Beware that Renovate follows tags strictly.
 For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
 
+## gitIgnoredAuthors
+
+Specify commit authors ignored by Renovate.
+
+By default, Renovate will treat any PR as modified if another git author has added to the branch.
+When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
+If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other git author(s) to `gitIgnoredAuthors`.
+
+Example:
+
+```json
+{
+  "gitIgnoredAuthors": ["some-bot@example.org"]
+}
+```
+
 ## gitLabAutomerge
 
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
@@ -814,6 +830,26 @@ To abort Renovate for errors for a specific `docker` host:
 ```
 
 When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) receives a response _not_ matching any of the configured `abortIgnoreStatusCodes` (e.g. `500 Internal Error`);
+
+### authType
+
+This can be used with `token` to create a custom http `authorization` header.
+
+An example for npm basic auth with token:
+
+```json
+{
+  "hostRules": [
+    {
+      "domainName": "npm.custom.org",
+      "token": "<some-token>",
+      "authType": "Basic"
+    }
+  ]
+}
+```
+
+This will generate the following header: `authorization: Basic <some-token>`.
 
 ### baseUrl
 
@@ -1125,7 +1161,7 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
@@ -1405,7 +1441,7 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
-Here's an example of where you use this to group together all packages from the `renovatebot` github org:
+Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
 
 ```json
 {
@@ -1585,11 +1621,11 @@ Therefore you can customise this setting if you wish to be notified a little lat
 
 This setting - if enabled - helps slow down Renovate, particularly during the onboarding phase. What may happen without this setting is:
 
-1.  Onboarding PR is created
-2.  User merges onboarding PR to activate Renovate
-3.  Renovate creates a "Pin Dependencies" PR (if necessary)
-4.  User merges Pin PR
-5.  Renovate then creates every single upgrade PR necessary - potentially dozens
+1. Onboarding PR is created
+2. User merges onboarding PR to activate Renovate
+3. Renovate creates a "Pin Dependencies" PR (if necessary)
+4. User merges Pin PR
+5. Renovate then creates every single upgrade PR necessary - potentially dozens
 
 The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged.
 Instead, if `prHourlyLimit` is configure to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59).
@@ -1656,13 +1692,11 @@ Behavior:
 
 Renovate's `"auto"` strategy works like this for npm:
 
-1.  Always pin `devDependencies`
-2.  Pin `dependencies` if we detect that it's an app and not a library
-3.  Widen `peerDependencies`
-4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-5.  Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
-
-**bump**
+1. Always pin `devDependencies`
+2. Pin `dependencies` if we detect that it's an app and not a library
+3. Widen `peerDependencies`
+4. If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
+5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 As such, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
@@ -1935,11 +1969,12 @@ The field supports multiple URLs however it is datasource-dependent on whether o
 
 Currently Renovate's default behavior is to only automerge if every status check has succeeded.
 
-Setting this option to `null` means that Renovate will ignore all status checks.
-You need to set this if you don't have any status checks but still want Renovate to automerge PRs.
+Setting this option to `null` means that Renovate will ignore _all_ status checks.
+You can set this if you don't have any status checks but still want Renovate to automerge PRs.
+Beware: configuring Renovate to automerge without any tests can lead to broken builds on your default branch, please think again before enabling this!
 
 In future, this might be configurable to allow certain status checks to be ignored/required.
-See [issue 1853 at the renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
+See [issue 1853 at the Renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
 
 ## respectLatest
 
@@ -2073,6 +2108,8 @@ If enough days have passed then a passing status check will be added.
 
 There are a couple of uses for this:
 
+<!-- markdownlint-disable MD001 -->
+
 #### Suppress branch/PR creation for X days
 
 If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
@@ -2082,6 +2119,8 @@ It's recommended that you enable `dependencyDashboard=true` so you don't lose vi
 
 If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed.
 This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
+
+<!-- markdownlint-enable MD001 -->
 
 ## supportPolicy
 
@@ -2116,7 +2155,7 @@ This is considered a feature flag with the aim to remove it and default to this 
 
 ## unicodeEmoji
 
-If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
+If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
 
 ## updateInternalDeps
 
