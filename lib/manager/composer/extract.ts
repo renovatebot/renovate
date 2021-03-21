@@ -6,7 +6,12 @@ import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { api as semverComposer } from '../../versioning/composer';
 import type { PackageDependency, PackageFile } from '../types';
-import type { ComposerConfig, ComposerLock, Repo } from './types';
+import type {
+  ComposerConfig,
+  ComposerLock,
+  ComposerManagerData,
+  Repo,
+} from './types';
 import { extractContraints } from './utils';
 
 /**
@@ -176,8 +181,11 @@ export async function extractPackageFile(
     return null;
   }
   res.deps = deps;
-  if (composerJson.type) {
-    res.managerData = { composerJsonType: composerJson.type };
+  if (is.string(composerJson.type)) {
+    const managerData: ComposerManagerData = {
+      composerJsonType: composerJson.type,
+    };
+    res.managerData = managerData;
   }
   return res;
 }

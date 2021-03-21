@@ -102,7 +102,7 @@ This configuration will be applied after all other environment variables so that
 
 ## dockerImagePrefix
 
-Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.
+Override the default Renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so Renovate will pull images from a custom Docker registry.
 
 If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
 
