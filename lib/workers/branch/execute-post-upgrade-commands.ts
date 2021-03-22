@@ -8,7 +8,7 @@ import { File, getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import * as template from '../../util/template';
-import { BranchConfig, BranchUpgradeConfig } from '../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 export async function postUpgradeCommandExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
