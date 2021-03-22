@@ -34,7 +34,7 @@ import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import { getUpdatedPackageFiles } from './get-updated';
-import executePostUpgradeCommands from './post-upgrade-command-executer';
+import executePostUpgradeCommands from './execute-post-upgrade-commands';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setStability } from './status-checks';
