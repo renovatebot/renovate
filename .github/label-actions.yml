@@ -28,15 +28,54 @@
     The Renovate team will take a look at the reproduction repository.
     Once we confirm the provided repository reproduces the problem, the label will be changed to `reproduction:confirmed`.
 
-'logs:formatting':
+'logs:problem':
   comment: >
-    Please put long logs into a `<details>` and `<summary>` element like this:
+    Hi there,
+
+
+    We have found that there's a problem with the logs.
+    Depending on which situation applies follow one, some or all of these instructions.
+
+
+    ### No logs at all
+
+    If there's no log posted yet, we need you to find and copy/paste the log into the issue template.
+
+
+    #### Finding logs on hosted app
+
+    If you use the Renovate app (GitHub/GitLab/etc):
+
+    1. Go to the affected PR, and search for "View repository job log here"
+
+    1. Click on the link to go to the "WhiteSource Renovate Dashboard" and log in
+
+    1. You are now in the correct repository log overview screen
+
+    1. Copy/paste the correct log
+
+    1. Follow the steps in the **formatting your logs** section
+
+
+    #### Finding logs on self-hosted app
+
+    If you host Renovate bot yourself, go to .... to find the logging output.
+
+
+    ### Insufficient logs
+
+    If you already provided logs, and the Renovate team said they are not enough, follow the instructions from the **No logs at all** section.
+
+
+    ### Formatting your logs
+
+    Please put your logs in a `<details>` and `<summary>` element like this:
 
 
         <details><summary>Click me to see logs</summary>
 
-        REPLACE THIS TEXT WITH 3 BACKTICKS
+        ```
         Copy/paste your log here
-        REPLACE THIS TEXT WITH 3 BACKTICKS
+        ```
 
         </details>
