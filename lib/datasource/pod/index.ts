@@ -9,6 +9,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'pod';
 
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://cdn.cocoapods.org'];
 export const registryStrategy = 'hunt';
 

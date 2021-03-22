@@ -1,9 +1,10 @@
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
-describe('platform/gitea/gitea-helper', () => {
+describe(getName(__filename), () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
@@ -186,7 +187,7 @@ describe('platform/gitea/gitea-helper', () => {
     it('should construct proper query parameters', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/repos/search?uid=13')
+        .get('/repos/search?uid=13&archived=false')
         .reply(200, {
           ok: true,
           data: [otherMockRepo],
@@ -194,6 +195,7 @@ describe('platform/gitea/gitea-helper', () => {
 
       const res = await ght.searchRepos({
         uid: 13,
+        archived: false,
       });
       expect(res).toEqual([otherMockRepo]);
       expect(httpMock.getTrace()).toMatchSnapshot();

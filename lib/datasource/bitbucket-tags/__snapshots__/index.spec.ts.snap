@@ -56,6 +56,7 @@ Array [
 
 exports[`datasource/bitbucket-tags/index getReleases returns tags from bitbucket cloud 1`] = `
 Object {
+  "registryUrl": "https://bitbucket.org",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",

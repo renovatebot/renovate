@@ -12,7 +12,7 @@ import { http } from './common';
 import * as goproxy from './goproxy';
 
 export const id = 'go';
-export const registryUrlRestriction = 'disallowed';
+export const customRegistrySupport = false;
 
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
 

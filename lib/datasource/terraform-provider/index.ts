@@ -7,6 +7,7 @@ import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'terraform-provider';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [
   'https://registry.terraform.io',
   'https://releases.hashicorp.com',

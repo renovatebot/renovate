@@ -6,6 +6,7 @@ import * as githubReleases from '../github-releases';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'github-tags';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 

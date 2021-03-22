@@ -2,6 +2,7 @@
 
 exports[`datasource/github-releases getReleases returns releases 1`] = `
 Object {
+  "registryUrl": "https://github.com",
   "releases": Array [
     Object {
       "gitRef": "1.0.0",
