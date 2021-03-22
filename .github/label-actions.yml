@@ -44,6 +44,9 @@
 
     #### Finding logs on hosted app
 
+    <details><summary>Click me to read instructions</summary>
+
+
     If you use the Renovate app (GitHub/GitLab/etc):
 
     1. Go to the affected PR, and search for "View repository job log here"
@@ -56,18 +59,33 @@
 
     1. Follow the steps in the **formatting your logs** section
 
+    </details>
+
 
     #### Finding logs on self-hosted app
 
+    <details><summary>Click me to read instructions</summary>
+
+
     If you host Renovate bot yourself, go to .... to find the logging output.
+
+    </details>
 
 
     ### Insufficient logs
 
+    <details><summary>Click me to read instructions</summary>
+
+
     If you already provided logs, and the Renovate team said they are not enough, follow the instructions from the **No logs at all** section.
+
+    </details>
 
 
     ### Formatting your logs
+
+    <details><summary>Click me to read instructions</summary>
+
 
     Please put your logs in a `<details>` and `<summary>` element like this:
 
@@ -79,3 +97,5 @@
         ```
 
         </details>
+
+    </details>
