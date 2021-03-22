@@ -20,7 +20,7 @@ async function cargoUpdate(
 
   const execOptions: ExecOptions = {
     docker: {
-      image: 'renovate/rust',
+      image: 'rust',
     },
   };
   try {

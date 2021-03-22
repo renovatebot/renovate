@@ -111,6 +111,12 @@ function handleGotError(
     } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       throw new Error(REPOSITORY_CHANGED);
+    } else if (
+      err.body?.errors?.find((e: any) =>
+        e.message?.startsWith('A pull request already exists')
+      )
+    ) {
+      throw err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);

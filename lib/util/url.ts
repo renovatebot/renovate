@@ -48,3 +48,11 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
     return false;
   }
 }
+
+export function parseUrl(url: string): URL | null {
+  try {
+    return new URL(url);
+  } catch (err) {
+    return null;
+  }
+}

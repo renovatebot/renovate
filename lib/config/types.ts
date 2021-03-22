@@ -61,6 +61,7 @@ export interface RenovateSharedConfig {
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
+  gitIgnoredAuthors?: string[];
 }
 
 // Config options used only within the global worker
@@ -153,7 +154,7 @@ export interface RenovateConfig
   defaultBranch?: string;
   branchList?: string[];
   description?: string | string[];
-
+  force?: RenovateConfig;
   errors?: ValidationMessage[];
 
   gitAuthor?: string;

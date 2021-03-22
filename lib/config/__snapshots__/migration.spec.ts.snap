@@ -87,7 +87,7 @@ Object {
   "binarySource": "global",
   "branchName": "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}{{{packageFileDir}}}",
   "branchPrefix": "renovate/",
-  "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
+  "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message {{depName}}",
   "constraints": Object {
     "python": "3.7",
   },

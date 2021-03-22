@@ -7,6 +7,8 @@ description: Self-Hosted Configuration usable in renovate.json or package.json
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
+Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
+
 ## allowPostUpgradeCommandTemplating
 
 If true allow templating for post-upgrade commands on dependency level post upgrade commands.
@@ -100,7 +102,7 @@ This configuration will be applied after all other environment variables so that
 
 ## dockerImagePrefix
 
-Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.
+Override the default Renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so Renovate will pull images from a custom Docker registry.
 
 If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
 

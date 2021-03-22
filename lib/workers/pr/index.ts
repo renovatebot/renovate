@@ -214,7 +214,8 @@ export async function ensurePr(prConfig: BranchConfig): Promise<EnsurePr> {
       );
       if (
         !dependencyDashboardCheck &&
-        (config.stabilityStatus !== BranchStatus.yellow ||
+        ((config.stabilityStatus &&
+          config.stabilityStatus !== BranchStatus.yellow) ||
           elapsedHours < config.prNotPendingHours)
       ) {
         logger.debug(
