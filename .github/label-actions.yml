@@ -27,3 +27,16 @@
 
     The Renovate team will take a look at the reproduction repository.
     Once we confirm the provided repository reproduces the problem, the label will be changed to `reproduction:confirmed`.
+
+'logs:formatting':
+  comment: >
+    Please put long logs into a `<details>` and `<summary>` element like this:
+
+
+        <details><summary>Click me to see logs</summary>
+
+        REPLACE THIS TEXT WITH 3 BACKTICKS
+        Copy/paste your log here
+        REPLACE THIS TEXT WITH 3 BACKTICKS
+
+        </details>
