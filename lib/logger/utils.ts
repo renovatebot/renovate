@@ -135,6 +135,11 @@ export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
         curValue = '[content]';
       } else if (templateFields.includes(key)) {
         curValue = '[Template]';
+      } else if (key === 'secrets') {
+        curValue = {};
+        Object.keys(val).forEach((secretKey) => {
+          curValue[secretKey] = '***********';
+        });
       } else {
         curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
       }

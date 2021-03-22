@@ -265,6 +265,49 @@ Warning: this is an experimental feature and may be modified or removed in a fut
 
 ## requireConfig
 
+## secrets
+
+Secrets may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
+
+```js
+module.exports = {
+  secrets: {
+    GOOGLE_TOKEN: 'abc123',
+  },
+};
+```
+
+They can also be configured per repository, e.g.
+
+```js
+module.exports = {
+  repositories: [
+    {
+      repository: 'abc/def',
+      secrets: {
+        GOOGLE_TOKEN: 'abc123',
+      },
+    },
+  ],
+};
+```
+
+It could then be used in a repository config or preset like so:
+
+```json
+{
+  "hostRules": [
+    {
+      "domainName": "google.com",
+      "token": "{{ secrets.GOOGLE_TOKEN }}"
+    }
+  ]
+}
+```
+
+Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
+
 ## skipInstalls
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.

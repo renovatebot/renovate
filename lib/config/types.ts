@@ -127,6 +127,7 @@ export type RenovateRepository =
   | string
   | {
       repository: string;
+      secrets?: Record<string, string>;
     };
 
 export interface CustomManager {
@@ -189,6 +190,7 @@ export interface RenovateConfig
   regexManagers?: CustomManager[];
 
   fetchReleaseNotes?: boolean;
+  secrets?: Record<string, string>;
 }
 
 export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
