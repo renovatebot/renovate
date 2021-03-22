@@ -284,6 +284,31 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readFile
+      .mockResolvedValueOnce('New go.sum' as any)
+      .mockResolvedValueOnce('New go.mod' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: ['github.com/pkg/errors'],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          newMajor: 1,
+          postUpdateOptions: ['gomodUpdateImportPaths'],
+        },
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('updates import paths with specific tool version from constraint', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename

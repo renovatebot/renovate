@@ -126,10 +126,11 @@ export async function updateArtifacts({
     logger.debug({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
-    // Update import paths on major updates
+    // Update import paths on major updates above v1
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
-      config.updateType === 'major';
+      config.updateType === 'major' &&
+      config.newMajor > 1;
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
       if (updateImportCmds.length > 0) {
