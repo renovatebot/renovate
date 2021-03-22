@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { getAdminConfig } from '../../config/admin';
-import { ExecutionMode } from '../../config/types';
 import { addMeta, logger } from '../../logger';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
@@ -12,36 +11,13 @@ import * as template from '../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../types';
 
 export async function postUpgradeCommandExecutorByMode(
-  executionMode: ExecutionMode,
-  config: BranchConfig
+  filteredUpgradeCommands: BranchUpgradeConfig[],
+  config: BranchConfig,
+  allowPostUpgradeCommandTemplating: boolean
 ): Promise<File[]> {
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const adminConfig = getAdminConfig();
   const allowedPostUpgradeCommands = adminConfig.allowedPostUpgradeCommands;
-  const allowPostUpgradeCommandTemplating =
-    executionMode === 'update' && adminConfig.allowPostUpgradeCommandTemplating;
-  let filteredUpgradeCommands: BranchUpgradeConfig[];
-
-  if (executionMode === 'branch') {
-    filteredUpgradeCommands = [
-      {
-        depName: config.upgrades.map(({ depName }) => depName).join(' '),
-        branchName: config.branchName,
-        postUpgradeTasks:
-          config.postUpgradeTasks.executionMode === 'branch'
-            ? config.postUpgradeTasks
-            : undefined,
-        fileFilters: config.fileFilters,
-      },
-    ];
-  } else {
-    filteredUpgradeCommands = config.upgrades.filter(
-      ({ postUpgradeTasks }) =>
-        !postUpgradeTasks ||
-        !postUpgradeTasks.executionMode ||
-        postUpgradeTasks.executionMode === executionMode
-    );
-  }
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -50,7 +26,7 @@ export async function postUpgradeCommandExecutorByMode(
         tasks: upgrade.postUpgradeTasks,
         allowedCommands: allowedPostUpgradeCommands,
       },
-      `Checking for ${executionMode} level post-upgrade tasks`
+      `Checking for post-upgrade tasks`
     );
     const commands = upgrade.postUpgradeTasks?.commands || [];
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters || [];
@@ -167,12 +143,36 @@ export async function postUpgradeCommandExecutorByMode(
 export default async function postUpgradeCommandExecutor(
   config: BranchConfig
 ): Promise<File[]> {
-  const updatedArtifacts = await postUpgradeCommandExecutorByMode(
-    'update',
-    config
+  const branchUpgradeCommands: BranchUpgradeConfig[] = [
+    {
+      depName: config.upgrades.map(({ depName }) => depName).join(' '),
+      branchName: config.branchName,
+      postUpgradeTasks:
+        config.postUpgradeTasks.executionMode === 'branch'
+          ? config.postUpgradeTasks
+          : undefined,
+      fileFilters: config.fileFilters,
+    },
+  ];
+
+  const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
+    ({ postUpgradeTasks }) =>
+      !postUpgradeTasks ||
+      !postUpgradeTasks.executionMode ||
+      postUpgradeTasks.executionMode === 'update'
   );
-  return postUpgradeCommandExecutorByMode('branch', {
-    ...config,
-    updatedArtifacts,
-  });
+
+  const updatedArtifacts = await postUpgradeCommandExecutorByMode(
+    updateUpgradeCommands,
+    config,
+    getAdminConfig().allowPostUpgradeCommandTemplating
+  );
+  return postUpgradeCommandExecutorByMode(
+    branchUpgradeCommands,
+    {
+      ...config,
+      updatedArtifacts,
+    },
+    false
+  );
 }
