@@ -13,7 +13,6 @@ export async function getReleases({
   if (res) {
     res.tags = res['dist-tags'];
     delete res['dist-tags'];
-    delete res['renovate-config'];
   }
   return res;
 }

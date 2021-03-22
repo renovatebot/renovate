@@ -32,6 +32,7 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { regEx } from '../../util/regex';
+import { sanitize } from '../../util/sanitize';
 import * as template from '../../util/template';
 import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
@@ -396,20 +397,29 @@ export async function processBranch(
                 regEx(pattern).test(cmd)
               )
             ) {
-              const compiledCmd = allowPostUpgradeCommandTemplating
-                ? template.compile(cmd, upgrade)
-                : cmd;
+              try {
+                const compiledCmd = allowPostUpgradeCommandTemplating
+                  ? template.compile(cmd, upgrade)
+                  : cmd;
 
-              logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
+                logger.debug(
+                  { cmd: compiledCmd },
+                  'Executing post-upgrade task'
+                );
+                const execResult = await exec(compiledCmd, {
+                  cwd: config.localDir,
+                });
 
-              const execResult = await exec(compiledCmd, {
-                cwd: config.localDir,
-              });
-
-              logger.debug(
-                { cmd: compiledCmd, ...execResult },
-                'Executed post-upgrade task'
-              );
+                logger.debug(
+                  { cmd: compiledCmd, ...execResult },
+                  'Executed post-upgrade task'
+                );
+              } catch (error) {
+                config.artifactErrors.push({
+                  lockFile: upgrade.packageFile,
+                  stderr: sanitize(error.message),
+                });
+              }
             } else {
               logger.warn(
                 {
@@ -418,6 +428,16 @@ export async function processBranch(
                 },
                 'Post-upgrade task did not match any on allowed list'
               );
+              config.artifactErrors.push({
+                lockFile: upgrade.packageFile,
+                stderr: sanitize(
+                  `Post-upgrade command '${cmd}' does not match allowed pattern${
+                    allowedPostUpgradeCommands.length === 1 ? '' : 's'
+                  } ${allowedPostUpgradeCommands
+                    .map((x) => `'${x}'`)
+                    .join(', ')}`
+                ),
+              });
             }
           }
 

@@ -6,6 +6,7 @@ import upath from 'upath';
 import * as pkg from '../../../package.json';
 import * as configParser from '../../config';
 import { GlobalConfig } from '../../config';
+import { validateConfigSecrets } from '../../config/secrets';
 import { getProblems, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
@@ -77,6 +78,9 @@ export async function start(): Promise<number> {
     config = await globalInitialize(config);
 
     checkEnv();
+
+    // validate secrets. Will throw and abort if invalid
+    validateConfigSecrets(config);
 
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);

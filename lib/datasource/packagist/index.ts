@@ -10,6 +10,7 @@ import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'packagist';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://packagist.org'];
 export const defaultVersioning = composerVersioning.id;
 export const registryStrategy = 'hunt';

@@ -1,17 +1,13 @@
-import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
-import delay from 'delay';
-import registryAuthToken from 'registry-auth-token';
-import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http, HttpOptions } from '../../util/http';
-import { maskToken } from '../../util/mask';
-import { parseUrl, resolveBaseUrl } from '../../util/url';
+import { parseUrl } from '../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import { id } from './common';
-import { getNpmrc } from './npmrc';
+import { resolvePackage } from './npmrc';
+import { NpmResponse } from './types';
 
 const http = new Http(id);
 
@@ -37,38 +33,11 @@ export interface NpmDependency extends ReleaseResult {
   sourceUrl: string;
   versions: Record<string, any>;
   'dist-tags': Record<string, string>;
-  'renovate-config': any;
   sourceDirectory?: string;
 }
 
-export interface NpmResponse {
-  _id: string;
-  name?: string;
-  versions?: Record<
-    string,
-    {
-      repository?: {
-        url: string;
-        directory: string;
-      };
-      homepage?: string;
-      deprecated?: boolean;
-      gitHead?: string;
-      dependencies?: Record<string, string>;
-      devDependencies?: Record<string, string>;
-    }
-  >;
-  repository?: {
-    url?: string;
-    directory?: string;
-  };
-  homepage?: string;
-  time?: Record<string, string>;
-}
-
 export async function getDependency(
-  packageName: string,
-  retries = 3
+  packageName: string
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${packageName})`);
 
@@ -78,86 +47,34 @@ export async function getDependency(
     return JSON.parse(memcache[packageName]) as NpmDependency;
   }
 
-  const scope = packageName.split('/')[0];
-  let regUrl: string;
-  const npmrc = getNpmrc();
-  try {
-    regUrl = getRegistryUrl(scope, npmrc);
-  } catch (err) {
-    regUrl = 'https://registry.npmjs.org';
-  }
-  const pkgUrl = resolveBaseUrl(
-    regUrl,
-    encodeURIComponent(packageName).replace(/^%40/, '@')
-  );
+  const { headers, packageUrl, registryUrl } = resolvePackage(packageName);
+
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
   const cachedResult = await packageCache.get<NpmDependency>(
     cacheNamespace,
-    pkgUrl
+    packageUrl
   );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
-  const headers: OutgoingHttpHeaders = {};
-  let authInfo = registryAuthToken(regUrl, { npmrc, recursive: true });
 
-  if (
-    !authInfo &&
-    npmrc &&
-    npmrc._authToken &&
-    regUrl.replace(/\/?$/, '/') === npmrc.registry?.replace(/\/?$/, '/')
-  ) {
-    authInfo = { type: 'Bearer', token: npmrc._authToken };
-  }
+  const uri = parseUrl(packageUrl);
 
-  if (authInfo?.type && authInfo.token) {
-    headers.authorization = `${authInfo.type} ${authInfo.token}`;
-    logger.trace(
-      { token: maskToken(authInfo.token), npmName: packageName },
-      'Using auth (via npmrc) for npm lookup'
-    );
-  } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
-    logger.trace(
-      { token: maskToken(process.env.NPM_TOKEN), npmName: packageName },
-      'Using auth (via process.env.NPM_TOKEN) for npm lookup'
-    );
-    headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
-  }
-
-  const uri = parseUrl(pkgUrl);
-
-  if (uri.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
+  if (uri?.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
     // Delete the authorization header for non-scoped public packages to improve http caching
     // Otherwise, authenticated requests are not cacheable until the registry adds "public" to Cache-Control
     // Ref: https://greenbytes.de/tech/webdav/rfc7234.html#caching.authenticated.responses
     delete headers.authorization;
   }
 
-  // This tells our http layer not to serve responses directly from the cache and instead to revalidate them every time
-  headers['Cache-Control'] = 'no-cache';
-
   try {
-    const useCache = retries === 3; // Disable cache if we're retrying
     const opts: HttpOptions = {
       headers,
-      useCache,
     };
-    const raw = await http.getJson<NpmResponse>(pkgUrl, opts);
-    if (retries < 3) {
-      logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
-    }
+    const raw = await http.getJson<NpmResponse>(packageUrl, opts);
     const res = raw.body;
-    // eslint-disable-next-line no-underscore-dangle
-    const returnedName = res.name ? res.name : res._id || '';
-    if (returnedName.toLowerCase() !== packageName.toLowerCase()) {
-      logger.warn(
-        { lookupName: packageName, returnedName: res.name, regUrl },
-        'Returned name does not match with requested name'
-      );
-      return null;
-    }
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
       logger.debug({ dependency: packageName }, 'No versions returned');
@@ -186,13 +103,13 @@ export async function getDependency(
       versions: {},
       releases: null,
       'dist-tags': res['dist-tags'],
-      'renovate-config': latestVersion['renovate-config'],
+      registryUrl,
     };
     if (res.repository?.directory) {
       dep.sourceDirectory = res.repository.directory;
     }
     if (latestVersion.deprecated) {
-      dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
+      dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
       dep.deprecationSource = id;
     }
     dep.releases = Object.keys(res.versions).map((version) => {
@@ -225,18 +142,17 @@ export async function getDependency(
     ];
     if (
       !raw.authorization &&
-      (whitelistedPublicScopes.includes(scope) || !packageName.startsWith('@'))
+      (whitelistedPublicScopes.includes(packageName.split('/')[0]) ||
+        !packageName.startsWith('@'))
     ) {
-      await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+      await packageCache.set(cacheNamespace, packageUrl, dep, cacheMinutes);
     }
     return dep;
   } catch (err) {
     if (err.statusCode === 401 || err.statusCode === 403) {
       logger.debug(
         {
-          pkgUrl,
-          authInfoType: authInfo ? authInfo.type : undefined,
-          authInfoToken: authInfo ? maskToken(authInfo.token) : undefined,
+          packageUrl,
           err,
           statusCode: err.statusCode,
           packageName,
@@ -248,9 +164,7 @@ export async function getDependency(
     if (err.statusCode === 402) {
       logger.debug(
         {
-          pkgUrl,
-          authInfoType: authInfo ? authInfo.type : undefined,
-          authInfoToken: authInfo ? maskToken(authInfo.token) : undefined,
+          packageUrl,
           err,
           statusCode: err.statusCode,
           packageName,
@@ -260,30 +174,13 @@ export async function getDependency(
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug({ packageName }, `Dependency lookup failure: not found`);
-      logger.debug({
-        err,
-        token: authInfo ? maskToken(authInfo.token) : 'none',
-      });
+      logger.debug(
+        { err, packageName },
+        `Dependency lookup failure: not found`
+      );
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {
-      // istanbul ignore if
-      if (
-        (err.name === 'ParseError' ||
-          err.code === 'ECONNRESET' ||
-          err.code === 'ETIMEDOUT') &&
-        retries > 0
-      ) {
-        // Delay a random time to avoid contention
-        const delaySeconds = 5 + Math.round(Math.random() * 25);
-        logger.warn(
-          { pkgUrl, errName: err.name, delaySeconds },
-          'Retrying npm error'
-        );
-        await delay(1000 * delaySeconds);
-        return getDependency(packageName, retries - 1);
-      }
       // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';

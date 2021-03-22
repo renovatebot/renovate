@@ -1,6 +1,6 @@
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
-import * as datasourceGitSubmodules from '../../datasource/git-submodules';
+import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { getHttpUrl } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
@@ -105,7 +105,7 @@ export default async function extractPackageFile(
     await Promise.all(
       depNames.map(async ({ name, path }) => {
         try {
-          const [currentValue] = (await git.subModule(['status', path]))
+          const [currentDigest] = (await git.subModule(['status', path]))
             .trim()
             .replace(/^[-+]/, '')
             .split(/\s/);
@@ -115,16 +115,16 @@ export default async function extractPackageFile(
           let httpSubModuleUrl = getHttpUrl(subModuleUrl);
           const hostRule = hostRules.find({ url: httpSubModuleUrl });
           httpSubModuleUrl = getHttpUrl(subModuleUrl, hostRule?.token);
-          const submoduleBranch = await getBranch(
+          const currentValue = await getBranch(
             gitModulesPath,
             name,
             httpSubModuleUrl
           );
           return {
             depName: path,
-            registryUrls: [httpSubModuleUrl, submoduleBranch],
+            lookupName: httpSubModuleUrl,
             currentValue,
-            currentDigest: currentValue,
+            currentDigest,
           };
         } catch (err) /* istanbul ignore next */ {
           logger.warn(
@@ -137,5 +137,5 @@ export default async function extractPackageFile(
     )
   ).filter(Boolean);
 
-  return { deps, datasource: datasourceGitSubmodules.id };
+  return { deps, datasource: datasourceGitRefs.id };
 }

@@ -7,6 +7,8 @@ description: Self-Hosted Configuration usable in renovate.json or package.json
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
+Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
+
 ## allowPostUpgradeCommandTemplating
 
 If true allow templating for post-upgrade commands.
@@ -100,7 +102,7 @@ This configuration will be applied after all other environment variables so that
 
 ## dockerImagePrefix
 
-Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.
+Override the default Renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so Renovate will pull images from a custom Docker registry.
 
 If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
 
@@ -262,6 +264,49 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
+
+## secrets
+
+Secrets may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
+
+```js
+module.exports = {
+  secrets: {
+    GOOGLE_TOKEN: 'abc123',
+  },
+};
+```
+
+They can also be configured per repository, e.g.
+
+```js
+module.exports = {
+  repositories: [
+    {
+      repository: 'abc/def',
+      secrets: {
+        GOOGLE_TOKEN: 'abc123',
+      },
+    },
+  ],
+};
+```
+
+It could then be used in a repository config or preset like so:
+
+```json
+{
+  "hostRules": [
+    {
+      "domainName": "google.com",
+      "token": "{{ secrets.GOOGLE_TOKEN }}"
+    }
+  ]
+}
+```
+
+Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
 
 ## skipInstalls
 

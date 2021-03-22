@@ -60,7 +60,7 @@ export async function generateLockFiles(
       let installNpm = 'npm i -g npm';
       const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
-        installNpm += `@${quote(npmCompatibility)}`;
+        installNpm += `@${quote(npmCompatibility)} || true`;
       }
       preCommands.push(installNpm, 'hash -d npm');
       cmdOptions = '--ignore-scripts  --no-audit';
@@ -89,7 +89,7 @@ export async function generateLockFiles(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,

@@ -208,7 +208,7 @@ To learn more read the section below.
 
 You can see in the example above that Renovate won't normally open a PR for the `snorgleborf` patch release.
 
-There are 2 ways to tell renovate to open a separate PR for the patch release:
+There are 2 ways to tell Renovate to open a separate PR for the patch release:
 
 - Set `separateMinorPatch` to `true`
 - Set `automerge` to the value: `"patch"`

@@ -12,6 +12,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { SBT_PLUGINS_REPO, parseIndexDir } from './util';
 
 export const id = 'sbt-plugin';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';

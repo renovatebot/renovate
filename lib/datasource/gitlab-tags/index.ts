@@ -6,6 +6,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 const gitlabApi = new GitlabHttp();
 
 export const id = 'gitlab-tags';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://gitlab.com'];
 export const registryStrategy = 'first';
 

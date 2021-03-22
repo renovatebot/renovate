@@ -4,7 +4,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'dart';
 export const defaultRegistryUrls = ['https://pub.dartlang.org/'];
-export const registryUrlRestriction = 'fixed';
+export const customRegistrySupport = false;
 
 const http = new Http(id);
 
