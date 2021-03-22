@@ -27,6 +27,14 @@ If you're running self-hosted, run with `--log-level=debug` or LOG_LEVEL=debug a
 Paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others do not have permissions to view them).
 -->
 
+<details><summary>Click me to see logs</summary>
+
+```
+Copy/paste your log here
+```
+
+</details>
+
 **Have you created a minimal reproduction repository?**
 
 Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
