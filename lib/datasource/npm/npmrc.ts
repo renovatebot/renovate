@@ -1,5 +1,4 @@
 import { OutgoingHttpHeaders } from 'http';
-import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
 import registryAuthToken from 'registry-auth-token';
@@ -8,6 +7,7 @@ import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
+import { resolveBaseUrl } from '../../util/url';
 
 let npmrc: Record<string, any> | null = null;
 let npmrcRaw: string;
@@ -108,7 +108,7 @@ export function resolvePackage(packageName: string): PackageResolution {
   } catch (err) {
     registryUrl = 'https://registry.npmjs.org';
   }
-  const packageUrl = url.resolve(
+  const packageUrl = resolveBaseUrl(
     registryUrl,
     encodeURIComponent(packageName).replace(/^%40/, '@')
   );
