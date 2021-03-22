@@ -10,7 +10,7 @@ import { sanitize } from '../../util/sanitize';
 import * as template from '../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../types';
 
-export async function postUpgradeCommandExecutorByMode(
+export async function postUpgradeCommandExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: BranchConfig,
   allowPostUpgradeCommandTemplating: boolean
@@ -140,7 +140,7 @@ export async function postUpgradeCommandExecutorByMode(
   return updatedArtifacts;
 }
 
-export default async function postUpgradeCommandExecutor(
+export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<File[]> {
   const branchUpgradeCommands: BranchUpgradeConfig[] = [
@@ -162,12 +162,12 @@ export default async function postUpgradeCommandExecutor(
       postUpgradeTasks.executionMode === 'update'
   );
 
-  const updatedArtifacts = await postUpgradeCommandExecutorByMode(
+  const updatedArtifacts = await postUpgradeCommandExecutor(
     updateUpgradeCommands,
     config,
     getAdminConfig().allowPostUpgradeCommandTemplating
   );
-  return postUpgradeCommandExecutorByMode(
+  return postUpgradeCommandExecutor(
     branchUpgradeCommands,
     {
       ...config,

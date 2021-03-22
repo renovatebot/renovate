@@ -34,7 +34,7 @@ import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import { getUpdatedPackageFiles } from './get-updated';
-import postUpgradeCommandExecutor from './post-upgrade-command-executer';
+import executePostUpgradeCommands from './post-upgrade-command-executer';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setStability } from './status-checks';
@@ -354,7 +354,7 @@ export async function processBranch(
       getAdminConfig().trustLevel === 'high' &&
       is.nonEmptyArray(allowedPostUpgradeCommands)
     ) {
-      config.updatedArtifacts = await postUpgradeCommandExecutor(config);
+      config.updatedArtifacts = await executePostUpgradeCommands(config);
     }
 
     removeMeta(['dep']);
