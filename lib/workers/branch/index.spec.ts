@@ -9,6 +9,7 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
+import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../types';
@@ -29,6 +30,7 @@ jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../../util/exec');
+jest.mock('../../util/sanitize');
 jest.mock('../../util/git');
 jest.mock('fs-extra');
 jest.mock('../global/limits');
@@ -42,6 +44,7 @@ const automerge = mocked(_automerge);
 const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
+const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
@@ -65,7 +68,19 @@ describe('workers/branch', () => {
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('abc123');
+
+      platform.massageMarkdown.mockImplementation((prBody) => prBody);
+      prWorker.ensurePr.mockResolvedValue({
+        prResult: PrResult.Created,
+        pr: {
+          title: '',
+          sourceBranch: '',
+          state: '',
+          body: '',
+        },
+      });
       setAdminConfig();
+      sanitize.sanitize.mockImplementation((input) => input);
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
@@ -743,6 +758,85 @@ describe('workers/branch', () => {
       expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
       });
+      const errorMessage = expect.stringContaining(
+        "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
+      );
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: errorMessage,
+        })
+      );
+      expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
+    });
+
+    it('handles post-upgrade task exec errors', async () => {
+      const updatedPackageFile: File = {
+        name: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [updatedPackageFile],
+        artifactErrors: [],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            name: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      } as never);
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        body: `- [x] <!-- rebase-check -->`,
+      } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce({
+        modified: ['modified_file'],
+        not_added: [],
+        deleted: ['deleted_file'],
+      } as StatusResult);
+
+      fs.outputFile.mockReturnValue();
+      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const adminConfig = {
+        allowedPostUpgradeCommands: ['^exit 1$'],
+        allowPostUpgradeCommandTemplating: true,
+        trustLevel: 'high',
+      };
+      setAdminConfig(adminConfig);
+
+      exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
+
+      await branchWorker.processBranch({
+        ...config,
+        localDir: '/localDir',
+        upgrades: [
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name',
+            postUpgradeTasks: {
+              commands: ['exit 1'],
+              fileFilters: ['modified_file', 'deleted_file'],
+            },
+          } as never,
+        ],
+      });
+
+      const errorMessage = expect.stringContaining('Meh, this went wrong!');
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: errorMessage,
+        })
+      );
+      expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
     });
 
     it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {

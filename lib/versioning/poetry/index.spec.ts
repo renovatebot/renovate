@@ -420,9 +420,9 @@ describe(getName(__filename), () => {
           currentValue: '^1.0.0',
           rangeStrategy: 'replace',
           currentVersion: '1.0.0',
-          newVersion: '1.0.7',
+          newVersion: '1.2.3',
         })
-      ).toEqual('^1.0.7');
+      ).toEqual('^1.0.0');
     });
     it('bumps short tilde', () => {
       expect(
