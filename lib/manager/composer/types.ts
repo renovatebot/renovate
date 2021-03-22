@@ -30,3 +30,7 @@ export interface ComposerLock {
   packages?: ComposerLockPackage[];
   'packages-dev'?: ComposerLockPackage[];
 }
+
+export interface ComposerManagerData {
+  composerJsonType?: string;
+}

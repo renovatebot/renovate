@@ -22,6 +22,22 @@ Array [
 ]
 `;
 
+exports[`config/presets/gitea/index getPreset() should query custom paths 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/path%2Fcustom.json?",
+  },
+]
+`;
+
 exports[`config/presets/gitea/index getPreset() should query preset within the file 1`] = `
 Array [
   Object {

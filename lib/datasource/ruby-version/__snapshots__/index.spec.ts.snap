@@ -3,6 +3,7 @@
 exports[`datasource/gradle getReleases parses real data 1`] = `
 Object {
   "homepage": "https://www.ruby-lang.org",
+  "registryUrl": "https://www.ruby-lang.org/",
   "releases": Array [
     Object {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2002/03/01/167-is-released/",
