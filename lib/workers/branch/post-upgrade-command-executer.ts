@@ -10,7 +10,7 @@ import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../types';
 
-export default async function postUpgradeCommandExecutor(
+export async function postUpgradeCommandExecutorByMode(
   executionMode: ExecutionMode,
   config: BranchConfig
 ): Promise<File[]> {
@@ -148,4 +148,17 @@ export default async function postUpgradeCommandExecutor(
     }
   }
   return updatedArtifacts;
+}
+
+export default async function postUpgradeCommandExecutor(
+  config: BranchConfig
+): Promise<File[]> {
+  const updatedArtifacts = await postUpgradeCommandExecutorByMode(
+    'update',
+    config
+  );
+  return postUpgradeCommandExecutorByMode('branch', {
+    ...config,
+    updatedArtifacts,
+  });
 }
