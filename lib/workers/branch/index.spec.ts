@@ -6,29 +6,29 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import * as _npmPostExtract from '../../manager/npm/post-update';
+import { WriteExistingFilesResult } from '../../manager/npm/post-update';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
+import { EnsurePr } from '../pr';
+import { Pr } from '../repository/onboarding/branch/check';
 import {
   BranchConfig,
+  BranchUpgradeConfig,
   PrResult,
   ProcessBranchResult,
-  BranchUpgradeConfig,
 } from '../types';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
 import * as _getUpdated from './get-updated';
+import { PackageFilesResult } from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
-import { Pr } from '../repository/onboarding/branch/check';
-import { EnsurePr } from '../pr';
-import { PackageFilesResult } from './get-updated';
-import { WriteExistingFilesResult } from '../../manager/npm/post-update';
 
 jest.mock('./get-updated');
 jest.mock('./schedule');
