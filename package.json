@@ -164,7 +164,7 @@
     "minimatch": "3.0.4",
     "moo": "0.5.1",
     "node-emoji": "1.10.0",
-    "node-html-parser": "3.0.4",
+    "node-html-parser": "3.1.0",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
     "p-queue": "6.6.2",
