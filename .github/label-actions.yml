@@ -67,7 +67,7 @@
     <details><summary>Click me to read instructions</summary>
 
 
-    If you host Renovate bot yourself, go to .... to find the logging output.
+    If you're running self-hosted, run with `--log-level=debug` or LOG_LEVEL=debug and search for whatever dependency/branch/PR that is causing the problem.
 
     </details>
 
