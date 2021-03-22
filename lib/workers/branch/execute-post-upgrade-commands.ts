@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { getAdminConfig } from '../../config/admin';
 import { addMeta, logger } from '../../logger';
+import { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { File, getRepoStatus } from '../../util/git';
@@ -10,12 +11,17 @@ import { sanitize } from '../../util/sanitize';
 import * as template from '../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
-export async function postUpgradeCommandExecutor(
+type PostUpgradeCommandsExecutionResult = {
+  updatedArtifacts: File[];
+  artifactErrors: ArtifactError[];
+};
+export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: BranchConfig,
   allowPostUpgradeCommandTemplating: boolean
-): Promise<File[]> {
+): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
+  const artifactErrors = [...(config.artifactErrors || [])];
   const adminConfig = getAdminConfig();
   const allowedPostUpgradeCommands = adminConfig.allowedPostUpgradeCommands;
 
@@ -64,7 +70,7 @@ export async function postUpgradeCommandExecutor(
               'Executed post-upgrade task'
             );
           } catch (error) {
-            config.artifactErrors.push({
+            artifactErrors.push({
               lockFile: upgrade.packageFile,
               stderr: sanitize(error.message),
             });
@@ -77,7 +83,7 @@ export async function postUpgradeCommandExecutor(
             },
             'Post-upgrade task did not match any on allowed list'
           );
-          config.artifactErrors.push({
+          artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
               `Post-upgrade command '${cmd}' does not match allowed pattern${
@@ -137,12 +143,12 @@ export async function postUpgradeCommandExecutor(
       }
     }
   }
-  return updatedArtifacts;
+  return { updatedArtifacts, artifactErrors };
 }
 
 export default async function executePostUpgradeCommands(
   config: BranchConfig
-): Promise<File[]> {
+): Promise<PostUpgradeCommandsExecutionResult> {
   const branchUpgradeCommands: BranchUpgradeConfig[] = [
     {
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
@@ -162,16 +168,20 @@ export default async function executePostUpgradeCommands(
       postUpgradeTasks.executionMode === 'update'
   );
 
-  const updatedArtifacts = await postUpgradeCommandExecutor(
+  const {
+    updatedArtifacts,
+    artifactErrors,
+  } = await postUpgradeCommandsExecutor(
     updateUpgradeCommands,
     config,
     getAdminConfig().allowPostUpgradeCommandTemplating
   );
-  return postUpgradeCommandExecutor(
+  return postUpgradeCommandsExecutor(
     branchUpgradeCommands,
     {
       ...config,
       updatedArtifacts,
+      artifactErrors,
     },
     false
   );
