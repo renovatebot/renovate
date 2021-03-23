@@ -67,7 +67,7 @@
     <details><summary>Click me to read instructions</summary>
 
 
-    If you're running self-hosted, run with `--log-level=debug` or LOG_LEVEL=debug and search for whatever dependency/branch/PR that is causing the problem.
+    If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
 
     </details>
 
