@@ -30,7 +30,7 @@ Paste the *relevant* logs here, not the entire thing and not just a link to the 
 <details><summary>Click me to see logs</summary>
 
 ```
-Copy/paste your log here
+Copy/paste any log here, between the starting and ending backticks
 ```
 
 </details>
