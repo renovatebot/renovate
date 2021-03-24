@@ -1,4 +1,5 @@
 import { parseRange } from 'semver-utils';
+import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -130,6 +131,16 @@ function getNewValue({
 }: NewValueConfig): string {
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
+    try {
+      if (npm.matches(padZeroes(newVersion), npmCurrentValue)) {
+        return currentValue;
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.info(
+        { err },
+        'Poetry versioning: Error caught checking if newVersion satisfies currentValue'
+      );
+    }
     const parsedRange = parseRange(npmCurrentValue);
     const element = parsedRange[parsedRange.length - 1];
     if (parsedRange.length === 1 && element.operator) {
