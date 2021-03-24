@@ -132,7 +132,11 @@ function getNewValue({
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
     try {
-      if (npm.matches(padZeroes(newVersion), npmCurrentValue)) {
+      const massagedNewVersion = padZeroes(newVersion);
+      if (
+        npm.isVersion(massagedNewVersion) &&
+        npm.matches(massagedNewVersion, npmCurrentValue)
+      ) {
         return currentValue;
       }
     } catch (err) /* istanbul ignore next */ {
