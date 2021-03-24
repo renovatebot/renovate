@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import * as gradleVersioning from '../../versioning/gradle';
 import type { PackageDependency, PackageFile } from '../types';
 
+// https://regex101.com/r/1GaQ2X/1
 const DISTRIBUTION_URL_REGEX = /^(?:distributionUrl\s*=\s*)\S*-(?<version>\d+\.\d+(?:\.\d+)?(?:-\w+)*)-(?<type>bin|all)\.zip\s*$/;
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
