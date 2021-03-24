@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import * as gradleVersioning from '../../versioning/gradle';
 import type { PackageDependency, PackageFile } from '../types';
 
-const DISTRIBUTION_URL_REGEX = /^(?<assignment>distributionUrl\s*=\s*)\S*-(?<version>(\d|\.)+)-(?<type>bin|all)\.zip\s*$/;
+const DISTRIBUTION_URL_REGEX = /^(?:distributionUrl\s*=\s*)\S*-(?<version>\d+\.\d+(?:\.\d+)?(?:-\w+)*)-(?<type>bin|all)\.zip\s*$/;
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
