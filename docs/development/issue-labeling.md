@@ -154,7 +154,7 @@ Add the label `help wanted` to indicate that we need the original poster or some
 Add a label `logs:problem` to indicate that there's a problem with the logs, and the contributor needs to do one of these things:
 
 1. Provide logs (if there are none yet)
-1. Provide more logs (in case current log insufficient)
+1. Provide more logs (in case current logs are insufficient)
 1. Format their logs properly
 
 Add a label `reproduction:needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
