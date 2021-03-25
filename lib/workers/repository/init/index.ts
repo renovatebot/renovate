@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../config';
+import { applySecretsToConfig } from '../../../config/secrets';
 import { logger } from '../../../logger';
 import { clone } from '../../../util/clone';
 import { setUserRepoConfig } from '../../../util/git';
@@ -20,6 +21,7 @@ export async function initRepo(
   config = await initApis(config);
   config = await getRepoConfig(config);
   checkIfConfigured(config);
+  config = applySecretsToConfig(config);
   await setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
