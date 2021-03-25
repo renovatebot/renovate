@@ -172,6 +172,16 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset parses local with subdirectory 1`] = `
+Object {
+  "packageName": "some-group/some-repo",
+  "params": undefined,
+  "presetName": "some-file",
+  "presetPath": "some-dir",
+  "presetSource": "local",
+}
+`;
+
 exports[`config/presets parsePreset parses no prefix as local 1`] = `
 Object {
   "packageName": "some/repo",
