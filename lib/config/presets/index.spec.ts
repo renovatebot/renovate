@@ -75,6 +75,36 @@ describe('config/presets', () => {
       expect(e.validationMessage).toMatchSnapshot();
     });
 
+    it('throws if path + invalid syntax', async () => {
+      config.foo = 1;
+      config.extends = ['github>user/repo//'];
+      let e: Error;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
+    });
+
+    it('throws if path + sub-preset', async () => {
+      config.foo = 1;
+      config.extends = ['github>user/repo//path:subpreset'];
+      let e: Error;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
+    });
+
     it('throws noconfig', async () => {
       config.foo = 1;
       config.extends = ['noconfig:base'];
@@ -261,6 +291,16 @@ describe('config/presets', () => {
         presets.parsePreset(
           'github>some/repo:somefile/somepreset/somesubpreset'
         )
+      ).toMatchSnapshot();
+    });
+    it('parses github subdirectories', () => {
+      expect(
+        presets.parsePreset('github>some/repo//somepath/somesubpath/somefile')
+      ).toMatchSnapshot();
+    });
+    it('parses github toplevel file using subdirectory syntax', () => {
+      expect(
+        presets.parsePreset('github>some/repo//somefile')
       ).toMatchSnapshot();
     });
     it('parses gitlab', () => {

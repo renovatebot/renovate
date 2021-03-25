@@ -13,6 +13,7 @@ import type { Preset, PresetConfig } from '../types';
 export function getPreset({
   packageName: pkgName,
   presetName = 'default',
+  presetPath,
   baseConfig,
 }: PresetConfig): Promise<Preset> {
   const { platform, endpoint } = baseConfig;
@@ -21,17 +22,33 @@ export function getPreset({
   }
   switch (platform.toLowerCase()) {
     case PLATFORM_TYPE_GITLAB:
-      return gitlab.getPresetFromEndpoint(pkgName, presetName, endpoint);
+      return gitlab.getPresetFromEndpoint(
+        pkgName,
+        presetName,
+        presetPath,
+        endpoint
+      );
     case PLATFORM_TYPE_GITHUB:
-      return github.getPresetFromEndpoint(pkgName, presetName, endpoint);
+      return github.getPresetFromEndpoint(
+        pkgName,
+        presetName,
+        presetPath,
+        endpoint
+      );
     case PLATFORM_TYPE_BITBUCKET_SERVER:
       return bitbucketServer.getPresetFromEndpoint(
         pkgName,
         presetName,
+        presetPath,
         endpoint
       );
     case PLATFORM_TYPE_GITEA:
-      return gitea.getPresetFromEndpoint(pkgName, presetName, endpoint);
+      return gitea.getPresetFromEndpoint(
+        pkgName,
+        presetName,
+        presetPath,
+        endpoint
+      );
     default:
       throw new Error(
         `Unsupported platform '${baseConfig.platform}' for local preset.`

@@ -694,7 +694,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/search?uid=13",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/search?uid=13&archived=false",
   },
 ]
 `;

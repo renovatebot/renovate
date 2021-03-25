@@ -1,0 +1,62 @@
+environments:
+  templated-environment: &templated-environment
+    values:
+      - ./environment/_shared/env.yaml
+      - ./environment/{{ .Environment.Name }}/env.yaml
+  beta:
+    <<: *templated-environment
+  support:
+    <<: *templated-environment
+---
+
+helmDefaults:
+# {{- if eq false (hasKey .Values "noKubeConf") }}
+  kubeContext: "{{ .Values.global.kube_context | getOrNil .Environment.Name | default .Environment.Name }}"
+# {{- end }}
+
+---
+
+repositories:
+- name: stable
+  url: https://charts.helm.sh/stable/
+- name: incubator
+  url: https://charts.helm.sh/incubator/
+- name: bitnami
+  url: https://charts.bitnami.com/bitnami
+- name: prometheus-community
+  url: https://prometheus-community.github.io/helm-charts
+
+templates:
+  external-chart: &external-chart
+    missingFileHandler: Debug
+    installedTemplate: '{{`{{ .Values | getOrNil .Release.Name | getOrNil "enabled" | default false }}`}}'
+    namespace: '{{`{{ .Values | getOrNil .Release.Name | getOrNil "namespace" | default "default" }}`}}'
+    version: '{{`{{ .Values | getOrNil .Release.Name | getOrNil "version" | default "*" }}`}}'
+    values:
+      - "./environment/_shared/{{`{{ .Release.Name }}`}}.yaml"
+      - "./environment/_shared/{{`{{ .Release.Name }}`}}.yaml.gotmpl"
+      - "./environment/{{`{{ .Environment.Name }}`}}/{{`{{ .Release.Name }}`}}.yaml"
+      - "./environment/{{`{{ .Environment.Name }}`}}/{{`{{ .Release.Name }}`}}.yaml.gotmpl"
+    secrets:
+      # {{- if eq false (hasKey .Values "noSecrets") }}
+      - "./environment/{{`{{ .Environment.Name }}`}}/{{`{{ .Release.Name }}`}}-secrets.yaml"
+      # {{- end }}
+
+releases:
+- name: manifests
+  chart: "./environment/{{`{{ .Environment.Name }}`}}/static"
+  installedTemplate: '{{`{{ .Values | getOrNil .Release.Name | getOrNil "enabled" | default false  }}`}}'
+
+- name: rabbitmq
+  <<: *external-chart
+  chart: bitnami/rabbitmq
+  needs:
+    - manifests
+  version: 7.4.3
+
+- name: prometheus-operator
+  <<: *external-chart
+  chart: prometheus-community/kube-prometheus-stack
+  needs:
+    - manifests
+  version: 13.7.2

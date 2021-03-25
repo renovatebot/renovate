@@ -1,0 +1,10 @@
+
+# Loop detection
+include: 'lib/manager/gitlabci/__fixtures__/include.yml'
+
+test:
+  stage: test
+  image: alpine:3.11
+  script:
+    - echo test
+    - !reference [.setup, script]

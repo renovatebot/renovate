@@ -115,8 +115,8 @@ async function getDockerTag(
   return 'latest';
 }
 
-function getContainerName(image: string, prefix: string): string {
-  return (prefix || 'renovate_') + image.replace(/\//g, '_');
+function getContainerName(image: string, prefix?: string): string {
+  return `${prefix || 'renovate_'}${image}`.replace(/\//g, '_');
 }
 
 function getContainerLabel(prefix: string): string {

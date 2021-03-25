@@ -61,6 +61,7 @@ export interface RenovateSharedConfig {
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
+  gitIgnoredAuthors?: string[];
 }
 
 // Config options used only within the global worker
@@ -127,6 +128,7 @@ export type RenovateRepository =
   | string
   | {
       repository: string;
+      secrets?: Record<string, string>;
     };
 
 export interface CustomManager {
@@ -189,6 +191,7 @@ export interface RenovateConfig
   regexManagers?: CustomManager[];
 
   fetchReleaseNotes?: boolean;
+  secrets?: Record<string, string>;
 }
 
 export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
