@@ -1,8 +1,9 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http } from '../../util/http';
+import { Http, HttpError } from '../../util/http';
 import { regEx } from '../../util/regex';
 import * as gradleVersioning from '../../versioning/gradle';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type { GradleRelease } from './types';
 
 export const id = 'gradle-version';
 export const customRegistrySupport = true;
@@ -11,14 +12,6 @@ export const defaultVersioning = gradleVersioning.id;
 export const registryStrategy = 'merge';
 
 const http = new Http(id);
-
-interface GradleRelease {
-  snapshot?: boolean;
-  nightly?: boolean;
-  rcFor?: string;
-  version: string;
-  buildTime?: string;
-}
 
 const buildTimeRegex = regEx(
   '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'
@@ -37,22 +30,21 @@ function formatBuildTime(timeStr: string): string | null {
 export async function getReleases({
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult> {
-  let releases;
+  let releases: Release[];
   try {
     const response = await http.getJson<GradleRelease[]>(registryUrl);
     releases = response.body
       .filter((release) => !release.snapshot && !release.nightly)
-      .filter(
-        (release) =>
-          // some milestone have wrong metadata and need to be filtered by version name content
-          release.rcFor === '' && !release.version.includes('milestone')
-      )
       .map((release) => ({
         version: release.version,
         releaseTimestamp: formatBuildTime(release.buildTime),
+        ...(release.broken && { isDeprecated: release.broken }),
       }));
-  } catch (err) /* istanbul ignore next */ {
-    if (err.host === 'services.gradle.org') {
+  } catch (err) {
+    if (
+      err instanceof HttpError &&
+      err.response?.url === defaultRegistryUrls[0]
+    ) {
       throw new ExternalHostError(err);
     }
     throw err;
@@ -66,6 +58,5 @@ export async function getReleases({
   if (res.releases.length) {
     return res;
   }
-  // istanbul ignore next
   return null;
 }
