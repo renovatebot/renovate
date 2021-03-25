@@ -300,6 +300,16 @@ describe(getName(__filename), () => {
         })
       ).toEqual('^2.0.0');
     });
+    it('handles precision change caret', () => {
+      expect(
+        versionig.getNewValue({
+          currentValue: '^5.0.3',
+          rangeStrategy: 'replace',
+          currentVersion: '5.3.1',
+          newVersion: '5.5',
+        })
+      ).toEqual('^5.0.3');
+    });
     it('replaces naked version', () => {
       expect(
         versionig.getNewValue({
