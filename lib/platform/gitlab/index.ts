@@ -272,7 +272,15 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config?.mergeMethod !== 'merge');
 }
 
-type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
+type BranchState =
+  | 'pending'
+  | 'created'
+  | 'running'
+  | 'manual'
+  | 'success'
+  | 'failed'
+  | 'canceled'
+  | 'skipped';
 
 interface GitlabBranchStatus {
   status: BranchState;
@@ -303,7 +311,7 @@ async function getStatus(
   }
 }
 
-const gitlabToRenovateStatusMapping: Record<string, BranchStatus> = {
+const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
   pending: BranchStatus.yellow,
   created: BranchStatus.yellow,
   manual: BranchStatus.yellow,
@@ -334,8 +342,10 @@ export async function getBranchStatus(
     throw new Error(REPOSITORY_CHANGED);
   }
 
-  const res = await getStatus(branchName);
-  logger.debug(`Got res with ${res.length} results`);
+  const branchStatuses = await getStatus(branchName);
+  logger.debug(`Got res with ${branchStatuses.length} results`);
+  // ignore all skipped jobs
+  const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
     return BranchStatus.yellow;
