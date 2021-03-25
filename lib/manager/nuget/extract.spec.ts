@@ -12,6 +12,9 @@ describe(getName(__filename), () => {
         localDir: upath.resolve('lib/manager/nuget/__fixtures__'),
       };
     });
+    it('checks if Prettifier works now', () => {
+      // nothing to do here
+    });
     it('returns empty for invalid csproj', async () => {
       expect(
         await extractPackageFile('nothing here', 'bogus', config)
