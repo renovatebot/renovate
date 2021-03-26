@@ -1,5 +1,5 @@
 export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)plugins\\.txt'],
+  fileMatch: ['(^|/)plugins\\.(txt|ya?ml)$'],
 };

@@ -49,18 +49,10 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
   }
 }
 
-export function massageUrlProtocol(
-  url?: string,
-  protocol = 'https'
-): string | null {
-  if (!url) {
+export function parseUrl(url: string): URL | null {
+  try {
+    return new URL(url);
+  } catch (err) {
     return null;
   }
-
-  if (validateUrl(url, false)) {
-    return url;
-  }
-
-  const massagedUrl = `${protocol}://${url}`;
-  return validateUrl(massagedUrl, false) ? massagedUrl : null;
 }

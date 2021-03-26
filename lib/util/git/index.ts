@@ -9,6 +9,7 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
+import { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_DISABLED,
@@ -51,6 +52,7 @@ interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
+  ignoredAuthors: string[];
 }
 
 // istanbul ignore next
@@ -165,6 +167,7 @@ async function fetchBranchCommits(): Promise<void> {
 
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
+  config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
   git = Git(config.localDir);
@@ -200,7 +203,7 @@ async function cleanLocalBranches(): Promise<void> {
  * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
  * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
  */
-export async function setBranchPrefix(branchPrefix: string): Promise<void> {
+async function setBranchPrefix(branchPrefix: string): Promise<void> {
   config.branchPrefix = branchPrefix;
   // If the repo is already cloned then set branchPrefix now, otherwise it will be called again during syncGit()
   if (gitInitialized) {
@@ -213,6 +216,14 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
       throw err;
     }
   }
+}
+
+export async function setUserRepoConfig({
+  branchPrefix,
+  gitIgnoredAuthors,
+}: RenovateConfig): Promise<void> {
+  await setBranchPrefix(branchPrefix);
+  config.ignoredAuthors = gitIgnoredAuthors ?? [];
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -305,14 +316,14 @@ export async function syncGit(): Promise<void> {
     }
   }
   try {
-    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
-    logger.debug({ latestCommitDate }, 'latest commit');
+    const latestCommit = (await git.log({ n: 1 })).latest;
+    logger.debug({ latestCommit }, 'latest repository commit');
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (err.message.includes('does not have any commits yet')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    logger.warn({ err }, 'Cannot retrieve latest commit date');
+    logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   try {
     const { gitAuthorName, gitAuthorEmail } = config;
@@ -478,7 +489,8 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   const { gitAuthorEmail } = config;
   if (
     lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
-    lastAuthor === gitAuthorEmail
+    lastAuthor === gitAuthorEmail ||
+    config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
     // author matches - branch has not been modified
     config.branchIsModified[branchName] = false;

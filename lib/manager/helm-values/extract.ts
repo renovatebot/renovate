@@ -21,6 +21,8 @@ function getHelmDep({
   const dep = getDep(`${registry}${repository}:${tag}`, false);
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
+  dep.autoReplaceStringTemplate =
+    '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   return dep;
 }
 

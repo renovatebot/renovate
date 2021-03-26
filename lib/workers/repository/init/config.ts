@@ -181,7 +181,7 @@ export async function mergeRenovateConfig(
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = decryptConfig(migratedConfig);
   // istanbul ignore if
-  if (decryptedConfig.npmrc) {
+  if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
@@ -191,7 +191,7 @@ export async function mergeRenovateConfig(
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
   // istanbul ignore if
-  if (resolvedConfig.npmrc) {
+  if (is.string(resolvedConfig.npmrc)) {
     logger.debug(
       'Ignoring any .npmrc files in repository due to configured npmrc'
     );
