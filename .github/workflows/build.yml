@@ -4,17 +4,14 @@ on:
   push:
     branches:
       - master
-      - 'renovate/**'
 
-  pull_request:
+  workflow_dispatch:
 
 env:
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
-  NODE_VERSION: 12
-  # https://github.com/chalk/supports-color/issues/106
-  FORCE_COLOR: true
+  NODE_VERSION: 14
 
 jobs:
   test:
@@ -26,38 +23,35 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12, ^14.15.0]
+        node-version: [14]
         python-version: [3.8]
-        java-version: [8]
-        exclude:
-          - os: windows-latest
-            node-version: 10
+        java-version: [11]
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
       NODE_VERSION: ${{ matrix.node-version }}
       PYTHON_VERSION: ${{ matrix.python-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1.4.4
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2.1.4
+        uses: actions/setup-python@v2.2.1
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
-        if: env.NODE_VERSION == '12'
+        if: env.NODE_VERSION == '14'
         uses: actions/setup-java@v1.4.3
         with:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Skip Java tests
-        if: env.NODE_VERSION != '12'
+        if: env.NODE_VERSION != '14'
         run: echo "SKIP_JAVA_TESTS=true" >> $GITHUB_ENV
 
       - name: Init platform
@@ -72,11 +66,13 @@ jobs:
           python --version
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 2
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.4
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -91,26 +87,16 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build
-        run: yarn build
-
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
-
-      - name: Upload coverage
-        uses: actions/upload-artifact@v2.2.0
-        if: always() && env.coverage == 'true'
-        with:
-          name: coverage
-          path: coverage
+        run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        shell: bash
+        uses: codecov/codecov-action@v1.3.1
         if: always() && env.coverage == 'true'
-        continue-on-error: true
-        run: bash <(curl -s https://codecov.io/bash)
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      # build after tests to exclude files
+      - name: Build
+        run: yarn build
 
       - name: E2E Test
         run: yarn test-e2e
@@ -123,7 +109,7 @@ jobs:
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1.4.4
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -137,11 +123,11 @@ jobs:
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.4
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -158,6 +144,7 @@ jobs:
 
       - name: Lint
         run: |
+          yarn ls-lint
           yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
           yarn prettier
 
@@ -175,7 +162,7 @@ jobs:
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1.4.4
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -189,12 +176,12 @@ jobs:
           npm config set scripts-prepend-node-path true
 
       # full checkout for semantic-release
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
         with:
           fetch-depth: 0
 
       - name: Cache Yarn packages
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.4
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}

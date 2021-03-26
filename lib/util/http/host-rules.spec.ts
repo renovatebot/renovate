@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITEA,
@@ -33,17 +33,27 @@ describe(getName(__filename), () => {
       password: 'password',
     });
 
+    hostRules.add({
+      hostType: 'npm',
+      authType: 'Basic',
+      token: 'XXX',
+    });
+
     httpMock.reset();
     httpMock.setup();
   });
 
   afterEach(() => {
     delete process.env.HTTP_PROXY;
+    httpMock.reset();
   });
 
   it('adds token', () => {
     expect(applyHostRules(url, { ...options })).toMatchInlineSnapshot(`
       Object {
+        "context": Object {
+          "authType": undefined,
+        },
         "hostType": "github",
         "token": "token",
       }
@@ -57,6 +67,18 @@ describe(getName(__filename), () => {
         "hostType": "gitea",
         "password": "password",
         "username": undefined,
+      }
+    `);
+  });
+
+  it('adds custom auth', () => {
+    expect(applyHostRules(url, { hostType: 'npm' })).toMatchInlineSnapshot(`
+      Object {
+        "context": Object {
+          "authType": "Basic",
+        },
+        "hostType": "npm",
+        "token": "XXX",
       }
     `);
   });

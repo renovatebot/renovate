@@ -5,15 +5,15 @@ description: PHP Composer support in Renovate
 
 # Automated Dependency Updates for PHP Composer Dependencies
 
-Renovate supports upgrading dependencies in PHP's `composer.json` files and their accompanying `composer.lock` lock files.
+Renovate can upgrade dependencies in PHP's `composer.json` and `composer.lock` files.
 
 ## How It Works
 
-1.  Renovate will search each repository for any `composer.json` files.
-2.  Existing dependencies will be extracted from the relevant sections of the JSON
-3.  Renovate will resolve the dependency on Packagist or elsewhere if configured, and filter for semver versions
-4.  A PR will be created with `composer.json` and `composer.lock` updated in the same commit
-5.  If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
+1. Renovate searches in each repository for any `composer.json` files
+1. Existing dependencies are extracted from the relevant sections of the JSON
+1. Renovate resolves the dependency on Packagist (or elsewhere if configured), and filter for SemVer versions
+1. A PR is created with `composer.json` and `composer.lock` updated in the same commit
+1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
 
 ## Enabling
 
@@ -36,9 +36,11 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
 }
 ```
 
-This host rule is best added to the bot's `config.js` config so that it is not visible to users of the repository. If you are using the hosted WhiteSource Renovate App then you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
+This host rule is best added to the bot's `config.js` config so that it is not visible to users of the repository.
+If you are using the hosted WhiteSource Renovate App then you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Go to [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste in the secret string you wish to encrypt, click _Encrypt_, then copy the encrypted result. You may encrypt your `password` only or even pass your `username` encrypted.
+Go to [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste in the secret string you wish to encrypt, click _Encrypt_, then copy the encrypted result.
+You may encrypt your `password` only, but you can encrypt your `username` as well.
 
 ```json
 {

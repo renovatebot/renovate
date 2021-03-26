@@ -1,9 +1,9 @@
 /* eslint jest/no-standalone-expect: 0 */
 import { exec as _exec } from 'child_process';
-import { resolve } from 'path';
 import { readFile } from 'fs-extra';
-import { envMock, mockExecAll } from '../../../test/execUtil';
-import * as httpMock from '../../../test/httpMock';
+import { resolve } from 'upath';
+import { envMock, mockExecAll } from '../../../test/exec-util';
+import * as httpMock from '../../../test/http-mock';
 import {
   addReplacingSerializer,
   env,
@@ -27,7 +27,7 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const fixtures = resolve(__dirname, './__fixtures__');
 const config = {
   localDir: resolve(fixtures, './testFiles'),
-  toVersion: '5.6.4',
+  newValue: '5.6.4',
 };
 const dockerConfig = { ...config, binarySource: BinarySource.Docker };
 
@@ -76,7 +76,7 @@ describe(getName(__filename), () => {
       newPackageFileContent: await readString(
         `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
       ),
-      config: { ...config, toVersion: '6.3' },
+      config: { ...config, newValue: '6.3' },
     });
 
     expect(res).toEqual(
@@ -84,14 +84,12 @@ describe(getName(__filename), () => {
         'gradle/wrapper/gradle-wrapper.properties',
         'gradlew',
         'gradlew.bat',
-      ].map((fileProjectPath) => {
-        return {
-          file: {
-            name: fileProjectPath,
-            contents: 'test',
-          },
-        };
-      })
+      ].map((fileProjectPath) => ({
+        file: {
+          name: fileProjectPath,
+          contents: 'test',
+        },
+      }))
     );
     expect(execSnapshots).toMatchSnapshot();
   });

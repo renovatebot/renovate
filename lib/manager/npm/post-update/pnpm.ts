@@ -1,10 +1,12 @@
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
+import { getAdminConfig } from '../../../config/admin';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { readFile, remove } from '../../../util/fs';
-import { PostUpdateConfig, Upgrade } from '../../common';
+import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
@@ -41,14 +43,14 @@ export async function generateLockFile(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
       },
     };
     // istanbul ignore if
-    if (global.trustLevel === 'high') {
+    if (getAdminConfig().trustLevel === 'high') {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
       execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
@@ -61,7 +63,7 @@ export async function generateLockFile(
     }
     cmd = 'pnpm';
     let args = 'install --recursive --lockfile-only';
-    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+    if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
     }
@@ -84,6 +86,9 @@ export async function generateLockFile(
     await exec(`${cmd} ${args}`, execOptions);
     lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug(
       {
         cmd,

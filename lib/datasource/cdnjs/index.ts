@@ -1,9 +1,11 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
-import { CachePromise, cacheAble } from '../cache';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'cdnjs';
+export const customRegistrySupport = false;
+export const defaultRegistryUrls = ['https://api.cdnjs.com/'];
+export const caching = true;
 
 const http = new Http(id);
 
@@ -22,22 +24,17 @@ interface CdnjsResponse {
   assets?: CdnjsAsset[];
 }
 
-async function downloadLibrary(library: string): CachePromise<CdnjsResponse> {
-  const url = `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
-  return { data: (await http.getJson<CdnjsResponse>(url)).body };
-}
-
 export async function getReleases({
   lookupName,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   // Each library contains multiple assets, so we cache at the library level instead of per-asset
   const library = lookupName.split('/')[0];
+  const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
   try {
-    const { assets, homepage, repository } = await cacheAble({
-      id,
-      lookup: library,
-      cb: downloadLibrary,
-    });
+    const { assets, homepage, repository } = (
+      await http.getJson<CdnjsResponse>(url)
+    ).body;
     if (!assets) {
       return null;
     }

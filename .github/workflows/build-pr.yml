@@ -1,0 +1,130 @@
+name: build-pr
+
+on:
+  pull_request:
+
+env:
+  YARN_MODULES_CACHE_KEY: v1
+  YARN_PACKAGE_CACHE_KEY: v1
+  YARN_CACHE_FOLDER: .cache/yarn
+  NODE_VERSION: 14
+  PYTHON_VERSION: 3.8
+  SKIP_JAVA_TESTS: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # tests shouldn't need more time
+    timeout-minutes: 30
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Init platform
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          python --version
+          echo "Yarn $(yarn --version)"
+
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 2
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Unit tests
+        run: yarn jest --logHeapUsage --maxWorkers=2 --ci
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1.3.1
+        if: always()
+
+      # build after tests to exclude files
+      - name: Build
+        run: yarn build
+
+      - name: E2E Test
+        run: yarn test-e2e
+
+  lint:
+    runs-on: ubuntu-latest
+
+    # lint shouldn't need more than 10 min
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          echo "Yarn $(yarn --version)"
+
+      - uses: actions/checkout@v2.3.4
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: |
+          yarn ls-lint
+          yarn eslint
+          yarn prettier
+
+      - name: Test schema
+        run: yarn test-schema
+
+      - name: Type check
+        run: yarn type-check

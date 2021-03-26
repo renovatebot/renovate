@@ -1,4 +1,4 @@
-import { RangeStrategy } from '..';
+import type { RangeStrategy } from '../../types';
 import swift from '.';
 
 const {
@@ -6,7 +6,7 @@ const {
   isValid,
   isVersion,
   minSatisfyingVersion,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   isLessThanRange,
   matches,
 } = swift;
@@ -68,13 +68,13 @@ describe('isValid(input)', () => {
       minSatisfyingVersion(['v1.2.3', 'v1.2.4', 'v1.2.5'], '..<"1.2.4"')
     ).toBe('1.2.3');
     expect(
-      maxSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..<"1.2.4"')
+      getSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..<"1.2.4"')
     ).toBe('1.2.3');
     expect(
-      maxSatisfyingVersion(['v1.2.3', 'v1.2.4', 'v1.2.5'], '..<"1.2.4"')
+      getSatisfyingVersion(['v1.2.3', 'v1.2.4', 'v1.2.5'], '..<"1.2.4"')
     ).toBe('1.2.3');
     expect(
-      maxSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..."1.2.4"')
+      getSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..."1.2.4"')
     ).toBe('1.2.4');
     expect(isLessThanRange('1.2.3', '..."1.2.4"')).toBe(false);
     expect(isLessThanRange('v1.2.3', '..."1.2.4"')).toBe(false);
@@ -99,12 +99,12 @@ describe('getNewValue()', () => {
       ['"1.2.3"..<"1.2.4"', 'auto', '1.2.3', '1.2.5', '"1.2.3"..<"1.2.5"'],
       ['..."1.2.4"', 'auto', '1.2.3', '1.2.5', '..."1.2.5"'],
       ['..<"1.2.4"', 'auto', '1.2.3', '1.2.5', '..<"1.2.5"'],
-    ].forEach(([range, rangeStrategy, fromVersion, toVersion, result]) => {
+    ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
       const newValue = getNewValue({
         currentValue: range,
         rangeStrategy: rangeStrategy as RangeStrategy,
-        fromVersion,
-        toVersion,
+        currentVersion,
+        newVersion,
       });
       expect(newValue).toEqual(result);
     });

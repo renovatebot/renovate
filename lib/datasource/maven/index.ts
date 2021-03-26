@@ -5,14 +5,17 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import mavenVersion from '../../versioning/maven';
+import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
-import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import { downloadHttpProtocol, isHttpResourceExists } from './util';
 
 export { id } from './common';
 
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [MAVEN_REPO];
+export const defaultVersioning = mavenVersioning.id;
 export const registryStrategy = 'merge';
 
 function containsPlaceholder(str: string): boolean {
@@ -35,40 +38,44 @@ function getMavenUrl(
   return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
+interface MavenXml {
+  authorization?: boolean;
+  xml?: XmlDocument;
+}
+
 async function downloadMavenXml(
   pkgUrl: url.URL | null
-): Promise<XmlDocument | null> {
+): Promise<MavenXml | null> {
   /* istanbul ignore if */
   if (!pkgUrl) {
-    return null;
+    return {};
   }
   let rawContent: string;
+  let authorization: boolean;
   switch (pkgUrl.protocol) {
     case 'file:':
       rawContent = await downloadFileProtocol(pkgUrl);
       break;
     case 'http:':
     case 'https:':
-      rawContent = await downloadHttpProtocol(pkgUrl);
+      ({ authorization, body: rawContent } = await downloadHttpProtocol(
+        pkgUrl
+      ));
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
-      return null;
+      return {};
     default:
-      logger.warn(
-        `Invalid protocol '${
-          pkgUrl.protocol
-        }' for Maven url: ${pkgUrl.toString()}`
-      );
-      return null;
+      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
+      return {};
   }
 
   if (!rawContent) {
     logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
-    return null;
+    return {};
   }
 
-  return new XmlDocument(rawContent);
+  return { authorization, xml: new XmlDocument(rawContent) };
 }
 
 async function getDependencyInfo(
@@ -80,7 +87,7 @@ async function getDependencyInfo(
   const path = `${version}/${dependency.name}-${version}.pom`;
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
-  const pomContent = await downloadMavenXml(pomUrl);
+  const { xml: pomContent } = await downloadMavenXml(pomUrl);
   if (!pomContent) {
     return result;
   }
@@ -158,13 +165,17 @@ async function getVersionsFromMetadata(
     return cachedVersions;
   }
 
-  const mavenMetadata = await downloadMavenXml(metadataUrl);
+  const { authorization, xml: mavenMetadata } = await downloadMavenXml(
+    metadataUrl
+  );
   if (!mavenMetadata) {
     return null;
   }
 
   const versions = extractVersions(mavenMetadata);
-  await packageCache.set(cacheNamespace, cacheKey, versions, 30);
+  if (!authorization) {
+    await packageCache.set(cacheNamespace, cacheKey, versions, 30);
+  }
   return versions;
 }
 
@@ -202,9 +213,10 @@ async function filterMissingArtifacts(
 ): Promise<Release[]> {
   const cacheNamespace = 'datasource-maven-metadata';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-  let artifactsInfo: ArtifactsInfo | null = await packageCache.get<
-    ArtifactsInfo
-  >(cacheNamespace, cacheKey);
+  let artifactsInfo: ArtifactsInfo | null = await packageCache.get<ArtifactsInfo>(
+    cacheNamespace,
+    cacheKey
+  );
 
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
     const queue = versions

@@ -1,5 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
+import { lt } from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -10,13 +11,13 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
-import {
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -31,10 +32,10 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
+import { smartLinks } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -45,11 +46,13 @@ interface GiteaRepoConfig {
   issueList: Promise<Issue[]> | null;
   labelList: Promise<helper.Label[]> | null;
   defaultBranch: string;
+  cloneSubmodules: boolean;
 }
 
 const defaults = {
   hostType: PLATFORM_TYPE_GITEA,
   endpoint: 'https://gitea.com/api/v1/',
+  version: '0.0.0',
 };
 
 let config: GiteaRepoConfig = {} as any;
@@ -154,9 +157,9 @@ function getLabelList(): Promise<helper.Label[]> {
         return [];
       });
 
-    config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) => {
-      return [].concat(...labels);
-    });
+    config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
+      [].concat(...labels)
+    );
   }
 
   return config.labelList;
@@ -190,6 +193,7 @@ const platform: Platform = {
       gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
+      defaults.version = await helper.getVersion({ token });
     } catch (err) {
       logger.debug(
         { err },
@@ -217,12 +221,17 @@ const platform: Platform = {
     }
   },
 
-  async initRepo({ repository, localDir }: RepoParams): Promise<RepoResult> {
+  async initRepo({
+    repository,
+    localDir,
+    cloneSubmodules,
+  }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
     config = {} as any;
     config.repository = repository;
     config.localDir = localDir;
+    config.cloneSubmodules = cloneSubmodules;
 
     // Attempt to fetch information about repository
     try {
@@ -305,7 +314,10 @@ const platform: Platform = {
   async getRepos(): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
     try {
-      const repos = await helper.searchRepos({ uid: botUserID });
+      const repos = await helper.searchRepos({
+        uid: botUserID,
+        archived: false,
+      });
       return repos.map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
@@ -590,12 +602,14 @@ const platform: Platform = {
   async ensureIssue({
     title,
     reuseTitle,
-    body,
+    body: content,
     shouldReOpen,
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
     logger.debug(`ensureIssue(${title})`);
     try {
+      const body = smartLinks(content);
+
       const issueList = await platform.getIssueList();
       let issues = issueList.filter((i) => i.title === title);
       if (!issues.length) {
@@ -720,14 +734,14 @@ const platform: Platform = {
           { repository: config.repository, issue, comment: c.id },
           'Comment added'
         );
-      } else if (comment.body !== body) {
+      } else if (comment.body === body) {
+        logger.debug(`Comment #${comment.id} is already up-to-date`);
+      } else {
         const c = await helper.updateComment(config.repository, issue, body);
         logger.debug(
           { repository: config.repository, issue, comment: c.id },
           'Comment updated'
         );
-      } else {
-        logger.debug(`Comment #${comment.id} is already up-to-date`);
       }
 
       return true;
@@ -782,21 +796,24 @@ const platform: Platform = {
     });
   },
 
-  addReviewers(number: number, reviewers: string[]): Promise<void> {
-    // Adding reviewers to a PR through API is not supported by Gitea as of today
-    // See tracking issue: https://github.com/go-gitea/gitea/issues/5733
-    logger.debug(
-      `Updating reviewers '${reviewers?.join(', ')}' on Pull Request #${number}`
-    );
-    logger.warn('Unimplemented in Gitea: Reviewers');
-    return Promise.resolve();
+  async addReviewers(number: number, reviewers: string[]): Promise<void> {
+    logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
+    if (lt(defaults.version, '1.14.0')) {
+      logger.debug(
+        { version: defaults.version },
+        'Adding reviewer not yet supported.'
+      );
+      return;
+    }
+    try {
+      await helper.requestPrReviewers(config.repository, number, { reviewers });
+    } catch (err) {
+      logger.warn({ err, number, reviewers }, 'Failed to assign reviewer');
+    }
   },
 
-  getPrBody(prBody: string): string {
-    return smartTruncate(
-      prBody.replace(/\]\(\.\.\/pull\//g, '](pulls/'),
-      1000000
-    );
+  massageMarkdown(prBody: string): string {
+    return smartTruncate(smartLinks(prBody), 1000000);
   },
 
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
@@ -822,7 +839,7 @@ export const {
   getJsonFile,
   getIssueList,
   getPr,
-  getPrBody,
+  massageMarkdown,
   getPrList,
   getRepoForceRebase,
   getRepos,

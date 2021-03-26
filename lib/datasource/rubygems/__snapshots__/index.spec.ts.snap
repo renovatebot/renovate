@@ -2,7 +2,7 @@
 
 exports[`datasource/rubygems getReleases returns a dep for rubygems.org package hit 1`] = `
 Object {
-  "name": "1pass",
+  "registryUrl": "https://rubygems.org",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -101,6 +101,7 @@ Array [
 exports[`datasource/rubygems getReleases uses multiple source urls 1`] = `
 Object {
   "homepage": "http://rubyonrails.org",
+  "registryUrl": "https://firstparty.com/basepath/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
@@ -2520,7 +2521,7 @@ Array [
 
 exports[`datasource/rubygems getReleases uses rubygems.org if no registry urls were provided 1`] = `
 Object {
-  "name": "1pass",
+  "registryUrl": "https://rubygems.org",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -2550,6 +2551,7 @@ Array [
 exports[`datasource/rubygems getReleases works with real data 1`] = `
 Object {
   "homepage": "http://rubyonrails.org",
+  "registryUrl": "https://thirdparty.com",
   "releases": Array [
     Object {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",

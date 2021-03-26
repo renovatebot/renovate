@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
@@ -190,7 +190,6 @@ describe('.updateArtifacts()', () => {
     await setExecConfig({
       ...config,
       binarySource: 'docker',
-      dockerUser: 'ubuntu',
     });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
@@ -215,7 +214,6 @@ describe('.updateArtifacts()', () => {
     await setExecConfig({
       ...config,
       binarySource: 'docker',
-      dockerUser: 'ubuntu',
     });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);

@@ -2,7 +2,7 @@
 
 exports[`datasource/terraform getReleases processes data with alternative backend 1`] = `
 Object {
-  "name": "hashicorp/google-beta",
+  "registryUrl": "https://releases.hashicorp.com",
   "releases": Array [
     Object {
       "version": "1.19.0",
@@ -15,7 +15,6 @@ Object {
     },
   ],
   "sourceUrl": "https://github.com/terraform-providers/terraform-provider-google-beta",
-  "versions": Object {},
 }
 `;
 
@@ -57,7 +56,7 @@ Array [
 exports[`datasource/terraform getReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/providers/hashicorp/azurerm",
-  "name": "hashicorp/azurerm",
+  "registryUrl": "https://registry.terraform.io",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -252,12 +251,11 @@ Object {
       "version": "1.36.1",
     },
     Object {
-      "releaseTimestamp": "2019-11-26T08:22:56Z",
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
       "version": "1.37.0",
     },
   ],
   "sourceUrl": "https://github.com/terraform-providers/terraform-provider-azurerm",
-  "versions": Object {},
 }
 `;
 
@@ -289,7 +287,7 @@ Array [
 exports[`datasource/terraform getReleases processes real data from lookupName 1`] = `
 Object {
   "homepage": "https://registry.company.com/providers/hashicorp/azurerm",
-  "name": "hashicorp/azurerm",
+  "registryUrl": "https://registry.company.com",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -484,12 +482,11 @@ Object {
       "version": "1.36.1",
     },
     Object {
-      "releaseTimestamp": "2019-11-26T08:22:56Z",
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
       "version": "1.37.0",
     },
   ],
   "sourceUrl": "https://github.com/terraform-providers/terraform-provider-azurerm",
-  "versions": Object {},
 }
 `;
 

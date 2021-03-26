@@ -1,5 +1,8 @@
 import { quote } from 'shlex';
-import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
+import {
+  BUNDLER_INVALID_CREDENTIALS,
+  TEMPORARY_ERROR,
+} from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
@@ -12,7 +15,7 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { isValid } from '../../versioning/ruby';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
@@ -121,9 +124,13 @@ export async function updateArtifacts(
 
     const bundlerHostRulesVariables = findAllAuthenticatable({
       hostType: 'bundler',
-    }).reduce((variables, hostRule) => {
-      return { ...variables, ...buildBundleHostVariable(hostRule) };
-    }, {} as Record<string, string>);
+    }).reduce(
+      (variables, hostRule) => ({
+        ...variables,
+        ...buildBundleHostVariable(hostRule),
+      }),
+      {} as Record<string, string>
+    );
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -132,7 +139,7 @@ export async function updateArtifacts(
         GEM_HOME: await getGemHome(config),
       },
       docker: {
-        image: 'renovate/ruby',
+        image: 'ruby',
         tagScheme: 'ruby',
         tagConstraint: await getRubyConstraint(updateArtifact),
         preCommands,
@@ -154,6 +161,9 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
       err.message.includes('fatal: Could not parse object') ||

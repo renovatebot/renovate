@@ -1,9 +1,10 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
-describe('platform/gitea/gitea-helper', () => {
+describe(getName(__filename), () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
@@ -143,6 +144,9 @@ describe('platform/gitea/gitea-helper', () => {
     httpMock.setup();
     setBaseUrl(baseUrl);
   });
+  afterEach(() => {
+    httpMock.reset();
+  });
 
   describe('getCurrentUser', () => {
     it('should call /api/v1/user endpoint', async () => {
@@ -151,6 +155,17 @@ describe('platform/gitea/gitea-helper', () => {
       const res = await ght.getCurrentUser();
       expect(res).toEqual(mockUser);
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('getVersion', () => {
+    it('should call /api/v1/version endpoint', async () => {
+      const version = '1.13.01.14.0+dev-754-g5d2b7ba63';
+      httpMock.scope(baseUrl).get('/version').reply(200, { version });
+
+      const res = await ght.getVersion();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).toEqual(version);
     });
   });
 
@@ -172,7 +187,7 @@ describe('platform/gitea/gitea-helper', () => {
     it('should construct proper query parameters', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/repos/search?uid=13')
+        .get('/repos/search?uid=13&archived=false')
         .reply(200, {
           ok: true,
           data: [otherMockRepo],
@@ -180,6 +195,7 @@ describe('platform/gitea/gitea-helper', () => {
 
       const res = await ght.searchRepos({
         uid: 13,
+        archived: false,
       });
       expect(res).toEqual([otherMockRepo]);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -367,6 +383,20 @@ describe('platform/gitea/gitea-helper', () => {
 
       const res = await ght.getPR(mockRepo.full_name, mockPR.number);
       expect(res).toEqual(mockPR);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('addReviewers', () => {
+    it('should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.number}/requested_reviewers`
+        )
+        .reply(200);
+
+      await ght.requestPrReviewers(mockRepo.full_name, mockPR.number, {});
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

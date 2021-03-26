@@ -1,0 +1,210 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/presets/gitea/index fetchJSONFile() returns JSON 1`] = `
+Object {
+  "from": "api",
+}
+`;
+
+exports[`config/presets/gitea/index fetchJSONFile() returns JSON 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/some-filename.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() should query custom paths 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/path%2Fcustom.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() should query preset within the file 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/somefile.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() should query subpreset 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/somefile.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() should return custom.json 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/custom.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() should return default.json 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/default.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() should throws not-found 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/somefile.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() throws if fails to parse 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/default.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() throws if no content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/default.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPreset() tries default then renovate 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/default.json?",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/renovate.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPresetFromEndpoint() uses custom endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.gitea.example.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.gitea.example.org/repos/some/repo/contents/default.json?",
+  },
+]
+`;
+
+exports[`config/presets/gitea/index getPresetFromEndpoint() uses default endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "gitea.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.com/api/v1/repos/some/repo/contents/default.json?",
+  },
+]
+`;

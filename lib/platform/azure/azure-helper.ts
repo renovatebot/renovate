@@ -26,12 +26,12 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   if (!config.token && config.username && config.password) {
     authType = 'basic';
     authValue = toBase64(`${config.username}:${config.password}`);
-  } else if (config.token.length !== 52) {
-    authType = 'bearer';
-    authValue = config.token;
-  } else {
+  } else if (config.token.length === 52) {
     authType = 'basic';
     authValue = toBase64(`:${config.token}`);
+  } else {
+    authType = 'bearer';
+    authValue = config.token;
   }
   add(authValue);
   return {
@@ -177,17 +177,42 @@ export function getProjectAndRepo(
 
 export async function getMergeMethod(
   repoId: string,
-  project: string
+  project: string,
+  branchRef?: string
 ): Promise<GitPullRequestMergeStrategy> {
+  type Scope = {
+    repositoryId: string;
+    refName?: string;
+    matchKind: 'Prefix' | 'Exact';
+  };
+  const isRelevantScope = (scope: Scope): boolean => {
+    if (scope.repositoryId !== repoId) {
+      return false;
+    }
+    if (!branchRef) {
+      return true;
+    }
+    return scope.matchKind === 'Exact'
+      ? scope.refName === branchRef
+      : branchRef.startsWith(scope.refName);
+  };
+
   const policyConfigurations = (
     await (await azureApi.policyApi()).getPolicyConfigurations(project)
   )
     .filter(
       (p) =>
-        p.settings.scope.some((s) => s.repositoryId === repoId) &&
-        p.type.id === mergePolicyGuid
+        p.settings.scope.some(isRelevantScope) && p.type.id === mergePolicyGuid
     )
     .map((p) => p.settings)[0];
+
+  logger.trace(
+    `getMergeMethod(${repoId}, ${project}, ${branchRef}) determining mergeMethod from matched policy:\n${JSON.stringify(
+      policyConfigurations,
+      null,
+      4
+    )}`
+  );
 
   try {
     return Object.keys(policyConfigurations)

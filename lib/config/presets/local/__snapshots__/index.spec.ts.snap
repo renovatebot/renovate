@@ -5,6 +5,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     "https://git.example.com",
   ],
 ]
@@ -12,11 +13,25 @@ Array [
 
 exports[`config/presets/local/index getPreset() forwards to custom bitbucket-server 2`] = `undefined`;
 
+exports[`config/presets/local/index getPreset() forwards to custom gitea 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "default",
+    undefined,
+    "https://api.gitea.example.com",
+  ],
+]
+`;
+
+exports[`config/presets/local/index getPreset() forwards to custom gitea 2`] = `undefined`;
+
 exports[`config/presets/local/index getPreset() forwards to custom github 1`] = `
 Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     "https://api.github.example.com",
   ],
 ]
@@ -33,6 +48,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     "https://gitlab.example.com/api/v4",
   ],
 ]
@@ -44,11 +60,25 @@ Object {
 }
 `;
 
+exports[`config/presets/local/index getPreset() forwards to gitea 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "default",
+    undefined,
+    undefined,
+  ],
+]
+`;
+
+exports[`config/presets/local/index getPreset() forwards to gitea 2`] = `undefined`;
+
 exports[`config/presets/local/index getPreset() forwards to github 1`] = `
 Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     undefined,
   ],
 ]
@@ -65,6 +95,7 @@ Array [
   Array [
     "some/repo",
     "default",
+    undefined,
     undefined,
   ],
 ]

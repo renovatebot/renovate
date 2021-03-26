@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { GiteaHttp, setBaseUrl } from './gitea';
 
@@ -16,6 +16,10 @@ describe(getName(__filename), () => {
     httpMock.setup();
 
     setBaseUrl(baseUrl);
+  });
+
+  afterEach(() => {
+    httpMock.reset();
   });
 
   it('supports responses without pagination when enabled', async () => {

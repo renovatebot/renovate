@@ -2,14 +2,17 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'galaxy';
+export const defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+export const customRegistrySupport = false;
 
 const http = new Http(id);
 
 export async function getReleases({
   lookupName,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-galaxy';
   const cacheKey = lookupName;
@@ -26,14 +29,13 @@ export async function getReleases({
   const userName = lookUp[0];
   const projectName = lookUp[1];
 
-  const baseUrl = 'https://galaxy.ansible.com/';
   const galaxyAPIUrl =
-    baseUrl +
+    registryUrl +
     'api/v1/roles/?owner__username=' +
     userName +
     '&name=' +
     projectName;
-  const galaxyProjectUrl = baseUrl + userName + '/' + projectName;
+  const galaxyProjectUrl = registryUrl + userName + '/' + projectName;
   try {
     let res: any = await http.get(galaxyAPIUrl);
     if (!res || !res.body) {

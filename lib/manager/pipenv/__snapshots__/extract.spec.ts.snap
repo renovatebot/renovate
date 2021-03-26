@@ -2,6 +2,9 @@
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts dependencies 1`] = `
 Object {
+  "constraints": Object {
+    "python": "== 3.6.*",
+  },
   "deps": Array [
     Object {
       "currentValue": "==0.3.1",
@@ -48,6 +51,9 @@ Object {
       "managerData": Object {},
     },
   ],
+  "lockFiles": Array [
+    "Pipfile.lock",
+  ],
   "registryUrls": Array [
     "https://pypi.org/simple",
     "http://example.com/private-pypi/",
@@ -57,6 +63,9 @@ Object {
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts example pipfile 1`] = `
 Object {
+  "constraints": Object {
+    "python": "== 2.7.*",
+  },
   "deps": Array [
     Object {
       "depName": "requests",
@@ -118,6 +127,9 @@ Object {
       },
     },
   ],
+  "lockFiles": Array [
+    "Pipfile.lock",
+  ],
   "registryUrls": Array [
     "https://pypi.python.org/simple",
   ],
@@ -126,6 +138,9 @@ Object {
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
 Object {
+  "constraints": Object {
+    "python": "== 3.6.*",
+  },
   "deps": Array [
     Object {
       "currentValue": "==1",
@@ -163,6 +178,9 @@ Object {
       "managerData": Object {},
     },
   ],
+  "lockFiles": Array [
+    "Pipfile.lock",
+  ],
   "registryUrls": Array [
     "https://pypi.org/simple",
   ],
@@ -171,6 +189,7 @@ Object {
 
 exports[`lib/manager/pipenv/extract extractPackageFile() supports custom index 1`] = `
 Object {
+  "constraints": Object {},
   "deps": Array [
     Object {
       "currentValue": "==0.21.0",
@@ -184,6 +203,9 @@ Object {
         "https://testpypi.python.org/pypi",
       ],
     },
+  ],
+  "lockFiles": Array [
+    "Pipfile.lock",
   ],
   "registryUrls": Array [
     "https://pypi.python.org/simple",

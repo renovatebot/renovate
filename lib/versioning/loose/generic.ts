@@ -1,4 +1,4 @@
-import { NewValueConfig, VersioningApi } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export interface GenericVersion {
   release: number[];
@@ -77,15 +77,15 @@ export const comparer = (
   }
 
   // we don't not have ranges, so versions has to be equal
-  function maxSatisfyingVersion(versions: string[], range: string): string {
+  function getSatisfyingVersion(versions: string[], range: string): string {
     return versions.find((v) => equals(v, range)) || null;
   }
   function minSatisfyingVersion(versions: string[], range: string): string {
     return versions.find((v) => equals(v, range)) || null;
   }
   function getNewValue(newValueConfig: NewValueConfig): string {
-    const { toVersion } = newValueConfig || {};
-    return toVersion;
+    const { newVersion } = newValueConfig || {};
+    return newVersion;
   }
   function sortVersions(version: string, other: string): number {
     return compare(version, other);
@@ -96,7 +96,7 @@ export const comparer = (
     isGreaterThan,
     isLessThanRange,
     matches: equals,
-    maxSatisfyingVersion,
+    getSatisfyingVersion,
     minSatisfyingVersion,
     getNewValue,
     sortVersions,
@@ -181,7 +181,7 @@ export abstract class GenericVersioningApi<
     return this._compare(version, range) < 0;
   }
 
-  maxSatisfyingVersion(versions: string[], range: string): string | null {
+  getSatisfyingVersion(versions: string[], range: string): string | null {
     return versions.find((v) => this.equals(v, range)) || null;
   }
 
@@ -191,8 +191,8 @@ export abstract class GenericVersioningApi<
 
   // eslint-disable-next-line class-methods-use-this
   getNewValue(newValueConfig: NewValueConfig): string {
-    const { toVersion } = newValueConfig || {};
-    return toVersion;
+    const { newVersion } = newValueConfig || {};
+    return newVersion;
   }
 
   sortVersions(version: string, other: string): number {

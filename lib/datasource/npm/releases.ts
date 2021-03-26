@@ -1,4 +1,4 @@
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { getDependency } from './get';
 import { setNpmrc } from './npmrc';
 
@@ -13,7 +13,6 @@ export async function getReleases({
   if (res) {
     res.tags = res['dist-tags'];
     delete res['dist-tags'];
-    delete res['renovate-config'];
   }
   return res;
 }

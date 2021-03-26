@@ -1,7 +1,9 @@
+import is from '@sindresorhus/is';
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { PackageDependency, PackageFile } from '../common';
+import * as ubuntuVersioning from '../../versioning/ubuntu';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
@@ -34,6 +36,11 @@ export function getDep(
   currentFrom: string,
   specifyReplaceString = true
 ): PackageDependency {
+  if (!is.string(currentFrom)) {
+    return {
+      skipReason: SkipReason.InvalidValue,
+    };
+  }
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
     dep.replaceString = currentFrom;
@@ -48,62 +55,71 @@ export function getDep(
   ) {
     dep.commitMessageTopic = 'Node.js';
   }
+
+  if (dep.depName === 'ubuntu') {
+    dep.versioning = ubuntuVersioning.id;
+  }
   return dep;
 }
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
-  let lineNumber = 0;
-  for (const fromLine of content.split('\n')) {
-    const fromMatch = /^FROM /i.test(fromLine);
-    if (fromMatch) {
-      logger.trace({ lineNumber, fromLine }, 'FROM line');
-      const [, currentFrom, ...fromRest] = fromLine.match(/\S+/g);
-      if (fromRest.length === 2 && fromRest[0].toLowerCase() === 'as') {
-        logger.debug('Found a multistage build stage name');
-        stageNames.push(fromRest[1]);
-      }
-      if (currentFrom === 'scratch') {
-        logger.debug('Skipping scratch');
-      } else if (stageNames.includes(currentFrom)) {
-        logger.debug({ currentFrom }, 'Skipping alias FROM');
-      } else {
-        const dep = getDep(currentFrom);
-        logger.trace(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-            currentDigest: dep.currentDigest,
-          },
-          'Dockerfile FROM'
-        );
-        deps.push(dep);
-      }
-    }
 
-    const copyFromMatch = /^(COPY --from=)([^\s]+)\s+(.*)$/i.exec(fromLine);
-    if (copyFromMatch) {
-      const [, , currentFrom] = copyFromMatch;
-      logger.trace({ lineNumber, fromLine }, 'COPY --from line');
-      if (stageNames.includes(currentFrom)) {
-        logger.debug({ currentFrom }, 'Skipping alias COPY --from');
-      } else if (!Number.isNaN(Number(currentFrom))) {
-        logger.debug({ currentFrom }, 'Skipping index reference COPY --from');
-      } else {
-        const dep = getDep(currentFrom);
-        logger.debug(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-            currentDigest: dep.currentDigest,
-          },
-          'Dockerfile COPY --from'
-        );
-        deps.push(dep);
-      }
+  const fromMatches = content.matchAll(
+    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\w+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim
+  );
+
+  for (const fromMatch of fromMatches) {
+    if (fromMatch.groups.name) {
+      logger.debug('Found a multistage build stage name');
+      stageNames.push(fromMatch.groups.name);
     }
-    lineNumber += 1;
+    if (fromMatch.groups.image === 'scratch') {
+      logger.debug('Skipping scratch');
+    } else if (stageNames.includes(fromMatch.groups.image)) {
+      logger.debug({ image: fromMatch.groups.image }, 'Skipping alias FROM');
+    } else {
+      const dep = getDep(fromMatch.groups.image);
+      logger.trace(
+        {
+          depName: dep.depName,
+          currentValue: dep.currentValue,
+          currentDigest: dep.currentDigest,
+        },
+        'Dockerfile FROM'
+      );
+      deps.push(dep);
+    }
+  }
+
+  const copyFromMatches = content.matchAll(
+    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|[ \t]--[a-z]+=\w+?)*[ \t]--from=(?<image>\S+)/gim
+  );
+
+  for (const copyFromMatch of copyFromMatches) {
+    if (stageNames.includes(copyFromMatch.groups.image)) {
+      logger.debug(
+        { image: copyFromMatch.groups.image },
+        'Skipping alias COPY --from'
+      );
+    } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
+      const dep = getDep(copyFromMatch.groups.image);
+      logger.debug(
+        {
+          depName: dep.depName,
+          currentValue: dep.currentValue,
+          currentDigest: dep.currentDigest,
+        },
+        'Dockerfile COPY --from'
+      );
+      deps.push(dep);
+    } else {
+      logger.debug(
+        { image: copyFromMatch.groups.image },
+        'Skipping index reference COPY --from'
+      );
+    }
   }
   if (!deps.length) {
     return null;

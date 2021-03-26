@@ -1,4 +1,4 @@
-import { Preset } from '../common';
+import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   base: {
@@ -18,6 +18,7 @@ export const presets: Record<string, Preset> = {
       'group:monorepos',
       'group:recommended',
       'helpers:disableTypesNodeMajor',
+      'workarounds:all',
     ],
   },
   'base-js': {

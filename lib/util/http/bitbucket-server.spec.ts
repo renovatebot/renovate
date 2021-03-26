@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import * as hostRules from '../host-rules';
@@ -26,6 +26,9 @@ describe(getName(__filename), () => {
     httpMock.setup();
 
     setBaseUrl(baseUrl);
+  });
+  afterEach(() => {
+    httpMock.reset();
   });
   it('posts', async () => {
     const body = ['a', 'b'];

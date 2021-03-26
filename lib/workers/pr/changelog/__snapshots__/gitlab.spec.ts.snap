@@ -190,6 +190,49 @@ Object {
 }
 `;
 
+exports[`workers/pr/changelog/gitlab getChangeLogJSON supports self-hosted gitlab changelog 1`] = `
+Object {
+  "hasReleaseNotes": false,
+  "project": Object {
+    "apiBaseUrl": "https://git.test.com/api/v4/",
+    "baseUrl": "https://git.test.com/",
+    "depName": "renovate",
+    "gitlab": "meno/dropzone",
+    "repository": "https://git.test.com/meno/dropzone/",
+  },
+  "versions": Array [
+    Object {
+      "changes": Array [],
+      "compare": Object {},
+      "date": undefined,
+      "releaseNotes": null,
+      "version": "5.6.1",
+    },
+    Object {
+      "changes": Array [],
+      "compare": Object {},
+      "date": "2020-02-13T15:37:00.000Z",
+      "releaseNotes": null,
+      "version": "5.6.0",
+    },
+    Object {
+      "changes": Array [],
+      "compare": Object {},
+      "date": undefined,
+      "releaseNotes": null,
+      "version": "5.5.0",
+    },
+    Object {
+      "changes": Array [],
+      "compare": Object {},
+      "date": "2018-08-24T14:23:00.000Z",
+      "releaseNotes": null,
+      "version": "5.4.0",
+    },
+  ],
+}
+`;
+
 exports[`workers/pr/changelog/gitlab getChangeLogJSON uses GitLab tags 1`] = `
 Object {
   "hasReleaseNotes": true,

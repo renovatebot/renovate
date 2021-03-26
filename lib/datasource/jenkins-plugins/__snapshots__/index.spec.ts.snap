@@ -2,7 +2,6 @@
 
 exports[`datasource/jenkins-plugins/index getReleases returns package releases for a hit for info and miss for releases 1`] = `
 Object {
-  "name": "email-ext",
   "releases": Array [],
   "sourceUrl": "https://github.com/jenkinsci/email-ext-plugin",
 }
@@ -10,11 +9,10 @@ Object {
 
 exports[`datasource/jenkins-plugins/index getReleases returns package releases for a hit for info and releases 1`] = `
 Object {
-  "name": "email-ext",
+  "registryUrl": "https://updates.jenkins.io/",
   "releases": Array [
     Object {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.10/email-ext.hpi",
-      "releaseTimestamp": null,
       "version": "2.10",
     },
     Object {

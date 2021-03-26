@@ -1,6 +1,6 @@
 import fs from 'fs';
-import path from 'path';
 import nock from 'nock';
+import upath from 'upath';
 import { getPkgReleases } from '..';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
@@ -8,12 +8,12 @@ import { parseIndexDir } from '../sbt-plugin/util';
 import * as sbtPlugin from '.';
 
 const mavenIndexHtml = fs.readFileSync(
-  path.resolve(__dirname, `./__fixtures__/maven-index.html`),
+  upath.resolve(__dirname, `./__fixtures__/maven-index.html`),
   'utf8'
 );
 
 const sbtPluginIndex = fs.readFileSync(
-  path.resolve(__dirname, `./__fixtures__/sbt-plugins-index.html`),
+  upath.resolve(__dirname, `./__fixtures__/sbt-plugins-index.html`),
   'utf8'
 );
 
@@ -180,9 +180,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest',
-        group: 'org.scalatest',
-        name: 'scalatest',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '1.2.0' }, { version: '1.2.3' }],
       });
       expect(
@@ -194,9 +192,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest_2.12',
-        group: 'org.scalatest',
-        name: 'scalatest_2.12',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '1.2.3' }],
       });
     });
@@ -211,9 +207,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest-app_2.12',
-        group: 'org.scalatest',
-        name: 'scalatest-app_2.12',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '6.5.4' }],
         homepage: 'http://www.scalatest.org',
         sourceUrl: 'https://github.com/scalatest/scalatest',
@@ -227,9 +221,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest-flatspec_2.12',
-        group: 'org.scalatest',
-        name: 'scalatest-flatspec_2.12',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '6.5.4' }],
         sourceUrl: 'https://github.com/scalatest/scalatest',
       });
@@ -242,9 +234,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
-        display: 'org.scalatest:scalatest-matchers-core_2.12',
-        group: 'org.scalatest',
-        name: 'scalatest-matchers-core_2.12',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '6.5.4' }],
         homepage: 'http://www.scalatest.org',
       });

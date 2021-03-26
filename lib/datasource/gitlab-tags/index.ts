@@ -1,11 +1,12 @@
 import URL from 'url';
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 const gitlabApi = new GitlabHttp();
 
 export const id = 'gitlab-tags';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://gitlab.com'];
 export const registryStrategy = 'first';
 

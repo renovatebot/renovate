@@ -243,6 +243,9 @@ COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data
 
+# openresty/headers-more-nginx-module
+
+ENV NGINX_MODULE_HEADERS_MORE_VERSION=0.30 # github-tags/openresty/headers-more-nginx-module&versioning=loose&extractVersion=^v(?<version>.*)$
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
 USER 1000

@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
-import { RenovateConfig } from '../../../config/common';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
   extractPackageFile,
   get,
 } from '../../../manager';
-import { PackageFile } from '../../../manager/common';
+import type { PackageFile } from '../../../manager/types';
 import { readLocalFile } from '../../../util/fs';
 
 export async function getManagerPackageFiles(
@@ -60,7 +60,6 @@ export async function getManagerPackageFiles(
         }
         packageFiles.push({
           packageFile,
-          manager,
           ...res,
         });
       }

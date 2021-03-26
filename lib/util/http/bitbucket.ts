@@ -1,8 +1,8 @@
-import { URL } from 'url';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.bitbucket.org/';
+
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };

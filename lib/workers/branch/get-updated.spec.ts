@@ -1,18 +1,21 @@
 import { defaultConfig, git, mocked } from '../../../test/util';
-import * as datasourceGitSubmodules from '../../datasource/git-submodules';
+import * as datasourceGitRefs from '../../datasource/git-refs';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
+import * as _helmv3 from '../../manager/helmv3';
 import * as _npm from '../../manager/npm';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
 
 const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
+const helmv3 = mocked(_helmv3);
 const npm = mocked(_npm);
 const autoReplace = mocked(_autoReplace);
 
 jest.mock('../../manager/composer');
+jest.mock('../../manager/helmv3');
 jest.mock('../../manager/npm');
 jest.mock('../../manager/git-submodules');
 jest.mock('../../util/git');
@@ -108,6 +111,30 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
+    it('handles isRemediation success', async () => {
+      config.upgrades.push({
+        manager: 'npm',
+        isRemediation: true,
+      } as never);
+      npm.updateLockedDependency.mockResolvedValueOnce({
+        'package-lock.json': 'new contents',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles isRemediation rebase', async () => {
+      config.upgrades.push({
+        manager: 'npm',
+        isRemediation: true,
+      } as never);
+      config.reuseExistingBranch = true;
+      git.getFile.mockResolvedValueOnce('existing content');
+      npm.updateLockedDependency.mockResolvedValue({
+        'package-lock.json': 'new contents',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
     it('handles lockFileMaintenance error', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -145,7 +172,7 @@ describe('workers/branch/get-updated', () => {
     it('handles git submodules', async () => {
       config.upgrades.push({
         manager: 'git-submodules',
-        datasource: datasourceGitSubmodules.id,
+        datasource: datasourceGitRefs.id,
       } as never);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
@@ -166,6 +193,30 @@ describe('workers/branch/get-updated', () => {
           },
         },
       ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('bumps versions in updateDependency managers', async () => {
+      config.upgrades.push({
+        branchName: undefined,
+        bumpVersion: 'patch',
+        manager: 'npm',
+      });
+      npm.updateDependency.mockReturnValue('old version');
+      npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('bumps versions in autoReplace managers', async () => {
+      config.upgrades.push({
+        branchName: undefined,
+        bumpVersion: 'patch',
+        manager: 'helmv3',
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
+      helmv3.bumpPackageVersion.mockReturnValue({
+        bumpedContent: 'version: 0.0.2',
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });

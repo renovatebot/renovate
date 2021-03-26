@@ -1,31 +1,37 @@
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
-import { BranchUpgradeConfig } from '../../common';
-import { ChangeLogResult } from './common';
+import type { BranchUpgradeConfig } from '../../types';
 import { getInRangeReleases } from './releases';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
+import type { ChangeLogResult } from './types';
 
-export * from './common';
+export * from './types';
 
 export async function getChangeLogJSON(
   args: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
-  const { sourceUrl, versioning, fromVersion, toVersion } = args;
+  const { sourceUrl, versioning, currentVersion, newVersion } = args;
   try {
-    if (!(sourceUrl && fromVersion && toVersion)) {
+    if (!(sourceUrl && currentVersion && newVersion)) {
       return null;
     }
     const version = allVersioning.get(versioning);
-    if (version.equals(fromVersion, toVersion)) {
+    if (version.equals(currentVersion, newVersion)) {
       return null;
     }
-
+    logger.debug(
+      `Fetching changelog: ${sourceUrl} (${currentVersion} -> ${newVersion})`
+    );
     const releases = args.releases || (await getInRangeReleases(args));
 
     let res: ChangeLogResult | null = null;
 
-    if (args.sourceUrl?.includes('gitlab')) {
+    if (
+      args.sourceUrl?.includes('gitlab') ||
+      (args.platform === 'gitlab' &&
+        new URL(args.sourceUrl).hostname === new URL(args.endpoint).hostname)
+    ) {
       res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
     } else {
       res = await sourceGithub.getChangeLogJSON({ ...args, releases });

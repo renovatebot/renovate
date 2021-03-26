@@ -1,11 +1,15 @@
 import is from '@sindresorhus/is';
 import { getManagerList } from '../manager';
-import { regEx } from '../util/regex';
+import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import { RenovateConfig, ValidationMessage } from './common';
-import { RenovateOptions, getOptions } from './definitions';
+import { getOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
+import type {
+  RenovateConfig,
+  RenovateOptions,
+  ValidationMessage,
+} from './types';
 import * as managerValidator from './validation-helpers/managers';
 
 const options = getOptions();
@@ -45,6 +49,8 @@ export async function validateConfig(
       branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
       commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
       prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
+      yarnrc:
+        'Use of `yarnrc` in config is deprecated. Please commit it to your repository instead.',
     };
     return deprecatedOptions[option];
   }
@@ -59,6 +65,7 @@ export async function validateConfig(
       'repository',
       'vulnerabilityAlertsOnly',
       'vulnerabilityAlert',
+      'isVulnerabilityAlert',
       'copyLocalLibs', // deprecated - functionality is now enabled by default
       'prBody', // deprecated
     ];
@@ -121,9 +128,9 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = template.compile(val.toString(), config);
-          res = template.compile(res, config);
-          template.compile(res, config);
+          let res = template.compile(val.toString(), config, false);
+          res = template.compile(res, config, false);
+          template.compile(res, config, false);
         } catch (err) {
           errors.push({
             depName: 'Configuration Error',
@@ -145,30 +152,10 @@ export async function validateConfig(
           });
         }
       } else if (
-        key === 'allowedVersions' &&
-        is.string(val) &&
-        val.length > 1 &&
-        val.startsWith('/') &&
-        val.endsWith('/')
+        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        isConfigRegex(val)
       ) {
-        try {
-          regEx(val.slice(1, -1));
-        } catch (err) {
-          errors.push({
-            depName: 'Configuration Error',
-            message: `Invalid regExp for ${currentPath}: \`${val}\``,
-          });
-        }
-      } else if (
-        key === 'allowedVersions' &&
-        is.string(val) &&
-        val.length > 2 &&
-        val.startsWith('!/') &&
-        val.endsWith('/')
-      ) {
-        try {
-          regEx(val.slice(2, -1));
-        } catch (err) {
+        if (!configRegexPredicate(val)) {
           errors.push({
             depName: 'Configuration Error',
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
@@ -194,12 +181,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'array' && val) {
-          if (!is.array(val)) {
-            errors.push({
-              depName: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
-            });
-          } else {
+          if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await module.exports.validateConfig(
@@ -237,19 +219,20 @@ export async function validateConfig(
             }
 
             const selectors = [
-              'paths',
-              'languages',
-              'baseBranchList',
-              'managers',
-              'datasources',
-              'depTypeList',
-              'packageNames',
-              'packagePatterns',
+              'matchFiles',
+              'matchPaths',
+              'matchLanguages',
+              'matchBaseBranches',
+              'matchManagers',
+              'matchDatasources',
+              'matchDepTypes',
+              'matchPackageNames',
+              'matchPackagePatterns',
               'excludePackageNames',
               'excludePackagePatterns',
-              'sourceUrlPrefixes',
-              'updateTypes',
               'matchCurrentVersion',
+              'matchSourceUrlPrefixes',
+              'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
               for (const packageRule of val) {
@@ -286,12 +269,15 @@ export async function validateConfig(
             }
             if (key === 'regexManagers') {
               const allowedKeys = [
+                'description',
                 'fileMatch',
                 'matchStrings',
+                'matchStringsStrategy',
                 'depNameTemplate',
                 'lookupNameTemplate',
                 'datasourceTemplate',
                 'versioningTemplate',
+                'registryUrlTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
@@ -309,20 +295,7 @@ export async function validateConfig(
                       ', '
                     )}`,
                   });
-                } else if (
-                  !regexManager.matchStrings ||
-                  regexManager.matchStrings.length !== 1
-                ) {
-                  errors.push({
-                    depName: 'Configuration Error',
-                    message: `Each Regex Manager must contain a matchStrings array of length one`,
-                  });
-                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
-                  errors.push({
-                    depName: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
-                  });
-                } else {
+                } else if (is.nonEmptyArray(regexManager.fileMatch)) {
                   let validRegex = false;
                   for (const matchString of regexManager.matchStrings) {
                     try {
@@ -357,10 +330,18 @@ export async function validateConfig(
                       }
                     }
                   }
+                } else {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Each Regex Manager must contain a fileMatch array`,
+                  });
                 }
               }
             }
-            if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
+            if (
+              key === 'matchPackagePatterns' ||
+              key === 'excludePackagePatterns'
+            ) {
               for (const pattern of val as string[]) {
                 if (pattern !== '*') {
                   try {
@@ -396,6 +377,11 @@ export async function validateConfig(
                 message: `${currentPath}: ${key} should be inside a \`packageRule\` only`,
               });
             }
+          } else {
+            errors.push({
+              depName: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
+            });
           }
         } else if (type === 'string') {
           if (!is.string(val)) {

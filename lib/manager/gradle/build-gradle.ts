@@ -8,7 +8,6 @@ import { BuildDependency } from './gradle-updates-report';
 
 let variables: Record<string, string> = {};
 
-// TODO: Unify with BuildDependency ?
 export interface GradleDependency {
   group: string;
   name: string;
@@ -19,7 +18,7 @@ interface UpdateFunction {
   (
     dependency: GradleDependency,
     buildGradleContent: string,
-    newVersion: string
+    newValue: string
   ): string;
 }
 
@@ -167,7 +166,18 @@ function dependencyStringVariableExpressionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
   return regEx(
-    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"]+)['"](?:\\s|;|})`
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:` +
+      // eslint-disable-next-line no-template-curly-in-string
+      '${([^}]*)}' +
+      `['"](?:\\s|;|})`
+  );
+}
+
+function dependencyStringLiteralExpressionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return regEx(
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"{}$]+)['"](?:\\s|;|})`
   );
 }
 
@@ -211,8 +221,14 @@ export function collectVersionVariables(
       }
     }
 
-    if (!dep.currentValue && variables[depName]) {
-      dep.currentValue = variables[depName];
+    if (!dep.currentValue) {
+      const dependencyLiteralRegex = dependencyStringLiteralExpressionFormatMatch(
+        dependency
+      );
+      const currentValue = dependencyLiteralRegex.exec(buildGradleContent)?.[1];
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      }
     }
   }
 }
@@ -224,7 +240,7 @@ export function init(): void {
 function updateVersionLiterals(
   dependency: GradleDependency,
   buildGradleContent: string,
-  newVersion: string
+  newValue: string
 ): string | null {
   const regexes: RegExp[] = [
     moduleStringVersionFormatMatch(dependency),
@@ -238,7 +254,7 @@ function updateVersionLiterals(
   for (const regex of regexes) {
     const match = regex.exec(result);
     if (match) {
-      result = result.replace(match[0], `${match[1]}${newVersion}${match[2]}`);
+      result = result.replace(match[0], `${match[1]}${newValue}${match[2]}`);
     }
   }
   return result === buildGradleContent ? null : result;
@@ -247,7 +263,7 @@ function updateVersionLiterals(
 function updateLocalVariables(
   dependency: GradleDependency,
   buildGradleContent: string,
-  newVersion: string
+  newValue: string
 ): string | null {
   const regexes: RegExp[] = [
     ...moduleMapVariableVersionFormatMatch(dependency),
@@ -268,7 +284,7 @@ function updateLocalVariables(
       if (variableDefinitionMatch) {
         return buildGradleContent.replace(
           variableDefinitionMatch[0],
-          `${variableDefinitionMatch[1]}${newVersion}${variableDefinitionMatch[3]}`
+          `${variableDefinitionMatch[1]}${newValue}${variableDefinitionMatch[3]}`
         );
       }
     }
@@ -279,7 +295,7 @@ function updateLocalVariables(
 function updateGlobalVariables(
   dependency: GradleDependency,
   buildGradleContent: string,
-  newVersion: string
+  newValue: string
 ): string | null {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
@@ -288,7 +304,7 @@ function updateGlobalVariables(
     if (match) {
       return buildGradleContent.replace(
         match[0],
-        `${match[1]}${newVersion}${match[3]}`
+        `${match[1]}${newValue}${match[3]}`
       );
     }
   }
@@ -298,7 +314,7 @@ function updateGlobalVariables(
 function updateGlobalMapVariables(
   dependency: GradleDependency,
   buildGradleContent: string,
-  newVersion: string
+  newValue: string
 ): string | null {
   let variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
@@ -311,7 +327,7 @@ function updateGlobalMapVariables(
       if (match) {
         return buildGradleContent.replace(
           match[0],
-          `${match[1]}${newVersion}${match[3]}`
+          `${match[1]}${newValue}${match[3]}`
         );
       }
 
@@ -325,7 +341,7 @@ function updateGlobalMapVariables(
 function updateKotlinVariablesByExtra(
   dependency: GradleDependency,
   buildGradleContent: string,
-  newVersion: string
+  newValue: string
 ): string | null {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
@@ -336,7 +352,7 @@ function updateKotlinVariablesByExtra(
     if (match) {
       return buildGradleContent.replace(
         match[0],
-        `${match[1]}${newVersion}${match[3]}`
+        `${match[1]}${newValue}${match[3]}`
       );
     }
   }
@@ -346,14 +362,14 @@ function updateKotlinVariablesByExtra(
 function updatePropertyFileGlobalVariables(
   dependency: GradleDependency,
   buildGradleContent: string,
-  newVersion: string
+  newValue: string
 ): string | null {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
     const regex = regEx(`(${variable}\\s*=\\s*)(.*)`);
     const match = regex.exec(buildGradleContent);
     if (match) {
-      return buildGradleContent.replace(match[0], `${match[1]}${newVersion}`);
+      return buildGradleContent.replace(match[0], `${match[1]}${newValue}`);
     }
   }
   return null;
@@ -362,7 +378,7 @@ function updatePropertyFileGlobalVariables(
 export function updateGradleVersion(
   buildGradleContent: string,
   dependency: GradleDependency,
-  newVersion: string
+  newValue: string
 ): string {
   if (dependency) {
     const updateFunctions: UpdateFunction[] = [
@@ -378,7 +394,7 @@ export function updateGradleVersion(
       const gradleContentUpdated = updateFunction(
         dependency,
         buildGradleContent,
-        newVersion
+        newValue
       );
       if (gradleContentUpdated) {
         return gradleContentUpdated;

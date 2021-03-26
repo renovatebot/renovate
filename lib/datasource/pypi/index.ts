@@ -4,15 +4,17 @@ import { logger } from '../../logger';
 import { parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
-import { matches } from '../../versioning/pep440';
 import * as pep440 from '../../versioning/pep440';
-import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export const id = 'pypi';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [
   process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/',
 ];
+export const defaultVersioning = pep440.id;
 export const registryStrategy = 'merge';
+export const caching = true;
 
 const githubRepoPattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
@@ -37,28 +39,9 @@ function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
 }
 
-function compatibleVersions(
-  releases: Releases,
-  constraints: Record<string, string>
-): string[] {
-  const versions = Object.keys(releases);
-  if (!(constraints?.python && pep440.isVersion(constraints.python))) {
-    return versions;
-  }
-  return versions.filter((version) =>
-    releases[version].some((release) => {
-      if (!release.requires_python) {
-        return true;
-      }
-      return matches(constraints.python, release.requires_python);
-    })
-  );
-}
-
 async function getDependency(
   packageName: string,
-  hostUrl: string,
-  constraints: Record<string, string>
+  hostUrl: string
 ): Promise<ReleaseResult | null> {
   const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
   const dependency: ReleaseResult = { releases: null };
@@ -68,6 +51,9 @@ async function getDependency(
   if (!dep) {
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
+  }
+  if (rep.authorization) {
+    dependency.isPrivate = true;
   }
   logger.trace({ lookupUrl }, 'Got pypi api result');
   if (
@@ -121,7 +107,7 @@ async function getDependency(
 
   dependency.releases = [];
   if (dep.releases) {
-    const versions = compatibleVersions(dep.releases, constraints);
+    const versions = Object.keys(dep.releases);
     dependency.releases = versions.map((version) => {
       const releases = dep.releases[version] || [];
       const { upload_time: releaseTimestamp } = releases[0] || {};
@@ -133,6 +119,10 @@ async function getDependency(
       if (isDeprecated) {
         result.isDeprecated = isDeprecated;
       }
+      // There may be multiple releases with different requires_python, so we return all in an array
+      result.constraints = {
+        python: releases.map(({ requires_python }) => requires_python),
+      };
       return result;
     });
   }
@@ -172,11 +162,11 @@ function cleanSimpleHtml(html: string): string {
       .replace(/<\/?pre>/, '')
       // Certain simple repositories like artifactory don't escape > and <
       .replace(
-        /data-requires-python="(.*?)>(.*?)"/g,
+        /data-requires-python="([^"]*?)>([^"]*?)"/g,
         'data-requires-python="$1&gt;$2"'
       )
       .replace(
-        /data-requires-python="(.*?)<(.*?)"/g,
+        /data-requires-python="([^"]*?)<([^"]*?)"/g,
         'data-requires-python="$1&lt;$2"'
       )
   );
@@ -184,10 +174,9 @@ function cleanSimpleHtml(html: string): string {
 
 async function getSimpleDependency(
   packageName: string,
-  hostUrl: string,
-  constraints: Record<string, string>
+  hostUrl: string
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${packageName}`);
+  const lookupUrl = url.resolve(hostUrl, ensureTrailingSlash(packageName));
   const dependency: ReleaseResult = { releases: null };
   const response = await http.get(lookupUrl);
   const dep = response?.body;
@@ -195,7 +184,10 @@ async function getSimpleDependency(
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
   }
-  const root: HTMLElement = parse(cleanSimpleHtml(dep));
+  if (response.authorization) {
+    dependency.isPrivate = true;
+  }
+  const root = parse(cleanSimpleHtml(dep));
   const links = root.querySelectorAll('a');
   const releases: Releases = {};
   for (const link of Array.from(links)) {
@@ -214,7 +206,7 @@ async function getSimpleDependency(
       releases[version].push(release);
     }
   }
-  const versions = compatibleVersions(releases, constraints);
+  const versions = Object.keys(releases);
   dependency.releases = versions.map((version) => {
     const versionReleases = releases[version] || [];
     const isDeprecated = versionReleases.some(({ yanked }) => yanked);
@@ -222,45 +214,43 @@ async function getSimpleDependency(
     if (isDeprecated) {
       result.isDeprecated = isDeprecated;
     }
+    // There may be multiple releases with different requires_python, so we return all in an array
+    result.constraints = {
+      python: versionReleases.map(({ requires_python }) => requires_python),
+    };
     return result;
   });
   return dependency;
 }
 
 export async function getReleases({
-  constraints,
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  let dependency: ReleaseResult = null;
   const hostUrl = ensureTrailingSlash(registryUrl);
 
   // not all simple indexes use this identifier, but most do
   if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
     logger.trace({ lookupName, hostUrl }, 'Looking up pypi simple dependency');
-    return getSimpleDependency(lookupName, hostUrl, constraints);
-  }
+    dependency = await getSimpleDependency(lookupName, hostUrl);
+  } else {
+    logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
+    try {
+      // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
+      dependency = await getDependency(lookupName, hostUrl);
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
 
-  logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
-  try {
-    // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
-    const releases = await getDependency(lookupName, hostUrl, constraints);
-    // the dep was found in the json api, return as-is
-    return releases;
-  } catch (err) {
-    if (err.statusCode !== 404) {
-      throw err;
+      // error contacting json-style api -- attempt to fallback to a simple-style api
+      logger.trace(
+        { lookupName, hostUrl },
+        'Looking up pypi simple dependency via fallback'
+      );
+      dependency = await getSimpleDependency(lookupName, hostUrl);
     }
-
-    // error contacting json-style api -- attempt to fallback to a simple-style api
-    logger.trace(
-      { lookupName, hostUrl },
-      'Looking up pypi simple dependency via fallback'
-    );
-    const releases = await getSimpleDependency(
-      lookupName,
-      hostUrl,
-      constraints
-    );
-    return releases;
   }
+  return dependency;
 }

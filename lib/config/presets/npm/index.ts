@@ -1,13 +1,24 @@
-import { getDependency } from '../../../datasource/npm/get';
+import { resolvePackage } from '../../../datasource/npm/npmrc';
+import { NpmResponse } from '../../../datasource/npm/types';
 import { logger } from '../../../logger';
-import { Preset, PresetConfig } from '../common';
+import { Http } from '../../../util/http';
+import type { Preset, PresetConfig } from '../types';
+
+const id = 'npm';
+
+const http = new Http(id);
 
 export async function getPreset({
-  packageName: pkgName,
+  packageName,
   presetName = 'default',
 }: PresetConfig): Promise<Preset> {
-  const dep = await getDependency(pkgName);
-  if (!dep) {
+  let dep;
+  try {
+    const { headers, packageUrl } = resolvePackage(packageName);
+    const body = (await http.getJson<NpmResponse>(packageUrl, { headers }))
+      .body;
+    dep = body.versions[body['dist-tags'].latest];
+  } catch (err) {
     throw new Error('dep not found');
   }
   if (!dep['renovate-config']) {

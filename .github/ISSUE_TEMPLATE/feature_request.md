@@ -1,18 +1,15 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
+labels: 'type:feature, status:requirements, priority-5-triage'
 ---
 
 **What would you like Renovate to be able to do?**
 
-<!-- A clear and concise description of what problem needs solving. Make sure you describe what you "really" are trying to achieve (the bigger picture) as that often helps. -->
+<!-- Tell us what requirements you need solving, and be sure to mention too if this is part of any "bigger" problem you're trying to solve. -->
 
 **Did you already have any implementation ideas?**
 
-<!-- This is totally optional, but we know many people dig into the source code already before raising a request. Try to keep implementation ideas separate from *requirements* above -->
+<!-- In case you've already dug into existing options or source code and have ideas, mention them here. Try to keep implementation ideas separate from *requirements* above -->
 
-**Are there any workarounds or alternative ideas you've tried to avoid needing this feature?**
-
-**Is this a feature you'd be interested in implementing yourself?**
-
-<!-- Again, totally optional. But let us know if you're interested and if you need any particular help -->
+<!-- Please also mention here in case this is a feature you'd be interested in writing yourself, so you can be assigned it. -->

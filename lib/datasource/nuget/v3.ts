@@ -7,9 +7,9 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
-import { Release, ReleaseResult } from '../common';
+import type { Release, ReleaseResult } from '../types';
 
-import { id } from './common';
+import { id, removeBuildMeta } from './common';
 
 const http = new Http(id);
 
@@ -76,11 +76,12 @@ export async function getResourceUrl(
     // istanbul ignore if
     if (
       resourceType === 'RegistrationsBaseUrl' &&
+      !version?.startsWith('3.0.0-') &&
       !semver.satisfies(version, '^3.0.0')
     ) {
       logger.warn(
-        { url },
-        `Nuget: RegistrationsBaseUrl/${version} is the major update`
+        { url, version },
+        `Nuget: Unknown version returned. Only v3 is supported`
       );
     }
 
@@ -145,12 +146,12 @@ export async function getReleases(
   let latestStable: string = null;
   const releases = catalogEntries.map(
     ({ version, published: releaseTimestamp, projectUrl, listed }) => {
-      const release: Release = { version };
+      const release: Release = { version: removeBuildMeta(version) };
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
-        latestStable = version;
+        latestStable = removeBuildMeta(version);
         homepage = projectUrl || homepage;
       }
       if (listed === false) {
@@ -164,8 +165,14 @@ export async function getReleases(
     return null;
   }
 
+  // istanbul ignore if: only happens when no stable version exists
+  if (latestStable === null) {
+    const last = catalogEntries.pop();
+    latestStable = removeBuildMeta(last.version);
+    homepage ??= last.projectUrl;
+  }
+
   const dep: ReleaseResult = {
-    pkgName,
     releases,
   };
 

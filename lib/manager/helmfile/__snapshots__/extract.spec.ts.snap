@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/helmfile/extract extractPackageFile() parses multidoc yaml 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "depName": "./environment/{{\`{{ .Environment.Name }}\`}}/static",
+      "skipReason": "local-chart",
+    },
+    Object {
+      "currentValue": "7.4.3",
+      "depName": "rabbitmq",
+      "registryUrls": Array [
+        "https://charts.bitnami.com/bitnami",
+      ],
+    },
+    Object {
+      "currentValue": "13.7.2",
+      "depName": "kube-prometheus-stack",
+      "registryUrls": Array [
+        "https://prometheus-community.github.io/helm-charts",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/helmfile/extract extractPackageFile() skip chart that does not have specified version 1`] = `
 Object {
   "datasource": "helm",
@@ -8,7 +34,7 @@ Object {
       "currentValue": undefined,
       "depName": "example",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable",
       ],
       "skipReason": "local-chart",
     },
@@ -88,7 +114,7 @@ Object {
       "currentValue": "1.0.0",
       "depName": "{{\`{{ .Release.Name }}\`}}",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable",
       ],
       "skipReason": "unsupported-chart-type",
     },
@@ -96,7 +122,7 @@ Object {
       "currentValue": "1.0.0",
       "depName": "example",
       "registryUrls": Array [
-        "https://kubernetes-charts.storage.googleapis.com/",
+        "https://charts.helm.sh/stable",
       ],
     },
   ],

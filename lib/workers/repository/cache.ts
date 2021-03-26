@@ -12,7 +12,7 @@ import {
   getBranchParentSha,
   isBranchModified,
 } from '../../util/git';
-import { BranchConfig, BranchUpgradeConfig } from '../common';
+import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 function generateBranchUpgradeCache(
   upgrade: BranchUpgradeConfig
@@ -22,20 +22,22 @@ function generateBranchUpgradeCache(
     depName,
     lookupName,
     fixedVersion,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
     currentDigest,
     newDigest,
+    sourceUrl,
   } = upgrade;
   return {
     datasource,
     depName,
     lookupName,
     fixedVersion,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
     currentDigest,
     newDigest,
+    sourceUrl,
   };
 }
 

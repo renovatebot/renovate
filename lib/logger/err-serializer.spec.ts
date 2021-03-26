@@ -1,4 +1,4 @@
-import * as httpMock from '../../test/httpMock';
+import * as httpMock from '../../test/http-mock';
 import { partial } from '../../test/util';
 import * as hostRules from '../util/host-rules';
 import { Http } from '../util/http';

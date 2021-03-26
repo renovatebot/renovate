@@ -274,28 +274,28 @@ describe('regex', () => {
     });
   });
 
-  describe('.maxSatisfyingVersion', () => {
+  describe('.getSatisfyingVersion', () => {
     it('returns greatest version that matches range', () => {
       expect(
-        regex.maxSatisfyingVersion(
+        regex.getSatisfyingVersion(
           ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
           '2.1.6'
         )
       ).toEqual('2.1.6');
       expect(
-        regex.maxSatisfyingVersion(
+        regex.getSatisfyingVersion(
           ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
           '2.1.6-foo'
         )
       ).toEqual('2.1.6');
       expect(
-        regex.maxSatisfyingVersion(['2.1.5-foo', '2.1.6'], '2.1.6-foo')
+        regex.getSatisfyingVersion(['2.1.5-foo', '2.1.6'], '2.1.6-foo')
       ).toEqual('2.1.6');
     });
 
     it('returns null if version that matches is absent', () => {
       expect(
-        regex.maxSatisfyingVersion(['1.2.3', '1.2.4'], '3.5.0')
+        regex.getSatisfyingVersion(['1.2.3', '1.2.4'], '3.5.0')
       ).toBeNull();
     });
   });
@@ -327,13 +327,13 @@ describe('regex', () => {
   });
 
   describe('.getNewValue', () => {
-    it('returns toVersion', () => {
+    it('returns newVersion', () => {
       expect(
         regex.getNewValue({
           currentValue: null,
           rangeStrategy: null,
-          fromVersion: null,
-          toVersion: '1.2.3',
+          currentVersion: null,
+          newVersion: '1.2.3',
         })
       ).toBe('1.2.3');
     });

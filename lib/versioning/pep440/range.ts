@@ -2,14 +2,14 @@ import { gte, lte, satisfies } from '@renovate/pep440';
 import { parse as parseRange } from '@renovate/pep440/lib/specifier';
 import { parse as parseVersion } from '@renovate/pep440/lib/version';
 import { logger } from '../../logger';
-import { NewValueConfig } from '../common';
+import type { NewValueConfig } from '../types';
 
 function getFutureVersion(
   baseVersion: string,
-  toVersion: string,
+  newVersion: string,
   step: number
 ): string {
-  const toRelease: number[] = parseVersion(toVersion).release;
+  const toRelease: number[] = parseVersion(newVersion).release;
   const baseRelease: number[] = parseVersion(baseVersion).release;
   let found = false;
   const futureRelease = baseRelease.map((basePart, index) => {
@@ -38,15 +38,15 @@ interface Range {
 export function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string {
   // easy pin
   if (rangeStrategy === 'pin') {
-    return '==' + toVersion;
+    return '==' + newVersion;
   }
-  if (currentValue === fromVersion) {
-    return toVersion;
+  if (currentValue === currentVersion) {
+    return newVersion;
   }
   const ranges: Range[] = parseRange(currentValue);
   if (!ranges) {
@@ -60,7 +60,7 @@ export function getNewValue({
     return currentValue;
   }
   if (rangeStrategy === 'replace') {
-    if (satisfies(toVersion, currentValue)) {
+    if (satisfies(newVersion, currentValue)) {
       return currentValue;
     }
   }
@@ -73,8 +73,8 @@ export function getNewValue({
     return getNewValue({
       currentValue,
       rangeStrategy: 'replace',
-      fromVersion,
-      toVersion,
+      currentVersion,
+      newVersion,
     });
   }
   if (ranges.some((range) => range.operator === '===')) {
@@ -92,13 +92,13 @@ export function getNewValue({
 
       // used to mark minimum supported version
       if (['>', '>='].includes(range.operator)) {
-        if (lte(toVersion, range.version)) {
+        if (lte(newVersion, range.version)) {
           // this looks like a rollback
-          return '>=' + toVersion;
+          return '>=' + newVersion;
         }
         // this is similar to ~=
         if (rangeStrategy === 'bump' && range.operator === '>=') {
-          return range.operator + toVersion;
+          return range.operator + newVersion;
         }
         // otherwise treat it same as exclude
         return range.operator + range.version;
@@ -106,11 +106,11 @@ export function getNewValue({
 
       // this is used to exclude future versions
       if (range.operator === '<') {
-        // if toVersion is that future version
-        if (gte(toVersion, range.version)) {
+        // if newVersion is that future version
+        if (gte(newVersion, range.version)) {
           // now here things get tricky
           // we calculate the new future version
-          const futureVersion = getFutureVersion(range.version, toVersion, 1);
+          const futureVersion = getFutureVersion(range.version, newVersion, 1);
           return range.operator + futureVersion;
         }
         // otherwise treat it same as exclude
@@ -119,18 +119,18 @@ export function getNewValue({
 
       // keep the .* suffix
       if (range.prefix) {
-        const futureVersion = getFutureVersion(range.version, toVersion, 0);
+        const futureVersion = getFutureVersion(range.version, newVersion, 0);
         return range.operator + futureVersion + '.*';
       }
 
       if (['==', '~=', '<='].includes(range.operator)) {
-        return range.operator + toVersion;
+        return range.operator + newVersion;
       }
 
       // unless PEP440 changes, this won't happen
       // istanbul ignore next
       logger.error(
-        { toVersion, currentValue, range },
+        { newVersion, currentValue, range },
         'pep440: failed to process range'
       );
       // istanbul ignore next
@@ -143,10 +143,10 @@ export function getNewValue({
     result = result.replace(/, /g, ',');
   }
 
-  if (!satisfies(toVersion, result)) {
+  if (!satisfies(newVersion, result)) {
     // we failed at creating the range
-    logger.error(
-      { result, toVersion, currentValue },
+    logger.warn(
+      { result, newVersion, currentValue },
       'pep440: failed to calculate newValue'
     );
     return null;

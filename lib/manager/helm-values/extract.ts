@@ -1,7 +1,8 @@
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency, PackageFile } from '../types';
 
 import {
   HelmDockerImageDependency,
@@ -19,6 +20,9 @@ function getHelmDep({
 }): PackageDependency {
   const dep = getDep(`${registry}${repository}:${tag}`, false);
   dep.replaceString = tag;
+  dep.versioning = dockerVersioning;
+  dep.autoReplaceStringTemplate =
+    '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   return dep;
 }
 

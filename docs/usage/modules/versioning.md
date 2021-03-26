@@ -1,17 +1,21 @@
 # Versioning
 
-Once Managers have extracted dependencies, and Datasources have located available versions, then Renovate makes use of "Versioning" schemes to perform sorting and filtering of results. This is necessary because different managers use different types of numbering/versioning, e.g. `1.0.0-beta.1` in `npm` and `1.0.0b1` in Python.
+Once Managers have extracted dependencies, and Datasources have located available versions, then Renovate will use a "Versioning" scheme to perform sorting and filtering of results.
+The "versioning" is different for each package manager, because different package managers use different versioning schemes.
+For example, `npm` uses`1.0.0-beta.1` and `pip` uses `1.0.0b1`.
 
 ## Configuring Versioning
 
-There are times when you may need to manually configure/override the `versioning` value for a particular dependency. You generally won't have a need for this in ecosystems with strict versioning enforcement like `npm`, but you might often need it for ecosystems like Docker where versioning is barely a "convention". e.g.
+You can manually configure/override the `versioning` value for a particular dependency.
+You generally won't need to override the defaults for ecosystems which enforce a strict version scheme like `npm`.
+Configuring or overriding the default `versioning` can be helpful for ecosystems like Docker, where versioning is barely a "convention". e.g.
 
 ```json
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["python"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
       "versioning": "pep440"
     }
   ]

@@ -1,9 +1,9 @@
-import * as httpMock from '../../../../test/httpMock';
+import * as httpMock from '../../../../test/http-mock';
 import { getName } from '../../../../test/util';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
-import { BranchUpgradeConfig } from '../../common';
+import type { BranchUpgradeConfig } from '../../types';
 import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../lib/datasource/npm');
@@ -13,8 +13,8 @@ const upgrade: BranchUpgradeConfig = {
   endpoint: 'https://gitlab.com/api/v4/ ',
   depName: 'renovate',
   versioning: semverVersioning.id,
-  fromVersion: '5.2.0',
-  toVersion: '5.7.0',
+  currentVersion: '5.2.0',
+  newVersion: '5.7.0',
   sourceUrl: 'https://gitlab.com/meno/dropzone/',
   releases: [
     // TODO: test gitRef
@@ -50,18 +50,18 @@ describe(getName(__filename), () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          fromVersion: null,
+          currentVersion: null,
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toBeEmpty();
     });
-    it('returns null if fromVersion equals toVersion', async () => {
+    it('returns null if currentVersion equals newVersion', async () => {
       httpMock.scope(baseUrl);
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          fromVersion: '1.0.0',
-          toVersion: '1.0.0',
+          currentVersion: '1.0.0',
+          newVersion: '1.0.0',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toBeEmpty();
@@ -186,6 +186,23 @@ describe(getName(__filename), () => {
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
           endpoint: 'https://gitlab-enterprise.example.com/',
+        })
+      ).toMatchSnapshot();
+    });
+    it('supports self-hosted gitlab changelog', async () => {
+      httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
+      hostRules.add({
+        hostType: PLATFORM_TYPE_GITLAB,
+        baseUrl: 'https://git.test.com/',
+        token: 'abc',
+      });
+      process.env.GITHUB_ENDPOINT = '';
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          platform: PLATFORM_TYPE_GITLAB,
+          sourceUrl: 'https://git.test.com/meno/dropzone/',
+          endpoint: 'https://git.test.com/api/v4/',
         })
       ).toMatchSnapshot();
     });

@@ -1,5 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/regex/index extracts and applies a registryUrlTemplate 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "registryUrls": Array [
+        "http://registry.gradle.com/",
+      ],
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+  ],
+  "matchStrings": Array [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+  ],
+  "registryUrlTemplate": "http://registry.{{depName}}.com/",
+}
+`;
+
+exports[`manager/regex/index extracts and does not apply a registryUrlTemplate if the result is an invalid url 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+  ],
+  "matchStrings": Array [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+  ],
+  "registryUrlTemplate": "this-is-not-a-valid-url-{{depName}}",
+}
+`;
+
+exports[`manager/regex/index extracts extractVersion 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.30",
+      "datasource": "github-tags",
+      "depName": "openresty/headers-more-nginx-module",
+      "extractVersion": "^v(?<version>.*)$",
+      "replaceString": "ENV NGINX_MODULE_HEADERS_MORE_VERSION=0.30 # github-tags/openresty/headers-more-nginx-module&versioning=loose&extractVersion=^v(?<version>.*)$
+",
+      "versioning": "loose",
+    },
+  ],
+  "matchStrings": Array [
+    "ENV NGINX_MODULE_HEADERS_MORE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?(\\\\&extractVersion=(?<extractVersion>.*?))?\\\\s",
+  ],
+}
+`;
+
 exports[`manager/regex/index extracts multiple dependencies 1`] = `
 Object {
   "deps": Array [
@@ -69,7 +129,175 @@ Object {
     },
   ],
   "matchStrings": Array [
-    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\\\&versioning=(?<versioning>[^&]*?))?\\\\s",
   ],
+  "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}",
+}
+`;
+
+exports[`manager/regex/index extracts multiple dependencies with multiple matchStrings 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+    Object {
+      "currentValue": "10.19.0",
+      "datasource": "github-tags",
+      "depName": "nodejs/node",
+      "replaceString": "ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
+",
+      "versioning": "node",
+    },
+  ],
+  "matchStrings": Array [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+    "ENV NODE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+  ],
+  "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}",
+}
+`;
+
+exports[`manager/regex/index extracts registryUrl 1`] = `
+Object {
+  "datasourceTemplate": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "8.12.13",
+      "datasource": "helm",
+      "depName": "prometheus-operator",
+      "registryUrls": Array [
+        "https://charts.helm.sh/stable",
+      ],
+      "replaceString": "chart:
+          repository: https://charts.helm.sh/stable
+          name: prometheus-operator
+          version: 8.12.13
+",
+    },
+  ],
+  "matchStrings": Array [
+    "chart:
+ *repository: (?<registryUrl>.*?)
+ *name: (?<depName>.*?)
+ *version: (?<currentValue>.*)
+",
+  ],
+}
+`;
+
+exports[`manager/regex/index extracts with combination strategy 1`] = `
+Object {
+  "datasourceTemplate": "docker",
+  "deps": Array [
+    Object {
+      "currentValue": "v2.21.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "prometheus_version: \\"v2.21.0\\" //",
+    },
+  ],
+  "matchStrings": Array [
+    "prometheus_image:\\\\s*\\"(?<depName>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
+exports[`manager/regex/index extracts with combination strategy and multiple matches 1`] = `
+Object {
+  "datasourceTemplate": "docker",
+  "deps": Array [
+    Object {
+      "currentValue": "0.12.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "someother_version: \\"0.12.0\\" //",
+    },
+  ],
+  "matchStrings": Array [
+    ".*_image:\\\\s*\\"(?<depName>.*)\\"\\\\s*\\\\/\\\\/",
+    ".*_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
+exports[`manager/regex/index extracts with recursive strategy and fail because of not sufficient regexes 1`] = `null`;
+
+exports[`manager/regex/index extracts with recursive strategy and fail because there is no match 1`] = `null`;
+
+exports[`manager/regex/index extracts with recursive strategy and multiple layers  1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.6.1",
+      "datasource": "docker",
+      "depName": "grafana/loki",
+      "replaceString": "\\"name\\": \\"grafana/loki\\",
+      \\"type\\": \\"docker\\",
+      \\"value\\": \\"1.6.1\\"",
+    },
+  ],
+  "matchStrings": Array [
+    "\\"backup\\":\\\\s*{[^}]*}",
+    "\\"test\\":\\\\s*\\\\{[^}]*}",
+    "\\"name\\":\\\\s*\\"(?<depName>.*)\\"[^\\"]*\\"type\\":\\\\s*\\"(?<datasource>.*)\\"[^\\"]*\\"value\\":\\\\s*\\"(?<currentValue>.*)\\"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
+
+exports[`manager/regex/index extracts with recursive strategy and multiple matches 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "\\"name\\": \\"prom/prometheus\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"v2.19.0\\"",
+    },
+    Object {
+      "currentValue": "7.2.2",
+      "datasource": "docker",
+      "depName": "grafana/grafana",
+      "replaceString": "\\"name\\": \\"grafana/grafana\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"7.2.2\\"",
+    },
+  ],
+  "matchStrings": Array [
+    "\\"group.{1}\\":\\\\s*\\\\{[^}]*}",
+    "\\"name\\":\\\\s*\\"(?<depName>.*)\\"[^\\"]*\\"type\\":\\\\s*\\"(?<datasource>.*)\\"[^\\"]*\\"value\\":\\\\s*\\"(?<currentValue>.*)\\"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
+
+exports[`manager/regex/index extracts with recursive strategy and single match 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "\\"name\\": \\"prom/prometheus\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"v2.19.0\\"",
+    },
+  ],
+  "matchStrings": Array [
+    "\\"group1\\":\\\\s*\\\\{[^}]*}",
+    "\\"name\\":\\\\s*\\"(?<depName>.*)\\"[^\\"]*\\"type\\":\\\\s*\\"(?<datasource>.*)\\"[^\\"]*\\"value\\":\\\\s*\\"(?<currentValue>.*)\\"",
+  ],
+  "matchStringsStrategy": "recursive",
 }
 `;

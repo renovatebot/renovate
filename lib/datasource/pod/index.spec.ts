@@ -1,5 +1,5 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as rubyVersioning from '../../versioning/ruby';
 import * as pod from '.';
@@ -86,6 +86,7 @@ describe('datasource/cocoapods', () => {
           registryUrls: ['https://github.com/CocoaPods/Specs'],
         })
       ).toEqual({
+        registryUrl: 'https://github.com/CocoaPods/Specs',
         releases: [
           {
             version: '1.2.3',
@@ -106,6 +107,7 @@ describe('datasource/cocoapods', () => {
         registryUrls: ['https://github.com/Artsy/Specs'],
       });
       expect(res).toEqual({
+        registryUrl: 'https://github.com/Artsy/Specs',
         releases: [
           {
             version: '1.2.3',

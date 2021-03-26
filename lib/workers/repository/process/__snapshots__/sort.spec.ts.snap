@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/process/sort sortBranches() sorts based on isVulnerabilityAlert 1`] = `
+Array [
+  Object {
+    "isVulnerabilityAlert": true,
+    "prPriority": -1,
+    "prTitle": "a minor update",
+    "updateType": "minor",
+  },
+  Object {
+    "prPriority": 1,
+    "prTitle": "some major update",
+    "updateType": "major",
+  },
+  Object {
+    "prPriority": 0,
+    "prTitle": "some other pin",
+    "updateType": "pin",
+  },
+  Object {
+    "prPriority": -1,
+    "prTitle": "some pin",
+    "updateType": "pin",
+  },
+]
+`;
+
 exports[`workers/repository/process/sort sortBranches() sorts based on prPriority 1`] = `
 Array [
   Object {

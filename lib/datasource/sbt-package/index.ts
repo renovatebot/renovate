@@ -1,14 +1,16 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
-import { GetReleasesConfig, ReleaseResult } from '../common';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import { parseIndexDir } from '../sbt-plugin/util';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'sbt-package';
-
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [MAVEN_REPO];
+export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
@@ -18,7 +20,7 @@ export async function getArtifactSubdirs(
   artifact: string,
   scalaVersion: string
 ): Promise<string[]> {
-  const indexContent = await downloadHttpProtocol(
+  const { body: indexContent } = await downloadHttpProtocol(
     ensureTrailingSlash(searchRoot),
     'sbt'
   );
@@ -58,7 +60,7 @@ export async function getPackageReleases(
     const parseReleases = (content: string): string[] =>
       parseIndexDir(content, (x) => !/^\.+$/.test(x));
     for (const searchSubdir of artifactSubdirs) {
-      const content = await downloadHttpProtocol(
+      const { body: content } = await downloadHttpProtocol(
         ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
         'sbt'
       );
@@ -108,7 +110,7 @@ export async function getUrls(
 
     for (const pomFileName of pomFileNames) {
       const pomUrl = `${searchRoot}/${artifactDir}/${version}/${pomFileName}`;
-      const content = await downloadHttpProtocol(pomUrl, 'sbt');
+      const { body: content } = await downloadHttpProtocol(pomUrl, 'sbt');
 
       if (content) {
         const pomXml = new XmlDocument(content);
@@ -166,9 +168,6 @@ export async function getReleases({
     if (versions) {
       return {
         ...urls,
-        display: lookupName,
-        group: groupId,
-        name: artifactId,
         dependencyUrl,
         releases: versions.map((v) => ({ version: v })),
       };

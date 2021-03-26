@@ -1,6 +1,6 @@
 import * as pep440 from '@renovate/pep440';
 import { filter } from '@renovate/pep440/lib/specifier';
-import { VersioningApi } from '../common';
+import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
 export const id = 'pep440';
@@ -34,7 +34,7 @@ const isStable = (input: string): boolean => {
 export const isValid = (input: string): string =>
   validRange(input) || isVersion(input);
 
-const maxSatisfyingVersion = (versions: string[], range: string): string => {
+const getSatisfyingVersion = (versions: string[], range: string): string => {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
 };
@@ -50,9 +50,8 @@ export const isSingleVersion = (constraint: string): string =>
 
 export { isVersion, matches };
 
-const equals = (version1: string, version2: string): boolean => {
-  return isVersion(version1) && isVersion(version2) && eq(version1, version2);
-};
+const equals = (version1: string, version2: string): boolean =>
+  isVersion(version1) && isVersion(version2) && eq(version1, version2);
 
 export const api: VersioningApi = {
   equals,
@@ -66,7 +65,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,

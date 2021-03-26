@@ -82,22 +82,22 @@ describe('semver.isLessThanRange()', () => {
     expect(semver.isLessThanRange('0.5.1', '~0.4')).toBe(false);
   });
 });
-describe('semver.maxSatisfyingVersion()', () => {
+describe('semver.getSatisfyingVersion()', () => {
   it('handles massaged tilde', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~4'
       )
     ).toBe('4.2.0');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0'],
         '~4'
       )
     ).toBe('4.2.0');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~0.4'
       )
@@ -105,7 +105,7 @@ describe('semver.maxSatisfyingVersion()', () => {
   });
   it('handles prereleases', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         [
           '0.4.0',
           '0.5.0',
@@ -165,31 +165,31 @@ describe('semver.matches()', () => {
   });
 });
 describe('semver.getNewValue()', () => {
-  it('returns pinned toVersion', () => {
+  it('returns pinned newVersion', () => {
     expect(
       semver.getNewValue({
         currentValue: '~1.0',
         rangeStrategy: 'pin',
-        fromVersion: '1.0',
-        toVersion: 'V1.1',
+        currentVersion: '1.0',
+        newVersion: 'V1.1',
       })
     ).toEqual('V1.1');
     expect(
       semver.getNewValue({
         currentValue: '^1.0',
         rangeStrategy: 'pin',
-        fromVersion: '1.0',
-        toVersion: 'V1.1',
+        currentVersion: '1.0',
+        newVersion: 'V1.1',
       })
     ).toEqual('V1.1');
   });
-  it('returns toVersion', () => {
+  it('returns newVersion', () => {
     expect(
       semver.getNewValue({
         currentValue: 'v1.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.0',
-        toVersion: '1.1',
+        currentVersion: '1.0',
+        newVersion: '1.1',
       })
     ).toEqual('v1.1');
   });
@@ -198,8 +198,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
-        toVersion: '1.0.7',
+        currentVersion: '1.0.0',
+        newVersion: '1.0.7',
       })
     ).toEqual('^1.0');
   });
@@ -208,8 +208,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '<2.7.14',
         rangeStrategy: 'bump',
-        fromVersion: '2.0.3',
-        toVersion: '2.0.4',
+        currentVersion: '2.0.3',
+        newVersion: '2.0.4',
       })
     ).toEqual('<2.7.14');
   });
@@ -218,8 +218,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1.0.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
-        toVersion: '1.3.5',
+        currentVersion: '1.0.0',
+        newVersion: '1.3.5',
       })
     ).toEqual('^1.3.5');
   });
@@ -228,8 +228,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
-        toVersion: '1.3.5',
+        currentVersion: '1.0.0',
+        newVersion: '1.3.5',
       })
     ).toEqual('^1');
   });
@@ -238,8 +238,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^1.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
-        toVersion: '2.3.5',
+        currentVersion: '1.0.0',
+        newVersion: '2.3.5',
       })
     ).toEqual('^2.0');
   });
@@ -248,16 +248,16 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~0.2',
         rangeStrategy: 'replace',
-        fromVersion: '0.2.0',
-        toVersion: '0.3.0',
+        currentVersion: '0.2.0',
+        newVersion: '0.3.0',
       })
     ).toEqual('~0.3');
     expect(
       semver.getNewValue({
         currentValue: '~0.2',
         rangeStrategy: 'replace',
-        fromVersion: '0.2.0',
-        toVersion: '1.1.0',
+        currentVersion: '0.2.0',
+        newVersion: '1.1.0',
       })
     ).toEqual('~1.0');
   });
@@ -266,16 +266,16 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~4',
         rangeStrategy: 'replace',
-        fromVersion: '4.0.0',
-        toVersion: '4.2.0',
+        currentVersion: '4.0.0',
+        newVersion: '4.2.0',
       })
     ).toEqual('~4');
     expect(
       semver.getNewValue({
         currentValue: '~4',
         rangeStrategy: 'replace',
-        fromVersion: '4.0.0',
-        toVersion: '5.1.0',
+        currentVersion: '4.0.0',
+        newVersion: '5.1.0',
       })
     ).toEqual('~5');
   });
@@ -284,52 +284,52 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~4.0',
         rangeStrategy: 'replace',
-        fromVersion: '4.0.0',
-        toVersion: '5.1.0',
+        currentVersion: '4.0.0',
+        newVersion: '5.1.0',
       })
     ).toEqual('~5.0');
     expect(
       semver.getNewValue({
         currentValue: '~4.0',
         rangeStrategy: 'replace',
-        fromVersion: '4.0.0',
-        toVersion: '4.1.0',
+        currentVersion: '4.0.0',
+        newVersion: '4.1.0',
       })
     ).toEqual('~4.1');
     expect(
       semver.getNewValue({
         currentValue: '~1.2 || ~2.0',
         rangeStrategy: 'replace',
-        fromVersion: '2.0.0',
-        toVersion: '3.1.0',
+        currentVersion: '2.0.0',
+        newVersion: '3.1.0',
       })
     ).toEqual('~3.0');
     expect(
       semver.getNewValue({
         currentValue: '~1.2 || ~2.0',
         rangeStrategy: 'widen',
-        fromVersion: '2.0.0',
-        toVersion: '3.1.0',
+        currentVersion: '2.0.0',
+        newVersion: '3.1.0',
       })
     ).toEqual('~1.2 || ~2.0 || ~3.0');
   });
-  it('returns toVersion if unsupported', () => {
+  it('returns newVersion if unsupported', () => {
     expect(
       semver.getNewValue({
         currentValue: '+4.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '4.0.0',
-        toVersion: '4.2.0',
+        currentVersion: '4.0.0',
+        newVersion: '4.2.0',
       })
     ).toEqual('4.2.0');
   });
-  it('returns versioned toVersion', () => {
+  it('returns versioned newVersion', () => {
     expect(
       semver.getNewValue({
         currentValue: 'v4.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '4.0.0',
-        toVersion: '4.2.0',
+        currentVersion: '4.0.0',
+        newVersion: '4.2.0',
       })
     ).toEqual('v4.2.0');
   });
@@ -338,8 +338,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^v1.0',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
-        toVersion: '1.1.7',
+        currentVersion: '1.0.0',
+        newVersion: '1.1.7',
       })
     ).toEqual('^v1.1');
   });
@@ -348,8 +348,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^v1.0@beta',
         rangeStrategy: 'bump',
-        fromVersion: '1.0.0-beta3',
-        toVersion: '1.0.0-beta5',
+        currentVersion: '1.0.0-beta3',
+        newVersion: '1.0.0-beta5',
       })
     ).toEqual('^v1.0.0-beta5@beta');
   });
@@ -358,8 +358,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^v1.0@beta',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0-beta3',
-        toVersion: '2.0.0-beta5',
+        currentVersion: '1.0.0-beta3',
+        newVersion: '2.0.0-beta5',
       })
     ).toEqual('^v2.0.0-beta5@beta');
   });
@@ -368,8 +368,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '^4.0@alpha',
         rangeStrategy: 'replace',
-        fromVersion: '4.0.0-alpha1',
-        toVersion: '4.0.0-beta5',
+        currentVersion: '4.0.0-alpha1',
+        newVersion: '4.0.0-beta5',
       })
     ).toEqual('^4.0.0-beta5@alpha');
   });
@@ -378,8 +378,8 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '3.6.*',
         rangeStrategy: 'replace',
-        fromVersion: '3.6.0',
-        toVersion: '3.7',
+        currentVersion: '3.6.0',
+        newVersion: '3.7',
       })
     ).toEqual('3.7.*');
 
@@ -387,10 +387,62 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: 'v3.1.*',
         rangeStrategy: 'replace',
-        fromVersion: '3.1.10',
-        toVersion: '3.2.0',
+        currentVersion: '3.1.10',
+        newVersion: '3.2.0',
       })
     ).toEqual('v3.2.*'); // #5388
+  });
+  it('handles update-lockfile strategy', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^0.1',
+        rangeStrategy: 'update-lockfile',
+        currentVersion: '0.1.0',
+        newVersion: '0.1.1',
+      })
+    ).toEqual('^0.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '^0.1',
+        rangeStrategy: 'update-lockfile',
+        currentVersion: '0.1.0',
+        newVersion: '0.2.0',
+      })
+    ).toEqual('^0.2');
+
+    expect(
+      semver.getNewValue({
+        currentValue: '^5.1',
+        rangeStrategy: 'update-lockfile',
+        currentVersion: '5.1.0',
+        newVersion: '5.2.0',
+      })
+    ).toEqual('^5.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '^5.1',
+        rangeStrategy: 'update-lockfile',
+        currentVersion: '5.1.0',
+        newVersion: '6.0.0',
+      })
+    ).toEqual('^6.0');
+
+    expect(
+      semver.getNewValue({
+        currentValue: '^5',
+        rangeStrategy: 'update-lockfile',
+        currentVersion: '5.1.0',
+        newVersion: '5.2.0',
+      })
+    ).toEqual('^5');
+    expect(
+      semver.getNewValue({
+        currentValue: '^5',
+        rangeStrategy: 'update-lockfile',
+        currentVersion: '5.1.0',
+        newVersion: '6.0.0',
+      })
+    ).toEqual('^6');
   });
 });
 describe('.sortVersions', () => {

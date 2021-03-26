@@ -1,5 +1,9 @@
 import { exec as _exec } from 'child_process';
-import { ExecSnapshots, envMock, mockExecAll } from '../../../../test/execUtil';
+import {
+  ExecSnapshots,
+  envMock,
+  mockExecAll,
+} from '../../../../test/exec-util';
 import { fs, getName, mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _yarnHelper from './yarn';
@@ -41,7 +45,9 @@ describe(getName(__filename), () => {
       });
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
-          return new Promise<string>((resolve) => resolve(null));
+          return new Promise<string>((resolve) =>
+            resolve('yarn-path ./.yarn/cli.js\n')
+          );
         }
         return new Promise<string>((resolve) =>
           resolve('package-lock-contents')
@@ -162,5 +168,31 @@ describe(getName(__filename), () => {
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+  describe('checkYarnrc()', () => {
+    it('returns offline mirror and yarn path', async () => {
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) =>
+            resolve(
+              'yarn-offline-mirror "./packages-cache"\nyarn-path "./.yarn/cli.js"\n'
+            )
+          );
+        }
+        return new Promise<string>((resolve) => resolve(''));
+      });
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+    });
+    it('returns no offline mirror and unquoted yarn path', async () => {
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) =>
+            resolve('yarn-path ./.yarn/cli.js\n')
+          );
+        }
+        return new Promise<string>((resolve) => resolve(''));
+      });
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+    });
   });
 });

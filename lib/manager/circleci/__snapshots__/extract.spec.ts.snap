@@ -13,16 +13,6 @@ Array [
     "replaceString": "cimg/node:14.8.0",
     "versioning": "docker",
   },
-  Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "currentDigest": undefined,
-    "currentValue": "201903-01",
-    "datasource": "docker",
-    "depName": "ubuntu-1604",
-    "depType": "docker",
-    "replaceString": "ubuntu-1604:201903-01",
-    "versioning": "docker",
-  },
 ]
 `;
 

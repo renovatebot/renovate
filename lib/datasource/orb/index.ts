@@ -1,9 +1,11 @@
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'orb';
+export const defaultRegistryUrls = ['https://circleci.com/'];
+export const customRegistrySupport = false;
 
 const http = new Http(id);
 
@@ -22,6 +24,7 @@ interface OrbRelease {
  */
 export async function getReleases({
   lookupName,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   logger.debug({ lookupName }, 'orb.getReleases()');
   const cacheNamespace = 'orb';
@@ -34,7 +37,7 @@ export async function getReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  const url = 'https://circleci.com/graphql-unstable';
+  const url = `${registryUrl}graphql-unstable`;
   const body = {
     query: `{orb(name:"${lookupName}"){name, homeUrl, versions {version, createdAt}}}`,
     variables: {},
@@ -50,15 +53,13 @@ export async function getReleases({
   }
   // Simplify response before caching and returning
   const dep: ReleaseResult = {
-    name: lookupName,
-    versions: {},
     releases: null,
   };
   if (res.homeUrl?.length) {
     dep.homepage = res.homeUrl;
   }
   dep.homepage =
-    dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
+    dep.homepage || `https://circleci.com/developer/orbs/orb/${lookupName}`;
   dep.releases = res.versions.map(({ version, createdAt }) => ({
     version,
     releaseTimestamp: createdAt || null,

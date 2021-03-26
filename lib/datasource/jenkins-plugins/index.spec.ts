@@ -1,5 +1,5 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import * as versioning from '../../versioning/docker';
 import jenkinsPluginsVersions from './__fixtures__/plugin-versions.json';
@@ -68,7 +68,6 @@ describe(getName(__filename), () => {
       expect(res.sourceUrl).toBe(
         'https://github.com/jenkinsci/email-ext-plugin'
       );
-      expect(res.name).toBe('email-ext');
 
       expect(
         res.releases.find((release) => release.version === '2.69')
@@ -100,7 +99,6 @@ describe(getName(__filename), () => {
       expect(res.sourceUrl).toBe(
         'https://github.com/jenkinsci/email-ext-plugin'
       );
-      expect(res.name).toBe('email-ext');
     });
 
     it('returns null empty response', async () => {

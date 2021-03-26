@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import * as utils from './utils';
 
@@ -7,11 +7,16 @@ const range = (count: number) => [...Array(count).keys()];
 const baseUrl = 'https://api.bitbucket.org';
 
 describe('accumulateValues()', () => {
-  it('paginates', async () => {
-    httpMock.reset();
+  beforeEach(() => {
     httpMock.setup();
     setBaseUrl(baseUrl);
+  });
 
+  afterEach(() => {
+    httpMock.reset();
+  });
+
+  it('paginates', async () => {
     httpMock
       .scope(baseUrl)
       .get('/some-url?pagelen=10')
@@ -35,5 +40,11 @@ describe('accumulateValues()', () => {
     expect(res).toHaveLength(25);
     expect(httpMock.getTrace()).toHaveLength(3);
     expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('isConflicted', () => {
+    expect(
+      utils.isConflicted([{ chunks: [{ changes: [{ content: '+=======' }] }] }])
+    ).toBe(true);
   });
 });

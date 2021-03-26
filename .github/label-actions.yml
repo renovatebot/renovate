@@ -1,0 +1,29 @@
+'reproduction:needed':
+  comment: >
+    Hi there,
+
+
+    The Renovate team needs your help!
+    Before we can start work on your issue we first need to know exactly what's causing the current behavior.
+    A minimal reproduction helps us with this.
+
+
+    To get started, please read our guide on [minimal reproductions](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to understand what is needed.
+
+
+    We may close the issue if you have not provided a minimal reproduction within two weeks.
+    If you need more time, or are stuck, please ask for help or more time in a comment.
+
+
+    Good luck,
+
+
+    The Renovate team
+
+'reproduction:provided':
+  comment: >
+    Thank you for providing a reproduction! :tada: :rocket:
+
+
+    The Renovate team will take a look at the reproduction repository.
+    Once we confirm the provided repository reproduces the problem, the label will be changed to `reproduction:confirmed`.

@@ -1,16 +1,17 @@
-import { resolve } from 'path';
 import { stat } from 'fs-extra';
+import { resolve } from 'upath';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { StatusResult, getRepoStatus } from '../../util/git';
 import { Http } from '../../util/http';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
   extraEnv,
   gradleWrapperFileName,
   prepareGradleCommand,
 } from '../gradle/utils';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const http = new Http('gradle-wrapper');
 
@@ -74,25 +75,28 @@ export async function updateArtifacts({
         // need to reset version, otherwise we have a checksum mismatch
         await writeLocalFile(
           packageFileName,
-          newPackageFileContent.replace(config.toVersion, config.currentValue)
+          newPackageFileContent.replace(config.newValue, config.currentValue)
         );
         const checksum = await getDistributionChecksum(distributionUrl);
         cmd += ` --gradle-distribution-sha256-sum ${checksum}`;
       }
     } else {
-      cmd += ` --gradle-version ${config.toVersion}`;
+      cmd += ` --gradle-version ${config.newValue}`;
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
-        image: 'renovate/gradle',
+        image: 'gradle',
       },
       extraEnv,
     };
     try {
       await exec(cmd, execOptions);
     } catch (err) {
-      // TODO: Is this an artifact error?
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
       logger.warn(
         { err },
         'Error executing gradle wrapper update command. It can be not a critical one though.'

@@ -1,4 +1,4 @@
-Currently Terraform support is limited to Terraform registry sources and github sources that include semver refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
+Currently Terraform support is limited to Terraform registry sources and GitHub sources that include SemVer refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
 
 Fixed versions like the following will receive a PR whenever there is a newer version available:
 

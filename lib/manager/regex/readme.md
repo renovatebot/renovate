@@ -22,7 +22,10 @@ Configuration-wise, it works like this:
 - You can optionally have a `lookupName` capture group or a `lookupNameTemplate` if it differs from `depName`
 - You must have either a `datasource` capture group or a `datasourceTemplate` config field
 - You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver` will be used as the default
+- You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
 - You can optionally have a `currentDigest` capture group.
+- You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field
+  - If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array.
 
 ### Regular Expression Capture Groups
 
@@ -97,6 +100,6 @@ The above (obviously not a complete `Dockerfile`, but abbreviated for this examp
 }
 ```
 
-In the above the `versioningTemplate` is not actually necessary because Renovate already defaults to `semver` versioning, but it has been included to help illustrate why we call these fields _templates_. They are named this way because they are compiled using `handlebars` and so can be composed from values you collect in named capture groups. You will usually want to use the tripe brace `{{{ }}}` template (e.v. `{{{versioning}}}` to be safe because `handlebars` escapes special characters by default with double braces.
+In the above the `versioningTemplate` is not actually necessary because Renovate already defaults to `semver` versioning, but it has been included to help illustrate why we call these fields _templates_. They are named this way because they are compiled using Handlebars and so can be composed from values you collect in named capture groups. You will usually want to use the tripe brace `{{{ }}}` template (e.v. `{{{versioning}}}` to be safe because Handlebars escapes special characters by default with double braces.
 
 By adding the comments to the `Dockerfile`, you can see that instead of four separate `regexManagers` being required, there is now only one - and the `Dockerfile` itself is now somewhat better documented too. The syntax we used there is completely arbitrary and you may choose your own instead if you prefer - just be sure to update your `matchStrings` regex.

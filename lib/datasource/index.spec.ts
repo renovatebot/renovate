@@ -1,4 +1,4 @@
-import { mocked } from '../../test/util';
+import { getName, logger, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -6,23 +6,27 @@ import {
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
 import * as datasourceDocker from './docker';
+import * as datasourceGalaxy from './galaxy';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
 import * as datasourceNpm from './npm';
 import * as datasourcePackagist from './packagist';
+import type { DatasourceApi } from './types';
 import * as datasource from '.';
 
 jest.mock('./docker');
+jest.mock('./galaxy');
 jest.mock('./maven');
 jest.mock('./npm');
 jest.mock('./packagist');
 
 const dockerDatasource = mocked(datasourceDocker);
+const galaxyDatasource = mocked(datasourceGalaxy);
 const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe('datasource/index', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -31,10 +35,7 @@ describe('datasource/index', () => {
     expect(datasource.getDatasourceList()).toBeDefined();
   });
   it('validates dataource', () => {
-    function validateDatasource(
-      module: datasource.Datasource,
-      name: string
-    ): boolean {
+    function validateDatasource(module: DatasourceApi, name: string): boolean {
       if (!module.getReleases) {
         return false;
       }
@@ -129,6 +130,15 @@ describe('datasource/index', () => {
     });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
+  });
+  it('ignores and warns for registryUrls', async () => {
+    galaxyDatasource.getReleases.mockResolvedValue(null);
+    await datasource.getPkgReleases({
+      datasource: datasourceGalaxy.id,
+      depName: 'some.dep',
+      registryUrls: ['https://google.com/'],
+    });
+    expect(logger.logger.warn).toHaveBeenCalled();
   });
   it('warns if multiple registryUrls for registryStrategy=first', async () => {
     dockerDatasource.getReleases.mockResolvedValue(null);

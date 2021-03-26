@@ -1,7 +1,7 @@
-import path from 'path';
 import is from '@sindresorhus/is';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
+import upath from 'upath';
 
 import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
@@ -66,7 +66,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       rawFileContents = '{}';
     }
 
-    const fileType = path.extname(configFileName);
+    const fileType = upath.extname(configFileName);
 
     if (fileType === '.json5') {
       try {
@@ -179,21 +179,19 @@ export async function mergeRenovateConfig(
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
   // Decrypt before resolving in case we need npm authentication for any presets
-  const decryptedConfig = decryptConfig(migratedConfig, config.privateKey);
+  const decryptedConfig = decryptConfig(migratedConfig);
   // istanbul ignore if
-  if (decryptedConfig.npmrc) {
+  if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
   const resolvedConfig = decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig, config),
-    config.privateKey
+    await presets.resolveConfigPresets(decryptedConfig, config)
   );
-  delete resolvedConfig.privateKey;
   logger.trace({ config: resolvedConfig }, 'resolved config');
   // istanbul ignore if
-  if (resolvedConfig.npmrc) {
+  if (is.string(resolvedConfig.npmrc)) {
     logger.debug(
       'Ignoring any .npmrc files in repository due to configured npmrc'
     );

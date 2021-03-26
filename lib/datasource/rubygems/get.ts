@@ -2,7 +2,7 @@ import { OutgoingHttpHeaders } from 'http';
 import urlJoin from 'url-join';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import { ReleaseResult } from '../common';
+import type { ReleaseResult } from '../types';
 import { id } from './common';
 
 const http = new Http(id);
@@ -10,9 +10,7 @@ const http = new Http(id);
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
 
-const getHeaders = (): OutgoingHttpHeaders => {
-  return { hostType: id };
-};
+const getHeaders = (): OutgoingHttpHeaders => ({ hostType: id });
 
 export async function fetch(
   dependency: string,

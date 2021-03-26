@@ -4,7 +4,7 @@ import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import * as dockerVersioning from '../../versioning/docker';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 interface Image {
   name: string;
@@ -40,7 +40,6 @@ export function extractBase(base: string): PackageDependency | null {
   return {
     datasource: datasourceGitTags.id,
     depName: match.groups.path.replace('.git', ''),
-    depNameShort: match.groups.project.replace('.git', ''),
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,
   };
@@ -48,11 +47,22 @@ export function extractBase(base: string): PackageDependency | null {
 
 export function extractImage(image: Image): PackageDependency | null {
   if (image?.name && image.newTag) {
+    const replaceString = image.newTag;
+    let currentValue;
+    let currentDigest;
+    if (replaceString.startsWith('sha256:')) {
+      currentDigest = replaceString;
+      currentValue = undefined;
+    } else {
+      currentValue = replaceString;
+    }
     return {
       datasource: datasourceDocker.id,
       versioning: dockerVersioning.id,
       depName: image.newName ?? image.name,
-      currentValue: image.newTag,
+      currentValue,
+      currentDigest,
+      replaceString,
     };
   }
 

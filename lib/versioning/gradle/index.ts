@@ -1,4 +1,4 @@
-import { NewValueConfig, VersioningApi } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
 import {
   RangeBound,
   TokenType,
@@ -150,8 +150,8 @@ const matches = (a: string, b: string): boolean => {
   return leftResult && rightResult;
 };
 
-const maxSatisfyingVersion = (versions: string[], range: string): string => {
-  return versions.reduce((result, version) => {
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  versions.reduce((result, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -162,10 +162,9 @@ const maxSatisfyingVersion = (versions: string[], range: string): string => {
     }
     return result;
   }, null);
-};
 
-const minSatisfyingVersion = (versions: string[], range: string): string => {
-  return versions.reduce((result, version) => {
+const minSatisfyingVersion = (versions: string[], range: string): string =>
+  versions.reduce((result, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -176,15 +175,14 @@ const minSatisfyingVersion = (versions: string[], range: string): string => {
     }
     return result;
   }, null);
-};
 
 function getNewValue({
   currentValue,
   rangeStrategy,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string | null {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
-    return toVersion;
+    return newVersion;
   }
   return null;
 }
@@ -201,7 +199,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions: compare,

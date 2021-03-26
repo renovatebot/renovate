@@ -1,10 +1,11 @@
 import URL from 'url';
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
-
-import * as datasourceGitSubmodules from '../../datasource/git-submodules';
+import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
-import { ManagerConfig, PackageFile } from '../common';
+import { getHttpUrl } from '../../util/git';
+import * as hostRules from '../../util/host-rules';
+import type { ManagerConfig, PackageFile } from '../types';
 
 type GitModule = {
   name: string;
@@ -104,20 +105,26 @@ export default async function extractPackageFile(
     await Promise.all(
       depNames.map(async ({ name, path }) => {
         try {
-          const [currentValue] = (await git.subModule(['status', path]))
+          const [currentDigest] = (await git.subModule(['status', path]))
             .trim()
-            .split(/[+\s]/);
+            .replace(/^[-+]/, '')
+            .split(/\s/);
           const subModuleUrl = await getUrl(git, gitModulesPath, name);
-          const submoduleBranch = await getBranch(
+          // hostRules only understands HTTP URLs
+          // Find HTTP URL, then apply token
+          let httpSubModuleUrl = getHttpUrl(subModuleUrl);
+          const hostRule = hostRules.find({ url: httpSubModuleUrl });
+          httpSubModuleUrl = getHttpUrl(subModuleUrl, hostRule?.token);
+          const currentValue = await getBranch(
             gitModulesPath,
             name,
-            subModuleUrl
+            httpSubModuleUrl
           );
           return {
             depName: path,
-            registryUrls: [subModuleUrl, submoduleBranch],
+            lookupName: httpSubModuleUrl,
             currentValue,
-            currentDigest: currentValue,
+            currentDigest,
           };
         } catch (err) /* istanbul ignore next */ {
           logger.warn(
@@ -130,5 +137,5 @@ export default async function extractPackageFile(
     )
   ).filter(Boolean);
 
-  return { deps, datasource: datasourceGitSubmodules.id };
+  return { deps, datasource: datasourceGitRefs.id };
 }

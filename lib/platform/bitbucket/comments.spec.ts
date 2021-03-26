@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import * as comments from './comments';
@@ -15,6 +15,9 @@ describe(getName(__filename), () => {
     httpMock.setup();
 
     setBaseUrl(baseUrl);
+  });
+  afterEach(() => {
+    httpMock.reset();
   });
 
   describe('ensureComment()', () => {

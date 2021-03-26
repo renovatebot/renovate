@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 // istanbul ignore file
+import { dequal } from 'dequal';
 import { readFileSync } from 'fs-extra';
 import JSON5 from 'json5';
 import { configFileNames } from './config/app-strings';
-import { RenovateConfig } from './config/common';
-import { getConfig } from './config/file';
+import { getConfig as getFileConfig } from './config/file';
 import { massageConfig } from './config/massage';
+import { migrateConfig } from './config/migration';
+import type { RenovateConfig } from './config/types';
 import { validateConfig } from './config/validation';
+import { logger } from './logger';
 
 /* eslint-disable no-console */
 
@@ -17,17 +20,24 @@ async function validate(
   config: RenovateConfig,
   isPreset = false
 ): Promise<void> {
-  const res = await validateConfig(massageConfig(config), isPreset);
-  if (res.errors.length) {
-    console.log(
-      `${desc} contains errors:\n\n${JSON.stringify(res.errors, null, 2)}`
+  const { isMigrated, migratedConfig } = migrateConfig(config);
+  if (isMigrated) {
+    logger.warn(
+      {
+        oldConfig: config,
+        newConfig: migratedConfig,
+      },
+      'Config migration necessary'
     );
+  }
+  const massagedConfig = massageConfig(migratedConfig);
+  const res = await validateConfig(massagedConfig, isPreset);
+  if (res.errors.length) {
+    logger.error({ errors: res.errors }, `${desc} contains errors`);
     returnVal = 1;
   }
   if (res.warnings.length) {
-    console.log(
-      `${desc} contains warnings:\n\n${JSON.stringify(res.warnings, null, 2)}`
-    );
+    logger.warn({ warnings: res.warnings }, `${desc} contains warnings`);
     returnVal = 1;
   }
 }
@@ -43,17 +53,17 @@ type PackageJson = {
   )) {
     try {
       const rawContent = readFileSync(file, 'utf8');
-      console.log(`Validating ${file}`);
+      logger.info(`Validating ${file}`);
       try {
-        let jsonContent;
+        let jsonContent: RenovateConfig;
         if (file.endsWith('.json5')) {
-          jsonContent = JSON5.parse(rawContent) as PackageJson;
+          jsonContent = JSON5.parse(rawContent);
         } else {
-          jsonContent = JSON.parse(rawContent) as PackageJson;
+          jsonContent = JSON.parse(rawContent);
         }
         await validate(file, jsonContent);
       } catch (err) {
-        console.log(`${file} is not valid Renovate config`, err);
+        logger.info({ err }, `${file} is not valid Renovate config`);
         returnVal = 1;
       }
     } catch (err) {
@@ -65,11 +75,11 @@ type PackageJson = {
       readFileSync('package.json', 'utf8')
     ) as PackageJson;
     if (pkgJson.renovate) {
-      console.log(`Validating package.json > renovate`);
+      logger.info(`Validating package.json > renovate`);
       await validate('package.json > renovate', pkgJson.renovate);
     }
     if (pkgJson['renovate-config']) {
-      console.log(`Validating package.json > renovate-config`);
+      logger.info(`Validating package.json > renovate-config`);
       for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
         await validate('package.json > renovate-config', presetConfig, true);
       }
@@ -78,13 +88,16 @@ type PackageJson = {
     // ignore
   }
   try {
-    const fileConfig = getConfig(process.env);
-    console.log(`Validating config.js`);
-    try {
-      await validate('config.js', fileConfig);
-    } catch (err) {
-      console.log(`config.js is not valid Renovate config`);
-      returnVal = 1;
+    const fileConfig = getFileConfig(process.env);
+    if (!dequal(fileConfig, {})) {
+      const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
+      logger.info(`Validating ${file}`);
+      try {
+        await validate(file, fileConfig);
+      } catch (err) {
+        logger.error({ err }, `${file} is not valid Renovate config`);
+        returnVal = 1;
+      }
     }
   } catch (err) {
     // ignore
@@ -92,7 +105,7 @@ type PackageJson = {
   if (returnVal !== 0) {
     process.exit(returnVal);
   }
-  console.log('OK');
+  logger.info('Config validated successfully');
 })().catch((e) => {
   console.error(e);
   process.exit(99);

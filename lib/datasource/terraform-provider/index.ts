@@ -2,14 +2,17 @@ import URL from 'url';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'terraform-provider';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [
   'https://registry.terraform.io',
   'https://releases.hashicorp.com',
 ];
+export const defaultVersioning = hashicorpVersioning.id;
 export const registryStrategy = 'hunt';
 
 const http = new Http(id);
@@ -46,8 +49,6 @@ async function queryRegistry(
   const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
   const res = (await http.getJson<TerraformProvider>(backendURL)).body;
   const dep: ReleaseResult = {
-    name: repository,
-    versions: {},
     releases: null,
   };
   if (res.source) {
@@ -57,12 +58,12 @@ async function queryRegistry(
     version,
   }));
   // set published date for latest release
-  const currentVersion = dep.releases.find((release) => {
-    return res.version === release.version;
-  });
+  const latestVersion = dep.releases.find(
+    (release) => res.version === release.version
+  );
   // istanbul ignore else
-  if (currentVersion) {
-    currentVersion.releaseTimestamp = res.published_at;
+  if (latestVersion) {
+    latestVersion.releaseTimestamp = res.published_at;
   }
   dep.homepage = `${registryURL}/providers/${repository}`;
   logger.trace({ dep }, 'dep');
@@ -85,8 +86,6 @@ async function queryReleaseBackend(
   }
 
   const dep: ReleaseResult = {
-    name: repository,
-    versions: {},
     releases: null,
     sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
   };

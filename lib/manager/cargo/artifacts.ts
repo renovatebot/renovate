@@ -1,12 +1,13 @@
 import { quote } from 'shlex';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
-  getSiblingFileName,
+  findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function cargoUpdate(
   manifestPath: string,
@@ -19,7 +20,7 @@ async function cargoUpdate(
 
   const execOptions: ExecOptions = {
     docker: {
-      image: 'renovate/rust',
+      image: 'rust',
     },
   };
   try {
@@ -64,8 +65,16 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(packageFileName, 'Cargo.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName);
+  // For standalone package crates, the `Cargo.lock` will be in the same
+  // directory as `Cargo.toml` (ie. a sibling). For cargo workspaces, it
+  // will be further up.
+  const lockFileName = await findLocalSiblingOrParent(
+    packageFileName,
+    'Cargo.lock'
+  );
+  const existingLockFileContent = lockFileName
+    ? await readLocalFile(lockFileName)
+    : null;
   if (!existingLockFileContent) {
     logger.debug('No Cargo.lock found');
     return null;
@@ -97,6 +106,10 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.warn({ err }, 'Failed to update Cargo lock file');
     return [
       {

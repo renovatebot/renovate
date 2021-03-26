@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
   packageFileName,
@@ -31,7 +32,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {
-        image: 'renovate/python',
+        image: 'python',
         tagScheme: 'pip_requirements',
         preCommands: ['pip install hashin'],
       },
@@ -52,6 +53,10 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug({ err }, `Failed to update ${packageFileName} file`);
     return [
       {

@@ -4,7 +4,8 @@ import is from '@sindresorhus/is';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { PackageDependency, PackageFile } from '../common';
+import { localPathExists } from '../../util/fs';
+import type { PackageDependency, PackageFile } from '../types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
@@ -25,6 +26,7 @@ interface PipFile {
 
   packages?: Record<string, PipRequirement>;
   'dev-packages'?: Record<string, PipRequirement>;
+  requires?: Record<string, string>;
 }
 
 interface PipRequirement {
@@ -116,7 +118,10 @@ function extractFromSection(
   return deps;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export async function extractPackageFile(
+  content: string,
+  fileName: string
+): Promise<PackageFile | null> {
   logger.debug('pipenv.extractPackageFile()');
 
   let pipfile: PipFile;
@@ -136,8 +141,29 @@ export function extractPackageFile(content: string): PackageFile | null {
     ...extractFromSection(pipfile, 'packages'),
     ...extractFromSection(pipfile, 'dev-packages'),
   ];
-  if (res.deps.length) {
-    return res;
+  if (!res.deps.length) {
+    return null;
   }
-  return null;
+
+  const constraints: Record<string, any> = {};
+
+  if (is.nonEmptyString(pipfile.requires?.python_version)) {
+    constraints.python = `== ${pipfile.requires.python_version}.*`;
+  } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
+    constraints.python = `== ${pipfile.requires.python_full_version}`;
+  }
+
+  if (is.nonEmptyString(pipfile.packages?.pipenv)) {
+    constraints.pipenv = pipfile.packages.pipenv;
+  } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
+    constraints.pipenv = pipfile['dev-packages'].pipenv;
+  }
+
+  const lockFileName = fileName + '.lock';
+  if (await localPathExists(lockFileName)) {
+    res.lockFiles = [lockFileName];
+  }
+
+  res.constraints = constraints;
+  return res;
 }

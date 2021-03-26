@@ -1,6 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches errors 1`] = `
+exports[`manager/mix/artifacts catches exec errors 1`] = `
+Array [
+  Object {
+    "artifactError": Object {
+      "lockFile": "mix.lock",
+      "stderr": "exec-error",
+    },
+  },
+]
+`;
+
+exports[`manager/mix/artifacts catches write errors 1`] = `
 Array [
   Object {
     "artifactError": Object {
@@ -11,7 +22,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
+exports[`manager/mix/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
     "cmd": "mix deps.update plug",
@@ -34,7 +45,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated mix.lock 1`] = `
+exports[`manager/mix/artifacts returns updated mix.lock 1`] = `
 Array [
   Object {
     "file": Object {
@@ -45,10 +56,22 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated mix.lock 2`] = `
+exports[`manager/mix/artifacts returns updated mix.lock 2`] = `
 Array [
   Object {
-    "cmd": "docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo renovate/elixir mix deps.update plug",
+    "cmd": "docker pull renovate/elixir",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_elixir -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_elixir --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/elixir bash -l -c \\"mix deps.update plug\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

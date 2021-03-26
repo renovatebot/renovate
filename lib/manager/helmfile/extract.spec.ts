@@ -1,5 +1,10 @@
+import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
+const multidocYaml = readFileSync(
+  'lib/manager/helmfile/__fixtures__/multidoc.yaml',
+  'utf8'
+);
 describe('lib/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
@@ -15,7 +20,7 @@ describe('lib/manager/helmfile/extract', () => {
       const fileName = 'helmfile.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
-          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+          stable: 'https://charts.helm.sh/stable',
         },
       });
       expect(result).toBeNull();
@@ -32,7 +37,7 @@ describe('lib/manager/helmfile/extract', () => {
       const fileName = 'helmfile.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
-          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+          stable: 'https://charts.helm.sh/stable',
         },
       });
       expect(result).toBeNull();
@@ -51,7 +56,7 @@ describe('lib/manager/helmfile/extract', () => {
       const fileName = 'helmfile.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
-          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+          stable: 'https://charts.helm.sh/stable',
         },
       });
       expect(result).not.toBeNull();
@@ -75,7 +80,7 @@ describe('lib/manager/helmfile/extract', () => {
       const fileName = 'helmfile.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
-          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+          stable: 'https://charts.helm.sh/stable',
         },
       });
       expect(result).not.toBeNull();
@@ -95,7 +100,7 @@ describe('lib/manager/helmfile/extract', () => {
       const fileName = 'helmfile.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
-          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+          stable: 'https://charts.helm.sh/stable',
         },
       });
       expect(result).not.toBeNull();
@@ -116,7 +121,7 @@ describe('lib/manager/helmfile/extract', () => {
       const fileName = 'helmfile.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
-          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+          stable: 'https://charts.helm.sh/stable',
         },
       });
       expect(result).not.toBeNull();
@@ -140,7 +145,7 @@ describe('lib/manager/helmfile/extract', () => {
       const fileName = 'helmfile.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
-          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+          stable: 'https://charts.helm.sh/stable',
         },
       });
       expect(result).not.toBeNull();
@@ -160,12 +165,23 @@ describe('lib/manager/helmfile/extract', () => {
       const fileName = 'helmfile.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
-          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+          stable: 'https://charts.helm.sh/stable',
         },
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
       expect(result.deps.every((dep) => dep.skipReason)).toBeTruthy();
+    });
+
+    it('parses multidoc yaml', () => {
+      const fileName = 'helmfile.yaml';
+      const result = extractPackageFile(multidocYaml, fileName, {
+        aliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
     });
   });
 });

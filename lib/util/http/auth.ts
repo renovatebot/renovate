@@ -36,10 +36,12 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
         options.headers.authorization = `Bearer ${options.token}`;
       }
     } else {
-      options.headers.authorization = `Bearer ${options.token}`;
+      // Custom Auth type, eg `Basic XXXX_TOKEN`
+      const type = options.context?.authType ?? 'Bearer';
+      options.headers.authorization = `${type} ${options.token}`;
     }
     delete options.token;
-  } else if (options.password) {
+  } else if (options.password !== undefined) {
     // Otherwise got will add username and password to url and header
     const auth = Buffer.from(
       `${options.username || ''}:${options.password}`

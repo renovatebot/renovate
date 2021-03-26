@@ -1,22 +1,18 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 import { isSpace, removeComments, skip } from './util';
 
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;
   i += 'sha256'.length;
-  i = skip(i, content, (c) => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   if (content[i] !== '"' && content[i] !== "'") {
     return null;
   }
   i += 1;
-  const j = skip(i, content, (c) => {
-    return c !== '"' && c !== "'";
-  });
+  const j = skip(i, content, (c) => c !== '"' && c !== "'");
   const sha256 = content.slice(i, j);
   return sha256;
 }
@@ -33,17 +29,13 @@ function extractSha256(content: string): string | null {
 function parseUrl(idx: number, content: string): string | null {
   let i = idx;
   i += 'url'.length;
-  i = skip(i, content, (c) => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   const chr = content[i];
   if (chr !== '"' && chr !== "'") {
     return null;
   }
   i += 1;
-  const j = skip(i, content, (c) => {
-    return c !== '"' && c !== "'" && !isSpace(c);
-  });
+  const j = skip(i, content, (c) => c !== '"' && c !== "'" && !isSpace(c));
   const url = content.slice(i, j);
   return url;
 }
@@ -108,31 +100,21 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
 function parseClassHeader(idx: number, content: string): string | null {
   let i = idx;
   i += 'class'.length;
-  i = skip(i, content, (c) => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   // Skip all non space and non '<' characters
-  let j = skip(i, content, (c) => {
-    return !isSpace(c) && c !== '<';
-  });
+  let j = skip(i, content, (c) => !isSpace(c) && c !== '<');
   const className = content.slice(i, j);
   i = j;
   // Skip spaces
-  i = skip(i, content, (c) => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   if (content[i] === '<') {
     i += 1;
   } else {
     return null;
   } // Skip spaces
-  i = skip(i, content, (c) => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   // Skip non-spaces
-  j = skip(i, content, (c) => {
-    return !isSpace(c);
-  });
+  j = skip(i, content, (c) => !isSpace(c));
   if (content.slice(i, j) !== 'Formula') {
     return null;
   }

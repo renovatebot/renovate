@@ -1,7 +1,7 @@
-import { resolve } from 'path';
 import { readFile, readFileSync } from 'fs-extra';
 import Git from 'simple-git';
-import * as httpMock from '../../../test/httpMock';
+import { resolve } from 'upath';
+import * as httpMock from '../../../test/http-mock';
 import { getName, git, partial } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { StatusResult } from '../../util/git';
@@ -13,7 +13,7 @@ jest.mock('../../util/git');
 const fixtures = resolve(__dirname, './__fixtures__');
 const config = {
   localDir: resolve(fixtures, './testFiles'),
-  toVersion: '5.6.4',
+  newValue: '5.6.4',
 };
 
 function readString(...paths: string[]): Promise<string> {
@@ -61,7 +61,7 @@ describe(getName(__filename), () => {
         newPackageFileContent: await readString(
           `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
-        config: { ...config, toVersion: '6.3' },
+        config: { ...config, newValue: '6.3' },
       });
 
       expect(res).toEqual(
@@ -70,14 +70,12 @@ describe(getName(__filename), () => {
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map((fileProjectPath) => {
-          return {
-            file: {
-              name: fileProjectPath,
-              contents: readBinSync(`./testFiles/${fileProjectPath}`),
-            },
-          };
-        })
+        ].map((fileProjectPath) => ({
+          file: {
+            name: fileProjectPath,
+            contents: readBinSync(`./testFiles/${fileProjectPath}`),
+          },
+        }))
       );
 
       [
@@ -101,7 +99,7 @@ describe(getName(__filename), () => {
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: ``,
-        config: { ...config, toVersion: '6.3' },
+        config: { ...config, newValue: '6.3' },
       });
 
       expect(result).toHaveLength(1);
@@ -223,7 +221,7 @@ describe(getName(__filename), () => {
         ),
         config: {
           ...config,
-          toVersion: '6.3',
+          newValue: '6.3',
           currentValue: '5.6.4',
         },
       });

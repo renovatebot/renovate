@@ -1,12 +1,12 @@
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import { PackageDependency } from '../../manager/common';
+import type { PackageDependency } from '../../manager/types';
 import { writeLocalFile } from '../../util/fs';
 import { escapeRegExp, regEx } from '../../util/regex';
 import { matchAt, replaceAt } from '../../util/string';
 import { compile } from '../../util/template';
-import { BranchUpgradeConfig } from '../common';
+import type { BranchUpgradeConfig } from '../types';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
@@ -31,13 +31,13 @@ export async function confirmIfDepUpdated(
     );
     newUpgrade = newExtract.deps[depIndex];
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ manager, packageFile }, 'Failed to parse newContent');
+    logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
   if (!newUpgrade) {
     logger.debug({ manager, packageFile }, 'No newUpgrade');
     return false;
   }
-  // istanbul ignore if
+
   if (upgrade.depName !== newUpgrade.depName) {
     logger.debug(
       {
@@ -48,6 +48,7 @@ export async function confirmIfDepUpdated(
       },
       'depName mismatch'
     );
+    return false;
   }
   if (newUpgrade.currentValue !== newValue) {
     logger.debug(
@@ -136,9 +137,9 @@ export async function doAutoReplace(
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
-    logger.warn(
+    logger.info(
       { packageFile, depName, existingContent, replaceString },
-      'Cannot find replaceString in current file content'
+      'Cannot find replaceString in current file content. Was it already updated?'
     );
     return existingContent;
   }

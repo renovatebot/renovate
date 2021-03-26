@@ -1,6 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import { VersioningApi } from '../common';
+import type { VersioningApi } from '../types';
 import { getNewValue, toSemverRange } from './range';
 
 export const id = 'swift';
@@ -29,7 +29,7 @@ const {
 export const isValid = (input: string): boolean =>
   !!valid(input) || !!validRange(toSemverRange(input));
 export const isVersion = (input: string): boolean => !!valid(input);
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
+const getSatisfyingVersion = (versions: string[], range: string): string =>
   maxSatisfying(
     versions.map((v) => v.replace(/^v/, '')),
     toSemverRange(range)
@@ -58,7 +58,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   sortVersions,
 };

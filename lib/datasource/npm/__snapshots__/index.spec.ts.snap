@@ -1,18 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/npm/index should cache package info from npm 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
 exports[`datasource/npm/index should fetch package info from custom registry 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://npm.mycustomregistry.com/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -23,21 +36,34 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should fetch package info from custom registry 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "npm.mycustomregistry.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://npm.mycustomregistry.com/foobar",
+  },
+]
 `;
 
 exports[`datasource/npm/index should fetch package info from npm 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -48,21 +74,34 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should fetch package info from npm 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
 `;
 
 exports[`datasource/npm/index should handle foobar 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -73,16 +112,30 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should handle foobar 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
 `;
 
 exports[`datasource/npm/index should handle no time 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
@@ -96,16 +149,68 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should handle no time 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
+exports[`datasource/npm/index should not send an authorization header if public package 1`] = `
+Object {
+  "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
+  "releases": Array [
+    Object {
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
+      "version": "0.0.1",
+    },
+    Object {
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
+      "version": "0.0.2",
+    },
+  ],
+  "sourceDirectory": "src/a",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "tags": Object {
+    "latest": "0.0.1",
+  },
+  "versions": Object {},
+}
+`;
+
+exports[`datasource/npm/index should not send an authorization header if public package 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
 `;
 
 exports[`datasource/npm/index should parse repo url (string) 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
   ],
@@ -115,16 +220,30 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should parse repo url (string) 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
 `;
 
 exports[`datasource/npm/index should parse repo url 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
   ],
@@ -136,19 +255,32 @@ Object {
 }
 `;
 
+exports[`datasource/npm/index should parse repo url 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
 exports[`datasource/npm/index should replace any environment variable in npmrc 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://registry.from-env.com/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -161,26 +293,39 @@ Object {
 }
 `;
 
+exports[`datasource/npm/index should replace any environment variable in npmrc 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.from-env.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.from-env.com/foobar",
+  },
+]
+`;
+
 exports[`datasource/npm/index should return deprecated 1`] = `
 Object {
-  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v0.0.2) of dependency \`foobar\` has the following deprecation notice:
+  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`foobar\` has the following deprecation notice:
 
 \`This is deprecated\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "deprecationSource": "npm",
-  "latestVersion": "0.0.2",
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "isDeprecated": true,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -193,26 +338,84 @@ Marking the latest version of an npm package as deprecated results in the entire
 `;
 
 exports[`datasource/npm/index should return deprecated 2`] = `
-"On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v0.0.2) of dependency \`foobar\` has the following deprecation notice:
+"On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`foobar\` has the following deprecation notice:
 
 \`This is deprecated\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake."
 `;
 
+exports[`datasource/npm/index should return deprecated 3`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
+exports[`datasource/npm/index should return null for no versions 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
+exports[`datasource/npm/index should return null if lookup fails 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
+exports[`datasource/npm/index should return null if lookup fails 401 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
 exports[`datasource/npm/index should send an authorization header if provided 1`] = `
 Object {
-  "latestVersion": "0.0.1",
-  "name": "foobar",
+  "name": "@foobar/core",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -223,21 +426,110 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should send an authorization header if provided 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic 1234",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/@foobar%2Fcore",
+  },
+]
+`;
+
+exports[`datasource/npm/index should throw error for 5xx 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
+exports[`datasource/npm/index should throw error for 408 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
+exports[`datasource/npm/index should throw error for 429 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
+exports[`datasource/npm/index should throw error for others 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
+`;
+
+exports[`datasource/npm/index should throw error for unparseable 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
 `;
 
 exports[`datasource/npm/index should use NPM_TOKEN if provided 1`] = `
 Object {
-  "latestVersion": "0.0.1",
-  "name": "foobar",
+  "name": "@foobar/core",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -248,21 +540,35 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should use NPM_TOKEN if provided 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/@foobar%2Fcore",
+  },
+]
 `;
 
 exports[`datasource/npm/index should use default registry if missing from npmrc 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -273,21 +579,34 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should use default registry if missing from npmrc 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.npmjs.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.npmjs.org/foobar",
+  },
+]
 `;
 
 exports[`datasource/npm/index should use host rules by baseUrl if provided 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -300,19 +619,33 @@ Object {
 }
 `;
 
+exports[`datasource/npm/index should use host rules by baseUrl if provided 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abcde",
+      "host": "npm.mycustomregistry.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/foobar",
+  },
+]
+`;
+
 exports[`datasource/npm/index should use host rules by hostName if provided 1`] = `
 Object {
-  "latestVersion": "0.0.1",
   "name": "foobar",
+  "registryUrl": "https://npm.mycustomregistry.com/",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
-      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
       "version": "0.0.2",
     },
   ],
@@ -323,4 +656,20 @@ Object {
   },
   "versions": Object {},
 }
+`;
+
+exports[`datasource/npm/index should use host rules by hostName if provided 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abcde",
+      "host": "npm.mycustomregistry.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://npm.mycustomregistry.com/foobar",
+  },
+]
 `;

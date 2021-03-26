@@ -1,7 +1,7 @@
 // TODO fix mocks
 import nock from 'nock';
 import { Platform, RepoParams } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -39,6 +39,9 @@ describe('platform/gitlab', () => {
     });
     httpMock.reset();
     httpMock.setup();
+  });
+  afterEach(() => {
+    httpMock.reset();
   });
 
   describe('initPlatform()', () => {
@@ -155,11 +158,12 @@ describe('platform/gitlab', () => {
   }
 
   describe('initRepo', () => {
+    const okReturn = { default_branch: 'master', url: 'https://some-url' };
     it(`should escape all forward slashes in project names`, async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
-        .reply(200, []);
+        .reply(200, okReturn);
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
@@ -310,9 +314,7 @@ describe('platform/gitlab', () => {
     it('should return null if no PR exists', async () => {
       const scope = await initRepo();
       scope
-        .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=some-branch'
-        )
+        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
         .reply(200, []);
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toBeNull();
@@ -321,12 +323,11 @@ describe('platform/gitlab', () => {
     it('should return the PR object', async () => {
       const scope = await initRepo();
       scope
-        .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=some-branch'
-        )
+        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 91,
+            title: 'some change',
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
@@ -359,12 +360,11 @@ describe('platform/gitlab', () => {
     it('should strip draft prefix from title', async () => {
       const scope = await initRepo();
       scope
-        .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=some-branch'
-        )
+        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 91,
+            title: 'Draft: some change',
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
@@ -397,12 +397,11 @@ describe('platform/gitlab', () => {
     it('should strip deprecated draft prefix from title', async () => {
       const scope = await initRepo();
       scope
-        .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=some-branch'
-        )
+        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 91,
+            title: 'WIP: some change',
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
@@ -886,9 +885,7 @@ describe('platform/gitlab', () => {
     it('returns true if no title and all state', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -906,9 +903,7 @@ describe('platform/gitlab', () => {
     it('returns true if not open', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -928,9 +923,7 @@ describe('platform/gitlab', () => {
     it('returns true if open and with title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -951,9 +944,7 @@ describe('platform/gitlab', () => {
     it('returns true with title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -972,9 +963,7 @@ describe('platform/gitlab', () => {
     it('returns true with draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -993,9 +982,7 @@ describe('platform/gitlab', () => {
     it('returns true with deprecated draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1282,9 +1269,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1302,9 +1287,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1322,9 +1305,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1342,9 +1323,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1385,9 +1364,9 @@ These updates have all been created already. Click a checkbox below to force a r
 
  - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\`gh-got\`, \`gl-got\`, \`got\`)
 `;
-  describe('getPrBody(input)', () => {
+  describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
-      expect(gitlab.getPrBody(prBody)).toMatchSnapshot();
+      expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });
   describe('getVulnerabilityAlerts()', () => {
@@ -1426,12 +1405,12 @@ These updates have all been created already. Click a checkbox below to force a r
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master'
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=master'
         )
         .reply(200, {
           content: Buffer.from(JSON.stringify(data)).toString('base64'),
         });
-      const res = await gitlab.getJsonFile('file.json');
+      const res = await gitlab.getJsonFile('dir/file.json');
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

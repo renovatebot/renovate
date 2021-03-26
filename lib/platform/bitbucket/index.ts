@@ -4,12 +4,12 @@ import parseDiff from 'parse-diff';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { sanitize } from '../../util/sanitize';
-import {
+import type {
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -24,8 +24,7 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
@@ -116,6 +115,8 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
+  cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -125,6 +126,7 @@ export async function initRepo({
   config = {
     repository,
     username: opts.username,
+    ignorePrAuthor,
   } as utils.Config;
   let info: utils.RepoInfo;
   try {
@@ -137,11 +139,12 @@ export async function initRepo({
     );
     config.defaultBranch = info.mainbranch;
 
-    Object.assign(config, {
+    config = {
+      ...config,
       owner: info.owner,
       mergeMethod: info.mergeMethod,
       has_issues: info.has_issues,
-    });
+    };
 
     logger.debug(`${repository} owner = ${config.owner}`);
   } catch (err) /* istanbul ignore next */ {
@@ -172,6 +175,7 @@ export async function initRepo({
     url,
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
   const repoConfig: RepoResult = {
     defaultBranch: info.mainbranch,
@@ -182,7 +186,7 @@ export async function initRepo({
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
 export function getRepoForceRebase(): Promise<boolean> {
-  // BB doesnt have an option to flag staled branches
+  // BB doesn't have an option to flag staled branches
   return Promise.resolve(false);
 }
 
@@ -207,7 +211,7 @@ export async function getPrList(): Promise<Pr[]> {
     config.prList = prs
       .filter((pr) => {
         const prAuthorId = pr?.author?.uuid;
-        return renovateUserUuid && prAuthorId
+        return renovateUserUuid && prAuthorId && !config.ignorePrAuthor
           ? renovateUserUuid === prAuthorId
           : true;
       })
@@ -456,7 +460,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
   );
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 50000)
     .replace(
@@ -475,7 +479,7 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(sanitize(body));
+  const description = massageMarkdown(sanitize(body));
 
   /* istanbul ignore if */
   if (!config.has_issues) {
@@ -542,12 +546,10 @@ export async function ensureIssue({
   return null;
 }
 
-export /* istanbul ignore next */ async function getIssueList(): Promise<
-  Issue[]
-> {
+/* istanbul ignore next */
+export async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
 
-  /* istanbul ignore if */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot getIssueList');
     return [];
@@ -564,9 +566,9 @@ export /* istanbul ignore next */ async function getIssueList(): Promise<
         await bitbucketHttp.getJson<{ values: Issue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`
         )
-      ).body.values || /* istanbul ignore next */ []
+      ).body.values || []
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.warn({ err }, 'Error finding issues');
     return [];
   }
@@ -615,7 +617,8 @@ export async function addReviewers(
   );
 }
 
-export /* istanbul ignore next */ function deleteLabel(): never {
+/* istanbul ignore next */
+export function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
 

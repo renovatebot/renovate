@@ -1,4 +1,5 @@
 export interface HostRule {
+  authType?: string;
   endpoint?: string;
   host?: string;
   hostType?: string;
@@ -17,4 +18,5 @@ export interface HostRule {
   abortIgnoreStatusCodes?: number[];
   enabled?: boolean;
   enableHttp2?: boolean;
+  concurrentRequestLimit?: number;
 }

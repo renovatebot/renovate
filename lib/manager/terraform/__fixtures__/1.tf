@@ -6,6 +6,10 @@ module "bar" {
   source = "github.com/hashicorp/example?ref=next"
 }
 
+module "repo-with-non-semver-ref" {
+  source = "github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9"
+}
+
 module "repo-with-dot" {
   source = "github.com/hashicorp/example.2.3?ref=v1.0.0"
 }

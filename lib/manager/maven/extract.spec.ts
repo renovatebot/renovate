@@ -1,6 +1,6 @@
 /* eslint-disable no-template-curly-in-string */
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve } from 'upath';
 import { extractPackage } from './extract';
 
 const minimumContent = readFileSync(

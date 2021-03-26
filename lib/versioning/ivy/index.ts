@@ -1,7 +1,13 @@
-import { VersioningApi } from '../common';
 import maven from '../maven';
-import { TYPE_QUALIFIER, isSubversion, tokenize } from '../maven/compare';
 import {
+  TYPE_QUALIFIER,
+  autoExtendMavenRange,
+  isSubversion,
+  tokenize,
+} from '../maven/compare';
+import type { NewValueConfig, VersioningApi } from '../types';
+import {
+  LATEST_REGEX,
   REV_TYPE_LATEST,
   REV_TYPE_SUBREV,
   parseDynamicRevision,
@@ -20,27 +26,27 @@ const {
   getMinor,
   getPatch,
   isGreaterThan,
-  isSingleVersion,
   isStable,
   matches: mavenMatches,
-  maxSatisfyingVersion,
-  minSatisfyingVersion,
-  getNewValue,
   sortVersions,
 } = maven;
 
-function isVersion(str: string): string | boolean {
+function isValid(str: string): string | boolean {
   if (!str) {
     return false;
   }
-  return isSingleVersion(str) || !!parseDynamicRevision(str);
+  return maven.isVersion(str) || !!parseDynamicRevision(str);
+}
+
+function isVersion(str: string): string | boolean {
+  if (!str || LATEST_REGEX.test(str)) {
+    return false;
+  }
+  return maven.isVersion(str);
 }
 
 function matches(a: string, b: string): boolean {
-  if (!a) {
-    return false;
-  }
-  if (!b) {
+  if (!a || !b) {
     return false;
   }
   const dynamicRevision = parseDynamicRevision(b);
@@ -70,6 +76,31 @@ function matches(a: string, b: string): boolean {
   return mavenMatches(a, value);
 }
 
+function getSatisfyingVersion(versions: string[], range: string): string {
+  return versions.reduce((result, version) => {
+    if (matches(version, range)) {
+      if (!result) {
+        return version;
+      }
+      if (isGreaterThan(version, result)) {
+        return version;
+      }
+    }
+    return result;
+  }, null);
+}
+
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  newVersion,
+}: NewValueConfig): string | null {
+  if (isVersion(currentValue) || rangeStrategy === 'pin') {
+    return newVersion;
+  }
+  return autoExtendMavenRange(currentValue, newVersion);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -77,13 +108,13 @@ export const api: VersioningApi = {
   getPatch,
   isCompatible: isVersion,
   isGreaterThan,
-  isSingleVersion,
+  isSingleVersion: isVersion,
   isStable,
-  isValid: isVersion,
+  isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
-  minSatisfyingVersion,
+  getSatisfyingVersion,
+  minSatisfyingVersion: getSatisfyingVersion,
   getNewValue,
   sortVersions,
 };

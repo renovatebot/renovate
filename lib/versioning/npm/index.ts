@@ -1,6 +1,6 @@
 import * as semver from 'semver';
 import { is as isStable } from 'semver-stable';
-import { VersioningApi } from '../common';
+import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
 export const id = 'npm';
@@ -16,7 +16,7 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 const {
   compare: sortVersions,
-  maxSatisfying: maxSatisfyingVersion,
+  maxSatisfying: getSatisfyingVersion,
   minSatisfying: minSatisfyingVersion,
   major: getMajor,
   minor: getMinor,
@@ -51,7 +51,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   sortVersions,
 };

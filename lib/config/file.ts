@@ -1,21 +1,21 @@
-import path from 'path';
+import upath from 'upath';
 import { logger } from '../logger';
-import { RenovateConfig } from './common';
 import { migrateConfig } from './migration';
+import type { GlobalConfig } from './types';
 
-export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
+export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config';
-  if (!path.isAbsolute(configFile)) {
+  if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
     logger.debug('Checking for config file in ' + configFile);
   }
-  let config: RenovateConfig = {};
+  let config: GlobalConfig = {};
   try {
     // eslint-disable-next-line global-require,import/no-dynamic-require
     config = require(configFile);
   } catch (err) {
     // istanbul ignore if
-    if (err instanceof SyntaxError) {
+    if (err instanceof SyntaxError || err instanceof TypeError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
       process.exit(1);
     }

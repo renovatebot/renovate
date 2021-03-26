@@ -1,9 +1,9 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-import * as presets from '../../../../config/presets';
+import * as presets from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { getOnboardingConfig } from './config';
 
-jest.mock('../../../../config/presets');
+jest.mock('../../../../config/presets/local');
 
 const mockedPresets = presets as jest.Mocked<typeof presets>;
 
@@ -47,6 +47,14 @@ describe('workers/repository/onboarding/branch', () => {
     it('ignores an unknown error', async () => {
       mockedPresets.getPreset.mockRejectedValue(
         new Error('unknown error for test')
+      );
+      onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
+      expect(JSON.parse(onboardingConfig)).toEqual(config.onboardingConfig);
+    });
+    it('ignores unsupported platform', async () => {
+      mockedPresets.getPreset.mockRejectedValue(
+        new Error(`Unsupported platform 'dummy' for local preset.`)
       );
       onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);

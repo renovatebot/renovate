@@ -16,7 +16,7 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
@@ -24,7 +24,7 @@ import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
-import {
+import type {
   AggregatedVulnerabilities,
   BranchStatusConfig,
   CreatePRConfig,
@@ -39,8 +39,7 @@ import {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-  VulnerabilityAlert,
-} from '../common';
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import {
   BranchProtection,
@@ -168,10 +167,12 @@ export async function initRepo({
   forkToken,
   localDir,
   renovateUsername,
+  cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository } as any;
+  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -246,7 +247,8 @@ export async function initRepo({
     logger.debug('Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
-      err.message === REPOSITORY_RENAMED
+      err.message === REPOSITORY_RENAMED ||
+      err.message === REPOSITORY_NOT_FOUND
     ) {
       throw err;
     }
@@ -297,14 +299,61 @@ export async function initRepo({
         )
       ).body.map((r) => r.full_name);
     try {
-      config.repository = (
-        await githubApi.postJson<{ full_name: string }>(
-          `repos/${repository}/forks`,
+      const forkedRepo = await githubApi.postJson<{
+        full_name: string;
+        default_branch: string;
+      }>(`repos/${repository}/forks`, {
+        token: forkToken || opts.token,
+      });
+      config.repository = forkedRepo.body.full_name;
+      const forkDefaultBranch = forkedRepo.body.default_branch;
+      if (forkDefaultBranch !== config.defaultBranch) {
+        const body = {
+          ref: `refs/heads/${config.defaultBranch}`,
+          sha: repo.defaultBranchRef.target.oid,
+        };
+        logger.debug(
           {
-            token: forkToken || opts.token,
+            defaultBranch: config.defaultBranch,
+            forkDefaultBranch,
+            body,
+          },
+          'Fork has different default branch to parent, attempting to create branch'
+        );
+        try {
+          await githubApi.postJson(`repos/${config.repository}/git/refs`, {
+            body,
+            token: forkToken,
+          });
+          logger.debug('Created new default branch in fork');
+        } catch (err) /* istanbul ignore next */ {
+          if (err.response?.body?.message === 'Reference already exists') {
+            logger.debug(
+              `Branch ${config.defaultBranch} already exists in the fork`
+            );
+          } else {
+            logger.warn(
+              { err, body: err.response?.body },
+              'Could not create parent defaultBranch in fork'
+            );
           }
-        )
-      ).body.full_name;
+        }
+        logger.debug(
+          `Setting ${config.defaultBranch} as default branch for ${config.repository}`
+        );
+        try {
+          await githubApi.patchJson(`repos/${config.repository}`, {
+            body: {
+              name: config.repository.split('/')[1],
+              default_branch: config.defaultBranch,
+            },
+            token: forkToken,
+          });
+          logger.debug('Successfully changed default branch for fork');
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ err }, 'Could not set default branch');
+        }
+      }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
@@ -314,7 +363,7 @@ export async function initRepo({
         { repository_fork: config.repository },
         'Found existing fork'
       );
-      // This is a lovely "hack" by GitHub that lets us force update our fork's master
+      // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
       // with the base commit from the parent repository
       try {
         logger.debug(
@@ -354,7 +403,10 @@ export async function initRepo({
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken;
   } else {
-    logger.debug('Using personal access token for git init');
+    const tokenType = opts.token?.startsWith('x-access-token:')
+      ? 'app'
+      : 'personal access';
+    logger.debug(`Using ${tokenType} token for git init`);
     parsedEndpoint.auth = opts.token;
   }
   parsedEndpoint.host = parsedEndpoint.host.replace(
@@ -430,7 +482,11 @@ async function getClosedPrs(): Promise<PrList> {
       query = `
       query {
         repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(states: [CLOSED, MERGED], orderBy: {field: UPDATED_AT, direction: DESC}) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
             nodes {
               number
               state
@@ -449,10 +505,7 @@ async function getClosedPrs(): Promise<PrList> {
       `;
       const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
         query,
-        'pullRequests',
-        {
-          paginate: false,
-        }
+        'pullRequests'
       );
       const prNumbers: number[] = [];
       // istanbul ignore if
@@ -493,7 +546,11 @@ async function getOpenPrs(): Promise<PrList> {
       query = `
       query {
         repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(states: [OPEN], orderBy: {field: UPDATED_AT, direction: DESC}) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
             nodes {
               number
               headRefName
@@ -547,7 +604,6 @@ async function getOpenPrs(): Promise<PrList> {
         query,
         'pullRequests',
         {
-          paginate: false,
           acceptHeader: 'application/vnd.github.merge-info-preview+json',
         }
       );
@@ -572,11 +628,11 @@ async function getOpenPrs(): Promise<PrList> {
         if (hasNegativeReview) {
           pr.canMerge = false;
           pr.canMergeReason = `hasNegativeReview`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
+        } else if (canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.canMerge = true;
+        } else {
           pr.canMerge = false;
           pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
-        } else {
-          pr.canMerge = true;
         }
         // https://developer.github.com/v4/enum/mergestatestatus
         if (pr.mergeStateStatus === 'DIRTY') {
@@ -683,14 +739,14 @@ export async function getPrList(): Promise<Pr[]> {
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = prList
-      .filter((pr) => {
-        return (
+      .filter(
+        (pr) =>
           config.forkMode ||
+          config.ignorePrAuthor ||
           (pr?.user?.login && config?.renovateUsername
             ? pr.user.login === config.renovateUsername
             : true)
-        );
-      })
+      )
       .map(
         (pr) =>
           ({
@@ -793,11 +849,12 @@ export async function getBranchStatus(
   try {
     const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
       branchName
-    )}/check-runs`;
+    )}/check-runs?per_page=100`;
     const opts = {
       headers: {
         accept: 'application/vnd.github.antiope-preview+json',
       },
+      paginate: true,
     };
     const checkRunsRaw = (
       await githubApi.getJson<{
@@ -1516,7 +1573,7 @@ export async function mergePr(
   return true;
 }
 
-export function getPrBody(input: string): string {
+export function massageMarkdown(input: string): string {
   if (config.isGhe) {
     return smartTruncate(input, 60000);
   }

@@ -1,5 +1,5 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import * as rubyVersioning from '../../versioning/ruby';
 import railsInfo from './__fixtures__/rails/info.json';
 import railsVersions from './__fixtures__/rails/versions.json';

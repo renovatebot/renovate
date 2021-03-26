@@ -4,7 +4,7 @@ import * as datasourceSbtPackage from '../../datasource/sbt-package';
 import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 const stripComment = (str: string): string => str.replace(/(^|\s+)\/\/.*$/, '');
 
@@ -24,6 +24,15 @@ const isScalaVersion = (str: string): boolean =>
 
 const getScalaVersion = (str: string): string =>
   str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"[\s,]*$/, '');
+
+const isPackageFileVersion = (str: string): boolean =>
+  /^(version\s*:=\s*).*$/.test(str);
+
+const getPackageFileVersion = (str: string): string =>
+  str
+    .replace(/^\s*version\s*:=\s*/, '')
+    .replace(/[\s,]*$/, '')
+    .replace(/"/g, '');
 
 /*
   https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
@@ -116,7 +125,9 @@ function parseDepExpr(
 
   const tokens = expr
     .trim()
-    .replace(/[()]/g, '')
+    .split(/("[^"]*")/g)
+    .map((x) => (/"[^"]*"/.test(x) ? x : x.replace(/[()]+/g, '')))
+    .join('')
     .split(/\s*(%%?)\s*|\s*classifier\s*/);
 
   const [
@@ -176,6 +187,10 @@ function parseDepExpr(
     currentValue,
   };
 
+  if (variables[rawVersion]) {
+    result.groupName = `${rawVersion} for ${groupId}`;
+  }
+
   if (depType) {
     result.depType = depType;
   }
@@ -197,7 +212,7 @@ function parseSbtLine(
 ): (PackageFile & ParseOptions) | null {
   const { deps, registryUrls, variables } = acc;
 
-  let { isMultiDeps, scalaVersion } = acc;
+  let { isMultiDeps, scalaVersion, packageFileVersion } = acc;
 
   const ctx: ParseContext = {
     scalaVersion,
@@ -221,6 +236,8 @@ function parseSbtLine(
     } else if (isScalaVersionVariable(line)) {
       isMultiDeps = false;
       scalaVersionVariable = getScalaVersionVariable(line);
+    } else if (isPackageFileVersion(line)) {
+      packageFileVersion = getPackageFileVersion(line);
     } else if (isResolver(line)) {
       isMultiDeps = false;
       const url = getResolverUrl(line);
@@ -265,6 +282,10 @@ function parseSbtLine(
     if (!dep.datasource) {
       if (dep.depType === 'plugin') {
         dep.datasource = datasourceSbtPlugin.id;
+        dep.registryUrls = [
+          ...registryUrls,
+          ...datasourceSbtPlugin.defaultRegistryUrls,
+        ];
       } else {
         dep.datasource = datasourceSbtPackage.id;
       }
@@ -284,10 +305,14 @@ function parseSbtLine(
         (scalaVersionVariable &&
           variables[scalaVersionVariable] &&
           normalizeScalaVersion(variables[scalaVersionVariable].val)),
+      packageFileVersion,
     };
   }
   if (deps.length) {
-    return { deps };
+    return {
+      deps,
+      packageFileVersion,
+    };
   }
   return null;
 }

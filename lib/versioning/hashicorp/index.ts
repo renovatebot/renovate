@@ -1,5 +1,5 @@
-import { NewValueConfig, VersioningApi } from '../common';
 import { api as npm } from '../npm';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'hashicorp';
 export const displayName = 'Hashicorp';
@@ -23,8 +23,8 @@ export const isValid = (input: string): string | boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(hashicorp2npm(version), hashicorp2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
@@ -32,21 +32,21 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string {
   // handle specia. ~> 1.2 case
   if (/(~>\s*)\d+\.\d+$/.test(currentValue)) {
     return currentValue.replace(
       /(~>\s*)\d+\.\d+$/,
-      `$1${npm.getMajor(toVersion)}.0`
+      `$1${npm.getMajor(newVersion)}.0`
     );
   }
   return npm.getNewValue({
     currentValue,
     rangeStrategy,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
   });
 }
 
@@ -55,7 +55,7 @@ export const api: VersioningApi = {
   isLessThanRange,
   isValid,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
 };

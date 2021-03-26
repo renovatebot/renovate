@@ -1,8 +1,13 @@
 import { readFileSync } from 'fs';
-import { extractPackageFile } from './extract';
+import { extractPackageFile, getDep } from './extract';
 
 const d1 = readFileSync(
-  'lib/manager/dockerfile/__fixtures__/Dockerfile1',
+  'lib/manager/dockerfile/__fixtures__/1.Dockerfile',
+  'utf8'
+);
+
+const d2 = readFileSync(
+  'lib/manager/dockerfile/__fixtures__/2.Dockerfile',
   'utf8'
 );
 
@@ -142,9 +147,23 @@ describe('lib/manager/dockerfile/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
+    it('extracts images from all sorts of (maybe multiline) FROM and COPY --from statements', () => {
+      const res = extractPackageFile(d2).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(9);
+    });
     it('handles calico/node', () => {
       const res = extractPackageFile('FROM calico/node\n').deps;
       expect(res).toMatchSnapshot();
+    });
+    it('handles ubuntu', () => {
+      const res = extractPackageFile('FROM ubuntu:18.04\n').deps;
+      expect(res).toMatchSnapshot();
+    });
+  });
+  describe('getDep()', () => {
+    it('rejects null', () => {
+      expect(getDep(null)).toMatchSnapshot();
     });
   });
 });

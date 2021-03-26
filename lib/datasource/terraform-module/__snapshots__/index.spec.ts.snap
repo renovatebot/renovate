@@ -3,7 +3,7 @@
 exports[`datasource/terraform-module getReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
-  "name": "hashicorp/consul/aws",
+  "registryUrl": "https://registry.terraform.io",
   "releases": Array [
     Object {
       "version": "0.0.1",
@@ -72,12 +72,11 @@ Object {
       "version": "0.3.10",
     },
     Object {
-      "releaseTimestamp": "2018-09-20T11:25:22.957584Z",
+      "releaseTimestamp": "2018-09-20T11:25:22.957Z",
       "version": "0.4.0",
     },
   ],
   "sourceUrl": "https://github.com/hashicorp/terraform-aws-consul",
-  "versions": Object {},
 }
 `;
 
@@ -133,7 +132,7 @@ Array [
 
 exports[`datasource/terraform-module getReleases processes real data on changed subpath 2`] = `
 Object {
-  "name": "hashicorp/consul/aws",
+  "registryUrl": "https://terraform.foo.bar",
   "releases": Array [
     Object {
       "version": "0.0.1",
@@ -202,19 +201,18 @@ Object {
       "version": "0.3.10",
     },
     Object {
-      "releaseTimestamp": "2018-09-20T11:25:22.957584Z",
+      "releaseTimestamp": "2018-09-20T11:25:22.957Z",
       "version": "0.4.0",
     },
   ],
   "sourceUrl": "https://github.com/hashicorp/terraform-aws-consul",
-  "versions": Object {},
 }
 `;
 
 exports[`datasource/terraform-module getReleases processes with registry in name 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
-  "name": "hashicorp/consul/aws",
+  "registryUrl": "https://registry.terraform.io",
   "releases": Array [
     Object {
       "version": "0.0.1",
@@ -283,12 +281,11 @@ Object {
       "version": "0.3.10",
     },
     Object {
-      "releaseTimestamp": "2018-09-20T11:25:22.957584Z",
+      "releaseTimestamp": "2018-09-20T11:25:22.957Z",
       "version": "0.4.0",
     },
   ],
   "sourceUrl": "https://github.com/hashicorp/terraform-aws-consul",
-  "versions": Object {},
 }
 `;
 

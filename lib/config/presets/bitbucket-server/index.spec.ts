@@ -1,4 +1,4 @@
-import * as httpMock from '../../../../test/httpMock';
+import * as httpMock from '../../../../test/http-mock';
 import { getName, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { PRESET_DEP_NOT_FOUND } from '../util';
@@ -112,6 +112,26 @@ describe(getName(__filename), () => {
         await bitbucketServer.getPresetFromEndpoint(
           'some/repo',
           'default',
+          undefined,
+          'https://api.github.example.org'
+        )
+      ).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('uses custom path', async () => {
+      httpMock
+        .scope('https://api.github.example.org')
+        .get(`${basePath}/path/default.json`)
+        .query({ limit: 20000 })
+        .reply(200, {
+          isLastPage: true,
+          lines: [{ text: '{"from":"api"}' }],
+        });
+      expect(
+        await bitbucketServer.getPresetFromEndpoint(
+          'some/repo',
+          'default',
+          'path',
           'https://api.github.example.org'
         )
       ).toEqual({ from: 'api' });

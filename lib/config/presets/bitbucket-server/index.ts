@@ -1,11 +1,11 @@
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { FileData } from '../../../types/platform/bitbucket-server';
+import type { FileData } from '../../../types/platform/bitbucket-server';
 import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
-import { Preset } from '../common';
+import type { Preset } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
 
 const http = new BitbucketServerHttp();
@@ -48,11 +48,13 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
+  presetPath: string,
   endpoint: string
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
     filePreset,
+    presetPath,
     endpoint,
     fetch: fetchJSONFile,
   });
