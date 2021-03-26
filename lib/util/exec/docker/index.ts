@@ -152,6 +152,7 @@ export async function removeDockerContainer(
   }
 }
 
+// istanbul ignore next
 export async function removeDanglingContainers(prefix: string): Promise<void> {
   try {
     const containerLabel = getContainerLabel(prefix);
