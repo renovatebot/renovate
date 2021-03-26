@@ -31,3 +31,5 @@ For example:
 This manager assumes that any bundles referenced use tags for versioning, and that these tags use [SemVer](../../versioning/semver).
 The implementation of SemVer is strict - versions must follow the `X.Y.Z` or `vX.Y.Z` format.
 Versions that don't match this format (eg. `X.Y`) will be ignored.
+
+If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
