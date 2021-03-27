@@ -111,10 +111,14 @@ export async function extractPackageFile(
         npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
       }
       if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
-        logger.debug('Discarding .npmrc file with variables');
-        ignoreNpmrcFile = true;
-        npmrc = undefined;
-        await deleteLocalFile(npmrcFileName);
+        logger.debug(
+          { npmrcFileName },
+          'Discarding .npmrc lines with variables'
+        );
+        npmrc = npmrc
+          .split('\n')
+          .filter((line) => !line.includes('=${'))
+          .join('\n');
       }
     } else {
       npmrc = undefined;
