@@ -104,7 +104,10 @@ export async function extractPackageFile(
     npmrc = await readLocalFile(npmrcFileName, 'utf8');
     if (is.string(npmrc)) {
       if (npmrc.includes('package-lock')) {
-        logger.debug('Stripping package-lock setting from npmrc');
+        logger.debug(
+          { npmrcFileName },
+          'Stripping package-lock setting from .npmrc'
+        );
         npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
       }
       if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
