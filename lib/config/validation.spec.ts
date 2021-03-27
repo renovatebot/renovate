@@ -291,6 +291,7 @@ describe('config/validation', () => {
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
+            registryUrlTemplate: 'foobar',
           },
         ],
       };

@@ -635,6 +635,22 @@ If configured, Renovate bypasses its normal major/minor/patch upgrade logic and 
 Beware that Renovate follows tags strictly.
 For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
 
+## gitIgnoredAuthors
+
+Specify commit authors ignored by Renovate.
+
+By default, Renovate will treat any PR as modified if another git author has added to the branch.
+When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
+If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other git author(s) to `gitIgnoredAuthors`.
+
+Example:
+
+```json
+{
+  "gitIgnoredAuthors": ["some-bot@example.org"]
+}
+```
+
 ## gitLabAutomerge
 
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
@@ -1145,7 +1161,7 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
@@ -1425,7 +1441,7 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
-Here's an example of where you use this to group together all packages from the `renovatebot` github org:
+Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
 
 ```json
 {
@@ -1471,7 +1487,8 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 ## postUpdateOptions
 
-- `gomodTidy`: Run `go mod tidy` after Go module updates
+- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates.
+- `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
 - `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
@@ -1953,11 +1970,12 @@ The field supports multiple URLs however it is datasource-dependent on whether o
 
 Currently Renovate's default behavior is to only automerge if every status check has succeeded.
 
-Setting this option to `null` means that Renovate will ignore all status checks.
-You need to set this if you don't have any status checks but still want Renovate to automerge PRs.
+Setting this option to `null` means that Renovate will ignore _all_ status checks.
+You can set this if you don't have any status checks but still want Renovate to automerge PRs.
+Beware: configuring Renovate to automerge without any tests can lead to broken builds on your default branch, please think again before enabling this!
 
 In future, this might be configurable to allow certain status checks to be ignored/required.
-See [issue 1853 at the renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
+See [issue 1853 at the Renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
 
 ## respectLatest
 
@@ -2138,7 +2156,7 @@ This is considered a feature flag with the aim to remove it and default to this 
 
 ## unicodeEmoji
 
-If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
+If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
 
 ## updateInternalDeps
 

@@ -4,6 +4,8 @@ import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { GitlabPipeline } from './types';
+import { replaceReferenceTags } from './utils';
 
 function skipCommentLines(
   lines: string[],
@@ -84,27 +86,42 @@ export function extractPackageFile(content: string): PackageFile | null {
 }
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
+  _config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  const filesToExamine = new Set<string>(packageFiles);
+  const filesToExamine = [...packageFiles];
+  const seen = new Set<string>(packageFiles);
   const results: PackageFile[] = [];
 
   // extract all includes from the files
-  while (filesToExamine.size > 0) {
-    const file = filesToExamine.values().next().value;
-    filesToExamine.delete(file);
+  while (filesToExamine.length > 0) {
+    const file = filesToExamine.pop();
 
     const content = await readLocalFile(file, 'utf8');
-    const doc = yaml.safeLoad(content, { json: true }) as any;
-    if (doc?.include && is.array(doc.include)) {
+    let doc: GitlabPipeline;
+    try {
+      doc = yaml.safeLoad(replaceReferenceTags(content), {
+        json: true,
+      }) as GitlabPipeline;
+    } catch (err) {
+      logger.warn({ err, file }, 'Error extracting GitLab CI dependencies');
+    }
+
+    if (is.array(doc?.include)) {
       for (const includeObj of doc.include) {
-        if (includeObj.local) {
-          const fileObj = (includeObj.local as string).replace(/^\//, '');
-          if (!filesToExamine.has(fileObj)) {
-            filesToExamine.add(fileObj);
+        if (is.string(includeObj.local)) {
+          const fileObj = includeObj.local.replace(/^\//, '');
+          if (!seen.has(fileObj)) {
+            seen.add(fileObj);
+            filesToExamine.push(fileObj);
           }
         }
+      }
+    } else if (is.string(doc?.include)) {
+      const fileObj = doc.include.replace(/^\//, '');
+      if (!seen.has(fileObj)) {
+        seen.add(fileObj);
+        filesToExamine.push(fileObj);
       }
     }
 

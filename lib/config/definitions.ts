@@ -107,6 +107,17 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'secrets',
+    description: 'Object containing secret name/value pairs',
+    type: 'object',
+    admin: true,
+    mergeable: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'extends',
     description:
       'Configuration presets to use/extend. Note: does not work if configured in config.js.',
@@ -589,6 +600,14 @@ const options: RenovateOptions[] = [
     cli: false,
     admin: true,
     stage: 'global',
+  },
+  {
+    name: 'gitIgnoredAuthors',
+    description:
+      'Additional git authors which are ignored by Renovate. Must conform to RFC5322.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
   },
   {
     name: 'enabledManagers',
@@ -1480,6 +1499,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodUpdateImportPaths',
       'gomodTidy',
       'npmDedupe',
       'yarnDedupeFewer',

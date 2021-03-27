@@ -156,17 +156,7 @@ describe('datasource/maven', () => {
           's3://somewhere.s3.aws.amazon.com',
         ],
       });
-      expect(releases.releases).toEqual(
-        generateReleases([
-          '1.1',
-          '1.2',
-          '1.2.1',
-          '1.3.RC2',
-          '1.3',
-          '2.1-rc2',
-          '2.1-rc3',
-        ])
-      );
+      expect(releases.releases).toMatchSnapshot();
     });
 
     it('should return versions in all repositories for a specific library', async () => {
@@ -178,9 +168,7 @@ describe('datasource/maven', () => {
           'file://lib/datasource/maven/__fixtures__/custom_maven_repo/maven2/',
         ],
       });
-      expect(releases.releases).toEqual(
-        generateReleases(['6.0.4', ...MYSQL_VERSIONS, '8.0.11', '8.0.12'])
-      );
+      expect(releases).toMatchSnapshot();
     });
 
     it('should return all versions of a specific library for http repositories', async () => {
@@ -214,7 +202,7 @@ describe('datasource/maven', () => {
           'http://empty_repo',
         ],
       });
-      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
+      expect(releases.releases).toMatchSnapshot();
     });
 
     it('should throw external-host-error if default maven repo fails', async () => {
@@ -243,7 +231,7 @@ describe('datasource/maven', () => {
           'ftp://protocol_error_repo',
         ],
       });
-      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
+      expect(releases.releases).toMatchSnapshot();
     });
 
     it('should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository', async () => {
@@ -268,7 +256,7 @@ describe('datasource/maven', () => {
           'http://invalid_metadata_repo/maven2/',
         ],
       });
-      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
+      expect(releases).toMatchSnapshot();
     });
 
     it('should return all versions of a specific library if a repository fails because a metadata file is not xml', async () => {

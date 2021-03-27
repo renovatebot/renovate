@@ -41,6 +41,8 @@ const repoGroups = {
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
+  'System.IO.Abstractions':
+    'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',

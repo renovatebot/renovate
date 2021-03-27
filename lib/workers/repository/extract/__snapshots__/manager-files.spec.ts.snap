@@ -14,9 +14,7 @@ Array [
         "prettyDepType": "dependency",
       },
     ],
-    "ignoreNpmrcFile": undefined,
     "lernaClient": undefined,
-    "lernaDir": undefined,
     "lernaPackages": undefined,
     "managerData": Object {
       "hasFileRefs": false,

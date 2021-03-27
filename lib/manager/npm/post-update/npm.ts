@@ -36,7 +36,7 @@ export async function generateLockFile(
     if (npmCompatibility) {
       // istanbul ignore else
       if (validRange(npmCompatibility)) {
-        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)}`;
+        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)} || true`;
       } else {
         logger.debug(
           { npmCompatibility },
@@ -64,7 +64,7 @@ export async function generateLockFile(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,

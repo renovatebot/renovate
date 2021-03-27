@@ -10,8 +10,8 @@ import webpackJson from '../../../../config/npm/__fixtures__/webpack.json';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import * as datasourceDocker from '../../../../datasource/docker';
 import { id as datasourceDockerId } from '../../../../datasource/docker';
-import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
-import { id as datasourceGitSubmodulesId } from '../../../../datasource/git-submodules';
+import * as datasourceGitRefs from '../../../../datasource/git-refs';
+import { id as datasourceGitRefsId } from '../../../../datasource/git-refs';
 import * as datasourceGithubReleases from '../../../../datasource/github-releases';
 import { id as datasourceGithubTagsId } from '../../../../datasource/github-tags';
 import { id as datasourceNpmId } from '../../../../datasource/npm';
@@ -26,14 +26,14 @@ import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
-jest.mock('../../../../datasource/git-submodules');
+jest.mock('../../../../datasource/git-refs');
 jest.mock('../../../../datasource/github-releases');
 
 qJson.latestVersion = '1.4.1';
 
 const docker = mocked(datasourceDocker) as any;
 docker.defaultRegistryUrls = ['https://index.docker.io'];
-const gitSubmodules = mocked(datasourceGitSubmodules);
+const gitRefs = mocked(datasourceGitRefs);
 const githubReleases = mocked(datasourceGithubReleases);
 
 Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
@@ -1125,14 +1125,18 @@ describe('workers/repository/process/lookup', () => {
     it('handles git submodule update', async () => {
       config.depName = 'some-path';
       config.versioning = gitVersioningId;
-      config.datasource = datasourceGitSubmodulesId;
-      gitSubmodules.getReleases.mockResolvedValueOnce({
+      config.datasource = datasourceGitRefsId;
+      config.currentDigest = 'some-digest';
+      gitRefs.getReleases.mockResolvedValueOnce({
         releases: [
           {
-            version: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            version: 'master',
           },
         ],
       });
+      gitRefs.getDigest.mockResolvedValueOnce(
+        '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
+      );
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
