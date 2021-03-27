@@ -359,13 +359,11 @@ export async function extractPackageFile(
     yarnrc,
     ...lockFiles,
     managerData: {
+      hasFileRefs,
       lernaJsonFile,
     },
     lernaClient,
     lernaPackages,
-    managerData: {
-      hasFileRefs,
-    },
     yarnWorkspacesPackages,
     constraints,
   };
