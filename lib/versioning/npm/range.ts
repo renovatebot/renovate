@@ -11,6 +11,47 @@ import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import type { NewValueConfig } from '../types';
 
+function replaceCaretValue(oldValue: string, newValue: string): string {
+  const toVersionMajor = major(newValue);
+  const toVersionMinor = minor(newValue);
+  const toVersionPatch = patch(newValue);
+
+  const currentMajor = major(oldValue);
+  const currentMinor = minor(oldValue);
+  const currentPatch = patch(oldValue);
+
+  const oldTuple = [currentMajor, currentMinor, currentPatch];
+  const newTuple = [toVersionMajor, toVersionMinor, toVersionPatch];
+  const resultTuple = [];
+
+  let leadingZero = true;
+  let needReplace = false;
+  for (let idx = 0; idx < 3; idx += 1) {
+    const oldVal = oldTuple[idx];
+    const newVal = newTuple[idx];
+
+    let leadingDigit = false;
+    if (oldVal !== 0 || newVal !== 0) {
+      if (leadingZero) {
+        leadingZero = false;
+        leadingDigit = true;
+      }
+    }
+
+    if (leadingDigit && newVal > oldVal) {
+      needReplace = true;
+    }
+
+    if (!needReplace && newVal < oldVal) {
+      return newValue;
+    }
+
+    resultTuple.push(leadingDigit ? newVal : 0);
+  }
+
+  return needReplace ? resultTuple.join('.') : oldValue;
+}
+
 export function getNewValue({
   currentValue,
   rangeStrategy,
@@ -150,16 +191,7 @@ export function getNewValue({
     if (suffix.length || !currentVersion) {
       return `^${toVersionMajor}.${toVersionMinor}.${toVersionPatch}${suffix}`;
     }
-    if (toVersionMajor === major(currentVersion)) {
-      if (toVersionMajor === 0) {
-        if (toVersionMinor === 0) {
-          return `^${newVersion}`;
-        }
-        return `^${toVersionMajor}.${toVersionMinor}.0`;
-      }
-      return `^${newVersion}`;
-    }
-    return `^${toVersionMajor}.0.0`;
+    return `^${replaceCaretValue(currentVersion, newVersion)}`;
   }
   if (element.operator === '=') {
     return `=${newVersion}`;
