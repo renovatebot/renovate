@@ -139,11 +139,7 @@ export async function writeExistingFiles(
     const npmrc: string = packageFile.npmrc || config.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (is.string(npmrc)) {
-      try {
-        await outputFile(npmrcFilename, `${npmrc}\n`);
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
-      }
+      await outputFile(npmrcFilename, `${npmrc}\n`);
     } else if (config.ignoreNpmrcFile) {
       logger.debug('Removing ignored .npmrc file before artifact generation');
       await remove(npmrcFilename);
@@ -151,16 +147,12 @@ export async function writeExistingFiles(
     if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);
       const yarnrcFilename = upath.join(basedir, '.yarnrc');
-      try {
-        await outputFile(
-          yarnrcFilename,
-          packageFile.yarnrc
-            .replace('--install.pure-lockfile true', '')
-            .replace('--install.frozen-lockfile true', '')
-        );
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
-      }
+      await outputFile(
+        yarnrcFilename,
+        packageFile.yarnrc
+          .replace('--install.pure-lockfile true', '')
+          .replace('--install.frozen-lockfile true', '')
+      );
     }
     const { npmLock } = packageFile;
     if (npmLock) {
@@ -304,14 +296,10 @@ async function updateNpmrcContent(
   const newNpmrc = originalContent
     ? [originalContent, ...additionalLines]
     : additionalLines;
-  try {
-    const newContent = newNpmrc.join('\n');
-    if (newContent !== originalContent) {
-      logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
-      await writeFile(npmrcFilePath, `${newContent}\n`);
-    }
-  } catch {
-    logger.warn('Unable to write custom npmrc file');
+  const newContent = newNpmrc.join('\n');
+  if (newContent !== originalContent) {
+    logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
+    await writeFile(npmrcFilePath, `${newContent}\n`);
   }
 }
 
