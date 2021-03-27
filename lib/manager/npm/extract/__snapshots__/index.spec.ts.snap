@@ -15,6 +15,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -137,6 +138,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": true,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -299,6 +301,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -347,6 +350,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -406,6 +410,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -459,6 +464,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -594,6 +600,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -729,6 +736,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -864,6 +872,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -885,6 +894,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1022,6 +1032,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1043,6 +1054,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1066,6 +1078,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1203,6 +1216,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "hasFileRefs": false,
+    "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
   "npmrc": undefined,

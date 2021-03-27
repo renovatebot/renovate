@@ -18,6 +18,7 @@ Array [
     "lernaPackages": undefined,
     "managerData": Object {
       "hasFileRefs": false,
+      "lernaJsonFile": undefined,
     },
     "npmLock": undefined,
     "npmrc": undefined,
