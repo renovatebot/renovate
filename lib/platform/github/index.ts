@@ -811,18 +811,8 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
       });
       logger.debug({ branchName, sha }, 'Recreated autoclosed branch');
     } catch (err) {
-      if (
-        err.response?.statusCode === 422 &&
-        err.response?.body?.message === 'Reference already exists'
-      ) {
-        logger.debug(
-          { branchName },
-          'Branch already exists - no need to recreate'
-        );
-      } else {
-        logger.debug('Could not recreate autoclosed branch - skipping reopen');
-        return null;
-      }
+      logger.debug('Could not recreate autoclosed branch - skipping reopen');
+      return null;
     }
     try {
       const title = autoclosedPr.title.replace(/ - autoclosed$/, '');
@@ -840,7 +830,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
       logger.debug('Could not reopen autoclosed PR');
       return null;
     }
-    delete config.closedPrList[number]; // So that it's no longer found in the closed list
+    delete config.closedPrList?.[number]; // So that it's no longer found in the closed list
     return getPr(number);
   }
   return null;
