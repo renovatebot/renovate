@@ -50,6 +50,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   updateType?: UpdateType;
   newValue?: string;
   newVersion?: string;
+  newMajor?: number;
 }
 
 export interface PackageUpdateConfig {
