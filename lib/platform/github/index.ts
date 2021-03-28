@@ -822,7 +822,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
           title,
         },
       });
-      logger.debug(
+      logger.info(
         { branchName, title, number },
         'Successfully reopened autoclosed PR'
       );
