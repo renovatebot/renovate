@@ -791,49 +791,11 @@ export async function findPr({
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const openPr = await findPr({
+  const existingPr = await findPr({
     branchName,
     state: PrState.Open,
   });
-  if (openPr) {
-    return getPr(openPr.number);
-  }
-  const autoclosedPr = await findPr({
-    branchName,
-    state: PrState.Closed,
-  });
-  if (autoclosedPr?.title?.endsWith(' - autoclosed')) {
-    logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
-    const { sha, number } = autoclosedPr;
-    try {
-      await githubApi.postJson(`repos/${config.repository}/git/refs`, {
-        body: { ref: `refs/heads/${branchName}`, sha },
-      });
-      logger.debug({ branchName, sha }, 'Recreated autoclosed branch');
-    } catch (err) {
-      logger.debug('Could not recreate autoclosed branch - skipping reopen');
-      return null;
-    }
-    try {
-      const title = autoclosedPr.title.replace(/ - autoclosed$/, '');
-      await githubApi.patchJson(`repos/${config.repository}/pulls/${number}`, {
-        body: {
-          state: 'open',
-          title,
-        },
-      });
-      logger.info(
-        { branchName, title, number },
-        'Successfully reopened autoclosed PR'
-      );
-    } catch (err) {
-      logger.debug('Could not reopen autoclosed PR');
-      return null;
-    }
-    delete config.closedPrList?.[number]; // So that it's no longer found in the closed list
-    return getPr(number);
-  }
-  return null;
+  return existingPr ? getPr(existingPr.number) : null;
 }
 
 async function getStatus(
