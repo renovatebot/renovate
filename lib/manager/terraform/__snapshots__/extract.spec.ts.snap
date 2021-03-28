@@ -138,6 +138,12 @@ Object {
       "depType": "terraform",
     },
     Object {
+      "currentValue": "1.28.3",
+      "datasource": "terraform-module",
+      "depName": "particuleio/addons/kubernetes",
+      "depType": "terraform",
+    },
+    Object {
       "currentValue": "~> 1.1.0",
       "datasource": "terraform-module",
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
@@ -264,7 +270,7 @@ Object {
       "datasource": "github-tags",
       "depName": "hashicorp/terraform",
       "extractVersion": "v(?<version>.*)$",
-      "lineNumber": 205,
+      "lineNumber": 229,
     },
     Object {
       "currentValue": "2.7.2",
