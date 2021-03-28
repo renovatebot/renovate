@@ -360,6 +360,7 @@ export async function extractPackageFile(
   }
 
   return {
+    packageFile: fileName,
     deps,
     packageJsonName,
     packageFileVersion,
@@ -392,15 +393,13 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const npmFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
+    // const npmrc = ini.parse((config.npmrc || '').replace(/\\n/g, '\n'));
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      const deps = await extractPackageFile(content, packageFile, config);
-      if (deps) {
-        npmFiles.push({
-          packageFile,
-          ...deps,
-        });
+      const res = await extractPackageFile(content, packageFile, config);
+      if (res) {
+        npmFiles.push(res);
       }
     } else {
       logger.debug({ packageFile }, 'packageFile has no content');
