@@ -329,8 +329,6 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
-TODO: Check if this feature is still present in Renovate code.
-
 ## requireConfig
 
 ## secrets
