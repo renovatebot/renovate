@@ -28,6 +28,14 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
 We will do our best to answer your question(s).
 
+A `subtype` in the configuration table specifies what type you're allowed to use within the main element.
+
+If a config option has a `parent` defined, it means it's only allowed to configure it within an object with the parent name, such as `packageRules` or `hostRules`.
+
+When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
+
+---
+
 ## addLabels
 
 The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
