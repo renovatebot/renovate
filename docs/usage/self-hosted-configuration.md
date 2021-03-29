@@ -242,15 +242,11 @@ Warning: Configuring `logLevel` config option or `--log-level` cli option is dep
 
 ## onboarding
 
-Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
-
 Set this to `false` only if all three statements are true:
 
 - You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
-
-TODO: check if the list should replace the (a,b,c) statements.
 
 ## onboardingBranch
 
