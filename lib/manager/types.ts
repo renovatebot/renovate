@@ -50,6 +50,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   updateType?: UpdateType;
   newValue?: string;
   newVersion?: string;
+  newMajor?: number;
 }
 
 export interface PackageUpdateConfig {
@@ -84,7 +85,6 @@ export interface PackageFile<T = Record<string, any>>
   datasource?: string;
   registryUrls?: string[];
   deps: PackageDependency[];
-  ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
   mavenProps?: Record<string, any>;

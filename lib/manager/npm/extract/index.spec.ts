@@ -125,7 +125,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBeUndefined();
+      expect(res.npmrc).toEqual('');
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {

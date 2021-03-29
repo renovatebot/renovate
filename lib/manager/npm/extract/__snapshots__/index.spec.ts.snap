@@ -11,7 +11,6 @@ Object {
       "skipReason": "invalid-name",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -19,6 +18,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": undefined,
   "packageJsonName": undefined,
   "packageJsonType": "app",
@@ -135,7 +135,6 @@ Object {
       "prettyDepType": "engine",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -143,6 +142,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": undefined,
   "packageJsonName": undefined,
   "packageJsonType": "library",
@@ -299,7 +299,6 @@ Object {
       "sourceUrl": "https://github.com/owner/n",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -307,6 +306,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": undefined,
   "packageJsonName": undefined,
   "packageJsonType": "app",
@@ -349,7 +349,6 @@ Object {
       "skipReason": "unknown-version",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -357,6 +356,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": undefined,
   "packageJsonName": undefined,
   "packageJsonType": "app",
@@ -410,7 +410,6 @@ Object {
       "skipReason": "unknown-volta",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -418,6 +417,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": undefined,
   "packageJsonName": undefined,
   "packageJsonType": "library",
@@ -465,7 +465,6 @@ Object {
       "skipReason": "unknown-version",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -473,6 +472,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": undefined,
   "packageJsonName": undefined,
   "packageJsonType": "library",
@@ -602,7 +602,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -610,6 +609,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": "1.0.0",
   "packageJsonName": "renovate",
   "packageJsonType": "app",
@@ -739,7 +739,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "yarn",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -747,6 +746,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": "1.0.0",
   "packageJsonName": "renovate",
   "packageJsonType": "app",
@@ -876,7 +876,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -884,6 +883,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": "1.0.0",
   "packageJsonName": "renovate",
   "packageJsonType": "app",
@@ -899,7 +899,6 @@ exports[`manager/npm/extract .extractPackageFile() finds complex yarn workspaces
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -907,6 +906,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": "0.0.8",
   "packageJsonName": "@a/b",
   "packageJsonType": "app",
@@ -1038,7 +1038,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -1046,6 +1045,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": "1.0.0",
   "packageJsonName": "renovate",
   "packageJsonType": "app",
@@ -1061,7 +1061,6 @@ exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces 
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -1069,6 +1068,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": "0.0.8",
   "packageJsonName": "@a/b",
   "packageJsonType": "app",
@@ -1086,7 +1086,6 @@ exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces 
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -1094,6 +1093,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": "0.0.8",
   "packageJsonName": "@a/b",
   "packageJsonType": "app",
@@ -1225,7 +1225,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -1233,6 +1232,7 @@ Object {
   },
   "npmLock": undefined,
   "npmrc": undefined,
+  "packageFile": "package.json",
   "packageFileVersion": "1.0.0",
   "packageJsonName": "renovate",
   "packageJsonType": "app",
