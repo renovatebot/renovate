@@ -80,7 +80,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultConfig
+        { ...defaultConfig, npmrc: 'some-npmrc' }
       );
       expect(res).toMatchSnapshot();
     });
@@ -94,7 +94,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultConfig
+        { ...defaultConfig, ignoreNpmrcFile: true }
       );
       expect(res).toMatchSnapshot();
     });
