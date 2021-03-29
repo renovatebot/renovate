@@ -199,9 +199,6 @@ You probably have no need for this option - it is an experimental setting for th
 You can customize the Git author that's used whenever Renovate creates a commit.
 The `gitAuthor` option accepts a RFC5322-compliant string.
 
-If you are migrating from a old Git author to a new Git author, put the old `gitAuthor` into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment.
-Renovate will then check for the old and current Git author before it decides if a branch has been modified.
-
 **Note** We strongly recommend that the Git author email you use is unique to Renovate.
 Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 

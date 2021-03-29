@@ -651,6 +651,9 @@ By default, Renovate will treat any PR as modified if another git author has add
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
 If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other git author(s) to `gitIgnoredAuthors`.
 
+If you are migrating from a old Git author to a new Git author, put the old `gitAuthor` into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment.
+Renovate will then check for the old and current Git author before it decides if a branch has been modified.
+
 Example:
 
 ```json
