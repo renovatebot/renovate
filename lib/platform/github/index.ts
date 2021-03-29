@@ -791,6 +791,7 @@ export async function findPr({
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
+  // istanbul ignore if
   if (config.branchPrs[branchName]) {
     return config.branchPrs[branchName];
   }
