@@ -528,6 +528,7 @@ export async function getPr(iid: number): Promise<Pr> {
         merge_status: string;
         assignee?: { id?: number };
         assignees?: { id?: number }[];
+        reviewers?: { id: number; username: string }[];
       }
     >(url)
   ).body;
@@ -541,7 +542,7 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
   delete pr.assignee;
   delete pr.assignees;
-  pr.hasReviewers = false;
+  pr.hasReviewers = !!pr.reviewers?.length;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
@@ -839,28 +840,26 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   }
 }
 
+async function getUserID(username: string): Promise<number> {
+  return (
+    await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
+  ).body[0].id;
+}
+
 export async function addAssignees(
   iid: number,
   assignees: string[]
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
   try {
-    let assigneeId = (
-      await gitlabApi.getJson<{ id: number }[]>(
-        `users?username=${assignees[0]}`
-      )
-    ).body[0].id;
+    let assigneeId = await getUserID(assignees[0]);
     let url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
     await gitlabApi.putJson(url);
     try {
       if (assignees.length > 1) {
         url = `projects/${config.repository}/merge_requests/${iid}?assignee_ids[]=${assigneeId}`;
         for (let i = 1; i < assignees.length; i += 1) {
-          assigneeId = (
-            await gitlabApi.getJson<{ id: number }[]>(
-              `users?username=${assignees[i]}`
-            )
-          ).body[0].id;
+          assigneeId = await getUserID(assignees[i]);
           url += `&assignee_ids[]=${assigneeId}`;
         }
         await gitlabApi.putJson(url);
@@ -874,10 +873,27 @@ export async function addAssignees(
   }
 }
 
-export function addReviewers(iid: number, reviewers: string[]): Promise<void> {
-  logger.debug(`addReviewers('${iid}, [${reviewers.join(', ')}])`);
-  logger.warn('Unimplemented in GitLab: approvals');
-  return Promise.resolve();
+export async function addReviewers(
+  issueNo: number,
+  reviewers: string[]
+): Promise<void> {
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${issueNo}`);
+
+  const pr = await getPr(issueNo);
+  const existingReviewers = (pr.reviewers ?? []).map((r) => r.username);
+  const existingReviewerIDs = (pr.reviewers ?? []).map((r) => r.id);
+
+  const newReviewers = reviewers.filter((r) => !existingReviewers.includes(r));
+  const newReviewerIDs = await Promise.all(
+    newReviewers.map((r) => getUserID(r))
+  );
+
+  await gitlabApi.putJson(
+    `projects/${config.repository}/merge_requests/${issueNo}`,
+    {
+      body: { reviewer_ids: [...existingReviewerIDs, ...newReviewerIDs] },
+    }
+  );
 }
 
 export async function deleteLabel(
