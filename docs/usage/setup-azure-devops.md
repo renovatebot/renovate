@@ -87,12 +87,12 @@ Use the `baseUrl` config option to specify the full path to the registry.
 ```javascript
 module.exports = {
   platform: 'azure',
-  endpoint: 'https://<redacted>.visualstudio.com/',
+  endpoint: 'https://myorg.visualstudio.com/',
   token: process.env.TOKEN,
   hostRules: [
     {
       baseUrl:
-        'https://<redacted>.pkgs.visualstudio.com/_packaging/<redacted>/npm/registry/',
+        'https://myorg.pkgs.visualstudio.com/_packaging/myorg/npm/registry/',
       token: process.env.TOKEN,
       hostType: 'npm',
     },
@@ -108,7 +108,7 @@ module.exports = {
 Put this in your repository's `.npmrc` file:
 
 ```ini
-registry=https://<redacted>.pkgs.visualstudio.com/_packaging/<redacted>/npm/registry/
+registry=https://myorg.pkgs.visualstudio.com/_packaging/myorg/npm/registry/
 always-auth=true
 ```
 
