@@ -105,6 +105,13 @@ module.exports = {
 };
 ```
 
+Put this in your repository's `.npmrc` file:
+
+```ini
+registry=https://<redacted>.pkgs.visualstudio.com/_packaging/<redacted>/npm/registry/
+always-auth=true
+```
+
 ### Add renovate.json file
 
 Additionally, you can create a `renovate.json` file which holds the Renovate configuration, in the root of the repo.
