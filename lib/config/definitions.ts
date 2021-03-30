@@ -544,12 +544,6 @@ const options: RenovateOptions[] = [
     admin: true,
   },
   {
-    name: 'ignoreNpmrcFile',
-    description: 'Whether to ignore any .npmrc file found in repository.',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'autodiscover',
     description: 'Autodiscover all repositories.',
     stage: 'global',

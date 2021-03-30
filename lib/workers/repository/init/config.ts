@@ -196,7 +196,6 @@ export async function mergeRenovateConfig(
       'Ignoring any .npmrc files in repository due to configured npmrc'
     );
     npmApi.setNpmrc(resolvedConfig.npmrc);
-    resolvedConfig.ignoreNpmrcFile = true;
   }
   // istanbul ignore if
   if (resolvedConfig.hostRules) {

@@ -23,7 +23,6 @@ export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
-  ignoreNpmrcFile?: boolean;
   npmrc?: string;
   yarnrc?: string;
   skipInstalls?: boolean;

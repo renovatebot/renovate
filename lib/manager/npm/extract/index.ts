@@ -94,10 +94,7 @@ export async function extractPackageFile(
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
   const npmrcFileContent = await readLocalFile(npmrcFileName, 'utf8');
   if (is.string(npmrcFileContent)) {
-    if (config.ignoreNpmrcFile) {
-      logger.debug({ npmrcFileName }, 'Ignoring .npmrc file in repository');
-      npmrc = '';
-    } else if (is.string(config.npmrc)) {
+    if (is.string(config.npmrc)) {
       // configured npmrc takes precedence over repository .npmrc
       // This could include an empty string used to blank the .npmrc
       logger.debug(
@@ -124,8 +121,6 @@ export async function extractPackageFile(
           .join('\n');
       }
     }
-  } else if (config.ignoreNpmrcFile) {
-    npmrc = '';
   }
   const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
   let yarnrc;

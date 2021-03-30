@@ -94,7 +94,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { ...defaultConfig, ignoreNpmrcFile: true }
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -111,20 +111,6 @@ describe('manager/npm/extract', () => {
         {}
       );
       expect(res.npmrc).toBeDefined();
-    });
-    it('ignores .npmrc when ignoreNpmrcFile', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
-        if (fileName === '.npmrc') {
-          return 'some-npmrc\n';
-        }
-        return null;
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        { ignoreNpmrcFile: true }
-      );
-      expect(res.npmrc).toEqual('');
     });
     it('ignores .npmrc when config.npmrc is defined', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
