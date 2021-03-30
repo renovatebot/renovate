@@ -882,7 +882,7 @@ Object {
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
-  "npmrc": undefined,
+  "npmrc": "",
   "packageFile": "package.json",
   "packageFileVersion": "1.0.0",
   "packageJsonName": "renovate",
