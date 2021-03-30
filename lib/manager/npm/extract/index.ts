@@ -6,11 +6,7 @@ import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import {
-  deleteLocalFile,
-  getSiblingFileName,
-  readLocalFile,
-} from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -95,23 +91,30 @@ export async function extractPackageFile(
   delete lockFiles.shrinkwrapJson;
 
   let npmrc: string;
-  let ignoreNpmrcFile: boolean;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  // istanbul ignore if
-  if (config.ignoreNpmrcFile) {
-    await deleteLocalFile(npmrcFileName);
+  if (is.string(config.npmrc)) {
+    logger.debug('Using configured npmrc');
+  } else if (config.ignoreNpmrcFile) {
+    npmrc = '';
   } else {
     npmrc = await readLocalFile(npmrcFileName, 'utf8');
-    if (npmrc?.includes('package-lock')) {
-      logger.debug('Stripping package-lock setting from npmrc');
-      npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
-    }
-    if (npmrc) {
+    if (is.string(npmrc)) {
+      if (npmrc.includes('package-lock')) {
+        logger.debug(
+          { npmrcFileName },
+          'Stripping package-lock setting from .npmrc'
+        );
+        npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
+      }
       if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
-        logger.debug('Discarding .npmrc file with variables');
-        ignoreNpmrcFile = true;
-        npmrc = undefined;
-        await deleteLocalFile(npmrcFileName);
+        logger.debug(
+          { npmrcFileName },
+          'Discarding .npmrc lines with variables'
+        );
+        npmrc = npmrc
+          .split('\n')
+          .filter((line) => !line.includes('=${'))
+          .join('\n');
       }
     } else {
       npmrc = undefined;
@@ -358,12 +361,12 @@ export async function extractPackageFile(
   }
 
   return {
+    packageFile: fileName,
     deps,
     packageJsonName,
     packageFileVersion,
     packageJsonType,
     npmrc,
-    ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
     managerData: {
@@ -391,15 +394,13 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const npmFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
+    // const npmrc = ini.parse((config.npmrc || '').replace(/\\n/g, '\n'));
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      const deps = await extractPackageFile(content, packageFile, config);
-      if (deps) {
-        npmFiles.push({
-          packageFile,
-          ...deps,
-        });
+      const res = await extractPackageFile(content, packageFile, config);
+      if (res) {
+        npmFiles.push(res);
       }
     } else {
       logger.debug({ packageFile }, 'packageFile has no content');

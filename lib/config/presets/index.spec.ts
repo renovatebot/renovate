@@ -312,6 +312,11 @@ describe('config/presets', () => {
     it('parses local', () => {
       expect(presets.parsePreset('local>some/repo')).toMatchSnapshot();
     });
+    it('parses local with subdirectory', () => {
+      expect(
+        presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
+      ).toMatchSnapshot();
+    });
     it('parses no prefix as local', () => {
       expect(presets.parsePreset('some/repo')).toMatchSnapshot();
     });

@@ -519,6 +519,101 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should reopen an autoclosed PR', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .post('/graphql')
+        .twice() // getOpenPrs() and getClosedPrs()
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, [
+          {
+            number: 90,
+            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+            state: PrState.Open,
+          },
+          {
+            number: 91,
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            title: 'old title - autoclosed',
+            state: PrState.Closed,
+          },
+        ])
+        .post('/repos/some/repo/git/refs')
+        .reply(201)
+        .patch('/repos/some/repo/pulls/91')
+        .reply(201)
+        .get('/repos/some/repo/pulls/91')
+        .reply(200, {
+          number: 91,
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          base: {
+            sha: '1234',
+          },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: PrState.Open,
+        });
+
+      await github.initRepo({
+        repository: 'some/repo',
+      } as any);
+      const pr = await github.getBranchPr('somebranch');
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('aborts reopening if branch recreation fails', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, [
+          {
+            number: 91,
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            title: 'old title - autoclosed',
+            state: PrState.Closed,
+          },
+        ])
+        .post('/repos/some/repo/git/refs')
+        .reply(201)
+        .patch('/repos/some/repo/pulls/91')
+        .reply(422);
+
+      await github.initRepo({
+        repository: 'some/repo',
+      } as any);
+      const pr = await github.getBranchPr('somebranch');
+      expect(pr).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('aborts reopening if PR reopening fails', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, [
+          {
+            number: 91,
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            title: 'old title - autoclosed',
+            state: PrState.Closed,
+          },
+        ])
+        .post('/repos/some/repo/git/refs')
+        .reply(422);
+
+      await github.initRepo({
+        repository: 'some/repo',
+      } as any);
+      const pr = await github.getBranchPr('somebranch');
+      expect(pr).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('should return the PR object in fork mode', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);

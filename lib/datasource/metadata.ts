@@ -17,6 +17,7 @@ const manualChangelogUrls = {
       'https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md',
     'react-native':
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
+    sharp: 'https://github.com/lovell/sharp/blob/master/docs/changelog.md',
     'zone.js':
       'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },

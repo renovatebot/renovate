@@ -107,10 +107,11 @@ export async function generateLockFiles(
       const homeNpmrc = join(homeDir, '.npmrc');
       execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
-    cmd.push(`${lernaClient} install ${cmdOptions}`);
     const lernaVersion = getLernaVersion(lernaPackageFile);
     logger.debug('Using lerna version ' + lernaVersion);
     preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
+    cmd.push('lerna info');
+    cmd.push(`${lernaClient} install ${cmdOptions}`);
     cmd.push(lernaCommand);
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {

@@ -34,6 +34,13 @@ Object {
         "https://my-registry.gcr.io/",
       ],
     },
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": Array [
+        "https://registry.example.com/",
+      ],
+    },
   ],
   "packageFileVersion": "0.1.0",
 }

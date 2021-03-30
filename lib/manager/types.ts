@@ -24,6 +24,7 @@ export interface ExtractConfig extends ManagerConfig {
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
+  npmrc?: string;
   yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
@@ -50,6 +51,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   updateType?: UpdateType;
   newValue?: string;
   newVersion?: string;
+  newMajor?: number;
 }
 
 export interface PackageUpdateConfig {
@@ -84,7 +86,6 @@ export interface PackageFile<T = Record<string, any>>
   datasource?: string;
   registryUrls?: string[];
   deps: PackageDependency[];
-  ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
   mavenProps?: Record<string, any>;
