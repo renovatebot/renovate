@@ -92,13 +92,20 @@ export async function extractPackageFile(
 
   let npmrc: string;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  if (is.string(config.npmrc)) {
-    logger.debug('Using configured npmrc');
-  } else if (config.ignoreNpmrcFile) {
-    npmrc = '';
-  } else {
-    npmrc = await readLocalFile(npmrcFileName, 'utf8');
-    if (is.string(npmrc)) {
+  const npmrcFileContent = await readLocalFile(npmrcFileName, 'utf8');
+  if (is.string(npmrcFileContent)) {
+    if (config.ignoreNpmrcFile) {
+      logger.debug({ npmrcFileName }, 'Ignoring .npmrc file in repository');
+      npmrc = '';
+    } else if (is.string(config.npmrc)) {
+      // configured npmrc takes precedence over repository .npmrc
+      // This could include an empty string used to blank the .npmrc
+      logger.debug(
+        { npmrcFileName },
+        'Overriding and ignoring .npmrc file content and using configured npmrc instead'
+      );
+    } else {
+      npmrc = npmrcFileContent;
       if (npmrc.includes('package-lock')) {
         logger.debug(
           { npmrcFileName },
@@ -116,9 +123,9 @@ export async function extractPackageFile(
           .filter((line) => !line.includes('=${'))
           .join('\n');
       }
-    } else {
-      npmrc = undefined;
     }
+  } else if (config.ignoreNpmrcFile) {
+    npmrc = '';
   }
   const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
   let yarnrc;
