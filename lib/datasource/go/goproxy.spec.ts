@@ -2,7 +2,8 @@ import * as httpMock from '../../../test/http-mock';
 import {
   encodeCase,
   listVersions,
-  parseGoproxyString,
+  parseGoproxy,
+  parseNoproxy,
   versionInfo,
 } from './goproxy';
 
@@ -67,11 +68,11 @@ describe('datasource/go/utils', () => {
 
   describe('parseGoproxyString', () => {
     it('parses single url', () => {
-      const result = parseGoproxyString('foo');
+      const result = parseGoproxy('foo');
       expect(result).toMatchObject([{ url: 'foo' }]);
     });
     it('parses multiple urls', () => {
-      const result = parseGoproxyString('foo,bar|baz,qux');
+      const result = parseGoproxy('foo,bar|baz,qux');
       expect(result).toMatchObject([
         { url: 'foo', fallback: ',' },
         { url: 'bar', fallback: '|' },
@@ -79,5 +80,12 @@ describe('datasource/go/utils', () => {
         { url: 'qux' },
       ]);
     });
+  });
+
+  it('goprivateToRegex', () => {
+    expect(parseNoproxy('')).toEqual('');
+    expect(parseNoproxy('*')).toEqual('[^/]*');
+    expect(parseNoproxy('?')).toEqual('[^/]');
+    expect(parseNoproxy('foo,bar')).toEqual('foo|bar');
   });
 });

@@ -1,5 +1,7 @@
+import moo from 'moo';
 import pAll from 'p-all';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { http } from './common';
 
@@ -43,35 +45,6 @@ export async function versionInfo(
   return result;
 }
 
-export async function getReleases(
-  config: GetReleasesConfig
-): Promise<ReleaseResult | null> {
-  const { lookupName } = config;
-
-  const baseUrl = 'https://proxy.golang.org';
-
-  try {
-    const versions = await listVersions(baseUrl, lookupName);
-    const queue = versions.map((version) => async (): Promise<Release> => {
-      try {
-        return await versionInfo(baseUrl, lookupName, version);
-      } catch (err) {
-        if (err?.response?.statusCode !== 410) {
-          throw err;
-        }
-      }
-      return { version };
-    });
-    const releases = await pAll(queue, { concurrency: 5 });
-    if (releases.length) {
-      return { releases };
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Goproxy error');
-  }
-  return null;
-}
-
 enum GoproxyFallback {
   WhenNotFoundOrGone = ',',
   Always = '|',
@@ -80,9 +53,10 @@ enum GoproxyFallback {
 interface GoproxyHost {
   url: string;
   fallback: GoproxyFallback;
+  disabled?: true;
 }
 
-export function parseGoproxyString(input: unknown): GoproxyHost[] | null {
+export function parseGoproxy(input: unknown): GoproxyHost[] | null {
   if (!input || typeof input !== 'string') {
     return null;
   }
@@ -99,4 +73,118 @@ export function parseGoproxyString(input: unknown): GoproxyHost[] | null {
   }
 
   return result.length ? result : null;
+}
+
+// https://golang.org/pkg/path/#Match
+const pathGlobLexer = {
+  main: {
+    separator: {
+      match: /\s*?,\s*?/,
+      value: (_: string) => '|',
+    },
+    asterisk: {
+      match: '*',
+      value: (_: string) => '[^/]*',
+    },
+    qmark: {
+      match: '?',
+      value: (_: string) => '[^/]',
+    },
+    characterRangeOpen: {
+      match: '[',
+      push: 'characterRange',
+      value: (_: string) => '[',
+    },
+    char: /[^*?\\[\n]/,
+    escapedChar: {
+      match: /\\./,
+      value: (s: string) => s.slice(1),
+    },
+  },
+  characterRange: {
+    char: /[^\\\-\]\n]/,
+    escapedChar: {
+      match: /\\./,
+      value: (s: string) => s.slice(1),
+    },
+    range: /.-./,
+    characterRangeEnd: {
+      match: ']',
+      pop: 1,
+    },
+  },
+};
+
+export function parseNoproxy(input: unknown): string {
+  if (!input || typeof input !== 'string') {
+    return null;
+  }
+
+  const lexer = moo.states(pathGlobLexer);
+  lexer.reset(input);
+  return [...lexer].map(({ value }) => value).join('');
+}
+
+export function getProxyList(
+  proxy: string = process.env.GOPROXY,
+  noproxy: string = process.env.GONOPROXY || process.env.GOPRIVATE
+): GoproxyHost[] | null {
+  const proxyList = parseGoproxy(proxy);
+  if (!proxyList) {
+    return null;
+  }
+
+  const noproxyPattern = parseNoproxy(noproxy);
+  const noproxyRegex = noproxyPattern ? regEx(noproxyPattern) : null;
+
+  const result: GoproxyHost[] = proxyList.map((x) => {
+    if (noproxyRegex?.test(x.url)) {
+      return { ...x, disabled: true };
+    }
+    return x;
+  });
+
+  return result;
+}
+
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { lookupName } = config;
+
+  const proxyList = getProxyList();
+
+  for (const { url, fallback, disabled } of proxyList) {
+    if (!disabled) {
+      try {
+        const versions = await listVersions(url, lookupName);
+        const queue = versions.map((version) => async (): Promise<Release> => {
+          try {
+            return await versionInfo(url, lookupName, version);
+          } catch (err) {
+            if (err?.response?.statusCode !== 410) {
+              throw err;
+            }
+          }
+          return { version };
+        });
+        const releases = await pAll(queue, { concurrency: 5 });
+        if (releases.length) {
+          return { releases };
+        }
+      } catch (err) {
+        logger.debug({ err }, 'Goproxy error');
+        const statusCode = err?.response?.statusCode;
+        if (
+          fallback === GoproxyFallback.WhenNotFoundOrGone &&
+          statusCode !== 404 &&
+          statusCode !== 410
+        ) {
+          break;
+        }
+      }
+    }
+  }
+
+  return null;
 }
