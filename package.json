@@ -172,7 +172,7 @@
     "parse-link-header": "1.0.1",
     "redis": "3.0.2",
     "registry-auth-token": "4.2.1",
-    "semver": "7.3.4",
+    "semver": "7.3.5",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.0.2",
