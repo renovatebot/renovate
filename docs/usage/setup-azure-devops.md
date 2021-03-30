@@ -79,6 +79,32 @@ module.exports = {
 For the `endpoint` key, replace `YOUR-ORG` with your Azure DevOps organization.
 For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository.
 
+### Yarn users
+
+To do a succesfull `yarn install` you need to match the URL of the registry fully.
+Use the `baseUrl` config option to specify the full path to the registry.
+
+```javascript
+module.exports = {
+  platform: 'azure',
+  endpoint: 'https://<redacted>.visualstudio.com/',
+  token: process.env.TOKEN,
+  hostRules: [
+    {
+      baseUrl:
+        'https://<redacted>.pkgs.visualstudio.com/_packaging/<redacted>/npm/registry/',
+      token: process.env.TOKEN,
+      hostType: 'npm',
+    },
+    {
+      domainName: 'github.com',
+      token: process.env.GITHUB_COM_TOKEN,
+    },
+  ],
+  repositories: ['YOUR-PROJECT/YOUR-REPO'],
+};
+```
+
 ### Add renovate.json file
 
 Additionally, you can create a `renovate.json` file which holds the Renovate configuration, in the root of the repo.
