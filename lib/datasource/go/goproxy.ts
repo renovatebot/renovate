@@ -33,7 +33,6 @@ export async function versionInfo(
 ): Promise<Release> {
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/${version}.info`;
   const res = await http.getJson<VersionInfo>(url);
-  debugger;
 
   const result: Release = {
     version: res.body.Version,
