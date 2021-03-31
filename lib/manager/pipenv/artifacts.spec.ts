@@ -34,11 +34,9 @@ describe('.updateArtifacts()', () => {
   let pipFileLock;
   beforeEach(async () => {
     jest.resetAllMocks();
-    env.getChildProcessEnv.mockReturnValue({
-      ...envMock.basic,
-      LANG: 'en_US.UTF-8',
-      LC_ALL: 'en_US',
-    });
+    envMock.basic.LANG = 'en_US.UTF-8';
+    envMock.basic.LC_ALL = 'en_US';
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
@@ -214,6 +212,30 @@ describe('.updateArtifacts()', () => {
         config: { ...dockerConfig, constraints: { pipenv: '==2020.1.1' } },
       })
     ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('injects environment variables', async () => {
+    const envVariables = process.env;
+    envVariables.PIPENV_ENV_TEST_VALUE = 'this is a test';
+    envVariables.PIPENV_OTHER_TEST_VALUE = 'this should not be included';
+    git.getRepoStatus.mockResolvedValue({
+      modified: ['Pipfile.lock'],
+    } as StatusResult);
+    fs.readFile.mockReturnValueOnce('new lock' as any);
+    const execSnapshots = mockExecAll(exec);
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).not.toBeNull();
+    const snapShotEnv = execSnapshots[execSnapshots.length - 1]?.options?.env;
+    expect(snapShotEnv).toMatchObject({
+      TEST_VALUE: 'this is a test',
+    });
+    expect(snapShotEnv?.OTHER_TEST_VALUE).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
   });
 });

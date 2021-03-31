@@ -70,6 +70,25 @@ function getPipenvConstraint(
   return '';
 }
 
+const pipEnvEnvironmentVariablePrefix = 'PIPENV_ENV_';
+
+function getPipenvEnvironment(): Record<string, string> {
+  const pipenvKeys = Object.keys(process.env).filter((key) =>
+    key.startsWith(pipEnvEnvironmentVariablePrefix)
+  );
+  const pipenvTargets = pipenvKeys.map((key) => ({
+    envKey: key,
+    targetEnvKey: key.slice(pipEnvEnvironmentVariablePrefix.length),
+  }));
+  const pipenvEnvironment = Object.fromEntries(
+    pipenvTargets.map(({ envKey, targetEnvKey }) => [
+      targetEnvKey,
+      process.env[envKey],
+    ])
+  );
+  return pipenvEnvironment;
+}
+
 export async function updateArtifacts({
   packageFileName: pipfileName,
   newPackageFileContent: newPipfileContent,
@@ -78,7 +97,12 @@ export async function updateArtifacts({
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
   const cacheDir = await ensureCacheDir('./others/pipenv', 'PIPENV_CACHE_DIR');
-  logger.debug('Using pipenv cache ' + cacheDir);
+  logger.debug(`Using pipenv cache ${cacheDir}`);
+  const extraEnv = {
+    ...getPipenvEnvironment(),
+    PIPENV_CACHE_DIR: cacheDir,
+  };
+  logger.debug(`Using pipenv environment variables ${extraEnv.toString()}`);
 
   const lockFileName = pipfileName + '.lock';
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
@@ -99,9 +123,7 @@ export async function updateArtifacts({
     );
     const execOptions: ExecOptions = {
       cwdFile: pipfileName,
-      extraEnv: {
-        PIPENV_CACHE_DIR: cacheDir,
-      },
+      extraEnv,
       docker: {
         image: 'python',
         tagConstraint,
