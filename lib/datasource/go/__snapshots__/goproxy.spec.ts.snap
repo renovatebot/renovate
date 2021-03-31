@@ -1,5 +1,200 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/go/utils getReleases fetches release data from goproxy 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.0.info",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.1.info",
+  },
+]
+`;
+
+exports[`datasource/go/utils getReleases handles comma fallback 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "foo.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://foo.example.com/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "bar.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://bar.example.com/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.0.info",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.1.info",
+  },
+]
+`;
+
+exports[`datasource/go/utils getReleases handles pipe fallback 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example.com/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.0.info",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.1.info",
+  },
+]
+`;
+
+exports[`datasource/go/utils getReleases handles timestamp fetch errors 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.0.info",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "proxy.golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.1.info",
+  },
+]
+`;
+
+exports[`datasource/go/utils getReleases short-circuits with comma fallback 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "foo.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://foo.example.com/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "bar.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://bar.example.com/github.com/google/btree/@v/list",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "baz.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://baz.example.com/github.com/google/btree/@v/list",
+  },
+]
+`;
+
 exports[`datasource/go/utils requests listVersions 1`] = `
 Array [
   Object {

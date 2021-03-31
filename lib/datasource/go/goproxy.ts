@@ -33,6 +33,7 @@ export async function versionInfo(
 ): Promise<Release> {
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/${version}.info`;
   const res = await http.getJson<VersionInfo>(url);
+  debugger;
 
   const result: Release = {
     version: res.body.Version,
@@ -84,11 +85,11 @@ const pathGlobLexer = {
     },
     asterisk: {
       match: '*',
-      value: (_: string) => '[^/]*',
+      value: (_: string) => '[^\\/]*',
     },
     qmark: {
       match: '?',
-      value: (_: string) => '[^/]',
+      value: (_: string) => '[^\\/]',
     },
     characterRangeOpen: {
       match: '[',
@@ -102,12 +103,11 @@ const pathGlobLexer = {
     },
   },
   characterRange: {
-    char: /[^\\\-\]\n]/,
+    char: /[^\\\]\n]/,
     escapedChar: {
       match: /\\./,
       value: (s: string) => s.slice(1),
     },
-    range: /.-./,
     characterRangeEnd: {
       match: ']',
       pop: 1,
@@ -115,27 +115,26 @@ const pathGlobLexer = {
   },
 };
 
-export function parseNoproxy(input: unknown): string {
+export function parseNoproxy(input: unknown): RegExp | null {
   if (!input || typeof input !== 'string') {
     return null;
   }
-
   const lexer = moo.states(pathGlobLexer);
   lexer.reset(input);
-  return [...lexer].map(({ value }) => value).join('');
+  const noproxyPattern = [...lexer].map(({ value }) => value).join('');
+  return noproxyPattern ? regEx(noproxyPattern) : null;
 }
 
 export function getProxyList(
   proxy: string = process.env.GOPROXY,
   noproxy: string = process.env.GONOPROXY || process.env.GOPRIVATE
-): GoproxyHost[] | null {
+): GoproxyHost[] {
   const proxyList = parseGoproxy(proxy);
   if (!proxyList) {
-    return null;
+    return [];
   }
 
-  const noproxyPattern = parseNoproxy(noproxy);
-  const noproxyRegex = noproxyPattern ? regEx(noproxyPattern) : null;
+  const noproxyRegex = parseNoproxy(noproxy);
 
   const result: GoproxyHost[] = proxyList.map((x) => {
     if (noproxyRegex?.test(x.url)) {
@@ -162,11 +161,8 @@ export async function getReleases(
           try {
             return await versionInfo(url, lookupName, version);
           } catch (err) {
-            if (err?.response?.statusCode !== 410) {
-              throw err;
-            }
+            return { version };
           }
-          return { version };
         });
         const releases = await pAll(queue, { concurrency: 5 });
         if (releases.length) {
