@@ -720,6 +720,13 @@ export async function commitFiles({
       );
       return null;
     }
+    if (err.message.includes('protected branch hook declined')) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.configFile = branchName;
+      error.validationError = 'Renovate branch is protected';
+      error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
+      throw error;
+    }
     if (err.message.includes('remote: error: cannot lock ref')) {
       logger.error({ err }, 'Error committing files.');
       return null;
