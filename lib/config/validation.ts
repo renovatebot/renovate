@@ -165,7 +165,7 @@ export async function validateConfig(
       ) {
         const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
         warnings.push({
-          depName: `${parentPath ? `${parentPath}.` : ''}${key}`,
+          topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
         });
       }
