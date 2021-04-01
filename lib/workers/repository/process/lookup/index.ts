@@ -1,6 +1,7 @@
 import type { ValidationMessage } from '../../../../config/types';
 import {
   Release,
+  getDatasourceList,
   getDefaultVersioning,
   getDigest,
   getPkgReleases,
@@ -45,7 +46,10 @@ export async function lookupUpdates(
   );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
   // istanbul ignore if
-  if (!isGetPkgReleasesConfig(config)) {
+  if (
+    !isGetPkgReleasesConfig(config) ||
+    !getDatasourceList().includes(datasource)
+  ) {
     res.skipReason = SkipReason.InvalidConfig;
     return res;
   }

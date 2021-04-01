@@ -66,6 +66,7 @@ module.exports = {
   token: process.env.TOKEN,
   hostRules: [
     {
+      hostType: 'npm',
       hostName: 'pkgs.dev.azure.com',
       username: 'apikey',
       password: process.env.TOKEN,

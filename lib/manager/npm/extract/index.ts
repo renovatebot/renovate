@@ -92,8 +92,9 @@ export async function extractPackageFile(
 
   let npmrc: string;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  // istanbul ignore if
-  if (config.ignoreNpmrcFile) {
+  if (is.string(config.npmrc)) {
+    logger.debug('Using configured npmrc');
+  } else if (config.ignoreNpmrcFile) {
     npmrc = '';
   } else {
     npmrc = await readLocalFile(npmrcFileName, 'utf8');
