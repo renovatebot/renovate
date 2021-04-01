@@ -138,7 +138,7 @@ export async function writeExistingFiles(
     );
     const npmrc: string = packageFile.npmrc || config.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
-    if (npmrc) {
+    if (is.string(npmrc)) {
       try {
         await outputFile(npmrcFilename, `${npmrc}\n`);
       } catch (err) /* istanbul ignore next */ {
