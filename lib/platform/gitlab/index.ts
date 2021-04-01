@@ -1,7 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import semver from 'semver';
+import semver, { lt } from 'semver';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -63,6 +63,7 @@ let config: {
 const defaults = {
   hostType: PLATFORM_TYPE_GITLAB,
   endpoint: 'https://gitlab.com/api/v4/',
+  version: '0.0.0',
 };
 
 const DRAFT_PREFIX = 'Draft: ';
@@ -100,6 +101,7 @@ export async function initPlatform({
       await gitlabApi.getJson<{ version: string }>('version', { token })
     ).body.version.split('-')[0];
     logger.debug('GitLab version is: ' + gitlabVersion);
+    defaults.version = gitlabVersion;
   } catch (err) {
     logger.debug(
       { err },
@@ -878,6 +880,14 @@ export async function addReviewers(
   reviewers: string[]
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${issueNo}`);
+
+  if (lt(defaults.version, '13.9')) {
+    logger.warn(
+      { currentVersion: defaults.version },
+      'Adding reviewers is only available in GitLab 13.9 and onwards'
+    );
+    return;
+  }
 
   const pr = await getPr(issueNo);
   const existingReviewers = (pr.reviewers ?? []).map((r) => r.username);
