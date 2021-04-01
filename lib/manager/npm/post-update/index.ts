@@ -140,6 +140,9 @@ export async function writeExistingFiles(
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (is.string(npmrc)) {
       await outputFile(npmrcFilename, `${npmrc}\n`);
+    } else if (config.ignoreNpmrcFile) {
+      logger.debug('Removing ignored .npmrc file before artifact generation');
+      await remove(npmrcFilename);
     }
     if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);

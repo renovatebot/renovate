@@ -6,7 +6,11 @@ import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -91,10 +95,11 @@ export async function extractPackageFile(
   delete lockFiles.shrinkwrapJson;
 
   let npmrc: string;
+  let ignoreNpmrcFile: boolean;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
   // istanbul ignore if
   if (config.ignoreNpmrcFile) {
-    npmrc = '';
+    await deleteLocalFile(npmrcFileName);
   } else {
     npmrc = await readLocalFile(npmrcFileName, 'utf8');
     if (is.string(npmrc)) {
@@ -365,6 +370,7 @@ export async function extractPackageFile(
     packageFileVersion,
     packageJsonType,
     npmrc,
+    ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
     managerData: {
