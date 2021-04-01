@@ -48,7 +48,7 @@ import type {
   RepoResponse,
 } from './types';
 
-export const gitlabApi = new GitlabHttp();
+const gitlabApi = new GitlabHttp();
 
 let config: {
   repository: string;
