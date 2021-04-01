@@ -871,7 +871,7 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${iid}`);
 
-  if (lt(defaults.version, '13.9')) {
+  if (lt(defaults.version, '13.9.0')) {
     logger.warn(
       { currentVersion: defaults.version },
       'Adding reviewers is only available in GitLab 13.9 and onwards'
