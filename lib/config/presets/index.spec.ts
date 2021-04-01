@@ -56,7 +56,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -70,7 +70,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -85,7 +85,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -100,7 +100,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -115,7 +115,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -130,7 +130,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -153,7 +153,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -414,7 +414,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -426,7 +426,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -438,7 +438,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -450,7 +450,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });

@@ -240,7 +240,7 @@ export interface PackageRule
 }
 
 export interface ValidationMessage {
-  depName: string;
+  topic: string;
   message: string;
 }
 

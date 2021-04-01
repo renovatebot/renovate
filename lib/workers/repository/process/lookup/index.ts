@@ -59,7 +59,7 @@ export async function lookupUpdates(
     if (!dependency) {
       // If dependency lookup fails then warn and return
       const warning: ValidationMessage = {
-        depName,
+        topic: depName,
         message: `Failed to look up dependency ${depName}`,
       };
       logger.debug({ dependency: depName, packageFile }, warning.message);
@@ -98,7 +98,7 @@ export async function lookupUpdates(
       const taggedVersion = dependency.tags[followTag];
       if (!taggedVersion) {
         res.warnings.push({
-          depName,
+          topic: depName,
           message: `Can't find version with tag ${followTag} for ${depName}`,
         });
         return res;
@@ -119,7 +119,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (!rollback) {
         res.warnings.push({
-          depName,
+          topic: depName,
           message: `Can't find version matching ${currentValue} for ${depName}`,
         });
         return res;
