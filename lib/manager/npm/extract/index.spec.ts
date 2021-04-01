@@ -126,6 +126,14 @@ describe('manager/npm/extract', () => {
       );
       expect(res.npmrc).toEqual('');
     });
+    it('returns empty string when ignoreNpmrcFile', async () => {
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { ignoreNpmrcFile: true }
+      );
+      expect(res.npmrc).toEqual('');
+    });
     it('ignores .npmrc when config.npmrc is defined', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
