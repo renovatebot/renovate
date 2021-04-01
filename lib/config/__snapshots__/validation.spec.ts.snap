@@ -214,8 +214,8 @@ exports[`config/validation validateConfig(config) validates valid alias objects 
 exports[`config/validation validateConfig(config) warns if hostType has the wrong parent 1`] = `
 Array [
   Object {
-    "depName": "hostType",
     "message": "hostType should only be configured within a \\"hostRules\\" object. Was found in .",
+    "topic": "hostType",
   },
 ]
 `;

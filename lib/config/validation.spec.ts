@@ -2,6 +2,21 @@ import * as configValidation from './validation';
 import { RenovateConfig } from '.';
 
 describe('config/validation', () => {
+  describe('getParentName()', () => {
+    it('ignores encrypted in root', () => {
+      expect(configValidation.getParentName('encrypted')).toEqual('');
+    });
+    it('handles array types', () => {
+      expect(configValidation.getParentName('hostRules[1]')).toEqual(
+        'hostRules'
+      );
+    });
+    it('handles encrypted within array types', () => {
+      expect(configValidation.getParentName('hostRules[0].encrypted')).toEqual(
+        'hostRules'
+      );
+    });
+  });
   describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
       const config = {
