@@ -8,6 +8,33 @@ export interface GitlabComment {
   id: number;
 }
 
+export type GitLabUser = {
+  id: number;
+  username: string;
+};
+
+export type GitLabMergeRequest = {
+  iid: number;
+  title: string;
+  state: string;
+  source_branch: string;
+  target_branch: string;
+  description: string;
+  diverged_commits_count: number;
+  merge_status: string;
+  assignee?: GitLabUser;
+  assignees?: GitLabUser[];
+  reviewers?: GitLabUser[];
+};
+
+export interface UpdateMergeRequest {
+  target_branch?: string;
+  title?: string;
+  assignee_id?: number;
+  assignee_ids?: number[];
+  reviewer_ids?: number[];
+}
+
 export type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 
 export type RepoResponse = {

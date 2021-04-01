@@ -39,14 +39,16 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+import { getMR, updateMR } from './merge-request';
 import type {
+  GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
   MergeMethod,
   RepoResponse,
 } from './types';
 
-const gitlabApi = new GitlabHttp();
+export const gitlabApi = new GitlabHttp();
 
 let config: {
   repository: string;
@@ -518,34 +520,22 @@ export async function createPr({
 
 export async function getPr(iid: number): Promise<Pr> {
   logger.debug(`getPr(${iid})`);
-  const url = `projects/${config.repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
-  const pr = (
-    await gitlabApi.getJson<
-      Pr & {
-        iid: number;
-        source_branch: string;
-        target_branch: string;
-        description: string;
-        diverged_commits_count: number;
-        merge_status: string;
-        assignee?: { id?: number };
-        assignees?: { id?: number }[];
-        reviewers?: { id: number; username: string }[];
-      }
-    >(url)
-  ).body;
+  const mr = await getMR(config.repository, iid);
+
   // Harmonize fields with GitHub
-  pr.sourceBranch = pr.source_branch;
-  pr.targetBranch = pr.target_branch;
-  pr.number = pr.iid;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.body = pr.description;
-  pr.state = pr.state === 'opened' ? PrState.Open : pr.state;
-  pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
-  delete pr.assignee;
-  delete pr.assignees;
-  pr.hasReviewers = !!pr.reviewers?.length;
-  if (pr.merge_status === 'cannot_be_merged') {
+  const pr: Pr = {
+    sourceBranch: mr.source_branch,
+    targetBranch: mr.target_branch,
+    number: mr.iid,
+    displayNumber: `Merge Request #${mr.iid}`,
+    body: mr.description,
+    state: mr.state === 'opened' ? PrState.Open : mr.state,
+    hasAssignees: !!(mr.assignee?.id || mr.assignees?.[0]?.id),
+    hasReviewers: !!mr.reviewers?.length,
+    title: mr.title,
+  };
+
+  if (mr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
     pr.isConflicted = true;
@@ -876,10 +866,10 @@ export async function addAssignees(
 }
 
 export async function addReviewers(
-  issueNo: number,
+  iid: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${issueNo}`);
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${iid}`);
 
   if (lt(defaults.version, '13.9')) {
     logger.warn(
@@ -889,21 +879,35 @@ export async function addReviewers(
     return;
   }
 
-  const pr = await getPr(issueNo);
-  const existingReviewers = (pr.reviewers ?? []).map((r) => r.username);
-  const existingReviewerIDs = (pr.reviewers ?? []).map((r) => r.id);
+  let mr: GitLabMergeRequest;
+  try {
+    mr = await getMR(config.repository, iid);
+  } catch (err) {
+    logger.error({ error: err }, 'Failed to get existing reviewers');
+  }
 
+  mr.reviewers = mr.reviewers ?? [];
+  const existingReviewers = mr.reviewers.map((r) => r.username);
+  const existingReviewerIDs = mr.reviewers.map((r) => r.id);
+
+  // Figure out which reviewers (of the ones we want to add) are not already on the MR as a reviewer
   const newReviewers = reviewers.filter((r) => !existingReviewers.includes(r));
-  const newReviewerIDs = await Promise.all(
-    newReviewers.map((r) => getUserID(r))
-  );
 
-  await gitlabApi.putJson(
-    `projects/${config.repository}/merge_requests/${issueNo}`,
-    {
-      body: { reviewer_ids: [...existingReviewerIDs, ...newReviewerIDs] },
-    }
-  );
+  // Gather the IDs for all the reviewers we want to add
+  let newReviewerIDs: number[];
+  try {
+    newReviewerIDs = await Promise.all(newReviewers.map((r) => getUserID(r)));
+  } catch (err) {
+    logger.error({ error: err }, 'Failed to get IDs of the new reviewers');
+  }
+
+  try {
+    await updateMR(config.repository, iid, {
+      reviewer_ids: [...existingReviewerIDs, ...newReviewerIDs],
+    });
+  } catch (err) {
+    logger.error({ error: err }, 'Failed to add reviewers');
+  }
 }
 
 export async function deleteLabel(
