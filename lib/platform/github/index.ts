@@ -278,6 +278,7 @@ export async function initRepo({
   config.prList = null;
   config.openPrList = null;
   config.closedPrList = null;
+  config.branchPrs = [];
 
   config.forkMode = !!forkMode;
   if (forkMode) {
@@ -790,12 +791,57 @@ export async function findPr({
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
+  // istanbul ignore if
+  if (config.branchPrs[branchName]) {
+    return config.branchPrs[branchName];
+  }
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({
+  const openPr = await findPr({
     branchName,
     state: PrState.Open,
   });
-  return existingPr ? getPr(existingPr.number) : null;
+  if (openPr) {
+    config.branchPrs[branchName] = await getPr(openPr.number);
+    return config.branchPrs[branchName];
+  }
+  const autoclosedPr = await findPr({
+    branchName,
+    state: PrState.Closed,
+  });
+  if (autoclosedPr?.title?.endsWith(' - autoclosed')) {
+    logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
+    const { sha, number } = autoclosedPr;
+    try {
+      await githubApi.postJson(`repos/${config.repository}/git/refs`, {
+        body: { ref: `refs/heads/${branchName}`, sha },
+      });
+      logger.debug({ branchName, sha }, 'Recreated autoclosed branch');
+    } catch (err) {
+      logger.debug('Could not recreate autoclosed branch - skipping reopen');
+      return null;
+    }
+    try {
+      const title = autoclosedPr.title.replace(/ - autoclosed$/, '');
+      await githubApi.patchJson(`repos/${config.repository}/pulls/${number}`, {
+        body: {
+          state: 'open',
+          title,
+        },
+      });
+      logger.info(
+        { branchName, title, number },
+        'Successfully reopened autoclosed PR'
+      );
+    } catch (err) {
+      logger.debug('Could not reopen autoclosed PR');
+      return null;
+    }
+    delete config.openPrList; // So that it gets refreshed
+    delete config.closedPrList?.[number]; // So that it's no longer found in the closed list
+    config.branchPrs[branchName] = await getPr(number);
+    return config.branchPrs[branchName];
+  }
+  return null;
 }
 
 async function getStatus(

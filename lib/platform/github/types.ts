@@ -74,6 +74,7 @@ export interface LocalRepoConfig {
   renovateUsername: string;
   productLinks: any;
   ignorePrAuthor: boolean;
+  branchPrs: Pr[];
 }
 
 export type BranchProtection = any;

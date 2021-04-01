@@ -58,9 +58,14 @@ export async function extractPackageFile(
     };
     if (dep.repository) {
       res.registryUrls = [dep.repository];
-      if (dep.repository.startsWith('@')) {
-        const repoWithAtRemoved = dep.repository.slice(1);
-        const alias = config.aliases[repoWithAtRemoved];
+      if (
+        dep.repository.startsWith('@') ||
+        dep.repository.startsWith('alias:')
+      ) {
+        const repoWithPrefixRemoved = dep.repository.slice(
+          dep.repository[0] === '@' ? 1 : 6
+        );
+        const alias = config.aliases[repoWithPrefixRemoved];
         if (alias) {
           res.registryUrls = [alias];
           return res;

@@ -130,7 +130,7 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
-    const re = /^([\w./]+?)\/\/(?:([\w./]+)\/)?([\w.]+)$/;
+    const re = /^([\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/;
 
     // Validation
     if (str.includes(':')) {

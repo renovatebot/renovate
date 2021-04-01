@@ -107,6 +107,17 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'secrets',
+    description: 'Object containing secret name/value pairs',
+    type: 'object',
+    admin: true,
+    mergeable: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'extends',
     description:
       'Configuration presets to use/extend. Note: does not work if configured in config.js.',
@@ -1487,6 +1498,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodUpdateImportPaths',
       'gomodTidy',
       'npmDedupe',
       'yarnDedupeFewer',
