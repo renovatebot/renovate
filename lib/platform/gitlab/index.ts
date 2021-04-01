@@ -1,7 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import semver, { lt } from 'semver';
+import { lt } from 'semver';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -111,7 +111,7 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  draftPrefix = semver.lt(gitlabVersion, '13.2.0')
+  draftPrefix = lt(gitlabVersion, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
   const platformConfig: PlatformResult = {
