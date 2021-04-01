@@ -87,7 +87,8 @@ export function setNpmrc(input?: string): void {
       npmrc[key] = envReplace(npmrc[key]);
       sanitize(key, npmrc[key]);
     }
-  } else {
+  } else if (npmrc) {
+    logger.debug('Resetting npmrc');
     npmrc = null;
     npmrcRaw = null;
   }
