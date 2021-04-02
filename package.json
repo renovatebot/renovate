@@ -263,6 +263,7 @@
     "typescript": "4.2.3"
   },
   "resolutions": {
+    "underscore": "^1.12.1",
     "jest-silent-reporter/jest-util": ">=25.1.0",
     "jest-junit/jest-validate": ">=25.1.0",
     "**/acorn": ">=6.4.1 <7.0.0 || >=7.1.1",
