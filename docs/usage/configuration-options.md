@@ -1285,7 +1285,7 @@ See also `matchPackagePrefixes`.
 {
   "packageRules": [
     {
-      "matchPackagePrefixes": ["^eslint"],
+      "matchPackagePrefixes": ["eslint"],
       "excludePackagePrefixes": ["eslint-foo"]
     }
   ]
