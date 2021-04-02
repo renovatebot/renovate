@@ -1,8 +1,6 @@
 import { logger } from '../../logger';
-import { GitlabHttp } from '../../util/http/gitlab';
+import { gitlabApi } from './http';
 import { GitLabMergeRequest, UpdateMergeRequest } from './types';
-
-export const gitlabApi = new GitlabHttp();
 
 export async function getMR(
   repository: string,

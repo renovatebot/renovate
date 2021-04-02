@@ -19,7 +19,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
-import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
+import { setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import type {
@@ -39,6 +39,7 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+import { getUserID, gitlabApi } from './http';
 import { getMR, updateMR } from './merge-request';
 import type {
   GitLabMergeRequest,
@@ -47,8 +48,6 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
-
-const gitlabApi = new GitlabHttp();
 
 let config: {
   repository: string;
@@ -830,12 +829,6 @@ export async function ensureIssueClosing(title: string): Promise<void> {
       );
     }
   }
-}
-
-async function getUserID(username: string): Promise<number> {
-  return (
-    await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
-  ).body[0].id;
 }
 
 export async function addAssignees(
