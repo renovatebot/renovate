@@ -265,6 +265,7 @@
   "resolutions": {
     "jest-silent-reporter/jest-util": ">=25.1.0",
     "jest-junit/jest-validate": ">=25.1.0",
+    "trim": "^1.0.0",
     "**/acorn": ">=6.4.1 <7.0.0 || >=7.1.1",
     "**/kind-of": ">=6.0.3",
     "**/lock-verify/@iarna/cli": ">=2"
