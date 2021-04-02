@@ -6,11 +6,13 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "1.0.0",
+      "isStable": undefined,
       "releaseTimestamp": "2020-03-09T11:00:00.000Z",
       "version": "1.0.0",
     },
     Object {
       "gitRef": "v1.1.0",
+      "isStable": undefined,
       "releaseTimestamp": "2020-03-09T10:00:00.000Z",
       "version": "v1.1.0",
     },
