@@ -884,6 +884,7 @@ export async function addReviewers(
     mr = await getMR(config.repository, iid);
   } catch (err) {
     logger.error({ error: err }, 'Failed to get existing reviewers');
+    return;
   }
 
   mr.reviewers = mr.reviewers ?? [];
@@ -899,6 +900,7 @@ export async function addReviewers(
     newReviewerIDs = await Promise.all(newReviewers.map((r) => getUserID(r)));
   } catch (err) {
     logger.error({ error: err }, 'Failed to get IDs of the new reviewers');
+    return;
   }
 
   try {
