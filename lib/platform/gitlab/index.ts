@@ -532,6 +532,8 @@ export async function getPr(iid: number): Promise<Pr> {
     hasAssignees: !!(mr.assignee?.id || mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,
     title: mr.title,
+    labels: mr.labels,
+    sha: mr.sha,
   };
 
   if (mr.merge_status === 'cannot_be_merged') {

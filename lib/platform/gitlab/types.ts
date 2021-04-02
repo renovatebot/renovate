@@ -25,6 +25,8 @@ export type GitLabMergeRequest = {
   assignee?: GitLabUser;
   assignees?: GitLabUser[];
   reviewers?: GitLabUser[];
+  labels: string[];
+  sha: string;
 };
 
 export interface UpdateMergeRequest {
