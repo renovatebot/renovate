@@ -453,7 +453,7 @@ async function getTags(
     let page = 1;
 
     // quay registry returns unordered tags using v2, let's use v1 for now
-    const isQuay = registry.endsWith('.quay.io');
+    const isQuay = registry.endsWith('quay.io');
     if (isQuay) {
       url = `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}`;
     } else {
