@@ -448,19 +448,32 @@ async function getTags(
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
     const limit = ecrRegex.test(registry) ? 1000 : 10000;
-    let url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
+
+    let url: string;
+    let page = 1;
+
+    // quay registry returns unordered tags using v2, let's use v1 for now
+    const isQuay = registry.endsWith('.quay.io');
+    if (isQuay) {
+      url = `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}`;
+    } else {
+      url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
+    }
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
     do {
+      page += 1;
       const res = await http.getJson<{ tags: string[] }>(url, { headers });
       tags = tags.concat(res.body.tags);
-      const linkHeader = parseLinkHeader(res.headers.link as string);
-      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
-      page += 1;
+      if (isQuay) {
+        url = res.body.tags.length > 0 ? `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}` : null;
+      } else {
+        const linkHeader = parseLinkHeader(res.headers.link as string);
+        url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      }
     } while (url && page < 20);
     const cacheMinutes = 30;
     await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
