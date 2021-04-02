@@ -9,6 +9,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
+import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
@@ -19,11 +20,15 @@ describe('platform/gitlab', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
+  let logger: jest.Mocked<typeof _logger>;
+
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.resetAllMocks();
     gitlab = await import('.');
+    jest.mock('../../logger');
+    logger = (await import('../../logger')).logger as never;
     jest.mock('../../util/host-rules');
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
@@ -849,12 +854,15 @@ describe('platform/gitlab', () => {
     });
   });
 
-  describe('addReviewers(issueNo, reviewers)', () => {
+  describe('addReviewers(iid, reviewers)', () => {
     describe('13.8.0', () => {
       it('should not be supported in too low version', async () => {
         await initFakePlatform('13.8.0');
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
-        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(logger.warn).toHaveBeenCalledWith(
+          { currentVersion: '13.8.0' },
+          'Adding reviewers is only available in GitLab 13.9 and onwards'
+        );
       });
     });
 
