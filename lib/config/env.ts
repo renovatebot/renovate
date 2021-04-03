@@ -20,7 +20,19 @@ export function getEnvName(option: Partial<RenovateOptions>): string {
 export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
   const options = getOptions();
 
-  const config: GlobalConfig = { hostRules: [] };
+  let config: GlobalConfig = {};
+
+  if (env.RENOVATE_CONFIG) {
+    try {
+      config = JSON.parse(env.RENOVATE_CONFIG);
+      logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
+    } catch (err) /* istanbul ignore if */ {
+      logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
+      process.exit(1);
+    }
+  }
+
+  config.hostRules ||= [];
 
   const coersions = {
     boolean: (val: string): boolean => val === 'true',
