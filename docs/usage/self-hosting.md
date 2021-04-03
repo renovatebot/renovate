@@ -206,7 +206,7 @@ If you are configuring using env variables, there are two possibilities:
 - Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
 - JSON stringify the whole config and pass in, e.g. `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
 
-If you combine both of the above then any single config options in env will override what's in `RENOVATE_CONFIG`
+If you combine both of the above then any single config options in the environment variable will override what's in `RENOVATE_CONFIG`.
 
 ## Authentication
 
