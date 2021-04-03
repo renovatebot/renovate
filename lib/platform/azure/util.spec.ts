@@ -1,9 +1,11 @@
+import { Readable } from 'stream';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getNewBranchName,
   getRenovatePRFormat,
+  streamToString,
 } from './util';
 
 describe('platform/azure/helpers', () => {
@@ -105,6 +107,13 @@ describe('platform/azure/helpers', () => {
     it('should be formated (isConflicted)', () => {
       const res = getRenovatePRFormat({ mergeStatus: 2 } as any);
       expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('streamToString', () => {
+    it('converts Readable stream to string', async () => {
+      const res = await streamToString(Readable.from('foobar'));
+      expect(res).toEqual('foobar');
     });
   });
 });
