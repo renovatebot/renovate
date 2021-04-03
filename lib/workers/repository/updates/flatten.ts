@@ -27,14 +27,6 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(/-+/, '-')
         .toLowerCase()
     : undefined;
-  if (
-    updateConfig.language === LANGUAGE_DOCKER &&
-    /(^|\/)node$/.exec(updateConfig.depName) &&
-    updateConfig.depName !== 'calico/node'
-  ) {
-    updateConfig.additionalBranchPrefix = '';
-    updateConfig.depNameSanitized = 'node';
-  }
   generateBranchName(updateConfig);
   return updateConfig;
 }
