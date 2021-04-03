@@ -69,7 +69,7 @@ With the above config:
 ## additionalBranchPrefix
 
 This value defaults to an empty string, and is typically not necessary.
-Some managers previously populate this field, but they no longer do it by default.
+Some managers previously populated this field, but they no longer do so by default.
 You normally don't need to configure this, but one example where it can be useful is combining with `parentDir` in monorepos to split PRs based on where the package definition is located, e.g.
 
 ```json
