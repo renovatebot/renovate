@@ -26,7 +26,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     try {
       config = JSON.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
-    } catch (err) /* istanbul ignore if */ {
+    } catch (err) /* istanbul ignore next */ {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);
     }
