@@ -917,7 +917,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/master/file.json",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/HEAD/file.json",
   },
 ]
 `;
@@ -944,7 +944,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/master/file.json",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/HEAD/file.json",
   },
 ]
 `;
