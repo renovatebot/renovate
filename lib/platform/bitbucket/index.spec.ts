@@ -845,7 +845,7 @@ describe('platform/bitbucket', () => {
       const data = { foo: 'bar' };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .reply(200, JSON.stringify(data));
       const res = await bitbucket.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -854,7 +854,7 @@ describe('platform/bitbucket', () => {
     it('returns null on errors', async () => {
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .replyWithError('some error');
       const res = await bitbucket.getJsonFile('file.json');
       expect(res).toBeNull();
