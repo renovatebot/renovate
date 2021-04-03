@@ -115,3 +115,19 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     ...(isConflicted && { isConflicted }),
   } as AzurePr;
 }
+
+export async function streamToString(
+  stream: NodeJS.ReadableStream
+): Promise<string> {
+  const chunks: string[] = [];
+  /* eslint-disable promise/avoid-new */
+  const p = await new Promise<string>((resolve) => {
+    stream.on('data', (chunk: any) => {
+      chunks.push(chunk.toString());
+    });
+    stream.on('end', () => {
+      resolve(chunks.join(''));
+    });
+  });
+  return p;
+}
