@@ -201,6 +201,11 @@ Self-hosted Renovate can be configured using any of the following (or a combinat
 Note that some Renovate configuration options are _only_ available for self-hosting, and so can only be configured using one of the above methods.
 These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
 
+If you are configuring using env variables, there are two possibilities:
+
+- Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
+- JSON stringify the whole config and pass in, e.g. `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
+
 ## Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
