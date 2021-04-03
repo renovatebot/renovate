@@ -11,11 +11,14 @@ export const presets: Record<string, Preset> = {
     docker: {
       additionalBranchPrefix: 'docker-',
     },
-    helm: {
-      additionalBranchPrefix: 'helm-',
-    },
     homebrew: {
       additionalBranchPrefix: 'homebrew-',
     },
+    packageRules: [
+      {
+        matchDatasources: ['helm'],
+        additionalBranchPrefix: 'helm-',
+      },
+    ],
   },
 };
