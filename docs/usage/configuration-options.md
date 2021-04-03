@@ -1276,6 +1276,24 @@ See also `matchPackagePatterns`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### excludePackagePrefixes
+
+Use this field if you want to have one or more package name prefixes excluded in your package rule, without needing to write a regex.
+See also `matchPackagePrefixes`.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePrefixes": ["eslint"],
+      "excludePackagePrefixes": ["eslint-foo"]
+    }
+  ]
+}
+```
+
+The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
+
 ### matchLanguages
 
 Use this field to restrict rules to a particular language. e.g.
@@ -1418,6 +1436,24 @@ See also `excludePackagePatterns`.
 ```
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
+### matchPackagePrefixes
+
+Use this field to match a package prefix without needing to write a regex expression.
+See also `excludePackagePrefixes`.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePrefixes": ["angular"],
+      "rangeStrategy": "replace"
+    }
+  ]
+}
+```
+
+Just like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
 ### matchPaths
 
