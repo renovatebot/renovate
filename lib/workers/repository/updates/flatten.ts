@@ -4,7 +4,6 @@ import {
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config';
-import { LANGUAGE_DOCKER } from '../../../constants/languages';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
