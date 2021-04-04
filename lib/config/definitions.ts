@@ -454,17 +454,33 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'trustLevel',
+    name: 'exposeAllEnv',
     description:
-      'Set this to "high" if the bot should trust the repository owners/contents.',
+      'Configure this to true to allow passing of all env variables to package managers.',
     admin: true,
-    type: 'string',
-    default: 'low',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'allowScripts',
+    description:
+      'Configure this to true if repositories are allowed to run install scripts.',
+    admin: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'allowCustomCrateRegistries',
+    description:
+      'Configure this to true if custom crate registries are allowed.',
+    admin: true,
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'ignoreScripts',
     description:
-      'Configure this to true if trustLevel is high but you wish to skip running scripts when updating lock files.',
+      'Configure this to true if allowScripts=true but you wish to skip running scripts when updating lock files.',
     type: 'boolean',
     default: false,
   },
