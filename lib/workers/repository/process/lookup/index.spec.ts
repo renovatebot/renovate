@@ -186,7 +186,7 @@ describe('workers/repository/process/lookup', () => {
         Error(CONFIG_VALIDATION)
       );
     });
-    it('returns minor update if separate patches not configured', async () => {
+    it('returns patch update even if separate patches not configured', async () => {
       config.currentValue = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
@@ -195,8 +195,8 @@ describe('workers/repository/process/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(2);
-      expect(res.updates[0].updateType).not.toEqual('patch');
-      expect(res.updates[1].updateType).not.toEqual('patch');
+      expect(res.updates[0].updateType).toEqual('patch');
+      expect(res.updates[1].updateType).toEqual('major');
     });
     it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
@@ -212,7 +212,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].updateType).toEqual('minor');
+      expect(res.updates[0].updateType).toEqual('patch');
     });
     it('returns patch update if separateMinorPatch', async () => {
       config.separateMinorPatch = true;

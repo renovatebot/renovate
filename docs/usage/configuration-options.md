@@ -1517,7 +1517,6 @@ For example to apply a special label for Major updates:
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
-Only applies if `separateMinorPatch` is set to true.
 
 ## php
 
