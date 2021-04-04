@@ -107,7 +107,7 @@ export async function extractPackageFile(
       npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
     }
     if (is.string(npmrc)) {
-      if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
+      if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
         logger.debug('Discarding .npmrc file with variables');
         ignoreNpmrcFile = true;
         npmrc = undefined;

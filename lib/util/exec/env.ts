@@ -17,7 +17,7 @@ export function getChildProcessEnv(
   customEnvVars: string[] = []
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
-  if (getAdminConfig().trustLevel === 'high') {
+  if (getAdminConfig().exposeAllEnv) {
     return { ...env, ...process.env };
   }
   const envVars = [...basicEnvVars, ...customEnvVars];

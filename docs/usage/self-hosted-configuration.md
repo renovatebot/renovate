@@ -9,6 +9,8 @@ The configuration options listed in this document are applicable to self-hosted 
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
+## allowCustomCrateRegistries
+
 ## allowPostUpgradeCommandTemplating
 
 Set to true to allow templating of post-upgrade commands.
@@ -51,6 +53,8 @@ With this configuration, the executable command for `@angular/core` looks like t
 npm ci --ignore-scripts
 npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty --force
 ```
+
+## allowScripts
 
 ## allowedPostUpgradeCommands
 
@@ -184,6 +188,13 @@ e.g.
 
 ## endpoint
 
+## exposeAllEnv
+
+By default, Renovate will only pass a limited set of environment variables to package managers.
+Potentially, there could be leaks of confidential data if a script you don't trust enumerates all values in env, so set this to true only if you trust the repositories which the bot runs against.
+
+Setting this to true will also allow for variable substitution in `.npmrc` files.
+
 ## force
 
 This object is used as a "force override" when you need to make sure certain configuration overrides whatever is configured in the repository.
@@ -230,18 +241,6 @@ If left as default (null), a random short ID will be selected.
 ## logFile
 
 ## logFileLevel
-
-## logLevel
-
-We recommend that you run the Renovate bot at the debug level if you can.
-Use the environment variable `LOG_LEVEL=debug` to run Renovate at the debug level.
-
-When you use `LOG_LEVEL=debug`, debug logging starts from the beginning of the app.
-If you had configured debug logging in a file config, then the debug logging starts _after_ the file config is parsed.
-
-Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
-
-Warning: Configuring `logLevel` config option or `--log-level` cli option is deprecated and will be removed in a major version.
 
 ## onboarding
 
@@ -378,14 +377,5 @@ It could then be used in a repository config or preset like so:
 Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
 
 ## token
-
-## trustLevel
-
-Setting trustLevel to `"high"` can make sense in many self-hosted cases where the bot operator trusts the content in each repository.
-
-Setting trustLevel=high means:
-
-- Child processes are run with full access to `env`
-- `.npmrc` files can have environment variable substitution performed
 
 ## username
