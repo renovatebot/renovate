@@ -84,15 +84,6 @@ export async function parseConfigs(
     delete config.privateKeyPath;
   }
 
-  // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
-  // istanbul ignore if
-  if (config.logLevel) {
-    logger.warn(
-      'Configuring logLevel in CLI or file is deprecated. Use LOG_LEVEL environment variable instead'
-    );
-    levels('stdout', config.logLevel);
-  }
-
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
     setContext(config.logContext);
