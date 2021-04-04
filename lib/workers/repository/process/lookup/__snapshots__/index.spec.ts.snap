@@ -112,7 +112,7 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "updateType": "minor",
+    "updateType": "patch",
   },
   Object {
     "blockedByPin": true,
@@ -705,53 +705,7 @@ Array [
       "0.9.5",
       "0.9.6",
     ],
-    "updateType": "minor",
-  },
-  Object {
-    "bucket": "major",
-    "currentVersion": "0.9.0",
-    "isSingleVersion": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "skippedOverVersions": Array [
-      "1.0.0",
-      "1.0.1",
-      "1.1.0",
-      "1.1.1",
-      "1.1.2",
-      "1.2.0",
-      "1.2.1",
-      "1.3.0",
-      "1.4.0",
-    ],
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup .lookupUpdates() returns minor update if separate patches not configured 1`] = `
-Array [
-  Object {
-    "bucket": "non-major",
-    "currentVersion": "0.9.0",
-    "isSingleVersion": true,
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "0.9.7",
-    "newVersion": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "skippedOverVersions": Array [
-      "0.9.1",
-      "0.9.2",
-      "0.9.3",
-      "0.9.4",
-      "0.9.5",
-      "0.9.6",
-    ],
-    "updateType": "minor",
+    "updateType": "patch",
   },
   Object {
     "bucket": "major",
@@ -979,6 +933,52 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup .lookupUpdates() returns patch update even if separate patches not configured 1`] = `
+Array [
+  Object {
+    "bucket": "non-major",
+    "currentVersion": "0.9.0",
+    "isSingleVersion": true,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
+    "newVersion": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
+    "skippedOverVersions": Array [
+      "0.9.1",
+      "0.9.2",
+      "0.9.3",
+      "0.9.4",
+      "0.9.5",
+      "0.9.6",
+    ],
+    "updateType": "patch",
+  },
+  Object {
+    "bucket": "major",
+    "currentVersion": "0.9.0",
+    "isSingleVersion": true,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
+    "newVersion": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "skippedOverVersions": Array [
+      "1.0.0",
+      "1.0.1",
+      "1.1.0",
+      "1.1.1",
+      "1.1.2",
+      "1.2.0",
+      "1.2.1",
+      "1.3.0",
+      "1.4.0",
+    ],
+    "updateType": "major",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup .lookupUpdates() returns patch update if separateMinorPatch 1`] = `
 Array [
   Object {
@@ -1096,7 +1096,7 @@ Array [
       "3.1.0-dev.20180809",
       "3.1.0-dev.20180810",
     ],
-    "updateType": "minor",
+    "updateType": "patch",
   },
 ]
 `;
@@ -1112,7 +1112,7 @@ Array [
     "newValue": "2.5.17-beta.0",
     "newVersion": "2.5.17-beta.0",
     "releaseTimestamp": "2018-03-23T23:29:13.819Z",
-    "updateType": "minor",
+    "updateType": "patch",
   },
 ]
 `;
@@ -1140,7 +1140,7 @@ Array [
     "newValue": "3.0.1-insiders.20180726",
     "newVersion": "3.0.1-insiders.20180726",
     "releaseTimestamp": "2018-07-26T18:20:51.679Z",
-    "updateType": "minor",
+    "updateType": "patch",
   },
 ]
 `;
@@ -1171,7 +1171,7 @@ Array [
     "newValue": "3.0.1-insiders.20180726",
     "newVersion": "3.0.1-insiders.20180726",
     "releaseTimestamp": "2018-07-26T18:20:51.679Z",
-    "updateType": "minor",
+    "updateType": "patch",
   },
 ]
 `;
@@ -1187,7 +1187,7 @@ Array [
     "newValue": "3.0.1",
     "newVersion": "3.0.1",
     "releaseTimestamp": "2018-07-30T16:21:13.150Z",
-    "updateType": "minor",
+    "updateType": "patch",
   },
 ]
 `;
@@ -1218,7 +1218,7 @@ Array [
     "newValue": "^0.0.35",
     "newVersion": "0.0.35",
     "releaseTimestamp": "2017-04-27T16:59:06.479Z",
-    "updateType": "minor",
+    "updateType": "patch",
   },
 ]
 `;
@@ -2648,7 +2648,7 @@ Array [
     "newValue": "1.0.1",
     "newVersion": "1.0.1",
     "releaseTimestamp": "2014-03-11T18:47:17.560Z",
-    "updateType": "minor",
+    "updateType": "patch",
   },
 ]
 `;
