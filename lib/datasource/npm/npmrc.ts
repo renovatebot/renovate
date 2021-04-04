@@ -8,9 +8,10 @@ import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
+import { ensureTrailingSlash } from '../../util/url';
 
-let npmrc: Record<string, any> | null = null;
-let npmrcRaw: string;
+let npmrc: Record<string, any> = {};
+let npmrcRaw = '';
 
 export type Npmrc = Record<string, any>;
 
@@ -89,8 +90,8 @@ export function setNpmrc(input?: string): void {
     }
   } else if (npmrc) {
     logger.debug('Resetting npmrc');
-    npmrc = null;
-    npmrcRaw = null;
+    npmrc = {};
+    npmrcRaw = '';
   }
 }
 
@@ -106,7 +107,7 @@ export function resolvePackage(packageName: string): PackageResolution {
   try {
     registryUrl = getRegistryUrl(scope, getNpmrc());
   } catch (err) {
-    registryUrl = 'https://registry.npmjs.org';
+    registryUrl = 'https://registry.npmjs.org/';
   }
   const packageUrl = url.resolve(
     registryUrl,
