@@ -74,6 +74,7 @@ function checkForPlatformFailure(err: Error): void {
     'Could not resolve host',
     ' is not a member of team',
     'early EOF',
+    'fatal: bad config', // .gitmodules problem
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
