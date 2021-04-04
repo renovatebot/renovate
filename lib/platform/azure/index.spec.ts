@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 import is from '@sindresorhus/is';
 import {
   GitPullRequestMergeStrategy,
@@ -1184,18 +1185,24 @@ describe('platform/azure', () => {
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
-      azureHelper.getFile.mockResolvedValueOnce(JSON.stringify(data));
-      await initRepo({
-        repository: 'some-repo',
-      });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() =>
+              Promise.resolve(Readable.from(JSON.stringify(data)))
+            ),
+          } as any)
+      );
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
     it('returns null on errors', async () => {
-      azureHelper.getFile.mockRejectedValueOnce('some error');
-      await initRepo({
-        repository: 'some-repo',
-      });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() => Promise.reject('some error')),
+          } as any)
+      );
       const res = await azure.getJsonFile('file.json');
       expect(res).toBeNull();
     });

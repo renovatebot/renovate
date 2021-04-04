@@ -33,7 +33,7 @@ export function check({
   return managersErrMessage
     ? [
         {
-          depName: 'Configuration Error',
+          topic: 'Configuration Error',
           message: managersErrMessage,
         },
       ]

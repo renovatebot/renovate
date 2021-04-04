@@ -53,8 +53,10 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const matchDepTypes = packageRule.matchDepTypes || [];
   const matchPackageNames = packageRule.matchPackageNames || [];
   let matchPackagePatterns = packageRule.matchPackagePatterns || [];
+  const matchPackagePrefixes = packageRule.matchPackagePrefixes || [];
   const excludePackageNames = packageRule.excludePackageNames || [];
   const excludePackagePatterns = packageRule.excludePackagePatterns || [];
+  const excludePackagePrefixes = packageRule.excludePackagePrefixes || [];
   const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes || [];
   const matchCurrentVersion = packageRule.matchCurrentVersion || null;
   const matchUpdateTypes = packageRule.matchUpdateTypes || [];
@@ -132,7 +134,12 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (depName && (matchPackageNames.length || matchPackagePatterns.length)) {
+  if (
+    depName &&
+    (matchPackageNames.length ||
+      matchPackagePatterns.length ||
+      matchPackagePrefixes.length)
+  ) {
     let isMatch = matchPackageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
@@ -147,6 +154,12 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
           isMatch = true;
         }
       }
+    }
+    // prefix match is also "or"
+    if (!isMatch && matchPackagePrefixes.length) {
+      isMatch = matchPackagePrefixes.some((prefix) =>
+        depName.startsWith(prefix)
+      );
     }
     if (!isMatch) {
       return false;
@@ -171,6 +184,15 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
         isMatch = true;
       }
     }
+    if (isMatch) {
+      return false;
+    }
+    positiveMatch = true;
+  }
+  if (depName && excludePackagePrefixes.length) {
+    const isMatch = excludePackagePrefixes.some((prefix) =>
+      depName.startsWith(prefix)
+    );
     if (isMatch) {
       return false;
     }
@@ -248,8 +270,10 @@ export function applyPackageRules<T extends Config>(inputConfig: T): T {
       config = mergeChildConfig(config, packageRule);
       delete config.matchPackageNames;
       delete config.matchPackagePatterns;
+      delete config.matchPackagePrefixes;
       delete config.excludePackageNames;
       delete config.excludePackagePatterns;
+      delete config.excludePackagePrefixes;
       delete config.matchDepTypes;
       delete config.matchCurrentVersion;
     }

@@ -1546,7 +1546,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=master",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD",
   },
 ]
 `;
@@ -1573,7 +1573,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/file.json?ref=HEAD",
   },
 ]
 `;
