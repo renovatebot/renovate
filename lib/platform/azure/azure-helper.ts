@@ -12,6 +12,7 @@ import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
   getNewBranchName,
+  streamToString,
 } from './util';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
@@ -76,20 +77,6 @@ export async function getAzureBranchObj(
     name: getNewBranchName(branchName),
     oldObjectId: refs[0].objectId,
   };
-}
-
-async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
-  const chunks: string[] = [];
-  /* eslint-disable promise/avoid-new */
-  const p = await new Promise<string>((resolve) => {
-    stream.on('data', (chunk: any) => {
-      chunks.push(chunk.toString());
-    });
-    stream.on('end', () => {
-      resolve(chunks.join(''));
-    });
-  });
-  return p;
 }
 
 // if no branchName, look globally
