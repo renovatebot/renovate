@@ -19,8 +19,5 @@ export function getUpdateType(
   if (versioning.getMinor(newVersion) > versioning.getMinor(currentVersion)) {
     return 'minor';
   }
-  if (config.separateMinorPatch) {
-    return 'patch';
-  }
-  return 'minor';
+  return 'patch';
 }
