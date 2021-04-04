@@ -499,6 +499,9 @@ const staticGroups = {
         minor: {
           groupName: 'JS unit test packages',
         },
+        patch: {
+          groupName: 'JS unit test packages',
+        },
       },
     ],
   },
@@ -517,6 +520,9 @@ const staticGroups = {
       {
         extends: 'packages:unitTest',
         minor: {
+          groupName: 'unit test packages',
+        },
+        patch: {
           groupName: 'unit test packages',
         },
       },
@@ -539,6 +545,9 @@ const staticGroups = {
         minor: {
           groupName: 'JS test packages',
         },
+        patch: {
+          groupName: 'JS test packages',
+        },
       },
     ],
   },
@@ -557,6 +566,9 @@ const staticGroups = {
       {
         extends: 'packages:test',
         minor: {
+          groupName: 'test packages',
+        },
+        patch: {
           groupName: 'test packages',
         },
       },
