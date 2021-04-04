@@ -233,18 +233,6 @@ If left as default (null), a random short ID will be selected.
 
 ## logFileLevel
 
-## logLevel
-
-We recommend that you run the Renovate bot at the debug level if you can.
-Use the environment variable `LOG_LEVEL=debug` to run Renovate at the debug level.
-
-When you use `LOG_LEVEL=debug`, debug logging starts from the beginning of the app.
-If you had configured debug logging in a file config, then the debug logging starts _after_ the file config is parsed.
-
-Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
-
-Warning: Configuring `logLevel` config option or `--log-level` cli option is deprecated and will be removed in a major version.
-
 ## onboarding
 
 Set this to `false` only if all three statements are true:
