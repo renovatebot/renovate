@@ -208,13 +208,12 @@ const platform: Platform = {
     };
   },
 
-  async getJsonFile(fileName: string): Promise<any | null> {
+  async getJsonFile(
+    fileName: string,
+    repo: string = config.repository
+  ): Promise<any | null> {
     try {
-      const contents = await helper.getRepoContents(
-        config.repository,
-        fileName,
-        config.defaultBranch
-      );
+      const contents = await helper.getRepoContents(repo, fileName);
       return JSON.parse(contents.contentString);
     } catch (err) /* istanbul ignore next */ {
       return null;
