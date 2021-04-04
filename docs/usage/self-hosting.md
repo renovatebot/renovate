@@ -204,7 +204,7 @@ These are described in the [Self-hosted Configuration](./self-hosted-configurati
 If you are configuring using env variables, there are two possibilities:
 
 - Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
-- JSON stringify the whole config and pass in, e.g. `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
+- Set `RENOVATE_CONFIG` to a [stringified](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) version of the full JSON config, e.g. `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
 
 If you combine both of the above then any single config options in the environment variable will override what's in `RENOVATE_CONFIG`.
 
