@@ -129,12 +129,6 @@ export function resolvePackage(packageName: string): PackageResolution {
       { token: maskToken(authInfo.token), npmName: packageName },
       'Using auth (via npmrc) for npm lookup'
     );
-  } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
-    logger.trace(
-      { token: maskToken(process.env.NPM_TOKEN), npmName: packageName },
-      'Using auth (via process.env.NPM_TOKEN) for npm lookup'
-    );
-    headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
   }
   return { headers, packageUrl, registryUrl };
 }
