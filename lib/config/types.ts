@@ -74,7 +74,6 @@ export interface GlobalOnlyConfig {
   gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
-  logLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
   redisUrl?: string;

@@ -1,4 +1,4 @@
-import { addStream, levels, logger, setContext } from '../logger';
+import { addStream, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
 import { ensureDir, getSubDirectory, readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
@@ -78,15 +78,6 @@ export async function parseConfigs(
   if (!config.privateKey && config.privateKeyPath) {
     config.privateKey = await readFile(config.privateKeyPath);
     delete config.privateKeyPath;
-  }
-
-  // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
-  // istanbul ignore if
-  if (config.logLevel) {
-    logger.warn(
-      'Configuring logLevel in CLI or file is deprecated. Use LOG_LEVEL environment variable instead'
-    );
-    levels('stdout', config.logLevel);
   }
 
   if (config.logContext) {
