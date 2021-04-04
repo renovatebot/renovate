@@ -64,7 +64,7 @@ module.exports = {
 };
 ```
 
-**NOTE:** Do not use `NPM_TOKEN` as an environment variable, it's incompatible with `hostRules` and will be deprecated soon.
+**NOTE:** Do not use `NPM_TOKEN` as an environment variable.
 
 ### Commit .npmrc file into repository
 
