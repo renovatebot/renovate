@@ -208,13 +208,12 @@ const platform: Platform = {
     };
   },
 
-  async getJsonFile(fileName: string): Promise<any | null> {
+  async getJsonFile(
+    fileName: string,
+    repo: string = config.repository
+  ): Promise<any | null> {
     try {
-      const contents = await helper.getRepoContents(
-        config.repository,
-        fileName,
-        config.defaultBranch
-      );
+      const contents = await helper.getRepoContents(repo, fileName);
       return JSON.parse(contents.contentString);
     } catch (err) /* istanbul ignore next */ {
       return null;
@@ -314,7 +313,10 @@ const platform: Platform = {
   async getRepos(): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
     try {
-      const repos = await helper.searchRepos({ uid: botUserID });
+      const repos = await helper.searchRepos({
+        uid: botUserID,
+        archived: false,
+      });
       return repos.map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');

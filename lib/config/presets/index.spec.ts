@@ -56,7 +56,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -70,7 +70,37 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
+    });
+
+    it('throws if path + invalid syntax', async () => {
+      config.foo = 1;
+      config.extends = ['github>user/repo//'];
+      let e: Error;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.location).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
+    });
+
+    it('throws if path + sub-preset', async () => {
+      config.foo = 1;
+      config.extends = ['github>user/repo//path:subpreset'];
+      let e: Error;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -85,7 +115,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -100,7 +130,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -123,7 +153,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -146,14 +176,15 @@ describe('config/presets', () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackagePatterns).toHaveLength(2);
+      expect(res.matchPackagePrefixes).toHaveLength(2);
     });
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.matchPackageNames).toHaveLength(3);
-      expect(res.matchPackagePatterns).toHaveLength(5);
+      expect(res.matchPackagePatterns).toHaveLength(1);
+      expect(res.matchPackagePrefixes).toHaveLength(4);
     });
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
@@ -162,7 +193,8 @@ describe('config/presets', () => {
       const rule = res.packageRules[0];
       expect(rule.automerge).toBe(true);
       expect(rule.matchPackageNames).toHaveLength(3);
-      expect(rule.matchPackagePatterns).toHaveLength(5);
+      expect(rule.matchPackagePatterns).toHaveLength(1);
+      expect(rule.matchPackagePrefixes).toHaveLength(4);
     });
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
@@ -263,6 +295,16 @@ describe('config/presets', () => {
         )
       ).toMatchSnapshot();
     });
+    it('parses github subdirectories', () => {
+      expect(
+        presets.parsePreset('github>some/repo//somepath/somesubpath/somefile')
+      ).toMatchSnapshot();
+    });
+    it('parses github toplevel file using subdirectory syntax', () => {
+      expect(
+        presets.parsePreset('github>some/repo//somefile')
+      ).toMatchSnapshot();
+    });
     it('parses gitlab', () => {
       expect(presets.parsePreset('gitlab>some/repo')).toMatchSnapshot();
     });
@@ -271,6 +313,11 @@ describe('config/presets', () => {
     });
     it('parses local', () => {
       expect(presets.parsePreset('local>some/repo')).toMatchSnapshot();
+    });
+    it('parses local with subdirectory', () => {
+      expect(
+        presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
+      ).toMatchSnapshot();
     });
     it('parses no prefix as local', () => {
       expect(presets.parsePreset('some/repo')).toMatchSnapshot();
@@ -369,7 +416,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -381,7 +428,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -393,7 +440,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -405,7 +452,7 @@ describe('config/presets', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.configFile).toMatchSnapshot();
+      expect(e.location).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });

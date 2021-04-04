@@ -1,19 +1,21 @@
 ---
-title: Self-Hosted Configuration
-description: Self-Hosted Configuration usable in renovate.json or package.json
+title: Self-Hosted configuration
+description: Self-Hosted configuration usable in config file, CLI or environment variables
 ---
 
-# Self-Hosted Configuration Options
+# Self-Hosted configuration options
 
-The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
+The configuration options listed in this document are applicable to self-hosted instances of Renovate ("the bot").
+
+Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 ## allowPostUpgradeCommandTemplating
 
-If true allow templating for post-upgrade commands.
+Set to true to allow templating of post-upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
-Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`
+Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`:
 
 ```javascript
 module.exports = {
@@ -24,7 +26,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option)
+The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option).
 
 ```json
 {
@@ -43,7 +45,7 @@ The command to install dependencies is necessary because, by default, the instal
 }
 ```
 
-With this configuration, the executable command for `@angular/core` will look like this
+With this configuration, the executable command for `@angular/core` looks like this:
 
 ```bash
 npm ci --ignore-scripts
@@ -67,32 +69,64 @@ e.g.
 
 ## autodiscover
 
-Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to.
-To filter this list, use `autodiscoverFilter`.
+When you enable `autodiscover`, by default, Renovate will run on _every_ repository that the bot account can access.
+If you want Renovate to run on only a subset of those, use the `autodiscoverFilter` option to limit the bot to only the wanted repositories.
 
 ## autodiscoverFilter
 
-A [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern for filtering `autodiscover`ed repositories. Ex: `project/*`
+You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
+It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern.
+
+e.g.
+
+```json
+{
+  "autodiscoverFilter": "project/*"
+}
+```
 
 ## baseDir
 
-Configure this directory if you want to change which directory Renovate uses for storing data.
-If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/`.
+By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
+You can override this default with the `baseDir` option.
+
+e.g.
+
+```json
+{
+  "baseDir": "/my-own-different-temporary-folder"
+}
+```
 
 ## binarySource
 
-Set this to `global` if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
-Set this to `docker` instead to use Docker-based binaries.
+Renovate often needs to use third party binaries in its PRs, e.g. `npm` to update `package-lock.json` or `go` to update `go.sum`.
+By default, Renovate will use a child process to run such tools, so they need to be pre-installed before running Renovate and available in the path.
+
+As an alternative, Renovate can use "sidecar" containers for third party tools.
+If configured, Renovate will use `docker run` to create containers such as Node.js or Python to run tools within as-needed.
+For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
 
 ## cacheDir
 
-Configure this directory if you want to change which directory Renovate uses for storing cache data.
-If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/cache/`.
-If you configure this to be different to the `baseDir`, it means you can have one location for repo data and another for cache data.
+By default Renovate uses a temporary directory like `/tmp/renovate/cache` to store cache data.
+Use the `cacheDir` option to override this default.
+
+The `baseDir` and `cacheDir` option do not need to point to the same directory.
+You can use one directory for the repo data, and another for the the cache data.
+
+e.g.
+
+```json
+{
+  "baseDir": "/my-own-different-temporary-folder",
+  "cacheDir": "/my-own-different-cache-folder"
+}
+```
 
 ## composerIgnorePlatformReqs
 
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
+Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.s
 
 ## customEnvVariables
 
@@ -100,21 +134,45 @@ This configuration will be applied after all other environment variables so that
 
 ## dockerImagePrefix
 
-Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.
+By default Renovate pulls the sidecar Docker containers from `docker.io/renovate`.
+You can use the `dockerImagePrefix` option to override this default.
 
-If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
+Say you want to pull your images from `ghcr.io/renovatebot` instead of `docker.io/renovate`.
+You would use put this in your configuration file:
+
+```json
+{
+  "dockerImagePrefix": "ghcr.io/renovatebot"
+}
+```
+
+If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
 
 ## dockerMapDotfiles
 
 This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files.
 Currently applicable to `.npmrc` only.
 
+```json
+{
+  "dockerMapDotfiles": true
+}
+```
+
 ## dockerUser
 
 Override default user and group used by Docker-based binaries.
-UID and GID should match the user that executes renovate.
-See [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
+The user-id (UID) and group-id (GID) should match the user that executes Renovate.
+
+Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
+e.g.
+
+```json
+{
+  "dockerUser": "1001:1002"
+}
+```
 
 ## dryRun
 
@@ -123,7 +181,7 @@ Set this to `1001:1002` to use UID 1001 and GID 1002.
 ## force
 
 This object is used as a "force override" when you need to make sure certain configuration overrides whatever is configured in the repository.
-For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that's currently in active.
+For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that's currently inactive.
 
 In practice, it is implemented by converting the `force` configuration into a `packageRule` that matches all packages.
 
@@ -138,11 +196,10 @@ You probably have no need for this option - it is an experimental setting for th
 
 ## gitAuthor
 
-RFC5322-compliant string if you wish to customise the Git author for commits.
-If you need to transition from one Git author to another, put the old gitAuthor into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment.
-Renovate will then check against it as well as the current Git author value before deciding if a branch has been modified.
+You can customize the Git author that's used whenever Renovate creates a commit.
+The `gitAuthor` option accepts a RFC5322-compliant string.
 
-**Note** It is strongly recommended that the Git author email you provide should be unique to Renovate.
+**Note** We strongly recommend that the Git author email you use is unique to Renovate.
 Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
 ## gitPrivateKey
@@ -153,10 +210,11 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
-- First, run `gpg import` if it hasn't been run before
-- Then, run `git config user.signingkey` and `git config commit.gpgsign true`
+1. Run `gpg import` (if it hasn't been run before)
+1. Run `git config user.signingkey` and `git config commit.gpgsign true`
 
-The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global Git configs on shared systems.
+The `git` commands are run locally in the cloned repo instead of globally.
+This reduces the chance of unintended consequences with global Git configs on shared systems.
 
 ## logContext
 
@@ -169,8 +227,11 @@ If left as default (null), a random short ID will be selected.
 
 ## logLevel
 
-It's recommended to run at debug level if you can, and configure it using the environment variable `LOG_LEVEL=debug`.
-By configuring using the environment it means that debug logging starts from the beginning of the app, while if you configure it using file config then the debug logging can only start after the file config is parsed.
+We recommend that you run the Renovate bot at the debug level if you can.
+Use the environment variable `LOG_LEVEL=debug` to run Renovate at the debug level.
+
+When you use `LOG_LEVEL=debug`, debug logging starts from the beginning of the app.
+If you had configured debug logging in a file config, then the debug logging starts _after_ the file config is parsed.
 
 Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
 
@@ -178,7 +239,11 @@ Warning: Configuring `logLevel` config option or `--log-level` cli option is dep
 
 ## onboarding
 
-Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
+Set this to `false` only if all three statements are true:
+
+- You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
+- You want to run Renovate on every repository the bot has access to
+- You want to skip all onboarding PRs
 
 ## onboardingBranch
 
@@ -207,7 +272,7 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 ## persistRepoData
 
-Set this to true if you wish for Renovate to persist repo data between runs.
+Set this to true if you want Renovate to persist repo data between runs.
 The intention is that this allows Renovate to do a faster `git fetch` between runs rather than `git clone`.
 It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
@@ -232,7 +297,7 @@ This private key is used to decrypt config files.
 The corresponding public key can be used to create encrypted values for config files.
 If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://renovatebot.com/encrypt>.
 
-To create the key pair with openssl use the following commands:
+To create the key pair with OpenSSL use the following commands:
 
 - `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
 - `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
@@ -262,6 +327,49 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
+
+## secrets
+
+Secrets may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
+
+```js
+module.exports = {
+  secrets: {
+    GOOGLE_TOKEN: 'abc123',
+  },
+};
+```
+
+They can also be configured per repository, e.g.
+
+```js
+module.exports = {
+  repositories: [
+    {
+      repository: 'abc/def',
+      secrets: {
+        GOOGLE_TOKEN: 'abc123',
+      },
+    },
+  ],
+};
+```
+
+It could then be used in a repository config or preset like so:
+
+```json
+{
+  "hostRules": [
+    {
+      "domainName": "google.com",
+      "token": "{{ secrets.GOOGLE_TOKEN }}"
+    }
+  ]
+}
+```
+
+Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
 
 ## skipInstalls
 

@@ -34,3 +34,5 @@ For fine-grained control, e.g. to turn off only parts of this manager, there are
 | docker container            | docker_container  |
 | docker image                |   docker_image    |
 | docker service              |  docker_service   |
+
+If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.

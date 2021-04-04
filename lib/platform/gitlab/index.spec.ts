@@ -488,6 +488,39 @@ describe('platform/gitlab', () => {
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns success if job is skipped', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [{ status: 'success' }, { status: 'skipped' }]);
+      const res = await gitlab.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.green);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns yellow if there are no jobs expect skipped', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [{ status: 'skipped' }]);
+      const res = await gitlab.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.yellow);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns failure if any mandatory jobs fails and one job is skipped', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [{ status: 'skipped' }, { status: 'failed' }]);
+      const res = await gitlab.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.red);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns failure if any mandatory jobs fails', async () => {
       const scope = await initRepo();
       scope
@@ -1405,7 +1438,7 @@ These updates have all been created already. Click a checkbox below to force a r
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=master'
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
         )
         .reply(200, {
           content: Buffer.from(JSON.stringify(data)).toString('base64'),
@@ -1417,9 +1450,7 @@ These updates have all been created already. Click a checkbox below to force a r
     it('returns null on errors', async () => {
       const scope = await initRepo();
       scope
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master'
-        )
+        .get('/api/v4/projects/some%2Frepo/repository/files/file.json?ref=HEAD')
         .replyWithError('some error');
       const res = await gitlab.getJsonFile('file.json');
       expect(res).toBeNull();

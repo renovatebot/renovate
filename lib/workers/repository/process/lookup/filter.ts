@@ -96,7 +96,7 @@ export function filterVersions(
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
-      error.configFile = 'config';
+      error.location = 'config';
       error.validationError = 'Invalid `allowedVersions`';
       error.validationMessage =
         'The following allowedVersions does not parse as a valid version or range: ' +

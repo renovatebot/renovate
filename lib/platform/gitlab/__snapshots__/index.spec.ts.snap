@@ -1238,6 +1238,33 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns failure if any mandatory jobs fails and one job is skipped 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
 exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns pending if no results 1`] = `
 Array [
   Object {
@@ -1319,7 +1346,61 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns success if job is skipped 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
 exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns success if optional jobs fail 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
+exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns yellow if there are no jobs expect skipped 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1465,7 +1546,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=master",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD",
   },
 ]
 `;
@@ -1492,7 +1573,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/file.json?ref=HEAD",
   },
 ]
 `;
@@ -1712,19 +1793,6 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
-`;
-
-exports[`platform/gitlab massageMarkdown(input) returns updated pr body 1`] = `
-"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
-
-  Merge Requests are the best, here are some MRs.
-
-  ## Open
-
-These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
-
- - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
-"
 `;
 
 exports[`platform/gitlab getRepoForceRebase should return false 1`] = `
@@ -2024,6 +2092,19 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
 ]
+`;
+
+exports[`platform/gitlab massageMarkdown(input) returns updated pr body 1`] = `
+"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
+
+  Merge Requests are the best, here are some MRs.
+
+  ## Open
+
+These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+
+ - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
+"
 `;
 
 exports[`platform/gitlab mergePr(pr) merges the PR 1`] = `

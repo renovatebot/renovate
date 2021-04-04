@@ -116,7 +116,7 @@ async function getDockerTag(
 }
 
 function getContainerName(image: string): string {
-  return image.replace(/\//g, '_');
+  return `renovate_${image}`.replace(/\//g, '_');
 }
 
 export async function removeDockerContainer(image: string): Promise<void> {
@@ -210,12 +210,7 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  if (dockerImagePrefix) {
-    image = image.replace(
-      /^renovate\//,
-      ensureTrailingSlash(dockerImagePrefix)
-    );
-  }
+  image = `${ensureTrailingSlash(dockerImagePrefix ?? 'renovate')}${image}`;
 
   let tag: string;
   if (options.tag) {

@@ -142,6 +142,22 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('should query custom paths', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/path%2Fcustom.json`)
+        .reply(200, {
+          content: Buffer.from('{"foo":"bar"}').toString('base64'),
+        });
+      const content = await gitea.getPreset({
+        packageName: 'some/repo',
+        presetName: 'custom',
+        presetPath: 'path',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('should throws not-found', async () => {
       httpMock
         .scope(giteaApiHost)
@@ -168,7 +184,7 @@ describe(getName(__filename), () => {
           content: Buffer.from('{"from":"api"}').toString('base64'),
         });
       expect(
-        await gitea.getPresetFromEndpoint('some/repo', 'default')
+        await gitea.getPresetFromEndpoint('some/repo', 'default', undefined)
       ).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -185,6 +201,7 @@ describe(getName(__filename), () => {
           .getPresetFromEndpoint(
             'some/repo',
             'default',
+            undefined,
             'https://api.gitea.example.org'
           )
           .catch(() => ({ from: 'api' }))

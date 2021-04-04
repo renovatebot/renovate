@@ -133,7 +133,7 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv,
       docker: {
-        image: 'renovate/python',
+        image: 'python',
         tagConstraint,
         tagScheme: 'poetry',
         preCommands: [poetryInstall],

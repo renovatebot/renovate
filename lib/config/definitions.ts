@@ -107,6 +107,17 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'secrets',
+    description: 'Object containing secret name/value pairs',
+    type: 'object',
+    admin: true,
+    mergeable: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'extends',
     description:
       'Configuration presets to use/extend. Note: does not work if configured in config.js.',
@@ -590,6 +601,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
   },
   {
+    name: 'gitIgnoredAuthors',
+    description:
+      'Additional git authors which are ignored by Renovate. Must conform to RFC5322.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+  },
+  {
     name: 'enabledManagers',
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
@@ -782,6 +801,32 @@ const options: RenovateOptions[] = [
     name: 'excludePackageNames',
     description:
       'Package names to exclude. Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchPackagePrefixes',
+    description:
+      'Package name prefixes to match. Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludePackagePrefixes',
+    description:
+      'Package name prefixes to exclude. Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1479,6 +1524,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodUpdateImportPaths',
       'gomodTidy',
       'npmDedupe',
       'yarnDedupeFewer',

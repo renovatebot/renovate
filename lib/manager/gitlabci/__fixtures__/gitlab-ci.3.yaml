@@ -10,4 +10,11 @@ services:
 
 include:
   - local: 'lib/manager/gitlabci/__fixtures__/include.yml'
+  - local: 'lib/manager/gitlabci/__fixtures__/include.yml' # Loop detection
   - local: 'lib/manager/gitlabci/__fixtures__/include.1.yml'
+  - project: 'my-group/my-project'
+    ref: master
+    file: '/templates/.gitlab-ci-template.yml'
+
+script:
+  - !reference [.setup, script]
