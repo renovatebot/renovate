@@ -1,4 +1,5 @@
 import type { PackageDependency } from '../types';
+import { analyzeTerraformProvider } from './providers';
 import {
   ExtractionResult,
   TerraformDependencyTypes,
@@ -71,4 +72,11 @@ export function extractTerraformRequiredProviders(
     }
   } while (line.trim() !== '}');
   return { lineNumber, dependencies: deps };
+}
+
+export function analyzeTerraformRequiredProvider(dep: PackageDependency): void {
+  /* eslint-disable no-param-reassign */
+  analyzeTerraformProvider(dep);
+  dep.depType = `required_provider`;
+  /* eslint-enable no-param-reassign */
 }
