@@ -48,6 +48,7 @@ export function extractTerraformRequiredVersion(
 
 export function analyseTerraformVersion(dep: PackageDependency): void {
   /* eslint-disable no-param-reassign */
+  dep.depType = 'required_version';
   dep.datasource = datasourceGithubTags.id;
   dep.depName = 'hashicorp/terraform';
   dep.extractVersion = 'v(?<version>.*)$';

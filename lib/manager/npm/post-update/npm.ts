@@ -71,10 +71,9 @@ export async function generateLockFile(
       },
     };
     // istanbul ignore if
-    if (getAdminConfig().trustLevel === 'high') {
+    if (getAdminConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
-      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
     }
     if (config.dockerMapDotfiles) {
       const homeDir =
