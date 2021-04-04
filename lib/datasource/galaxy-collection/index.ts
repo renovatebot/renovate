@@ -4,7 +4,7 @@ import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
-export const id = 'galaxy-collections';
+export const id = 'galaxy-collection';
 export const defaultRegistryUrls = ['https://galaxy.ansible.com/'];
 export const customRegistrySupport = false;
 
@@ -131,9 +131,11 @@ export async function getReleases({
       })
     );
 
+    // filter failed versions
+    const filteredReleases = enrichedReleases.filter((value) => value != null);
     // extract base information which are only provided on the release from the newest release
     const result: ReleaseResult = {
-      releases: enrichedReleases,
+      releases: filteredReleases,
       sourceUrl: newestVersionDetails?.metadata.repository,
       homepage: newestVersionDetails?.metadata.homepage,
       tags: newestVersionDetails?.metadata.tags,

@@ -44,6 +44,65 @@ describe('datasource/galaxy-collection', () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('returns null for remote host error', async () => {
+      httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(500);
+      let e;
+      try {
+        await getPkgReleases({ datasource, depName: 'foo.bar' });
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null for unexpected data at base', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v2/collections/community/kubernetes/')
+        .reply(200, '');
+      expect(
+        await getPkgReleases({ datasource, depName: 'community.kubernetes' })
+      ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null for unexpected data at versions', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v2/collections/community/kubernetes/')
+        .reply(200, communityKubernetesBase)
+        .get('/api/v2/collections/community/kubernetes/versions/')
+        .reply(200, '');
+      expect(
+        await getPkgReleases({ datasource, depName: 'community.kubernetes' })
+      ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns only valid versions if a version detail fails', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v2/collections/community/kubernetes/')
+        .reply(200, communityKubernetesBase)
+        .get('/api/v2/collections/community/kubernetes/versions/')
+        .reply(200, communityKubernetesVersions)
+        .get('/api/v2/collections/community/kubernetes/versions/1.2.1/')
+        .reply(200, '')
+        .get('/api/v2/collections/community/kubernetes/versions/1.2.0/')
+        .reply(200, communityKubernetesDetails120)
+        .get('/api/v2/collections/community/kubernetes/versions/0.11.1/')
+        .reply(200, communityKubernetesDetails0111);
+
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'community.kubernetes',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(res.releases).toHaveLength(2);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns null for empty lookup', async () => {
       expect(await getPkgReleases({ datasource, depName: '' })).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -58,7 +117,7 @@ describe('datasource/galaxy-collection', () => {
         .get('/api/v2/collections/foo/bar/')
         .replyWithError('some unknown error');
       expect(
-        await getPkgReleases({ datasource, depName: 'some_crate' })
+        await getPkgReleases({ datasource, depName: 'foo.bar' })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -82,6 +141,7 @@ describe('datasource/galaxy-collection', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+      expect(res.releases).toHaveLength(3);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

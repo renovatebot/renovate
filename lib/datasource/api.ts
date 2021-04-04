@@ -42,7 +42,7 @@ api.set('crate', crate);
 api.set('dart', dart);
 api.set('docker', docker);
 api.set('galaxy', galaxy);
-api.set('galaxy-collections', galaxyCollection);
+api.set('galaxy-collection', galaxyCollection);
 api.set('git-refs', gitRefs);
 api.set('git-tags', gitTags);
 api.set('github-releases', githubReleases);
