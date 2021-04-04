@@ -21,8 +21,7 @@ Most users will be happy with the default `branchPrefix` of `renovate/`, but you
 Say you don't want the forward slashes, in that case you would use `renovate-` as your `branchPrefix`.
 The onboarding PR will always use `renovate/configure`.
 
-`additionalBranchPrefix` is optional and by default is empty for all JavaScript dependencies.
-We use `docker-` for all Docker updates, branches will look like this: `renovate/docker-ubuntu-16.x`.
+`additionalBranchPrefix` is optional and by default is empty.
 
 `branchTopic` depends on the package manager and upgrade type, so you will see a lot of variety.
 This is probably a setting you want to change yourself.

@@ -93,6 +93,7 @@ export function parsePreset(input: string): ParsedPreset {
     str = str.slice(0, str.indexOf('('));
   }
   const presetsPackages = [
+    'compatibility',
     'config',
     'default',
     'docker',
