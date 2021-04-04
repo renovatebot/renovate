@@ -6,6 +6,15 @@ import { logger } from '../logger';
 import { getOptions } from './definitions';
 import type { GlobalConfig, RenovateOptions } from './types';
 
+// istanbul ignore if
+if (process.env.ENV_PREFIX) {
+  for (const [key, val] of Object.entries(process.env)) {
+    if (key.startsWith(process.env.ENV_PREFIX)) {
+      process.env[key.replace(process.env.ENV_PREFIX, 'RENOVATE_')] = val;
+    }
+  }
+}
+
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
     return '';
