@@ -1,4 +1,4 @@
-import { addStream, levels, logger, setContext } from '../logger';
+import { addStream, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
 import { ensureDir, getSubDirectory, readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
