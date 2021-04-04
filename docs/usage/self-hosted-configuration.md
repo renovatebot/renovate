@@ -184,10 +184,11 @@ e.g.
 
 ## exposeAllEnv
 
-By default, Renovate will only pass a limited set of environment variables to package managers.
-Potentially, there could be leaks of confidential data if a script you don't trust enumerates all values in env, so set this to true only if you trust the repositories which the bot runs against.
+By default, Renovate only passes a limited set of environment variables to package managers.
+Confidential data can be leaked if a malicious script enumerates all environment variables.
+Set `exposeAllEnv` to `true` only if you have reviewed (and trust) the repositories which Renovate bot runs against.
 
-Setting this to true will also allow for variable substitution in `.npmrc` files.
+Setting this to `true` will also allow for variable substitution in `.npmrc` files.
 
 ## force
 
