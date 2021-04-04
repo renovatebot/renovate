@@ -4,20 +4,81 @@ exports[`lib/manager/ansible-galaxy/extract extractPackageFile() check collectio
 Array [
   Object {
     "currentValue": "0.9.3",
-    "datasource": "galaxy-collections",
+    "datasource": "galaxy-collection",
     "depName": "geerlingguy.php_roles",
     "depType": "collection",
-    "lookupName": "https://galaxy.ansible.com",
     "registryUrls": Array [
       "https://galaxy.ansible.com",
     ],
   },
   Object {
     "currentValue": "1.2.2",
-    "datasource": "galaxy-collections",
+    "datasource": "galaxy-collection",
     "depName": "davidban77.gns3",
     "depType": "collection",
-    "lookupName": "davidban77.gns3",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "1.2.2",
+    "datasource": "github-tags",
+    "depName": "github.com/organization/repo_name",
+    "depType": "collection",
+    "lookupName": "https://github.com/organization/repo_name.git",
+  },
+  Object {
+    "currentValue": "1.2.2",
+    "datasource": "git-tags",
+    "depName": "example.com/organization/repo_name",
+    "depType": "collection",
+    "lookupName": "https://example.com/organization/repo_name.git",
+  },
+  Object {
+    "currentValue": "1.2.2",
+    "datasource": "git-tags",
+    "depName": "example.com/organization/repo_name",
+    "depType": "collection",
+    "lookupName": "https://example.com/organization/repo_name.git",
+  },
+  Object {
+    "datasource": "galaxy-collection",
+    "depName": "f5networks.f5_modules",
+    "depType": "collection",
+    "registryUrls": Array [
+      "https://cloud.redhat.com/api/automation-hub/",
+    ],
+    "skipReason": "no-version",
+  },
+  Object {
+    "currentValue": null,
+    "datasource": "git-tags",
+    "depName": "foo.bar/organization/repo_name",
+    "depType": "collection",
+    "lookupName": "https://foo.bar/organization/repo_name.git",
+    "skipReason": "no-version",
+  },
+  Object {
+    "currentValue": "1.0.0",
+    "depName": "fooBar",
+    "depType": "collection",
+    "skipReason": "no-source-match",
+  },
+  Object {
+    "depName": "foo.Bar",
+    "depType": "collection",
+    "skipReason": "unsupported",
+  },
+  Object {
+    "depName": "foo.Bar",
+    "depType": "collection",
+    "skipReason": "local-dependency",
+  },
+  Object {
+    "currentValue": "1.2.2",
+    "datasource": "git-tags",
+    "depName": "example.com/organization/repo_name",
+    "depType": "collection",
+    "lookupName": "https://example.com/organization/repo_name.git",
+    "skipReason": "unsupported",
   },
   Object {
     "currentValue": "1.9.6",
@@ -40,20 +101,18 @@ exports[`lib/manager/ansible-galaxy/extract extractPackageFile() check collectio
 Array [
   Object {
     "currentValue": "0.9.3",
-    "datasource": "galaxy-collections",
+    "datasource": "galaxy-collection",
     "depName": "geerlingguy.php_roles",
     "depType": "collection",
-    "lookupName": "https://galaxy.ansible.com",
     "registryUrls": Array [
       "https://galaxy.ansible.com",
     ],
   },
   Object {
     "currentValue": "1.2.2",
-    "datasource": "galaxy-collections",
+    "datasource": "galaxy-collection",
     "depName": "davidban77.gns3",
     "depType": "collection",
-    "lookupName": "davidban77.gns3",
   },
   Object {
     "currentValue": "1.9.6",
@@ -76,13 +135,13 @@ exports[`lib/manager/ansible-galaxy/extract extractPackageFile() check galaxy de
 Array [
   Object {
     "currentValue": "1.4.0",
-    "datasource": "galaxy-collections",
+    "datasource": "galaxy-collection",
     "depName": "ansible.windows",
     "depType": "collection",
   },
   Object {
     "currentValue": ">=1.0.0,<2.0.0",
-    "datasource": "galaxy-collections",
+    "datasource": "galaxy-collection",
     "depName": "community.windows",
     "depType": "collection",
   },

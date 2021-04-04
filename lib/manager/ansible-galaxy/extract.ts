@@ -26,7 +26,7 @@ export default function extractPackageFile(
   fileName: string
 ): PackageFile | null {
   logger.trace('ansible-galaxy.extractPackageFile()');
-  const galaxyFileNameRegEx = new RegExp(/galaxy\.ya?ml$/);
+  const galaxyFileNameRegEx = /galaxy\.ya?ml$/;
   const deps: PackageDependency[] = [];
   const lines = content.split('\n');
 
