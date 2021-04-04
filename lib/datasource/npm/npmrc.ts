@@ -8,7 +8,6 @@ import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
 
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
