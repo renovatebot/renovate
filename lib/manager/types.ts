@@ -280,7 +280,7 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   cacheDir?: string;
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
-  artifactUpdateApproach?: string;
+  artifactUpdateApproach?: 'auto' | 'deep' | 'shallow';
   platform?: string;
   upgrades?: Upgrade[];
   npmLock?: string;
