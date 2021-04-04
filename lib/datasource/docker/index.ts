@@ -26,7 +26,6 @@ export const defaultVersioning = dockerVersioning.id;
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
-  additionalBranchPrefix: 'docker-',
   commitMessageTopic: '{{{depName}}} Docker tag',
   major: { enabled: false },
   commitMessageExtra:
