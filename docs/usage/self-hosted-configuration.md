@@ -152,17 +152,6 @@ You would use put this in your configuration file:
 
 If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
 
-## dockerMapDotfiles
-
-This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files.
-Currently applicable to `.npmrc` only.
-
-```json
-{
-  "dockerMapDotfiles": true
-}
-```
-
 ## dockerUser
 
 Override default user and group used by Docker-based binaries.
