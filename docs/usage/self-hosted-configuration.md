@@ -9,6 +9,8 @@ The configuration options listed in this document are applicable to self-hosted 
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
+## allowCustomCrateRegistries
+
 ## allowPostUpgradeCommandTemplating
 
 Set to true to allow templating of post-upgrade commands.
@@ -51,6 +53,8 @@ With this configuration, the executable command for `@angular/core` looks like t
 npm ci --ignore-scripts
 npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty --force
 ```
+
+## allowScripts
 
 ## allowedPostUpgradeCommands
 
@@ -177,6 +181,13 @@ e.g.
 ## dryRun
 
 ## endpoint
+
+## exposeAllEnv
+
+By default, Renovate will only pass a limited set of environment variables to package managers.
+Potentially, there could be leaks of confidential data if a script you don't trust enumerates all values in env, so set this to true only if you trust the repositories which the bot runs against.
+
+Setting this to true will also allow for variable substitution in `.npmrc` files.
 
 ## force
 
@@ -378,14 +389,5 @@ If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
-
-## trustLevel
-
-Setting trustLevel to `"high"` can make sense in many self-hosted cases where the bot operator trusts the content in each repository.
-
-Setting trustLevel=high means:
-
-- Child processes are run with full access to `env`
-- `.npmrc` files can have environment variable substitution performed
 
 ## username

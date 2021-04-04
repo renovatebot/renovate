@@ -39,7 +39,7 @@ describe(getName(__filename), () => {
   });
 
   it('sanitize _authtoken with high trust', () => {
-    setAdminConfig({ trustLevel: 'high' });
+    setAdminConfig({ exposeAllEnv: true });
     process.env.TEST_TOKEN = 'test';
     setNpmrc(
       // eslint-disable-next-line no-template-curly-in-string
