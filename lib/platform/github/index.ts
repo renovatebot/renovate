@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import { DateTime } from 'luxon';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -759,7 +760,7 @@ export async function getPrList(): Promise<Pr[]> {
                 ? /* istanbul ignore next */ PrState.Merged
                 : pr.state,
             createdAt: pr.created_at,
-            closed_at: pr.closed_at,
+            closedAt: pr.closed_at,
             sourceRepo: pr.head?.repo?.full_name,
           } as never)
       );
@@ -788,6 +789,8 @@ export async function findPr({
   return pr;
 }
 
+const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
+
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   // istanbul ignore if
@@ -807,7 +810,17 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     branchName,
     state: PrState.Closed,
   });
-  if (autoclosedPr?.title?.endsWith(' - autoclosed')) {
+  if (
+    autoclosedPr?.title?.endsWith(' - autoclosed') &&
+    autoclosedPr?.closedAt
+  ) {
+    const closedMillisAgo = DateTime.fromISO(autoclosedPr.closedAt)
+      .diffNow()
+      .negate()
+      .toMillis();
+    if (closedMillisAgo > REOPEN_THRESHOLD_MILLIS) {
+      return null;
+    }
     logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
     const { sha, number } = autoclosedPr;
     try {
