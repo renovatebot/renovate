@@ -1671,7 +1671,9 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       }
     }
   }`;
-  let alerts: VulnerabilityAlert[] = [];
+  let vulnerabilityAlerts: {
+    node: VulnerabilityAlert;
+  }[];
   try {
     vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
