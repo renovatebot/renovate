@@ -116,6 +116,15 @@ describe('config/env', () => {
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
+    it('merges full config from env', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG: '{"enabled":false,"token":"foo"}',
+        RENOVATE_TOKEN: 'a',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.enabled).toBe(false);
+      expect(config.token).toBe('a');
+    });
   });
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {

@@ -199,9 +199,6 @@ You probably have no need for this option - it is an experimental setting for th
 You can customize the Git author that's used whenever Renovate creates a commit.
 The `gitAuthor` option accepts a RFC5322-compliant string.
 
-If you are migrating from a old Git author to a new Git author, put the old `gitAuthor` into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment (TODO: Explain where/what is this "environment"???).
-Renovate will then check for the old and current Git author before it decides if a branch has been modified.
-
 **Note** We strongly recommend that the Git author email you use is unique to Renovate.
 Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
@@ -242,15 +239,11 @@ Warning: Configuring `logLevel` config option or `--log-level` cli option is dep
 
 ## onboarding
 
-Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
-
 Set this to `false` only if all three statements are true:
 
 - You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
-
-TODO: check if the list should replace the (a,b,c) statements.
 
 ## onboardingBranch
 
@@ -332,8 +325,6 @@ Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
 Warning: this is an experimental feature and may be modified or removed in a future non-major release.
-
-TODO: Check if this feature is still present in Renovate code.
 
 ## requireConfig
 

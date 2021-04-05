@@ -80,7 +80,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { ...defaultConfig, npmrc: 'some-npmrc' }
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -94,7 +94,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { ...defaultConfig, ignoreNpmrcFile: true }
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -125,7 +125,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toEqual('');
+      expect(res.npmrc).toBeUndefined();
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
