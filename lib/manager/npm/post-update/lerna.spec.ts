@@ -99,7 +99,7 @@ describe(getName(__filename), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        {},
+        { constraints: { npm: '^6.0.0' } },
         {}
       );
       expect(res.error).toBe(false);
