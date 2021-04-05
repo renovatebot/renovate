@@ -210,3 +210,12 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) validates valid alias objects 1`] = `Array []`;
+
+exports[`config/validation validateConfig(config) warns if hostType has the wrong parent 1`] = `
+Array [
+  Object {
+    "message": "hostType should only be configured within a \\"hostRules\\" object. Was found in .",
+    "topic": "hostType",
+  },
+]
+`;
