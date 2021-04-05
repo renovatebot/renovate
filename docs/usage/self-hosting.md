@@ -208,6 +208,8 @@ If you are configuring using environment variables, there are two possibilities:
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
+Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+
 ## Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.

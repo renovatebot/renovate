@@ -141,17 +141,28 @@ async function getBranchProtection(
   return res.body;
 }
 
-export async function getJsonFile(
+export async function getRawFile(
   fileName: string,
   repo: string = config.repository
-): Promise<any | null> {
+): Promise<string | null> {
   try {
     const url = `repos/${repo}/contents/${fileName}`;
     const res = await githubApi.getJson<{ content: string }>(url);
     const buf = res.body.content;
     const str = Buffer.from(buf, 'base64').toString();
-    const result = JSON.parse(str);
-    return result;
+    return str;
+  } catch (err) {
+    return null;
+  }
+}
+
+export async function getJsonFile(
+  fileName: string,
+  repo: string = config.repository
+): Promise<any | null> {
+  try {
+    const raw = await getRawFile(fileName, repo);
+    return raw && JSON.parse(raw);
   } catch (err) {
     return null;
   }
@@ -1671,14 +1682,28 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       }
     }
   }`;
-  let alerts: VulnerabilityAlert[] = [];
+  let vulnerabilityAlerts: {
+    node: VulnerabilityAlert;
+  }[];
   try {
-    const vulnerabilityAlerts = await githubApi.queryRepoField<{
+    vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
     }>(query, 'vulnerabilityAlerts', {
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
     });
+  } catch (err) {
+    logger.debug({ err }, 'Error retrieving vulnerability alerts');
+    logger.warn(
+      {
+        url:
+          'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+      },
+      'Cannot access vulnerability alerts. Please ensure permissions have been granted.'
+    );
+  }
+  let alerts: VulnerabilityAlert[] = [];
+  try {
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
       const shortAlerts: AggregatedVulnerabilities = {};
@@ -1701,10 +1726,10 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
       }
     } else {
-      logger.debug('Cannot read vulnerability alerts');
+      logger.debug('No vulnerability alerts found');
     }
-  } catch (err) {
-    logger.debug({ err }, 'Error retrieving vulnerability alerts');
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Error processing vulnerabity alerts');
   }
   return alerts;
 }
