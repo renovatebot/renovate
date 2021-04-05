@@ -60,14 +60,12 @@ npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dir
 
 A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed.
 If this list is empty then no tasks will be executed.
-Also you need to have `"trustLevel": "high"`, otherwise these tasks will be ignored.
 
 e.g.
 
 ```json
 {
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"],
-  "trustLevel": "high"
+  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
 ```
 
