@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/pr/body/controls getControls when the branch is  modified has the correct contents 1`] = `
+"
+
+---
+
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box. ⚠️ **Warning**: custom changes will be lost.
+
+"
+`;
+
+exports[`workers/pr/body/controls getControls when the branch is  not modified has the correct contents 1`] = `
+"
+
+---
+
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box.
+
+"
+`;
