@@ -54,6 +54,10 @@ export async function updateLockedDependency(
       logger.warn({ err }, 'Failed to parse files');
       return null;
     }
+    if (packageLockJson.lockfileVersion === 2) {
+      logger.debug('Only lockfileVersion 1 is supported');
+      return null;
+    }
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
