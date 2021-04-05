@@ -14,10 +14,6 @@ const lockFileContent = readFileSync(
   resolve(__dirname, './__fixtures__/package-lock.json'),
   'utf8'
 );
-const lockFileV2Content = readFileSync(
-  resolve(__dirname, './__fixtures__/package-lock.v2.json'),
-  'utf8'
-);
 
 const acceptsJson = JSON.parse(
   readFileSync(resolve(__dirname, './__fixtures__/accepts.json'), 'utf8')
@@ -79,6 +75,14 @@ describe(getName(__filename), () => {
         await updateLockedDependency({ ...config, lockFileContent: 'not json' })
       ).toBeNull();
     });
+    it('rejects lockFileVersion 2', async () => {
+      expect(
+        await updateLockedDependency({
+          ...config,
+          lockFileContent: lockFileContent.replace(': 1,', ': 2,'),
+        })
+      ).toBeNull();
+    });
     it('returns null if no locked deps', async () => {
       expect(await updateLockedDependency(config)).toBeNull();
     });
@@ -96,18 +100,6 @@ describe(getName(__filename), () => {
     it('remediates in-range', async () => {
       const res = await updateLockedDependency({
         ...config,
-        depName: 'mime',
-        currentVersion: '1.2.11',
-        newVersion: '1.2.12',
-      });
-      expect(
-        JSON.parse(res['package-lock.json']).dependencies.mime.version
-      ).toEqual('1.2.12');
-    });
-    it('remediates v2 in-range', async () => {
-      const res = await updateLockedDependency({
-        ...config,
-        lockFileContent: lockFileV2Content,
         depName: 'mime',
         currentVersion: '1.2.11',
         newVersion: '1.2.12',
@@ -140,18 +132,6 @@ describe(getName(__filename), () => {
       config.currentVersion = '4.0.0';
       config.newVersion = '4.1.0';
       const res = await updateLockedDependency(config);
-      expect(res['package.json']).toContain('"express": "4.1.0"');
-      const packageLock = JSON.parse(res['package-lock.json']);
-      expect(packageLock.dependencies.express.version).toEqual('4.1.0');
-    });
-    it('remediates v2 express', async () => {
-      config.depName = 'express';
-      config.currentVersion = '4.0.0';
-      config.newVersion = '4.1.0';
-      const res = await updateLockedDependency({
-        ...config,
-        lockFileContent: lockFileV2Content,
-      });
       expect(res['package.json']).toContain('"express": "4.1.0"');
       const packageLock = JSON.parse(res['package-lock.json']);
       expect(packageLock.dependencies.express.version).toEqual('4.1.0');
