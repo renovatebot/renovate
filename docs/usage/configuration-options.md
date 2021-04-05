@@ -2229,7 +2229,13 @@ In most cases it would not be recommended, but there are some cases such as Dock
 
 ## vulnerabilityAlerts
 
-Use this object to customise PRs that are raised when vulnerability alerts are detected (GitHub-only).
+Renovate can read from GitHub's Vulnerability Alerts and customize Pull Requests accordingly.
+For this to work, you must first ensure you have enabled "Dependency graph" and "Dependabot alerts" under the "Security & analysis" section of the repository's "Settings" tab.
+Additionally, if you are running Renovate in app mode the you must make sure that the app has been granted the permissions to read "Vulnerability alerts".
+
+If the above conditions are met, and you have received one or more vulnerability alerts from GitHub for this repository, then Renovate will attempt to raise fix PRs accordingly.
+
+Use the `vulnerabilityAlerts` configuration object if you want to customise vulnerability-fix PRs specifically.
 For example, to configure custom labels and assignees:
 
 ```json
@@ -2241,7 +2247,7 @@ For example, to configure custom labels and assignees:
 }
 ```
 
-To disable vulnerability alerts completely, configure like this:
+To disable vulnerability alerts functionality completely, configure like this:
 
 ```json
 {
