@@ -4,7 +4,7 @@ import { extractCollections } from './collections';
 import { extractCollectionsMetaDataFile } from './collections-metadata';
 import { extractRoles } from './roles';
 
-function getSliceEndNumber(
+export function getSliceEndNumber(
   start: number,
   numberOfLines: number,
   ...blocks: number[]
