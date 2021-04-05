@@ -78,7 +78,7 @@ Array [
     "topic": "Configuration Error",
   },
   Object {
-    "message": "packageRules: Each packageRule must contain at least one selector (matchFiles, matchPaths, matchLanguages, matchBaseBranches, matchManagers, matchDatasources, matchDepTypes, matchPackageNames, matchPackagePatterns, excludePackageNames, excludePackagePatterns, matchCurrentVersion, matchSourceUrlPrefixes, matchUpdateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "packageRules: Each packageRule must contain at least one selector (matchFiles, matchPaths, matchLanguages, matchBaseBranches, matchManagers, matchDatasources, matchDepTypes, matchPackageNames, matchPackagePatterns, matchPackagePrefixes, excludePackageNames, excludePackagePatterns, excludePackagePrefixes, matchCurrentVersion, matchSourceUrlPrefixes, matchUpdateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
     "topic": "Configuration Error",
   },
   Object {
@@ -210,3 +210,12 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) validates valid alias objects 1`] = `Array []`;
+
+exports[`config/validation validateConfig(config) warns if hostType has the wrong parent 1`] = `
+Array [
+  Object {
+    "message": "hostType should only be configured within a \\"hostRules\\" object. Was found in .",
+    "topic": "hostType",
+  },
+]
+`;

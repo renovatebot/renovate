@@ -208,14 +208,25 @@ const platform: Platform = {
     };
   },
 
-  async getJsonFile(fileName: string): Promise<any | null> {
+  async getRawFile(
+    fileName: string,
+    repo: string = config.repository
+  ): Promise<string | null> {
     try {
-      const contents = await helper.getRepoContents(
-        config.repository,
-        fileName,
-        config.defaultBranch
-      );
-      return JSON.parse(contents.contentString);
+      const contents = await helper.getRepoContents(repo, fileName);
+      return contents.contentString;
+    } catch (err) /* istanbul ignore next */ {
+      return null;
+    }
+  },
+
+  async getJsonFile(
+    fileName: string,
+    repo: string = config.repository
+  ): Promise<any | null> {
+    try {
+      const raw = await platform.getRawFile(fileName, repo);
+      return raw && JSON.parse(raw);
     } catch (err) /* istanbul ignore next */ {
       return null;
     }
@@ -836,6 +847,7 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
+  getRawFile,
   getJsonFile,
   getIssueList,
   getPr,

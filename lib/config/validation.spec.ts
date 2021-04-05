@@ -2,6 +2,21 @@ import * as configValidation from './validation';
 import { RenovateConfig } from '.';
 
 describe('config/validation', () => {
+  describe('getParentName()', () => {
+    it('ignores encrypted in root', () => {
+      expect(configValidation.getParentName('encrypted')).toEqual('');
+    });
+    it('handles array types', () => {
+      expect(configValidation.getParentName('hostRules[1]')).toEqual(
+        'hostRules'
+      );
+    });
+    it('handles encrypted within array types', () => {
+      expect(configValidation.getParentName('hostRules[0].encrypted')).toEqual(
+        'hostRules'
+      );
+    });
+  });
   describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
       const config = {
@@ -152,7 +167,7 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(12);
     });
@@ -175,7 +190,7 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toHaveLength(2);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(2);
     });
@@ -458,6 +473,18 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
+      expect(warnings).toMatchSnapshot();
+    });
+
+    it('warns if hostType has the wrong parent', async () => {
+      const config = {
+        hostType: 'npm',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
     });
 

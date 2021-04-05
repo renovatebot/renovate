@@ -196,10 +196,19 @@ Self-hosted Renovate can be configured using any of the following (or a combinat
 
 - A `config.js` file (can also be named `config.json`, but you can't have both at the same time)
 - CLI parameters
-- Environment parameters
+- Environment variables
 
 Note that some Renovate configuration options are _only_ available for self-hosting, and so can only be configured using one of the above methods.
 These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
+
+If you are configuring using environment variables, there are two possibilities:
+
+- Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
+- Set `RENOVATE_CONFIG` to a [stringified](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) version of the full JSON config, e.g. `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
+
+If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
+
+Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
 ## Authentication
 

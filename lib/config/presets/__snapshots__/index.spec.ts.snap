@@ -379,10 +379,10 @@ Object {
   "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "matchPackagePatterns": Array [
-    "^@typescript-eslint/",
-    "^eslint",
-    "^stylelint",
+  "matchPackagePrefixes": Array [
+    "@typescript-eslint/",
+    "eslint",
+    "stylelint",
   ],
 }
 `;
@@ -468,9 +468,9 @@ Object {
   "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "matchPackagePatterns": Array [
-    "^@typescript-eslint/",
-    "^eslint",
+  "matchPackagePrefixes": Array [
+    "@typescript-eslint/",
+    "eslint",
   ],
 }
 `;
@@ -486,11 +486,13 @@ Object {
     "remark-lint",
   ],
   "matchPackagePatterns": Array [
-    "^ember-template-lint",
-    "^@typescript-eslint/",
-    "^eslint",
-    "^stylelint",
     "\\\\btslint\\\\b",
+  ],
+  "matchPackagePrefixes": Array [
+    "ember-template-lint",
+    "@typescript-eslint/",
+    "eslint",
+    "stylelint",
   ],
 }
 `;
@@ -512,11 +514,13 @@ Object {
         "remark-lint",
       ],
       "matchPackagePatterns": Array [
-        "^ember-template-lint",
-        "^@typescript-eslint/",
-        "^eslint",
-        "^stylelint",
         "\\\\btslint\\\\b",
+      ],
+      "matchPackagePrefixes": Array [
+        "ember-template-lint",
+        "@typescript-eslint/",
+        "eslint",
+        "stylelint",
       ],
     },
   ],
@@ -531,9 +535,9 @@ Object {
       "matchPackageNames": Array [
         "babel-eslint",
       ],
-      "matchPackagePatterns": Array [
-        "^@typescript-eslint/",
-        "^eslint",
+      "matchPackagePrefixes": Array [
+        "@typescript-eslint/",
+        "eslint",
       ],
     },
   ],

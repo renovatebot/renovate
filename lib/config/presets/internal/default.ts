@@ -391,7 +391,7 @@ export const presets: Record<string, Preset> = {
     description: 'Update @types/* packages automatically if tests pass',
     packageRules: [
       {
-        matchPackagePatterns: ['^@types/'],
+        matchPackagePrefixes: ['@types/'],
         automerge: true,
       },
     ],

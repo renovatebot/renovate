@@ -1276,6 +1276,24 @@ See also `matchPackagePatterns`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### excludePackagePrefixes
+
+Use this field if you want to have one or more package name prefixes excluded in your package rule, without needing to write a regex.
+See also `matchPackagePrefixes`.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePrefixes": ["eslint"],
+      "excludePackagePrefixes": ["eslint-foo"]
+    }
+  ]
+}
+```
+
+The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
+
 ### matchLanguages
 
 Use this field to restrict rules to a particular language. e.g.
@@ -1418,6 +1436,24 @@ See also `excludePackagePatterns`.
 ```
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
+### matchPackagePrefixes
+
+Use this field to match a package prefix without needing to write a regex expression.
+See also `excludePackagePrefixes`.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePrefixes": ["angular"],
+      "rangeStrategy": "replace"
+    }
+  ]
+}
+```
+
+Just like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
 ### matchPaths
 
@@ -2193,7 +2229,15 @@ In most cases it would not be recommended, but there are some cases such as Dock
 
 ## vulnerabilityAlerts
 
-Use this object to customise PRs that are raised when vulnerability alerts are detected (GitHub-only).
+Renovate can read from GitHub's Vulnerability Alerts and customize Pull Requests accordingly.
+For this to work, you must first ensure you have enabled "[Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/about-the-dependency-graph#enabling-the-dependency-graph)" and "[Dependabot alerts](https://docs.github.com/en/github/administering-a-repository/managing-security-and-analysis-settings-for-your-repository)" under the "Security & analysis" section of the repository's "Settings" tab.
+
+Additionally, if you are running Renovate in app mode then you must make sure that the app has been granted the permissions to read "Vulnerability alerts".
+If you are the account admin, browse to the app (e.g. [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and verify that read access to "vulnerability alerts" is mentioned.
+
+Once the above conditions are met, and you have received one or more vulnerability alerts from GitHub for this repository, then Renovate will attempt to raise fix PRs accordingly.
+
+Use the `vulnerabilityAlerts` configuration object if you want to customise vulnerability-fix PRs specifically.
 For example, to configure custom labels and assignees:
 
 ```json
@@ -2205,7 +2249,7 @@ For example, to configure custom labels and assignees:
 }
 ```
 
-To disable vulnerability alerts completely, configure like this:
+To disable the vulnerability alerts functionality completely, configure like this:
 
 ```json
 {
