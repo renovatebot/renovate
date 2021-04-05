@@ -1682,9 +1682,13 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       acceptHeader: 'application/vnd.github.vixen-preview+json',
     });
   } catch (err) {
+    logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
-      { err },
-      'Error retrieving vulnerability alerts. Please ensure permissions have been granted.'
+      {
+        url:
+          'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+      },
+      'Cannot access vulnerability alerts. Please ensure permissions have been granted'
     );
   }
   let alerts: VulnerabilityAlert[] = [];
