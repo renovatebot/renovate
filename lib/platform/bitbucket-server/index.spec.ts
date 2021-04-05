@@ -2107,6 +2107,20 @@ Followed by some information.
           expect(res).toEqual(data);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
+        it('returns null for malformed JSON', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: '!@#' }],
+            });
+          const res = await bitbucket.getJsonFile('file.json');
+          expect(res).toBeNull();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
         it('returns null for long content', async () => {
           const scope = await initRepo();
           scope
