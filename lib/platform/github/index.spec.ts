@@ -541,9 +541,7 @@ describe('platform/github', () => {
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             title: 'old title - autoclosed',
             state: PrState.Closed,
-            closed_at: DateTime.now()
-              .minus({ days: 6, hours: 23, minutes: 59, seconds: 59 })
-              .toISO(),
+            closed_at: DateTime.now().minus({ days: 6 }).toISO(),
           },
         ])
         .post('/repos/some/repo/git/refs')
