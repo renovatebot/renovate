@@ -541,9 +541,7 @@ describe('platform/github', () => {
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             title: 'old title - autoclosed',
             state: PrState.Closed,
-            closed_at: DateTime.now()
-              .minus({ days: 6, hours: 23, minutes: 59, seconds: 59 })
-              .toISO(),
+            closed_at: DateTime.now().minus({ days: 6 }).toISO(),
           },
         ])
         .post('/repos/some/repo/git/refs')
@@ -2152,6 +2150,17 @@ describe('platform/github', () => {
       });
       const res = await github.getJsonFile('file.json');
       expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null for malformed JSON', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.get('/repos/some/repo/contents/file.json').reply(200, {
+        content: Buffer.from('!@#').toString('base64'),
+      });
+      const res = await github.getJsonFile('file.json');
+      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null on errors', async () => {
