@@ -1363,6 +1363,14 @@ describe(getName(__filename), () => {
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
+    it('returns null for malformed JSON', async () => {
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: '!@#',
+      } as never);
+      await initFakeRepo({ full_name: 'some/repo' });
+      const res = await gitea.getJsonFile('file.json');
+      expect(res).toBeNull();
+    });
     it('returns null on errors', async () => {
       helper.getRepoContents.mockRejectedValueOnce('some error');
       await initFakeRepo({ full_name: 'some/repo' });

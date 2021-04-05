@@ -1196,6 +1196,18 @@ describe('platform/azure', () => {
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
+    it('returns null for malformed JSON', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() =>
+              Promise.resolve(Readable.from('!@#'))
+            ),
+          } as any)
+      );
+      const res = await azure.getJsonFile('file.json');
+      expect(res).toBeNull();
+    });
     it('returns null on errors', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
