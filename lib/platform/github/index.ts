@@ -1688,7 +1688,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         url:
           'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
       },
-      'Cannot access vulnerability alerts. Please ensure permissions have been granted'
+      'Cannot access vulnerability alerts. Please ensure permissions have been granted.'
     );
   }
   let alerts: VulnerabilityAlert[] = [];
