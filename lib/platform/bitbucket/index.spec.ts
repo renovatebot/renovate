@@ -851,6 +851,15 @@ describe('platform/bitbucket', () => {
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns null for malformed JSON', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
+        .reply(200, '!@#');
+      const res = await bitbucket.getJsonFile('file.json');
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns null on errors', async () => {
       const scope = await initRepoMock();
       scope

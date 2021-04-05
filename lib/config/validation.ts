@@ -15,6 +15,7 @@ import * as managerValidator from './validation-helpers/managers';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
+let optionParents: Record<string, RenovateOptions['parent']>;
 
 export interface ValidationResult {
   errors: ValidationMessage[];
@@ -30,6 +31,16 @@ function isManagerPath(parentPath: string): boolean {
   );
 }
 
+export function getParentName(parentPath: string): string {
+  return parentPath
+    ? parentPath
+        .replace(/\.?encrypted$/, '')
+        .replace(/\[\d+\]$/, '')
+        .split('.')
+        .pop()
+    : '.';
+}
+
 export async function validateConfig(
   config: RenovateConfig,
   isPreset?: boolean,
@@ -39,6 +50,14 @@ export async function validateConfig(
     optionTypes = {};
     options.forEach((option) => {
       optionTypes[option.name] = option.type;
+    });
+  }
+  if (!optionParents) {
+    optionParents = {};
+    options.forEach((option) => {
+      if (option.parent) {
+        optionParents[option.name] = option.parent;
+      }
     });
   }
   let errors: ValidationMessage[] = [];
@@ -137,6 +156,18 @@ export async function validateConfig(
             message: `Invalid template in config path: ${currentPath}`,
           });
         }
+      }
+      const parentName = getParentName(parentPath);
+      if (
+        !isPreset &&
+        optionParents[key] &&
+        optionParents[key] !== parentName
+      ) {
+        const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
+        warnings.push({
+          topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
+          message,
+        });
       }
       if (!optionTypes[key]) {
         errors.push({
