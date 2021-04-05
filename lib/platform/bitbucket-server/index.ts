@@ -143,10 +143,8 @@ export async function getJsonFile(
 ): Promise<any | null> {
   try {
     const raw = await getRawFile(fileName, repo);
-    debugger;
     return raw && JSON.parse(raw);
   } catch (err) {
-    debugger;
     return null;
   }
 }
