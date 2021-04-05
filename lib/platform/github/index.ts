@@ -141,17 +141,28 @@ async function getBranchProtection(
   return res.body;
 }
 
-export async function getJsonFile(
+export async function getRawFile(
   fileName: string,
   repo: string = config.repository
-): Promise<any | null> {
+): Promise<string | null> {
   try {
     const url = `repos/${repo}/contents/${fileName}`;
     const res = await githubApi.getJson<{ content: string }>(url);
     const buf = res.body.content;
     const str = Buffer.from(buf, 'base64').toString();
-    const result = JSON.parse(str);
-    return result;
+    return str;
+  } catch (err) {
+    return null;
+  }
+}
+
+export async function getJsonFile(
+  fileName: string,
+  repo: string = config.repository
+): Promise<any | null> {
+  try {
+    const raw = await getRawFile(fileName, repo);
+    return raw && JSON.parse(raw);
   } catch (err) {
     return null;
   }

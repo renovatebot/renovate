@@ -910,7 +910,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic YWJjOjEyMw==",
       "host": "api.bitbucket.org",
@@ -937,7 +936,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic YWJjOjEyMw==",
       "host": "api.bitbucket.org",

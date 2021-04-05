@@ -104,15 +104,27 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
+export async function getRawFile(
+  fileName: string,
+  repo: string = config.repoId
+): Promise<string | null> {
+  try {
+    const azureApiGit = await azureApi.gitApi();
+    const buf = await azureApiGit.getItemContent(repo, fileName);
+    const str = await streamToString(buf);
+    return str;
+  } catch (err) {
+    return null;
+  }
+}
+
 export async function getJsonFile(
   fileName: string,
   repo: string = config.repoId
 ): Promise<any | null> {
   try {
-    const azureApiGit = await azureApi.gitApi();
-    const buf = await azureApiGit.getItemContent(repo, fileName);
-    const str = await streamToString(buf);
-    return JSON.parse(str);
+    const raw = await getRawFile(fileName, repo);
+    return raw && JSON.parse(raw);
   } catch (err) {
     return null;
   }
