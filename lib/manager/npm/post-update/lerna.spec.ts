@@ -93,27 +93,13 @@ describe(getName(__filename), () => {
       expect(res.error).toBe(false);
       expect(execSnapshots).toMatchSnapshot();
     });
-    it('maps dot files', async () => {
-      const execSnapshots = mockExecAll(exec);
-      const res = await lernaHelper.generateLockFiles(
-        lernaPkgFile('npm'),
-        'some-dir',
-        {
-          dockerMapDotfiles: true,
-          constraints: { npm: '^6.0.0' },
-        },
-        {}
-      );
-      expect(res.error).toBe(false);
-      expect(execSnapshots).toMatchSnapshot();
-    });
     it('allows scripts for trust level high', async () => {
       const execSnapshots = mockExecAll(exec);
       setAdminConfig({ allowScripts: true });
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        {},
+        { constraints: { npm: '^6.0.0' } },
         {}
       );
       expect(res.error).toBe(false);
