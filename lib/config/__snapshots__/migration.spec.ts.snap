@@ -124,6 +124,7 @@ Object {
   "minor": Object {
     "automerge": true,
   },
+  "npmrc": "",
   "nvmrc": Object {
     "packageRules": Array [
       Object {
