@@ -314,7 +314,7 @@ describe(getName(__filename), () => {
     setNpmrc(npmrcContent);
     setNpmrc(npmrcContent);
     setNpmrc();
-    expect(getNpmrc()).toBeNull();
+    expect(getNpmrc()).toEqual({});
   });
 
   it('should use default registry if missing from npmrc', async () => {
