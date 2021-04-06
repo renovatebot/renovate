@@ -170,6 +170,13 @@ export function migrateConfig(
         migratedConfig[key] = val.replace(/{{depNameShort}}/g, '{{depName}}');
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
+      } else if (key === 'skipInstalls') {
+        delete migratedConfig.skipInstalls;
+        if (val) {
+          migratedConfig.artifactUpdateApproach = 'shallow';
+        } else {
+          migratedConfig.artifactUpdateApproach = 'deep';
+        }
       } else if (key === 'rebaseStalePrs') {
         delete migratedConfig.rebaseStalePrs;
         if (!migratedConfig.rebaseWhen) {
@@ -198,6 +205,9 @@ export function migrateConfig(
           migratedConfig.allowScripts ??= true;
           migratedConfig.exposeAllEnv ??= true;
         }
+      } else if (key === 'ignoreNpmrcFile') {
+        delete migratedConfig.ignoreNpmrcFile;
+        migratedConfig.npmrc ||= '';
       } else if (
         key === 'branchName' &&
         is.string(val) &&

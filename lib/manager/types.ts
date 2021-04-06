@@ -23,9 +23,8 @@ export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
-  ignoreNpmrcFile?: boolean;
+  npmrc?: string;
   yarnrc?: string;
-  skipInstalls?: boolean;
   versioning?: string;
   updateInternalDeps?: boolean;
 }
@@ -85,7 +84,6 @@ export interface PackageFile<T = Record<string, any>>
   datasource?: string;
   registryUrls?: string[];
   deps: PackageDependency[];
-  ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
   mavenProps?: Record<string, any>;
@@ -95,7 +93,6 @@ export interface PackageFile<T = Record<string, any>>
   packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
   parent?: string;
-  skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
@@ -282,8 +279,7 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   cacheDir?: string;
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
-  skipInstalls?: boolean;
-
+  artifactUpdateApproach?: 'auto' | 'deep' | 'shallow';
   platform?: string;
   upgrades?: Upgrade[];
   npmLock?: string;

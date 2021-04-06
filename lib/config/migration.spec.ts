@@ -34,6 +34,7 @@ describe('config/migration', () => {
         onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
+        ignoreNpmrcFile: true,
         separateMajorReleases: true,
         separatePatchReleases: true,
         suppressNotifications: ['lockFileErrors', 'prEditNotification'],
@@ -42,6 +43,7 @@ describe('config/migration', () => {
         binarySource: 'auto',
         automergeMinor: true,
         automergePatch: true,
+        skipInstalls: true,
         masterIssue: 'true',
         masterIssueTitle: 'foo',
         gomodTidy: true,
@@ -85,6 +87,7 @@ describe('config/migration', () => {
         ],
         peerDependencies: {
           versionStrategy: 'widen',
+          skipInstalls: false,
         },
         packageRules: [
           {

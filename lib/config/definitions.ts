@@ -545,18 +545,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
   },
   {
-    name: 'skipInstalls',
+    name: 'artifactUpdateApproach',
     description:
-      'Skip installing modules/dependencies if lock file updating is possible alone.',
-    type: 'boolean',
-    default: null,
+      'Whether to employ a deep or shallow approach to artifact updating.',
+    type: 'string',
+    allowedValues: ['auto', 'deep', 'shallow'],
+    default: 'auto',
     admin: true,
-  },
-  {
-    name: 'ignoreNpmrcFile',
-    description: 'Whether to ignore any .npmrc file found in repository.',
-    type: 'boolean',
-    default: false,
   },
   {
     name: 'autodiscover',
