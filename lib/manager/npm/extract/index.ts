@@ -102,7 +102,7 @@ export async function extractPackageFile(
     } else {
       npmrc = npmrcContent;
       if (npmrc?.includes('package-lock')) {
-        logger.debug('Stripping package-lock setting from npmrc');
+        logger.debug('Stripping package-lock setting from .npmrc');
         npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
       }
       if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
