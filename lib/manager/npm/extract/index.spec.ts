@@ -113,6 +113,20 @@ describe(getName(__filename), () => {
       );
       expect(res.npmrc).toBeDefined();
     });
+    it('ignores .npmrc when config.npmrc is defined', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.npmrc') {
+          return 'some-npmrc\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { npmrc: 'some-configured-npmrc' }
+      );
+      expect(res.npmrc).toBeUndefined();
+    });
     it('finds and discards .npmrc', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
@@ -126,7 +140,7 @@ describe(getName(__filename), () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBeUndefined();
+      expect(res.npmrc).toEqual('');
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
