@@ -33,8 +33,6 @@ The recommended approaches in order of preference are:
 
 **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `hostName` and `token` specified
 
-**Self-hosted .npmrc**: copy an `.npmrc` file to the home dir of the bot.
-
 **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
 
 **Renovate App with a private registry**: Add an unencrypted `npmrc` plus an encrypted `npmToken` in config
@@ -66,21 +64,9 @@ module.exports = {
 
 **NOTE:** Do not use `NPM_TOKEN` as an environment variable.
 
-### Commit .npmrc file into repository
-
-One approach that many projects use for private repositories is to simply check in an authenticated `.npmrc` into the repository that is then shared between all developers.
-Therefore anyone running `npm install` or `yarn install` from the project root will be automatically authenticated with npm without having to distribute npm logins to every developer and make sure they've run `npm login` first before installing.
-
-The good news is that this works for Renovate too.
-If Renovate detects a `.npmrc` or `.yarnrc` file then it will use it for its install.
-
-Does not work if using binarySource=docker.
-_This method will be deprecated soon_
-
 ### Add npmrc string to Renovate config
 
-The above solution maybe have a downside that all users of the repository (e.g. developers) will also use any `.npmrc` that is checked into the repository, instead of their own one in `~/.npmrc`.
-To avoid this, you can instead add your `.npmrc` authentication line to your Renovate config under the field `npmrc`. e.g. a `renovate.json` might look like this:
+You can add an `.npmrc` authentication line to your Renovate config under the field `npmrc`. e.g. a `renovate.json` might look like this:
 
 ```json
 {
