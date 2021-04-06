@@ -17,7 +17,7 @@ const defaultConfigFile = (config: RenovateConfig): string =>
     ? config.onboardingConfigFileName
     : configFileNames[0];
 
-async function getJsonFile(file: string): Promise<any | null> {
+async function getJsonFile(file: string): Promise<RenovateConfig | null> {
   try {
     return await platform.getJsonFile(file);
   } catch (err) {
