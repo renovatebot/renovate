@@ -522,7 +522,7 @@ Array [
 exports[`datasource/npm/index should use default registry if missing from npmrc 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",

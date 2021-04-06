@@ -51,6 +51,6 @@ describe(getName(__filename), () => {
   it('ignores localhost', () => {
     setNpmrc(`registry=http://localhost`);
     expect(sanitize.add).toHaveBeenCalledTimes(0);
-    expect(getNpmrc()).toBeNull();
+    expect(getNpmrc()).toEqual({});
   });
 });
