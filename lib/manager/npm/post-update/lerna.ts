@@ -110,7 +110,7 @@ export async function generateLockFiles(
     const lernaVersion = getLernaVersion(lernaPackageFile);
     logger.debug('Using lerna version ' + lernaVersion);
     preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
-    cmd.push('lerna info');
+    cmd.push('lerna info || echo "Ignoring lerna info failure"');
     cmd.push(`${lernaClient} install ${cmdOptions}`);
     cmd.push(lernaCommand);
     await exec(cmd, execOptions);
