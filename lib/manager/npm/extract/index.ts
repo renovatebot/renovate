@@ -6,11 +6,7 @@ import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import {
-  deleteLocalFile,
-  getSiblingFileName,
-  readLocalFile,
-} from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -95,26 +91,24 @@ export async function extractPackageFile(
   delete lockFiles.shrinkwrapJson;
 
   let npmrc: string;
-  let ignoreNpmrcFile: boolean;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  // istanbul ignore if
-  if (config.ignoreNpmrcFile) {
-    await deleteLocalFile(npmrcFileName);
-  } else {
-    npmrc = await readLocalFile(npmrcFileName, 'utf8');
-    if (npmrc?.includes('package-lock')) {
-      logger.debug('Stripping package-lock setting from npmrc');
-      npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
-    }
-    if (is.string(npmrc)) {
-      if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
-        logger.debug('Discarding .npmrc file with variables');
-        ignoreNpmrcFile = true;
-        npmrc = undefined;
-        await deleteLocalFile(npmrcFileName);
-      }
+  const npmrcContent = await readLocalFile(npmrcFileName, 'utf8');
+  if (is.string(npmrcContent)) {
+    if (is.string(config.npmrc)) {
+      logger.debug(
+        { npmrcFileName },
+        'Repo .npmrc file is ignored due to presence of config.npmrc'
+      );
     } else {
-      npmrc = undefined;
+      npmrc = npmrcContent;
+      if (npmrc?.includes('package-lock')) {
+        logger.debug('Stripping package-lock setting from npmrc');
+        npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
+      }
+      if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
+        logger.debug('Overriding .npmrc file with variables');
+        npmrc = '';
+      }
     }
   }
   const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
@@ -363,7 +357,6 @@ export async function extractPackageFile(
     packageFileVersion,
     packageJsonType,
     npmrc,
-    ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
     managerData: {
