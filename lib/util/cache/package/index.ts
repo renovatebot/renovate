@@ -52,7 +52,7 @@ export function init(config: GlobalConfig): void {
 }
 
 export function cleanup(config: GlobalConfig): void {
-  if (config.redisUrl) {
+  if (config?.redisUrl) {
     redisCache.end();
   }
 }
