@@ -59,7 +59,14 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
       });
       platform.getJsonFile.mockRejectedValue(new Error());
-      await expect(initApis(config)).resolves.not.toThrow();
+      await expect(
+        initApis({
+          ...config,
+          optimizeForDisabled: true,
+          includeForks: false,
+          isFork: true,
+        })
+      ).resolves.not.toThrow();
     });
     it('uses the onboardingConfigFileName if set', async () => {
       platform.initRepo.mockResolvedValueOnce({
