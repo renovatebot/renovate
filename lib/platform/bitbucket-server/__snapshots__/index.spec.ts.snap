@@ -1931,7 +1931,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns null for long content 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() throws on errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1972,7 +1972,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns null for malformed JSON 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() throws on long content 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2013,7 +2013,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns null on errors 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() throws on malformed JSON 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6062,7 +6062,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns null for long content 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() throws on errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6103,7 +6103,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns null for malformed JSON 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() throws on long content 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6144,7 +6144,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns null on errors 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() throws on malformed JSON 1`] = `
 Array [
   Object {
     "headers": Object {
