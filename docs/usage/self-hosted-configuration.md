@@ -28,7 +28,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option).
+The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `artifactUpdateApproach` admin option).
 
 ```json
 {
@@ -68,6 +68,12 @@ e.g.
   "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
 ```
+
+## artifactUpdateApproach
+
+By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
+If this is set to 'deep', then a full install of modules will be done.
+This is currently applicable to `npm` and `yarn` only, and automatically set to `deep` when a full install is detected as necessary.
 
 ## autodiscover
 
@@ -368,12 +374,6 @@ It could then be used in a repository config or preset like so:
 ```
 
 Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
-
-## skipInstalls
-
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 
