@@ -34,6 +34,7 @@ describe('config/migration', () => {
         onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
+        ignoreNpmrcFile: true,
         separateMajorReleases: true,
         separatePatchReleases: true,
         suppressNotifications: ['lockFileErrors', 'prEditNotification'],

@@ -205,6 +205,9 @@ export function migrateConfig(
           migratedConfig.allowScripts ??= true;
           migratedConfig.exposeAllEnv ??= true;
         }
+      } else if (key === 'ignoreNpmrcFile') {
+        delete migratedConfig.ignoreNpmrcFile;
+        migratedConfig.npmrc ||= '';
       } else if (
         key === 'branchName' &&
         is.string(val) &&
