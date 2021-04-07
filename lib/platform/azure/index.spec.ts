@@ -1196,7 +1196,7 @@ describe('platform/azure', () => {
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
-    it('returns null for malformed JSON', async () => {
+    it('throws on malformed JSON', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1205,18 +1205,18 @@ describe('platform/azure', () => {
             ),
           } as any)
       );
-      const res = await azure.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
-    it('returns null on errors', async () => {
+    it('throws on errors', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getItemContent: jest.fn(() => Promise.reject('some error')),
+            getItemContent: jest.fn(() => {
+              throw new Error('some error');
+            }),
           } as any)
       );
-      const res = await azure.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
   });
 });

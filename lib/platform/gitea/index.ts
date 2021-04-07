@@ -212,24 +212,16 @@ const platform: Platform = {
     fileName: string,
     repo: string = config.repository
   ): Promise<string | null> {
-    try {
-      const contents = await helper.getRepoContents(repo, fileName);
-      return contents.contentString;
-    } catch (err) /* istanbul ignore next */ {
-      return null;
-    }
+    const contents = await helper.getRepoContents(repo, fileName);
+    return contents.contentString;
   },
 
   async getJsonFile(
     fileName: string,
     repo: string = config.repository
   ): Promise<any | null> {
-    try {
-      const raw = await platform.getRawFile(fileName, repo);
-      return raw && JSON.parse(raw);
-    } catch (err) /* istanbul ignore next */ {
-      return null;
-    }
+    const raw = await platform.getRawFile(fileName, repo);
+    return JSON.parse(raw);
   },
 
   async initRepo({

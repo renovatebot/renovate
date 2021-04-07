@@ -1,7 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
 import { getName, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
-import { PRESET_NOT_FOUND } from '../util';
+import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as github from '.';
 
 jest.mock('../../../util/host-rules');
@@ -61,7 +61,7 @@ describe(getName(__filename), () => {
 
       await expect(
         github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow('invalid preset JSON');
+      ).rejects.toThrow(PRESET_INVALID_JSON);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -75,7 +75,7 @@ describe(getName(__filename), () => {
 
       await expect(
         github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow('invalid preset JSON');
+      ).rejects.toThrow(PRESET_INVALID_JSON);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
