@@ -870,7 +870,7 @@ export async function addReviewers(
 
   if (lt(defaults.version, '13.9.0')) {
     logger.warn(
-      { currentVersion: defaults.version },
+      { version: defaults.version },
       'Adding reviewers is only available in GitLab 13.9 and onwards'
     );
     return;
@@ -880,7 +880,7 @@ export async function addReviewers(
   try {
     mr = await getMR(config.repository, iid);
   } catch (err) {
-    logger.error({ error: err }, 'Failed to get existing reviewers');
+    logger.warn({ err }, 'Failed to get existing reviewers');
     return;
   }
 
@@ -896,7 +896,7 @@ export async function addReviewers(
   try {
     newReviewerIDs = await Promise.all(newReviewers.map((r) => getUserID(r)));
   } catch (err) {
-    logger.error({ error: err }, 'Failed to get IDs of the new reviewers');
+    logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
   }
 
@@ -905,7 +905,7 @@ export async function addReviewers(
       reviewer_ids: [...existingReviewerIDs, ...newReviewerIDs],
     });
   } catch (err) {
-    logger.error({ error: err }, 'Failed to add reviewers');
+    logger.warn({ err }, 'Failed to add reviewers');
   }
 }
 
