@@ -33,7 +33,7 @@ export function getPreset({
       `Unsupported platform '${baseConfig.platform}' for local preset.`
     );
   }
-  return resolver?.getPresetFromEndpoint(
+  return resolver.getPresetFromEndpoint(
     pkgName,
     presetName,
     presetPath,
