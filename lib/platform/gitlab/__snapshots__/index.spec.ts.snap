@@ -202,12 +202,12 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
   },
   Object {
-    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
+    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true,\\"squash\\":true}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Bearer abc123",
-      "content-length": "72",
+      "content-length": "86",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2090,12 +2090,12 @@ These updates have all been created already. Click a checkbox below to force a r
 exports[`platform/gitlab mergePr(pr) merges the PR 1`] = `
 Array [
   Object {
-    "body": "{\\"should_remove_source_branch\\":true}",
+    "body": "{\\"should_remove_source_branch\\":true,\\"squash\\":true}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Bearer abc123",
-      "content-length": "36",
+      "content-length": "50",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",

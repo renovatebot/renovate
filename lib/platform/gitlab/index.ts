@@ -469,6 +469,7 @@ async function tryPrAutomerge(
           body: {
             should_remove_source_branch: true,
             merge_when_pipeline_succeeds: true,
+            squash: true,
           },
         }
       );
@@ -588,6 +589,7 @@ export async function mergePr(iid: number): Promise<boolean> {
       {
         body: {
           should_remove_source_branch: true,
+          squash: true,
         },
       }
     );
