@@ -207,7 +207,9 @@ export function migrateConfig(
         }
       } else if (key === 'ignoreNpmrcFile') {
         delete migratedConfig.ignoreNpmrcFile;
-        migratedConfig.npmrc ||= '';
+        if (!is.string(migratedConfig.npmrc)) {
+          migratedConfig.npmrc = '';
+        }
       } else if (
         key === 'branchName' &&
         is.string(val) &&
