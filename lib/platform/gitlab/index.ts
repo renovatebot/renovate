@@ -608,13 +608,21 @@ export async function mergePr(iid: number): Promise<boolean> {
 }
 
 export function massageMarkdown(input: string): string {
-  return smartTruncate(
-    input
-      .replace(/Pull Request/g, 'Merge Request')
-      .replace(/PR/g, 'MR')
-      .replace(/\]\(\.\.\/pull\//g, '](!'),
-    25000 // TODO: increase it once https://gitlab.com/gitlab-org/gitlab/-/issues/217483 is closed
-  );
+  let desc = input
+    .replace(/Pull Request/g, 'Merge Request')
+    .replace(/PR/g, 'MR')
+    .replace(/\]\(\.\.\/pull\//g, '](!');
+
+  if (lt(defaults.version, '13.4.0')) {
+    logger.debug(
+      { version: defaults.version },
+      'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters'
+    );
+
+    desc = smartTruncate(desc, 25000);
+  }
+
+  return desc;
 }
 
 // Branch
