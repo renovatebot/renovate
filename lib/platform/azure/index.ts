@@ -108,26 +108,18 @@ export async function getRawFile(
   fileName: string,
   repo: string = config.repoId
 ): Promise<string | null> {
-  try {
-    const azureApiGit = await azureApi.gitApi();
-    const buf = await azureApiGit.getItemContent(repo, fileName);
-    const str = await streamToString(buf);
-    return str;
-  } catch (err) {
-    return null;
-  }
+  const azureApiGit = await azureApi.gitApi();
+  const buf = await azureApiGit.getItemContent(repo, fileName);
+  const str = await streamToString(buf);
+  return str;
 }
 
 export async function getJsonFile(
   fileName: string,
   repo: string = config.repoId
 ): Promise<any | null> {
-  try {
-    const raw = await getRawFile(fileName, repo);
-    return raw && JSON.parse(raw);
-  } catch (err) {
-    return null;
-  }
+  const raw = await getRawFile(fileName, repo);
+  return JSON.parse(raw);
 }
 
 export async function initRepo({
