@@ -860,7 +860,7 @@ describe('platform/gitlab', () => {
         await initFakePlatform('13.8.0');
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
         expect(logger.warn).toHaveBeenCalledWith(
-          { currentVersion: '13.8.0' },
+          { version: '13.8.0' },
           'Adding reviewers is only available in GitLab 13.9 and onwards'
         );
       });
