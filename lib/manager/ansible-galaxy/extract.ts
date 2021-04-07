@@ -4,7 +4,8 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency, PackageFile } from '../types';
 
-const galaxyRoleRegex = /.+\..+/;
+const galaxyUrlRegex = /((git\+)?((git|ssh|http(s)?):\/\/)?(.*@)?([\w.-]+)((:\d+)?\/|:))([\w./-]+)(\.git)?/;
+const galaxyRoleRegex = /[\w-]+\.[\w-]+/;
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
@@ -48,12 +49,11 @@ function finalize(dependency: PackageDependency): boolean {
   }
 
   const source: string = dep.managerData.src;
-  const sourceMatch: RegExpMatchArray = new RegExp(
-    /^(git|http|git\+http|ssh)s?(:\/\/|@).*(\/|:)(.+\/[^.]+)\/?(\.git)?$/
-  ).exec(source);
+  const sourceMatch: RegExpMatchArray = galaxyUrlRegex.exec(source);
   if (sourceMatch) {
     dep.datasource = datasourceGitTags.id;
-    dep.depName = sourceMatch[4];
+    // remove ending `.git` from URLs
+    dep.depName = sourceMatch[10].replace(/\.git$/, '');
     // remove leading `git+` from URLs like `git+https://...`
     dep.lookupName = source.replace(/git\+/, '');
   } else if (galaxyRoleRegex.exec(source)) {
