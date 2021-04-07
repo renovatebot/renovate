@@ -21,8 +21,15 @@ export function getPreset({
     throw new Error(`Missing platform config for local preset.`);
   }
   switch (platform.toLowerCase()) {
-    case PLATFORM_TYPE_GITLAB:
-      return gitlab.getPresetFromEndpoint(
+    case PLATFORM_TYPE_BITBUCKET_SERVER:
+      return bitbucketServer.getPresetFromEndpoint(
+        pkgName,
+        presetName,
+        presetPath,
+        endpoint
+      );
+    case PLATFORM_TYPE_GITEA:
+      return gitea.getPresetFromEndpoint(
         pkgName,
         presetName,
         presetPath,
@@ -35,15 +42,8 @@ export function getPreset({
         presetPath,
         endpoint
       );
-    case PLATFORM_TYPE_BITBUCKET_SERVER:
-      return bitbucketServer.getPresetFromEndpoint(
-        pkgName,
-        presetName,
-        presetPath,
-        endpoint
-      );
-    case PLATFORM_TYPE_GITEA:
-      return gitea.getPresetFromEndpoint(
+    case PLATFORM_TYPE_GITLAB:
+      return gitlab.getPresetFromEndpoint(
         pkgName,
         presetName,
         presetPath,
