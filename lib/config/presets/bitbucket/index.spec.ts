@@ -28,7 +28,7 @@ describe(getName(__filename), () => {
       httpMock
         .scope(baseUrl)
         .get(`${basePath}/some-filename.json`)
-        .reply(200, JSON.stringify({ foo: 'bar' }));
+        .reply(200, JSON.stringify(data));
 
       const res = await bitbucket.fetchJSONFile(
         'some/repo',
@@ -64,7 +64,7 @@ describe(getName(__filename), () => {
       httpMock
         .scope(baseUrl)
         .get(`${basePath}/foo/bar/some-filename.json`)
-        .reply(200, JSON.stringify({ foo: 'bar' }));
+        .reply(200, JSON.stringify(data));
       const res = await bitbucket.getPresetFromEndpoint(
         'some/repo',
         'some-filename',
