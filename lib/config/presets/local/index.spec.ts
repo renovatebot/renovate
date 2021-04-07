@@ -1,15 +1,18 @@
 import { getName, mocked } from '../../../../test/util';
+import * as _bitbucket from '../bitbucket';
 import * as _bitbucketServer from '../bitbucket-server';
 import * as _gitea from '../gitea';
 import * as _github from '../github';
 import * as _gitlab from '../gitlab';
 import * as local from '.';
 
+jest.mock('../bitbucket');
 jest.mock('../bitbucket-server');
 jest.mock('../gitea');
 jest.mock('../github');
 jest.mock('../gitlab');
 
+const bitbucket = mocked(_bitbucket);
 const bitbucketServer = mocked(_bitbucketServer);
 const gitea = mocked(_gitea);
 const github = mocked(_github);
@@ -19,6 +22,7 @@ describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     const preset = { resolved: 'preset' };
+    bitbucket.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     bitbucketServer.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     gitea.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     github.getPresetFromEndpoint.mockResolvedValueOnce(preset);
@@ -46,6 +50,18 @@ describe(getName(__filename), () => {
           },
         });
       }).rejects.toThrow();
+    });
+
+    it('forwards to bitbucket', async () => {
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        presetName: 'default',
+        baseConfig: {
+          platform: 'bitbucket',
+        },
+      });
+      expect(bitbucket.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toMatchSnapshot();
     });
 
     it('forwards to custom bitbucket-server', async () => {
