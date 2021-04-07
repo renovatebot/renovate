@@ -244,14 +244,6 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'dockerMapDotfiles',
-    description:
-      'Map relevant home directory dotfiles into containers when binarySource=docker.',
-    admin: true,
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'dockerImagePrefix',
     description:
       'Change this value in order to override the default Renovate Docker sidecar image name prefix.',
