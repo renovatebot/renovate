@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { gitlabApi } from './http';
-import { GitLabMergeRequest, UpdateMergeRequest } from './types';
+import type { GitLabMergeRequest, UpdateMergeRequest } from './types';
 
 export async function getMR(
   repository: string,

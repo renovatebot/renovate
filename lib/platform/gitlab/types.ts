@@ -8,12 +8,12 @@ export interface GitlabComment {
   id: number;
 }
 
-export type GitLabUser = {
+export interface GitLabUser {
   id: number;
   username: string;
-};
+}
 
-export type GitLabMergeRequest = {
+export interface GitLabMergeRequest {
   iid: number;
   title: string;
   state: string;
@@ -27,7 +27,7 @@ export type GitLabMergeRequest = {
   reviewers?: GitLabUser[];
   labels: string[];
   sha: string;
-};
+}
 
 export interface UpdateMergeRequest {
   target_branch?: string;
@@ -39,7 +39,7 @@ export interface UpdateMergeRequest {
 
 export type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 
-export type RepoResponse = {
+export interface RepoResponse {
   archived: boolean;
   mirror: boolean;
   default_branch: string;
@@ -50,4 +50,4 @@ export type RepoResponse = {
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   merge_method: MergeMethod;
   path_with_namespace: string;
-};
+}
