@@ -53,9 +53,7 @@ describe('platform/gitlab', () => {
     httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(200, {
       email: 'a@b.com',
       name: 'Renovate Bot',
-    });
-    httpMock
-      .scope(gitlabApiHost)
+    })
       .get('/api/v4/version')
       .reply(200, {
         version: `${version}-ee`,
