@@ -11,7 +11,11 @@ Array [
 ]
 `;
 
-exports[`config/presets/local/index getPreset() forwards to custom bitbucket-server 2`] = `undefined`;
+exports[`config/presets/local/index getPreset() forwards to custom bitbucket-server 2`] = `
+Object {
+  "resolved": "preset",
+}
+`;
 
 exports[`config/presets/local/index getPreset() forwards to custom gitea 1`] = `
 Array [
@@ -24,7 +28,11 @@ Array [
 ]
 `;
 
-exports[`config/presets/local/index getPreset() forwards to custom gitea 2`] = `undefined`;
+exports[`config/presets/local/index getPreset() forwards to custom gitea 2`] = `
+Object {
+  "resolved": "preset",
+}
+`;
 
 exports[`config/presets/local/index getPreset() forwards to custom github 1`] = `
 Array [
@@ -71,7 +79,11 @@ Array [
 ]
 `;
 
-exports[`config/presets/local/index getPreset() forwards to gitea 2`] = `undefined`;
+exports[`config/presets/local/index getPreset() forwards to gitea 2`] = `
+Object {
+  "resolved": "preset",
+}
+`;
 
 exports[`config/presets/local/index getPreset() forwards to github 1`] = `
 Array [

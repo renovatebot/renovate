@@ -10,6 +10,13 @@ import * as github from '../github';
 import * as gitlab from '../gitlab';
 import type { Preset, PresetConfig } from '../types';
 
+const resolvers = {
+  [PLATFORM_TYPE_BITBUCKET_SERVER]: bitbucketServer,
+  [PLATFORM_TYPE_GITEA]: gitea,
+  [PLATFORM_TYPE_GITHUB]: github,
+  [PLATFORM_TYPE_GITLAB]: gitlab,
+};
+
 export function getPreset({
   packageName: pkgName,
   presetName = 'default',
@@ -20,38 +27,16 @@ export function getPreset({
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
-  switch (platform.toLowerCase()) {
-    case PLATFORM_TYPE_GITLAB:
-      return gitlab.getPresetFromEndpoint(
-        pkgName,
-        presetName,
-        presetPath,
-        endpoint
-      );
-    case PLATFORM_TYPE_GITHUB:
-      return github.getPresetFromEndpoint(
-        pkgName,
-        presetName,
-        presetPath,
-        endpoint
-      );
-    case PLATFORM_TYPE_BITBUCKET_SERVER:
-      return bitbucketServer.getPresetFromEndpoint(
-        pkgName,
-        presetName,
-        presetPath,
-        endpoint
-      );
-    case PLATFORM_TYPE_GITEA:
-      return gitea.getPresetFromEndpoint(
-        pkgName,
-        presetName,
-        presetPath,
-        endpoint
-      );
-    default:
-      throw new Error(
-        `Unsupported platform '${baseConfig.platform}' for local preset.`
-      );
+  const resolver = resolvers[platform.toLowerCase()];
+  if (!resolver) {
+    throw new Error(
+      `Unsupported platform '${baseConfig.platform}' for local preset.`
+    );
   }
+  return resolver.getPresetFromEndpoint(
+    pkgName,
+    presetName,
+    presetPath,
+    endpoint
+  );
 }
