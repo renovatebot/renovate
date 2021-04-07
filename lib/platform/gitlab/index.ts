@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import pAll from 'p-all';
 import { lt } from 'semver';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
@@ -894,7 +895,10 @@ export async function addReviewers(
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
   try {
-    newReviewerIDs = await Promise.all(newReviewers.map((r) => getUserID(r)));
+    newReviewerIDs = await pAll(
+      newReviewers.map((r) => () => getUserID(r)),
+      { concurrency: 5 }
+    );
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
