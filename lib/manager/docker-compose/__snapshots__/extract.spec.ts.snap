@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 1 1`] = `
+exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 1 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -68,7 +68,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 1`] = `
+exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -136,7 +136,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 without set version key 1`] = `
+exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 without set version key 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
