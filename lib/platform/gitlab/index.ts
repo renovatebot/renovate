@@ -146,28 +146,20 @@ export async function getRawFile(
   fileName: string,
   repo: string = config.repository
 ): Promise<string | null> {
-  try {
-    const escapedFileName = urlEscape(fileName);
-    const url = `projects/${repo}/repository/files/${escapedFileName}?ref=HEAD`;
-    const res = await gitlabApi.getJson<{ content: string }>(url);
-    const buf = res.body.content;
-    const str = Buffer.from(buf, 'base64').toString();
-    return str;
-  } catch (err) {
-    return null;
-  }
+  const escapedFileName = urlEscape(fileName);
+  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=HEAD`;
+  const res = await gitlabApi.getJson<{ content: string }>(url);
+  const buf = res.body.content;
+  const str = Buffer.from(buf, 'base64').toString();
+  return str;
 }
 
 export async function getJsonFile(
   fileName: string,
   repo: string = config.repository
 ): Promise<any | null> {
-  try {
-    const raw = await getRawFile(fileName, repo);
-    return raw && JSON.parse(raw);
-  } catch (err) {
-    return null;
-  }
+  const raw = await getRawFile(fileName, repo);
+  return JSON.parse(raw);
 }
 
 // Initialize GitLab by getting base branch

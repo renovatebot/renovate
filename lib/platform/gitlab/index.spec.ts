@@ -1571,7 +1571,7 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null for malformed JSON', async () => {
+    it('throws on malformed JSON', async () => {
       const scope = await initRepo();
       scope
         .get(
@@ -1580,17 +1580,17 @@ These updates have all been created already. Click a checkbox below to force a r
         .reply(200, {
           content: Buffer.from('!@#').toString('base64'),
         });
-      const res = await gitlab.getJsonFile('dir/file.json');
-      expect(res).toBeNull();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null on errors', async () => {
+    it('throws on errors', async () => {
       const scope = await initRepo();
       scope
-        .get('/api/v4/projects/some%2Frepo/repository/files/file.json?ref=HEAD')
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
+        )
         .replyWithError('some error');
-      const res = await gitlab.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

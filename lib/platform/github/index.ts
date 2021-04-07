@@ -145,27 +145,19 @@ export async function getRawFile(
   fileName: string,
   repo: string = config.repository
 ): Promise<string | null> {
-  try {
-    const url = `repos/${repo}/contents/${fileName}`;
-    const res = await githubApi.getJson<{ content: string }>(url);
-    const buf = res.body.content;
-    const str = Buffer.from(buf, 'base64').toString();
-    return str;
-  } catch (err) {
-    return null;
-  }
+  const url = `repos/${repo}/contents/${fileName}`;
+  const res = await githubApi.getJson<{ content: string }>(url);
+  const buf = res.body.content;
+  const str = Buffer.from(buf, 'base64').toString();
+  return str;
 }
 
 export async function getJsonFile(
   fileName: string,
   repo: string = config.repository
 ): Promise<any | null> {
-  try {
-    const raw = await getRawFile(fileName, repo);
-    return raw && JSON.parse(raw);
-  } catch (err) {
-    return null;
-  }
+  const raw = await getRawFile(fileName, repo);
+  return JSON.parse(raw);
 }
 
 let existingRepos;

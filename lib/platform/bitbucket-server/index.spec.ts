@@ -2107,7 +2107,7 @@ Followed by some information.
           expect(res).toEqual(data);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
-        it('returns null for malformed JSON', async () => {
+        it('throws on malformed JSON', async () => {
           const scope = await initRepo();
           scope
             .get(
@@ -2117,11 +2117,10 @@ Followed by some information.
               isLastPage: true,
               lines: [{ text: '!@#' }],
             });
-          const res = await bitbucket.getJsonFile('file.json');
-          expect(res).toBeNull();
+          await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
-        it('returns null for long content', async () => {
+        it('throws on long content', async () => {
           const scope = await initRepo();
           scope
             .get(
@@ -2131,19 +2130,17 @@ Followed by some information.
               isLastPage: false,
               lines: [{ text: '{' }],
             });
-          const res = await bitbucket.getJsonFile('file.json');
-          expect(res).toBeNull();
+          await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
-        it('returns null on errors', async () => {
+        it('throws on errors', async () => {
           const scope = await initRepo();
           scope
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
             )
             .replyWithError('some error');
-          const res = await bitbucket.getJsonFile('file.json');
-          expect(res).toBeNull();
+          await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
