@@ -93,11 +93,15 @@ describe('lib/manager/helm-requirements/extract', () => {
         - name: redis
           version: 0.9.0
           repository: '@placeholder'
+        - name: example
+          version: 1.0.0
+          repository: alias:longalias
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
           placeholder: 'https://my-registry.gcr.io/',
+          longalias: 'https://registry.example.com/',
         },
       });
       expect(result).not.toBeNull();

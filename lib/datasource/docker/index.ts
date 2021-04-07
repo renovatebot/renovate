@@ -354,7 +354,10 @@ async function getConfigDigest(
     return null;
   }
 
-  if (manifest.mediaType === MediaType.manifestListV2) {
+  if (
+    manifest.mediaType === MediaType.manifestListV2 &&
+    manifest.manifests.length
+  ) {
     logger.trace(
       { registry, dockerRepository, tag },
       'Found manifest list, using first image'
@@ -367,7 +370,7 @@ async function getConfigDigest(
   }
 
   if (manifest.mediaType === MediaType.manifestV2) {
-    return manifest.config.digest;
+    return manifest.config?.digest || null;
   }
 
   logger.debug({ manifest }, 'Invalid manifest - returning');

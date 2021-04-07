@@ -74,6 +74,7 @@ function checkForPlatformFailure(err: Error): void {
     'Could not resolve host',
     ' is not a member of team',
     'early EOF',
+    'fatal: bad config', // .gitmodules problem
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -703,6 +704,13 @@ export async function commitFiles({
     return commit;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
+    if (err.message.includes(`'refs/heads/renovate' exists`)) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.location = 'None';
+      error.validationError = 'An existing branch is blocking Renovate';
+      error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
+      throw error;
+    }
     if (
       err.message.includes(
         'refusing to allow a GitHub App to create or update workflow'
@@ -712,6 +720,13 @@ export async function commitFiles({
         'App has not been granted permissions to update Workflows - aborting branch.'
       );
       return null;
+    }
+    if (err.message.includes('protected branch hook declined')) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.location = branchName;
+      error.validationError = 'Renovate branch is protected';
+      error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
+      throw error;
     }
     if (err.message.includes('remote: error: cannot lock ref')) {
       logger.error({ err }, 'Error committing files.');

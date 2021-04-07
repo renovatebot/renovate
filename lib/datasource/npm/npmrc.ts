@@ -130,9 +130,8 @@ export function resolvePackage(packageName: string): PackageResolution {
       'Using auth (via npmrc) for npm lookup'
     );
   } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
-    logger.trace(
-      { token: maskToken(process.env.NPM_TOKEN), npmName: packageName },
-      'Using auth (via process.env.NPM_TOKEN) for npm lookup'
+    logger.warn(
+      'Support for NPM_TOKEN in env will be dropped in the next major release'
     );
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
   }

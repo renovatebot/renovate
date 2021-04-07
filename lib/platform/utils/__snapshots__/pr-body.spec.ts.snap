@@ -35,11 +35,11 @@ exports[`platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 
 ##### Features
 
--   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithu</details>
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https:</details>
 
 ---
 
-### Renovate configuration
+### Configuration
 
 :date: **Schedule**: At any time (no schedule defined).
 

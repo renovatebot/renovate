@@ -4,6 +4,7 @@ import type { Preset } from './types';
 
 export const PRESET_DEP_NOT_FOUND = 'dep not found';
 export const PRESET_NOT_FOUND = 'preset not found';
+export const PRESET_INVALID_JSON = 'invalid preset JSON';
 
 export type PresetFetcher = (
   repo: string,

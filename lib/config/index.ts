@@ -64,10 +64,6 @@ export async function parseConfigs(
 
   config = mergeChildConfig(defaultConfig, config);
 
-  if (config.prFooter !== defaultConfig.prFooter) {
-    config.customPrFooter = true;
-  }
-
   if (config.forceCli) {
     const forcedCli = { ...cliConfig };
     delete forcedCli.token;
