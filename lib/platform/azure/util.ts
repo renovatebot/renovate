@@ -1,5 +1,6 @@
 import {
   GitPullRequest,
+  GitRepository,
   GitStatusContext,
   PullRequestAsyncStatus,
   PullRequestStatus,
@@ -181,4 +182,23 @@ export function getProjectAndRepo(
   const msg = `${str} can be only structured this way : 'repository' or 'projectName/repository'!`;
   logger.error(msg);
   throw new Error(msg);
+}
+
+export function getRepoByName(
+  name: string,
+  repos: GitRepository[]
+): GitRepository | null {
+  logger.trace(`getRepoByName(${name})`);
+
+  let { project, repo } = getProjectAndRepo(name);
+  project = project.toLowerCase();
+  repo = repo.toLowerCase();
+
+  return (
+    repos?.find(
+      (r) =>
+        project === r?.project?.name?.toLowerCase() &&
+        repo === r?.name?.toLowerCase()
+    ) || null
+  );
 }
