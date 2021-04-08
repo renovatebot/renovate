@@ -15,12 +15,8 @@ import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
 import type { EnsurePrResult } from '../pr';
 import type { Pr } from '../repository/onboarding/branch/check';
-import type {
-  BranchConfig,
-  BranchUpgradeConfig,
-  PrResult,
-  ProcessBranchResult,
-} from '../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { PrResult, ProcessBranchResult } from '../types';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
