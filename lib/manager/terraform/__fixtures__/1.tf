@@ -79,6 +79,31 @@ module "vote_service_sg" {
   ]
 }
 
+module "addons_aws" {
+
+  providers = {
+    helm       = helm.core
+    kubectl    = kubectl.core
+    kubernetes = kubernetes.core
+  }
+
+  cluster-name = data.aws_eks_cluster.core_cluster.id
+
+  aws-ebs-csi-driver = {
+    enabled          = true
+    is_default_class = true
+    version = "1.0.0"
+  }
+
+
+  source  = "particuleio/addons/kubernetes//modules/aws"
+  version = "1.28.3"
+
+  aws-load-balancer-controller = {
+    enabled = true
+  }
+}
+
 module "consul" {
   source  = "app.terraform.io/example-corp/k8s-cluster/azurerm"
   version = "~> 1.1.0"

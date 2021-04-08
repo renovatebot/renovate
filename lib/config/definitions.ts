@@ -107,6 +107,17 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'secrets',
+    description: 'Object containing secret name/value pairs',
+    type: 'object',
+    admin: true,
+    mergeable: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'extends',
     description:
       'Configuration presets to use/extend. Note: does not work if configured in config.js.',
@@ -239,6 +250,14 @@ const options: RenovateOptions[] = [
     admin: true,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'dockerChildPrefix',
+    description:
+      'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
+    type: 'string',
+    admin: true,
+    default: 'renovate_',
   },
   {
     name: 'dockerImagePrefix',
@@ -590,6 +609,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
   },
   {
+    name: 'gitIgnoredAuthors',
+    description:
+      'Additional git authors which are ignored by Renovate. Must conform to RFC5322.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+  },
+  {
     name: 'enabledManagers',
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
@@ -782,6 +809,32 @@ const options: RenovateOptions[] = [
     name: 'excludePackageNames',
     description:
       'Package names to exclude. Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchPackagePrefixes',
+    description:
+      'Package name prefixes to match. Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludePackagePrefixes',
+    description:
+      'Package name prefixes to exclude. Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1479,6 +1532,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodUpdateImportPaths',
       'gomodTidy',
       'npmDedupe',
       'yarnDedupeFewer',
@@ -1692,6 +1746,17 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     parent: 'hostRules',
     default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'authType',
+    description:
+      'Authentication type for http header. e.g. "Bearer" or "Basic".',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: 'Bearer',
     cli: false,
     env: false,
   },

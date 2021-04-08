@@ -134,7 +134,7 @@ export async function updateArtifacts({
         COMPOSER_AUTH: getAuthJson(),
       },
       docker: {
-        image: 'renovate/composer',
+        image: 'composer',
         tagConstraint: getConstraint(config),
         tagScheme: composerVersioningId,
       },

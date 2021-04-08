@@ -24,7 +24,7 @@ export async function prAlreadyExisted(
     const prDetails = await platform.getPr(pr.number);
     // istanbul ignore if
     if (prDetails.state === PrState.Open) {
-      logger.debug('PR reopened');
+      logger.debug('PR reopened - aborting run');
       throw new Error(REPOSITORY_CHANGED);
     }
     return pr;

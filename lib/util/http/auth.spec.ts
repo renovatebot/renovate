@@ -112,6 +112,32 @@ describe(getName(__filename), () => {
     });
   });
 
+  it(`npm basic token`, () => {
+    const opts: GotOptions = {
+      headers: {},
+      token: 'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+      hostType: 'npm',
+      context: {
+        authType: 'Basic',
+      },
+    };
+
+    applyAuthorization(opts);
+
+    expect(opts).toMatchInlineSnapshot(`
+      Object {
+        "context": Object {
+          "authType": "Basic",
+        },
+        "headers": Object {
+          "authorization": "Basic a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
+        },
+        "hostType": "npm",
+        "token": "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
+      }
+    `);
+  });
+
   describe('removeAuthorization', () => {
     it('no authorization', () => {
       const opts = partial<NormalizedOptions>({

@@ -66,7 +66,7 @@ Branches have names like `renovate/webpack-1.x` instead of `renovate/webpack-1.2
 We do this because:
 
 - Branches often receive updates (e.g. new patches) before they're merged
-- Naming the branch like `1.x` means its name still names sense if a `1.2.1` release happens
+- Naming the branch like `1.x` means its name still makes sense if a `1.2.1` release happens
 
 Note: You can configure the branch names by using the string template `branchName` and/or its sub-templates `branchPrefix` and `branchTopic`.
 
@@ -90,7 +90,7 @@ String templates (e.g. commit or PR name) are not configurable via CLI options, 
 If you must configure via CLI, use an environment variable instead. e.g.
 
 ```sh
-$ RENOVATE_BRANCH_NAME=foo renovate
+RENOVATE_BRANCH_NAME=foo renovate
 ```
 
 Alternatively, consider using a Configuration File.

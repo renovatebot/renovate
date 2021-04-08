@@ -4,12 +4,14 @@ import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
+import { trimTrailingSlash } from '../../util/url';
 import * as bitbucket from '../bitbucket-tags';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'go';
+export const customRegistrySupport = false;
 
 const http = new Http(id);
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
@@ -115,8 +117,11 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       const parsedUrl = URL.parse(goImportURL);
 
       // split the go module from the URL: host/go/module -> go/module
-      const split = goModule.split('/');
-      const lookupName = split[1] + '/' + split[2];
+      const lookupName = trimTrailingSlash(parsedUrl.pathname)
+        .replace(/\.git$/, '')
+        .split('/')
+        .slice(-2)
+        .join('/');
 
       return {
         datasource: github.id,

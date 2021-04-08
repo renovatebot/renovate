@@ -57,23 +57,19 @@ export async function parseConfigs(
   const cliConfig = await resolveConfigPresets(cliParser.getConfig(argv));
   const envConfig = await resolveConfigPresets(envParser.getConfig(env));
 
-  let config = mergeChildConfig(fileConfig, envConfig);
+  let config: GlobalConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
   const combinedConfig = config;
 
   config = mergeChildConfig(defaultConfig, config);
 
-  if (config.prFooter !== defaultConfig.prFooter) {
-    config.customPrFooter = true;
-  }
-
   if (config.forceCli) {
     const forcedCli = { ...cliConfig };
     delete forcedCli.token;
     delete forcedCli.hostRules;
     if (config.force) {
-      config.force = Object.assign(config.force, forcedCli);
+      config.force = { ...config.force, ...forcedCli };
     } else {
       config.force = forcedCli;
     }

@@ -60,7 +60,7 @@ export async function generateLockFiles(
       let installNpm = 'npm i -g npm';
       const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
-        installNpm += `@${quote(npmCompatibility)}`;
+        installNpm += `@${quote(npmCompatibility)} || true`;
       }
       preCommands.push(installNpm, 'hash -d npm');
       cmdOptions = '--ignore-scripts  --no-audit';
@@ -89,7 +89,7 @@ export async function generateLockFiles(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
@@ -107,10 +107,11 @@ export async function generateLockFiles(
       const homeNpmrc = join(homeDir, '.npmrc');
       execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
-    cmd.push(`${lernaClient} install ${cmdOptions}`);
     const lernaVersion = getLernaVersion(lernaPackageFile);
     logger.debug('Using lerna version ' + lernaVersion);
     preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
+    cmd.push('lerna info || echo "Ignoring lerna info failure"');
+    cmd.push(`${lernaClient} install ${cmdOptions}`);
     cmd.push(lernaCommand);
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {

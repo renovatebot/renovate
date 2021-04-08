@@ -11,6 +11,7 @@ import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'packagist';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://packagist.org'];
 export const defaultVersioning = composerVersioning.id;
 export const registryStrategy = 'hunt';
@@ -19,13 +20,13 @@ const http = new Http(id);
 
 // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
 function getHostOpts(url: string): HttpOptions {
-  const opts: HttpOptions = {};
+  let opts: HttpOptions = {};
   const { username, password } = hostRules.find({
     hostType: id,
     url,
   });
   if (username && password) {
-    Object.assign(opts, { username, password });
+    opts = { ...opts, username, password };
   }
   return opts;
 }

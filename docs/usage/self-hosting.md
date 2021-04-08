@@ -5,14 +5,14 @@
 ### npmjs
 
 ```sh
-$ npm install -g renovate
+npm install -g renovate
 ```
 
 Renovate does not embed `npm`, `pnpm` and `yarn` as its own dependencies.
 If you want to use these package managers to update your lockfiles, you must ensure that the correct versions are already installed globally.
 
 ```sh
-$ npm install -g yarn pnpm
+npm install -g yarn pnpm
 ```
 
 The same goes for any other third party binary tool like `gradle` or `poetry` - you need to make sure they are installed and the appropriate version before running Renovate.
@@ -24,10 +24,10 @@ It builds `latest` based on the `master` branch and all semver tags are publishe
 For example, all the following are valid tags:
 
 ```sh
-$ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:24.53.0
-$ docker run --rm renovate/renovate:24.53
-$ docker run --rm renovate/renovate:24
+docker run --rm renovate/renovate
+docker run --rm renovate/renovate:24.53.0
+docker run --rm renovate/renovate:24.53
+docker run --rm renovate/renovate:24
 ```
 
 Do not use the example tags listed above, as they will be out-of-date.
@@ -37,7 +37,7 @@ If you want to configure Renovate using a `config.js` file then map it to `/usr/
 For example:
 
 ```sh
-$ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
+docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
 ```
 
 ### Kubernetes
@@ -66,6 +66,9 @@ spec:
               args:
                 - user/repo
               # Environment Variables
+              env:
+                - name: LOG_LEVEL
+                  value: debug
               envFrom:
                 - secretRef:
                     name: renovate-env
@@ -131,6 +134,8 @@ spec:
                   value: '/tmp/renovate/'
                 - name: RENOVATE_CONFIG_FILE
                   value: '/opt/renovate/config.json'
+                - name: LOG_LEVEL
+                  value: debug
               volumeMounts:
                 - name: config-volume
                   mountPath: /opt/renovate/
@@ -191,10 +196,19 @@ Self-hosted Renovate can be configured using any of the following (or a combinat
 
 - A `config.js` file (can also be named `config.json`, but you can't have both at the same time)
 - CLI parameters
-- Environment parameters
+- Environment variables
 
 Note that some Renovate configuration options are _only_ available for self-hosting, and so can only be configured using one of the above methods.
 These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
+
+If you are configuring using environment variables, there are two possibilities:
+
+- Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
+- Set `RENOVATE_CONFIG` to a [stringified](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) version of the full JSON config, e.g. `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
+
+If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
+
+Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
 ## Authentication
 
@@ -226,6 +240,8 @@ Create a [Personal Access Token](https://confluence.atlassian.com/bitbucketserve
 Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
 Also configure the `username` for your bot account too, if you decided not to name it `@renovate-bot`.
 Don't forget to configure `platform=bitbucket-server` somewhere in config.
+
+If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
 ### Azure DevOps
 

@@ -1,13 +1,13 @@
 import type { ValidationMessage } from '../../../../config/types';
 import {
   Release,
+  getDatasourceList,
   getDefaultVersioning,
   getDigest,
   getPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../datasource';
-import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
 import type { LookupUpdate } from '../../../../manager/types';
@@ -46,7 +46,10 @@ export async function lookupUpdates(
   );
   const res: UpdateResult = { updates: [], warnings: [] } as any;
   // istanbul ignore if
-  if (!isGetPkgReleasesConfig(config)) {
+  if (
+    !isGetPkgReleasesConfig(config) ||
+    !getDatasourceList().includes(datasource)
+  ) {
     res.skipReason = SkipReason.InvalidConfig;
     return res;
   }
@@ -56,7 +59,7 @@ export async function lookupUpdates(
     if (!dependency) {
       // If dependency lookup fails then warn and return
       const warning: ValidationMessage = {
-        depName,
+        topic: depName,
         message: `Failed to look up dependency ${depName}`,
       };
       logger.debug({ dependency: depName, packageFile }, warning.message);
@@ -95,7 +98,7 @@ export async function lookupUpdates(
       const taggedVersion = dependency.tags[followTag];
       if (!taggedVersion) {
         res.warnings.push({
-          depName,
+          topic: depName,
           message: `Can't find version with tag ${followTag} for ${depName}`,
         });
         return res;
@@ -116,7 +119,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (!rollback) {
         res.warnings.push({
-          depName,
+          topic: depName,
           message: `Can't find version matching ${currentValue} for ${depName}`,
         });
         return res;
@@ -299,7 +302,7 @@ export async function lookupUpdates(
   }
   // Add digests if necessary
   if (supportsDigests(config)) {
-    if (currentDigest && datasource !== datasourceGitSubmodules.id) {
+    if (currentDigest) {
       if (!digestOneAndOnly || !res.updates.length) {
         // digest update
         res.updates.push({
@@ -314,14 +317,6 @@ export async function lookupUpdates(
         res.updates.push({
           updateType: 'pin',
           newValue: currentValue,
-        });
-      }
-    } else if (datasource === datasourceGitSubmodules.id) {
-      const dependency = clone(await getPkgReleases(config));
-      if (dependency?.releases[0]?.version) {
-        res.updates.push({
-          updateType: 'digest',
-          newValue: dependency.releases[0].version,
         });
       }
     }

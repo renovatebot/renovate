@@ -66,7 +66,7 @@ There are multiple reasons why Renovate may need to "recreate" PRs after you mer
 
 Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off `master` before you can test and merge again, and Renovate won't do this until it's back in schedule.
 
-#### Selective scheduling
+### Selective scheduling
 
 Don't think that you need to apply blanket rules to scheduling.
 Remember that Renovate's configuration is highly flexible so you can configure `automerge` anywhere from globally (entire repo) right down to a package/upgrade type level.
@@ -116,7 +116,7 @@ For example, if you have `jest` or `mocha` as a dependency, and it has an upgrad
 If you have a linter like `eslint` or `tslint` and its update passes: automerge them!
 If you have an API with 100% test coverage and `express` is updated: automerge it!
 
-#### Branch automerging
+### Branch automerging
 
 Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged.
 For this reason we recommend you consider setting `automergeType=branch` which will mean:
@@ -127,7 +127,7 @@ For this reason we recommend you consider setting `automergeType=branch` which w
 
 The result is that passing updates are essentially "silent" - the only sign of them are the commits to your `master` branch.
 
-#### Automerging and scheduling
+### Automerging and scheduling
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.
 And this is especially so if your repository needs rebasing, e.g. because you use lock files. e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.

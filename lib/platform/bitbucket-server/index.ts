@@ -118,19 +118,28 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-export async function getJsonFile(fileName: string): Promise<any | null> {
-  try {
-    const { body } = await bitbucketServerHttp.getJson<FileData>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/browse/${fileName}?limit=20000`
-    );
-    if (body.isLastPage) {
-      return JSON.parse(body.lines.map((l) => l.text).join(''));
-    }
-    logger.warn({ size: body.size }, `The file is too big`);
-  } catch (err) {
-    // no-op
+export async function getRawFile(
+  fileName: string,
+  repo: string = config.repository
+): Promise<string | null> {
+  const [project, slug] = repo.split('/');
+  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
+  const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
+  const { isLastPage, lines, size } = res.body;
+  if (isLastPage) {
+    return lines.map(({ text }) => text).join('');
   }
-  return null;
+  const msg = `The file is too big (${size}B)`;
+  logger.warn({ size }, msg);
+  throw new Error(msg);
+}
+
+export async function getJsonFile(
+  fileName: string,
+  repo: string = config.repository
+): Promise<any | null> {
+  const raw = await getRawFile(fileName, repo);
+  return JSON.parse(raw);
 }
 
 // Initialize BitBucket Server by getting base branch
@@ -408,6 +417,7 @@ export async function getBranchStatus(
   }
 
   if (!git.branchExists(branchName)) {
+    logger.debug('Branch does not exist - cannot fetch status');
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -604,6 +614,9 @@ export async function addReviewers(
       err.statusCode === 409 &&
       !utils.isInvalidReviewersResponse(err)
     ) {
+      logger.debug(
+        '409 response to adding reviewers - has repository changed?'
+      );
       throw new Error(REPOSITORY_CHANGED);
     } else {
       throw err;

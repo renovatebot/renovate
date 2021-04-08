@@ -1,13 +1,20 @@
+import { OutgoingHttpHeaders } from 'http';
+import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
+import registryAuthToken from 'registry-auth-token';
+import getRegistryUrl from 'registry-auth-token/registry-url';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
+import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
 
 let npmrc: Record<string, any> | null = null;
 let npmrcRaw: string;
 
-export function getNpmrc(): Record<string, any> | null {
+export type Npmrc = Record<string, any>;
+
+export function getNpmrc(): Npmrc | null {
   return npmrc;
 }
 
@@ -85,4 +92,48 @@ export function setNpmrc(input?: string): void {
     npmrc = null;
     npmrcRaw = null;
   }
+}
+
+export interface PackageResolution {
+  headers: OutgoingHttpHeaders;
+  packageUrl: string;
+  registryUrl: string;
+}
+
+export function resolvePackage(packageName: string): PackageResolution {
+  const scope = packageName.split('/')[0];
+  let registryUrl: string;
+  try {
+    registryUrl = getRegistryUrl(scope, getNpmrc());
+  } catch (err) {
+    registryUrl = 'https://registry.npmjs.org';
+  }
+  const packageUrl = url.resolve(
+    registryUrl,
+    encodeURIComponent(packageName).replace(/^%40/, '@')
+  );
+  const headers: OutgoingHttpHeaders = {};
+  let authInfo = registryAuthToken(registryUrl, { npmrc, recursive: true });
+  if (
+    !authInfo &&
+    npmrc &&
+    npmrc._authToken &&
+    registryUrl.replace(/\/?$/, '/') === npmrc.registry?.replace(/\/?$/, '/')
+  ) {
+    authInfo = { type: 'Bearer', token: npmrc._authToken };
+  }
+
+  if (authInfo?.type && authInfo.token) {
+    headers.authorization = `${authInfo.type} ${authInfo.token}`;
+    logger.trace(
+      { token: maskToken(authInfo.token), npmName: packageName },
+      'Using auth (via npmrc) for npm lookup'
+    );
+  } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
+    logger.warn(
+      'Support for NPM_TOKEN in env will be dropped in the next major release'
+    );
+    headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
+  }
+  return { headers, packageUrl, registryUrl };
 }

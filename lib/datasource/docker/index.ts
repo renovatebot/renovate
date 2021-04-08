@@ -11,6 +11,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { Image, ImageList, MediaType } from './types';
@@ -19,6 +20,7 @@ import { Image, ImageList, MediaType } from './types';
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
 export const id = 'docker';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://index.docker.io'];
 export const defaultVersioning = dockerVersioning.id;
 export const registryStrategy = 'first';
@@ -66,9 +68,14 @@ export function getRegistryRepository(
   registryUrl: string
 ): RegistryRepository {
   if (registryUrl !== defaultRegistryUrls[0]) {
-    const registry = registryUrl.replace('https://', '');
-    const registryEndingWithSlash = registry.replace(/\/?$/, '/');
+    const registryEndingWithSlash = ensureTrailingSlash(
+      registryUrl.replace(/^https?:\/\//, '')
+    );
     if (lookupName.startsWith(registryEndingWithSlash)) {
+      let registry = trimTrailingSlash(registryUrl);
+      if (!/^https?:\/\//.test(registry)) {
+        registry = `https://${registry}`;
+      }
       return {
         registry,
         repository: lookupName.replace(registryEndingWithSlash, ''),
@@ -344,7 +351,10 @@ async function getConfigDigest(
     return null;
   }
 
-  if (manifest.mediaType === MediaType.manifestListV2) {
+  if (
+    manifest.mediaType === MediaType.manifestListV2 &&
+    manifest.manifests.length
+  ) {
     logger.trace(
       { registry, dockerRepository, tag },
       'Found manifest list, using first image'
@@ -357,7 +367,7 @@ async function getConfigDigest(
   }
 
   if (manifest.mediaType === MediaType.manifestV2) {
-    return manifest.config.digest;
+    return manifest.config?.digest || null;
   }
 
   logger.debug({ manifest }, 'Invalid manifest - returning');

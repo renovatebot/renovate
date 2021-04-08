@@ -1,0 +1,20 @@
+image:
+  # comment
+  name: renovate/renovate:19.70.8-slim
+
+services:
+  # comment
+  - mariadb:10.4.11
+  # another comment
+  - other/image:1.0.0
+
+include:
+  - local: 'lib/manager/gitlabci/__fixtures__/include.yml'
+  - local: 'lib/manager/gitlabci/__fixtures__/include.yml' # Loop detection
+  - local: 'lib/manager/gitlabci/__fixtures__/include.1.yml'
+  - project: 'my-group/my-project'
+    ref: master
+    file: '/templates/.gitlab-ci-template.yml'
+
+script:
+  - !reference [.setup, script]

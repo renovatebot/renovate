@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 import is from '@sindresorhus/is';
 import {
   GitPullRequestMergeStrategy,
@@ -127,13 +128,13 @@ describe('platform/azure', () => {
         ({
           getRepositories: jest.fn(() => [
             {
-              name: 'some-repo',
+              name: 'repo',
               id: '1',
               privateRepo: true,
               isFork: false,
               defaultBranch: 'defBr',
               project: {
-                name: 'some-repo',
+                name: 'some',
               },
             },
             {
@@ -145,10 +146,6 @@ describe('platform/azure', () => {
           ]),
         } as any)
     );
-    azureHelper.getProjectAndRepo.mockImplementationOnce(() => ({
-      project: 'some-repo',
-      repo: 'some-repo',
-    }));
 
     if (is.string(args)) {
       return azure.initRepo({
@@ -165,7 +162,7 @@ describe('platform/azure', () => {
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
       const config = await initRepo({
-        repository: 'some-repo',
+        repository: 'some/repo',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
@@ -478,12 +475,12 @@ describe('platform/azure', () => {
   });
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
-      await initRepo('some-repo');
+      await initRepo('some/repo');
       const res = await azure.getBranchStatus('somebranch', null);
       expect(res).toEqual(BranchStatus.green);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some-repo');
+      await initRepo('some/repo');
       const res = await azure.getBranchStatus('somebranch', ['foo']);
       expect(res).toEqual(BranchStatus.red);
     });
@@ -1184,20 +1181,38 @@ describe('platform/azure', () => {
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
-      azureHelper.getFile.mockResolvedValueOnce(JSON.stringify(data));
-      await initRepo({
-        repository: 'some-repo',
-      });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() =>
+              Promise.resolve(Readable.from(JSON.stringify(data)))
+            ),
+          } as any)
+      );
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
-    it('returns null on errors', async () => {
-      azureHelper.getFile.mockRejectedValueOnce('some error');
-      await initRepo({
-        repository: 'some-repo',
-      });
-      const res = await azure.getJsonFile('file.json');
-      expect(res).toBeNull();
+    it('throws on malformed JSON', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() =>
+              Promise.resolve(Readable.from('!@#'))
+            ),
+          } as any)
+      );
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
+    });
+    it('throws on errors', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() => {
+              throw new Error('some error');
+            }),
+          } as any)
+      );
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
   });
 });

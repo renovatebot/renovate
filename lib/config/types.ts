@@ -61,6 +61,7 @@ export interface RenovateSharedConfig {
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
+  gitIgnoredAuthors?: string[];
 }
 
 // Config options used only within the global worker
@@ -86,6 +87,7 @@ export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
   customEnvVariables?: Record<string, string>;
+  dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
@@ -126,6 +128,7 @@ export type RenovateRepository =
   | string
   | {
       repository: string;
+      secrets?: Record<string, string>;
     };
 
 export interface CustomManager {
@@ -151,7 +154,7 @@ export interface RenovateConfig
   defaultBranch?: string;
   branchList?: string[];
   description?: string | string[];
-
+  force?: RenovateConfig;
   errors?: ValidationMessage[];
 
   gitAuthor?: string;
@@ -188,6 +191,7 @@ export interface RenovateConfig
   regexManagers?: CustomManager[];
 
   fetchReleaseNotes?: boolean;
+  secrets?: Record<string, string>;
 }
 
 export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
@@ -229,15 +233,17 @@ export interface PackageRule
   matchDepTypes?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
+  matchPackagePrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
+  excludePackagePrefixes?: string[];
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchUpdateTypes?: UpdateType[];
 }
 
 export interface ValidationMessage {
-  depName: string;
+  topic: string;
   message: string;
 }
 
