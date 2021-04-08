@@ -579,7 +579,9 @@ const options: RenovateOptions[] = [
     name: 'autodiscoverFilter',
     description: 'Filter the list of autodiscovered repositories.',
     stage: 'global',
-    type: 'string',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
     default: null,
   },
   {
