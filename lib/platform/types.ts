@@ -61,8 +61,6 @@ export interface Pr {
   targetBranch?: string;
   title: string;
   isDraft?: boolean;
-  /** whether the PR needs to be squashed when it is automerged. Only affects GitLab */
-  squash?: boolean;
 }
 
 /**
@@ -152,7 +150,7 @@ export interface Platform {
   ): Promise<EnsureIssueResult | null>;
   massageMarkdown(prBody: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
-  mergePr(number: number, branchName: string, pr: Pr): Promise<boolean>;
+  mergePr(number: number, branchName: string): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr>;

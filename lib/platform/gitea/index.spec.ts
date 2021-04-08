@@ -12,7 +12,7 @@ import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/gitea';
-import { PlatformResult, Pr } from '../types';
+import { PlatformResult } from '../types';
 import * as ght from './gitea-helper';
 
 /**
@@ -890,7 +890,7 @@ describe(getName(__filename), () => {
     it('should return true when merging succeeds', async () => {
       await initFakeRepo();
 
-      expect(await gitea.mergePr(1, 'some-branch', {} as Pr)).toEqual(true);
+      expect(await gitea.mergePr(1, 'some-branch')).toEqual(true);
       expect(helper.mergePR).toHaveBeenCalledTimes(1);
       expect(helper.mergePR).toHaveBeenCalledWith(
         mockRepo.full_name,
@@ -903,7 +903,7 @@ describe(getName(__filename), () => {
       helper.mergePR.mockRejectedValueOnce(new Error());
       await initFakeRepo();
 
-      expect(await gitea.mergePr(1, 'some-branch', {} as Pr)).toEqual(false);
+      expect(await gitea.mergePr(1, 'some-branch')).toEqual(false);
     });
   });
 

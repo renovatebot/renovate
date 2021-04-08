@@ -4,7 +4,7 @@ import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/bitbucket';
-import type { Platform, Pr, RepoParams } from '../types';
+import type { Platform, RepoParams } from '../types';
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -829,7 +829,7 @@ describe('platform/bitbucket', () => {
     it('posts Merge', async () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
-      await bitbucket.mergePr(5, 'branch', {} as Pr);
+      await bitbucket.mergePr(5, 'branch');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
