@@ -42,6 +42,7 @@ import {
   getNewBranchName,
   getProjectAndRepo,
   getRenovatePRFormat,
+  getRepoByName,
   getStorageExtraCloneOpts,
   max4000Chars,
   streamToString,
@@ -109,19 +110,29 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repoId
+  repoName?: string
 ): Promise<string | null> {
   const azureApiGit = await azureApi.gitApi();
-  const buf = await azureApiGit.getItemContent(repo, fileName);
+
+  let repoId: string;
+  if (repoName) {
+    const repos = await azureApiGit.getRepositories();
+    const repo = getRepoByName(repoName, repos);
+    repoId = repo.id;
+  } else {
+    repoId = config.repoId;
+  }
+
+  const buf = await azureApiGit.getItemContent(repoId, fileName);
   const str = await streamToString(buf);
   return str;
 }
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repoId
+  repoName?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName);
   return JSON.parse(raw);
 }
 
@@ -134,12 +145,7 @@ export async function initRepo({
   config = { repository } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  const names = getProjectAndRepo(repository);
-  const repo = repos.filter(
-    (c) =>
-      c.name.toLowerCase() === names.repo.toLowerCase() &&
-      c.project.name.toLowerCase() === names.project.toLowerCase()
-  )[0];
+  const repo = getRepoByName(repository, repos);
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   // istanbul ignore if
   if (!repo.defaultBranch) {
@@ -153,6 +159,7 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
+  const names = getProjectAndRepo(repository);
   config.defaultMergeMethod = await azureHelper.getMergeMethod(
     repo.id,
     names.project
