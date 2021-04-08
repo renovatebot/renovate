@@ -2,15 +2,20 @@ import * as datasourceGalaxyCollection from '../../datasource/galaxy-collection'
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
-import { PackageDependency } from '../types';
-import { blockLineRegEx, galaxyDepRegex, newBlockRegEx } from './util';
+import type { PackageDependency } from '../types';
+import {
+  blockLineRegEx,
+  galaxyDepRegex,
+  nameMatchRegex,
+  newBlockRegEx,
+} from './util';
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
   lineNumber: number,
   dependency: PackageDependency
-): PackageDependency {
-  const localDependency: PackageDependency = dependency;
+): void {
+  const localDependency = dependency;
   const key = lineMatch[2];
   const value = lineMatch[3].replace(/["']/g, '');
   switch (key) {
@@ -37,13 +42,12 @@ function interpretLine(
       localDependency.skipReason = SkipReason.Unsupported;
     }
   }
-  return localDependency;
 }
 
 function handleGitDep(
   dep: PackageDependency,
   nameMatch: RegExpExecArray
-): PackageDependency {
+): void {
   /* eslint-disable no-param-reassign */
   dep.datasource = datasourceGitTags.id;
 
@@ -67,17 +71,15 @@ function handleGitDep(
       dep.currentValue = dep.managerData.version;
     }
   }
-  return dep;
   /* eslint-enable no-param-reassign */
 }
 
-function handleGalaxyDep(dep: PackageDependency): PackageDependency {
+function handleGalaxyDep(dep: PackageDependency): void {
   /* eslint-disable no-param-reassign */
   dep.datasource = datasourceGalaxyCollection.id;
   dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
   dep.currentValue = dep.managerData.version;
-  return dep;
   /* eslint-enable no-param-reassign */
 }
 
@@ -86,7 +88,6 @@ function finalize(dependency: PackageDependency): boolean {
   dep.depName = dep.managerData.name;
 
   const name = dep.managerData.name;
-  const nameMatchRegex = /^(?<source>(git|http|git\+http|ssh)s?(:\/\/|@)(?<hostname>.*)(\/|:)(?<depName>.+\/[^.,]+)\/?(\.git)?)(,(?<version>.*))?$/;
   const nameMatch = nameMatchRegex.exec(name);
 
   // use type if defined
@@ -131,7 +132,7 @@ export function extractCollections(lines: string[]): PackageDependency[] {
     let lineMatch = newBlockRegEx.exec(lines[lineNumber]);
     if (lineMatch) {
       const dep: PackageDependency = {
-        depType: 'collection',
+        depType: 'galaxy-collection',
         managerData: {
           name: null,
           version: null,

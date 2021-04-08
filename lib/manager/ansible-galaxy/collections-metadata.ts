@@ -1,11 +1,10 @@
 import * as datasourceGalaxyCollection from '../../datasource/galaxy-collection';
-import { PackageDependency } from '../types';
+import type { PackageDependency } from '../types';
+import { dependencyRegex, galaxyRegEx } from './util';
 
 export function extractCollectionsMetaDataFile(
   lines: string[]
 ): PackageDependency[] {
-  const dependencyRegex = /^dependencies:/;
-  const galaxyRegEx = /^\s+(?<lookupName>[\w.]+):\s*["'](?<version>.+)["']\s*/;
   const deps: PackageDependency[] = [];
   // in a galaxy.yml the dependency map is inside a `dependencies:` block
   let foundDependencyBlock = false;
@@ -19,7 +18,7 @@ export function extractCollectionsMetaDataFile(
       const galaxyRegExResult = galaxyRegEx.exec(line);
       if (galaxyRegExResult) {
         const dep: PackageDependency = {
-          depType: 'collection',
+          depType: 'galaxy-collection',
           datasource: datasourceGalaxyCollection.id,
           depName: galaxyRegExResult.groups.lookupName,
           currentValue: galaxyRegExResult.groups.version,

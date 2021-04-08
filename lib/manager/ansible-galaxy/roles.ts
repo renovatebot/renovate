@@ -1,7 +1,7 @@
 import * as datasourceGalaxy from '../../datasource/galaxy';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import { SkipReason } from '../../types';
-import { PackageDependency } from '../types';
+import type { PackageDependency } from '../types';
 import { blockLineRegEx, galaxyDepRegex, newBlockRegEx } from './util';
 
 function interpretLine(
