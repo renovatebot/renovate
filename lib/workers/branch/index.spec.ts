@@ -14,8 +14,8 @@ import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
 import type { EnsurePrResult } from '../pr';
-import { Pr } from '../repository/onboarding/branch/check';
-import {
+import type { Pr } from '../repository/onboarding/branch/check';
+import type {
   BranchConfig,
   BranchUpgradeConfig,
   PrResult,
@@ -25,7 +25,7 @@ import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
 import * as _getUpdated from './get-updated';
-import { PackageFilesResult } from './get-updated';
+import type { PackageFilesResult } from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
