@@ -4,7 +4,10 @@ import {
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getNewBranchName,
+  getProjectAndRepo,
   getRenovatePRFormat,
+  getStorageExtraCloneOpts,
+  max4000Chars,
   streamToString,
 } from './util';
 
@@ -120,6 +123,59 @@ describe('platform/azure/helpers', () => {
       const res = streamToString(stream);
       stream.destroy(new Error('some unknown error'));
       await expect(res).rejects.toThrow('some unknown error');
+    });
+  });
+
+  describe('getStorageExtraCloneOpts', () => {
+    it('should configure basic auth', () => {
+      const res = getStorageExtraCloneOpts({
+        username: 'user',
+        password: 'pass',
+      });
+      expect(res).toMatchSnapshot();
+    });
+    it('should configure personal access token', () => {
+      const res = getStorageExtraCloneOpts({
+        token: '1234567890123456789012345678901234567890123456789012',
+      });
+      expect(res).toMatchSnapshot();
+    });
+    it('should configure bearer token', () => {
+      const res = getStorageExtraCloneOpts({ token: 'token' });
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('max4000Chars', () => {
+    it('should be the same', () => {
+      const res = max4000Chars('Hello');
+      expect(res).toMatchSnapshot();
+    });
+    it('should be truncated', () => {
+      let str = '';
+      for (let i = 0; i < 5000; i += 1) {
+        str += 'a';
+      }
+      const res = max4000Chars(str);
+      expect(res).toHaveLength(3999);
+    });
+  });
+
+  describe('getProjectAndRepo', () => {
+    it('should return the object with same strings', () => {
+      const res = getProjectAndRepo('myRepoName');
+      expect(res).toMatchSnapshot();
+    });
+    it('should return the object with project and repo', () => {
+      const res = getProjectAndRepo('prjName/myRepoName');
+      expect(res).toMatchSnapshot();
+    });
+    it('should return an error', () => {
+      expect(() => getProjectAndRepo('prjName/myRepoName/blalba')).toThrow(
+        Error(
+          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
+        )
+      );
     });
   });
 });
