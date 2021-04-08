@@ -115,5 +115,11 @@ describe('platform/azure/helpers', () => {
       const res = await streamToString(Readable.from('foobar'));
       expect(res).toEqual('foobar');
     });
+    it('handles error', async () => {
+      const stream = Readable.from('foobar');
+      const res = streamToString(stream);
+      stream.destroy(new Error('some unknown error'));
+      await expect(res).rejects.toThrow('some unknown error');
+    });
   });
 });
