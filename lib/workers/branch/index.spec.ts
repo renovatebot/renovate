@@ -13,7 +13,7 @@ import { File, StatusResult } from '../../util/git';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
-import { EnsurePr } from '../pr';
+import type { EnsurePrResult } from '../pr';
 import { Pr } from '../repository/onboarding/branch/check';
 import {
   BranchConfig,
@@ -445,7 +445,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.Created,
         pr: {},
-      } as EnsurePr);
+      } as EnsurePrResult);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -466,7 +466,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.Created,
         pr: {},
-      } as EnsurePr);
+      } as EnsurePrResult);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -487,7 +487,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.Created,
         pr: {},
-      } as EnsurePr);
+      } as EnsurePrResult);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -509,7 +509,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.Created,
         pr: {},
-      } as EnsurePr);
+      } as EnsurePrResult);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -531,7 +531,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.Created,
         pr: {},
-      } as EnsurePr);
+      } as EnsurePrResult);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
@@ -552,7 +552,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.Created,
         pr: {},
-      } as EnsurePr);
+      } as EnsurePrResult);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -667,7 +667,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.Created,
         pr: {},
-      } as EnsurePr);
+      } as EnsurePrResult);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       setAdminConfig({ dryRun: true });
       expect(
