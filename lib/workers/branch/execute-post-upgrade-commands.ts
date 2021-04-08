@@ -18,11 +18,14 @@ export type PostUpgradeCommandsExecutionResult = {
 
 export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
-  config: BranchConfig,
+  config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const artifactErrors = [...(config.artifactErrors || [])];
-  const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } = getAdminConfig();
+  const {
+    allowedPostUpgradeCommands,
+    allowPostUpgradeCommandTemplating,
+  } = getAdminConfig();
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -147,7 +150,22 @@ export async function postUpgradeCommandsExecutor(
 
 export default async function executePostUpgradeCommands(
   config: BranchConfig
-): Promise<PostUpgradeCommandsExecutionResult> {
+): Promise<PostUpgradeCommandsExecutionResult | null> {
+  const { allowedPostUpgradeCommands } = getAdminConfig();
+
+  const hasChangedFiles =
+    config.updatedPackageFiles?.length > 0 ||
+    config.updatedArtifacts?.length > 0;
+
+  if (
+    /* Only run post-upgrade tasks if there are changes to package files... */
+    !hasChangedFiles ||
+    getAdminConfig().trustLevel !== 'high' ||
+    is.emptyArray(allowedPostUpgradeCommands)
+  ) {
+    return null;
+  }
+
   const branchUpgradeCommands: BranchUpgradeConfig[] = [
     {
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
@@ -170,17 +188,10 @@ export default async function executePostUpgradeCommands(
   const {
     updatedArtifacts,
     artifactErrors,
-  } = await postUpgradeCommandsExecutor(
-    updateUpgradeCommands,
-    config,
-  );
-  return postUpgradeCommandsExecutor(
-    branchUpgradeCommands,
-    {
-      ...config,
-      updatedArtifacts,
-      artifactErrors,
-    },
-    false
-  );
+  } = await postUpgradeCommandsExecutor(updateUpgradeCommands, config);
+  return postUpgradeCommandsExecutor(branchUpgradeCommands, {
+    ...config,
+    updatedArtifacts,
+    artifactErrors,
+  });
 }

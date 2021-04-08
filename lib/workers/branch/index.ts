@@ -343,21 +343,10 @@ export async function processBranch(
     } else {
       logger.debug('No updated lock files in branch');
     }
+    const postUpgradeCommandResults = await executePostUpgradeCommands(config);
 
-    const { allowedPostUpgradeCommands } = getAdminConfig();
-
-    if (
-      /* Only run post-upgrade tasks if there are changes to package files... */
-      (config.updatedPackageFiles?.length > 0 ||
-        /* ... or changes to artifacts */
-        config.updatedArtifacts?.length > 0) &&
-      getAdminConfig().trustLevel === 'high' &&
-      is.nonEmptyArray(allowedPostUpgradeCommands)
-    ) {
-      const {
-        updatedArtifacts,
-        artifactErrors,
-      } = await executePostUpgradeCommands(config);
+    if (postUpgradeCommandResults !== null) {
+      const { updatedArtifacts, artifactErrors } = postUpgradeCommandResults;
       config.updatedArtifacts = updatedArtifacts;
       config.artifactErrors = artifactErrors;
     }
