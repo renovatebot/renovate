@@ -2152,18 +2152,17 @@ describe('platform/github', () => {
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null for malformed JSON', async () => {
+    it('throws on malformed JSON', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
         content: Buffer.from('!@#').toString('base64'),
       });
-      const res = await github.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null on errors', async () => {
+    it('throws on errors', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
@@ -2171,8 +2170,7 @@ describe('platform/github', () => {
         .get('/repos/some/repo/contents/file.json')
         .replyWithError('some error');
 
-      const res = await github.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

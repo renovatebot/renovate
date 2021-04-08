@@ -9,6 +9,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
+import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
@@ -19,11 +20,15 @@ describe('platform/gitlab', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
+  let logger: jest.Mocked<typeof _logger>;
+
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.resetAllMocks();
     gitlab = await import('.');
+    jest.mock('../../logger');
+    logger = (await import('../../logger')).logger as never;
     jest.mock('../../util/host-rules');
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
@@ -43,6 +48,25 @@ describe('platform/gitlab', () => {
   afterEach(() => {
     httpMock.reset();
   });
+
+  async function initFakePlatform(version: string) {
+    httpMock
+      .scope(gitlabApiHost)
+      .get('/api/v4/user')
+      .reply(200, {
+        email: 'a@b.com',
+        name: 'Renovate Bot',
+      })
+      .get('/api/v4/version')
+      .reply(200, {
+        version: `${version}-ee`,
+      });
+
+    await gitlab.initPlatform({
+      token: 'some-token',
+      endpoint: undefined,
+    });
+  }
 
   describe('initPlatform()', () => {
     it(`should throw if no token`, async () => {
@@ -830,14 +854,115 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('addReviewers(issueNo, reviewers)', () => {
-    it('should add the given reviewers to the PR', async () => {
-      // no-op
-      httpMock.scope(gitlabApiHost);
-      await gitlab.addReviewers(42, ['someuser', 'someotheruser']);
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
+  describe('addReviewers(iid, reviewers)', () => {
+    describe('13.8.0', () => {
+      it('should not be supported in too low version', async () => {
+        await initFakePlatform('13.8.0');
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(logger.warn).toHaveBeenCalledWith(
+          { version: '13.8.0' },
+          'Adding reviewers is only available in GitLab 13.9 and onwards'
+        );
+      });
+    });
+
+    describe('13.9.0', () => {
+      beforeEach(async () => {
+        await initFakePlatform('13.9.0');
+      });
+
+      const existingReviewers = [
+        { id: 1, username: 'foo' },
+        { id: 2, username: 'bar' },
+      ];
+
+      it('should fail to get existing reviewers', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+          )
+          .reply(404);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
+
+      it('should fail to get user IDs', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+          )
+          .reply(200, { reviewers: existingReviewers })
+          .get('/api/v4/users?username=someuser')
+          .reply(200, [{ id: 10 }])
+          .get('/api/v4/users?username=someotheruser')
+          .reply(404);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
+
+      it('should fail to add reviewers to the MR', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+          )
+          .reply(200, { reviewers: existingReviewers })
+          .get('/api/v4/users?username=someuser')
+          .reply(200, [{ id: 10 }])
+          .get('/api/v4/users?username=someotheruser')
+          .reply(200, [{ id: 15 }])
+          .put('/api/v4/projects/undefined/merge_requests/42', {
+            reviewer_ids: [1, 2, 10, 15],
+          })
+          .reply(404);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
+
+      it('should add the given reviewers to the MR', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+          )
+          .reply(200, { reviewers: existingReviewers })
+          .get('/api/v4/users?username=someuser')
+          .reply(200, [{ id: 10 }])
+          .get('/api/v4/users?username=someotheruser')
+          .reply(200, [{ id: 15 }])
+          .put('/api/v4/projects/undefined/merge_requests/42', {
+            reviewer_ids: [1, 2, 10, 15],
+          })
+          .reply(200);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
+
+      it('should only add reviewers if necessary', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+          )
+          .reply(200, { reviewers: existingReviewers })
+          .get('/api/v4/users?username=someuser')
+          .reply(200, [{ id: 1 }])
+          .get('/api/v4/users?username=someotheruser')
+          .reply(200, [{ id: 2 }]);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
     });
   });
+
   describe('ensureComment', () => {
     it('add comment if not found', async () => {
       const scope = await initRepo();
@@ -1387,6 +1512,7 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   const prBody = `https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
 
   Pull Requests are the best, here are some PRs.
@@ -1397,11 +1523,28 @@ These updates have all been created already. Click a checkbox below to force a r
 
  - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\`gh-got\`, \`gl-got\`, \`got\`)
 `;
+
   describe('massageMarkdown(input)', () => {
-    it('returns updated pr body', () => {
+    it('returns updated pr body', async () => {
+      jest.mock('../utils/pr-body');
+      const { smartTruncate } = require('../utils/pr-body');
+
+      await initFakePlatform('13.4.0');
       expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
+      expect(smartTruncate).not.toHaveBeenCalled();
+    });
+
+    it('truncates description if too low API version', async () => {
+      jest.mock('../utils/pr-body');
+      const { smartTruncate } = require('../utils/pr-body');
+
+      await initFakePlatform('13.3.0');
+      gitlab.massageMarkdown(prBody);
+      expect(smartTruncate).toHaveBeenCalledTimes(1);
+      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 25000);
     });
   });
+
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty', async () => {
       const res = await gitlab.getVulnerabilityAlerts();
@@ -1447,7 +1590,7 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null for malformed JSON', async () => {
+    it('throws on malformed JSON', async () => {
       const scope = await initRepo();
       scope
         .get(
@@ -1456,17 +1599,17 @@ These updates have all been created already. Click a checkbox below to force a r
         .reply(200, {
           content: Buffer.from('!@#').toString('base64'),
         });
-      const res = await gitlab.getJsonFile('dir/file.json');
-      expect(res).toBeNull();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null on errors', async () => {
+    it('throws on errors', async () => {
       const scope = await initRepo();
       scope
-        .get('/api/v4/projects/some%2Frepo/repository/files/file.json?ref=HEAD')
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
+        )
         .replyWithError('some error');
-      const res = await gitlab.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
