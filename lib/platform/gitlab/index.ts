@@ -414,6 +414,7 @@ async function fetchPrList(): Promise<Pr[]> {
         title: string;
         state: string;
         created_at: string;
+        squash: boolean;
       }[]
     >(urlString, { paginate: true });
     return res.body.map((pr) =>
@@ -423,6 +424,7 @@ async function fetchPrList(): Promise<Pr[]> {
         title: pr.title,
         state: pr.state === 'opened' ? PrState.Open : pr.state,
         createdAt: pr.created_at,
+        squash: pr.squash,
       })
     );
   } catch (err) /* istanbul ignore next */ {
@@ -442,7 +444,8 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 async function tryPrAutomerge(
-  pr: number,
+  prId: number,
+  pr: Pr,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
   if (platformOptions?.gitLabAutomerge) {
@@ -455,7 +458,7 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJson<{
           merge_status: string;
           pipeline: string;
-        }>(`projects/${config.repository}/merge_requests/${pr}`);
+        }>(`projects/${config.repository}/merge_requests/${prId}`);
         // Only continue if the merge request can be merged and has a pipeline.
         if (body.merge_status === desiredStatus && body.pipeline !== null) {
           break;
@@ -464,12 +467,12 @@ async function tryPrAutomerge(
       }
 
       await gitlabApi.putJson(
-        `projects/${config.repository}/merge_requests/${pr}/merge`,
+        `projects/${config.repository}/merge_requests/${prId}/merge`,
         {
           body: {
             should_remove_source_branch: true,
             merge_when_pipeline_succeeds: true,
-            squash: true,
+            squash: pr.squash,
           },
         }
       );
@@ -516,7 +519,7 @@ export async function createPr({
     config.prList.push(pr);
   }
 
-  await tryPrAutomerge(pr.iid, platformOptions);
+  await tryPrAutomerge(pr.iid, pr, platformOptions);
 
   return massagePr(pr);
 }
@@ -568,7 +571,7 @@ export async function updatePr({
     [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
   }[state];
-  await gitlabApi.putJson(
+  const res = await gitlabApi.putJson<Pr>(
     `projects/${config.repository}/merge_requests/${iid}`,
     {
       body: {
@@ -578,18 +581,23 @@ export async function updatePr({
       },
     }
   );
+  const pr = res.body;
 
-  await tryPrAutomerge(iid, platformOptions);
+  await tryPrAutomerge(iid, pr, platformOptions);
 }
 
-export async function mergePr(iid: number): Promise<boolean> {
+export async function mergePr(
+  iid: number,
+  _branchName: string,
+  pr: Pr
+): Promise<boolean> {
   try {
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${iid}/merge`,
       {
         body: {
           should_remove_source_branch: true,
-          squash: true,
+          squash: pr.squash,
         },
       }
     );

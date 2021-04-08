@@ -8,7 +8,7 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as _git from '../../util/git';
-import type { Platform } from '../types';
+import type { Platform, Pr } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -1956,7 +1956,7 @@ describe('platform/github', () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(await github.mergePr(pr.number, '', {} as Pr)).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle merge error', async () => {
@@ -1972,7 +1972,7 @@ describe('platform/github', () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(false);
+      expect(await github.mergePr(pr.number, '', {} as Pr)).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -2020,7 +2020,7 @@ describe('platform/github', () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(await github.mergePr(pr.number, '', {} as Pr)).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should try squash after rebase', async () => {
@@ -2036,7 +2036,7 @@ describe('platform/github', () => {
           ref: 'someref',
         },
       };
-      await github.mergePr(pr.number, '');
+      await github.mergePr(pr.number, '', {} as Pr);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should try merge after squash', async () => {
@@ -2056,7 +2056,7 @@ describe('platform/github', () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(await github.mergePr(pr.number, '', {} as Pr)).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should give up', async () => {
@@ -2078,7 +2078,7 @@ describe('platform/github', () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(false);
+      expect(await github.mergePr(pr.number, '', {} as Pr)).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

@@ -8,6 +8,7 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
+import { Pr } from '../../workers/repository/onboarding/branch/check';
 import type { Platform } from '../types';
 
 function sshLink(projectKey: string, repositorySlug: string): string {
@@ -1610,13 +1611,13 @@ describe(getName(__filename), () => {
             )
             .reply(200);
 
-          expect(await bitbucket.mergePr(5, 'branch')).toBe(true);
+          expect(await bitbucket.mergePr(5, 'branch', {} as Pr)).toBe(true);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('throws not-found 1', async () => {
           await initRepo();
-          const res = bitbucket.mergePr(null as any, 'branch');
+          const res = bitbucket.mergePr(null as any, 'branch', {} as Pr);
           await expect(res).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1629,9 +1630,9 @@ describe(getName(__filename), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.mergePr(4, 'branch')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.mergePr(4, 'branch', {} as Pr)
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1651,9 +1652,9 @@ describe(getName(__filename), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.mergePr(5, 'branch', {} as Pr)
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1673,7 +1674,7 @@ describe(getName(__filename), () => {
             )
             .reply(409);
 
-          expect(await bitbucket.mergePr(5, 'branch')).toBeFalsy();
+          expect(await bitbucket.mergePr(5, 'branch', {} as Pr)).toBeFalsy();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1693,7 +1694,9 @@ describe(getName(__filename), () => {
             )
             .reply(405);
 
-          await expect(bitbucket.mergePr(5, 'branch')).resolves.toBe(false);
+          await expect(bitbucket.mergePr(5, 'branch', {} as Pr)).resolves.toBe(
+            false
+          );
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

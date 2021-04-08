@@ -9,7 +9,7 @@ import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
-import type { Platform, RepoParams } from '../types';
+import type { Platform, Pr, RepoParams } from '../types';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -1017,6 +1017,7 @@ describe('platform/azure', () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
+      const prMock = {} as Pr;
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
       const updatePullRequestMock = jest.fn(() => ({
         status: 3,
@@ -1036,7 +1037,11 @@ describe('platform/azure', () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr(
+        pullRequestIdMock,
+        branchNameMock,
+        prMock
+      );
 
       expect(updatePullRequestMock).toHaveBeenCalledWith(
         {
@@ -1056,6 +1061,7 @@ describe('platform/azure', () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
+      const prMock = {} as Pr;
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -1073,7 +1079,11 @@ describe('platform/azure', () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr(
+        pullRequestIdMock,
+        branchNameMock,
+        prMock
+      );
       expect(res).toBe(false);
     });
 
@@ -1093,8 +1103,8 @@ describe('platform/azure', () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      await azure.mergePr(1234, 'test-branch-1');
-      await azure.mergePr(5678, 'test-branch-2');
+      await azure.mergePr(1234, 'test-branch-1', {} as Pr);
+      await azure.mergePr(5678, 'test-branch-2', {} as Pr);
 
       expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
     });
@@ -1103,6 +1113,7 @@ describe('platform/azure', () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
+      const prMock = {} as Pr;
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
       const getPullRequestByIdMock = jest.fn(() => ({
         lastMergeSourceCommit: lastMergeSourceCommitMock,
@@ -1122,7 +1133,11 @@ describe('platform/azure', () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr(
+        pullRequestIdMock,
+        branchNameMock,
+        prMock
+      );
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
       expect(res).toBe(true);
@@ -1132,6 +1147,7 @@ describe('platform/azure', () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
+      const prMock = {} as Pr;
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
       const expectedNumRetries = 5;
       const getPullRequestByIdMock = jest.fn(() => ({
@@ -1152,7 +1168,11 @@ describe('platform/azure', () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr(
+        pullRequestIdMock,
+        branchNameMock,
+        prMock
+      );
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(
         expectedNumRetries + 1

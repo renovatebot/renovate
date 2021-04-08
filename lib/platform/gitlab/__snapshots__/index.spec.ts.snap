@@ -141,7 +141,84 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested 1`] = `
+exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested when squash is false 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/user",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer some-token",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/version",
+  },
+  Object {
+    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "content-length": "142",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+  },
+  Object {
+    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true,\\"squash\\":false}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "content-length": "87",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345/merge",
+  },
+]
+`;
+
+exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested when squash is true 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2087,7 +2164,26 @@ These updates have all been created already. Click a checkbox below to force a r
 "
 `;
 
-exports[`platform/gitlab mergePr(pr) merges the PR 1`] = `
+exports[`platform/gitlab mergePr(pr) merges the PR when squash is false 1`] = `
+Array [
+  Object {
+    "body": "{\\"should_remove_source_branch\\":true,\\"squash\\":false}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "content-length": "51",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/1/merge",
+  },
+]
+`;
+
+exports[`platform/gitlab mergePr(pr) merges the PR when squash is true 1`] = `
 Array [
   Object {
     "body": "{\\"should_remove_source_branch\\":true,\\"squash\\":true}",

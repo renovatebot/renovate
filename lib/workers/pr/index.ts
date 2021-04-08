@@ -554,7 +554,7 @@ export async function checkAutoMerge(
       logger.info(`DRY-RUN: Would merge PR #${pr.number}`);
       return false;
     }
-    const res = await platform.mergePr(pr.number, branchName);
+    const res = await platform.mergePr(pr.number, branchName, pr);
     if (res) {
       logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
     }
