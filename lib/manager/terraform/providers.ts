@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
 import {
@@ -16,7 +17,6 @@ export function extractTerraformProvider(
   moduleName: string
 ): ExtractionResult {
   let lineNumber = startingLine;
-  let line: string;
   const deps: PackageDependency[] = [];
   const dep: PackageDependency = {
     managerData: {
@@ -24,20 +24,38 @@ export function extractTerraformProvider(
       terraformDependencyType: TerraformDependencyTypes.provider,
     },
   };
+  let braceCounter = 0;
   do {
-    lineNumber += 1;
-    line = lines[lineNumber];
-    const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
-      if (kvMatch.groups.key === 'version') {
-        dep.currentValue = kvMatch.groups.value;
-      } else if (kvMatch.groups.key === 'source') {
-        dep.managerData.source = kvMatch.groups.value;
-        dep.managerData.sourceLine = lineNumber;
+    // istanbul ignore if
+    if (lineNumber > lines.length - 1) {
+      logger.debug(`Malformed Terraform file detected.`);
+    }
+
+    const line = lines[lineNumber];
+    // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
+    const openBrackets = (line.match(/\{/g) || []).length;
+    const closedBrackets = (line.match(/\}/g) || []).length;
+    braceCounter = braceCounter + openBrackets - closedBrackets;
+
+    // only update fields inside the root block
+    if (braceCounter === 1) {
+      const kvMatch = keyValueExtractionRegex.exec(line);
+      if (kvMatch) {
+        if (kvMatch.groups.key === 'version') {
+          dep.currentValue = kvMatch.groups.value;
+        } else if (kvMatch.groups.key === 'source') {
+          dep.managerData.source = kvMatch.groups.value;
+          dep.managerData.sourceLine = lineNumber;
+        }
       }
     }
-  } while (line.trim() !== '}');
+
+    lineNumber += 1;
+  } while (braceCounter !== 0);
   deps.push(dep);
+
+  // remove last lineNumber addition to not skip a line after the last bracket
+  lineNumber -= 1;
   return { lineNumber, dependencies: deps };
 }
 

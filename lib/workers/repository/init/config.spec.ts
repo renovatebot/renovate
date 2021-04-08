@@ -103,7 +103,7 @@ describe('workers/repository/init/config', () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       migrateAndValidate.migrateAndValidate.mockResolvedValueOnce({
-        errors: [{ depName: 'dep', message: 'test error' }],
+        errors: [{ topic: 'dep', message: 'test error' }],
       });
       let e: Error;
       try {

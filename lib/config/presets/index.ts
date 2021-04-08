@@ -130,7 +130,7 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
-    const re = /^([\w./]+?)\/\/(?:([\w./]+)\/)?([\w.]+)$/;
+    const re = /^([\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/;
 
     // Validation
     if (str.includes(':')) {
@@ -200,6 +200,8 @@ export async function getPreset(
     'excludePackageNames',
     'matchPackagePatterns',
     'excludePackagePatterns',
+    'matchPackagePrefixes',
+    'excludePackagePrefixes',
   ];
   if (presetKeys.every((key) => packageListKeys.includes(key))) {
     delete presetConfig.description;

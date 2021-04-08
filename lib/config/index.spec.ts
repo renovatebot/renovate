@@ -44,7 +44,6 @@ describe('config/index', () => {
         ['token', 'abc'],
         ['prFooter', 'custom'],
         ['logContext', 'abc123'],
-        ['customPrFooter', true],
       ]);
     });
 

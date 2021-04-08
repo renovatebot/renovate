@@ -1,7 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
 import { getName, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
-import { PRESET_DEP_NOT_FOUND } from '../util';
+import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as bitbucketServer from '.';
 
 jest.mock('../../../util/host-rules');
@@ -73,7 +73,7 @@ describe(getName(__filename), () => {
           'some-filename.json',
           bitbucketApiHost
         )
-      ).rejects.toThrow('invalid preset JSON');
+      ).rejects.toThrow(PRESET_INVALID_JSON);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -93,7 +93,7 @@ describe(getName(__filename), () => {
           'some-filename.json',
           bitbucketApiHost
         )
-      ).rejects.toThrow('invalid preset JSON');
+      ).rejects.toThrow(PRESET_INVALID_JSON);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

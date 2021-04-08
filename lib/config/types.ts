@@ -233,15 +233,17 @@ export interface PackageRule
   matchDepTypes?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
+  matchPackagePrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
+  excludePackagePrefixes?: string[];
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchUpdateTypes?: UpdateType[];
 }
 
 export interface ValidationMessage {
-  depName: string;
+  topic: string;
   message: string;
 }
 

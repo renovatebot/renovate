@@ -51,6 +51,11 @@ describe('workers/repository/process/lookup', () => {
   });
 
   describe('.lookupUpdates()', () => {
+    it('returns null if unknown datasource', async () => {
+      config.depName = 'some-dep';
+      config.datasource = 'does not exist';
+      expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
+    });
     it('returns rollback for pinned version', async () => {
       config.currentValue = '0.9.99';
       config.depName = 'q';

@@ -21,7 +21,7 @@ describe('workers/repository/error-config', () => {
     });
     it('creates issues', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.configFile = 'package.json';
+      error.location = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
       const res = await raiseConfigWarningIssue(config, error);
@@ -29,7 +29,7 @@ describe('workers/repository/error-config', () => {
     });
     it('creates issues (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.configFile = 'package.json';
+      error.location = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
       setAdminConfig({ dryRun: true });
@@ -38,7 +38,7 @@ describe('workers/repository/error-config', () => {
     });
     it('handles onboarding', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.configFile = 'package.json';
+      error.location = 'package.json';
       error.validationMessage = 'some-message';
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
@@ -50,7 +50,7 @@ describe('workers/repository/error-config', () => {
     });
     it('handles onboarding (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.configFile = 'package.json';
+      error.location = 'package.json';
       error.validationMessage = 'some-message';
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),

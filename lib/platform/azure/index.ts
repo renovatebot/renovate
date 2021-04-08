@@ -41,6 +41,7 @@ import {
   getGitStatusContextFromCombinedName,
   getNewBranchName,
   getRenovatePRFormat,
+  streamToString,
 } from './util';
 
 interface Config {
@@ -103,17 +104,22 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
-export async function getJsonFile(fileName: string): Promise<any | null> {
-  try {
-    const json = await azureHelper.getFile(
-      config.repoId,
-      fileName,
-      config.defaultBranch
-    );
-    return JSON.parse(json);
-  } catch (err) {
-    return null;
-  }
+export async function getRawFile(
+  fileName: string,
+  repo: string = config.repoId
+): Promise<string | null> {
+  const azureApiGit = await azureApi.gitApi();
+  const buf = await azureApiGit.getItemContent(repo, fileName);
+  const str = await streamToString(buf);
+  return str;
+}
+
+export async function getJsonFile(
+  fileName: string,
+  repo: string = config.repoId
+): Promise<any | null> {
+  const raw = await getRawFile(fileName, repo);
+  return JSON.parse(raw);
 }
 
 export async function initRepo({
