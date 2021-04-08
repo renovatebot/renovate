@@ -1931,7 +1931,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns null for long content 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() throws on errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1972,7 +1972,48 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns null on errors 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() throws on long content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() throws on malformed JSON 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2310,22 +2351,6 @@ Array [
 
 exports[`platform/bitbucket-server/index endpoint with no path getPr() returns null for no prNo 1`] = `Array []`;
 
-exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
-
-exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown() sanitizes HTML comments in the body 1`] = `
-"---
-
-- [ ] If you want to rebase/retry this PR, check this box
-- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
-
----
-
-Empty comment.
-
-Followed by some information.
-"
-`;
-
 exports[`platform/bitbucket-server/index endpoint with no path getPrList() has pr 1`] = `
 Array [
   Object {
@@ -2577,6 +2602,22 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
   },
 ]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, check this box
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
 `;
 
 exports[`platform/bitbucket-server/index endpoint with no path mergePr() posts Merge 1`] = `
@@ -6021,7 +6062,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns null for long content 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() throws on errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6062,7 +6103,48 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns null on errors 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() throws on long content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() throws on malformed JSON 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6400,22 +6482,6 @@ Array [
 
 exports[`platform/bitbucket-server/index endpoint with path getPr() returns null for no prNo 1`] = `Array []`;
 
-exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
-
-exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() sanitizes HTML comments in the body 1`] = `
-"---
-
-- [ ] If you want to rebase/retry this PR, check this box
-- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
-
----
-
-Empty comment.
-
-Followed by some information.
-"
-`;
-
 exports[`platform/bitbucket-server/index endpoint with path getPrList() has pr 1`] = `
 Array [
   Object {
@@ -6667,6 +6733,22 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
   },
 ]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, check this box
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
 `;
 
 exports[`platform/bitbucket-server/index endpoint with path mergePr() posts Merge 1`] = `

@@ -28,6 +28,14 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
 We will do our best to answer your question(s).
 
+A `subtype` in the configuration table specifies what type you're allowed to use within the main element.
+
+If a config option has a `parent` defined, it means it's only allowed to configure it within an object with the parent name, such as `packageRules` or `hostRules`.
+
+When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
+
+---
+
 ## addLabels
 
 The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
@@ -1268,6 +1276,24 @@ See also `matchPackagePatterns`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### excludePackagePrefixes
+
+Use this field if you want to have one or more package name prefixes excluded in your package rule, without needing to write a regex.
+See also `matchPackagePrefixes`.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePrefixes": ["eslint"],
+      "excludePackagePrefixes": ["eslint-foo"]
+    }
+  ]
+}
+```
+
+The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
+
 ### matchLanguages
 
 Use this field to restrict rules to a particular language. e.g.
@@ -1411,6 +1437,24 @@ See also `excludePackagePatterns`.
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
+### matchPackagePrefixes
+
+Use this field to match a package prefix without needing to write a regex expression.
+See also `excludePackagePrefixes`.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePrefixes": ["angular"],
+      "rangeStrategy": "replace"
+    }
+  ]
+}
+```
+
+Just like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
 ### matchPaths
 
 Renovate will match `matchPaths` against both a partial string match or a minimatch glob pattern.
@@ -1487,7 +1531,8 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 ## postUpdateOptions
 
-- `gomodTidy`: Run `go mod tidy` after Go module updates
+- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates.
+- `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
 - `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
@@ -2190,7 +2235,15 @@ In most cases it would not be recommended, but there are some cases such as Dock
 
 ## vulnerabilityAlerts
 
-Use this object to customise PRs that are raised when vulnerability alerts are detected (GitHub-only).
+Renovate can read from GitHub's Vulnerability Alerts and customize Pull Requests accordingly.
+For this to work, you must first ensure you have enabled "[Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/about-the-dependency-graph#enabling-the-dependency-graph)" and "[Dependabot alerts](https://docs.github.com/en/github/administering-a-repository/managing-security-and-analysis-settings-for-your-repository)" under the "Security & analysis" section of the repository's "Settings" tab.
+
+Additionally, if you are running Renovate in app mode then you must make sure that the app has been granted the permissions to read "Vulnerability alerts".
+If you are the account admin, browse to the app (e.g. [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and verify that read access to "vulnerability alerts" is mentioned.
+
+Once the above conditions are met, and you have received one or more vulnerability alerts from GitHub for this repository, then Renovate will attempt to raise fix PRs accordingly.
+
+Use the `vulnerabilityAlerts` configuration object if you want to customise vulnerability-fix PRs specifically.
 For example, to configure custom labels and assignees:
 
 ```json
@@ -2202,7 +2255,7 @@ For example, to configure custom labels and assignees:
 }
 ```
 
-To disable vulnerability alerts completely, configure like this:
+To disable the vulnerability alerts functionality completely, configure like this:
 
 ```json
 {

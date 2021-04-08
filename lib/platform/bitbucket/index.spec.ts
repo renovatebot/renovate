@@ -845,19 +845,26 @@ describe('platform/bitbucket', () => {
       const data = { foo: 'bar' };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .reply(200, JSON.stringify(data));
       const res = await bitbucket.getJsonFile('file.json');
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null on errors', async () => {
+    it('throws on malformed JSON', async () => {
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
+        .reply(200, '!@#');
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('throws on errors', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .replyWithError('some error');
-      const res = await bitbucket.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

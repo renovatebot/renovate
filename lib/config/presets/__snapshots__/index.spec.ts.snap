@@ -172,6 +172,16 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset parses local with subdirectory 1`] = `
+Object {
+  "packageName": "some-group/some-repo",
+  "params": undefined,
+  "presetName": "some-file",
+  "presetPath": "some-dir",
+  "presetSource": "local",
+}
+`;
+
 exports[`config/presets parsePreset parses no prefix as local 1`] = `
 Object {
   "packageName": "some/repo",
@@ -369,10 +379,10 @@ Object {
   "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "matchPackagePatterns": Array [
-    "^@typescript-eslint/",
-    "^eslint",
-    "^stylelint",
+  "matchPackagePrefixes": Array [
+    "@typescript-eslint/",
+    "eslint",
+    "stylelint",
   ],
 }
 `;
@@ -458,9 +468,9 @@ Object {
   "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "matchPackagePatterns": Array [
-    "^@typescript-eslint/",
-    "^eslint",
+  "matchPackagePrefixes": Array [
+    "@typescript-eslint/",
+    "eslint",
   ],
 }
 `;
@@ -476,11 +486,13 @@ Object {
     "remark-lint",
   ],
   "matchPackagePatterns": Array [
-    "^ember-template-lint",
-    "^@typescript-eslint/",
-    "^eslint",
-    "^stylelint",
     "\\\\btslint\\\\b",
+  ],
+  "matchPackagePrefixes": Array [
+    "ember-template-lint",
+    "@typescript-eslint/",
+    "eslint",
+    "stylelint",
   ],
 }
 `;
@@ -502,11 +514,13 @@ Object {
         "remark-lint",
       ],
       "matchPackagePatterns": Array [
-        "^ember-template-lint",
-        "^@typescript-eslint/",
-        "^eslint",
-        "^stylelint",
         "\\\\btslint\\\\b",
+      ],
+      "matchPackagePrefixes": Array [
+        "ember-template-lint",
+        "@typescript-eslint/",
+        "eslint",
+        "stylelint",
       ],
     },
   ],
@@ -521,9 +535,9 @@ Object {
       "matchPackageNames": Array [
         "babel-eslint",
       ],
-      "matchPackagePatterns": Array [
-        "^@typescript-eslint/",
-        "^eslint",
+      "matchPackagePrefixes": Array [
+        "@typescript-eslint/",
+        "eslint",
       ],
     },
   ],
