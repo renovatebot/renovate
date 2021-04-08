@@ -95,8 +95,8 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { env, docker, cwdFile } = opts;
-  const extraEnv = { ...opts.extraEnv, ...getAdminConfig().customEnvVariables };
-  const dockerChildPrefix = getAdminConfig().dockerChildPrefix;
+  const { dockerChildPrefix, customEnvVariables } = getAdminConfig();
+  const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
   // istanbul ignore if
   if (cwdFile) {
