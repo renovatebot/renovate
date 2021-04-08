@@ -188,7 +188,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1",
   },
   Object {
     "headers": Object {
@@ -199,7 +199,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1",
   },
   Object {
     "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true,\\"squash\\":false}",
@@ -265,7 +265,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1",
   },
   Object {
     "headers": Object {
@@ -276,7 +276,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1",
   },
   Object {
     "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true,\\"squash\\":true}",

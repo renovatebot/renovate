@@ -41,6 +41,7 @@ export interface GitLabMergeRequest {
 export interface UpdateMergeRequest {
   target_branch?: string;
   title?: string;
+  description?: string;
   assignee_id?: number;
   assignee_ids?: number[];
   reviewer_ids?: number[];

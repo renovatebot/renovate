@@ -1273,9 +1273,13 @@ describe('platform/gitlab', () => {
             iid: 12345,
             title: 'some title',
           })
-          .get('/api/v4/projects/undefined/merge_requests/12345')
+          .get(
+            '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          )
           .reply(200)
-          .get('/api/v4/projects/undefined/merge_requests/12345')
+          .get(
+            '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          )
           .reply(200, {
             merge_status: 'can_be_merged',
             squash,

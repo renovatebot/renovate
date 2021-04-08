@@ -447,9 +447,7 @@ async function tryPrAutomerge(
       let mr: GitLabMergeRequest;
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
-        const { body } = await gitlabApi.getJson<GitLabMergeRequest>(
-          `projects/${config.repository}/merge_requests/${iid}`
-        );
+        const body = await getMR(config.repository, iid);
         // Only continue if the merge request can be merged and has a pipeline.
         if (body.merge_status === desiredStatus && body.pipeline !== null) {
           mr = body;
@@ -563,16 +561,11 @@ export async function updatePr({
     [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
   }[state];
-  await gitlabApi.putJson<Pr>(
-    `projects/${config.repository}/merge_requests/${iid}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        ...(newState && { state_event: newState }),
-      },
-    }
-  );
+  await updateMR(config.repository, iid, {
+    title,
+    description: sanitize(description),
+    ...(newState && { state_event: newState }),
+  });
 
   await tryPrAutomerge(iid, platformOptions);
 }
