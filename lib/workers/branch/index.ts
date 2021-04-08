@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
