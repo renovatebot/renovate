@@ -24,20 +24,6 @@ Object {
 
 exports[`platform/azure/helpers getFile should return the file content because it is not a json 1`] = `"{\\"hello\\"= \\"test\\"}"`;
 
-exports[`platform/azure/helpers getProjectAndRepo should return the object with project and repo 1`] = `
-Object {
-  "project": "prjName",
-  "repo": "myRepoName",
-}
-`;
-
-exports[`platform/azure/helpers getProjectAndRepo should return the object with same strings 1`] = `
-Object {
-  "project": "myRepoName",
-  "repo": "myRepoName",
-}
-`;
-
 exports[`platform/azure/helpers getRef should get the ref with full ref name 1`] = `
 Array [
   Object {
@@ -53,23 +39,3 @@ Array [
   },
 ]
 `;
-
-exports[`platform/azure/helpers getStorageExtraCloneOpts should configure basic auth 1`] = `
-Object {
-  "-c": "http.extraheader=AUTHORIZATION: basic dXNlcjpwYXNz",
-}
-`;
-
-exports[`platform/azure/helpers getStorageExtraCloneOpts should configure bearer token 1`] = `
-Object {
-  "-c": "http.extraheader=AUTHORIZATION: bearer token",
-}
-`;
-
-exports[`platform/azure/helpers getStorageExtraCloneOpts should configure personal access token 1`] = `
-Object {
-  "-c": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
-}
-`;
-
-exports[`platform/azure/helpers max4000Chars should be the same 1`] = `"Hello"`;
