@@ -43,6 +43,7 @@ exports[`datasource/galaxy-collection getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -52,6 +53,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -61,6 +63,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -70,6 +73,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -79,6 +83,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -93,6 +98,7 @@ exports[`datasource/galaxy-collection getReleases returns null for 404 result 1`
 Array [
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -113,6 +119,7 @@ exports[`datasource/galaxy-collection getReleases returns null for remote host e
 Array [
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -127,6 +134,7 @@ exports[`datasource/galaxy-collection getReleases returns null for unexpected da
 Array [
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -141,6 +149,7 @@ exports[`datasource/galaxy-collection getReleases returns null for unexpected da
 Array [
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -150,6 +159,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -164,6 +174,7 @@ exports[`datasource/galaxy-collection getReleases returns null for unknown error
 Array [
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -200,6 +211,7 @@ exports[`datasource/galaxy-collection getReleases returns only valid versions if
 Array [
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -209,6 +221,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -218,6 +231,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -227,6 +241,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -236,6 +251,7 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",

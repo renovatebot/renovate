@@ -1,46 +1,20 @@
+import pMap from 'p-map';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import {
+  BaseProjectResult,
+  VersionsDetailResult,
+  VersionsProjectResult,
+} from './types';
 
 export const id = 'galaxy-collection';
 export const defaultRegistryUrls = ['https://galaxy.ansible.com/'];
 export const customRegistrySupport = false;
 
 const http = new Http(id);
-
-interface BaseProjectResult {
-  versions_url: string;
-  deprecated: boolean;
-  latest_version: {
-    version: string;
-  };
-}
-
-interface VersionsProjectResult {
-  results: Versions[];
-}
-
-interface VersionsDetailResult {
-  download_url: string;
-  artifact: {
-    filename: string;
-    size: bigint;
-    sha256: string;
-  };
-  metadata: {
-    homepage: string;
-    tags: Record<string, string>;
-    dependencies: Record<string, string>;
-    repository: string;
-  };
-}
-
-interface Versions {
-  version: string;
-  href: string;
-}
 
 export async function getReleases({
   lookupName,
@@ -57,14 +31,14 @@ export async function getReleases({
     return cachedResult;
   }
 
-  const lookUp = lookupName.split('.');
-  const namespace = lookUp[0];
-  const projectName = lookUp[1];
+  const [namespace, projectName] = lookupName.split('.');
 
   const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
 
   try {
-    const baseUrlResponse: any = await http.get(baseUrl);
+    const [baseUrlResponse] = await Promise.all([
+      http.getJson<BaseProjectResult>(baseUrl),
+    ]);
     if (!baseUrlResponse || !baseUrlResponse.body) {
       logger.warn(
         { dependency: lookupName },
@@ -73,21 +47,13 @@ export async function getReleases({
       return null;
     }
 
-    const baseProject: BaseProjectResult = JSON.parse(baseUrlResponse.body);
+    const baseProject = baseUrlResponse.body;
 
     const versionsUrl = `${baseUrl}versions/`;
-    const versionsUrlResponse: any = await http.get(versionsUrl);
-    if (!versionsUrlResponse || !versionsUrlResponse.body) {
-      logger.warn(
-        { dependency: lookupName },
-        `Received invalid data from ${baseUrl}versions/`
-      );
-      return null;
-    }
-
-    const versionsProject: VersionsProjectResult = JSON.parse(
-      versionsUrlResponse.body
+    const versionsUrlResponse = await http.getJson<VersionsProjectResult>(
+      versionsUrl
     );
+    const versionsProject = versionsUrlResponse.body;
 
     const releases: Release[] = versionsProject.results.map((value) => {
       const release: Release = {
@@ -99,38 +65,41 @@ export async function getReleases({
 
     let newestVersionDetails: VersionsDetailResult;
     // asynchronously get release details
-    const enrichedReleases: Release[] = await Promise.all(
-      releases.map(async (basicRelease) => {
-        // get release details from API
-        const versionDetailUrl = `${versionsUrl}${basicRelease.version}/`;
-        const versionsDetailUrlResponse: any = await http.get(versionDetailUrl);
-        if (!versionsDetailUrlResponse || !versionsDetailUrlResponse.body) {
-          logger.warn(
-            { dependency: lookupName },
-            `Received invalid data from ${versionDetailUrl}`
-          );
-          return null;
-        }
+    const enrichedReleases: Release[] = await pMap(
+      releases,
+      (basicRelease) =>
+        http
+          .getJson<VersionsDetailResult>(
+            `${versionsUrl}${basicRelease.version}/`
+          )
+          .then(
+            (versionDetailResultResponse) => versionDetailResultResponse.body
+          )
+          .then((versionDetails) => {
+            try {
+              const release: Release = {
+                version: basicRelease.version,
+                isDeprecated: basicRelease.isDeprecated,
+                downloadUrl: versionDetails.download_url,
+                newDigest: versionDetails.artifact.sha256,
+                dependencies: versionDetails.metadata.dependencies,
+              };
 
-        const versionDetails: VersionsDetailResult = JSON.parse(
-          versionsDetailUrlResponse.body
-        );
-        const release: Release = {
-          version: basicRelease.version,
-          isDeprecated: basicRelease.isDeprecated,
-          downloadUrl: versionDetails.download_url,
-          newDigest: versionDetails.artifact.sha256,
-          dependencies: versionDetails.metadata.dependencies,
-        };
-
-        // save details of the newest release for use on the ReleaseResult object
-        if (basicRelease.version === baseProject.latest_version.version) {
-          newestVersionDetails = versionDetails;
-        }
-        return release;
-      })
+              // save details of the newest release for use on the ReleaseResult object
+              if (basicRelease.version === baseProject.latest_version.version) {
+                newestVersionDetails = versionDetails;
+              }
+              return release;
+            } catch (e) {
+              logger.warn(
+                { dependency: lookupName },
+                `Received invalid data from ${versionsUrl}${basicRelease.version}/`
+              );
+              return null;
+            }
+          }),
+      { concurrency: 5 } // allow 5 requests at maximum in parallel
     );
-
     // filter failed versions
     const filteredReleases = enrichedReleases.filter((value) => value != null);
     // extract base information which are only provided on the release from the newest release

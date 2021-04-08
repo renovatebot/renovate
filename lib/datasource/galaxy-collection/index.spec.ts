@@ -25,7 +25,7 @@ const communityKubernetesDetails0111 = fs.readFileSync(
   'utf8'
 );
 
-const baseUrl = 'https://galaxy.ansible.com:443/';
+const baseUrl = 'https://galaxy.ansible.com';
 
 describe('datasource/galaxy-collection', () => {
   describe('getReleases', () => {
