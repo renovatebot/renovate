@@ -2,7 +2,12 @@ import * as datasourceGalaxy from '../../datasource/galaxy';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
-import { blockLineRegEx, galaxyDepRegex, newBlockRegEx } from './util';
+import {
+  blockLineRegEx,
+  galaxyDepRegex,
+  nameMatchRegex,
+  newBlockRegEx,
+} from './util';
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
@@ -46,12 +51,10 @@ function finalize(dependency: PackageDependency): boolean {
   }
 
   const source: string = dep.managerData.src;
-  const sourceMatch = /^(git|http|git\+http|ssh)s?(:\/\/|@).*(\/|:)(.+\/[^.]+)\/?(\.git)?$/.exec(
-    source
-  );
+  const sourceMatch = nameMatchRegex.exec(source);
   if (sourceMatch) {
     dep.datasource = datasourceGitTags.id;
-    dep.depName = sourceMatch[4];
+    dep.depName = sourceMatch.groups.depName.replace(/.git$/, '');
     // remove leading `git+` from URLs like `git+https://...`
     dep.lookupName = source.replace(/git\+/, '');
   } else if (galaxyDepRegex.exec(source)) {

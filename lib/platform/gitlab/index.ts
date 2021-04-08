@@ -1,7 +1,8 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import semver from 'semver';
+import pAll from 'p-all';
+import { lt } from 'semver';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -19,7 +20,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
-import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
+import { setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import type {
@@ -39,14 +40,15 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+import { getUserID, gitlabApi } from './http';
+import { getMR, updateMR } from './merge-request';
 import type {
+  GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
   MergeMethod,
   RepoResponse,
 } from './types';
-
-const gitlabApi = new GitlabHttp();
 
 let config: {
   repository: string;
@@ -63,6 +65,7 @@ let config: {
 const defaults = {
   hostType: PLATFORM_TYPE_GITLAB,
   endpoint: 'https://gitlab.com/api/v4/',
+  version: '0.0.0',
 };
 
 const DRAFT_PREFIX = 'Draft: ';
@@ -100,6 +103,7 @@ export async function initPlatform({
       await gitlabApi.getJson<{ version: string }>('version', { token })
     ).body.version.split('-')[0];
     logger.debug('GitLab version is: ' + gitlabVersion);
+    defaults.version = gitlabVersion;
   } catch (err) {
     logger.debug(
       { err },
@@ -107,7 +111,7 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  draftPrefix = semver.lt(gitlabVersion, '13.2.0')
+  draftPrefix = lt(gitlabVersion, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
   const platformConfig: PlatformResult = {
@@ -518,33 +522,24 @@ export async function createPr({
 
 export async function getPr(iid: number): Promise<Pr> {
   logger.debug(`getPr(${iid})`);
-  const url = `projects/${config.repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
-  const pr = (
-    await gitlabApi.getJson<
-      Pr & {
-        iid: number;
-        source_branch: string;
-        target_branch: string;
-        description: string;
-        diverged_commits_count: number;
-        merge_status: string;
-        assignee?: { id?: number };
-        assignees?: { id?: number }[];
-      }
-    >(url)
-  ).body;
+  const mr = await getMR(config.repository, iid);
+
   // Harmonize fields with GitHub
-  pr.sourceBranch = pr.source_branch;
-  pr.targetBranch = pr.target_branch;
-  pr.number = pr.iid;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.body = pr.description;
-  pr.state = pr.state === 'opened' ? PrState.Open : pr.state;
-  pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
-  delete pr.assignee;
-  delete pr.assignees;
-  pr.hasReviewers = false;
-  if (pr.merge_status === 'cannot_be_merged') {
+  const pr: Pr = {
+    sourceBranch: mr.source_branch,
+    targetBranch: mr.target_branch,
+    number: mr.iid,
+    displayNumber: `Merge Request #${mr.iid}`,
+    body: mr.description,
+    state: mr.state === 'opened' ? PrState.Open : mr.state,
+    hasAssignees: !!(mr.assignee?.id || mr.assignees?.[0]?.id),
+    hasReviewers: !!mr.reviewers?.length,
+    title: mr.title,
+    labels: mr.labels,
+    sha: mr.sha,
+  };
+
+  if (mr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
     pr.isConflicted = true;
@@ -613,13 +608,21 @@ export async function mergePr(iid: number): Promise<boolean> {
 }
 
 export function massageMarkdown(input: string): string {
-  return smartTruncate(
-    input
-      .replace(/Pull Request/g, 'Merge Request')
-      .replace(/PR/g, 'MR')
-      .replace(/\]\(\.\.\/pull\//g, '](!'),
-    25000 // TODO: increase it once https://gitlab.com/gitlab-org/gitlab/-/issues/217483 is closed
-  );
+  let desc = input
+    .replace(/Pull Request/g, 'Merge Request')
+    .replace(/PR/g, 'MR')
+    .replace(/\]\(\.\.\/pull\//g, '](!');
+
+  if (lt(defaults.version, '13.4.0')) {
+    logger.debug(
+      { version: defaults.version },
+      'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters'
+    );
+
+    desc = smartTruncate(desc, 25000);
+  }
+
+  return desc;
 }
 
 // Branch
@@ -847,22 +850,14 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
   try {
-    let assigneeId = (
-      await gitlabApi.getJson<{ id: number }[]>(
-        `users?username=${assignees[0]}`
-      )
-    ).body[0].id;
+    let assigneeId = await getUserID(assignees[0]);
     let url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
     await gitlabApi.putJson(url);
     try {
       if (assignees.length > 1) {
         url = `projects/${config.repository}/merge_requests/${iid}?assignee_ids[]=${assigneeId}`;
         for (let i = 1; i < assignees.length; i += 1) {
-          assigneeId = (
-            await gitlabApi.getJson<{ id: number }[]>(
-              `users?username=${assignees[i]}`
-            )
-          ).body[0].id;
+          assigneeId = await getUserID(assignees[i]);
           url += `&assignee_ids[]=${assigneeId}`;
         }
         await gitlabApi.putJson(url);
@@ -876,10 +871,54 @@ export async function addAssignees(
   }
 }
 
-export function addReviewers(iid: number, reviewers: string[]): Promise<void> {
-  logger.debug(`addReviewers('${iid}, [${reviewers.join(', ')}])`);
-  logger.warn('Unimplemented in GitLab: approvals');
-  return Promise.resolve();
+export async function addReviewers(
+  iid: number,
+  reviewers: string[]
+): Promise<void> {
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${iid}`);
+
+  if (lt(defaults.version, '13.9.0')) {
+    logger.warn(
+      { version: defaults.version },
+      'Adding reviewers is only available in GitLab 13.9 and onwards'
+    );
+    return;
+  }
+
+  let mr: GitLabMergeRequest;
+  try {
+    mr = await getMR(config.repository, iid);
+  } catch (err) {
+    logger.warn({ err }, 'Failed to get existing reviewers');
+    return;
+  }
+
+  mr.reviewers = mr.reviewers ?? [];
+  const existingReviewers = mr.reviewers.map((r) => r.username);
+  const existingReviewerIDs = mr.reviewers.map((r) => r.id);
+
+  // Figure out which reviewers (of the ones we want to add) are not already on the MR as a reviewer
+  const newReviewers = reviewers.filter((r) => !existingReviewers.includes(r));
+
+  // Gather the IDs for all the reviewers we want to add
+  let newReviewerIDs: number[];
+  try {
+    newReviewerIDs = await pAll(
+      newReviewers.map((r) => () => getUserID(r)),
+      { concurrency: 5 }
+    );
+  } catch (err) {
+    logger.warn({ err }, 'Failed to get IDs of the new reviewers');
+    return;
+  }
+
+  try {
+    await updateMR(config.repository, iid, {
+      reviewer_ids: [...existingReviewerIDs, ...newReviewerIDs],
+    });
+  } catch (err) {
+    logger.warn({ err }, 'Failed to add reviewers');
+  }
 }
 
 export async function deleteLabel(

@@ -252,6 +252,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'dockerChildPrefix',
+    description:
+      'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
+    type: 'string',
+    admin: true,
+    default: 'renovate_',
+  },
+  {
     name: 'dockerImagePrefix',
     description:
       'Change this value in order to override the default Renovate Docker sidecar image name prefix.',

@@ -449,6 +449,36 @@ describe(getName(__filename), () => {
     ],
 
     [
+      'Docker child prefix',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+        },
+        processEnv,
+        inCmd,
+        inOpts: { docker },
+        outCmd: [
+          dockerPullCmd,
+          `docker ps --filter name=myprefix_${image} -aq`,
+          `docker run --rm --name=myprefix_${image} --label=myprefix_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { dockerChildPrefix: 'myprefix_' },
+      },
+    ],
+
+    [
       'Docker extra commands',
       {
         execConfig: {

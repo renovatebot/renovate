@@ -13,26 +13,6 @@ describe('platform/azure/helpers', () => {
     azureApi = require('./azure-got-wrapper');
   });
 
-  describe('getStorageExtraCloneOpts', () => {
-    it('should configure basic auth', () => {
-      const res = azureHelper.getStorageExtraCloneOpts({
-        username: 'user',
-        password: 'pass',
-      });
-      expect(res).toMatchSnapshot();
-    });
-    it('should configure personal access token', () => {
-      const res = azureHelper.getStorageExtraCloneOpts({
-        token: '1234567890123456789012345678901234567890123456789012',
-      });
-      expect(res).toMatchSnapshot();
-    });
-    it('should configure bearer token', () => {
-      const res = azureHelper.getStorageExtraCloneOpts({ token: 'token' });
-      expect(res).toMatchSnapshot();
-    });
-  });
-
   describe('getRef', () => {
     it('should get the ref with short ref name', async () => {
       azureApi.gitApi.mockImplementationOnce(
@@ -203,21 +183,6 @@ describe('platform/azure/helpers', () => {
     });
   });
 
-  describe('max4000Chars', () => {
-    it('should be the same', () => {
-      const res = azureHelper.max4000Chars('Hello');
-      expect(res).toMatchSnapshot();
-    });
-    it('should be truncated', () => {
-      let str = '';
-      for (let i = 0; i < 5000; i += 1) {
-        str += 'a';
-      }
-      const res = azureHelper.max4000Chars(str);
-      expect(res).toHaveLength(3999);
-    });
-  });
-
   describe('getCommitDetails', () => {
     it('should get commit details', async () => {
       azureApi.gitApi.mockImplementationOnce(
@@ -230,26 +195,6 @@ describe('platform/azure/helpers', () => {
       );
       const res = await azureHelper.getCommitDetails('123', '123456');
       expect(res).toMatchSnapshot();
-    });
-  });
-
-  describe('getProjectAndRepo', () => {
-    it('should return the object with same strings', () => {
-      const res = azureHelper.getProjectAndRepo('myRepoName');
-      expect(res).toMatchSnapshot();
-    });
-    it('should return the object with project and repo', () => {
-      const res = azureHelper.getProjectAndRepo('prjName/myRepoName');
-      expect(res).toMatchSnapshot();
-    });
-    it('should return an error', () => {
-      expect(() =>
-        azureHelper.getProjectAndRepo('prjName/myRepoName/blalba')
-      ).toThrow(
-        Error(
-          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
-        )
-      );
     });
   });
 

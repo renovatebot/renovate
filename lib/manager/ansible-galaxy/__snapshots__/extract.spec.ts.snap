@@ -234,10 +234,24 @@ Array [
   },
   Object {
     "currentValue": "0.14",
-    "datasource": "galaxy",
-    "depName": "company.com:mygroup/ansible-base.git",
+    "datasource": "git-tags",
+    "depName": "mygroup/ansible-base",
     "depType": "role",
     "lookupName": "company.com:mygroup/ansible-base.git",
+  },
+  Object {
+    "currentValue": "47.11",
+    "datasource": "git-tags",
+    "depName": "org/repo",
+    "depType": "role",
+    "lookupName": "git://github.com/org/repo.git",
+  },
+  Object {
+    "currentValue": "47.11",
+    "datasource": "git-tags",
+    "depName": "org/re.po",
+    "depType": "role",
+    "lookupName": "git://github.com/org/re.po.git",
   },
 ]
 `;

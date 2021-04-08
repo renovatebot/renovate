@@ -60,7 +60,8 @@ function handleGitDep(
     }
     // source definition without version appendix
     const source = nameMatch.groups.source;
-    dep.depName = `${nameMatch.groups.hostname}/${nameMatch.groups.depName}`;
+    const massagedDepName = nameMatch.groups.depName.replace(/.git$/, '');
+    dep.depName = `${nameMatch.groups.hostname}/${massagedDepName}`;
     // remove leading `git+` from URLs like `git+https://...`
     dep.lookupName = source.replace(/git\+/, '');
 

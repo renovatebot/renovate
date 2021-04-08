@@ -4,9 +4,6 @@ import {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
-import { GitOptions } from '../../types/git';
-import { add } from '../../util/sanitize';
 import * as azureApi from './azure-got-wrapper';
 import {
   getBranchNameWithoutRefsPrefix,
@@ -16,29 +13,6 @@ import {
 } from './util';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
-
-function toBase64(from: string): string {
-  return Buffer.from(from).toString('base64');
-}
-
-export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
-  let authType: string;
-  let authValue: string;
-  if (!config.token && config.username && config.password) {
-    authType = 'basic';
-    authValue = toBase64(`${config.username}:${config.password}`);
-  } else if (config.token.length === 52) {
-    authType = 'basic';
-    authValue = toBase64(`:${config.token}`);
-  } else {
-    authType = 'bearer';
-    authValue = config.token;
-  }
-  add(authValue);
-  return {
-    '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}`,
-  };
-}
 
 export async function getRefs(
   repoId: string,
@@ -123,13 +97,6 @@ export async function getFile(
   return null; // no file found
 }
 
-export function max4000Chars(str: string): string {
-  if (str && str.length >= 4000) {
-    return str.substring(0, 3999);
-  }
-  return str;
-}
-
 export async function getCommitDetails(
   commit: string,
   repoId: string
@@ -138,28 +105,6 @@ export async function getCommitDetails(
   const azureApiGit = await azureApi.gitApi();
   const results = await azureApiGit.getCommit(commit, repoId);
   return results;
-}
-
-export function getProjectAndRepo(
-  str: string
-): { project: string; repo: string } {
-  logger.trace(`getProjectAndRepo(${str})`);
-  const strSplit = str.split(`/`);
-  if (strSplit.length === 1) {
-    return {
-      project: str,
-      repo: str,
-    };
-  }
-  if (strSplit.length === 2) {
-    return {
-      project: strSplit[0],
-      repo: strSplit[1],
-    };
-  }
-  const msg = `${str} can be only structured this way : 'repository' or 'projectName/repository'!`;
-  logger.error(msg);
-  throw new Error(msg);
 }
 
 export async function getMergeMethod(

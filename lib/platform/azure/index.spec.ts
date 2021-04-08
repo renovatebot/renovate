@@ -128,13 +128,13 @@ describe('platform/azure', () => {
         ({
           getRepositories: jest.fn(() => [
             {
-              name: 'some-repo',
+              name: 'repo',
               id: '1',
               privateRepo: true,
               isFork: false,
               defaultBranch: 'defBr',
               project: {
-                name: 'some-repo',
+                name: 'some',
               },
             },
             {
@@ -146,10 +146,6 @@ describe('platform/azure', () => {
           ]),
         } as any)
     );
-    azureHelper.getProjectAndRepo.mockImplementationOnce(() => ({
-      project: 'some-repo',
-      repo: 'some-repo',
-    }));
 
     if (is.string(args)) {
       return azure.initRepo({
@@ -166,7 +162,7 @@ describe('platform/azure', () => {
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
       const config = await initRepo({
-        repository: 'some-repo',
+        repository: 'some/repo',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
@@ -479,12 +475,12 @@ describe('platform/azure', () => {
   });
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
-      await initRepo('some-repo');
+      await initRepo('some/repo');
       const res = await azure.getBranchStatus('somebranch', null);
       expect(res).toEqual(BranchStatus.green);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some-repo');
+      await initRepo('some/repo');
       const res = await azure.getBranchStatus('somebranch', ['foo']);
       expect(res).toEqual(BranchStatus.red);
     });
@@ -1217,6 +1213,23 @@ describe('platform/azure', () => {
           } as any)
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
+    });
+    it('supports fetch from another repo', async () => {
+      const data = { foo: 'bar' };
+      const gitApiMock = {
+        getItemContent: jest.fn(() =>
+          Promise.resolve(Readable.from(JSON.stringify(data)))
+        ),
+        getRepositories: jest.fn(() =>
+          Promise.resolve([
+            { id: '123456', name: 'bar', project: { name: 'foo' } },
+          ])
+        ),
+      };
+      azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
+      const res = await azure.getJsonFile('file.json', 'foo/bar');
+      expect(res).toEqual(data);
+      expect(gitApiMock.getItemContent.mock.calls).toMatchSnapshot();
     });
   });
 });

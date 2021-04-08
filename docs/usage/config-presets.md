@@ -202,7 +202,6 @@ To host your preset config on Gitea:
 
 Renovate also supports local presets, e.g. presets that are hosted on the same platform as the target repository.
 This is especially helpful in self-hosted scenarios where public presets cannot be used.
-Local presets are only supported on GitHub, GitLab, Gitea and Bitbucket Server.
 Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`.
 Renovate will determine the current platform and look up the preset from there.
 
