@@ -40,7 +40,10 @@ import {
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getNewBranchName,
+  getProjectAndRepo,
   getRenovatePRFormat,
+  getStorageExtraCloneOpts,
+  max4000Chars,
   streamToString,
 } from './util';
 
@@ -131,7 +134,7 @@ export async function initRepo({
   config = { repository } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  const names = azureHelper.getProjectAndRepo(repository);
+  const names = getProjectAndRepo(repository);
   const repo = repos.filter(
     (c) =>
       c.name.toLowerCase() === names.repo.toLowerCase() &&
@@ -170,7 +173,7 @@ export async function initRepo({
     ...config,
     localDir,
     url,
-    extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
+    extraCloneOpts: getStorageExtraCloneOpts(opts),
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
     cloneSubmodules,
@@ -373,7 +376,7 @@ export async function createPr({
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = getNewBranchName(sourceBranch);
   const targetRefName = getNewBranchName(targetBranch);
-  const description = azureHelper.max4000Chars(sanitize(body));
+  const description = max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
@@ -434,7 +437,7 @@ export async function updatePr({
   };
 
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
+    objToUpdate.description = max4000Chars(sanitize(body));
   }
 
   if (state === PrState.Open) {
