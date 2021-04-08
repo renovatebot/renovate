@@ -151,7 +151,7 @@ export async function postUpgradeCommandsExecutor(
 export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
-  const { allowedPostUpgradeCommands, trustLevel } = getAdminConfig();
+  const { allowedPostUpgradeCommands } = getAdminConfig();
 
   const hasChangedFiles =
     config.updatedPackageFiles?.length > 0 ||
@@ -160,7 +160,6 @@ export default async function executePostUpgradeCommands(
   if (
     /* Only run post-upgrade tasks if there are changes to package files... */
     !hasChangedFiles ||
-    trustLevel !== 'high' ||
     is.emptyArray(allowedPostUpgradeCommands)
   ) {
     return null;

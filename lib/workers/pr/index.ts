@@ -115,6 +115,7 @@ export type EnsurePrResult = {
   prResult: PrResult;
   pr?: Pr;
 };
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
