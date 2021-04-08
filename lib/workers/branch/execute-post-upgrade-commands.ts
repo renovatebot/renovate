@@ -2,28 +2,27 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { getAdminConfig } from '../../config/admin';
 import { addMeta, logger } from '../../logger';
-import { ArtifactError } from '../../manager/types';
+import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { File, getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
-import * as template from '../../util/template';
+import { compile } from '../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
-type PostUpgradeCommandsExecutionResult = {
+export type PostUpgradeCommandsExecutionResult = {
   updatedArtifacts: File[];
   artifactErrors: ArtifactError[];
 };
+
 export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: BranchConfig,
-  allowPostUpgradeCommandTemplating: boolean
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const artifactErrors = [...(config.artifactErrors || [])];
-  const adminConfig = getAdminConfig();
-  const allowedPostUpgradeCommands = adminConfig.allowedPostUpgradeCommands;
+  const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } = getAdminConfig();
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -57,7 +56,7 @@ export async function postUpgradeCommandsExecutor(
         ) {
           try {
             const compiledCmd = allowPostUpgradeCommandTemplating
-              ? template.compile(cmd, upgrade)
+              ? compile(cmd, upgrade)
               : cmd;
 
             logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
@@ -174,7 +173,6 @@ export default async function executePostUpgradeCommands(
   } = await postUpgradeCommandsExecutor(
     updateUpgradeCommands,
     config,
-    getAdminConfig().allowPostUpgradeCommandTemplating
   );
   return postUpgradeCommandsExecutor(
     branchUpgradeCommands,
