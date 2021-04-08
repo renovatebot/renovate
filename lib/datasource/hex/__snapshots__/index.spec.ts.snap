@@ -3,6 +3,7 @@
 exports[`datasource/hex getReleases process public repo without auth 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/certifi",
+  "registryUrl": "https://hex.pm/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2015-09-10T13:58:55.620Z",
@@ -106,6 +107,7 @@ Array [
 exports[`datasource/hex getReleases processes real data 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/certifi",
+  "registryUrl": "https://hex.pm/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2015-09-10T13:58:55.620Z",

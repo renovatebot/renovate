@@ -141,8 +141,6 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `Array []`;
-
 exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested 1`] = `
 Array [
   Object {
@@ -968,23 +966,16 @@ Array [
 
 exports[`platform/gitlab getBranchPr(branchName) should return the PR object 1`] = `
 Object {
-  "additions": 1,
-  "base": Object {
-    "sha": "1234",
-  },
   "body": undefined,
-  "commits": 1,
-  "deletions": 1,
   "displayNumber": "Merge Request #91",
   "hasAssignees": false,
   "hasReviewers": false,
-  "iid": 91,
+  "labels": undefined,
   "number": 91,
+  "sha": undefined,
   "sourceBranch": "some-branch",
-  "source_branch": "some-branch",
   "state": "open",
   "targetBranch": "master",
-  "target_branch": "master",
   "title": "some change",
 }
 `;
@@ -1040,24 +1031,17 @@ Array [
 
 exports[`platform/gitlab getBranchPr(branchName) should strip deprecated draft prefix from title 1`] = `
 Object {
-  "additions": 1,
-  "base": Object {
-    "sha": "1234",
-  },
   "body": undefined,
-  "commits": 1,
-  "deletions": 1,
   "displayNumber": "Merge Request #91",
   "hasAssignees": false,
   "hasReviewers": false,
-  "iid": 91,
   "isDraft": true,
+  "labels": undefined,
   "number": 91,
+  "sha": undefined,
   "sourceBranch": "some-branch",
-  "source_branch": "some-branch",
   "state": "open",
   "targetBranch": "master",
-  "target_branch": "master",
   "title": "some change",
 }
 `;
@@ -1113,24 +1097,17 @@ Array [
 
 exports[`platform/gitlab getBranchPr(branchName) should strip draft prefix from title 1`] = `
 Object {
-  "additions": 1,
-  "base": Object {
-    "sha": "1234",
-  },
   "body": undefined,
-  "commits": 1,
-  "deletions": 1,
   "displayNumber": "Merge Request #91",
   "hasAssignees": false,
   "hasReviewers": false,
-  "iid": 91,
   "isDraft": true,
+  "labels": undefined,
   "number": 91,
+  "sha": undefined,
   "sourceBranch": "some-branch",
-  "source_branch": "some-branch",
   "state": "open",
   "targetBranch": "master",
-  "target_branch": "master",
   "title": "some change",
 }
 `;
@@ -1238,6 +1215,33 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns failure if any mandatory jobs fails and one job is skipped 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
 exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns pending if no results 1`] = `
 Array [
   Object {
@@ -1319,7 +1323,61 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns success if job is skipped 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
 exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns success if optional jobs fail 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
+exports[`platform/gitlab getBranchStatus(branchName, requiredStatusChecks) returns yellow if there are no jobs expect skipped 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1465,12 +1523,12 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=master",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD",
   },
 ]
 `;
 
-exports[`platform/gitlab getJsonFile() returns null on errors 1`] = `
+exports[`platform/gitlab getJsonFile() throws on errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1492,7 +1550,34 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD",
+  },
+]
+`;
+
+exports[`platform/gitlab getJsonFile() throws on malformed JSON 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD",
   },
 ]
 `;
@@ -1501,22 +1586,17 @@ exports[`platform/gitlab getPr(prNo) removes deprecated draft prefix from return
 Object {
   "body": "a merge request",
   "canMerge": false,
-  "description": "a merge request",
   "displayNumber": "Merge Request #12345",
-  "diverged_commits_count": 5,
   "hasAssignees": false,
   "hasReviewers": false,
-  "id": 1,
-  "iid": 12345,
   "isConflicted": true,
   "isDraft": true,
-  "merge_status": "cannot_be_merged",
+  "labels": undefined,
   "number": 12345,
+  "sha": undefined,
   "sourceBranch": "some-branch",
-  "source_branch": "some-branch",
   "state": "merged",
   "targetBranch": "master",
-  "target_branch": "master",
   "title": "do something",
 }
 `;
@@ -1541,22 +1621,17 @@ exports[`platform/gitlab getPr(prNo) removes draft prefix from returned title 1`
 Object {
   "body": "a merge request",
   "canMerge": false,
-  "description": "a merge request",
   "displayNumber": "Merge Request #12345",
-  "diverged_commits_count": 5,
   "hasAssignees": false,
   "hasReviewers": false,
-  "id": 1,
-  "iid": 12345,
   "isConflicted": true,
   "isDraft": true,
-  "merge_status": "cannot_be_merged",
+  "labels": undefined,
   "number": 12345,
+  "sha": undefined,
   "sourceBranch": "some-branch",
-  "source_branch": "some-branch",
   "state": "merged",
   "targetBranch": "master",
-  "target_branch": "master",
   "title": "do something",
 }
 `;
@@ -1581,21 +1656,16 @@ exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",
   "canMerge": false,
-  "description": "a merge request",
   "displayNumber": "Merge Request #12345",
-  "diverged_commits_count": 5,
   "hasAssignees": false,
   "hasReviewers": false,
-  "id": 1,
-  "iid": 12345,
   "isConflicted": true,
-  "merge_status": "cannot_be_merged",
+  "labels": undefined,
   "number": 12345,
+  "sha": undefined,
   "sourceBranch": "some-branch",
-  "source_branch": "some-branch",
   "state": "merged",
   "targetBranch": "master",
-  "target_branch": "master",
   "title": "do something",
 }
 `;
@@ -1620,21 +1690,16 @@ exports[`platform/gitlab getPr(prNo) returns the PR with nonexisting branch 1`] 
 Object {
   "body": "a merge request",
   "canMerge": false,
-  "description": "a merge request",
   "displayNumber": "Merge Request #12345",
-  "diverged_commits_count": 2,
   "hasAssignees": true,
   "hasReviewers": false,
-  "id": 1,
-  "iid": 12345,
   "isConflicted": true,
-  "merge_status": "cannot_be_merged",
+  "labels": undefined,
   "number": 12345,
+  "sha": undefined,
   "sourceBranch": "some-branch",
-  "source_branch": "some-branch",
   "state": "open",
   "targetBranch": "master",
-  "target_branch": "master",
   "title": "do something",
 }
 `;
@@ -1659,19 +1724,15 @@ exports[`platform/gitlab getPr(prNo) returns the mergeable PR 1`] = `
 Object {
   "body": "a merge request",
   "canMerge": true,
-  "description": "a merge request",
   "displayNumber": "Merge Request #12345",
-  "diverged_commits_count": 5,
   "hasAssignees": true,
   "hasReviewers": false,
-  "id": 1,
-  "iid": 12345,
+  "labels": undefined,
   "number": 12345,
+  "sha": undefined,
   "sourceBranch": "some-branch",
-  "source_branch": "some-branch",
   "state": "open",
   "targetBranch": "master",
-  "target_branch": "master",
   "title": "do something",
 }
 `;
@@ -1712,19 +1773,6 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
-`;
-
-exports[`platform/gitlab massageMarkdown(input) returns updated pr body 1`] = `
-"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
-
-  Merge Requests are the best, here are some MRs.
-
-  ## Open
-
-These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
-
- - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
-"
 `;
 
 exports[`platform/gitlab getRepoForceRebase should return false 1`] = `
@@ -2024,6 +2072,19 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
 ]
+`;
+
+exports[`platform/gitlab massageMarkdown(input) returns updated pr body 1`] = `
+"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
+
+  Merge Requests are the best, here are some MRs.
+
+  ## Open
+
+These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+
+ - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
+"
 `;
 
 exports[`platform/gitlab mergePr(pr) merges the PR 1`] = `

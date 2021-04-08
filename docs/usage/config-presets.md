@@ -33,15 +33,20 @@ In order to achieve these goals, preset configs allow for a very modular approac
 In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
 An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
-| name                    | example use          | preset    | resolves as                          | filename                          |
-| ----------------------- | -------------------- | --------- | ------------------------------------ | --------------------------------- |
-| GitHub default          | `github>abc/foo`     | `default` | `https://github.com/abc/foo`         | `default.json` or `renovate.json` |
-| GitHub with preset name | `github>abc/foo:xyz` | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`                        |
-| GitLab default          | `gitlab>abc/foo`     | `default` | `https://gitlab.com/abc/foo`         | `default.json` or `renovate.json` |
-| GitLab with preset name | `gitlab>abc/foo:xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`                        |
-| Gitea default           | `gitea>abc/foo`      | `default` | `https://gitea.com/abc/foo`          | `default.json` or `renovate.json` |
-| Gitea with preset name  | `gitea>abc/foo:xyz`  | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`                        |
-| Local default           | `local>abc/foo`      | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |
+| name                    | example use                | preset    | resolves as                          | filename                          |
+| ----------------------- | -------------------------- | --------- | ------------------------------------ | --------------------------------- |
+| GitHub default          | `github>abc/foo`           | `default` | `https://github.com/abc/foo`         | `default.json` or `renovate.json` |
+| GitHub with preset name | `github>abc/foo:xyz`       | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`                        |
+| GitHub with preset path | `github>abc/foo//path/xyz` | `xyz`     | `https://github.com/abc/foo`         | `path/xyz.json`                   |
+| GitLab default          | `gitlab>abc/foo`           | `default` | `https://gitlab.com/abc/foo`         | `default.json` or `renovate.json` |
+| GitLab with preset name | `gitlab>abc/foo:xyz`       | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`                        |
+| GitLab with preset path | `gitlab>abc/foo//path/xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `path/xyz.json`                   |
+| Gitea default           | `gitea>abc/foo`            | `default` | `https://gitea.com/abc/foo`          | `default.json` or `renovate.json` |
+| Gitea with preset name  | `gitea>abc/foo:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`                        |
+| Local default           | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |
+| Local with preset path  | `local>abc/foo//path/xyz`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json`                   |
+
+Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported. One workaround is to use distinct files instead of sub-presets.
 
 ## Example configs
 
@@ -129,7 +134,7 @@ To host your preset config on GitHub:
   "extends": ["github>rarkins/renovate-config"]
 ```
 
-From then on Renovate will use the renovate config from the preset repo's default branch.
+From then on Renovate will use the Renovate config from the preset repo's default branch.
 You do not need to add it as a devDependency or add any other files to the preset repo.
 
 ## GitLab-hosted Presets
@@ -158,7 +163,7 @@ To host your preset config on Gitea:
 
 Renovate also supports local presets, e.g. presets that are hosted on the same platform as the target repository.
 This is especially helpful in self-hosted scenarios where public presets cannot be used.
-Local presets are only supported on GitHub, GitLab, Gitea and Bitbucket Server.
+Local presets are only supported on GitHub, GitLab, Gitea, Bitbucket Cloud and Bitbucket Server.
 Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`.
 Renovate will determine the current platform and look up the preset from there.
 
@@ -200,6 +205,10 @@ Using npm-hosted presets is deprecated, we recommend you do not follow these ins
 
 If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
 That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
+
+Let's say that your username on npm and elsewhere is "fastcore".
+In that case, you can choose between publishing your preset config package as `@fastcore/renovate-config` or `renovate-config-fastcore`.
+Let's assume you choose `renovate-config-fastcore` as the package name.
 
 You then need to publish the `renovate-config-fastcore` package where the `package.json` contains the field `renovate-config` and then put your config under the field `default`.
 For example:

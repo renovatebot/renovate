@@ -87,6 +87,7 @@ Object {
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "default",
+  "presetPath": undefined,
   "presetSource": "gitea",
 }
 `;
@@ -96,6 +97,17 @@ Object {
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "default",
+  "presetPath": undefined,
+  "presetSource": "github",
+}
+`;
+
+exports[`config/presets parsePreset parses github subdirectories 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "somefile",
+  "presetPath": "somepath/somesubpath",
   "presetSource": "github",
 }
 `;
@@ -105,6 +117,7 @@ Object {
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "somefile",
+  "presetPath": undefined,
   "presetSource": "github",
 }
 `;
@@ -114,6 +127,7 @@ Object {
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "somefile/somepreset/somesubpreset",
+  "presetPath": undefined,
   "presetSource": "github",
 }
 `;
@@ -123,6 +137,17 @@ Object {
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "somefile/somepreset",
+  "presetPath": undefined,
+  "presetSource": "github",
+}
+`;
+
+exports[`config/presets parsePreset parses github toplevel file using subdirectory syntax 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "somefile",
+  "presetPath": undefined,
   "presetSource": "github",
 }
 `;
@@ -132,6 +157,7 @@ Object {
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "default",
+  "presetPath": undefined,
   "presetSource": "gitlab",
 }
 `;
@@ -141,6 +167,17 @@ Object {
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "default",
+  "presetPath": undefined,
+  "presetSource": "local",
+}
+`;
+
+exports[`config/presets parsePreset parses local with subdirectory 1`] = `
+Object {
+  "packageName": "some-group/some-repo",
+  "params": undefined,
+  "presetName": "some-file",
+  "presetPath": "some-dir",
   "presetSource": "local",
 }
 `;
@@ -150,6 +187,7 @@ Object {
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "default",
+  "presetPath": undefined,
   "presetSource": "local",
 }
 `;
@@ -159,6 +197,7 @@ Object {
   "packageName": "default",
   "params": undefined,
   "presetName": "base",
+  "presetPath": undefined,
   "presetSource": "internal",
 }
 `;
@@ -171,6 +210,7 @@ Object {
     "eslint",
   ],
   "presetName": "group",
+  "presetPath": undefined,
   "presetSource": "internal",
 }
 `;
@@ -180,6 +220,7 @@ Object {
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "default",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -189,6 +230,7 @@ Object {
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "webapp",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -198,6 +240,7 @@ Object {
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "webapp",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -209,6 +252,7 @@ Object {
     "param1",
   ],
   "presetName": "webapp",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -218,6 +262,7 @@ Object {
   "packageName": "@somescope/somepackagename",
   "params": undefined,
   "presetName": "default",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -231,6 +276,7 @@ Object {
     "param3",
   ],
   "presetName": "default",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -240,6 +286,7 @@ Object {
   "packageName": "@somescope/somepackagename",
   "params": undefined,
   "presetName": "somePresetName",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -252,6 +299,7 @@ Object {
     "param2",
   ],
   "presetName": "somePresetName",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -261,6 +309,7 @@ Object {
   "packageName": "@somescope/renovate-config",
   "params": undefined,
   "presetName": "somePresetName",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -272,6 +321,7 @@ Object {
     "param1",
   ],
   "presetName": "somePresetName",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -281,6 +331,7 @@ Object {
   "packageName": "@somescope/renovate-config",
   "params": undefined,
   "presetName": "default",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -292,6 +343,7 @@ Object {
     "param1",
   ],
   "presetName": "default",
+  "presetPath": undefined,
   "presetSource": "npm",
 }
 `;
@@ -327,10 +379,10 @@ Object {
   "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "matchPackagePatterns": Array [
-    "^@typescript-eslint/",
-    "^eslint",
-    "^stylelint",
+  "matchPackagePrefixes": Array [
+    "@typescript-eslint/",
+    "eslint",
+    "stylelint",
   ],
 }
 `;
@@ -416,9 +468,9 @@ Object {
   "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "matchPackagePatterns": Array [
-    "^@typescript-eslint/",
-    "^eslint",
+  "matchPackagePrefixes": Array [
+    "@typescript-eslint/",
+    "eslint",
   ],
 }
 `;
@@ -434,11 +486,13 @@ Object {
     "remark-lint",
   ],
   "matchPackagePatterns": Array [
-    "^ember-template-lint",
-    "^@typescript-eslint/",
-    "^eslint",
-    "^stylelint",
     "\\\\btslint\\\\b",
+  ],
+  "matchPackagePrefixes": Array [
+    "ember-template-lint",
+    "@typescript-eslint/",
+    "eslint",
+    "stylelint",
   ],
 }
 `;
@@ -460,11 +514,13 @@ Object {
         "remark-lint",
       ],
       "matchPackagePatterns": Array [
-        "^ember-template-lint",
-        "^@typescript-eslint/",
-        "^eslint",
-        "^stylelint",
         "\\\\btslint\\\\b",
+      ],
+      "matchPackagePrefixes": Array [
+        "ember-template-lint",
+        "@typescript-eslint/",
+        "eslint",
+        "stylelint",
       ],
     },
   ],
@@ -479,9 +535,9 @@ Object {
       "matchPackageNames": Array [
         "babel-eslint",
       ],
-      "matchPackagePatterns": Array [
-        "^@typescript-eslint/",
-        "^eslint",
+      "matchPackagePrefixes": Array [
+        "@typescript-eslint/",
+        "eslint",
       ],
     },
   ],
@@ -513,6 +569,18 @@ exports[`config/presets resolvePreset throws if invalid preset file 1`] = `undef
 exports[`config/presets resolvePreset throws if invalid preset file 2`] = `"Cannot find preset's package (notfound)"`;
 
 exports[`config/presets resolvePreset throws if invalid preset file 3`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if path + invalid syntax 1`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if path + invalid syntax 2`] = `"Preset is invalid (github>user/repo//)"`;
+
+exports[`config/presets resolvePreset throws if path + invalid syntax 3`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if path + sub-preset 1`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if path + sub-preset 2`] = `"Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)"`;
+
+exports[`config/presets resolvePreset throws if path + sub-preset 3`] = `undefined`;
 
 exports[`config/presets resolvePreset throws if valid and invalid 1`] = `undefined`;
 

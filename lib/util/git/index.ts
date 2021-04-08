@@ -9,6 +9,7 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
+import { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_DISABLED,
@@ -51,6 +52,7 @@ interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
+  ignoredAuthors: string[];
 }
 
 // istanbul ignore next
@@ -72,6 +74,7 @@ function checkForPlatformFailure(err: Error): void {
     'Could not resolve host',
     ' is not a member of team',
     'early EOF',
+    'fatal: bad config', // .gitmodules problem
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -165,6 +168,7 @@ async function fetchBranchCommits(): Promise<void> {
 
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
+  config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
   git = Git(config.localDir);
@@ -200,7 +204,7 @@ async function cleanLocalBranches(): Promise<void> {
  * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
  * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
  */
-export async function setBranchPrefix(branchPrefix: string): Promise<void> {
+async function setBranchPrefix(branchPrefix: string): Promise<void> {
   config.branchPrefix = branchPrefix;
   // If the repo is already cloned then set branchPrefix now, otherwise it will be called again during syncGit()
   if (gitInitialized) {
@@ -213,6 +217,14 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
       throw err;
     }
   }
+}
+
+export async function setUserRepoConfig({
+  branchPrefix,
+  gitIgnoredAuthors,
+}: RenovateConfig): Promise<void> {
+  await setBranchPrefix(branchPrefix);
+  config.ignoredAuthors = gitIgnoredAuthors ?? [];
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -478,7 +490,8 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   const { gitAuthorEmail } = config;
   if (
     lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
-    lastAuthor === gitAuthorEmail
+    lastAuthor === gitAuthorEmail ||
+    config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
     // author matches - branch has not been modified
     config.branchIsModified[branchName] = false;
@@ -691,6 +704,13 @@ export async function commitFiles({
     return commit;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
+    if (err.message.includes(`'refs/heads/renovate' exists`)) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.location = 'None';
+      error.validationError = 'An existing branch is blocking Renovate';
+      error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
+      throw error;
+    }
     if (
       err.message.includes(
         'refusing to allow a GitHub App to create or update workflow'
@@ -700,6 +720,13 @@ export async function commitFiles({
         'App has not been granted permissions to update Workflows - aborting branch.'
       );
       return null;
+    }
+    if (err.message.includes('protected branch hook declined')) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.location = branchName;
+      error.validationError = 'Renovate branch is protected';
+      error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
+      throw error;
     }
     if (err.message.includes('remote: error: cannot lock ref')) {
       logger.error({ err }, 'Error committing files.');

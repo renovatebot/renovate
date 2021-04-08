@@ -1,7 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
 import { getName, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
-import { PRESET_NOT_FOUND } from '../util';
+import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as github from '.';
 
 jest.mock('../../../util/host-rules');
@@ -61,7 +61,7 @@ describe(getName(__filename), () => {
 
       await expect(
         github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow('invalid preset JSON');
+      ).rejects.toThrow(PRESET_INVALID_JSON);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -75,7 +75,7 @@ describe(getName(__filename), () => {
 
       await expect(
         github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow('invalid preset JSON');
+      ).rejects.toThrow(PRESET_INVALID_JSON);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -140,6 +140,22 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('should query custom paths', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/path/custom.json`)
+        .reply(200, {
+          content: Buffer.from('{"foo":"bar"}').toString('base64'),
+        });
+      const content = await github.getPreset({
+        packageName: 'some/repo',
+        presetName: 'custom',
+        presetPath: 'path',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('should throws not-found', async () => {
       httpMock
         .scope(githubApiHost)
@@ -166,7 +182,7 @@ describe(getName(__filename), () => {
           content: Buffer.from('{"from":"api"}').toString('base64'),
         });
       expect(
-        await github.getPresetFromEndpoint('some/repo', 'default')
+        await github.getPresetFromEndpoint('some/repo', 'default', undefined)
       ).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -183,6 +199,7 @@ describe(getName(__filename), () => {
           .getPresetFromEndpoint(
             'some/repo',
             'default',
+            undefined,
             'https://api.github.example.org'
           )
           .catch(() => ({ from: 'api' }))

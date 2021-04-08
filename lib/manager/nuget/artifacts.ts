@@ -58,7 +58,7 @@ async function runDotnetRestore(
 ): Promise<void> {
   const execOptions: ExecOptions = {
     docker: {
-      image: 'renovate/dotnet',
+      image: 'dotnet',
     },
   };
 

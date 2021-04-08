@@ -53,6 +53,21 @@ describe('workers/repository/init/apis', () => {
         })
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
+    it('ignores platform.getJsonFile() failures', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+      });
+      platform.getJsonFile.mockRejectedValue(new Error());
+      await expect(
+        initApis({
+          ...config,
+          optimizeForDisabled: true,
+          includeForks: false,
+          isFork: true,
+        })
+      ).resolves.not.toThrow();
+    });
     it('uses the onboardingConfigFileName if set', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',

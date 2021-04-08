@@ -4,6 +4,7 @@ import { ensureTrailingSlash } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'github-releases';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 

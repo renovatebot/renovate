@@ -1,5 +1,5 @@
 import { BranchStatusConfig, Platform, RepoParams, RepoResult } from '..';
-import { partial } from '../../../test/util';
+import { getName, partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -20,7 +20,7 @@ import * as ght from './gitea-helper';
  */
 const GITEA_VERSION = '1.14.0+dev-754-g5d2b7ba63';
 
-describe('platform/gitea', () => {
+describe(getName(__filename), () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
@@ -1363,11 +1363,17 @@ describe('platform/gitea', () => {
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
-    it('returns null on errors', async () => {
-      helper.getRepoContents.mockRejectedValueOnce('some error');
+    it('throws on malformed JSON', async () => {
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: '!@#',
+      } as never);
       await initFakeRepo({ full_name: 'some/repo' });
-      const res = await gitea.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
+    });
+    it('throws on errors', async () => {
+      helper.getRepoContents.mockRejectedValueOnce(new Error('some error'));
+      await initFakeRepo({ full_name: 'some/repo' });
+      await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
   });
 });

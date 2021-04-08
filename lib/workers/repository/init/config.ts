@@ -138,7 +138,7 @@ export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
     return;
   }
   const error = new Error(CONFIG_VALIDATION);
-  error.configFile = repoConfig.configFileName;
+  error.location = repoConfig.configFileName;
   error.validationError = repoConfig.configFileParseError.validationError;
   error.validationMessage = repoConfig.configFileParseError.validationMessage;
   throw error;
@@ -162,7 +162,7 @@ export async function mergeRenovateConfig(
   const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
-    error.configFile = repoConfig.configFileName;
+    error.location = repoConfig.configFileName;
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
@@ -181,7 +181,7 @@ export async function mergeRenovateConfig(
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = decryptConfig(migratedConfig);
   // istanbul ignore if
-  if (decryptedConfig.npmrc) {
+  if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
@@ -191,7 +191,7 @@ export async function mergeRenovateConfig(
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
   // istanbul ignore if
-  if (resolvedConfig.npmrc) {
+  if (is.string(resolvedConfig.npmrc)) {
     logger.debug(
       'Ignoring any .npmrc files in repository due to configured npmrc'
     );

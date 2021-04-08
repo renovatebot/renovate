@@ -2,6 +2,7 @@
 
 exports[`datasource/dart getReleases processes real data 1`] = `
 Object {
+  "registryUrl": "https://pub.dartlang.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2017-05-09T18:25:24.268Z",

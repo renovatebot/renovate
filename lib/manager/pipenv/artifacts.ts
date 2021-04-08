@@ -103,7 +103,7 @@ export async function updateArtifacts({
         PIPENV_CACHE_DIR: cacheDir,
       },
       docker: {
-        image: 'renovate/python',
+        image: 'python',
         tagConstraint,
         tagScheme: 'pep440',
         preCommands: [
