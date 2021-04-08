@@ -225,7 +225,7 @@ describe(getName(__filename), () => {
       'gets release notes with body from gitlab repo %s',
       async (prefix) => {
         httpMock
-          .scope('https://api.gitlab.com/')
+          .scope('https://gitlab.com/api/v4/')
           .get('/projects/some%2fother-repository/releases?per_page=100')
           .reply(200, [
             { tag_name: `${prefix}1.0.0` },
@@ -241,7 +241,7 @@ describe(getName(__filename), () => {
           '1.0.1',
           'other',
           'https://gitlab.com/',
-          'https://api.gitlab.com/'
+          'https://gitlab.com/api/v4/'
         );
         expect(res).toMatchSnapshot();
         expect(httpMock.getTrace()).toMatchSnapshot();
@@ -356,7 +356,7 @@ describe(getName(__filename), () => {
     it('parses gitlab.com/gitlab-org/gitter/webapp', async () => {
       jest.setTimeout(0);
       httpMock
-        .scope('https://api.gitlab.com/')
+        .scope('https://gitlab.com/api/v4/')
         .get(
           '/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100'
         )
@@ -367,7 +367,7 @@ describe(getName(__filename), () => {
         'gitlab-org/gitter/webapp',
         '20.26.0',
         'https://gitlab.com/',
-        'https://api.gitlab.com/'
+        'https://gitlab.com/api/v4/'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).not.toBeNull();

@@ -275,11 +275,11 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "host": "api.gitlab.com",
+      "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2fother-repository/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2fother-repository/releases?per_page=100",
   },
 ]
 `;
@@ -292,11 +292,11 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "host": "api.gitlab.com",
+      "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2fother-repository/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2fother-repository/releases?per_page=100",
   },
 ]
 `;
@@ -309,11 +309,11 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "host": "api.gitlab.com",
+      "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2fother-repository/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2fother-repository/releases?per_page=100",
   },
 ]
 `;
@@ -652,20 +652,20 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "host": "api.gitlab.com",
+      "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate",
-      "host": "api.gitlab.com",
+      "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw",
+    "url": "https://gitlab.com/api/v4/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw",
   },
 ]
 `;
