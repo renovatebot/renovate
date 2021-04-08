@@ -116,7 +116,9 @@ export type EnsurePrResult = {
   pr?: Pr;
 };
 // Ensures that PR exists with matching title/body
-export async function ensurePr(prConfig: BranchConfig): Promise<EnsurePrResult> {
+export async function ensurePr(
+  prConfig: BranchConfig
+): Promise<EnsurePrResult> {
   const config: BranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
