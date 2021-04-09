@@ -48,14 +48,6 @@ export function getDep(
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
   dep.datasource = datasourceDocker.id;
-  if (
-    dep.depName &&
-    (dep.depName === 'node' || dep.depName.endsWith('/node')) &&
-    dep.depName !== 'calico/node'
-  ) {
-    dep.commitMessageTopic = 'Node.js';
-  }
-
   if (dep.depName === 'ubuntu') {
     dep.versioning = ubuntuVersioning.id;
   }
