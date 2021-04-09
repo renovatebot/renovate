@@ -58,6 +58,7 @@ describe(getName(__filename), () => {
       expect(e).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for unexpected data at base', async () => {
       httpMock
         .scope(baseUrl)
@@ -68,6 +69,7 @@ describe(getName(__filename), () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for unexpected data at versions', async () => {
       httpMock
         .scope(baseUrl)
@@ -80,6 +82,7 @@ describe(getName(__filename), () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns only valid versions if a version detail fails', async () => {
       httpMock
         .scope(baseUrl)
@@ -104,14 +107,17 @@ describe(getName(__filename), () => {
       expect(res.releases).toHaveLength(2);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for empty lookup', async () => {
       expect(await getPkgReleases({ datasource, depName: '' })).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for null lookupName ', async () => {
       expect(await getPkgReleases({ datasource, depName: null })).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope(baseUrl)
@@ -122,6 +128,7 @@ describe(getName(__filename), () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)

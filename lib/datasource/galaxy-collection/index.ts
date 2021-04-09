@@ -36,9 +36,7 @@ export async function getReleases({
   const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
 
   try {
-    const [baseUrlResponse] = await Promise.all([
-      http.getJson<BaseProjectResult>(baseUrl),
-    ]);
+    const baseUrlResponse = await http.getJson<BaseProjectResult>(baseUrl);
     if (!baseUrlResponse || !baseUrlResponse.body) {
       logger.warn(
         { dependency: lookupName },
