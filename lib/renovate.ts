@@ -1,7 +1,16 @@
 #!/usr/bin/env node
 
+import { logger } from './logger';
 import * as proxy from './proxy';
 import * as globalWorker from './workers/global';
+
+process.on('unhandledRejection', (err) => {
+  logger.error({ err }, 'unhandledRejection');
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error({ err }, 'uncaughtException');
+});
 
 proxy.bootstrap();
 
