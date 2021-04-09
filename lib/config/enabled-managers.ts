@@ -16,7 +16,6 @@ export function applyEnabledManagersFilter(
         manager.enabled = enabledSet.has(managerName);
       }
     }
-    enabledManagers.splice(0, enabledSet.size);
   }
   return config;
 }
