@@ -49,7 +49,7 @@ With this configuration, the executable command for `@angular/core` looks like t
 
 ```bash
 npm ci --ignore-scripts
-npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrate-only --allow-dirty --force
+npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
 ## allowedPostUpgradeCommands
