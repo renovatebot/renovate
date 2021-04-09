@@ -23,30 +23,26 @@ export async function extractAllDependencies(
   }
   const extractList: RenovateConfig[] = [];
   const fileList = await getFileList();
+
+  const tryConfig = (extractConfig: RenovateConfig): void => {
+    const matchingFileList = getMatchingFiles(extractConfig, fileList);
+    if (matchingFileList.length) {
+      extractList.push({ ...extractConfig, fileList: matchingFileList });
+    }
+  };
+
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
     if (manager === 'regex') {
       for (const regexManager of config.regexManagers) {
-        const regexManagerConfig = mergeChildConfig(
-          managerConfig,
-          regexManager
-        );
-        regexManagerConfig.fileList = getMatchingFiles(
-          regexManagerConfig,
-          fileList
-        );
-        if (regexManagerConfig.fileList.length) {
-          extractList.push(regexManagerConfig);
-        }
+        tryConfig(mergeChildConfig(managerConfig, regexManager));
       }
     } else {
-      managerConfig.fileList = getMatchingFiles(managerConfig, fileList);
-      if (managerConfig.fileList.length) {
-        extractList.push(managerConfig);
-      }
+      tryConfig(managerConfig);
     }
   }
+
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
       const packageFiles = await getManagerPackageFiles(managerConfig);
