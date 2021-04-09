@@ -14,16 +14,16 @@ describe('config/enabled-managers', () => {
     expect(applyEnabledManagersFilter(config)).toStrictEqual(config);
     expect(
       applyEnabledManagersFilter({ ...config, enabledManagers: ['foobar'] })
-    ).toStrictEqual({ ...config, enabledManagers: [] });
+    ).toStrictEqual({ ...config, enabledManagers: ['foobar'] });
   });
   it('changes enabled flag for enabled managers', () => {
     expect(
       applyEnabledManagersFilter({
-        ...config,
         enabledManagers: ['foobar', 'maven'],
+        ...config,
       })
     ).toStrictEqual({
-      enabledManagers: [],
+      enabledManagers: ['foobar', 'maven'],
       npm: { enabled: false },
       maven: { enabled: true },
     });
