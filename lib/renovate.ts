@@ -8,10 +8,6 @@ process.on('unhandledRejection', (err) => {
   logger.error({ err }, 'unhandledRejection');
 });
 
-process.on('uncaughtException', (err) => {
-  logger.error({ err }, 'uncaughtException');
-});
-
 proxy.bootstrap();
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
