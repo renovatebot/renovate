@@ -1,7 +1,7 @@
 {
-  "name": "myrenobatebot",
+  "name": "renovate",
   "description": "Automated dependency updates. Flexible so you don't need to be.",
-  "version": "0.0.8",
+  "version": "0.0.0-semantic-release",
   "bin": {
     "renovate": "dist/renovate.js",
     "renovate-config-validator": "dist/config-validator.js"
@@ -68,7 +68,7 @@
     "update",
     "yarn"
   ],
-  "author": "<cmarcano631@gmail.com>",
+  "author": "Rhys Arkins <rhys@arkins.net>",
   "contributors": [
     "Alex DelVecchio <alex@de.lvecch.io>",
     "Andreas Bexelius <andreas.brostrom@nordnet.se>",
