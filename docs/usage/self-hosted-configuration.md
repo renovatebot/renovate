@@ -36,7 +36,7 @@ The command to install dependencies (`npm ci --ignore-scripts`) is necessary bec
       "postUpgradeTasks": {
         "commands": [
           "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrateOnly --allowDirty --force"
+          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
         ],
         "fileFilters": ["**/**"]
       }
@@ -49,7 +49,7 @@ With this configuration, the executable command for `@angular/core` looks like t
 
 ```bash
 npm ci --ignore-scripts
-npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty --force
+npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
 ## allowedPostUpgradeCommands
