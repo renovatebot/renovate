@@ -24,9 +24,7 @@ export async function extractAllDependencies(
 
     const matchingFileList = getMatchingFiles(extractConfig, fileList);
     if (matchingFileList.length) {
-      extractList.push(
-        mergeChildConfig(extractConfig, { fileList: matchingFileList })
-      );
+      extractList.push({ ...extractConfig, fileList: matchingFileList });
     }
   };
 
