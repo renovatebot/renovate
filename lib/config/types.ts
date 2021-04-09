@@ -331,3 +331,8 @@ export type RenovateOptions =
   | RenovateBooleanOption
   | RenovateArrayOption
   | RenovateObjectOption;
+
+export interface ManagerConfig extends RenovateConfig {
+  language: string;
+  manager: string;
+}

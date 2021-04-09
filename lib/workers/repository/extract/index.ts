@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import {
   RenovateConfig,
   getManagerConfig,
@@ -14,39 +13,36 @@ import { getManagerPackageFiles } from './manager-files';
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
-  let managerList = getManagerList();
-  if (is.nonEmptyArray(config.enabledManagers)) {
-    logger.debug('Applying enabledManagers filtering');
-    managerList = managerList.filter((manager) =>
-      config.enabledManagers.includes(manager)
-    );
-  }
+  const managerList = getManagerList();
   const extractList: RenovateConfig[] = [];
   const fileList = await getFileList();
+
+  const tryConfig = (extractConfig: RenovateConfig): void => {
+    if (extractConfig.enabled === false) {
+      return;
+    }
+
+    const matchingFileList = getMatchingFiles(extractConfig, fileList);
+    if (matchingFileList.length) {
+      extractList.push(
+        mergeChildConfig(extractConfig, { fileList: matchingFileList })
+      );
+    }
+  };
+
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
+
     if (manager === 'regex') {
       for (const regexManager of config.regexManagers) {
-        const regexManagerConfig = mergeChildConfig(
-          managerConfig,
-          regexManager
-        );
-        regexManagerConfig.fileList = getMatchingFiles(
-          regexManagerConfig,
-          fileList
-        );
-        if (regexManagerConfig.fileList.length) {
-          extractList.push(regexManagerConfig);
-        }
+        tryConfig(mergeChildConfig(managerConfig, regexManager));
       }
     } else {
-      managerConfig.fileList = getMatchingFiles(managerConfig, fileList);
-      if (managerConfig.fileList.length) {
-        extractList.push(managerConfig);
-      }
+      tryConfig(managerConfig);
     }
   }
+
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
       const packageFiles = await getManagerPackageFiles(managerConfig);

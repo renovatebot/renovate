@@ -2,6 +2,9 @@
 
 exports[`workers/repository/extract/index extractAllDependencies() skips non-enabled managers 1`] = `
 Object {
+  "ansible": Array [
+    Object {},
+  ],
   "npm": Array [
     Object {},
   ],
