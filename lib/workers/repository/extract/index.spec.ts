@@ -23,9 +23,11 @@ describe('workers/repository/extract/index', () => {
       expect(Object.keys(res)).toContain('ansible');
     });
     it('skips non-enabled managers', async () => {
-      config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      const res = await extractAllDependencies(config);
+      const res = await extractAllDependencies({
+        ...config,
+        ansible: { enabled: false },
+      });
       expect(res).toMatchSnapshot();
     });
     it('checks custom managers', async () => {
