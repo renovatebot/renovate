@@ -111,14 +111,15 @@ export function getPlatformPrOptions(
       config.gitLabAutomerge,
   };
 }
+export type EnsurePrResult = {
+  prResult: PrResult;
+  pr?: Pr;
+};
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
-): Promise<{
-  prResult: PrResult;
-  pr?: Pr;
-}> {
+): Promise<EnsurePrResult> {
   const config: BranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
