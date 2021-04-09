@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { getManagerList } from '../manager';
-import type { RenovateConfig } from './types';
+import type { ManagerConfig, RenovateConfig } from './types';
 
 export function applyEnabledManagersFilter(
   config: RenovateConfig
@@ -11,7 +11,7 @@ export function applyEnabledManagersFilter(
     logger.debug({ enabledManagers }, 'Applying enabled managers filtering');
     const enabledSet = new Set([...enabledManagers]);
     for (const managerName of getManagerList()) {
-      const manager = config[managerName] as RenovateConfig;
+      const manager = config[managerName] as ManagerConfig;
       if (manager) {
         manager.enabled = enabledSet.has(managerName);
       }
