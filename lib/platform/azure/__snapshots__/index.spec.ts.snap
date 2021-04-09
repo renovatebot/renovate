@@ -181,6 +181,15 @@ Object {
 
 exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null`;
 
+exports[`platform/azure getJsonFile() supports fetch from another repo 1`] = `
+Array [
+  Array [
+    "123456",
+    "file.json",
+  ],
+]
+`;
+
 exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
 Object {
   "body": undefined,

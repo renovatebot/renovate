@@ -1214,5 +1214,22 @@ describe('platform/azure', () => {
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
+    it('supports fetch from another repo', async () => {
+      const data = { foo: 'bar' };
+      const gitApiMock = {
+        getItemContent: jest.fn(() =>
+          Promise.resolve(Readable.from(JSON.stringify(data)))
+        ),
+        getRepositories: jest.fn(() =>
+          Promise.resolve([
+            { id: '123456', name: 'bar', project: { name: 'foo' } },
+          ])
+        ),
+      };
+      azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
+      const res = await azure.getJsonFile('file.json', 'foo/bar');
+      expect(res).toEqual(data);
+      expect(gitApiMock.getItemContent.mock.calls).toMatchSnapshot();
+    });
   });
 });

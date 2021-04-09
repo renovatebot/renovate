@@ -6,6 +6,7 @@ import {
   getNewBranchName,
   getProjectAndRepo,
   getRenovatePRFormat,
+  getRepoByName,
   getStorageExtraCloneOpts,
   max4000Chars,
   streamToString,
@@ -176,6 +177,53 @@ describe('platform/azure/helpers', () => {
           `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
         )
       );
+    });
+  });
+
+  describe('getRepoByName', () => {
+    it('returns null when repos array is empty', () => {
+      expect(getRepoByName('foo/bar', [])).toBeNull();
+      expect(getRepoByName('foo/bar', undefined)).toBeNull();
+      expect(getRepoByName('foo/bar', null)).toBeNull();
+    });
+    it('returns null when repo is not found', () => {
+      expect(
+        getRepoByName('foo/foo', [{ name: 'bar', project: { name: 'bar' } }])
+      ).toBeNull();
+    });
+    it('finds repo', () => {
+      expect(
+        getRepoByName('foo/bar', [
+          { id: '1', name: 'baz', project: { name: 'qux' } },
+          null,
+          undefined,
+          { id: '2', name: 'bar' },
+          { id: '3', name: 'bar', project: { name: 'foo' } },
+          { id: '4', name: 'bar', project: { name: 'foo' } },
+        ])
+      ).toMatchObject({ id: '3' });
+    });
+    it('supports shorthand names', () => {
+      expect(
+        getRepoByName('foo', [
+          { id: '1', name: 'bar', project: { name: 'bar' } },
+          { id: '2', name: 'foo', project: { name: 'foo' } },
+        ])
+      ).toMatchObject({ id: '2' });
+    });
+    it('is case-independent', () => {
+      const repos = [
+        { id: '1', name: 'FOO', project: { name: 'FOO' } },
+        { id: '2', name: 'foo', project: { name: 'foo' } },
+      ];
+      expect(getRepoByName('FOO/foo', repos)).toMatchObject({ id: '1' });
+      expect(getRepoByName('foo/FOO', repos)).toMatchObject({ id: '1' });
+      expect(getRepoByName('foo/foo', repos)).toMatchObject({ id: '1' });
+    });
+    it('throws when repo name is invalid', () => {
+      expect(() => getRepoByName(undefined, [])).toThrow();
+      expect(() => getRepoByName(null, [])).toThrow();
+      expect(() => getRepoByName('foo/bar/baz', [])).toThrow();
     });
   });
 });
