@@ -1,4 +1,9 @@
-export { extractPackageFile } from './extract';
-export { updateDependency } from '../pip_requirements/update';
+import { LANGUAGE_PYTHON } from '../../constants/languages';
 
-export const language = 'python';
+export { extractPackageFile } from './extract';
+
+export const language = LANGUAGE_PYTHON;
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)setup.py$'],
+};

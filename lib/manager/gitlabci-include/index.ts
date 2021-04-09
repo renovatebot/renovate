@@ -1,4 +1,7 @@
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 
-export { extractPackageFile, updateDependency };
+export { extractPackageFile };
+
+export const defaultConfig = {
+  fileMatch: ['^\\.gitlab-ci\\.yml$'],
+};

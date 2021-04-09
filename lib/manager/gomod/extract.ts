@@ -1,6 +1,9 @@
+import { validRange } from 'semver';
+import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import { isVersion } from '../../versioning/semver';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 function getDep(
   lineNumber: number,
@@ -18,20 +21,12 @@ function getDep(
     depType: type,
     currentValue,
   };
-  if (!isVersion(currentValue)) {
-    dep.skipReason = 'unsupported-version';
+  if (isVersion(currentValue)) {
+    dep.datasource = datasourceGo.id;
   } else {
-    if (depName.startsWith('gopkg.in/')) {
-      const [pkg] = depName.replace('gopkg.in/', '').split('.');
-      dep.depNameShort = pkg;
-    } else if (depName.startsWith('github.com/')) {
-      dep.depNameShort = depName.replace('github.com/', '');
-    } else {
-      dep.depNameShort = depName;
-    }
-    dep.datasource = 'go';
+    dep.skipReason = SkipReason.UnsupportedVersion;
   }
-  const digestMatch = currentValue.match(/v0\.0.0-\d{14}-([a-f0-9]{12})/);
+  const digestMatch = /v0\.0.0-\d{14}-([a-f0-9]{12})/.exec(currentValue);
   if (digestMatch) {
     [, dep.currentDigest] = digestMatch;
     dep.digestOneAndOnly = true;
@@ -41,20 +36,24 @@ function getDep(
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
+  const constraints: Record<string, any> = {};
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      const replaceMatch = line.match(
-        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
+      if (line.startsWith('go ') && validRange(line.replace('go ', ''))) {
+        constraints.go = line.replace('go ', '');
+      }
+      const replaceMatch = /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/.exec(
+        line
       );
       if (replaceMatch) {
         const dep = getDep(lineNumber, replaceMatch, 'replace');
         deps.push(dep);
       }
-      const requireMatch = line.match(/^require\s+([^\s]+)\s+([^\s]+)/);
-      if (requireMatch) {
+      const requireMatch = /^require\s+([^\s]+)\s+([^\s]+)/.exec(line);
+      if (requireMatch && !line.endsWith('// indirect')) {
         logger.trace({ lineNumber }, `require line: "${line}"`);
         const dep = getDep(lineNumber, requireMatch, 'require');
         deps.push(dep);
@@ -64,9 +63,9 @@ export function extractPackageFile(content: string): PackageFile | null {
         do {
           lineNumber += 1;
           line = lines[lineNumber];
-          const multiMatch = line.match(/^\s+([^\s]+)\s+([^\s]+)/);
+          const multiMatch = /^\s+([^\s]+)\s+([^\s]+)/.exec(line);
           logger.trace(`reqLine: "${line}"`);
-          if (multiMatch) {
+          if (multiMatch && !line.endsWith('// indirect')) {
             logger.trace({ lineNumber }, `require line: "${line}"`);
             const dep = getDep(lineNumber, multiMatch, 'require');
             dep.managerData.multiLine = true;
@@ -83,5 +82,5 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  return { deps };
+  return { constraints, deps };
 }

@@ -1,30 +1,28 @@
-import moment from 'moment';
 import url from 'url';
-import getRegistryUrl from 'registry-auth-token/registry-url';
-import registryAuthToken from 'registry-auth-token';
-import parse from 'github-url-from-git';
-import { isBase64 } from 'validator';
-import { OutgoingHttpHeaders } from 'http';
+import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import got from '../../util/got';
-import * as hostRules from '../../util/host-rules';
-import { maskToken } from '../../util/mask';
-import { getNpmrc } from './npmrc';
-import { Release, ReleaseResult } from '../common';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
+import { Http, HttpOptions } from '../../util/http';
+import type { Release, ReleaseResult } from '../types';
+import { id } from './common';
+import { resolvePackage } from './npmrc';
+import { NpmResponse } from './types';
 
-let memcache = {};
+const http = new Http(id);
 
-export function resetMemCache() {
+let memcache: Record<string, string> = {};
+
+export function resetMemCache(): void {
   logger.debug('resetMemCache()');
   memcache = {};
 }
 
-export function resetCache() {
+export function resetCache(): void {
   resetMemCache();
 }
 
 export interface NpmRelease extends Release {
-  canBeUnpublished?: boolean;
   gitRef?: string;
 }
 export interface NpmDependency extends ReleaseResult {
@@ -32,108 +30,54 @@ export interface NpmDependency extends ReleaseResult {
   deprecationSource?: string;
   name: string;
   homepage: string;
-  latestVersion: string;
   sourceUrl: string;
   versions: Record<string, any>;
-  'dist-tags': string[];
-  'renovate-config': any;
+  'dist-tags': Record<string, string>;
   sourceDirectory?: string;
 }
 
 export async function getDependency(
-  name: string
+  packageName: string
 ): Promise<NpmDependency | null> {
-  logger.trace(`npm.getDependency(${name})`);
+  logger.trace(`npm.getDependency(${packageName})`);
 
   // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
-  if (memcache[name]) {
+  if (memcache[packageName]) {
     logger.trace('Returning cached result');
-    return JSON.parse(memcache[name]);
+    return JSON.parse(memcache[packageName]) as NpmDependency;
   }
 
-  const scope = name.split('/')[0];
-  let regUrl: string;
-  const npmrc = getNpmrc();
-  try {
-    regUrl = getRegistryUrl(scope, npmrc);
-  } catch (err) {
-    regUrl = 'https://registry.npmjs.org';
-  }
-  const pkgUrl = url.resolve(
-    regUrl,
-    encodeURIComponent(name).replace(/^%40/, '@')
-  );
+  const { headers, packageUrl, registryUrl } = resolvePackage(packageName);
+
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await renovateCache.get<NpmDependency>(
+  const cachedResult = await packageCache.get<NpmDependency>(
     cacheNamespace,
-    pkgUrl
+    packageUrl
   );
+  // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
-  const authInfo = registryAuthToken(regUrl, { npmrc });
-  const headers: OutgoingHttpHeaders = {};
 
-  if (authInfo && authInfo.type && authInfo.token) {
-    // istanbul ignore if
-    if (npmrc && npmrc.massagedAuth && isBase64(authInfo.token)) {
-      logger.debug('Massaging authorization type to Basic');
-      authInfo.type = 'Basic';
-    }
-    headers.authorization = `${authInfo.type} ${authInfo.token}`;
-    logger.trace(
-      { token: maskToken(authInfo.token), npmName: name },
-      'Using auth for npm lookup'
-    );
-  } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
-    headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
-  }
+  const uri = url.parse(packageUrl);
 
-  if (
-    pkgUrl.startsWith('https://registry.npmjs.org') &&
-    !pkgUrl.startsWith('https://registry.npmjs.org/@')
-  ) {
+  if (uri.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
     // Delete the authorization header for non-scoped public packages to improve http caching
     // Otherwise, authenticated requests are not cacheable until the registry adds "public" to Cache-Control
     // Ref: https://greenbytes.de/tech/webdav/rfc7234.html#caching.authenticated.responses
     delete headers.authorization;
   }
 
-  // This tells our http layer not to serve responses directly from the cache and instead to revalidate them every time
-  headers['Cache-Control'] = 'no-cache';
-
   try {
-    const raw = await got(pkgUrl, {
-      json: true,
-      retry: {
-        errorCodes: [
-          'ECONNRESET',
-          'ETIMEDOUT',
-          'ECONNRESET',
-          'EADDRINUSE',
-          'ECONNREFUSED',
-          'EPIPE',
-          'ENOTFOUND',
-          'ENETUNREACH',
-          'EAI_AGAIN',
-        ],
-      },
+    const opts: HttpOptions = {
       headers,
-    });
+    };
+    const raw = await http.getJson<NpmResponse>(packageUrl, opts);
     const res = raw.body;
-    // eslint-disable-next-line no-underscore-dangle
-    const returnedName = res.name ? res.name : res._id || '';
-    if (returnedName.toLowerCase() !== name.toLowerCase()) {
-      logger.warn(
-        { lookupName: name, returnedName: res.name, regUrl },
-        'Returned name does not match with requested name'
-      );
-      return null;
-    }
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
-      logger.info({ dependency: name }, 'No versions returned');
+      logger.debug({ dependency: packageName }, 'No versions returned');
       return null;
     }
 
@@ -144,60 +88,39 @@ export async function getDependency(
     // Determine repository URL
     let sourceUrl: string;
 
-    if (res.repository && res.repository.url) {
-      const extraBaseUrls = [];
-      // istanbul ignore next
-      hostRules.hosts({ hostType: 'github' }).forEach(host => {
-        extraBaseUrls.push(host, `gist.${host}`);
-      });
-      // Massage www out of github URL
-      res.repository.url = res.repository.url.replace(
-        'www.github.com',
-        'github.com'
-      );
-      if (res.repository.url.startsWith('https://github.com/')) {
-        res.repository.url = res.repository.url
-          .split('/')
-          .slice(0, 5)
-          .join('/');
+    if (res.repository) {
+      if (is.string(res.repository)) {
+        sourceUrl = res.repository;
+      } else if (res.repository.url) {
+        sourceUrl = res.repository.url;
       }
-      if (res.repository.url.startsWith('git:github.com/')) {
-        res.repository.url = 'https://' + res.repository.url.substr(4);
-      }
-      sourceUrl = parse(res.repository.url, {
-        extraBaseUrls,
-      });
-    }
-    if (res.homepage && res.homepage.includes('://github.com')) {
-      delete res.homepage;
     }
     // Simplify response before caching and returning
     const dep: NpmDependency = {
       name: res.name,
       homepage: res.homepage,
-      latestVersion: res['dist-tags'].latest,
       sourceUrl,
       versions: {},
       releases: null,
       'dist-tags': res['dist-tags'],
-      'renovate-config': latestVersion['renovate-config'],
+      registryUrl,
     };
-    if (res.repository && res.repository.directory) {
+    if (res.repository?.directory) {
       dep.sourceDirectory = res.repository.directory;
     }
     if (latestVersion.deprecated) {
-      dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${name}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
-      dep.deprecationSource = 'npm';
+      dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
+      dep.deprecationSource = id;
     }
-    dep.releases = Object.keys(res.versions).map(version => {
+    dep.releases = Object.keys(res.versions).map((version) => {
       const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,
+        dependencies: res.versions[version].dependencies,
+        devDependencies: res.versions[version].devDependencies,
       };
-      if (res.time && res.time[version]) {
+      if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
-        release.canBeUnpublished =
-          moment().diff(moment(release.releaseTimestamp), 'days') === 0;
       }
       if (res.versions[version].deprecated) {
         release.isDeprecated = true;
@@ -206,57 +129,64 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    memcache[name] = JSON.stringify(dep);
+    memcache[packageName] = JSON.stringify(dep);
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
-      : 5;
-    if (!name.startsWith('@')) {
-      await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+      : 15;
+    // TODO: use dynamic detection of public repos instead of a static list
+    const whitelistedPublicScopes = [
+      '@graphql-codegen',
+      '@storybook',
+      '@types',
+      '@typescript-eslint',
+    ];
+    if (
+      !raw.authorization &&
+      (whitelistedPublicScopes.includes(packageName.split('/')[0]) ||
+        !packageName.startsWith('@'))
+    ) {
+      await packageCache.set(cacheNamespace, packageUrl, dep, cacheMinutes);
     }
     return dep;
   } catch (err) {
     if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.info(
+      logger.debug(
         {
-          pkgUrl,
-          authInfoType: authInfo ? authInfo.type : undefined,
-          authInfoToken: authInfo ? maskToken(authInfo.token) : undefined,
+          packageUrl,
           err,
           statusCode: err.statusCode,
-          depName: name,
+          packageName,
         },
         `Dependency lookup failure: unauthorized`
       );
       return null;
     }
-    // istanbul ignore if
     if (err.statusCode === 402) {
-      logger.info(
+      logger.debug(
         {
-          pkgUrl,
-          authInfoType: authInfo ? authInfo.type : undefined,
-          authInfoToken: authInfo ? maskToken(authInfo.token) : undefined,
+          packageUrl,
           err,
           statusCode: err.statusCode,
-          depName: name,
+          packageName,
         },
         `Dependency lookup failure: payent required`
       );
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ depName: name }, `Dependency lookup failure: not found`);
-      logger.debug({
-        err,
-        token: authInfo ? maskToken(authInfo.token) : 'none',
-      });
+      logger.debug(
+        { err, packageName },
+        `Dependency lookup failure: not found`
+      );
       return null;
     }
-    if (regUrl.startsWith('https://registry.npmjs.org')) {
-      logger.warn({ err, regUrl, depName: name }, 'npm registry failure');
-      throw new Error('registry-failure');
+    if (uri.host === 'registry.npmjs.org') {
+      // istanbul ignore if
+      if (err.name === 'ParseError' && err.body) {
+        err.body = 'err.body deleted by Renovate';
+      }
+      throw new ExternalHostError(err);
     }
-    // istanbul ignore next
     return null;
   }
 }

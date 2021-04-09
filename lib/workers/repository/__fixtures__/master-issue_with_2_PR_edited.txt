@@ -1,0 +1,9 @@
+This issue contains a list of Renovate updates and their statuses.
+
+## Edited/Blocked
+
+These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, check the box below.
+
+ - [ ] <!-- rebase-branch=branchName1 -->[pr1](../pull/1)
+ - [ ] <!-- rebase-branch=branchName2 -->pr2 (`dep2`, `dep3`)
+

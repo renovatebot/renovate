@@ -1,51 +1,62 @@
-import { coerce } from 'semver';
-import { logger } from '../../logger';
-import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import { Http, HttpError } from '../../util/http';
+import { regEx } from '../../util/regex';
+import * as gradleVersioning from '../../versioning/gradle';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type { GradleRelease } from './types';
 
-const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
+export const id = 'gradle-version';
+export const customRegistrySupport = true;
+export const defaultRegistryUrls = ['https://services.gradle.org/versions/all'];
+export const defaultVersioning = gradleVersioning.id;
+export const registryStrategy = 'merge';
 
-interface GradleRelease {
-  body: {
-    snapshot?: boolean;
-    nightly?: boolean;
-    rcFor?: string;
-    version: string;
-    downloadUrl?: string;
-    checksumUrl?: string;
-  }[];
+const http = new Http(id);
+
+const buildTimeRegex = regEx(
+  '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'
+);
+
+function formatBuildTime(timeStr: string): string | null {
+  if (!timeStr) {
+    return null;
+  }
+  if (buildTimeRegex.test(timeStr)) {
+    return timeStr.replace(buildTimeRegex, '$1-$2-$3T$4:$5:$6$7');
+  }
+  return null;
 }
 
-export async function getPkgReleases(
-  _config: PkgReleaseConfig
-): Promise<ReleaseResult> {
+export async function getReleases({
+  registryUrl,
+}: GetReleasesConfig): Promise<ReleaseResult> {
+  let releases: Release[];
   try {
-    const response: GradleRelease = await got(GradleVersionsServiceUrl, {
-      json: true,
-    });
-    const releases = response.body
-      .filter(release => !release.snapshot && !release.nightly)
-      .filter(
-        release =>
-          // some milestone have wrong metadata and need to be filtered by version name content
-          release.rcFor === '' && !release.version.includes('milestone')
-      )
-      .map(release => ({
-        version: coerce(release.version).toString(),
-        downloadUrl: release.downloadUrl,
-        checksumUrl: release.checksumUrl,
+    const response = await http.getJson<GradleRelease[]>(registryUrl);
+    releases = response.body
+      .filter((release) => !release.snapshot && !release.nightly)
+      .map((release) => ({
+        version: release.version,
+        releaseTimestamp: formatBuildTime(release.buildTime),
+        ...(release.broken && { isDeprecated: release.broken }),
       }));
-    const gradle: ReleaseResult = {
-      releases,
-      homepage: 'https://gradle.org',
-      sourceUrl: 'https://github.com/gradle/gradle',
-    };
-    return gradle;
   } catch (err) {
-    logger.debug({ err });
-    if (!(err.statusCode === 404 || err.code === 'ENOTFOUND')) {
-      logger.warn({ err }, 'Gradle release lookup failure: Unknown error');
+    if (
+      err instanceof HttpError &&
+      err.response?.url === defaultRegistryUrls[0]
+    ) {
+      throw new ExternalHostError(err);
     }
-    throw new Error('registry-failure');
+    throw err;
   }
+
+  const res: ReleaseResult = {
+    releases,
+    homepage: 'https://gradle.org',
+    sourceUrl: 'https://github.com/gradle/gradle',
+  };
+  if (res.releases.length) {
+    return res;
+  }
+  return null;
 }

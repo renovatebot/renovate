@@ -1,48 +1,42 @@
 import { logger } from '../logger';
-import { getOptions } from '../config/definitions';
-import {
-  VersioningApi,
-  VersioningApiConstructor,
-  isVersioningApiConstructor,
-} from './common';
+import versionings from './api';
+import { isVersioningApiConstructor } from './common';
+import type { VersioningApi, VersioningApiConstructor } from './types';
 
-export * from './common';
+export * from './types';
 
-const supportedSchemes = getOptions().find(
-  option => option.name === 'versionScheme'
-).allowedValues;
+export const getVersioningList = (): string[] => Array.from(versionings.keys());
+/**
+ * Get versioning map. Can be used to dynamically add new versioning type
+ */
+export const getVersionings = (): Map<
+  string,
+  VersioningApi | VersioningApiConstructor
+> => versionings;
 
-const schemes: Record<string, VersioningApi | VersioningApiConstructor> = {};
-
-for (const scheme of supportedSchemes) {
-  schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
-}
-
-export { get };
-
-function get(versionScheme: string): VersioningApi {
-  if (!versionScheme) {
-    logger.debug('Missing versionScheme');
-    return schemes.semver as VersioningApi;
+export function get(versioning: string): VersioningApi {
+  if (!versioning) {
+    logger.debug('Missing versioning');
+    return versionings.get('semver') as VersioningApi;
   }
-  let schemeName: string;
-  let schemeConfig: string;
-  if (versionScheme.includes(':')) {
-    const versionSplit = versionScheme.split(':');
-    schemeName = versionSplit.shift();
-    schemeConfig = versionSplit.join(':');
+  let versioningName: string;
+  let versioningConfig: string;
+
+  if (versioning.includes(':')) {
+    const versionSplit = versioning.split(':');
+    versioningName = versionSplit.shift();
+    versioningConfig = versionSplit.join(':');
   } else {
-    schemeName = versionScheme;
+    versioningName = versioning;
   }
-  const scheme = schemes[schemeName];
-  if (!scheme) {
-    logger.warn({ versionScheme }, 'Unknown version scheme');
-    return schemes.semver as VersioningApi;
+  const theVersioning = versionings.get(versioningName);
+  if (!theVersioning) {
+    logger.info({ versioning }, 'Unknown versioning - defaulting to semver');
+    return versionings.get('semver') as VersioningApi;
   }
-  // istanbul ignore if: needs an implementation
-  if (isVersioningApiConstructor(scheme)) {
+  if (isVersioningApiConstructor(theVersioning)) {
     // eslint-disable-next-line new-cap
-    return new scheme(schemeConfig);
+    return new theVersioning(versioningConfig);
   }
-  return scheme;
+  return theVersioning;
 }

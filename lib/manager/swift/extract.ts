@@ -1,5 +1,5 @@
-import { isValid } from '../../versioning/swift';
-import { PackageFile, PackageDependency } from '../common';
+import * as datasourceGitTags from '../../datasource/git-tags';
+import type { PackageDependency, PackageFile } from '../types';
 
 const regExps = {
   wildcard: /^.*?/,
@@ -47,7 +47,7 @@ const searchLabels = {
   exactVersion: EXACT_VERSION,
 };
 
-function searchKeysForState(state): string[] {
+function searchKeysForState(state): (keyof typeof regExps)[] {
   switch (state) {
     case 'dependencies':
       return [SPACE, COLON, WILDCARD];
@@ -101,7 +101,7 @@ function getMatch(str: string, state: string): MatchResult | null {
     const key = keys[i];
     const regex = regExps[key];
     const label = searchLabels[key];
-    const match = str.match(regex);
+    const match = regex.exec(str);
     if (match) {
       const idx = match.index;
       const substr = match[0];
@@ -136,7 +136,9 @@ export function extractPackageFile(
   content: string,
   packageFile: string = null
 ): PackageFile | null {
-  if (!content) return null;
+  if (!content) {
+    return null;
+  }
 
   const result: PackageFile = {
     packageFile,
@@ -144,42 +146,37 @@ export function extractPackageFile(
   };
   const deps: PackageDependency[] = [];
 
-  let offset = 0;
   let restStr = content;
   let state: string = null;
   let match = getMatch(restStr, state);
 
   let lookupName: string = null;
   let currentValue: string = null;
-  let fileReplacePosition: number = null;
 
-  function yieldDep() {
+  function yieldDep(): void {
     const depName = getDepName(lookupName);
-    if (depName && currentValue && fileReplacePosition) {
+    if (depName && currentValue) {
       const dep: PackageDependency = {
-        datasource: 'gitTags',
+        datasource: datasourceGitTags.id,
         depName,
         lookupName,
         currentValue,
-        fileReplacePosition,
       };
 
-      if (isValid(currentValue)) {
-        deps.push(dep);
-      }
+      deps.push(dep);
     }
     lookupName = null;
     currentValue = null;
-    fileReplacePosition = null;
   }
 
   while (match) {
     const { idx, len, label, substr } = match;
-    offset += idx;
     // eslint-disable-next-line default-case
     switch (state) {
       case null:
-        if (deps.length) break;
+        if (deps.length) {
+          break;
+        }
         if (label === DEPS) {
           state = 'dependencies';
         }
@@ -256,15 +253,12 @@ export function extractPackageFile(
           yieldDep();
           state = null;
         } else if (label === FROM) {
-          fileReplacePosition = offset;
           currentValue = substr;
           state = '.package(url: [depName], from';
         } else if (label === STRING_LITERAL) {
-          fileReplacePosition = offset;
           currentValue = substr;
           state = '.package(url: [depName], [value]';
         } else if (label === RANGE_OP) {
-          fileReplacePosition = offset;
           currentValue = substr;
           state = '.package(url: [depName], [rangeFrom][rangeOp]';
         } else if (label === EXACT_VERSION) {
@@ -280,7 +274,6 @@ export function extractPackageFile(
           state = null;
         } else if (label === STRING_LITERAL) {
           currentValue = substr.slice(1, substr.length - 1);
-          fileReplacePosition = offset;
           yieldDep();
         } else if (label === PACKAGE) {
           yieldDep();
@@ -345,7 +338,6 @@ export function extractPackageFile(
         }
         break;
     }
-    offset += len;
     restStr = restStr.slice(idx + len);
     match = getMatch(restStr, state);
   }

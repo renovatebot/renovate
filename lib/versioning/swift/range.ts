@@ -1,59 +1,58 @@
 import semver from 'semver';
-import { RangeStrategy } from '../common';
+import type { NewValueConfig } from '../types';
 
 const fromParam = /^\s*from\s*:\s*"([^"]+)"\s*$/;
 const fromRange = /^\s*"([^"]+)"\s*\.\.\.\s*$/;
 const binaryRange = /^\s*"([^"]+)"\s*(\.\.[.<])\s*"([^"]+)"\s*$/;
 const toRange = /^\s*(\.\.[.<])\s*"([^"]+)"\s*$/;
 
-function toSemverRange(range: string) {
+function toSemverRange(range: string): string {
   if (fromParam.test(range)) {
-    const [, version] = range.match(fromParam);
+    const [, version] = fromParam.exec(range);
     if (semver.valid(version)) {
       const nextMajor = `${semver.major(version) + 1}.0.0`;
       return `>=${version} <${nextMajor}`;
     }
   } else if (fromRange.test(range)) {
-    const [, version] = range.match(fromRange);
+    const [, version] = fromRange.exec(range);
     if (semver.valid(version)) {
       return `>=${version}`;
     }
   } else if (binaryRange.test(range)) {
-    const [, fromVersion, op, toVersion] = range.match(binaryRange);
-    if (semver.valid(fromVersion) && semver.valid(toVersion)) {
+    const [, currentVersion, op, newVersion] = binaryRange.exec(range);
+    if (semver.valid(currentVersion) && semver.valid(newVersion)) {
       return op === '..<'
-        ? `>=${fromVersion} <${toVersion}`
-        : `>=${fromVersion} <=${toVersion}`;
+        ? `>=${currentVersion} <${newVersion}`
+        : `>=${currentVersion} <=${newVersion}`;
     }
   } else if (toRange.test(range)) {
-    const [, op, toVersion] = range.match(toRange);
-    if (semver.valid(toVersion)) {
-      return op === '..<' ? `<${toVersion}` : `<=${toVersion}`;
+    const [, op, newVersion] = toRange.exec(range);
+    if (semver.valid(newVersion)) {
+      return op === '..<' ? `<${newVersion}` : `<=${newVersion}`;
     }
   }
   return null;
 }
 
-function getNewValue(
-  currentValue: string,
-  _rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-) {
+function getNewValue({
+  currentValue,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
   if (fromParam.test(currentValue)) {
-    return toVersion;
+    return currentValue.replace(/".*?"/, `"${newVersion}"`);
   }
   if (fromRange.test(currentValue)) {
-    const [, version] = currentValue.match(fromRange);
-    return currentValue.replace(version, toVersion);
+    const [, version] = fromRange.exec(currentValue);
+    return currentValue.replace(version, newVersion);
   }
   if (binaryRange.test(currentValue)) {
-    const [, , , version] = currentValue.match(binaryRange);
-    return currentValue.replace(version, toVersion);
+    const [, , , version] = binaryRange.exec(currentValue);
+    return currentValue.replace(version, newVersion);
   }
   if (toRange.test(currentValue)) {
-    const [, , version] = currentValue.match(toRange);
-    return currentValue.replace(version, toVersion);
+    const [, , version] = toRange.exec(currentValue);
+    return currentValue.replace(version, newVersion);
   }
   return currentValue;
 }

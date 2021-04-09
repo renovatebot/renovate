@@ -1,0 +1,402 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
+Object {
+  "schedule": "after 5:00pm on wednesday and thursday",
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates packageRules 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "excludePackageNames": Array [
+        "baz",
+      ],
+      "excludePackagePatterns": Array [
+        "^baz",
+      ],
+      "matchBaseBranches": Array [
+        "master",
+      ],
+      "matchDatasources": Array [
+        "orb",
+      ],
+      "matchDepTypes": Array [
+        "peerDependencies",
+      ],
+      "matchLanguages": Array [
+        "python",
+      ],
+      "matchManagers": Array [
+        "dockerfile",
+      ],
+      "matchPackageNames": Array [
+        "foo",
+      ],
+      "matchPackagePatterns": Array [
+        "^bar",
+      ],
+      "matchPaths": Array [
+        "package.json",
+      ],
+      "matchSourceUrlPrefixes": Array [
+        "https://github.com/vuejs/vue",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
+Object {
+  "major": Object {
+    "schedule": Array [
+      "after 10pm",
+      "before 7am",
+    ],
+  },
+  "minor": Object {
+    "schedule": Array [
+      "after 10pm every weekday",
+      "before 7am every weekday",
+    ],
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 2`] = `
+Array [
+  "after 10pm every weekday",
+  "before 7am every weekday",
+]
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`] = `
+Object {
+  "additionalBranchPrefix": "{{parentDir}}-",
+  "autodiscover": true,
+  "automerge": false,
+  "automergeType": "branch",
+  "baseBranches": Array [
+    "next",
+  ],
+  "binarySource": "global",
+  "branchName": "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}{{{packageFileDir}}}",
+  "branchPrefix": "renovate/",
+  "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message {{depName}}",
+  "constraints": Object {
+    "python": "3.7",
+  },
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "foo",
+  "enabled": true,
+  "extends": Array [
+    "config:js-app",
+    "config:js-lib",
+    ":dependencyDashboard",
+  ],
+  "hostRules": Array [
+    Object {},
+  ],
+  "ignorePaths": Array [
+    "node_modules/",
+  ],
+  "includeForks": true,
+  "lockFileMaintenance": Object {
+    "automerge": true,
+    "schedule": "before 5am",
+    "trustLevel": "low",
+  },
+  "major": Object {
+    "automerge": false,
+  },
+  "meteor": Object {
+    "enabled": true,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
+  "nvmrc": Object {
+    "packageRules": Array [
+      Object {
+        "extends": Array [
+          "node",
+        ],
+        "matchPaths": Array [
+          "node/**",
+        ],
+      },
+    ],
+  },
+  "onboarding": false,
+  "packageRules": Array [
+    Object {
+      "extends": Array [
+        "foo",
+      ],
+      "matchPaths": Array [
+        "examples/**",
+      ],
+    },
+    Object {
+      "excludePackageNames": "foo",
+      "groupName": "angular packages",
+      "matchPackagePatterns": "^(@angular|typescript)",
+    },
+    Object {
+      "groupName": "foo",
+      "matchPackagePatterns": Array [
+        "^foo",
+      ],
+    },
+    Object {
+      "enabled": false,
+      "matchPackageNames": Array [
+        "angular",
+      ],
+      "matchPackagePatterns": Array [
+        "ang",
+      ],
+    },
+    Object {
+      "matchPackageNames": Array [
+        "guava",
+      ],
+      "versioning": "maven",
+    },
+    Object {
+      "matchDepTypes": Array [
+        "peerDependencies",
+      ],
+      "rangeStrategy": "widen",
+    },
+    Object {
+      "major": Object {
+        "automerge": false,
+      },
+      "matchDepTypes": Array [
+        "devDependencies",
+      ],
+      "minor": Object {
+        "automerge": true,
+      },
+      "schedule": null,
+    },
+    Object {
+      "major": Object {
+        "automerge": false,
+      },
+      "matchDepTypes": Array [
+        "optionalDependencies",
+      ],
+      "minor": Object {
+        "automerge": true,
+      },
+      "respectLatest": false,
+      "schedule": "before 5am on Monday",
+    },
+  ],
+  "patch": Object {
+    "automerge": true,
+  },
+  "pip_setup": Object {
+    "rebaseWhen": "never",
+  },
+  "pipenv": Object {
+    "rebaseWhen": "conflicted",
+  },
+  "platform": "github",
+  "poetry": Object {
+    "rebaseWhen": "behind-base-branch",
+    "versioning": "pep440",
+  },
+  "postUpdateOptions": Array [
+    "gomodTidy",
+  ],
+  "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
+  "rangeStrategy": "bump",
+  "rebaseWhen": "auto",
+  "schedule": "on the first day of the month",
+  "semanticCommitScope": "deps",
+  "semanticCommitType": "fix",
+  "separateMajorMinor": true,
+  "separateMajorReleases": true,
+  "separateMinorPatch": true,
+  "suppressNotifications": Array [
+    "lockFileErrors",
+    "deprecationWarningIssues",
+  ],
+  "travis": Object {
+    "enabled": true,
+  },
+  "trustLevel": "high",
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates more packageFiles 1`] = `
+Object {
+  "includePaths": Array [
+    "package.json",
+  ],
+  "packageRules": Array [
+    Object {
+      "matchDepTypes": Array [
+        "devDependencies",
+      ],
+      "matchPaths": Array [
+        "package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+    Object {
+      "matchDepTypes": Array [
+        "dependencies",
+      ],
+      "matchPaths": Array [
+        "package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates node to travis 1`] = `
+Object {
+  "node": Object {
+    "automerge": false,
+    "supportPolicy": Array [
+      "lts",
+    ],
+  },
+  "travis": Object {
+    "enabled": true,
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates packageFiles 1`] = `
+Object {
+  "includePaths": Array [
+    "package.json",
+    "backend/package.json",
+    "frontend/package.json",
+    "other/package.json",
+  ],
+  "packageRules": Array [
+    Object {
+      "matchPaths": Array [
+        "backend/package.json",
+      ],
+      "rangeStrategy": "replace",
+    },
+    Object {
+      "matchPaths": Array [
+        "frontend/package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+    Object {
+      "matchDepTypes": Array [
+        "devDependencies",
+      ],
+      "matchPaths": Array [
+        "other/package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+    Object {
+      "matchDepTypes": Array [
+        "dependencies",
+      ],
+      "matchPaths": Array [
+        "other/package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates packageRules objects 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "commitMessage": "fix(package): update peerDependency to accept typescript ^{{newMajor}} {{newMajor}}",
+      "matchPackageNames": Array [
+        "typescript",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates packages 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "groupName": "angular packages",
+      "matchPackagePatterns": "^(@angular|typescript)",
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates subconfig 1`] = `
+Object {
+  "lockFileMaintenance": Object {
+    "packageRules": Array [
+      Object {
+        "matchDepTypes": Array [
+          "optionalDependencies",
+        ],
+        "respectLatest": false,
+      },
+    ],
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) overrides existing automerge setting 1`] = `
+Object {
+  "major": Object {
+    "automerge": false,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
+  "packageRules": Array [
+    Object {
+      "major": Object {
+        "automerge": false,
+      },
+      "matchPackagePatterns": "^(@angular|typescript)",
+      "minor": Object {
+        "automerge": false,
+      },
+      "patch": Object {
+        "automerge": true,
+      },
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) removes invalid configs 1`] = `
+Object {
+  "baseBranches": Array [],
+  "commitMessage": "test",
+  "ignorePaths": Array [],
+  "includePaths": Array [
+    "test",
+  ],
+  "rebaseWhen": "auto",
+}
+`;

@@ -1,9 +1,0 @@
-*
-!package.json
-!yarn.lock
-!hooks
-!lib
-!bin/yarn*
-!bin/config-validator.js
-!tsconfig*.json
-!data

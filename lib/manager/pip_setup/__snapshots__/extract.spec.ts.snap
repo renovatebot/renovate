@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/pip_setup/extract getPythonAlias returns the python alias to use 1`] = `"python3.8"`;
+
+exports[`manager/pip_setup/extract getPythonAlias returns the python alias to use 2`] = `
+Array [
+  Object {
+    "cmd": "python --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "python3 --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "python3.8 --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;

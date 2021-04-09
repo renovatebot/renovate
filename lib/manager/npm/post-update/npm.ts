@@ -1,15 +1,23 @@
-import { readFile } from 'fs-extra';
+import { validRange } from 'semver';
+import { quote } from 'shlex';
 import { join } from 'upath';
-import { getInstalledPath } from 'get-installed-path';
-import { exec } from '../../../util/exec';
+import { getAdminConfig } from '../../../config/admin';
+import {
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
+} from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { PostUpdateConfig, Upgrade } from '../../common';
+import { ExecOptions, exec } from '../../../util/exec';
+import { move, pathExists, readFile, remove } from '../../../util/fs';
+import type { PostUpdateConfig, Upgrade } from '../../types';
+import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
   error?: boolean;
   lockFile?: string;
   stderr?: string;
 }
+
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
@@ -18,140 +26,136 @@ export async function generateLockFile(
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
-  const { skipInstalls, binarySource, postUpdateOptions } = config;
-  let lockFile: string = null;
-  let stdout = '';
-  let stderr = '';
-  let cmd: string;
-  let args = '';
+  const { skipInstalls, postUpdateOptions } = config;
+
+  let lockFile = null;
   try {
-    const startTime = process.hrtime();
-    try {
-      // See if renovate is installed locally
-      const installedPath = join(
-        await getInstalledPath('npm', {
-          local: true,
-        }),
-        'bin/npm-cli.js'
-      );
-      cmd = `node ${installedPath}`;
-    } catch (localerr) {
-      logger.debug('No locally installed npm found');
-      // Look inside globally installed renovate
-      try {
-        const renovateLocation = await getInstalledPath('renovate');
-        const installedPath = join(
-          await getInstalledPath('npm', {
-            local: true,
-            cwd: renovateLocation,
-          }),
-          'bin/npm-cli.js'
+    let installNpm = 'npm i -g npm';
+    const npmCompatibility = config.constraints?.npm as string;
+    // istanbul ignore else
+    if (npmCompatibility) {
+      // istanbul ignore else
+      if (validRange(npmCompatibility)) {
+        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)} || true`;
+      } else {
+        logger.debug(
+          { npmCompatibility },
+          'npm compatibility range is not valid - skipping'
         );
-        cmd = `node ${installedPath}`;
-      } catch (nestederr) {
-        logger.debug('Could not find globally nested npm');
-        // look for global npm
-        try {
-          const installedPath = join(
-            await getInstalledPath('npm'),
-            'bin/npm-cli.js'
-          );
-          cmd = `node ${installedPath}`;
-        } catch (globalerr) {
-          logger.warn('Could not find globally installed npm');
-          cmd = 'npm';
-        }
       }
-    }
-    if (binarySource === 'global') {
-      cmd = 'npm';
-    }
-    // istanbul ignore if
-    if (config.binarySource === 'docker') {
-      logger.info('Running npm via docker');
-      cmd = `docker run --rm `;
-      const volumes = [cwd];
-      if (config.cacheDir) {
-        volumes.push(config.cacheDir);
-      }
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
-      if (config.dockerMapDotfiles) {
-        const homeDir =
-          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-        const homeNpmrc = join(homeDir, '.npmrc');
-        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
-      }
-      const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
-      cmd += envVars.map(e => `-e ${e} `).join('');
-      cmd += `-w ${cwd} `;
-      cmd += `renovate/npm npm`;
-    }
-    args = `install`;
-    if (
-      (postUpdateOptions && postUpdateOptions.includes('npmDedupe')) ||
-      skipInstalls === false
-    ) {
-      logger.debug('Performing full npm install');
-      args += ' --ignore-scripts --no-audit';
     } else {
-      args += ' --package-lock-only --no-audit';
+      logger.debug('No npm compatibility range found - installing npm latest');
     }
-    logger.debug(`Using npm: ${cmd} ${args}`);
+    const preCommands = [installNpm, 'hash -d npm'];
+    const commands = [];
+    let cmdOptions = '';
+    if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
+      logger.debug('Performing node_modules install');
+      cmdOptions += '--ignore-scripts --no-audit';
+    } else {
+      logger.debug('Updating lock file only');
+      cmdOptions += '--package-lock-only --ignore-scripts --no-audit';
+    }
+    const tagConstraint = await getNodeConstraint(config);
+    const execOptions: ExecOptions = {
+      cwd,
+      extraEnv: {
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
+      },
+      docker: {
+        image: 'node',
+        tagScheme: 'npm',
+        tagConstraint,
+        preCommands,
+      },
+    };
     // istanbul ignore if
-    if (!upgrades.every(upgrade => upgrade.isLockfileUpdate)) {
-      // TODO: Switch to native util.promisify once using only node 8
-      ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
-        cwd,
-        env,
-      }));
+    if (getAdminConfig().trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
     }
-    const lockUpdates = upgrades.filter(upgrade => upgrade.isLockfileUpdate);
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
+    }
+
+    if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
+      // This command updates the lock file based on package.json
+      commands.push(`npm install ${cmdOptions}`.trim());
+    }
+
+    // rangeStrategy = update-lockfile
+    const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
     if (lockUpdates.length) {
-      logger.info('Performing lockfileUpdate (npm)');
+      logger.debug('Performing lockfileUpdate (npm)');
       const updateCmd =
-        `${cmd} ${args}` +
+        `npm install ${cmdOptions}` +
         lockUpdates
-          .map(update => ` ${update.depName}@${update.toVersion}`)
+          .map((update) => ` ${update.depName}@${update.newVersion}`)
           .join('');
-      const updateRes = await exec(updateCmd, {
-        cwd,
-        env,
-      });
-      stdout += updateRes.stdout ? updateRes.stdout : '';
-      stderr += updateRes.stderr ? updateRes.stderr : '';
+      commands.push(updateCmd);
     }
-    if (postUpdateOptions && postUpdateOptions.includes('npmDedupe')) {
-      logger.info('Performing npm dedupe');
-      const dedupeRes = await exec(`${cmd} dedupe`, {
-        cwd,
-        env,
-      });
-      stdout += dedupeRes.stdout ? dedupeRes.stdout : '';
-      stderr += dedupeRes.stderr ? dedupeRes.stderr : '';
+
+    if (upgrades.some((upgrade) => upgrade.isRemediation)) {
+      // We need to run twice to get the correct lock file
+      commands.push(`npm install ${cmdOptions}`.trim());
     }
-    // istanbul ignore if
-    if (stderr && stderr.includes('ENOSPC: no space left on device')) {
-      throw new Error('disk-space');
+
+    // postUpdateOptions
+    if (config.postUpdateOptions?.includes('npmDedupe')) {
+      logger.debug('Performing npm dedupe');
+      commands.push('npm dedupe');
     }
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
+
+    if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
+      const lockFileName = join(cwd, filename);
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+      );
+      try {
+        await remove(lockFileName);
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          { err, lockFileName },
+          'Error removing yarn.lock for lock file maintenance'
+        );
+      }
+    }
+
+    // Run the commands
+    await exec(commands, execOptions);
+
+    // massage to shrinkwrap if necessary
+    if (
+      filename === 'npm-shrinkwrap.json' &&
+      (await pathExists(join(cwd, 'package-lock.json')))
+    ) {
+      await move(
+        join(cwd, 'package-lock.json'),
+        join(cwd, 'npm-shrinkwrap.json')
+      );
+    }
+
+    // Read the result
     lockFile = await readFile(join(cwd, filename), 'utf8');
-    logger.info(
-      { seconds, type: filename, stdout, stderr },
-      'Generated lockfile'
-    );
   } catch (err) /* istanbul ignore next */ {
-    logger.info(
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
+    logger.debug(
       {
-        cmd,
-        args,
         err,
-        stdout,
-        stderr,
         type: 'npm',
       },
       'lock file error'
     );
+    if (err.stderr?.includes('ENOSPC: no space left on device')) {
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+    }
     return { error: true, stderr: err.stderr };
   }
   return { lockFile };

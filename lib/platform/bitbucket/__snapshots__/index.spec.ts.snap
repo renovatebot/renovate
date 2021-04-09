@@ -1,0 +1,1468 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/bitbucket addAssignees() does not throw 1`] = `undefined`;
+
+exports[`platform/bitbucket addReviewers should add the given reviewers to the PR 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
+  },
+  Object {
+    "body": "{\\"title\\":\\"title\\",\\"reviewers\\":[{\\"username\\":\\"someuser\\"},{\\"username\\":\\"someotheruser\\"}]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "84",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+]
+`;
+
+exports[`platform/bitbucket createPr() posts PR 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/default-reviewers",
+  },
+  Object {
+    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"source\\":{\\"branch\\":{\\"name\\":\\"branch\\"}},\\"destination\\":{\\"branch\\":{\\"name\\":\\"master\\"}},\\"close_source_branch\\":true,\\"reviewers\\":[{\\"uuid\\":\\"{1234-5678}\\"}]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "183",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests",
+  },
+]
+`;
+
+exports[`platform/bitbucket ensureComment() does not throw 1`] = `false`;
+
+exports[`platform/bitbucket ensureCommentRemoval() does not throw 1`] = `undefined`;
+
+exports[`platform/bitbucket ensureIssue() creates new issue 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/empty",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+  Object {
+    "body": "{\\"title\\":\\"title\\",\\"content\\":{\\"raw\\":\\"body\\",\\"markup\\":\\"markdown\\"}}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "62",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues",
+  },
+]
+`;
+
+exports[`platform/bitbucket ensureIssue() noop for existing issue 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+  Object {
+    "body": "{\\"state\\":\\"closed\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "18",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues/26",
+  },
+]
+`;
+
+exports[`platform/bitbucket ensureIssue() updates existing issues 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+  Object {
+    "body": "{\\"state\\":\\"closed\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "18",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues/26",
+  },
+  Object {
+    "body": "{\\"content\\":{\\"raw\\":\\"body\\",\\"markup\\":\\"markdown\\"}}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "46",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues/25",
+  },
+]
+`;
+
+exports[`platform/bitbucket ensureIssueClosing() closes issue 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+  Object {
+    "body": "{\\"state\\":\\"closed\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "18",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues/25",
+  },
+  Object {
+    "body": "{\\"state\\":\\"closed\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "18",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues/26",
+  },
+]
+`;
+
+exports[`platform/bitbucket ensureIssueClosing() does not throw 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+]
+`;
+
+exports[`platform/bitbucket findIssue() does not throw 1`] = `
+Object {
+  "body": "content",
+  "number": 25,
+}
+`;
+
+exports[`platform/bitbucket findIssue() does not throw 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+]
+`;
+
+exports[`platform/bitbucket findIssue() returns null if no issues 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/empty",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+]
+`;
+
+exports[`platform/bitbucket findPr() finds pr 1`] = `
+Object {
+  "body": "summary",
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "number": 5,
+  "sourceBranch": "branch",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+}
+`;
+
+exports[`platform/bitbucket findPr() finds pr 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchPr() bitbucket finds PR for branch 1`] = `
+Object {
+  "body": "summary",
+  "canMerge": true,
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": false,
+  "isConflicted": false,
+  "number": 5,
+  "sourceBranch": "branch",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+}
+`;
+
+exports[`platform/bitbucket getBranchPr() bitbucket finds PR for branch 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchPr() returns null if no PR for branch 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatus() getBranchStatus 1 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatus() getBranchStatus 2 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatus() getBranchStatus 3 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatus() getBranchStatus 4 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/branch",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatus() getBranchStatus 5 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/pending/branch",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/pending/branch_hash/statuses?pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatus() getBranchStatus 6 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/branch-with-empty-status",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/branch-with-empty-status/statuses?pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatusCheck() getBranchStatusCheck 1 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatusCheck() getBranchStatusCheck 2 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket getBranchStatusCheck() getBranchStatusCheck 3 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket getIssueList() does not throw 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+]
+`;
+
+exports[`platform/bitbucket getIssueList() get issues 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+]
+`;
+
+exports[`platform/bitbucket getIssueList() get issues 2`] = `
+Array [
+  Object {
+    "content": Object {
+      "raw": "content",
+    },
+    "id": 25,
+    "title": "title",
+  },
+  Object {
+    "content": Object {
+      "raw": "content",
+    },
+    "id": 26,
+    "title": "title",
+  },
+]
+`;
+
+exports[`platform/bitbucket getIssueList() has no issues 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+]
+`;
+
+exports[`platform/bitbucket getJsonFile() returns file content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/HEAD/file.json",
+  },
+]
+`;
+
+exports[`platform/bitbucket getJsonFile() throws on errors 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/HEAD/file.json",
+  },
+]
+`;
+
+exports[`platform/bitbucket getJsonFile() throws on malformed JSON 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/HEAD/file.json",
+  },
+]
+`;
+
+exports[`platform/bitbucket getPr() canRebase 1`] = `
+Object {
+  "body": "summary",
+  "canMerge": true,
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #3",
+  "hasReviewers": false,
+  "isConflicted": false,
+  "number": 3,
+  "sourceBranch": "branch",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+}
+`;
+
+exports[`platform/bitbucket getPr() canRebase 2`] = `
+Object {
+  "body": "summary",
+  "canMerge": true,
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": false,
+  "isConflicted": false,
+  "number": 5,
+  "sourceBranch": "branch",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+}
+`;
+
+exports[`platform/bitbucket getPr() canRebase 3`] = `
+Object {
+  "body": "summary",
+  "canMerge": true,
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": false,
+  "isConflicted": false,
+  "number": 5,
+  "sourceBranch": "branch",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+}
+`;
+
+exports[`platform/bitbucket getPr() canRebase 4`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3/diff",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
+  },
+]
+`;
+
+exports[`platform/bitbucket getPr() exists 1`] = `
+Object {
+  "body": "summary",
+  "canMerge": true,
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": false,
+  "isConflicted": false,
+  "number": 5,
+  "sourceBranch": "branch",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+}
+`;
+
+exports[`platform/bitbucket getPr() exists 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
+  },
+]
+`;
+
+exports[`platform/bitbucket getPrList() filters PR list by author 1`] = `
+Array [
+  Object {
+    "body": undefined,
+    "createdAt": undefined,
+    "number": 1,
+    "sourceBranch": "branch-a",
+    "state": "open",
+    "targetBranch": "branch-b",
+    "title": undefined,
+  },
+]
+`;
+
+exports[`platform/bitbucket getPrList() filters PR list by author 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic cmVub3ZhdGU6cGFzcw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/user",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50",
+  },
+]
+`;
+
+exports[`platform/bitbucket getRepos() returns repos 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories?role=contributor&pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket initPlatform() should init 1`] = `
+Object {
+  "endpoint": "https://api.bitbucket.org/",
+}
+`;
+
+exports[`platform/bitbucket initRepo() works 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`platform/bitbucket initRepo() works 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+]
+`;
+
+exports[`platform/bitbucket massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket mergePr() posts Merge 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": "{\\"close_source_branch\\":true,\\"merge_strategy\\":\\"merge_commit\\",\\"message\\":\\"auto merged\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "84",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket setBranchStatus() posts status 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/branch",
+  },
+  Object {
+    "body": "{\\"name\\":\\"context\\",\\"state\\":\\"FAILED\\",\\"key\\":\\"context\\",\\"description\\":\\"description\\",\\"url\\":\\"targetUrl\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "97",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/branch_hash/statuses/build",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/branch",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket updatePr() closes PR 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "body": "{\\"title\\":\\"title\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "17",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/decline",
+  },
+]
+`;
+
+exports[`platform/bitbucket updatePr() puts PR 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"reviewers\\":[{\\"display_name\\":\\"Jane Smith\\",\\"uuid\\":\\"{90b6646d-1724-4a64-9fd9-539515fe94e9}\\"}]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "130",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+]
+`;
+
+exports[`platform/bitbucket updatePr() throws an error on failure to get current list of reviewers 1`] = `"Response code 500 (Internal Server Error)"`;
+
+exports[`platform/bitbucket updatePr() throws an error on failure to get current list of reviewers 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+]
+`;

@@ -1,0 +1,346 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`bundler.updateArtifacts() Docker .ruby-version 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker .ruby-version 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:1.2.0",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker constraints options 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker constraints options 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler -v 3.2.1 && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration environment variables 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration environment variables 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:1.2.0",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUNDLE_GEMS__PRIVATE__COM -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "BUNDLE_GEMS__PRIVATE__COM": "some-user:some-password",
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker invalid constraints options 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker invalid constraints options 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() performs lockFileMaintenance 1`] = `
+Array [
+  Object {
+    "cmd": "bundle lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() returns error when failing in lockFileMaintenance true 1`] = `
+Array [
+  Object {
+    "artifactError": Object {
+      "lockFile": "Gemfile.lock",
+      "stderr": " foo was resolved to
+",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() returns error when failing in lockFileMaintenance true 2`] = `
+Array [
+  Object {
+    "cmd": "bundle lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 1`] = `null`;
+
+exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 2`] = `
+Array [
+  Object {
+    "cmd": "bundle lock --update foo bar",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() works explicit global binarySource 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() works explicit global binarySource 2`] = `
+Array [
+  Object {
+    "cmd": "bundle lock --update foo bar",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() works for default binarySource 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() works for default binarySource 2`] = `
+Array [
+  Object {
+    "cmd": "bundle lock --update foo bar",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;

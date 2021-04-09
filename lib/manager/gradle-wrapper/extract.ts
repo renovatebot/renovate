@@ -1,40 +1,30 @@
-import { coerce } from 'semver';
+import * as datasourceGradleVersion from '../../datasource/gradle-version';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { regEx } from '../../util/regex';
+import * as gradleVersioning from '../../versioning/gradle';
+import type { PackageDependency, PackageFile } from '../types';
+
+// https://regex101.com/r/1GaQ2X/1
+const DISTRIBUTION_URL_REGEX = regEx(
+  '^(?:distributionUrl\\s*=\\s*)\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip\\s*$'
+);
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
   const lines = fileContent.split('\n');
 
-  let lineNumber = 0;
   for (const line of lines) {
-    const match = line.match(
-      /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/
-    );
-    if (match) {
+    const distributionUrlMatch = DISTRIBUTION_URL_REGEX.exec(line);
+    if (distributionUrlMatch) {
       const dependency: PackageDependency = {
-        datasource: 'gradleVersion',
-        depType: 'gradle-wrapper',
         depName: 'gradle',
-        currentValue: coerce(match[1]).toString(),
-        managerData: { lineNumber, gradleWrapperType: match[3] },
-        versionScheme: 'semver',
+        currentValue: distributionUrlMatch.groups.version,
+        datasource: datasourceGradleVersion.id,
+        versioning: gradleVersioning.id,
       };
-
-      let shaLineNumber = 0;
-      for (const shaLine of lines) {
-        const shaMatch = shaLine.match(/^distributionSha256Sum=((\w){64}).*$/);
-        if (shaMatch) {
-          dependency.managerData.checksumLineNumber = shaLineNumber;
-          break;
-        }
-        shaLineNumber += 1;
-      }
-
-      logger.info(dependency, 'Gradle Wrapper');
+      logger.debug(dependency, 'Gradle Wrapper');
       return { deps: [dependency] };
     }
-    lineNumber += 1;
   }
   return null;
 }

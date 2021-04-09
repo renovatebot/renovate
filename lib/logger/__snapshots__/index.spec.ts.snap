@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`logger saves problems 1`] = `
+Array [
+  Object {
+    "any": "test",
+    "level": 50,
+    "logContext": "abc123",
+    "msg": "some meta",
+    "name": "renovate",
+  },
+  Object {
+    "any": "test",
+    "level": 50,
+    "logContext": "abc123",
+    "msg": "",
+    "name": "renovate",
+    "password": "***********",
+    "some": "meta",
+  },
+  Object {
+    "any": "test",
+    "level": 50,
+    "logContext": "abc123",
+    "msg": "message",
+    "name": "renovate",
+    "some": "meta",
+  },
+  Object {
+    "any": "test",
+    "level": 40,
+    "logContext": "abc123",
+    "msg": "a warning with a **redacted**",
+    "name": "renovate",
+  },
+]
+`;

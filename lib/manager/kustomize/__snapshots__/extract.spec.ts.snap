@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/kustomize/extract extractPackageFile() extracts http dependency 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "github-tags",
+    "depName": "user/repo",
+  },
+  Object {
+    "currentValue": "1.19.0",
+    "datasource": "github-tags",
+    "depName": "fluxcd/flux",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() extracts multiple image lines 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "git-tags",
+    "depName": "moredhel/remote-kustomize",
+    "lookupName": "https://moredhel/remote-kustomize.git",
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "git-tags",
+    "depName": "moredhel/remote-kustomize",
+    "lookupName": "https://moredhel/remote-kustomize.git",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() extracts sha256 instead of tag 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "currentValue": undefined,
+      "datasource": "docker",
+      "depName": "postgres",
+      "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "versioning": "docker",
+    },
+  ],
+}
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "github-tags",
+    "depName": "moredhel/remote-kustomize",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency with a subdir 1`] = `
+Array [
+  Object {
+    "currentValue": "v2.0.0",
+    "datasource": "github-tags",
+    "depName": "kubernetes-sigs/kustomize",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() should extract bases from bases block and the resources block 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "github-tags",
+    "depName": "moredhel/remote-kustomize",
+  },
+  Object {
+    "currentValue": "1.19.0",
+    "datasource": "github-tags",
+    "depName": "fluxcd/flux",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() should extract out image versions 1`] = `
+Array [
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "v0.1.0",
+    "datasource": "docker",
+    "depName": "node",
+    "replaceString": "v0.1.0",
+    "versioning": "docker",
+  },
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "v0.0.1",
+    "datasource": "docker",
+    "depName": "group/instance",
+    "replaceString": "v0.0.1",
+    "versioning": "docker",
+  },
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "v0.0.2",
+    "datasource": "docker",
+    "depName": "quay.io/test/repo",
+    "replaceString": "v0.0.2",
+    "versioning": "docker",
+  },
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "v0.0.3",
+    "datasource": "docker",
+    "depName": "gitlab.com/org/suborg/image",
+    "replaceString": "v0.0.3",
+    "versioning": "docker",
+  },
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "v0.0.4",
+    "datasource": "docker",
+    "depName": "but.this.lives.on.local/private-registry",
+    "replaceString": "v0.0.4",
+    "versioning": "docker",
+  },
+]
+`;

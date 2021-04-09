@@ -1,20 +1,22 @@
-import { logger, levels, addStream } from '../logger';
-import * as definitions from './definitions';
-import * as defaultsParser from './defaults';
-import * as fileParser from './file';
-import * as cliParser from './cli';
-import * as envParser from './env';
-
-// eslint-disable-next-line import/no-cycle
-import { resolveConfigPresets } from './presets';
+import { addStream, levels, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
-import { RenovateConfig, RenovateConfigStage } from './common';
+import { ensureDir, getSubDirectory, readFile } from '../util/fs';
+import { ensureTrailingSlash } from '../util/url';
+import * as cliParser from './cli';
+import * as defaultsParser from './defaults';
+import * as definitions from './definitions';
+import * as envParser from './env';
+import * as fileParser from './file';
+import { resolveConfigPresets } from './presets';
+import type {
+  GlobalConfig,
+  RenovateConfig,
+  RenovateConfigStage,
+} from './types';
+import { mergeChildConfig } from './utils';
 
-export * from './common';
-
-function clone<T>(input: T): T {
-  return JSON.parse(JSON.stringify(input));
-}
+export * from './types';
+export { mergeChildConfig };
 
 export interface ManagerConfig extends RenovateConfig {
   language: string;
@@ -46,7 +48,7 @@ export function getManagerConfig(
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
   argv: string[]
-): Promise<RenovateConfig> {
+): Promise<GlobalConfig> {
   logger.debug('Parsing configs');
 
   // Get configs
@@ -55,23 +57,42 @@ export async function parseConfigs(
   const cliConfig = await resolveConfigPresets(cliParser.getConfig(argv));
   const envConfig = await resolveConfigPresets(envParser.getConfig(env));
 
-  let config = mergeChildConfig(fileConfig, envConfig);
+  let config: GlobalConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
   const combinedConfig = config;
 
   config = mergeChildConfig(defaultConfig, config);
 
-  if (config.prFooter !== defaultConfig.prFooter) {
-    config.customPrFooter = true;
-  }
-
   if (config.forceCli) {
-    config = mergeChildConfig(config, { force: { ...cliConfig } });
+    const forcedCli = { ...cliConfig };
+    delete forcedCli.token;
+    delete forcedCli.hostRules;
+    if (config.force) {
+      config.force = { ...config.force, ...forcedCli };
+    } else {
+      config.force = forcedCli;
+    }
   }
 
-  // Set log level
-  levels('stdout', config.logLevel);
+  if (!config.privateKey && config.privateKeyPath) {
+    config.privateKey = await readFile(config.privateKeyPath);
+    delete config.privateKeyPath;
+  }
+
+  // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
+  // istanbul ignore if
+  if (config.logLevel) {
+    logger.warn(
+      'Configuring logLevel in CLI or file is deprecated. Use LOG_LEVEL environment variable instead'
+    );
+    levels('stdout', config.logLevel);
+  }
+
+  if (config.logContext) {
+    // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
+    setContext(config.logContext);
+  }
 
   // Add file logger
   // istanbul ignore if
@@ -79,6 +100,7 @@ export async function parseConfigs(
     logger.debug(
       `Enabling ${config.logFileLevel} logging to ${config.logFile}`
     );
+    await ensureDir(getSubDirectory(config.logFile));
     addStream({
       name: 'logfile',
       path: config.logFile,
@@ -97,53 +119,24 @@ export async function parseConfigs(
 
   // Print config
   logger.trace({ config }, 'Global config');
+
+  // Massage endpoint to have a trailing slash
+  if (config.endpoint) {
+    logger.debug('Adding trailing slash to endpoint');
+    config.endpoint = ensureTrailingSlash(config.endpoint);
+  }
+
   // Remove log file entries
   delete config.logFile;
   delete config.logFileLevel;
+
   return config;
 }
 
-export function mergeChildConfig<T extends RenovateConfig = RenovateConfig>(
-  parent: T,
-  child: RenovateConfig
-): T {
-  logger.trace({ parent, child }, `mergeChildConfig`);
-  if (!child) {
-    return parent;
-  }
-  const parentConfig = clone(parent);
-  const childConfig = clone(child);
-  const config: Record<string, any> = { ...parentConfig, ...childConfig };
-  for (const option of definitions.getOptions()) {
-    if (
-      option.mergeable &&
-      childConfig[option.name] &&
-      parentConfig[option.name]
-    ) {
-      logger.trace(`mergeable option: ${option.name}`);
-      if (option.type === 'array') {
-        config[option.name] = (parentConfig[option.name] || []).concat(
-          config[option.name] || []
-        );
-      } else {
-        config[option.name] = mergeChildConfig(
-          parentConfig[option.name],
-          childConfig[option.name]
-        );
-      }
-      logger.trace(
-        { result: config[option.name] },
-        `Merged config.${option.name}`
-      );
-    }
-  }
-  return Object.assign(config, config.force);
-}
-
 export function filterConfig(
-  inputConfig: RenovateConfig,
+  inputConfig: GlobalConfig,
   targetStage: RenovateConfigStage
-): RenovateConfig {
+): GlobalConfig {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
   const outputConfig: RenovateConfig = { ...inputConfig };
   const stages = ['global', 'repository', 'package', 'branch', 'pr'];

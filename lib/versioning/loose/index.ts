@@ -1,10 +1,20 @@
+import type { VersioningApi } from '../types';
 import * as generic from './generic';
-import { VersioningApi } from '../common';
 
-const pattern = /^v?(\d+(?:\.\d+)*)(.*)$/;
+export const id = 'loose';
+export const displayName = 'Loose';
+export const urls = [];
+export const supportsRanges = false;
 
-function parse(version: string) {
-  const matches = pattern.exec(version);
+const versionPattern = /^v?(\d+(?:\.\d+)*)(.*)$/;
+const commitHashPattern = /^[a-f0-9]{7,40}$/;
+const numericPattern = /^[0-9]+$/;
+
+function parse(version: string): any {
+  if (commitHashPattern.test(version) && !numericPattern.test(version)) {
+    return null;
+  }
+  const matches = versionPattern.exec(version);
   if (!matches) {
     return null;
   }
@@ -16,9 +26,9 @@ function parse(version: string) {
   return { release, suffix: suffix || '' };
 }
 
-function compare(version1: string, vervion2: string) {
+function compare(version1: string, version2: string): number {
   const parsed1 = parse(version1);
-  const parsed2 = parse(vervion2);
+  const parsed2 = parse(version2);
   // istanbul ignore if
   if (!(parsed1 && parsed2)) {
     return 1;

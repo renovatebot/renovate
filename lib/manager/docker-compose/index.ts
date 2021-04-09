@@ -1,6 +1,10 @@
+import { LANGUAGE_DOCKER } from '../../constants/languages';
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 
-const language = 'docker';
+const language = LANGUAGE_DOCKER;
 
-export { extractPackageFile, language, updateDependency };
+export { extractPackageFile, language };
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)docker-compose[^/]*\\.ya?ml$'],
+};

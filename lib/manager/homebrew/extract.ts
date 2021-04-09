@@ -1,60 +1,20 @@
-import { isValid } from '../../versioning/semver';
-import { skip, isSpace, removeComments } from './util';
+import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { SkipReason } from '../../types';
+import type { PackageDependency, PackageFile } from '../types';
+import { isSpace, removeComments, skip } from './util';
 
-// TODO: Maybe check if quotes/double-quotes are balanced
-export function extractPackageFile(content: string): PackageFile | null {
-  logger.trace('extractPackageFile()');
-  /*
-    1. match "class className < Formula"
-    2. extract className
-    3. extract url field (get depName from url)
-    4. extract sha256 field
-  */
-  const cleanContent = removeComments(content);
-  const className = extractClassName(cleanContent);
-  if (!className) {
-    logger.debug('Invalid class definition');
+function parseSha256(idx: number, content: string): string | null {
+  let i = idx;
+  i += 'sha256'.length;
+  i = skip(i, content, (c) => isSpace(c));
+  if (content[i] !== '"' && content[i] !== "'") {
     return null;
   }
-  const url = extractUrl(cleanContent);
-  if (!url) {
-    logger.debug('Invalid URL field');
-  }
-  const urlPathResult = parseUrlPath(url);
-  let skipReason: string;
-  let currentValue: string = null;
-  let ownerName: string = null;
-  let repoName: string = null;
-  if (urlPathResult) {
-    currentValue = urlPathResult.currentValue;
-    ownerName = urlPathResult.ownerName;
-    repoName = urlPathResult.repoName;
-  } else {
-    logger.debug('Error: Unsupported URL field');
-    skipReason = 'unsupported-url';
-  }
-  const sha256 = extractSha256(cleanContent);
-  if (!sha256 || sha256.length !== 64) {
-    logger.debug('Error: Invalid sha256 field');
-    skipReason = 'invalid-sha256';
-  }
-  const dep: PackageDependency = {
-    depName: `${ownerName}/${repoName}`,
-    managerData: { ownerName, repoName, sha256, url },
-    currentValue,
-    datasource: 'github',
-  };
-  if (skipReason) {
-    dep.skipReason = skipReason;
-    if (skipReason === 'unsupported-url') {
-      dep.depName = className;
-      dep.datasource = null;
-    }
-  }
-  const deps = [dep];
-  return { deps };
+  i += 1;
+  const j = skip(i, content, (c) => c !== '"' && c !== "'");
+  const sha256 = content.slice(i, j);
+  return sha256;
 }
 
 function extractSha256(content: string): string | null {
@@ -66,22 +26,18 @@ function extractSha256(content: string): string | null {
   return parseSha256(i, content);
 }
 
-function parseSha256(idx: number, content: string): string | null {
+function parseUrl(idx: number, content: string): string | null {
   let i = idx;
-  i += 'sha256'.length;
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
-  if (content[i] !== '"' && content[i] !== "'") {
+  i += 'url'.length;
+  i = skip(i, content, (c) => isSpace(c));
+  const chr = content[i];
+  if (chr !== '"' && chr !== "'") {
     return null;
   }
   i += 1;
-  let j = i;
-  j = skip(i, content, c => {
-    return c !== '"' && c !== "'";
-  });
-  const sha256 = content.slice(i, j);
-  return sha256;
+  const j = skip(i, content, (c) => c !== '"' && c !== "'" && !isSpace(c));
+  const url = content.slice(i, j);
+  return url;
 }
 
 function extractUrl(content: string): string | null {
@@ -114,7 +70,7 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
       return null;
     }
     let s = url.pathname.split('/');
-    s = s.filter(val => val);
+    s = s.filter((val) => val);
     const ownerName = s[0];
     const repoName = s[1];
     let currentValue: string;
@@ -133,32 +89,36 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
     if (!currentValue) {
       return null;
     }
-    if (!isValid(currentValue)) {
-      return null;
-    }
     return { currentValue, ownerName, repoName };
   } catch (_) {
     return null;
   }
 }
 
-function parseUrl(idx: number, content: string): string | null {
+/* This function parses the "class className < Formula" header
+   and returns the className and index of the character just after the header */
+function parseClassHeader(idx: number, content: string): string | null {
   let i = idx;
-  i += 'url'.length;
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
-  const chr = content[i];
-  if (chr !== '"' && chr !== "'") {
+  i += 'class'.length;
+  i = skip(i, content, (c) => isSpace(c));
+  // Skip all non space and non '<' characters
+  let j = skip(i, content, (c) => !isSpace(c) && c !== '<');
+  const className = content.slice(i, j);
+  i = j;
+  // Skip spaces
+  i = skip(i, content, (c) => isSpace(c));
+  if (content[i] === '<') {
+    i += 1;
+  } else {
+    return null;
+  } // Skip spaces
+  i = skip(i, content, (c) => isSpace(c));
+  // Skip non-spaces
+  j = skip(i, content, (c) => !isSpace(c));
+  if (content.slice(i, j) !== 'Formula') {
     return null;
   }
-  i += 1;
-  let j = i;
-  j = skip(i, content, c => {
-    return c !== '"' && c !== "'" && !isSpace(c);
-  });
-  const url = content.slice(i, j);
-  return url;
+  return className;
 }
 
 function extractClassName(content: string): string | null {
@@ -170,38 +130,56 @@ function extractClassName(content: string): string | null {
   return parseClassHeader(i, content);
 }
 
-/* This function parses the "class className < Formula" header
-   and returns the className and index of the character just after the header */
-function parseClassHeader(idx: number, content: string): string | null {
-  let i = idx;
-  i += 'class'.length;
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
-  // Skip all non space and non '<' characters
-  let j = skip(i, content, c => {
-    return !isSpace(c) && c !== '<';
-  });
-  const className = content.slice(i, j);
-  i = j;
-  // Skip spaces
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
-  if (content[i] === '<') {
-    i += 1;
-  } else {
-    return null;
-  } // Skip spaces
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
-  // Skip non-spaces
-  j = skip(i, content, c => {
-    return !isSpace(c);
-  });
-  if (content.slice(i, j) !== 'Formula') {
+// TODO: Maybe check if quotes/double-quotes are balanced
+export function extractPackageFile(content: string): PackageFile | null {
+  logger.trace('extractPackageFile()');
+  /*
+    1. match "class className < Formula"
+    2. extract className
+    3. extract url field (get depName from url)
+    4. extract sha256 field
+  */
+  const cleanContent = removeComments(content);
+  const className = extractClassName(cleanContent);
+  if (!className) {
+    logger.debug('Invalid class definition');
     return null;
   }
-  return className;
+  const url = extractUrl(cleanContent);
+  if (!url) {
+    logger.debug('Invalid URL field');
+  }
+  const urlPathResult = parseUrlPath(url);
+  let skipReason: SkipReason;
+  let currentValue: string = null;
+  let ownerName: string = null;
+  let repoName: string = null;
+  if (urlPathResult) {
+    currentValue = urlPathResult.currentValue;
+    ownerName = urlPathResult.ownerName;
+    repoName = urlPathResult.repoName;
+  } else {
+    logger.debug('Error: Unsupported URL field');
+    skipReason = SkipReason.UnsupportedUrl;
+  }
+  const sha256 = extractSha256(cleanContent);
+  if (!sha256 || sha256.length !== 64) {
+    logger.debug('Error: Invalid sha256 field');
+    skipReason = SkipReason.InvalidSha256;
+  }
+  const dep: PackageDependency = {
+    depName: `${ownerName}/${repoName}`,
+    managerData: { ownerName, repoName, sha256, url },
+    currentValue,
+    datasource: datasourceGithubTags.id,
+  };
+  if (skipReason) {
+    dep.skipReason = skipReason;
+    if (skipReason === 'unsupported-url') {
+      dep.depName = className;
+      dep.datasource = null;
+    }
+  }
+  const deps = [dep];
+  return { deps };
 }

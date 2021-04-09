@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+- service-1
+- https://moredhel/remote-kustomize.git?ref=v0.0.1
+- https://moredhel/remote-kustomize.git//deploy?ref=v0.0.1
+
+namespace: testing-namespace
+
+resources:
+- deployment.yaml

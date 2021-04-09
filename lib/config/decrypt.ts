@@ -1,15 +1,15 @@
-import is from '@sindresorhus/is';
 import crypto from 'crypto';
+import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
-import { RenovateConfig } from './common';
+import { add } from '../util/sanitize';
+import { getAdminConfig } from './admin';
+import type { RenovateConfig } from './types';
 
-export function decryptConfig(
-  config: RenovateConfig,
-  privateKey?: string | Buffer
-): RenovateConfig {
+export function decryptConfig(config: RenovateConfig): RenovateConfig {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
+  const { privateKey } = getAdminConfig();
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');
@@ -22,7 +22,7 @@ export function decryptConfig(
               decryptedStr = crypto
                 .privateDecrypt(privateKey, Buffer.from(eVal, 'base64'))
                 .toString();
-              logger.info('Decrypted config using default padding');
+              logger.debug('Decrypted config using default padding');
             } catch (err) {
               logger.debug('Trying RSA_PKCS1_PADDING for ' + eKey);
               decryptedStr = crypto
@@ -40,19 +40,20 @@ export function decryptConfig(
             if (!decryptedStr.length) {
               throw new Error('empty string');
             }
-            logger.info(`Decrypted ${eKey}`);
+            logger.debug(`Decrypted ${eKey}`);
             if (eKey === 'npmToken') {
               const token = decryptedStr.replace(/\n$/, '');
-              logger.info(
+              add(token);
+              logger.debug(
                 { decryptedToken: maskToken(token) },
                 'Migrating npmToken to npmrc'
               );
-              if (decryptedConfig.npmrc) {
+              if (is.string(decryptedConfig.npmrc)) {
                 /* eslint-disable no-template-curly-in-string */
                 if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
                   logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
                   decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                    '${NPM_TOKEN}',
+                    /\${NPM_TOKEN}/g,
                     token
                   );
                 } else {
@@ -71,9 +72,12 @@ export function decryptConfig(
               }
             } else {
               decryptedConfig[eKey] = decryptedStr;
+              add(decryptedStr);
             }
           } catch (err) {
-            logger.warn({ err }, `Error decrypting ${eKey}`);
+            const error = new Error('config-validation');
+            error.validationError = `Failed to decrypt field ${eKey}. Please re-encrypt and try again.`;
+            throw error;
           }
         }
       } else {
@@ -82,15 +86,17 @@ export function decryptConfig(
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {
       decryptedConfig[key] = [];
-      val.forEach(item => {
+      val.forEach((item) => {
         if (is.object(item) && !is.array(item)) {
-          decryptedConfig[key].push(decryptConfig(item, privateKey));
+          (decryptedConfig[key] as RenovateConfig[]).push(
+            decryptConfig(item as RenovateConfig)
+          );
         } else {
-          decryptedConfig[key].push(item);
+          (decryptedConfig[key] as unknown[]).push(item);
         }
       });
     } else if (is.object(val) && key !== 'content') {
-      decryptedConfig[key] = decryptConfig(val, privateKey);
+      decryptedConfig[key] = decryptConfig(val as RenovateConfig);
     }
   }
   delete decryptedConfig.encrypted;

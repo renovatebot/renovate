@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/mix/artifacts catches exec errors 1`] = `
+Array [
+  Object {
+    "artifactError": Object {
+      "lockFile": "mix.lock",
+      "stderr": "exec-error",
+    },
+  },
+]
+`;
+
+exports[`manager/mix/artifacts catches write errors 1`] = `
+Array [
+  Object {
+    "artifactError": Object {
+      "lockFile": "mix.lock",
+      "stderr": "not found",
+    },
+  },
+]
+`;
+
+exports[`manager/mix/artifacts returns null if unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "mix deps.update plug",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/mix/artifacts returns updated mix.lock 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New mix.lock",
+      "name": "mix.lock",
+    },
+  },
+]
+`;
+
+exports[`manager/mix/artifacts returns updated mix.lock 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/elixir",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_elixir -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_elixir --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/elixir bash -l -c \\"mix deps.update plug\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;

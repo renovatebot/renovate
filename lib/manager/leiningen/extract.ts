@@ -1,20 +1,22 @@
-import { DEFAULT_MAVEN_REPO } from '../maven/extract';
-import { PackageDependency, PackageFile } from '../common';
-
-export const DEFAULT_CLOJARS_REPO = 'https://clojars.org/repo/';
+import * as datasourceClojure from '../../datasource/clojure';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`);
   const keyOffset = str.search(regex);
-  if (keyOffset < 0) return null;
+  if (keyOffset < 0) {
+    return null;
+  }
   const withSpaces = str.slice(keyOffset + kwName.length + 1);
   const valueOffset = withSpaces.search(/[^\s]/);
-  if (valueOffset < 0) return null;
+  if (valueOffset < 0) {
+    return null;
+  }
   return withSpaces.slice(valueOffset);
 }
 
 export function expandDepName(name: string): string {
-  return name.indexOf('/') === -1 ? `${name}:${name}` : name.replace('/', ':');
+  return name.includes('/') ? name.replace('/', ':') : `${name}:${name}`;
 }
 
 export interface ExtractContext {
@@ -27,7 +29,9 @@ export function extractFromVectors(
   offset = 0,
   ctx: ExtractContext = {}
 ): PackageDependency[] {
-  if (str.indexOf('[') !== 0) return [];
+  if (!str.startsWith('[')) {
+    return [];
+  }
   let balance = 0;
   const result: PackageDependency[] = [];
   let idx = 0;
@@ -36,18 +40,18 @@ export function extractFromVectors(
   let version = '';
   let fileReplacePosition: number = null;
 
-  const isSpace = (ch: string) => ch && /[\s,]/.test(ch);
+  const isSpace = (ch: string): boolean => ch && /[\s,]/.test(ch);
 
-  const cleanStrLiteral = (s: string) => s.replace(/^"/, '').replace(/"$/, '');
+  const cleanStrLiteral = (s: string): string =>
+    s.replace(/^"/, '').replace(/"$/, '');
 
-  const yieldDep = () => {
+  const yieldDep = (): void => {
     if (artifactId && version && fileReplacePosition) {
       result.push({
         ...ctx,
-        datasource: 'maven',
+        datasource: datasourceClojure.id,
         depName: expandDepName(cleanStrLiteral(artifactId)),
         currentValue: cleanStrLiteral(version),
-        fileReplacePosition,
       });
     }
     artifactId = '';
@@ -90,7 +94,7 @@ export function extractFromVectors(
 }
 
 function extractLeinRepos(content: string): string[] {
-  const result = [DEFAULT_CLOJARS_REPO, DEFAULT_MAVEN_REPO];
+  const result = [];
 
   const repoContent = trimAtKey(
     content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments
@@ -114,15 +118,15 @@ function extractLeinRepos(content: string): string[] {
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
     const matches = repoSectionContent.match(/"https?:\/\/[^"]*"/g) || [];
-    const urls = matches.map(x => x.replace(/^"/, '').replace(/"$/, ''));
-    urls.forEach(url => result.push(url));
+    const urls = matches.map((x) => x.replace(/^"/, '').replace(/"$/, ''));
+    urls.forEach((url) => result.push(url));
   }
 
   return result;
 }
 
 export function extractPackageFile(content: string): PackageFile {
-  const collect = (key: string, ctx: ExtractContext) => {
+  const collect = (key: string, ctx: ExtractContext): PackageDependency[] => {
     let result: PackageDependency[] = [];
     let restContent = trimAtKey(content, key);
     while (restContent) {

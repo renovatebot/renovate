@@ -1,24 +1,28 @@
 import { fromStream } from 'hasha';
-import got from '../../util/got';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import * as packageCache from '../../util/cache/package';
+import { Http } from '../../util/http';
+import { regEx } from '../../util/regex';
+import type { UpdateDependencyConfig } from '../types';
+
+const http = new Http('bazel');
 
 function updateWithNewVersion(
   content: string,
   currentValue: string,
   newValue: string
 ): string {
-  const currentVersion = currentValue.replace(/^v/, '');
-  const newVersion = newValue.replace(/^v/, '');
+  const replaceFrom = currentValue.replace(/^v/, '');
+  const replaceTo = newValue.replace(/^v/, '');
   let newContent = content;
   do {
-    newContent = newContent.replace(currentVersion, newVersion);
-  } while (newContent.includes(currentVersion));
+    newContent = newContent.replace(replaceFrom, replaceTo);
+  } while (newContent.includes(replaceFrom));
   return newContent;
 }
 
 function extractUrl(flattened: string): string[] | null {
-  const urlMatch = flattened.match(/url="(.*?)"/);
+  const urlMatch = /url="(.*?)"/.exec(flattened);
   if (!urlMatch) {
     logger.debug('Cannot locate urls in new definition');
     return null;
@@ -28,7 +32,7 @@ function extractUrl(flattened: string): string[] | null {
 
 function extractUrls(content: string): string[] | null {
   const flattened = content.replace(/\n/g, '').replace(/\s/g, '');
-  const urlsMatch = flattened.match(/urls?=\[.*?\]/);
+  const urlsMatch = /urls?=\[.*?\]/.exec(flattened);
   if (!urlsMatch) {
     return extractUrl(flattened);
   }
@@ -36,24 +40,26 @@ function extractUrls(content: string): string[] | null {
     .replace(/urls?=\[/, '')
     .replace(/,?\]$/, '')
     .split(',')
-    .map(url => url.replace(/"/g, ''));
+    .map((url) => url.replace(/"/g, ''));
   return urls;
 }
 
 async function getHashFromUrl(url: string): Promise<string | null> {
   const cacheNamespace = 'url-sha256';
-  const cachedResult = await renovateCache.get<string | null>(
+  const cachedResult = await packageCache.get<string | null>(
     cacheNamespace,
     url
   );
   /* istanbul ignore next line */
-  if (cachedResult) return cachedResult;
+  if (cachedResult) {
+    return cachedResult;
+  }
   try {
-    const hash = await fromStream(got.stream(url), {
+    const hash = await fromStream(http.stream(url), {
       algorithm: 'sha256',
     });
     const cacheMinutes = 3 * 24 * 60; // 3 days
-    await renovateCache.set(cacheNamespace, url, hash, cacheMinutes);
+    await packageCache.set(cacheNamespace, url, hash, cacheMinutes);
     return hash;
   } catch (err) /* istanbul ignore next */ {
     return null;
@@ -61,12 +67,12 @@ async function getHashFromUrl(url: string): Promise<string | null> {
 }
 
 async function getHashFromUrls(urls: string[]): Promise<string | null> {
-  const hashes = (await Promise.all(
-    urls.map(url => getHashFromUrl(url))
-  )).filter(Boolean);
+  const hashes = (
+    await Promise.all(urls.map((url) => getHashFromUrl(url)))
+  ).filter(Boolean);
   const distinctHashes = [...new Set(hashes)];
   if (!distinctHashes.length) {
-    logger.debug({ hashes }, 'Could not calculate hash for URLs');
+    logger.debug({ hashes, urls }, 'Could not calculate hash for URLs');
     return null;
   }
   // istanbul ignore if
@@ -80,10 +86,10 @@ function setNewHash(content: string, hash: string): string {
   return content.replace(/(sha256\s*=\s*)"[^"]+"/, `$1"${hash}"`);
 }
 
-export async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
+export async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string | null> {
   try {
     logger.debug(
       `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`
@@ -107,20 +113,28 @@ export async function updateDependency(
           `$1"${upgrade.newDigest}",  # ${upgrade.newValue}\n`
         );
       }
-    } else if (upgrade.depType === 'http_archive' && upgrade.newValue) {
+    } else if (
+      upgrade.depType === 'http_archive' ||
+      upgrade.depType === 'http_file'
+    ) {
       newDef = updateWithNewVersion(
         upgrade.managerData.def,
-        upgrade.currentValue,
-        upgrade.newValue
+        upgrade.currentValue || upgrade.currentDigest,
+        upgrade.newValue || upgrade.newDigest
       );
       const massages = {
-        'bazel-skylib.0.9.0': 'bazel_skylib-0.9.0',
+        'bazel-skylib.': 'bazel_skylib-',
+        '/bazel-gazelle/releases/download/0':
+          '/bazel-gazelle/releases/download/v0',
+        '/bazel-gazelle-0': '/bazel-gazelle-v0',
+        '/rules_go/releases/download/0': '/rules_go/releases/download/v0',
+        '/rules_go-0': '/rules_go-v0',
       };
       for (const [from, to] of Object.entries(massages)) {
         newDef = newDef.replace(from, to);
       }
       const urls = extractUrls(newDef);
-      if (!(urls && urls.length)) {
+      if (!urls?.length) {
         logger.debug({ newDef }, 'urls is empty');
         return null;
       }
@@ -130,35 +144,21 @@ export async function updateDependency(
       }
       logger.debug({ hash }, 'Calculated hash');
       newDef = setNewHash(newDef, hash);
-    } else if (upgrade.depType === 'http_archive' && upgrade.newDigest) {
-      const [, shortRepo] = upgrade.repo.split('/');
-      const url = `https://github.com/${upgrade.repo}/archive/${upgrade.newDigest}.tar.gz`;
-      const hash = await getHashFromUrl(url);
-      newDef = setNewHash(upgrade.managerData.def, hash);
-      newDef = newDef.replace(
-        new RegExp(`(strip_prefix\\s*=\\s*)"[^"]*"`),
-        `$1"${shortRepo}-${upgrade.newDigest}"`
-      );
-      const match =
-        upgrade.managerData.def.match(/(?<=archive\/).*(?=\.tar\.gz)/g) || [];
-      match.forEach(matchedHash => {
-        newDef = newDef.replace(matchedHash, upgrade.newDigest);
-      });
     }
     logger.debug({ oldDef: upgrade.managerData.def, newDef });
     let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';
     }
-    const existingDef = new RegExp(existingRegExStr);
+    const existingDef = regEx(existingRegExStr);
     // istanbul ignore if
-    if (!fileContent.match(existingDef)) {
-      logger.info('Cannot match existing string');
+    if (!existingDef.test(fileContent)) {
+      logger.debug('Cannot match existing string');
       return null;
     }
     return fileContent.replace(existingDef, newDef);
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ err }, 'Error setting new bazel WORKSPACE version');
+    logger.debug({ err }, 'Error setting new bazel WORKSPACE version');
     return null;
   }
 }

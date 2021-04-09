@@ -1,6 +1,7 @@
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 
-const language = 'docker';
+export { extractPackageFile };
 
-export { extractPackageFile, language, updateDependency };
+export const defaultConfig = {
+  fileMatch: ['(^|/).circleci/config.yml$'],
+};

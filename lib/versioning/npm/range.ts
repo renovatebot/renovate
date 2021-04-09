@@ -1,43 +1,87 @@
 import {
   inc as increment,
+  valid as isVersion,
   major,
   minor,
   patch,
   prerelease,
   satisfies,
-  valid as isVersion,
 } from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
-import { RangeStrategy } from '../common';
+import type { NewValueConfig } from '../types';
 
-export { getNewValue };
+function replaceCaretValue(oldValue: string, newValue: string): string {
+  const toVersionMajor = major(newValue);
+  const toVersionMinor = minor(newValue);
+  const toVersionPatch = patch(newValue);
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-) {
+  const currentMajor = major(oldValue);
+  const currentMinor = minor(oldValue);
+  const currentPatch = patch(oldValue);
+
+  const oldTuple = [currentMajor, currentMinor, currentPatch];
+  const newTuple = [toVersionMajor, toVersionMinor, toVersionPatch];
+  const resultTuple = [];
+
+  let leadingZero = true;
+  let needReplace = false;
+  for (let idx = 0; idx < 3; idx += 1) {
+    const oldVal = oldTuple[idx];
+    const newVal = newTuple[idx];
+
+    let leadingDigit = false;
+    if (oldVal !== 0 || newVal !== 0) {
+      if (leadingZero) {
+        leadingZero = false;
+        leadingDigit = true;
+      }
+    }
+
+    if (leadingDigit && newVal > oldVal) {
+      needReplace = true;
+    }
+
+    if (!needReplace && newVal < oldVal) {
+      return newValue;
+    }
+
+    resultTuple.push(leadingDigit ? newVal : 0);
+  }
+
+  return needReplace ? resultTuple.join('.') : oldValue;
+}
+
+export function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
-    return toVersion;
+    return newVersion;
   }
   if (rangeStrategy === 'update-lockfile') {
-    if (satisfies(toVersion, currentValue)) {
+    if (satisfies(newVersion, currentValue)) {
       return currentValue;
     }
-    return getNewValue(currentValue, 'replace', fromVersion, toVersion);
+    return getNewValue({
+      currentValue,
+      rangeStrategy: 'replace',
+      currentVersion,
+      newVersion,
+    });
   }
   const parsedRange = parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
   if (rangeStrategy === 'widen') {
-    const newValue = getNewValue(
+    const newValue = getNewValue({
       currentValue,
-      'replace',
-      fromVersion,
-      toVersion
-    );
-    if (element.operator && element.operator.startsWith('<')) {
+      rangeStrategy: 'replace',
+      currentVersion,
+      newVersion,
+    });
+    if (element.operator?.startsWith('<')) {
       // TODO fix this
       const splitCurrent = currentValue.split(element.operator);
       splitCurrent.pop();
@@ -50,61 +94,90 @@ function getNewValue(
         splitCurrent.pop();
         return splitCurrent.join('-') + '- ' + newValue;
       }
-      if (element.operator && element.operator.startsWith('>')) {
+      if (element.operator?.startsWith('>')) {
         logger.warn(`Complex ranges ending in greater than are not supported`);
         return null;
       }
     }
     return `${currentValue} || ${newValue}`;
   }
-  const toVersionMajor = major(toVersion);
-  const toVersionMinor = minor(toVersion);
-  const toVersionPatch = patch(toVersion);
-  const suffix = prerelease(toVersion) ? '-' + prerelease(toVersion)[0] : '';
+  const toVersionMajor = major(newVersion);
+  const toVersionMinor = minor(newVersion);
+  const toVersionPatch = patch(newVersion);
+  const suffix = prerelease(newVersion) ? '-' + prerelease(newVersion)[0] : '';
   // Simple range
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
       if (!element.operator) {
-        return getNewValue(currentValue, 'replace', fromVersion, toVersion);
+        return getNewValue({
+          currentValue,
+          rangeStrategy: 'replace',
+          currentVersion,
+          newVersion,
+        });
       }
       if (element.operator === '^') {
         const split = currentValue.split('.');
         if (suffix.length) {
-          return `^${toVersion}`;
+          return `^${newVersion}`;
         }
         if (split.length === 1) {
           // ^4
-          return '^' + toVersionMajor;
+          return `^${toVersionMajor}`;
         }
         if (split.length === 2) {
           // ^4.1
-          return '^' + toVersionMajor + '.' + toVersionMinor;
+          return `^${toVersionMajor}.${toVersionMinor}`;
         }
-        return `^${toVersion}`;
+        return `^${newVersion}`;
       }
       if (element.operator === '~') {
         const split = currentValue.split('.');
         if (suffix.length) {
-          return `~${toVersion}`;
+          return `~${newVersion}`;
         }
         if (split.length === 1) {
           // ~4
-          return '~' + toVersionMajor;
+          return `~${toVersionMajor}`;
         }
         if (split.length === 2) {
           // ~4.1
-          return '~' + toVersionMajor + '.' + toVersionMinor;
+          return `~${toVersionMajor}.${toVersionMinor}`;
         }
-        return `~${toVersion}`;
+        return `~${newVersion}`;
       }
       if (element.operator === '=') {
-        return `=${toVersion}`;
+        return `=${newVersion}`;
       }
       if (element.operator === '>=') {
         return currentValue.includes('>= ')
-          ? `>= ${toVersion}`
-          : `>=${toVersion}`;
+          ? `>= ${newVersion}`
+          : `>=${newVersion}`;
       }
+      if (element.operator.startsWith('<')) {
+        return currentValue;
+      }
+    } else {
+      const newRange = parseRange(currentValue);
+      const versions = newRange.map((x) => {
+        const subRange = x.semver;
+        const bumpedSubRange = getNewValue({
+          currentValue: subRange,
+          rangeStrategy: 'bump',
+          currentVersion,
+          newVersion,
+        });
+        if (satisfies(newVersion, bumpedSubRange)) {
+          return bumpedSubRange;
+        }
+        return getNewValue({
+          currentValue: subRange,
+          rangeStrategy: 'replace',
+          currentVersion,
+          newVersion,
+        });
+      });
+      return versions.filter((x) => x !== null && x !== '').join(' ');
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue
@@ -115,22 +188,13 @@ function getNewValue(
     return `~> ${toVersionMajor}.${toVersionMinor}.0`;
   }
   if (element.operator === '^') {
-    if (suffix.length || !fromVersion) {
+    if (suffix.length || !currentVersion) {
       return `^${toVersionMajor}.${toVersionMinor}.${toVersionPatch}${suffix}`;
     }
-    if (toVersionMajor === major(fromVersion)) {
-      if (toVersionMajor === 0) {
-        if (toVersionMinor === 0) {
-          return `^${toVersion}`;
-        }
-        return `^${toVersionMajor}.${toVersionMinor}.0`;
-      }
-      return `^${toVersion}`;
-    }
-    return `^${toVersionMajor}.0.0`;
+    return `^${replaceCaretValue(currentVersion, newVersion)}`;
   }
   if (element.operator === '=') {
-    return `=${toVersion}`;
+    return `=${newVersion}`;
   }
   if (element.operator === '~') {
     if (suffix.length) {
@@ -141,7 +205,7 @@ function getNewValue(
   if (element.operator === '<=') {
     let res;
     if (element.patch || suffix.length) {
-      res = `<=${toVersion}`;
+      res = `<=${newVersion}`;
     } else if (element.minor) {
       res = `<=${toVersionMajor}.${toVersionMinor}`;
     } else {
@@ -158,14 +222,14 @@ function getNewValue(
       const newMajor = toVersionMajor + 1;
       res = `<${newMajor}.0.0`;
     } else if (element.patch) {
-      res = `<${increment(toVersion, 'patch')}`;
+      res = `<${increment(newVersion, 'patch')}`;
     } else if (element.minor) {
       res = `<${toVersionMajor}.${toVersionMinor + 1}`;
     } else {
       res = `<${toVersionMajor + 1}`;
     }
     if (currentValue.includes('< ')) {
-      res = res.replace('<', '< ');
+      res = res.replace(/</g, '< ');
     }
     return res;
   }
@@ -187,5 +251,5 @@ function getNewValue(
     }
     return `${toVersionMajor}`;
   }
-  return toVersion;
+  return newVersion;
 }

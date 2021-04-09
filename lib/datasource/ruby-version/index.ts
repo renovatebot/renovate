@@ -1,18 +1,23 @@
-import { parse } from 'node-html-parser';
-import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
+import { parse } from '../../util/html';
+import { Http } from '../../util/http';
+import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-import got from '../../util/got';
-import { isVersion } from '../../versioning/ruby';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+export const id = 'ruby-version';
+export const defaultRegistryUrls = ['https://www.ruby-lang.org/'];
+export const customRegistrySupport = false;
+export const defaultVersioning = rubyVersioningId;
 
-const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
+const http = new Http(id);
 
-export async function getPkgReleases(
-  _config?: PkgReleaseConfig
-): Promise<ReleaseResult> {
+export async function getReleases({
+  registryUrl,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   // First check the persistent cache
   const cacheNamespace = 'datasource-ruby-version';
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     'all'
   );
@@ -26,14 +31,14 @@ export async function getPkgReleases(
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
     };
-    const response = await got(rubyVersionsUrl);
+    const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
+    const response = await http.get(rubyVersionsUrl);
     const root = parse(response.body);
-    // @ts-ignore
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
-    for (const row of rows) {
-      const columns: string[] = Array.from(
-        row.querySelectorAll('td').map(td => td.innerHTML)
-      );
+    rows.forEach((row) => {
+      const tds = row.querySelectorAll('td');
+      const columns: string[] = [];
+      tds.forEach((td) => columns.push(td.innerHTML));
       if (columns.length) {
         const version = columns[0].replace('Ruby ', '');
         if (isVersion(version)) {
@@ -44,14 +49,10 @@ export async function getPkgReleases(
           res.releases.push({ version, releaseTimestamp, changelogUrl });
         }
       }
-    }
-    await renovateCache.set(cacheNamespace, 'all', res, 15);
+    });
+    await packageCache.set(cacheNamespace, 'all', res, 15);
     return res;
   } catch (err) {
-    if (err && (err.statusCode === 404 || err.code === 'ENOTFOUND')) {
-      throw new Error('registry-failure');
-    }
-    logger.warn({ err }, 'Ruby release lookup failure: Unknown error');
-    throw new Error('registry-failure');
+    throw new ExternalHostError(err);
   }
 }

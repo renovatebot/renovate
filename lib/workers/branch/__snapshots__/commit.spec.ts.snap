@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch/automerge commitFilesToBranch commits files 1`] = `
+Array [
+  Array [
+    Object {
+      "branchName": "renovate/some-branch",
+      "files": Array [
+        Object {
+          "contents": "some contents",
+          "name": "package.json",
+        },
+      ],
+      "force": false,
+      "message": "some commit message",
+    },
+  ],
+]
+`;

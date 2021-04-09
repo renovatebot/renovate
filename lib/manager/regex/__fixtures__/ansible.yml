@@ -1,0 +1,5 @@
+prometheus_image: "prom/prometheus"  // depName gets initially set
+prometheus_version: "v2.21.0" // currentValue get set
+
+someother_image: "" // will not be set as group value is null/empty string
+someother_version: "0.12.0" // overwrites currentValue as later values take precedence.

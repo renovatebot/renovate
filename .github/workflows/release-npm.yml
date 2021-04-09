@@ -1,0 +1,56 @@
+name: release-npm
+on:
+  repository_dispatch:
+    types: [renovate-release]
+
+env:
+  YARN_MODULES_CACHE_KEY: v1
+  YARN_PACKAGE_CACHE_KEY: v1
+  YARN_CACHE_FOLDER: .cache/yarn
+  NODE_VERSION: 14
+
+jobs:
+  release-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
+
+      - uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.event.client_payload.sha }}
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build ${{ github.event.client_payload.version }}
+        run: yarn build
+
+      - name: Prepare ${{ github.event.client_payload.version }}
+        run: |
+          npm --no-git-tag-version version ${{ github.event.client_payload.version }}
+
+      - name: Publish ${{ github.event.client_payload.version }}
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+          npm publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

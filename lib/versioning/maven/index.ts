@@ -1,26 +1,46 @@
+import type { NewValueConfig, VersioningApi } from '../types';
 import {
-  isVersion,
-  isValid,
-  tokenize,
-  compare,
+  EXCLUDING_POINT,
+  QualifierTypes,
   TYPE_NUMBER,
   TYPE_QUALIFIER,
-  isSingleVersion,
   autoExtendMavenRange,
+  compare,
+  isSingleVersion,
+  isValid,
+  isVersion,
   parseRange,
-  EXCLUDING_POINT,
+  qualifierType,
+  tokenize,
 } from './compare';
-import { RangeStrategy, VersioningApi } from '../common';
 
-const equals = (a: string, b: string) => compare(a, b) === 0;
+export const id = 'maven';
+export const displayName = 'Maven';
+export const urls = [
+  'https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification',
+  'https://octopus.com/blog/maven-versioning-explained',
+  'https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
-function matches(a: string, b: string) {
-  if (!b) return false;
-  if (isVersion(b)) return equals(a, b);
+const equals = (a: string, b: string): boolean => compare(a, b) === 0;
+
+function matches(a: string, b: string): boolean {
+  if (!b) {
+    return false;
+  }
+  if (isVersion(b)) {
+    return equals(a, b);
+  }
   const ranges = parseRange(b);
-  if (!ranges) return false;
-  return ranges.reduce((result, range) => {
-    if (result) return result;
+  if (!ranges) {
+    return false;
+  }
+  return ranges.reduce((result, range): any => {
+    if (result) {
+      return result;
+    }
 
     const { leftType, leftValue, rightType, rightValue } = range;
 
@@ -83,47 +103,47 @@ const getPatch = (version: string): number | null => {
   return null;
 };
 
-const isGreaterThan = (a: string, b: string) => compare(a, b) === 1;
+const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
 
 const isStable = (version: string): boolean | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
-    const qualToken = tokens.find(token => token.type === TYPE_QUALIFIER);
-    if (qualToken) {
-      const val = qualToken.val;
-      // TODO: Can this if be removed, we never get here
-      // istanbul ignore if
-      if (val === 'final' || val === 'ga') return true;
-
-      if (val === 'release' || val === 'sp') return true;
-      return false;
+    for (const token of tokens) {
+      if (token.type === TYPE_QUALIFIER) {
+        const qualType = qualifierType(token);
+        if (qualType && qualType < QualifierTypes.Release) {
+          return false;
+        }
+      }
     }
     return true;
   }
   return null;
 };
 
-const maxSatisfyingVersion = (versions: string[], range: string): string => {
-  // istanbul ignore next
-  return versions.reduce((result, version) => {
+// istanbul ignore next
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  versions.reduce((result, version) => {
     if (matches(version, range)) {
-      if (!result) return version;
-      if (isGreaterThan(version, result)) return version;
+      if (!result) {
+        return version;
+      }
+      if (isGreaterThan(version, result)) {
+        return version;
+      }
     }
     return result;
   }, null);
-};
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-): string | null {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  newVersion,
+}: NewValueConfig): string | null {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
-    return toVersion;
+    return newVersion;
   }
-  return autoExtendMavenRange(currentValue, toVersion);
+  return autoExtendMavenRange(currentValue, newVersion);
 }
 
 export { isValid };
@@ -140,8 +160,8 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
-  minSatisfyingVersion: maxSatisfyingVersion,
+  getSatisfyingVersion,
+  minSatisfyingVersion: getSatisfyingVersion,
   getNewValue,
   sortVersions: compare,
 };

@@ -1,0 +1,199 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+env:
+  YARN_MODULES_CACHE_KEY: v1
+  YARN_PACKAGE_CACHE_KEY: v1
+  YARN_CACHE_FOLDER: .cache/yarn
+  NODE_VERSION: 14
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    # tests shouldn't need more time
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [14]
+        python-version: [3.8]
+        java-version: [11]
+
+    env:
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+      NODE_VERSION: ${{ matrix.node-version }}
+      PYTHON_VERSION: ${{ matrix.python-version }}
+      JAVA_VERSION: ${{ matrix.java-version }}
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up Java  ${{ env.JAVA_VERSION }}
+        if: env.NODE_VERSION == '14'
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Skip Java tests
+        if: env.NODE_VERSION != '14'
+        run: echo "SKIP_JAVA_TESTS=true" >> $GITHUB_ENV
+
+      - name: Init platform
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          python --version
+          echo "Yarn $(yarn --version)"
+
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 2
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Unit tests
+        run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1.3.2
+        if: always() && env.coverage == 'true'
+
+      # build after tests to exclude files
+      - name: Build
+        run: yarn build
+
+      - name: E2E Test
+        run: yarn test-e2e
+
+  lint:
+    runs-on: ubuntu-latest
+
+    # lint shouldn't need more than 10 min
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          echo "Yarn $(yarn --version)"
+
+      - uses: actions/checkout@v2.3.4
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: |
+          yarn ls-lint
+          yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
+          yarn prettier
+
+      - name: Test schema
+        run: yarn test-schema
+
+      - name: Type check
+        run: yarn type-check
+
+  release:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    # release shouldn't need more than 5 min
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
+
+      # full checkout for semantic-release
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+
+      - name: Cache Yarn packages
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: semantic-release
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+          npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}} --ci ${{github.ref == 'refs/heads/master'}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

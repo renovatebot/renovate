@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/massage massageConfig massages npmToken 1`] = `
+Object {
+  "npmrc": "//registry.npmjs.org/:_authToken=some-token
+",
+}
+`;
+
+exports[`config/massage massageConfig massages packageRules matchUpdateTypes 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "matchPackageNames": Array [
+        "foo",
+      ],
+    },
+    Object {
+      "matchPackageNames": Array [
+        "foo",
+      ],
+      "matchUpdateTypes": Array [
+        "minor",
+      ],
+      "semanticCommitType": "feat",
+    },
+    Object {
+      "matchPackageNames": Array [
+        "foo",
+      ],
+      "matchUpdateTypes": Array [
+        "patch",
+      ],
+      "semanticCommitType": "fix",
+    },
+  ],
+}
+`;
+
+exports[`config/massage massageConfig returns empty 1`] = `Object {}`;

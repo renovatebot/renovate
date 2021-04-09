@@ -1,0 +1,472 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with private variables 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "2.13.0-RC5",
+      "datasource": "maven",
+      "depName": "scala",
+      "lookupName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+      "separateMinorPatch": true,
+    },
+    Object {
+      "currentValue": "0.7.1",
+      "datasource": "sbt-package",
+      "depName": "com.example:foo",
+      "lookupName": "com.example:foo_2.13.0-RC5",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc",
+      "groupName": "abcVersion for com.abc",
+      "lookupName": "com.abc:abc",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+}
+`;
+
+exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with variables 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "2.13.0-RC5",
+      "datasource": "maven",
+      "depName": "scala",
+      "lookupName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+      "separateMinorPatch": true,
+    },
+    Object {
+      "currentValue": "0.7.1",
+      "datasource": "sbt-package",
+      "depName": "com.example:foo",
+      "lookupName": "com.example:foo_2.13.0-RC5",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc",
+      "groupName": "abcVersion for com.abc",
+      "lookupName": "com.abc:abc",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+}
+`;
+
+exports[`lib/manager/sbt/extract extractPackageFile() extracts deps for generic use-cases 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "2.9.10",
+      "datasource": "maven",
+      "depName": "scala",
+      "lookupName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+      "separateMinorPatch": true,
+    },
+    Object {
+      "currentValue": "0.0.1",
+      "datasource": "sbt-package",
+      "depName": "org.example:foo",
+      "lookupName": "org.example:foo",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.2",
+      "datasource": "sbt-package",
+      "depName": "org.example:bar",
+      "lookupName": "org.example:bar_2.9.10",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.3",
+      "datasource": "sbt-package",
+      "depName": "org.example:baz",
+      "lookupName": "org.example:baz_2.9.10",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.4",
+      "datasource": "sbt-package",
+      "depName": "org.example:qux",
+      "lookupName": "org.example:qux",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "2.13.3",
+      "datasource": "sbt-package",
+      "depName": "org.scala-lang:scala-library",
+      "depType": "sources",
+      "lookupName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.5",
+      "datasource": "sbt-package",
+      "depName": "org.example:quux",
+      "lookupName": "org.example:quux",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.6",
+      "datasource": "sbt-package",
+      "depName": "org.example:quuz",
+      "depType": "test",
+      "lookupName": "org.example:quuz_2.9.10",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.7",
+      "datasource": "sbt-package",
+      "depName": "org.example:corge",
+      "depType": "Provided",
+      "lookupName": "org.example:corge",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.8",
+      "datasource": "sbt-package",
+      "depName": "org.example:grault",
+      "depType": "Test",
+      "groupName": "versionExample for org.example",
+      "lookupName": "org.example:grault",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.9",
+      "datasource": "sbt-plugin",
+      "depName": "org.example:waldo",
+      "depType": "plugin",
+      "lookupName": "org.example:waldo",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+      ],
+    },
+    Object {
+      "currentValue": "(,8.4.0]",
+      "datasource": "sbt-package",
+      "depName": "org.example:fred",
+      "lookupName": "org.example:fred",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+  ],
+  "packageFileVersion": "1.0",
+}
+`;
+
+exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.0.1",
+      "datasource": "sbt-package",
+      "depName": "org.example:foo",
+      "lookupName": "org.example:foo",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.2",
+      "datasource": "sbt-package",
+      "depName": "org.example:bar",
+      "lookupName": "org.example:bar_2.12",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.3",
+      "datasource": "sbt-package",
+      "depName": "org.example:baz",
+      "lookupName": "org.example:baz_2.12",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.4",
+      "datasource": "sbt-package",
+      "depName": "org.example:qux",
+      "lookupName": "org.example:qux",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.5",
+      "datasource": "sbt-package",
+      "depName": "org.example:quux",
+      "lookupName": "org.example:quux",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.6",
+      "datasource": "sbt-package",
+      "depName": "org.example:quuz",
+      "depType": "test",
+      "lookupName": "org.example:quuz_2.12",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.7",
+      "datasource": "sbt-package",
+      "depName": "org.example:corge",
+      "depType": "Provided",
+      "lookupName": "org.example:corge",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.8",
+      "datasource": "sbt-package",
+      "depName": "org.example:grault",
+      "depType": "Test",
+      "groupName": "versionExample for org.example",
+      "lookupName": "org.example:grault",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.9",
+      "datasource": "sbt-plugin",
+      "depName": "org.example:waldo",
+      "depType": "plugin",
+      "lookupName": "org.example:waldo",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+      ],
+    },
+  ],
+  "packageFileVersion": "3.2.1",
+}
+`;
+
+exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.0.2",
+      "datasource": "sbt-package",
+      "depName": "org.example:bar",
+      "lookupName": "org.example:bar_2.12",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+}
+`;
+
+exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined with a trailing comma 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "2.12.10",
+      "datasource": "maven",
+      "depName": "scala",
+      "lookupName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+      "separateMinorPatch": true,
+    },
+    Object {
+      "currentValue": "0.0.2",
+      "datasource": "sbt-package",
+      "depName": "org.example:bar",
+      "lookupName": "org.example:bar_2.12",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+}
+`;
+
+exports[`lib/manager/sbt/extract extractPackageFile() skips deps when scala version is missing 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "3.0.0",
+      "datasource": "sbt-package",
+      "depName": "org.scalatest:scalatest",
+      "lookupName": "org.scalatest:scalatest",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.0.11",
+      "datasource": "sbt-plugin",
+      "depName": "com.github.gseitz:sbt-release",
+      "depType": "plugin",
+      "groupName": "sbtReleaseVersion for com.github.gseitz",
+      "lookupName": "com.github.gseitz:sbt-release",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+      ],
+    },
+  ],
+  "packageFileVersion": "1.0.1",
+}
+`;

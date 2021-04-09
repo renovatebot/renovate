@@ -1,4 +1,5 @@
-import { RangeStrategy } from '../../versioning';
+import type { RangeStrategy } from '../../types';
+import type { RangeConfig } from '../types';
 
 /*
  * The getRangeStrategy() function is optional and can be removed if not applicable.
@@ -12,7 +13,10 @@ import { RangeStrategy } from '../../versioning';
  * If this function is not present then the default 'replace' value will be used.
  *
  */
+export function getRangeStrategy(config: RangeConfig): RangeStrategy {
+  if (config.rangeStrategy === 'auto') {
+    return 'replace';
+  }
 
-export function getRangeStrategy(): RangeStrategy {
-  return 'replace';
+  return config.rangeStrategy;
 }

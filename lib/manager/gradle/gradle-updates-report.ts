@@ -1,8 +1,9 @@
-import { join } from 'path';
-import { writeFile, exists, readFile } from 'fs-extra';
+import { exists, readFile, writeFile } from 'fs-extra';
+import { join } from 'upath';
+import * as datasourceSbtPackage from '../../datasource/sbt-package';
 import { logger } from '../../logger';
 
-const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
+export const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 
 interface GradleProject {
   project: string;
@@ -18,7 +19,6 @@ interface GradleDependency {
 
 type GradleDependencyWithRepos = GradleDependency & { repos: string[] };
 
-// TODO: Unify with GradleDependency ?
 export interface BuildDependency {
   name: string;
   depGroup: string;
@@ -27,7 +27,9 @@ export interface BuildDependency {
   registryUrls?: string[];
 }
 
-async function createRenovateGradlePlugin(localDir: string) {
+export async function createRenovateGradlePlugin(
+  localDir: string
+): Promise<void> {
   const content = `
 import groovy.json.JsonOutput
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
@@ -38,46 +40,35 @@ def output = new ConcurrentLinkedQueue<>();
 allprojects {
   tasks.register("renovate") {
     doLast {
-        def project = ['project': project.name]
-        output << project
-        def repos = (repositories + settings.pluginManagement.repositories)
-           .collect { "$it.url" }
-           .findAll { !it.startsWith('file:') }
-           .unique()
-        project.repositories = repos
-        def deps = (buildscript.configurations + configurations)
-          .collect { it.dependencies }
-          .flatten()
-          .findAll { it instanceof DefaultExternalModuleDependency }
-          .collect { ['name':it.name, 'group':it.group, 'version':it.version] }
-        project.dependencies = deps
+      def project = ['project': project.name]
+      output << project
+
+      def repos = (repositories + buildscript.repositories + settings.pluginManagement.repositories)
+        .findAll { it instanceof MavenArtifactRepository && it.url.scheme ==~ /https?/ }
+        .collect { "$it.url" }
+        .unique()
+      project.repositories = repos
+
+      def deps = (buildscript.configurations + configurations + settings.buildscript.configurations)
+        .collect { it.dependencies + it.dependencyConstraints }
+        .flatten()
+        .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
+        .findAll { 'Pinned to the embedded Kotlin' != it.reason } // Embedded Kotlin dependencies
+        .collect { ['name':it.name, 'group':it.group, 'version':it.version] }
+      project.dependencies = deps
     }
   }
 }
-
 gradle.buildFinished {
    def outputFile = new File('${GRADLE_DEPENDENCY_REPORT_FILENAME}')
    def json = JsonOutput.toJson(output)
    outputFile.write json
-}  `;
+}`;
   const gradleInitFile = join(localDir, 'renovate-plugin.gradle');
   logger.debug(
     'Creating renovate-plugin.gradle file with renovate gradle plugin'
   );
   await writeFile(gradleInitFile, content);
-}
-
-async function extractDependenciesFromUpdatesReport(
-  localDir: string
-): Promise<BuildDependency[]> {
-  const gradleProjectConfigurations = await readGradleReport(localDir);
-
-  const dependencies = gradleProjectConfigurations
-    .map(mergeDependenciesWithRepositories, [])
-    .reduce(flatternDependencies, [])
-    .reduce(combineReposOnDuplicatedDependencies, []);
-
-  return dependencies.map(gradleModule => buildDependency(gradleModule));
 }
 
 async function readGradleReport(localDir: string): Promise<GradleProject[]> {
@@ -104,13 +95,13 @@ function mergeDependenciesWithRepositories(
   if (!project.dependencies) {
     return [];
   }
-  return project.dependencies.map(dep => ({
+  return project.dependencies.map((dep) => ({
     ...dep,
     repos: [...project.repositories],
   }));
 }
 
-function flatternDependencies(
+function flattenDependencies(
   accumulator: GradleDependencyWithRepos[],
   currentValue: GradleDependencyWithRepos[]
 ): GradleDependencyWithRepos[] {
@@ -123,15 +114,15 @@ function combineReposOnDuplicatedDependencies(
   currentValue: GradleDependencyWithRepos
 ): GradleDependencyWithRepos[] {
   const existingDependency = accumulator.find(
-    dep => dep.name === currentValue.name && dep.group === currentValue.group
+    (dep) => dep.name === currentValue.name && dep.group === currentValue.group
   );
-  if (!existingDependency) {
-    accumulator.push(currentValue);
-  } else {
+  if (existingDependency) {
     const nonExistingRepos = currentValue.repos.filter(
-      repo => existingDependency.repos.indexOf(repo) === -1
+      (repo) => !existingDependency.repos.includes(repo)
     );
     existingDependency.repos.push(...nonExistingRepos);
+  } else {
+    accumulator.push(currentValue);
   }
   return accumulator;
 }
@@ -148,8 +139,31 @@ function buildDependency(
   };
 }
 
-export {
-  extractDependenciesFromUpdatesReport,
-  createRenovateGradlePlugin,
-  GRADLE_DEPENDENCY_REPORT_FILENAME,
-};
+export async function extractDependenciesFromUpdatesReport(
+  localDir: string
+): Promise<BuildDependency[]> {
+  const gradleProjectConfigurations = await readGradleReport(localDir);
+
+  const dependencies = gradleProjectConfigurations
+    .map(mergeDependenciesWithRepositories, [])
+    .reduce(flattenDependencies, [])
+    .reduce(combineReposOnDuplicatedDependencies, []);
+
+  return dependencies
+    .map((gradleModule) => buildDependency(gradleModule))
+    .map((dep) => {
+      /* https://github.com/renovatebot/renovate/issues/4627 */
+      const { depName, currentValue } = dep;
+      if (depName.endsWith('_%%')) {
+        return {
+          ...dep,
+          depName: depName.replace(/_%%/, ''),
+          datasource: datasourceSbtPackage.id,
+        };
+      }
+      if (/^%.*%$/.test(currentValue)) {
+        return { ...dep, skipReason: 'version-placeholder' };
+      }
+      return dep;
+    });
+}

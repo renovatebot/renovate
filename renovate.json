@@ -1,36 +1,34 @@
 {
-  "extends": [
-    "config:base",
-    ":rebaseStalePrs",
-    ":automergeMinor",
-    ":label(ready)",
-    "group:linters",
-    ":masterIssueApproval",
-    ":maintainLockFilesWeekly",
-    ":assignee(rarkins)"
-  ],
-  "postUpdateOptions": ["yarnDedupeHighest"],
+  "extends": ["github>renovatebot/.github"],
+  "assignees": ["rarkins", "viceice"],
   "semanticCommitScope": "deps",
-  "docker": {
-    "pinDigests": true,
+  "automergeType": "pr",
+  "dockerfile": {
     "semanticCommitType": "build"
   },
-  "prBodyDefinitions": {
-    "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
-  },
-  "prBodyColumns": ["Package", "Update", "Type", "Change", "Sourcegraph"],
+  "stabilityDays": 3,
   "packageRules": [
     {
-      "packageNames": ["npm", "yarn"],
-      "automerge": false
+      "matchPackageNames": [
+        "mcr.microsoft.com/vscode/devcontainers/typescript-node"
+      ],
+      "extends": ["schedule:monthly"]
     },
     {
-      "depTypeList": ["dependencies"],
+      "matchDepTypes": ["dependencies"],
       "semanticCommitType": "build"
     },
     {
-      "packageNames": ["semantic-release"],
+      "matchPackageNames": ["semantic-release"],
       "semanticCommitType": "build"
+    },
+    {
+      "matchPackageNames": ["@types/jest"],
+      "groupName": "jest monorepo"
+    },
+    {
+      "matchPaths": ["**/__fixtures__/**"],
+      "enabled": false
     }
   ]
 }

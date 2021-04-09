@@ -5,17 +5,25 @@
     "strictNullChecks": false /* required for js files */,
     "outDir": "./dist",
     "target": "es2018",
-    "allowJs": true,
-    "checkJs": true,
     "module": "commonjs",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "resolveJsonModule": false,
-    "isolatedModules": true,
+    "noUnusedLocals": true,
     "lib": ["es2018"],
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "allowJs": true,
+    "checkJs": true
   },
-  "include": ["lib/**/*", "test/**/*"],
-  "exclude": ["node_modules", "./.cache", "./dist", "**/__mocks__/*"]
+  "exclude": [
+    "node_modules",
+    "./.cache",
+    "./dist",
+    "**/__mocks__/*",
+    "bin",
+    "coverage",
+    "config.js",
+    "tmp"
+  ]
 }

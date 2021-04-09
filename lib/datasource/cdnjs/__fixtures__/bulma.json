@@ -1,0 +1,690 @@
+{
+  "homepage": "http://bulma.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgthms/bulma.git"
+  },
+  "assets": [
+    {
+      "version": "0.8.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-uByAjQgKh5//Z/gDvbL7MWsDcbwX7d/KizVil6On1dQ=",
+        "css/bulma.min.css": "sha256-1nEaE91OpXJD7M6W5uSiqxhdmrY+lOOTHC1iUxU9Pds="
+      }
+    },
+    {
+      "version": "0.8.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-XF2msWsEjJwE8ORQ0exG5nFk8jDTntTMbUZKtvPRkgU=",
+        "css/bulma.min.css": "sha256-D9M5yrVDqFlla7nlELDaYZIpXfFWDytQtiV+TaH6F1I="
+      }
+    },
+    {
+      "version": "0.7.5",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "only/0.7.5/style.css"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-ujE/ZUB6CMZmyJSgQjXGCF4sRRneOimQplBVLu8OU5w=",
+        "css/bulma.min.css": "sha256-vK3UTo/8wHbaUn+dTQD0X6dzidqc5l7gczvH+Bnowwk="
+      }
+    },
+    {
+      "version": "0.7.4",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-aan9tQnm7lVach/6JxYyrQRlheajRD+UBDwwWo3tAHQ=",
+        "css/bulma.min.css": "sha256-8B1OaG0zT7uYA572S2xOxWACq9NXYPQ+U5kHPV1bJN4="
+      }
+    },
+    {
+      "version": "0.7.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-dMQYvN6BU9M4mHK94P22cZ4dPGTSGOVP41yVXvXatws=",
+        "css/bulma.min.css": "sha256-2pUeJf+y0ltRPSbKOeJh09ipQFYxUdct5nTY6GAXswA="
+      }
+    },
+    {
+      "version": "0.7.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-zKA1Bf41O96+gJSlkn/Bh2HATW/OhwkApPlYTp3B5O8=",
+        "css/bulma.min.css": "sha256-zIG416V1ynj3Wgju/scU80KAEWOsO5rRLfVyRDuOv7Q="
+      }
+    },
+    {
+      "version": "0.7.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-8WedeikvPp0OAPWnwgdUHHaoIsl0TPbfX0Q+2P83mGw=",
+        "css/bulma.min.css": "sha256-Oe/IiGiJY0aqEFSXQHUCtq2gi0cNs2yUqVGFls9EgK8="
+      }
+    },
+    {
+      "version": "0.6.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-Ll4Z8mX5+0pGybXIES6J8YjUZUBFcQsJfS00wbXdbG8=",
+        "css/bulma.min.css": "sha256-2k1KVsNPRXxZOsXQ8aqcZ9GOOwmJTMoOB5o5Qp1d6/s="
+      }
+    },
+    {
+      "version": "0.6.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-lUssH++umYLC/97WXqr424ew3ing8e+dATTAmMpCF40=",
+        "css/bulma.min.css": "sha256-v5YlJGWVLS5hQ+o48fBzCKHEP2vMNsku57x3CosYykc="
+      }
+    },
+    {
+      "version": "0.6.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-0QptA3Zlf5Rkda4TBEMHhvZyWUd29CEvGbXG+P0BPYo=",
+        "css/bulma.min.css": "sha256-HEtF7HLJZSC3Le1HcsWbz1hDYFPZCqDhZa9QsCgVUdw="
+      }
+    },
+    {
+      "version": "0.5.3",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-vbUO+RDktGo8FKNb8XNn0q8liFDhdzxL3BbgMFVp07w=",
+        "css/bulma.min.css": "sha256-spCEAaZMKebC3rE/ZTt8jITn65b0Zan45WXblWjyDyQ="
+      }
+    },
+    {
+      "version": "0.5.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-zwJtr1GyyB98zj9jDSq9OGfgKEFzDYUmXudKYhhhOZo=",
+        "css/bulma.min.css": "sha256-d+mgRrjtsPCjrT7ltuB1sZ2VybUn1Xgdf8piVG/Va/k="
+      }
+    },
+    {
+      "version": "0.5.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-KGzlh3GrZQG1IDswBxp0OXmxeb7h0WezxI8tXeGr3yc=",
+        "css/bulma.min.css": "sha256-CDVQJfU+jJGU/oyDzvnzuGXbv0rz+SyBsPQwyn7x/jQ="
+      }
+    },
+    {
+      "version": "0.5.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-q//QGxAiKlL4UaKx9ox+b2JCphPqIbkl4OATVNeIvI8=",
+        "css/bulma.min.css": "sha256-qzwp3+P/LN8/hrx0ourjvGEOgPKNS+YNz7dNhasiRmQ="
+      }
+    },
+    {
+      "version": "0.4.4",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-nNnltvVPBWEs6TWdPICdwz/5mbVRtcbK8wzWFdhWle4=",
+        "css/bulma.min.css": "sha256-cqlVHMFcSR4diUVzW7ot+yIE0EHW0jfNvRG9GVEt8pE="
+      }
+    },
+    {
+      "version": "0.4.3",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-iO7hYdKmrm9CzcGgNrUri6m9rA8CVi0qkG++7J6KlsM=",
+        "css/bulma.min.css": "sha256-VC9bpAao257nf22leBRLU7AqKGwS9/Ylz8hfpHmOob4="
+      }
+    },
+    {
+      "version": "0.4.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-tzp6mtxeugpv7nF5uY4rqr1ZxZynL8F7G5MCwYxJkmY=",
+        "css/bulma.min.css": "sha256-5MiG346KC5bVXrbDQQU0cjus8r2Yxh07eorYOPNUcmw="
+      }
+    },
+    {
+      "version": "0.4.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-PELQzdZwUQw2WSX3q4QLMSzDqQyWrmrXODp2bZy6JOU=",
+        "css/bulma.min.css": "sha256-n+Ch7oRdzZ9+8/inp+1mK/0Bt4T/2PSmo4L6YGoDiVM="
+      }
+    },
+    {
+      "version": "0.4.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-i1MIGXdkXeJJLRlh6NXC1pmb/Rj3jEr0Y4tU0KjK9s4=",
+        "css/bulma.min.css": "sha256-8nf+BDtOgthqqdcfZXfDwth8LL6k314ILswPBDzXMp4="
+      }
+    },
+    {
+      "version": "0.3.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-2W7D1+BaVS4IyQ/jHh9Z97iKyfTY0IdVP+GLoD8Zfi8=",
+        "css/bulma.min.css": "sha256-gFMi0ldgZQk7xqpcLc/KjAYdPTLqv5Nv5gOkIPxuZkY="
+      }
+    },
+    {
+      "version": "0.3.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-E3NFAdoEdCZvMUGANNJ8cM/gRzIO+9Tx9QGCCzYHquw=",
+        "css/bulma.min.css": "sha256-6ZFIKt0ohcBorQWIruhlYBoADBIFrJuXtEJsjFxb2Wk="
+      }
+    },
+    {
+      "version": "0.3.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-IvbQzFiRARtQQANvvpAMfmLISux+WKZi/SOUJ/PU8BU=",
+        "css/bulma.min.css": "sha256-J2MxVJvpHeOeT0uUGqoj5CkoFkT4zBEweNmqP/UWu1U="
+      }
+    },
+    {
+      "version": "0.2.3",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-JPJOXvCZ7dfewrTiPV+GJzvdwvrVs3f2jTyMOjLq0aQ=",
+        "css/bulma.min.css": "sha256-F7gqKszCwmz8vhiti+AICU8dLfIEpxzPVihhhGfbbKg="
+      }
+    },
+    {
+      "version": "0.2.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-7cnnfR3Xk2kOdjB77b/yXopZ/CXuQlrUjWJcNQae+Qg=",
+        "css/bulma.min.css": "sha256-DRcOKg8NK1KkSkcymcGmxOtS/lAn0lHWJXRa15gMHHk="
+      }
+    },
+    {
+      "version": "0.2.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-OPtsycqLTj6B65PTzKGB/Db4QfWS7gQhBDHXApoOTXs=",
+        "css/bulma.min.css": "sha256-3jZh3lKj2GrREJG7pFXmh36IM2o9LLVrRIBQyE04D8Y="
+      }
+    },
+    {
+      "version": "0.1.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-LGC7VogpY1DEM2eIKie4gNcoyCjGNgjRBKh94PEmH/E=",
+        "css/bulma.min.css": "sha256-8TT9mHOU3psGaXjyZO82K8wm1ZwLUwWhN5zeZOxJ1Qs="
+      }
+    },
+    {
+      "version": "0.1.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-LGC7VogpY1DEM2eIKie4gNcoyCjGNgjRBKh94PEmH/E=",
+        "css/bulma.min.css": "sha256-8TT9mHOU3psGaXjyZO82K8wm1ZwLUwWhN5zeZOxJ1Qs="
+      }
+    },
+    {
+      "version": "0.1.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-mNUQ65hYdxtmWfzH1XghcPVZqqgS5UW82C8/tfax82Y=",
+        "css/bulma.min.css": "sha256-wY1WE5wUnk5ETTxanjGH8AfXaIyH5+tbA9aqvi6gSAw="
+      }
+    },
+    {
+      "version": "0.0.28",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-HWy4oyHCAsQUrboCiZM3QKQc832qCYyP6CJyN1gRLUc=",
+        "css/bulma.min.css": "sha256-b/7wl9KgZZEFwnFedQHe2Z+qcYMEPkmD7Kx13OT1wlQ="
+      }
+    },
+    {
+      "version": "0.0.27",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-gVVbkaQ5cXLnonjD5dGt9Ss4AbwnYuTfT0tmAnxCNDQ=",
+        "css/bulma.min.css": "sha256-JLahqXfDsi2eVA53OTdKfMOGzScPDFk+rbasxKSGsIc="
+      }
+    },
+    {
+      "version": "0.0.26",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-gVVbkaQ5cXLnonjD5dGt9Ss4AbwnYuTfT0tmAnxCNDQ=",
+        "css/bulma.min.css": "sha256-JLahqXfDsi2eVA53OTdKfMOGzScPDFk+rbasxKSGsIc="
+      }
+    },
+    {
+      "version": "0.0.25",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-5UeclJB2PL89MerRb1P6/cRigIHUDAwsBLAvTCxOsQo=",
+        "css/bulma.min.css": "sha256-UeLjY4mw4rw6henK/wENCf+ddAKmKXKpF94dqmNIdTI="
+      }
+    },
+    {
+      "version": "0.0.24",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-EGdHMzN0C86q1vhj0+w8kVwSsECqGN2tuSPLMuWqB3E=",
+        "css/bulma.min.css": "sha256-szI8Qt+cO6CUU/4frmHdH7uD1Yj6PjK4D+MUr1oIO7M="
+      }
+    },
+    {
+      "version": "0.0.23",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-8IKGWdeUJRHWtaxDjAO8le9gNTcyCvYtX+S964nl8AY=",
+        "css/bulma.min.css": "sha256-OnKsMZ9cPpVp4NksTsReXyjIKtb9FM+mezAZtuK0fHM="
+      }
+    },
+    {
+      "version": "0.0.22",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-CI0D79wfhW/fvYQf7+4Q/K5EGZUVwoSGZApeUlWeaew=",
+        "css/bulma.min.css": "sha256-BypekIZ6af8I3uWccMZ824MO8mD4F5cARkVYkxbP0oM="
+      }
+    },
+    {
+      "version": "0.0.21",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-CWfwx68mfMIapO4JcMtaWiup4Rh0KZb9bGsWm7Ijz+c=",
+        "css/bulma.min.css": "sha256-UEP+sG/JcDA1dtbWrdV/OQWiprVqEHAwj4KoZo5yCJ8="
+      }
+    },
+    {
+      "version": "0.0.20",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-/lwxjz5MrL8ymXcSdZ4q1rM24QbHqkFC6TAD39dlzmo=",
+        "css/bulma.min.css": "sha256-MrONUixIVU9UUzQTvQh0OZOc1RuD2igiZ82hJ+zy8ME="
+      }
+    },
+    {
+      "version": "0.0.19",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-WPzD5Utt3RSCLgUfwSfahDFPRZzYacbAikJyFjuj56w=",
+        "css/bulma.min.css": "sha256-2ckO9k7x6jD9dxp2rwqMMXA3O/MqBUyYdL85e5Oy+3o="
+      }
+    },
+    {
+      "version": "0.0.18",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-WPzD5Utt3RSCLgUfwSfahDFPRZzYacbAikJyFjuj56w=",
+        "css/bulma.min.css": "sha256-2ckO9k7x6jD9dxp2rwqMMXA3O/MqBUyYdL85e5Oy+3o="
+      }
+    },
+    {
+      "version": "0.0.17",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-WPzD5Utt3RSCLgUfwSfahDFPRZzYacbAikJyFjuj56w=",
+        "css/bulma.min.css": "sha256-2ckO9k7x6jD9dxp2rwqMMXA3O/MqBUyYdL85e5Oy+3o="
+      }
+    },
+    {
+      "version": "0.0.16",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-DaKywHsbjxdWISmW0vj1rqxXo+2m9jP58M82vE26/lo=",
+        "css/bulma.min.css": "sha256-t/8w8MBY+1xcArrA+FR7cizygVRFvCVb7YdwjQ1Szoo="
+      }
+    },
+    {
+      "version": "0.0.15",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-o+ckoIHHuI6C5rAJaVU5cPVqx3sBiPP0oM7UV42OchQ=",
+        "css/bulma.min.css": "sha256-yDRdc0rFCjFlV6phoR5U+IIo2BX6r1s64na0xV/3VII="
+      }
+    },
+    {
+      "version": "0.0.14",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-4n2LOsDn3dDiRt4+fumSkXG3Nx9e0VWXSlEHQ32AYM8=",
+        "css/bulma.min.css": "sha256-5j0oQLxKYqE6SIOENLM5Z+XwV0BDckBsmiZehD8kplg="
+      }
+    },
+    {
+      "version": "0.0.13",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-EEfwnmzAb2KFBMTyTn8Ayx5hOG/i1RRet1YUcTX/6K8=",
+        "css/bulma.min.css": "sha256-U4vo5QfK7+6vpb9prQCfKl5prRF5CAVdXE67Kw2q+zk="
+      }
+    },
+    {
+      "version": "0.0.12",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-WC0vtYAfKzLNqLbnaMiHky4bbui/DrhAfu+auISMki8=",
+        "css/bulma.min.css": "sha256-PxTvtkcYmnB3QTF1yEOZ+hZ3QtdruwGgH8gi+5ZhvL0="
+      }
+    },
+    {
+      "version": "0.0.11",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-kIMc9qJDvs9gUItCZOWS4j9IJTEH5cPA0XYDNNh615M=",
+        "css/bulma.min.css": "sha256-H3ycCK4h9KQ3eaT/hd10aawWxLrs55pvJSc4+AW/7Ss="
+      }
+    },
+    {
+      "version": "0.0.10",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-H+qxyugPe8R8ZDJ7624T+qBBGQtJxLfk6IwHDFU4qQQ=",
+        "css/bulma.min.css": "sha256-vSPLpIGAPxtjcNIvRnMG+qBMNHoiKWIfjWE9krwJs2w="
+      }
+    },
+    {
+      "version": "0.0.9",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-2p8Ap5rGQkvy/eSbHqq7YInLn7KlK+ttS7j83/4Mu5U=",
+        "css/bulma.min.css": "sha256-Ujuen6wSGYNncOiwgkf6etS4ynNQk09lEKe5N5EpVjY="
+      }
+    },
+    {
+      "version": "0.0.8",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-o9/qiZDq1YQYmN/l/FQ9ZfPWx0X1XCB7qN19NgU9mjI=",
+        "css/bulma.min.css": "sha256-ThvEzznTSx5zY/pglLOhYXMx/4Cna0fNekj5njnQi84="
+      }
+    },
+    {
+      "version": "0.0.7",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-3lL6WRsXNPHBD5kr4k7P2YDcUZFzmPnFG+9VKNiHmpk=",
+        "css/bulma.min.css": "sha256-h5PclMMTALOOZU4kVrwZ0hcvvYbE59vjueh4hCOerxM="
+      }
+    },
+    {
+      "version": "0.0.6",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-3lL6WRsXNPHBD5kr4k7P2YDcUZFzmPnFG+9VKNiHmpk=",
+        "css/bulma.min.css": "sha256-h5PclMMTALOOZU4kVrwZ0hcvvYbE59vjueh4hCOerxM="
+      }
+    },
+    {
+      "version": "0.0.5",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-SPVsd3RXnpGaxE3nQZdk7O/bmqIotrumXX6tMbr/5ig=",
+        "css/bulma.min.css": "sha256-agoMXPaQbV3bQHc/V/IzswebgOhTaiv9kfMy3haisgg="
+      }
+    },
+    {
+      "version": "0.0.4",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.min.css"
+      ],
+      "sri": {
+        "css/bulma.css": "sha256-HXOcPLKtDcuDy077hNwHqc/fwYY+c/wBzT379yHbphc=",
+        "css/bulma.min.css": "sha256-R+ODP4cL6k8BoKDqlXzcdbihW8iymks89ySJO0H6pPI="
+      }
+    }
+  ]
+}

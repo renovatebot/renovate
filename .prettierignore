@@ -1,4 +1,4 @@
-# It would be nice to remove this file and use .gitignore instead however we need to add package.json and _fixtures
+# It would be nice to remove this file and use .gitignore instead however we need to add package.json and __fixtures__
 
 /node_modules
 /config.js
@@ -9,5 +9,12 @@
 .cache
 /*.log
 package.json
-test/**/**/_fixtures
+**/__fixtures__/
+**/__mocks__/
 bin/yarn*
+.clinic/
+
+# generated code
+**/*.generated.ts
+/tools/dist
+/patches

@@ -1,29 +1,47 @@
+import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
+import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import { PackageFile, PackageDependency } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
-  logger.debug('github-actions.extractPackageFile()');
+  logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  let lineNumber = 0;
   for (const line of content.split('\n')) {
-    const match = line.match(/^\s+uses = "docker:\/\/([^"]+)"\s*$/);
-    if (match) {
-      const currentFrom = match[1];
+    if (line.trim().startsWith('#')) {
+      continue; // eslint-disable-line no-continue
+    }
+
+    const dockerMatch = /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
+    if (dockerMatch) {
+      const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
-      logger.debug(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Docker image inside GitHub Actions'
-      );
-      dep.managerData = { lineNumber };
-      dep.versionScheme = 'docker';
+      dep.depType = 'docker';
+      dep.versioning = dockerVersioning.id;
+      deps.push(dep);
+      continue; // eslint-disable-line no-continue
+    }
+
+    const tagMatch = /^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
+      line
+    );
+    if (tagMatch?.groups) {
+      const { depName, currentValue } = tagMatch.groups;
+      const dep: PackageDependency = {
+        depName,
+        currentValue,
+        commitMessageTopic: '{{{depName}}} action',
+        datasource: githubTagsDatasource.id,
+        versioning: dockerVersioning.id,
+        depType: 'action',
+        pinDigests: false,
+      };
+      if (!dockerVersioning.api.isValid(currentValue)) {
+        dep.skipReason = SkipReason.InvalidVersion;
+      }
       deps.push(dep);
     }
-    lineNumber += 1;
   }
   if (!deps.length) {
     return null;

@@ -1,0 +1,101 @@
+'reproduction:needed':
+  comment: >
+    Hi there,
+
+
+    The Renovate team needs your help!
+    Before we can start work on your issue we first need to know exactly what's causing the current behavior.
+    A minimal reproduction helps us with this.
+
+
+    To get started, please read our guide on [minimal reproductions](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to understand what is needed.
+
+
+    We may close the issue if you have not provided a minimal reproduction within two weeks.
+    If you need more time, or are stuck, please ask for help or more time in a comment.
+
+
+    Good luck,
+
+
+    The Renovate team
+
+'reproduction:provided':
+  comment: >
+    Thank you for providing a reproduction! :tada: :rocket:
+
+
+    The Renovate team will take a look at the reproduction repository.
+    Once we confirm the provided repository reproduces the problem, the label will be changed to `reproduction:confirmed`.
+
+'logs:problem':
+  comment: >
+    Hi there,
+
+
+    We have found that there's a problem with the logs.
+    Depending on which situation applies follow one, some or all of these instructions.
+
+
+    ### No logs at all
+
+    If there's no log posted yet, we need you to find and copy/paste the log into the issue template.
+
+
+    #### Finding logs on hosted app
+
+    <details><summary>Click me to read instructions</summary>
+
+
+    If you use the Renovate app (GitHub):
+
+    1. Go to the affected PR, and search for "View repository job log here"
+
+    1. Click on the link to go to the "WhiteSource Renovate Dashboard" and log in
+
+    1. You are now in the correct repository log overview screen
+
+    1. Copy/paste the correct log
+
+    1. Follow the steps in the **formatting your logs** section
+
+    </details>
+
+
+    #### Finding logs when self-hosting
+
+    <details><summary>Click me to read instructions</summary>
+
+
+    If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+
+    </details>
+
+
+    ### Insufficient logs
+
+    <details><summary>Click me to read instructions</summary>
+
+
+    If you already provided logs, and the Renovate team said they are not enough, follow the instructions from the **No logs at all** section.
+
+    </details>
+
+
+    ### Formatting your logs
+
+    <details><summary>Click me to read instructions</summary>
+
+
+    Please put your logs in a `<details>` and `<summary>` element like this:
+
+
+        <details><summary>Click me to see logs</summary>
+
+        ```
+        Copy/paste any log here, between the starting and ending backticks
+        ```
+
+        </details>
+
+    </details>

@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
-import { PackageFile, PackageDependency } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -8,7 +8,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const match = line.match(/^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+      const match = /^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
       if (match) {
         const currentFrom = match[1];
         const dep = getDep(currentFrom);
@@ -21,7 +21,6 @@ export function extractPackageFile(content: string): PackageFile | null {
           'DroneCI docker image'
         );
         dep.depType = 'docker';
-        dep.managerData = { lineNumber };
         deps.push(dep);
       }
     }

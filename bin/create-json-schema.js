@@ -9,6 +9,11 @@ const schema = {
   properties: {},
 };
 const options = getOptions();
+options.sort((a, b) => {
+  if (a.name < b.name) return -1;
+  if (a.name > b.name) return 1;
+  return 0;
+});
 const properties = {};
 
 function createSingleConfig(option) {
@@ -29,6 +34,12 @@ function createSingleConfig(option) {
         temp.items.enum = option.allowedValues;
       }
     }
+    if (option.subType == 'string' && option.allowString === true) {
+      const items = temp.items;
+      delete temp.items;
+      delete temp.type;
+      temp.oneOf = [{ type: 'array', items }, { ...items }];
+    }
   } else {
     if (option.format) {
       temp.format = option.format;
@@ -39,6 +50,9 @@ function createSingleConfig(option) {
   }
   if (option.default !== undefined) {
     temp.default = option.default;
+  }
+  if (option.additionalProperties !== undefined) {
+    temp.additionalProperties = option.additionalProperties;
   }
   if (temp.type === 'object' && !option.freeChoice) {
     temp.$ref = '#';

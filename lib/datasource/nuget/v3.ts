@@ -1,25 +1,42 @@
-import parse from 'github-url-from-git';
+import is from '@sindresorhus/is';
+import { RequestError } from 'got';
+import pAll from 'p-all';
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
-import got from '../../util/got';
-import { ReleaseResult } from '../common';
+import * as packageCache from '../../util/cache/package';
+import { Http } from '../../util/http';
+import { ensureTrailingSlash } from '../../util/url';
+import type { Release, ReleaseResult } from '../types';
+
+import { id, removeBuildMeta } from './common';
+
+const http = new Http(id);
 
 // https://api.nuget.org/v3/index.json is a default official nuget feed
 const defaultNugetFeed = 'https://api.nuget.org/v3/index.json';
 const cacheNamespace = 'datasource-nuget';
 
-export function getDefaultFeed() {
+export function getDefaultFeed(): string {
   return defaultNugetFeed;
 }
 
-export async function getQueryUrl(url: string): Promise<string | null> {
-  // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
-  const resourceType = 'SearchQueryService';
-  const cacheKey = `${url}:${resourceType}`;
-  const cachedResult = await renovateCache.get<string>(
+interface ServicesIndexRaw {
+  resources: {
+    '@id': string;
+    '@type': string;
+  }[];
+}
+
+export async function getResourceUrl(
+  url: string,
+  resourceType = 'RegistrationsBaseUrl'
+): Promise<string | null> {
+  // https://docs.microsoft.com/en-us/nuget/api/service-index
+  const resultCacheKey = `${url}:${resourceType}`;
+  const cachedResult = await packageCache.get<string>(
     cacheNamespace,
-    cacheKey
+    resultCacheKey
   );
 
   // istanbul ignore if
@@ -28,131 +45,176 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   }
 
   try {
-    const servicesIndexRaw = await got(url, { json: true, hostType: 'nuget' });
-    if (servicesIndexRaw.statusCode !== 200) {
-      logger.debug(
-        { dependency: url, servicesIndexRaw },
-        `nuget registry failure: status code != 200`
-      );
-      return null;
-    }
-    const searchQueryService = servicesIndexRaw.body.resources.find(
-      resource =>
-        resource['@type'] && resource['@type'].startsWith(resourceType)
-    );
-    const searchQueryServiceId = searchQueryService['@id'];
-
-    const cacheMinutes = 60;
-    await renovateCache.set(
+    const responseCacheKey = url;
+    let servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
       cacheNamespace,
-      cacheKey,
-      searchQueryServiceId,
-      cacheMinutes
+      responseCacheKey
     );
-    return searchQueryServiceId;
-  } catch (e) {
+    // istanbul ignore else: currently not testable
+    if (!servicesIndexRaw) {
+      servicesIndexRaw = (await http.getJson<ServicesIndexRaw>(url)).body;
+      await packageCache.set(
+        cacheNamespace,
+        responseCacheKey,
+        servicesIndexRaw,
+        3 * 24 * 60
+      );
+    }
+
+    const services = servicesIndexRaw.resources
+      .map(({ '@id': serviceId, '@type': t }) => ({
+        serviceId,
+        type: t?.split('/')?.shift(),
+        version: t?.split('/')?.pop(),
+      }))
+      .filter(
+        ({ type, version }) => type === resourceType && semver.valid(version)
+      )
+      .sort((x, y) => semver.compare(x.version, y.version));
+    const { serviceId, version } = services.pop();
+
+    // istanbul ignore if
+    if (
+      resourceType === 'RegistrationsBaseUrl' &&
+      !version?.startsWith('3.0.0-') &&
+      !semver.satisfies(version, '^3.0.0')
+    ) {
+      logger.warn(
+        { url, version },
+        `Nuget: Unknown version returned. Only v3 is supported`
+      );
+    }
+
+    await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
+    return serviceId;
+  } catch (err) {
     logger.debug(
-      { e },
-      `nuget registry failure: can't get SearchQueryService form ${url}`
+      { err, url },
+      `nuget registry failure: can't get ${resourceType}`
     );
     return null;
   }
 }
 
-export async function getPkgReleases(
+interface CatalogEntry {
+  version: string;
+  published?: string;
+  projectUrl?: string;
+  listed?: boolean;
+}
+
+interface CatalogPage {
+  '@id': string;
+  items: {
+    catalogEntry: CatalogEntry;
+  }[];
+}
+
+interface PackageRegistration {
+  items: CatalogPage[];
+}
+
+async function getCatalogEntry(
+  catalogPage: CatalogPage
+): Promise<CatalogEntry[]> {
+  let items = catalogPage.items;
+  if (!items) {
+    const url = catalogPage['@id'];
+    const catalogPageFull = await http.getJson<CatalogPage>(url);
+    items = catalogPageFull.body.items;
+  }
+  return items.map(({ catalogEntry }) => catalogEntry);
+}
+
+export async function getReleases(
   registryUrl: string,
   feedUrl: string,
   pkgName: string
 ): Promise<ReleaseResult | null> {
-  let queryUrl = `${feedUrl}?q=${pkgName}`;
-  if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
-    queryUrl = queryUrl.replace('q=', 'q=PackageId:');
-    queryUrl += '&semVerLevel=2.0.0&prerelease=true';
-  }
-  const dep: ReleaseResult = {
-    pkgName,
-    releases: null,
-  };
-  try {
-    const pkgUrlListRaw = await got(queryUrl, {
-      json: true,
-      hostType: 'nuget',
-    });
-    if (pkgUrlListRaw.statusCode !== 200) {
-      logger.debug(
-        { dependency: pkgName, pkgUrlListRaw },
-        `nuget registry failure: status code != 200`
-      );
-      return null;
-    }
+  const baseUrl = feedUrl.replace(/\/*$/, '');
+  const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
+  const packageRegistration = await http.getJson<PackageRegistration>(url);
+  const catalogPages = packageRegistration.body.items || [];
+  const catalogPagesQueue = catalogPages.map((page) => (): Promise<
+    CatalogEntry[]
+  > => getCatalogEntry(page));
+  const catalogEntries = (
+    await pAll(catalogPagesQueue, { concurrency: 5 })
+  ).flat();
 
-    const match = pkgUrlListRaw.body.data.find(
-      item => item.id.toLowerCase() === pkgName.toLowerCase()
-    );
-    if (!match) {
-      // There are no pkgName is current feed
-      return null;
-    }
-    dep.releases = (match.versions || []).map(item => ({
-      version: item.version,
-    }));
-
-    try {
-      // For nuget.org we have a way to get nuspec file
-      const sanitizedVersions = dep.releases
-        .map(release => semver.valid(release.version))
-        .filter(Boolean)
-        .filter(version => !semver.prerelease(version));
-      let lastVersion: string;
-      // istanbul ignore else
-      if (sanitizedVersions.length) {
-        // Use the last stable version we found
-        lastVersion = sanitizedVersions.pop();
-      } else {
-        // Just use the last one from the list and hope for the best
-        lastVersion = [...dep.releases].pop().version;
+  let homepage = null;
+  let latestStable: string = null;
+  const releases = catalogEntries.map(
+    ({ version, published: releaseTimestamp, projectUrl, listed }) => {
+      const release: Release = { version: removeBuildMeta(version) };
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
       }
-      if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
-        const nugetOrgApi = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${lastVersion}/${pkgName.toLowerCase()}.nuspec`;
-        let metaresult: { body: string };
-        try {
-          metaresult = await got(nugetOrgApi, { hostType: 'nuget' });
-        } catch (err) /* istanbul ignore next */ {
-          logger.debug(
-            `Cannot fetch metadata for ${pkgName} using popped version ${lastVersion}`
-          );
-          return dep;
-        }
-        const nuspec = new XmlDocument(metaresult.body);
-        if (nuspec) {
-          const sourceUrl = parse(
-            nuspec.valueWithPath('metadata.repository@url')
-          );
-          if (sourceUrl) {
-            dep.sourceUrl = sourceUrl;
-          }
-        }
-      } else if (
-        Object.prototype.hasOwnProperty.call(
-          pkgUrlListRaw.body.data[0],
-          'projectUrl'
-        )
-      ) {
-        dep.sourceUrl = parse(pkgUrlListRaw.body.data[0].projectUrl);
+      if (semver.valid(version) && !semver.prerelease(version)) {
+        latestStable = removeBuildMeta(version);
+        homepage = projectUrl || homepage;
       }
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug(
-        { err, pkgName, feedUrl },
-        `nuget registry failure: can't parse pkg info for project url`
-      );
+      if (listed === false) {
+        release.isDeprecated = true;
+      }
+      return release;
     }
+  );
 
-    return dep;
-  } catch (err) {
-    logger.debug(
-      { err, pkgName, feedUrl },
-      'nuget registry failure: Unknown error'
-    );
+  if (!releases.length) {
     return null;
   }
+
+  // istanbul ignore if: only happens when no stable version exists
+  if (latestStable === null) {
+    const last = catalogEntries.pop();
+    latestStable = removeBuildMeta(last.version);
+    homepage ??= last.projectUrl;
+  }
+
+  const dep: ReleaseResult = {
+    releases,
+  };
+
+  try {
+    const packageBaseAddress = await getResourceUrl(
+      registryUrl,
+      'PackageBaseAddress'
+    );
+    // istanbul ignore else: this is a required v3 api
+    if (is.nonEmptyString(packageBaseAddress)) {
+      const nuspecUrl = `${ensureTrailingSlash(
+        packageBaseAddress
+      )}${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`;
+      const metaresult = await http.get(nuspecUrl);
+      const nuspec = new XmlDocument(metaresult.body);
+      const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
+      if (sourceUrl) {
+        dep.sourceUrl = sourceUrl;
+      }
+    }
+  } catch (err) /* istanbul ignore next */ {
+    // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
+    if (err instanceof RequestError && err.response?.statusCode === 404) {
+      logger.debug(
+        { registryUrl, pkgName, pkgVersion: latestStable },
+        `package manifest (.nuspec) not found`
+      );
+      return dep;
+    }
+    logger.debug(
+      { err, registryUrl, pkgName, pkgVersion: latestStable },
+      `Cannot obtain sourceUrl`
+    );
+    return dep;
+  }
+
+  // istanbul ignore else: not easy testable
+  if (homepage) {
+    // only assign if not assigned
+    dep.sourceUrl ??= homepage;
+    dep.homepage ??= homepage;
+  }
+
+  return dep;
 }

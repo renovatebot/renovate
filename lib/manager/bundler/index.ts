@@ -1,9 +1,11 @@
-import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
+import { LANGUAGE_RUBY } from '../../constants/languages';
+import * as rubyVersioning from '../../versioning/ruby';
 import { updateArtifacts } from './artifacts';
+import { extractPackageFile } from './extract';
 import { getRangeStrategy } from './range';
 
-const language = 'ruby';
+const language = LANGUAGE_RUBY;
+export const supportsLockFileMaintenance = true;
 
 /*
  * Each of the below functions contain some explanations within their own files.
@@ -15,5 +17,9 @@ export {
   updateArtifacts, // Optional
   getRangeStrategy, // Optional
   language, // Optional
-  updateDependency, // Mandatory
+};
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)Gemfile$'],
+  versioning: rubyVersioning.id,
 };

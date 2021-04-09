@@ -1,6 +1,11 @@
+import { LANGUAGE_PYTHON } from '../../constants/languages';
+
 export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
 export { updateArtifacts } from './artifacts';
 
-export const language = 'python';
-export const supportsLockFileMaintenance = false;
+export const language = LANGUAGE_PYTHON;
+export const supportsLockFileMaintenance = true;
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)pyproject\\.toml$'],
+};

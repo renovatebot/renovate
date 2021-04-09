@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/gitlab-tags getReleases returns tags from custom registry 1`] = `
+Object {
+  "registryUrl": "https://gitlab.company.com/api/v4/",
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": "2020-03-04T18:01:37.000Z",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "version": "v1.1.0",
+    },
+    Object {
+      "gitRef": "v1.1.1",
+      "version": "v1.1.1",
+    },
+  ],
+  "sourceUrl": "https://gitlab.company.com/api/v4/some/dep2",
+}
+`;
+
+exports[`datasource/gitlab-tags getReleases returns tags from custom registry 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.company.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.company.com/api/v4/projects/some%2Fdep2/repository/tags?per_page=100",
+  },
+]
+`;
+
+exports[`datasource/gitlab-tags getReleases returns tags with default registry 1`] = `
+Object {
+  "registryUrl": "https://gitlab.com",
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/some/dep2",
+}
+`;
+
+exports[`datasource/gitlab-tags getReleases returns tags with default registry 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Fdep2/repository/tags?per_page=100",
+  },
+]
+`;

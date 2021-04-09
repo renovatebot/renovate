@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/gitsubmodules/artifacts updateArtifacts() returns empty content 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "",
+      "name": "",
+    },
+  },
+]
+`;
+
+exports[`lib/manager/gitsubmodules/artifacts updateArtifacts() returns two modules 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "",
+      "name": "renovate",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "",
+      "name": "renovate-pro",
+    },
+  },
+]
+`;

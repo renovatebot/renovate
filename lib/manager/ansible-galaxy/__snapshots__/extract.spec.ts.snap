@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/ansible-galaxy/extract extractPackageFile() extracts dependencies from a not beautified requirements file 1`] = `
+Array [
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "galaxy",
+    "depName": "yatesr.timezone",
+    "lookupName": "yatesr.timezone",
+  },
+  Object {
+    "currentValue": "0.1",
+    "datasource": "git-tags",
+    "depName": "mygroup/ansible-base",
+    "lookupName": "git@gitlab.company.com:mygroup/ansible-base.git",
+  },
+]
+`;
+
+exports[`lib/manager/ansible-galaxy/extract extractPackageFile() extracts multiple dependencies from requirements.yml 1`] = `
+Array [
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "galaxy",
+    "depName": "yatesr.timezone",
+    "lookupName": "yatesr.timezone",
+  },
+  Object {
+    "currentValue": "0.19.0",
+    "datasource": "galaxy",
+    "depName": "cloudalchemy.node-exporter",
+    "lookupName": "cloudalchemy.node-exporter",
+  },
+  Object {
+    "currentValue": "master",
+    "datasource": "git-tags",
+    "depName": "nginx_role",
+    "lookupName": "https://github.com/bennojoy/nginx",
+  },
+  Object {
+    "currentValue": "v1.4",
+    "datasource": "git-tags",
+    "depName": "willthames/git-ansible-galaxy",
+    "lookupName": "http://bitbucket.org/willthames/git-ansible-galaxy",
+  },
+  Object {
+    "currentValue": "0.1",
+    "datasource": "git-tags",
+    "depName": "mygroup/ansible-base",
+    "lookupName": "git@gitlab.company.com:mygroup/ansible-base.git",
+  },
+  Object {
+    "currentValue": "0.1",
+    "datasource": "git-tags",
+    "depName": "testGroup/testProject",
+    "lookupName": "ssh://git@gitlab.company.com/testGroup/testProject.git",
+  },
+  Object {
+    "currentValue": "0.1",
+    "datasource": "git-tags",
+    "depName": "testGroup/testProject2",
+    "lookupName": "ssh://gitlab.company.com/testGroup/testProject2.git",
+  },
+  Object {
+    "currentValue": "3.1",
+    "datasource": "git-tags",
+    "depName": "testGroup/testProject3",
+    "lookupName": "ssh://git@gitlab.company.com:23/testGroup/testProject3.git",
+  },
+  Object {
+    "currentValue": "0.14",
+    "datasource": "git-tags",
+    "depName": "mygroup/ansible-base",
+    "lookupName": "git@gitlab.company.com:mygroup/ansible-base.git",
+  },
+  Object {
+    "currentValue": "0.14",
+    "datasource": "git-tags",
+    "depName": "mygroup/ansible-base",
+    "lookupName": "company.com:mygroup/ansible-base.git",
+  },
+  Object {
+    "currentValue": "47.11",
+    "datasource": "git-tags",
+    "depName": "org/repo",
+    "lookupName": "git://github.com/org/repo.git",
+  },
+  Object {
+    "currentValue": "47.11",
+    "datasource": "git-tags",
+    "depName": "org/re.po",
+    "lookupName": "git://github.com/org/re.po.git",
+  },
+]
+`;

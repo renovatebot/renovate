@@ -1,161 +1,241 @@
-import { outputFile, readFile } from 'fs-extra';
-import { join, dirname } from 'upath';
-import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
-import { logger } from '../../logger';
-import { getPkgReleases } from '../../datasource/docker';
+import { quote } from 'shlex';
 import {
-  isValid,
-  isVersion,
-  matches,
-  sortVersions,
-} from '../../versioning/ruby';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+  BUNDLER_INVALID_CREDENTIALS,
+  TEMPORARY_ERROR,
+} from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { HostRule } from '../../types';
+import * as memCache from '../../util/cache/memory';
+import { ExecOptions, exec } from '../../util/exec';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
+import { isValid } from '../../versioning/ruby';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import {
+  findAllAuthenticatable,
+  getAuthenticationHeaderValue,
+  getDomain,
+} from './host-rules';
+import { getGemHome } from './utils';
 
-// istanbul ignore next
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
-  logger.debug(`bundler.updateArtifacts(${packageFileName})`);
-  // istanbul ignore if
-  if (global.repoCache.bundlerArtifactsError) {
-    logger.info('Aborting Bundler artifacts due to previous failed attempt');
-    throw new Error(global.repoCache.bundlerArtifactsError);
+const hostConfigVariablePrefix = 'BUNDLE_';
+
+async function getRubyConstraint(
+  updateArtifact: UpdateArtifact
+): Promise<string> {
+  const { packageFileName, config } = updateArtifact;
+  const { constraints = {} } = config;
+  const { ruby } = constraints;
+
+  let rubyConstraint: string;
+  if (ruby) {
+    logger.debug('Using rubyConstraint from config');
+    rubyConstraint = ruby;
+  } else {
+    const rubyVersionFile = getSiblingFileName(
+      packageFileName,
+      '.ruby-version'
+    );
+    const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
+    if (rubyVersionFileContent) {
+      logger.debug('Using ruby version specified in .ruby-version');
+      rubyConstraint = rubyVersionFileContent
+        .replace(/^ruby-/, '')
+        .replace(/\n/g, '')
+        .trim();
+    }
   }
-  const lockFileName = packageFileName + '.lock';
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  return rubyConstraint;
+}
+
+function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
+  const varName =
+    hostConfigVariablePrefix +
+    getDomain(hostRule)
+      .split('.')
+      .map((term) => term.toUpperCase())
+      .join('__');
+
+  return {
+    [varName]: `${getAuthenticationHeaderValue(hostRule)}`,
+  };
+}
+
+export async function updateArtifacts(
+  updateArtifact: UpdateArtifact
+): Promise<UpdateArtifactsResult[] | null> {
+  const {
+    packageFileName,
+    updatedDeps,
+    newPackageFileContent,
+    config,
+  } = updateArtifact;
+  const { constraints = {} } = config;
+  logger.debug(`bundler.updateArtifacts(${packageFileName})`);
+  const existingError = memCache.get<string>('bundlerArtifactsError');
+  // istanbul ignore if
+  if (existingError) {
+    logger.debug('Aborting Bundler artifacts due to previous failed attempt');
+    throw new Error(existingError);
+  }
+  const lockFileName = `${packageFileName}.lock`;
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');
     return null;
   }
-  const cwd = join(config.localDir, dirname(packageFileName));
-  let stdout: string;
-  let stderr: string;
+
+  if (config.isLockFileMaintenance) {
+    await deleteLocalFile(lockFileName);
+  }
+
   try {
-    const localPackageFileName = join(config.localDir, packageFileName);
-    await outputFile(localPackageFileName, newPackageFileContent);
-    const localLockFileName = join(config.localDir, lockFileName);
-    const env = getChildProcessEnv();
-    const startTime = process.hrtime();
+    await writeLocalFile(packageFileName, newPackageFileContent);
+
     let cmd;
-    if (config.binarySource === 'docker') {
-      logger.info('Running bundler via docker');
-      let tag = 'latest';
-      let rubyConstraint: string;
-      if (config && config.compatibility && config.compatibility.ruby) {
-        logger.debug('Using rubyConstraint from config');
-        rubyConstraint = config.compatibility.ruby;
-      } else {
-        const rubyVersionFile = join(dirname(packageFileName), '.ruby-version');
-        logger.debug('Checking ' + rubyVersionFile);
-        const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
-        if (rubyVersionFileContent) {
-          logger.debug('Using ruby version specified in .ruby-version');
-          rubyConstraint = rubyVersionFileContent
-            .replace(/^ruby-/, '')
-            .replace(/\n/g, '')
-            .trim();
-        }
-      }
-      if (rubyConstraint && isValid(rubyConstraint)) {
-        logger.debug({ rubyConstraint }, 'Found ruby compatibility');
-        const rubyReleases = await getPkgReleases({
-          lookupName: 'renovate/ruby',
-        });
-        if (rubyReleases && rubyReleases.releases) {
-          let versions = rubyReleases.releases.map(release => release.version);
-          versions = versions.filter(version => isVersion(version));
-          versions = versions.filter(version =>
-            matches(version, rubyConstraint)
-          );
-          versions = versions.sort(sortVersions);
-          if (versions.length) {
-            tag = versions.pop();
-          }
-        }
-        if (tag === 'latest') {
-          logger.warn(
-            { rubyConstraint },
-            'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
-          );
-        }
-      }
-      const bundlerConstraint =
-        config && config.compatibility && config.compatibility.bundler
-          ? config.compatibility.bundler
-          : undefined;
-      let bundlerVersion = '';
-      if (bundlerConstraint && isVersion(bundlerConstraint)) {
-        bundlerVersion = ' -v ' + bundlerConstraint;
-      }
-      cmd = `docker run --rm `;
-      const volumes = [config.localDir];
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
-      const envVars = [];
-      cmd += envVars.map(e => `-e ${e} `);
-      cmd += `-w ${cwd} `;
-      cmd += `renovate/ruby:${tag} bash -l -c "ruby --version && `;
-      cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
-      cmd += ' && bundle';
+
+    if (config.isLockFileMaintenance) {
+      cmd = 'bundle lock';
     } else {
-      logger.info('Running bundler via global bundler');
-      cmd = 'bundle';
+      cmd = `bundle lock --update ${updatedDeps.map(quote).join(' ')}`;
     }
-    cmd += ` lock --update ${updatedDeps.join(' ')}`;
-    if (cmd.includes('bash -l -c "')) {
-      cmd += '"';
+
+    let bundlerVersion = '';
+    const { bundler } = constraints;
+    if (bundler) {
+      if (isValid(bundler)) {
+        logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
+        bundlerVersion = ` -v ${quote(bundler)}`;
+      } else {
+        logger.warn({ bundlerVersion: bundler }, 'Invalid bundler version');
+      }
+    } else {
+      logger.debug('No bundler version constraint found - will use latest');
     }
-    logger.debug({ cmd }, 'bundler command');
-    ({ stdout, stderr } = await exec(cmd, {
-      cwd,
-      env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'Gemfile.lock', stdout, stderr },
-      'Generated lockfile'
+    const preCommands = [
+      'ruby --version',
+      `gem install bundler${bundlerVersion}`,
+    ];
+
+    const bundlerHostRulesVariables = findAllAuthenticatable({
+      hostType: 'bundler',
+    }).reduce(
+      (variables, hostRule) => ({
+        ...variables,
+        ...buildBundleHostVariable(hostRule),
+      }),
+      {} as Record<string, string>
     );
-    const status = await platform.getRepoStatus();
+
+    const execOptions: ExecOptions = {
+      cwdFile: packageFileName,
+      extraEnv: {
+        ...bundlerHostRulesVariables,
+        GEM_HOME: await getGemHome(config),
+      },
+      docker: {
+        image: 'ruby',
+        tagScheme: 'ruby',
+        tagConstraint: await getRubyConstraint(updateArtifact),
+        preCommands,
+      },
+    };
+    await exec(cmd, execOptions);
+    const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }
     logger.debug('Returning updated Gemfile.lock');
+    const lockFileContent = await readLocalFile(lockFileName);
     return [
       {
         file: {
           name: lockFileName,
-          contents: await readFile(localLockFileName, 'utf8'),
+          contents: lockFileContent,
         },
       },
     ];
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
+    const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
-      (err.stdout &&
-        err.stdout.includes('Please supply credentials for this source')) ||
-      (err.stderr && err.stderr.includes('Authentication is required'))
+      err.message.includes('fatal: Could not parse object') ||
+      output.includes('but that version could not be found')
     ) {
-      logger.warn(
-        { err },
-        'Gemfile.lock update failed due to missing credentials'
-      );
-      global.repoCache.bundlerArtifactsError = 'bundler-credentials';
-      throw new Error('bundler-credentials');
+      return [
+        {
+          artifactError: {
+            lockFile: lockFileName,
+            stderr: output,
+          },
+        },
+      ];
     }
-    if (err.stderr && err.stderr.includes('incompatible marshal file format')) {
-      const gemrcFile = await platform.getFile(join(cwd, '.gemrc'));
+    if (
+      err.stdout?.includes('Please supply credentials for this source') ||
+      err.stderr?.includes('Authentication is required') ||
+      err.stderr?.includes(
+        'Please make sure you have the correct access rights'
+      )
+    ) {
       logger.debug(
-        { err, gemfile: newPackageFileContent, gemrcFile },
-        'Gemfile marshalling error'
+        { err },
+        'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
-      logger.warn('Gemfile.lock update failed due to marshalling error');
-    } else {
-      logger.warn({ err }, 'Failed to generate Gemfile.lock (unknown error)');
+      // Do not generate these PRs because we don't yet support Bundler authentication
+      memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
+      throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    global.repoCache.bundlerArtifactsError = 'bundler-unknown';
-    throw new Error('bundler-unknown');
+    const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
+    if (output.match(resolveMatchRe) && !config.isLockFileMaintenance) {
+      logger.debug({ err }, 'Bundler has a resolve error');
+      const resolveMatches = [];
+      let resolveMatch;
+      do {
+        resolveMatch = resolveMatchRe.exec(output);
+        if (resolveMatch) {
+          resolveMatches.push(resolveMatch[1].split(' ').shift());
+        }
+      } while (resolveMatch);
+      if (resolveMatches.some((match) => !updatedDeps.includes(match))) {
+        logger.debug(
+          { resolveMatches, updatedDeps },
+          'Found new resolve matches - reattempting recursively'
+        );
+        const newUpdatedDeps = [
+          ...new Set([...updatedDeps, ...resolveMatches]),
+        ];
+        return updateArtifacts({
+          packageFileName,
+          updatedDeps: newUpdatedDeps,
+          newPackageFileContent,
+          config,
+        });
+      }
+      logger.debug(
+        { err },
+        'Gemfile.lock update failed due to incompatible packages'
+      );
+    } else {
+      logger.info(
+        { err },
+        'Gemfile.lock update failed due to an unknown reason'
+      );
+    }
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
+        },
+      },
+    ];
   }
 }

@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractAllPackageFiles 1`] = `
+Array [
+  Object {
+    "constraints": Object {},
+    "deps": Array [
+      Object {
+        "currentValue": "2.0.0",
+        "datasource": "npm",
+        "depIndex": 0,
+        "depName": "chalk",
+        "depType": "dependencies",
+        "prettyDepType": "dependency",
+      },
+    ],
+    "ignoreNpmrcFile": undefined,
+    "lernaClient": undefined,
+    "lernaPackages": undefined,
+    "managerData": Object {
+      "lernaJsonFile": undefined,
+    },
+    "npmLock": undefined,
+    "npmrc": undefined,
+    "packageFile": "package.json",
+    "packageFileVersion": undefined,
+    "packageJsonName": undefined,
+    "packageJsonType": "app",
+    "pnpmShrinkwrap": undefined,
+    "skipInstalls": undefined,
+    "yarnLock": undefined,
+    "yarnWorkspacesPackages": undefined,
+    "yarnrc": undefined,
+  },
+]
+`;
+
+exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractPackageFile 1`] = `
+Array [
+  Object {
+    "deps": Array [
+      Object {
+        "depIndex": 0,
+      },
+      Object {
+        "depIndex": 1,
+        "replaceString": "abc",
+      },
+    ],
+    "packageFile": "Dockerfile",
+  },
+]
+`;

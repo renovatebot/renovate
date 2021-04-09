@@ -1,92 +1,83 @@
 import {
+  LANGUAGE_DART,
+  LANGUAGE_DOCKER,
+  LANGUAGE_DOT_NET,
+  LANGUAGE_ELIXIR,
+  LANGUAGE_GOLANG,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PHP,
+  LANGUAGE_PYTHON,
+  LANGUAGE_RUBY,
+  LANGUAGE_RUST,
+} from '../constants/languages';
+import type { RangeStrategy } from '../types';
+import managers from './api';
+import type {
   ExtractConfig,
+  LookupUpdate,
   ManagerApi,
   PackageFile,
   PackageUpdateConfig,
   RangeConfig,
   Result,
-  PackageUpdateResult,
-} from './common';
-import { RangeStrategy } from '../versioning';
+} from './types';
 
-const managerList = [
-  'ansible',
-  'bazel',
-  'buildkite',
-  'bundler',
-  'cargo',
-  'circleci',
-  'composer',
-  'deps-edn',
-  'docker-compose',
-  'dockerfile',
-  'droneci',
-  'github-actions',
-  'gitlabci',
-  'gitlabci-include',
-  'gomod',
-  'gradle',
-  'gradle-wrapper',
-  'homebrew',
-  'kubernetes',
-  'leiningen',
-  'maven',
-  'meteor',
-  'npm',
-  'nuget',
-  'nvm',
-  'pip_requirements',
-  'pip_setup',
-  'pipenv',
-  'poetry',
-  'pub',
-  'sbt',
-  'swift',
-  'terraform',
-  'travis',
-  'ruby-version',
-];
-
-const managers: Record<string, ManagerApi> = {};
-for (const manager of managerList) {
-  managers[manager] = require(`./${manager}`); // eslint-disable-line
-}
+const managerList = Array.from(managers.keys());
 
 const languageList = [
-  'dart',
-  'docker',
-  'dotnet',
-  'golang',
-  'js',
-  'node',
-  'php',
-  'python',
-  'ruby',
-  'rust',
+  LANGUAGE_DART,
+  LANGUAGE_DOCKER,
+  LANGUAGE_DOT_NET,
+  LANGUAGE_ELIXIR,
+  LANGUAGE_GOLANG,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PHP,
+  LANGUAGE_PYTHON,
+  LANGUAGE_RUBY,
+  LANGUAGE_RUST,
 ];
 
-export const get = <T extends keyof ManagerApi>(manager: string, name: T) =>
-  managers[manager][name];
+export function get<T extends keyof ManagerApi>(
+  manager: string,
+  name: T
+): ManagerApi[T] | null {
+  return managers.get(manager)?.[name];
+}
 export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
+export const getManagers = (): Map<string, ManagerApi> => managers;
 
-export function extractAllPackageFiles(
+export async function extractAllPackageFiles(
   manager: string,
   config: ExtractConfig,
   files: string[]
-): Result<PackageFile[] | null> {
-  return managers[manager] && managers[manager].extractAllPackageFiles
-    ? managers[manager].extractAllPackageFiles(config, files)
-    : null;
+): Promise<PackageFile[] | null> {
+  if (!managers.has(manager)) {
+    return null;
+  }
+  const m = managers.get(manager);
+  if (m.extractAllPackageFiles) {
+    const res = await m.extractAllPackageFiles(config, files);
+    // istanbul ignore if
+    if (!res) {
+      return null;
+    }
+    return res;
+  }
+  return null;
 }
 
 export function getPackageUpdates(
   manager: string,
   config: PackageUpdateConfig
-): Result<PackageUpdateResult[]> | null {
-  return managers[manager] && managers[manager].getPackageUpdates
-    ? managers[manager].getPackageUpdates(config)
-    : null;
+): Result<LookupUpdate[]> | null {
+  if (!managers.has(manager)) {
+    return null;
+  }
+  const m = managers.get(manager);
+  return m.getPackageUpdates ? m.getPackageUpdates(config) : null;
 }
 
 export function extractPackageFile(
@@ -95,16 +86,24 @@ export function extractPackageFile(
   fileName?: string,
   config?: ExtractConfig
 ): Result<PackageFile | null> {
-  return managers[manager] && managers[manager].extractPackageFile
-    ? managers[manager].extractPackageFile(content, fileName, config)
+  if (!managers.has(manager)) {
+    return null;
+  }
+  const m = managers.get(manager);
+  return m.extractPackageFile
+    ? m.extractPackageFile(content, fileName, config)
     : null;
 }
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const { manager, rangeStrategy } = config;
-  if (managers[manager].getRangeStrategy) {
+  if (!managers.has(manager)) {
+    return null;
+  }
+  const m = managers.get(manager);
+  if (m.getRangeStrategy) {
     // Use manager's own function if it exists
-    return managers[manager].getRangeStrategy(config);
+    return m.getRangeStrategy(config);
   }
   if (rangeStrategy === 'auto') {
     // default to 'replace' for auto

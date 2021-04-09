@@ -1,8 +1,4 @@
 {
-  "eslint.validate": [
-    "javascript",
-    { "language": "typescript", "autoFix": true }
-  ],
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -13,6 +9,8 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "files.associations": {
-    "Dockerfile.*": "dockerfile"
-  }
+    "Dockerfile.*": "dockerfile",
+    ".releaserc": "json"
+  },
+  "omnisharp.autoStart": false
 }

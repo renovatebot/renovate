@@ -1,0 +1,14 @@
+dev_dependencies:
+  test: 0.1
+  build:
+    version: 0.1
+
+dependencies:
+  - bar:
+    sdk: flatter
+  foo: 1
+  bar:
+    version: 1
+  baz:
+    non-sense: true
+  qux: false

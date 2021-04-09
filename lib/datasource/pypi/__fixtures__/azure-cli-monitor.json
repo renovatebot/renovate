@@ -1,0 +1,830 @@
+{
+  "info": {
+    "author": "Microsoft Corporation",
+    "author_email": "azpycli@microsoft.com",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Development Status :: 4 - Beta",
+      "Intended Audience :: Developers",
+      "Intended Audience :: System Administrators",
+      "License :: OSI Approved :: MIT License",
+      "Programming Language :: Python",
+      "Programming Language :: Python :: 2",
+      "Programming Language :: Python :: 2.7",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3.4",
+      "Programming Language :: Python :: 3.5",
+      "Programming Language :: Python :: 3.6"
+    ],
+    "description": "Microsoft Azure CLI 'Monitor' Command Module\n============================================\n\n\n\n.. :changelog:\n\nRelease History\n===============\n\n0.1.7\n+++++\n* Minor fixes.\n\n0.1.6\n+++++\n* Minor fixes.\n\n0.1.5\n+++++\n* Minor fixes.\n* `sdist` is now compatible with wheel 0.31.0\n\n0.1.4\n+++++\n* `metrics list`: Added support for `--top`, `--orderby` and `--namespace`. [Closes #5785](https://github.com/Azure/azure-cli/issues/5785)\n* `metrics list`: Accepts a space-separated list of metrics to retrieve. [Fixes #4529](https://github.com/Azure/azure-cli/issues/5785)\n* `metrics list-definitions`: Added support for `--namespace`. [Closes #5785](https://github.com/Azure/azure-cli/issues/5785)\n\n0.1.3\n+++++\n* Deprecates the `monitor autoscale-settings` commands.\n* Adds the `monitor autoscale` command group.\n* Adds the `monitor autoscale profile` command group.\n* Adds the `monitor autoscale rule` command group.\n\n0.1.2\n+++++\n* Fix az monitor log-profiles create command\n\n0.1.1\n+++++\n* Minor fixes.\n\n0.1.0\n+++++\n* BC: Add multi-diagnostic settings support. `--name` is required in `monitor diagnostic-settings create`.\n* Add command to get diagnostic settings category.\n\n0.0.14\n++++++\n* Update for CLI core changes.\n\n0.0.13\n++++++\n* Update managed SDK reference to 0.4.0\n* Remove data plane SDK reference\n* BREAKING CHANGE: Add multi-dimension support to metrics command\n\n0.0.12\n++++++\n* Add activity-log alert commands\n* Minor fixes.\n\n0.0.11\n++++++\n* Add action-group commands\n\n0.0.10 (2017-09-22)\n+++++++++++++++++++\n* minor fixes\n\n0.0.9 (2017-08-28)\n++++++++++++++++++\n* minor fixes\n\n0.0.8 (2017-07-07)\n++++++++++++++++++\n* minor fixes\n\n0.0.7 (2017-06-21)\n++++++++++++++++++\n* No changes.\n\n0.0.6 (2017-06-13)\n++++++++++++++++++\n* Minor fixes.\n\n0.0.5 (2017-05-30)\n+++++++++++++++++++++\n\n* Include autoscale template file to fix `az monitor autoscale-settings get-parameters-template` command (#3349)\n* BC: `monitor alert-rule-incidents list` renamed `monitor alert list-incidents`\n* BC: `monitor alert-rule-incidents show` renamed `monitor alert show-incident`\n* BC: `monitor metric-defintions list` renamed `monitor metrics list-definitions`\n* BC: `monitor alert-rules` renamed `monitor alert`\n* BC: `monitor alert create` completely revamped. `condition` and `action` no longer accepts JSON.\n\t  Adds numerous parameters to simplify the rule creation process. `location` no longer required.\n\t  Added name or ID support for target.\n\t  `--alert-rule-resource-name` removed. `is-enabled` renamed `enabled` and no longer required.\n\t  `description` defaults based on the supplied condition. Added examples to help clarifiy the\n\t  new format.\n* BC: Support names or IDs for `monitor metric` commands.\n* `monitor alert rule update` - Added numerous convenience arguments to improve usability. Added\n  examples to explain usage of the new arguments.\n\n0.0.4 (2017-05-09)\n+++++++++++++++++++++\n\n* Minor fixes.\n\n0.0.3 (2017-04-28)\n+++++++++++++++++++++\n\n* Bug Fix: Modeling `--actions` of `az alert-rules create` to consume JSON string (#3009)\n* Bug fix - diagnostic settings create does not accept logs/metrics from show commands (#2913)\n\n0.0.2 (2017-04-17)\n+++++++++++++++++++++\n\n* Apply core changes required for JSON string parsing from shell (#2705)\n\n0.0.1 (2017-04-03)\n+++++++++++++++++++++\n\n* Preview release.\n\n\n",
+    "description_content_type": "",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": { "last_day": -1, "last_month": -1, "last_week": -1 },
+    "home_page": "https://github.com/Azure/azure-cli",
+    "keywords": "",
+    "license": "MIT",
+    "maintainer": "",
+    "maintainer_email": "",
+    "name": "azure-cli-monitor",
+    "package_url": "https://pypi.org/project/azure-cli-monitor/",
+    "platform": "",
+    "project_url": "https://pypi.org/project/azure-cli-monitor/",
+    "release_url": "https://pypi.org/project/azure-cli-monitor/0.1.7/",
+    "requires_dist": [
+      "azure-cli-command-modules-nspkg (>=2.0.0)",
+      "azure-mgmt-resource (==1.2.1)",
+      "azure-mgmt-monitor (==0.5.0)",
+      "azure-cli-core"
+    ],
+    "requires_python": "",
+    "summary": "Microsoft Azure Command-Line Tools Monitor Command Module",
+    "version": "0.1.7"
+  },
+  "last_serial": 3888535,
+  "releases": {
+    "0.0.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "17284f00c94059e22995b0e889786f59",
+          "sha256": "88d0c9e066135f1f05e526e0b5d88c44a12b34a1421e739250fa654e0ebd2859"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.1-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "17284f00c94059e22995b0e889786f59",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 11735,
+        "upload_time": "2017-04-03T16:55:14",
+        "url": "https://files.pythonhosted.org/packages/5f/3d/46a08ac85bf70f7fb0c1e139d02321c42b6b69b693d00595c9369b0cbbf1/azure_cli_monitor-0.0.1-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "ea2d70301b3de49399ee9cacd94ec6f2",
+          "sha256": "64868bd109a7550a2799e888412e18533af4a2650e076849aaceb0bda43b7116"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "ea2d70301b3de49399ee9cacd94ec6f2",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 6986,
+        "upload_time": "2017-04-03T16:55:08",
+        "url": "https://files.pythonhosted.org/packages/c4/2e/64b1b7c617f3b815262986cc6db19b9a38dcf010abe1553365d73bd9ea52/azure-cli-monitor-0.0.1.tar.gz"
+      }
+    ],
+    "0.0.10": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "705b6d205f3015690d4688112c0a0077",
+          "sha256": "a78f32d97fb39ae310952d35019cd948960ba10be8021d2643db9dea139be87b"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.10-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "705b6d205f3015690d4688112c0a0077",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 19131,
+        "upload_time": "2017-09-22T23:47:59",
+        "url": "https://files.pythonhosted.org/packages/4f/d1/75d28eafa22c1db4d0c1a72ebc2b2ceb953d455ec256081b56744b801426/azure_cli_monitor-0.0.10-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "ae80ef04dc67e8cd3510655552250052",
+          "sha256": "b442ce77045e82b973f6f3721118bb898d944b1f0aeab7a1b4a67754af1542a9"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.10.tar.gz",
+        "has_sig": false,
+        "md5_digest": "ae80ef04dc67e8cd3510655552250052",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 13540,
+        "upload_time": "2017-09-22T23:47:54",
+        "url": "https://files.pythonhosted.org/packages/38/db/5c580e582f3fc0233586be06c7ef1a1b1269f1eea7adf346447274f3e9d2/azure-cli-monitor-0.0.10.tar.gz"
+      }
+    ],
+    "0.0.11": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "9741d5fb17e5afd22b97a98954be5c0e",
+          "sha256": "5ab1f8a63f15d92968d58d5e2d66c023b685dccfd8b9d4d999371b78524628e5"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.11-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "9741d5fb17e5afd22b97a98954be5c0e",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 22504,
+        "upload_time": "2017-10-24T02:14:07",
+        "url": "https://files.pythonhosted.org/packages/71/58/65e0eefd0a6c2b29efd77daaa1671a7631717714c0dffb1bcd1434c4cd49/azure_cli_monitor-0.0.11-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "bc0a37c227a9dcbcfb42608099432143",
+          "sha256": "ea18d43746869662cdce369b3f4ad25f94e4817fe2e09ced9bd6444254da6799"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.11.tar.gz",
+        "has_sig": false,
+        "md5_digest": "bc0a37c227a9dcbcfb42608099432143",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 15598,
+        "upload_time": "2017-10-24T02:29:50",
+        "url": "https://files.pythonhosted.org/packages/42/ad/788c71dc815da91fca5a726fc76786025f8565bbefa0474e80364bd9690f/azure-cli-monitor-0.0.11.tar.gz"
+      }
+    ],
+    "0.0.12": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "6785a090a87d5c0f6927fd457f28da7b",
+          "sha256": "7234a35d3e941e6c26a251a90117392775de7c903d4e2ae2419b9e83510c68a0"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.12-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "6785a090a87d5c0f6927fd457f28da7b",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 27221,
+        "upload_time": "2017-11-14T18:31:57",
+        "url": "https://files.pythonhosted.org/packages/b0/3f/6f296f9b540d5b9519dd9e159e5d05bb76b0a8dcb802ae70718259ca4deb/azure_cli_monitor-0.0.12-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "a81e2a8df12398d8d5da79a3fda7fdca",
+          "sha256": "3e2fa39d7f476903c56f36b37315612eb601007d44b2345166260dc7350dc664"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.12.tar.gz",
+        "has_sig": false,
+        "md5_digest": "a81e2a8df12398d8d5da79a3fda7fdca",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 19533,
+        "upload_time": "2017-11-14T18:32:43",
+        "url": "https://files.pythonhosted.org/packages/31/d0/10d3af541d8df02d4d82d1979b5984373fee1cd1d1fcca0fcb2f6ad96ead/azure-cli-monitor-0.0.12.tar.gz"
+      }
+    ],
+    "0.0.13": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "799c3c09e95fb1e42f1ea5effdc422c3",
+          "sha256": "88ea8649209ab22dad796cb37a28f78a8c6123dc1af77fe70f4c10553e34cfa5"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.13-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "799c3c09e95fb1e42f1ea5effdc422c3",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 30199,
+        "upload_time": "2017-12-05T18:57:54",
+        "url": "https://files.pythonhosted.org/packages/46/ea/35e3d179d1fb4574d26635fdc954ff706b7628e0c5d6d7b87610671bc81d/azure_cli_monitor-0.0.13-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "aa857068429c5c9c27f10a79b1c2e506",
+          "sha256": "d4f5566e7d9918ededdffd32eb3ebd23d62683715a81da50e1cb6014353c22ed"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.13.tar.gz",
+        "has_sig": false,
+        "md5_digest": "aa857068429c5c9c27f10a79b1c2e506",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 20863,
+        "upload_time": "2017-12-05T18:58:20",
+        "url": "https://files.pythonhosted.org/packages/97/fd/16a638cf1e8280389a53cbe061dd6cbc8127664c07eab664b31f432881ef/azure-cli-monitor-0.0.13.tar.gz"
+      }
+    ],
+    "0.0.14": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "acaec33983735c75871f820849a0a5aa",
+          "sha256": "82c215845d715de7d175146ef1321f1d8cae970d1459ee3f00f3f4892ca50a99"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.14-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "acaec33983735c75871f820849a0a5aa",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 30530,
+        "upload_time": "2018-01-05T21:26:03",
+        "url": "https://files.pythonhosted.org/packages/7d/7b/6221b36aadf66b6e8cad6ff62596dabd2290f6910e33b6f2f0b735137ce6/azure_cli_monitor-0.0.14-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "4d5c74f2d41402fa444738c0f08823fb",
+          "sha256": "afb2f8cc871bf6bd9396bcbead930a257efeb4cf27b1e22fde6f66b5f53b10bc"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.14.tar.gz",
+        "has_sig": false,
+        "md5_digest": "4d5c74f2d41402fa444738c0f08823fb",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 21781,
+        "upload_time": "2018-01-05T21:26:54",
+        "url": "https://files.pythonhosted.org/packages/a5/1f/8bdbf22ef0f52788bcfab634f743b6f41bb52b5e20fda76a834b548f3cff/azure-cli-monitor-0.0.14.tar.gz"
+      }
+    ],
+    "0.0.2": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1005bde622fca8dfc32ddeb32baf5bbf",
+          "sha256": "a6d6a0645564c0590b5d44e3b9237c21dd6bcc151fa58f21249715a5d4c6419f"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.2-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "1005bde622fca8dfc32ddeb32baf5bbf",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 11855,
+        "upload_time": "2017-04-17T20:32:30",
+        "url": "https://files.pythonhosted.org/packages/e5/43/b7448186dc599f16fdfcece88f1c3374152939f10c0fefaae36753c1b8f2/azure_cli_monitor-0.0.2-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "267fe5c217ea0860bd8e5fd87b50f88c",
+          "sha256": "f6e5a56cf69630df41923a57ce0294c3d7a7c567e22b4a713af75cd367054ae0"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.2.tar.gz",
+        "has_sig": false,
+        "md5_digest": "267fe5c217ea0860bd8e5fd87b50f88c",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 7048,
+        "upload_time": "2017-04-17T20:32:38",
+        "url": "https://files.pythonhosted.org/packages/37/71/894d244697aeb3735522b95547c02beeb0ad5d3200fa0f453a6ca74a7a1b/azure-cli-monitor-0.0.2.tar.gz"
+      }
+    ],
+    "0.0.3": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "ea36d5d86d3ddb4d605c3d0a93375c4b",
+          "sha256": "236803bffb6571fa2a580f84aeec92c7940fe6662b8d3fc869708cd1f544dea7"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.3-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "ea36d5d86d3ddb4d605c3d0a93375c4b",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 11331,
+        "upload_time": "2017-04-28T21:18:54",
+        "url": "https://files.pythonhosted.org/packages/5f/1b/2d2324066c178e28149b99f545882b1a74a4fee772ab86b50c0d8f0fbef8/azure_cli_monitor-0.0.3-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "ca3d4da9a2758ce7ea18884e4fe1b711",
+          "sha256": "1733620e9908bd6a564cadb85dd1daeb585d0e6add9325b59ae1f6c3ebb0f29f"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.3.tar.gz",
+        "has_sig": false,
+        "md5_digest": "ca3d4da9a2758ce7ea18884e4fe1b711",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 7596,
+        "upload_time": "2017-04-28T21:18:47",
+        "url": "https://files.pythonhosted.org/packages/9f/b9/00ad1ffabd67357eef4845dc776527011aca7a21997df310eefcbde015fd/azure-cli-monitor-0.0.3.tar.gz"
+      }
+    ],
+    "0.0.4": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "d368722fcc8835fba707c3d79b85f700",
+          "sha256": "51c1b54d6a27b3c861b9582ed92e40e1bc58b64c1d8157e4a0e46647ab844e82"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.4-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "d368722fcc8835fba707c3d79b85f700",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 11355,
+        "upload_time": "2017-05-09T21:36:51",
+        "url": "https://files.pythonhosted.org/packages/82/f4/eb8a2d11b714c740fc69a7057323e867c55e8d6aa9454732c9e1cf9a9ad8/azure_cli_monitor-0.0.4-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "6ed319ef532e1a6a32ab7d969b8ef61b",
+          "sha256": "e6a596e1ffb5936a3ae8be38ebbc63acdc84c30b6ad7ef28907b127f9a3136c5"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.4.tar.gz",
+        "has_sig": false,
+        "md5_digest": "6ed319ef532e1a6a32ab7d969b8ef61b",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 7622,
+        "upload_time": "2017-05-09T21:36:57",
+        "url": "https://files.pythonhosted.org/packages/ab/c6/ff7d8ea31d3f0a70f3252e5f951ea34e15dabe9a5831b68ef204e9022d2c/azure-cli-monitor-0.0.4.tar.gz"
+      }
+    ],
+    "0.0.5": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "abe2a808ec605c22fd7d959d6f0dc31a",
+          "sha256": "16653c47758f0b2146b6671eb4174a6ab3a4d828b215e5542ccdb9f46268cc15"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.5-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "abe2a808ec605c22fd7d959d6f0dc31a",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 18878,
+        "upload_time": "2017-05-30T23:13:49",
+        "url": "https://files.pythonhosted.org/packages/74/ea/27435cea54defacd26e58eb8585e89ee4326bc93af4ff44c66b2e1e30ddf/azure_cli_monitor-0.0.5-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1701473f789c7954a62d452c81126062",
+          "sha256": "f1460b4d44b71f22e75d1bdafb1c01150f9fa14387d711bda78885994b001417"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.5.tar.gz",
+        "has_sig": false,
+        "md5_digest": "1701473f789c7954a62d452c81126062",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 13193,
+        "upload_time": "2017-05-30T23:13:57",
+        "url": "https://files.pythonhosted.org/packages/a0/19/39c6e78e0380272315f6443023cc0d510f310c122cc45e4cde72ed455112/azure-cli-monitor-0.0.5.tar.gz"
+      }
+    ],
+    "0.0.6": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1dcadd646fff0bf5d7e50769f272c938",
+          "sha256": "db631ae01a6304fe3c69ed1e657713ed2f399b930b314b259c4167bcdb207d24"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.6-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "1dcadd646fff0bf5d7e50769f272c938",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 18986,
+        "upload_time": "2017-06-13T22:21:05",
+        "url": "https://files.pythonhosted.org/packages/f4/50/6142564de6dfb3d2633989d7ce431e3543f5cecb04c7926531328b704263/azure_cli_monitor-0.0.6-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "c7310a7e641491c6cc5300c6e7cb7865",
+          "sha256": "38b4b5d438b67e2c60fba6df10f60ac5d1c69c1635130b308ec1c1e8cf9bc679"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.6.tar.gz",
+        "has_sig": false,
+        "md5_digest": "c7310a7e641491c6cc5300c6e7cb7865",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 14274,
+        "upload_time": "2017-06-13T22:20:58",
+        "url": "https://files.pythonhosted.org/packages/5d/49/ed4c9e0506927c6ed002463e563dc9acc3ecde7f5f96d431613bef6ceabe/azure-cli-monitor-0.0.6.tar.gz"
+      }
+    ],
+    "0.0.7": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "795e87a076be367bb408d95a8acf4f57",
+          "sha256": "0de0815b7579781dda5774bd8c5f4d13e687c6ce29eeb125b631b114c389f16c"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.7-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "795e87a076be367bb408d95a8acf4f57",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 19016,
+        "upload_time": "2017-06-21T22:12:36",
+        "url": "https://files.pythonhosted.org/packages/69/c1/3e6f95d9e13eb7d0ab5e9d1888443dc2a2e5dbc22b091baa41e5c2fc6634/azure_cli_monitor-0.0.7-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "d0ba835452265e5949d671ab08e9ac2d",
+          "sha256": "6c3136596dcff08df2bc167a31ca017b81ec08183e6673fed5f516f24f0de3af"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.7.tar.gz",
+        "has_sig": false,
+        "md5_digest": "d0ba835452265e5949d671ab08e9ac2d",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 14048,
+        "upload_time": "2017-06-21T22:12:47",
+        "url": "https://files.pythonhosted.org/packages/14/1f/b9766a9f387a5a472939e9b17852bb1f738430bbe417b1ae2a07b8443f23/azure-cli-monitor-0.0.7.tar.gz"
+      }
+    ],
+    "0.0.8": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "3dd0ffcf42f4c6d4521f336d12f31f7a",
+          "sha256": "3b424c35ec4d58b7b9284e64a9eff179463caf87c1823167c133faa8859ff48b"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.8-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "3dd0ffcf42f4c6d4521f336d12f31f7a",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 18939,
+        "upload_time": "2017-07-07T16:22:26",
+        "url": "https://files.pythonhosted.org/packages/11/84/f6ae7907a9198a5b64a982e91d0219181a406301504da0c705e5d76645fc/azure_cli_monitor-0.0.8-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "a949a91cc136d942cb3dc190a7cab255",
+          "sha256": "61c657e9a1ac78a2fac5c45515939ba90a8949e42e275b7c6a9b9bc73c064cd3"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.8.tar.gz",
+        "has_sig": false,
+        "md5_digest": "a949a91cc136d942cb3dc190a7cab255",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 13410,
+        "upload_time": "2017-07-07T16:22:24",
+        "url": "https://files.pythonhosted.org/packages/00/d3/5b260b008d292f407d031e3b1b34077487cba22e824933e204d59cfeb9d1/azure-cli-monitor-0.0.8.tar.gz"
+      }
+    ],
+    "0.0.9": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "ff7f416e7f3940e3e05ad8af69de44ed",
+          "sha256": "736ef755d363836264b22d3f2ffb1366dd7ebb2780f715da48e9106a5998b205"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.0.9-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "ff7f416e7f3940e3e05ad8af69de44ed",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 19038,
+        "upload_time": "2017-08-28T20:14:33",
+        "url": "https://files.pythonhosted.org/packages/03/57/eb27a9fb904e9c206abecc93aab93b84d820c189348eb4d9cd4c13e791c3/azure_cli_monitor-0.0.9-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "e2cc694bae4f8d44ef2c7ce1eaa4246d",
+          "sha256": "4980e24621c8482a7f78b84ce8c8f5eb84f95411d0c8d9e940b0896c2522d789"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.0.9.tar.gz",
+        "has_sig": false,
+        "md5_digest": "e2cc694bae4f8d44ef2c7ce1eaa4246d",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 13487,
+        "upload_time": "2017-08-28T20:14:31",
+        "url": "https://files.pythonhosted.org/packages/7d/2c/f3ea88ec03ee2691cb57cb8dba7030c1dd811189efa35ea6ef371e89d4a8/azure-cli-monitor-0.0.9.tar.gz"
+      }
+    ],
+    "0.1.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "cd460e9058c350d7973876560bb72dd1",
+          "sha256": "feb8d4adbd69ad75fa3a5ea1523c759c0189df632c57525499c984f0c787c435"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.1.0-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "cd460e9058c350d7973876560bb72dd1",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 30722,
+        "upload_time": "2018-01-17T18:36:39",
+        "url": "https://files.pythonhosted.org/packages/b2/4b/a30fa3ae56518a876cf3d5437927ca97eb4ba82841e45d64190c6393a838/azure_cli_monitor-0.1.0-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "93e8f84d8e4426e2a4e40b72f2eafbf0",
+          "sha256": "ca608dd71c0785764d99c5e5bfb51ca329cac9ad727cb9ef28d5d403d6aacb77"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.1.0.tar.gz",
+        "has_sig": false,
+        "md5_digest": "93e8f84d8e4426e2a4e40b72f2eafbf0",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 21107,
+        "upload_time": "2018-01-17T18:37:04",
+        "url": "https://files.pythonhosted.org/packages/71/73/973ca987ea96f411fbb2d37220a67474fa916252677ed144516882e4ce5b/azure-cli-monitor-0.1.0.tar.gz"
+      }
+    ],
+    "0.1.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "0d91fe557e90200c515e7d9a5ccbed25",
+          "sha256": "ba255eee0bab7e2a6788caf5764cede6845309e2222372f1653333daa5b78184"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.1.1-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "0d91fe557e90200c515e7d9a5ccbed25",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 30646,
+        "upload_time": "2018-01-31T18:05:22",
+        "url": "https://files.pythonhosted.org/packages/13/c5/3a43d82fce90f2cbc7c37d964b623947c9f7ca8baf48afc9adf0b555202a/azure_cli_monitor-0.1.1-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "c9678b31219832b1d336c5b57c895603",
+          "sha256": "7dff5068b377082fb5ec8c56e039cf27f8ca62d9dc2bfdc4727d1d0809dba47c"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.1.1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "c9678b31219832b1d336c5b57c895603",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 21054,
+        "upload_time": "2018-01-31T18:06:08",
+        "url": "https://files.pythonhosted.org/packages/af/4e/d180cc0750744d35c6206014b67c90912e028d11a07272c92fc01ef65319/azure-cli-monitor-0.1.1.tar.gz"
+      }
+    ],
+    "0.1.2": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "7201caa940cf58cc63b375e4b94aabfa",
+          "sha256": "3b0ea19f3eec23daa91513ee8cccdb26eb06ad29314597eda984c264266346e8"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.1.2-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "7201caa940cf58cc63b375e4b94aabfa",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 31534,
+        "upload_time": "2018-02-13T18:17:52",
+        "url": "https://files.pythonhosted.org/packages/9e/0b/8ff4e9eab2fbd4b69ca850b611e80afe8a45a0165f7511cc19b2ef435a77/azure_cli_monitor-0.1.2-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "2dad912e67404f401026934f3ce6c391",
+          "sha256": "5aa1654784f4b167f94ecb7030c95de657f69aac290490cd9b85801bc5540a10"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.1.2.tar.gz",
+        "has_sig": false,
+        "md5_digest": "2dad912e67404f401026934f3ce6c391",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 21577,
+        "upload_time": "2018-02-13T18:18:42",
+        "url": "https://files.pythonhosted.org/packages/28/c3/3ad4b3c8d025c771e902985fe7e6bf4d1f0cb4d89dfd75a4ec4b806a8e25/azure-cli-monitor-0.1.2.tar.gz"
+      }
+    ],
+    "0.1.3": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "c9752691452a57c13e9d8f434929e4e2",
+          "sha256": "bc5670c189c7fbb080f79612f2540b970651e427d9247d916c6d4aba3041d392"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.1.3-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "c9752691452a57c13e9d8f434929e4e2",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 42171,
+        "upload_time": "2018-03-13T17:08:20",
+        "url": "https://files.pythonhosted.org/packages/2b/13/7dd4844213db1abd2406051f52b092bae4e0f8b21a9dae513fbdabe9ef46/azure_cli_monitor-0.1.3-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "a39ee95b0798b1f8f209b584286d809f",
+          "sha256": "c84fe2ee965aefdf286cf6cf39ac0b99d9a56c3d5060bbdb8fc2c0a4b147d2e1"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.1.3.tar.gz",
+        "has_sig": false,
+        "md5_digest": "a39ee95b0798b1f8f209b584286d809f",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 31304,
+        "upload_time": "2018-03-13T17:09:04",
+        "url": "https://files.pythonhosted.org/packages/dd/12/01b1aedd6469bfd20d1558ab73623426887863cad8d89b7f3e4809e745c6/azure-cli-monitor-0.1.3.tar.gz"
+      }
+    ],
+    "0.1.4": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "9bbadb1b699d5f1d2c8f81ea73a7e6d0",
+          "sha256": "b80defea98e8702947bf4900a9a2ae9e82e5143cec488ee2c579a65203a022d5"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.1.4-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "9bbadb1b699d5f1d2c8f81ea73a7e6d0",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 42696,
+        "upload_time": "2018-03-27T17:55:25",
+        "url": "https://files.pythonhosted.org/packages/e9/d7/bb3637dd6d6c9b008aebe58e704e62744a89a5e38bf4bfbd8abdbd031816/azure_cli_monitor-0.1.4-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "c271707e92e826790e9861f3dd3cd643",
+          "sha256": "294a6795e9f21e2c4d480b0dd80fe9f74721f343c7537e70bc167c7db361c7f9"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.1.4.tar.gz",
+        "has_sig": false,
+        "md5_digest": "c271707e92e826790e9861f3dd3cd643",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 32685,
+        "upload_time": "2018-03-27T17:55:48",
+        "url": "https://files.pythonhosted.org/packages/b9/e7/0261848b9944cc47e727a843d0b8fc81b0274f54a1812cfaae1cd4696954/azure-cli-monitor-0.1.4.tar.gz"
+      }
+    ],
+    "0.1.5": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "bc18807e3202d0dbe8bddb1de828d126",
+          "sha256": "d455a01b16279abbe66ba84e9823c1acf2335a5b82ced372daab1082d7118395"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.1.5-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "bc18807e3202d0dbe8bddb1de828d126",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 42690,
+        "upload_time": "2018-04-10T17:25:47",
+        "url": "https://files.pythonhosted.org/packages/19/a9/59fe9b224a3a8787ec02aa790b52c38dc95234c7e7fdd92c74819f801d2c/azure_cli_monitor-0.1.5-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "629257aa533a15a17b38db91d4f9e526",
+          "sha256": "fa7b7d4b6b4207ddacb7949db59897566a7336fddfb50d68939f3aedf812f377"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.1.5.tar.gz",
+        "has_sig": false,
+        "md5_digest": "629257aa533a15a17b38db91d4f9e526",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 32685,
+        "upload_time": "2018-04-10T17:26:29",
+        "url": "https://files.pythonhosted.org/packages/fa/1b/f97dd43fe52d0883c9e09f659e27a47769c80db719391aa82b05711ed5be/azure-cli-monitor-0.1.5.tar.gz"
+      }
+    ],
+    "0.1.6": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "f27ab3150c7ff28a7e544ad5647d6981",
+          "sha256": "3ff637e785d0455eee08f8bef91454b131c86d3ae6e580da69e2e1211bfc7b6c"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.1.6-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "f27ab3150c7ff28a7e544ad5647d6981",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 40502,
+        "upload_time": "2018-05-07T17:59:09",
+        "url": "https://files.pythonhosted.org/packages/22/22/12006adab5c4a9952d12022cc1e015792135353e613d721aed3375178da8/azure_cli_monitor-0.1.6-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1e8cb6c4293eeee64a221d2c69d30a78",
+          "sha256": "bac2445a68a095060000b29fc0aa2f3a2cf3ece68def9e0167d531f809342b9c"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.1.6.tar.gz",
+        "has_sig": false,
+        "md5_digest": "1e8cb6c4293eeee64a221d2c69d30a78",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 32541,
+        "upload_time": "2018-05-07T17:59:37",
+        "url": "https://files.pythonhosted.org/packages/3a/d6/ec2f81b036f1aefc24bb6bf6336051335c519a9976bd6529636e4c20121c/azure-cli-monitor-0.1.6.tar.gz",
+        "yanked": true
+      }
+    ],
+    "0.1.7": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "a493c9ddf7946751ac6184b14195a62d",
+          "sha256": "0b11e9a9f9a0f8ed20295fa4ff1e7257c1b0692067f098317717e2b9c716895e"
+        },
+        "downloads": -1,
+        "filename": "azure_cli_monitor-0.1.7-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "a493c9ddf7946751ac6184b14195a62d",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "size": 40529,
+        "upload_time": "2018-05-22T17:25:23",
+        "url": "https://files.pythonhosted.org/packages/1b/ce/259302ad8df592b91633be2faae6a6ef69310d8f81ecd96fbff91209711e/azure_cli_monitor-0.1.7-py2.py3-none-any.whl"
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "0d75cd4e637e50f25010f8e7bec7f5f9",
+          "sha256": "d6612c2ebc787004d6046c907ed23cf5f407d01fadfc0276751a16322f0c8571"
+        },
+        "downloads": -1,
+        "filename": "azure-cli-monitor-0.1.7.tar.gz",
+        "has_sig": false,
+        "md5_digest": "0d75cd4e637e50f25010f8e7bec7f5f9",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "size": 31581,
+        "upload_time": "2018-05-22T17:25:49",
+        "url": "https://files.pythonhosted.org/packages/fb/56/d8482cdfd010c15468f00b9d439d3c05f858546f05f67ecd22c06ff00135/azure-cli-monitor-0.1.7.tar.gz"
+      }
+    ]
+  },
+  "urls": [
+    {
+      "comment_text": "",
+      "digests": {
+        "md5": "a493c9ddf7946751ac6184b14195a62d",
+        "sha256": "0b11e9a9f9a0f8ed20295fa4ff1e7257c1b0692067f098317717e2b9c716895e"
+      },
+      "downloads": -1,
+      "filename": "azure_cli_monitor-0.1.7-py2.py3-none-any.whl",
+      "has_sig": false,
+      "md5_digest": "a493c9ddf7946751ac6184b14195a62d",
+      "packagetype": "bdist_wheel",
+      "python_version": "py2.py3",
+      "size": 40529,
+      "upload_time": "2018-05-22T17:25:23",
+      "url": "https://files.pythonhosted.org/packages/1b/ce/259302ad8df592b91633be2faae6a6ef69310d8f81ecd96fbff91209711e/azure_cli_monitor-0.1.7-py2.py3-none-any.whl"
+    },
+    {
+      "comment_text": "",
+      "digests": {
+        "md5": "0d75cd4e637e50f25010f8e7bec7f5f9",
+        "sha256": "d6612c2ebc787004d6046c907ed23cf5f407d01fadfc0276751a16322f0c8571"
+      },
+      "downloads": -1,
+      "filename": "azure-cli-monitor-0.1.7.tar.gz",
+      "has_sig": false,
+      "md5_digest": "0d75cd4e637e50f25010f8e7bec7f5f9",
+      "packagetype": "sdist",
+      "python_version": "source",
+      "size": 31581,
+      "upload_time": "2018-05-22T17:25:49",
+      "url": "https://files.pythonhosted.org/packages/fb/56/d8482cdfd010c15468f00b9d439d3c05f858546f05f67ecd22c06ff00135/azure-cli-monitor-0.1.7.tar.gz"
+    }
+  ]
+}

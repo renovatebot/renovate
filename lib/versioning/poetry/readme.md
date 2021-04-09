@@ -1,27 +1,3 @@
-# Poetry versioning
+Poetry versioning is a little like a mix of PEP440 and SemVer.
 
-## Documentation and URLs
-
-https://poetry.eustace.io/docs/versions/
-
-## What type of versioning is used?
-
-Poetry uses [Semantic Versioning 2.0](https://semver.org).
-
-## Are ranges supported? How?
-
-Poetry supports ranges in a similar manner to npm, but not identical. The important differences are:
-
-##### Use of commas
-
-Multiple version requirements can be separated with a comma, e.g. `>= 1.2, < 1.5`. We interpret this to mean AND.
-
-## Range Strategy support
-
-Poetry versioning should support all range strategies - pin, replace, bump, extend.
-
-## Implementation plan/status
-
-- [x] Add poetry2npm and npm2poetry functions to leverage existing npm semver logic
-- [x] Exact version support
-- [x] Range support
+Currently Renovate's implementation is based off npm versioning, but it is being migrated to be based off PEP440 to be more compatible with Poetry's behavior.

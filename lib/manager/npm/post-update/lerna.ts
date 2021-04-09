@@ -1,81 +1,133 @@
-import { exec } from '../../../util/exec';
+import semver, { validRange } from 'semver';
+import { quote } from 'shlex';
+import { join } from 'upath';
+import { getAdminConfig } from '../../../config/admin';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { ExecOptions, exec } from '../../../util/exec';
+import type { PackageFile, PostUpdateConfig } from '../../types';
+import { getNodeConstraint } from './node-version';
+import { getOptimizeCommand } from './yarn';
 
 export interface GenerateLockFileResult {
   error?: boolean;
   stderr?: string;
 }
 
+// Exported for testability
+export function getLernaVersion(
+  lernaPackageFile: Partial<PackageFile>
+): string {
+  const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
+  if (!lernaDep || !semver.validRange(lernaDep.currentValue)) {
+    logger.warn(
+      `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
+    );
+    return 'latest';
+  }
+  return lernaDep.currentValue;
+}
+
 export async function generateLockFiles(
-  lernaClient: string,
+  lernaPackageFile: Partial<PackageFile>,
   cwd: string,
-  env?: NodeJS.ProcessEnv,
-  skipInstalls?: boolean,
-  binarySource?: string
+  config: PostUpdateConfig,
+  env: NodeJS.ProcessEnv,
+  skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
+  const lernaClient = lernaPackageFile.lernaClient;
   if (!lernaClient) {
     logger.warn('No lernaClient specified - returning');
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  let stdout: string;
-  let stderr: string;
-  let cmd: string;
+  const preCommands = [];
+  const cmd = [];
+  let cmdOptions = '';
   try {
-    const startTime = process.hrtime();
-    let lernaVersion: string;
-    try {
-      const pJson = JSON.parse(await platform.getFile('package.json'));
-      lernaVersion =
-        (pJson.dependencies && pJson.dependencies.lerna) ||
-        (pJson.devDependencies && pJson.devDependencies.lerna);
-    } catch (err) {
-      logger.warn('Could not detect lerna version in package.json');
-    }
-    lernaVersion = lernaVersion || 'latest';
-    logger.debug('Using lerna version ' + lernaVersion);
-    let params: string;
-    if (lernaClient === 'npm') {
-      if (skipInstalls === false) {
-        params = '--ignore-scripts  --no-audit';
-      } else {
-        params = '--package-lock-only --no-audit';
+    if (lernaClient === 'yarn') {
+      let installYarn = 'npm i -g yarn';
+      const yarnCompatibility = config.constraints?.yarn;
+      if (validRange(yarnCompatibility)) {
+        installYarn += `@${quote(yarnCompatibility)}`;
+      }
+      preCommands.push(installYarn);
+      if (skipInstalls !== false) {
+        preCommands.push(getOptimizeCommand());
+      }
+      cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
+    } else if (lernaClient === 'npm') {
+      let installNpm = 'npm i -g npm';
+      const npmCompatibility = config.constraints?.npm;
+      if (validRange(npmCompatibility)) {
+        installNpm += `@${quote(npmCompatibility)} || true`;
+      }
+      preCommands.push(installNpm, 'hash -d npm');
+      cmdOptions = '--ignore-scripts  --no-audit';
+      if (skipInstalls !== false) {
+        cmdOptions += ' --package-lock-only';
       }
     } else {
-      params =
-        '--ignore-scripts --ignore-engines --ignore-platform --mutex network:31879';
+      logger.warn({ lernaClient }, 'Unknown lernaClient');
+      return { error: false };
     }
-    cmd = `npm i -g -C ~/.npm/lerna@${lernaVersion} lerna@${lernaVersion} && ${lernaClient} install ${params} && ~/.npm/lerna@${lernaVersion}/bin/lerna bootstrap --no-ci -- ${params}`;
-    if (binarySource === 'global') {
-      cmd = `${lernaClient} install ${params} && lerna bootstrap --no-ci -- ${params}`;
+    let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
+    if (
+      getAdminConfig().trustLevel === 'high' &&
+      config.ignoreScripts !== false
+    ) {
+      cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
+      lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
-    logger.debug({ cmd });
-    // TODO: Switch to native util.promisify once using only node 8
-    ({ stdout, stderr } = await exec(cmd, {
+    lernaCommand += cmdOptions;
+    const allowUnstable = true; // lerna will pick the default installed npm@6 unless we use node@>=15
+    const tagConstraint = await getNodeConstraint(config, allowUnstable);
+    const execOptions: ExecOptions = {
       cwd,
-      env,
-    }));
-    logger.debug(`npm stdout:\n${stdout}`);
-    logger.debug(`npm stderr:\n${stderr}`);
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { type: 'lerna', seconds, lernaClient, stdout, stderr },
-      'Generated lockfile'
-    );
+      extraEnv: {
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
+      },
+      docker: {
+        image: 'node',
+        tagScheme: 'npm',
+        tagConstraint,
+        preCommands,
+      },
+    };
+    // istanbul ignore if
+    if (getAdminConfig().trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
+    }
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
+    }
+    const lernaVersion = getLernaVersion(lernaPackageFile);
+    logger.debug('Using lerna version ' + lernaVersion);
+    preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
+    cmd.push('lerna info || echo "Ignoring lerna info failure"');
+    cmd.push(`${lernaClient} install ${cmdOptions}`);
+    cmd.push(lernaCommand);
+    await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
-    logger.info(
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
+    logger.debug(
       {
         cmd,
         err,
-        stdout,
-        stderr,
         type: 'lerna',
         lernaClient,
       },
       'lock file error'
     );
-    return { error: true, stderr: stderr || err.stderr };
+    return { error: true, stderr: err.stderr };
   }
   return { error: false };
 }

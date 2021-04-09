@@ -1,7 +1,18 @@
+import { logger } from '../../logger';
 import { api as npm } from '../npm';
-import { VersioningApi, RangeStrategy } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
 
-function convertToCaret(item: string) {
+export const id = 'cargo';
+export const displayName = 'Cargo';
+export const urls = [
+  'https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
+const isVersion = (input: string): string | boolean => npm.isVersion(input);
+
+function convertToCaret(item: string): string {
   // In Cargo, "1.2.3" doesn't mean exactly 1.2.3, it means >= 1.2.3 < 2.0.0
   if (isVersion(item)) {
     // NOTE: Partial versions like '1.2' don't get converted to '^1.2'
@@ -12,21 +23,25 @@ function convertToCaret(item: string) {
   return item.trim();
 }
 
-function cargo2npm(input: string) {
+function cargo2npm(input: string): string {
   let versions = input.split(',');
   versions = versions.map(convertToCaret);
   return versions.join(' ');
 }
 
-function notEmpty(s: string) {
+function notEmpty(s: string): boolean {
   return s !== '';
 }
 
-function npm2cargo(input: string) {
+function npm2cargo(input: string): string {
+  // istanbul ignore if
+  if (!input) {
+    return input;
+  }
   // Note: this doesn't remove the ^
   const res = input
-    .split(' ')
-    .map(str => str.trim())
+    .split(/\s+,?\s*|\s*,?\s+/)
+    .map((str) => str.trim())
     .filter(notEmpty);
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
@@ -38,52 +53,57 @@ function npm2cargo(input: string) {
   return res.join(', ');
 }
 
-const isLessThanRange = (version: string, range: string) =>
+const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(version, cargo2npm(range));
 
-export const isValid = (input: string) => npm.isValid(cargo2npm(input));
+export const isValid = (input: string): string | boolean =>
+  npm.isValid(cargo2npm(input));
 
-const isVersion = (input: string) => npm.isVersion(input);
-
-const matches = (version: string, range: string) =>
+const matches = (version: string, range: string): boolean =>
   npm.matches(version, cargo2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string) =>
-  npm.maxSatisfyingVersion(versions, cargo2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions, cargo2npm(range));
 
-const minSatisfyingVersion = (versions: string[], range: string) =>
+const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions, cargo2npm(range));
 
-const isSingleVersion = (constraint: string) =>
+const isSingleVersion = (constraint: string): string | boolean =>
   constraint.trim().startsWith('=') &&
-  isVersion(
-    constraint
-      .trim()
-      .substring(1)
-      .trim()
-  );
+  isVersion(constraint.trim().substring(1).trim());
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-) {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
+  if (!currentValue || currentValue === '*') {
+    return currentValue;
+  }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
       res += ' ';
     }
-    res += toVersion;
+    res += newVersion;
     return res;
   }
-  const newSemver = npm.getNewValue(
-    cargo2npm(currentValue),
+  const newSemver = npm.getNewValue({
+    currentValue: cargo2npm(currentValue),
     rangeStrategy,
-    fromVersion,
-    toVersion
-  );
+    currentVersion,
+    newVersion,
+  });
   let newCargo = npm2cargo(newSemver);
+  // istanbul ignore if
+  if (!newCargo) {
+    logger.info(
+      { currentValue, newSemver },
+      'Could not get cargo version from semver'
+    );
+    return currentValue;
+  }
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {
     newCargo = newCargo.substring(1);
@@ -98,7 +118,7 @@ export const api: VersioningApi = {
   isSingleVersion,
   isValid,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
 };
 export default api;

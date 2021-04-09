@@ -1,25 +1,14 @@
-import is from '@sindresorhus/is';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { getDependency } from './get';
 import { getRubygemsOrgDependency } from './get-rubygems-org';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-export async function getPkgReleases({
+export function getReleases({
   lookupName,
-  registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  const registries = is.nonEmptyArray(registryUrls) ? registryUrls : [];
-
-  for (const registry of registries) {
-    let pkg: ReleaseResult;
-    if (registry.endsWith('rubygems.org')) {
-      pkg = await getRubygemsOrgDependency(lookupName);
-    } else {
-      pkg = await getDependency({ dependency: lookupName, registry });
+  registryUrl,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // prettier-ignore
+  if (registryUrl.endsWith('rubygems.org')) { // lgtm [js/incomplete-url-substring-sanitization]
+      return getRubygemsOrgDependency(lookupName);
     }
-    if (pkg) {
-      return pkg;
-    }
-  }
-
-  return null;
+  return getDependency(lookupName, registryUrl);
 }

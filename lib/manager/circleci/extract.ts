@@ -1,6 +1,8 @@
+import * as datasourceOrb from '../../datasource/orb';
 import { logger } from '../../logger';
+import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
-import { PackageFile, PackageDependency } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -8,7 +10,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const orbs = line.match(/^\s*orbs:\s*$/);
+      const orbs = /^\s*orbs:\s*$/.exec(line);
       if (orbs) {
         logger.trace(`Matched orbs on line ${lineNumber}`);
         let foundOrb: boolean;
@@ -16,7 +18,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           foundOrb = false;
           const orbLine = lines[lineNumber + 1];
           logger.trace(`orbLine: "${orbLine}"`);
-          const orbMatch = orbLine.match(/^\s+([^:]+):\s(.+)$/);
+          const orbMatch = /^\s+([^:]+):\s(.+)$/.exec(orbLine);
           if (orbMatch) {
             logger.trace('orbMatch');
             foundOrb = true;
@@ -27,18 +29,17 @@ export function extractPackageFile(content: string): PackageFile | null {
               depType: 'orb',
               depName,
               currentValue,
-              managerData: { lineNumber },
-              datasource: 'orb',
+              datasource: datasourceOrb.id,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
-              versionScheme: 'npm',
+              versioning: npmVersioning.id,
               rangeStrategy: 'pin',
             };
             deps.push(dep);
           }
         } while (foundOrb);
       }
-      const match = line.match(/^\s*- image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+      const match = /^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
       if (match) {
         const currentFrom = match[1];
         const dep = getDep(currentFrom);
@@ -51,8 +52,13 @@ export function extractPackageFile(content: string): PackageFile | null {
           'CircleCI docker image'
         );
         dep.depType = 'docker';
-        dep.managerData = { lineNumber };
-        deps.push(dep);
+        dep.versioning = 'docker';
+        if (
+          !dep.depName?.startsWith('ubuntu-') &&
+          !dep.depName?.startsWith('windows-server-')
+        ) {
+          deps.push(dep);
+        }
       }
     }
   } catch (err) /* istanbul ignore next */ {

@@ -1,31 +1,35 @@
 import { safeLoad } from 'js-yaml';
-import { isValid } from '../../versioning/npm/index';
+import * as datasourceDart from '../../datasource/dart';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 function getDeps(
   depsObj: { [x: string]: any },
   preset: { depType: string }
 ): PackageDependency[] {
-  if (!depsObj) return [];
+  if (!depsObj) {
+    return [];
+  }
   return Object.keys(depsObj).reduce((acc, depName) => {
-    if (depName === 'meta') return acc;
-
-    const section = depsObj[depName];
-    let currentValue = null;
-
-    if (section && isValid(section.toString())) {
-      currentValue = section.toString();
+    if (depName === 'meta') {
+      return acc;
     }
 
-    if (section.version && isValid(section.version.toString())) {
+    const section = depsObj[depName];
+
+    let currentValue: string | null = null;
+    if (section?.version) {
       currentValue = section.version.toString();
+    } else if (section) {
+      if (typeof section === 'string') {
+        currentValue = section;
+      }
+      if (typeof section === 'number') {
+        currentValue = section.toString();
+      }
     }
 
     const dep: PackageDependency = { ...preset, depName, currentValue };
-    if (!currentValue) {
-      dep.skipReason = 'not-a-version';
-    }
 
     return [...acc, dep];
   }, []);
@@ -36,7 +40,8 @@ export function extractPackageFile(
   packageFile: string
 ): PackageFile | null {
   try {
-    const doc = safeLoad(content);
+    // TODO: fix me
+    const doc = safeLoad(content, { json: true }) as any;
     const deps = [
       ...getDeps(doc.dependencies, {
         depType: 'dependencies',
@@ -49,13 +54,12 @@ export function extractPackageFile(
     if (deps.length) {
       return {
         packageFile,
-        manager: 'pub',
-        datasource: 'dart',
+        datasource: datasourceDart.id,
         deps,
       };
     }
   } catch (e) {
-    logger.info({ packageFile }, 'Can not parse dependency');
+    logger.debug({ packageFile }, 'Can not parse dependency');
   }
   return null;
 }

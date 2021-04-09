@@ -1,48 +1,52 @@
 import urlApi from 'url';
 import { logger } from '../../logger';
+import * as nugetVersioning from '../../versioning/nuget';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as v2 from './v2';
 import * as v3 from './v3';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-export async function getPkgReleases({
-  lookupName,
-  registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
-  logger.trace(`nuget.getPkgReleases(${lookupName})`);
-  let dep: ReleaseResult = null;
-  for (const feed of registryUrls || [v3.getDefaultFeed()]) {
-    const feedVersion = detectFeedVersion(feed);
-    if (feedVersion === 2) {
-      dep = await v2.getPkgReleases(feed, lookupName);
-    } else if (feedVersion === 3) {
-      const queryUrl = await v3.getQueryUrl(feed);
-      if (queryUrl !== null) {
-        dep = await v3.getPkgReleases(feed, queryUrl, lookupName);
-      }
+export { id } from './common';
+
+export const customRegistrySupport = true;
+export const defaultRegistryUrls = [v3.getDefaultFeed()];
+export const defaultVersioning = nugetVersioning.id;
+export const registryStrategy = 'merge';
+
+export function parseRegistryUrl(
+  registryUrl: string
+): { feedUrl: string; protocolVersion: number } {
+  try {
+    const parsedUrl = urlApi.parse(registryUrl);
+    let protocolVersion = 2;
+    const protocolVersionRegExp = /#protocolVersion=(2|3)/;
+    const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
+    if (protocolVersionMatch) {
+      parsedUrl.hash = '';
+      protocolVersion = Number.parseInt(protocolVersionMatch[1], 10);
+    } else if (parsedUrl.pathname.endsWith('.json')) {
+      protocolVersion = 3;
     }
-    if (dep != null) {
-      break;
-    }
+    return { feedUrl: urlApi.format(parsedUrl), protocolVersion };
+  } catch (err) {
+    logger.debug({ err }, `nuget registry failure: can't parse ${registryUrl}`);
+    return { feedUrl: registryUrl, protocolVersion: null };
   }
-  if (dep === null) {
-    logger.info(
-      { lookupName },
-      `Dependency lookup failure: not found in all feeds`
-    );
-  }
-  return dep;
 }
 
-function detectFeedVersion(url: string): 2 | 3 | null {
-  try {
-    const parsecUrl = urlApi.parse(url);
-    // Official client does it in the same way
-    if (parsecUrl.pathname.endsWith('.json')) {
-      return 3;
-    }
-    return 2;
-  } catch (e) {
-    logger.debug({ e }, `nuget registry failure: can't parse ${url}`);
-    return null;
+export async function getReleases({
+  lookupName,
+  registryUrl,
+}: GetReleasesConfig): Promise<ReleaseResult> {
+  logger.trace(`nuget.getReleases(${lookupName})`);
+  const { feedUrl, protocolVersion } = parseRegistryUrl(registryUrl);
+  if (protocolVersion === 2) {
+    return v2.getReleases(feedUrl, lookupName);
   }
+  if (protocolVersion === 3) {
+    const queryUrl = await v3.getResourceUrl(feedUrl);
+    if (queryUrl) {
+      return v3.getReleases(feedUrl, queryUrl, lookupName);
+    }
+  }
+  return null;
 }

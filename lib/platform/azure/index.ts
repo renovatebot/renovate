@@ -1,276 +1,283 @@
-import * as azureHelper from './azure-helper';
-import * as azureApi from './azure-got-wrapper';
-import * as hostRules from '../../util/host-rules';
-import { appSlug } from '../../config/app-strings';
-import GitStorage from '../git/storage';
+import is from '@sindresorhus/is';
+import {
+  GitPullRequest,
+  GitPullRequestCommentThread,
+  GitPullRequestMergeStrategy,
+  GitStatus,
+  GitStatusState,
+  PullRequestStatus,
+} from 'azure-devops-node-api/interfaces/GitInterfaces';
+import delay from 'delay';
+import { REPOSITORY_EMPTY } from '../../constants/error-messages';
+import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
+import * as git from '../../util/git';
+import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
+import { ensureTrailingSlash } from '../../util/url';
+import type {
+  BranchStatusConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
+  EnsureIssueResult,
+  FindPRConfig,
+  Issue,
+  PlatformParams,
+  PlatformResult,
+  Pr,
+  RepoParams,
+  RepoResult,
+  UpdatePrConfig,
+} from '../types';
+import { smartTruncate } from '../utils/pr-body';
+import * as azureApi from './azure-got-wrapper';
+import * as azureHelper from './azure-helper';
+import type { AzurePr } from './types';
+import {
+  getBranchNameWithoutRefsheadsPrefix,
+  getGitStatusContextCombinedName,
+  getGitStatusContextFromCombinedName,
+  getNewBranchName,
+  getProjectAndRepo,
+  getRenovatePRFormat,
+  getRepoByName,
+  getStorageExtraCloneOpts,
+  max4000Chars,
+  streamToString,
+} from './util';
 
 interface Config {
-  storage: GitStorage;
   repoForceRebase: boolean;
-  mergeMethod: string;
-  baseCommitSHA: string | undefined;
-  baseBranch: string;
-  defaultBranch: string;
+  defaultMergeMethod: GitPullRequestMergeStrategy;
+  mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
   repoId: string;
-  azureWorkItemId: any;
-  prList: null;
+  project: string;
+  prList: AzurePr[];
   fileList: null;
   repository: string;
+  defaultBranch: string;
+}
+
+interface User {
+  id: string;
+  name: string;
 }
 
 let config: Config = {} as any;
 
-const defaults: any = {
-  hostType: 'azure',
+const defaults: {
+  endpoint?: string;
+  hostType: string;
+} = {
+  hostType: PLATFORM_TYPE_AZURE,
 };
 
 export function initPlatform({
   endpoint,
   token,
-}: {
-  endpoint: string;
-  token: string;
-}) {
+  username,
+  password,
+}: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure an Azure DevOps endpoint');
   }
-  if (!token) {
-    throw new Error('Init: You must configure an Azure DevOps token');
+  if (!token && !(username && password)) {
+    throw new Error(
+      'Init: You must configure an Azure DevOps token, or a username and password'
+    );
   }
   // TODO: Add a connection check that endpoint/token combination are valid
   const res = {
-    endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
+    endpoint: ensureTrailingSlash(endpoint),
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return platformConfig;
+  return Promise.resolve(platformConfig);
 }
 
-export async function getRepos() {
-  logger.info('Autodiscovering Azure DevOps repositories');
+export async function getRepos(): Promise<string[]> {
+  logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  return repos.map(repo => `${repo.project!.name}/${repo.name}`);
+  return repos.map((repo) => `${repo.project.name}/${repo.name}`);
+}
+
+export async function getRawFile(
+  fileName: string,
+  repoName?: string
+): Promise<string | null> {
+  const azureApiGit = await azureApi.gitApi();
+
+  let repoId: string;
+  if (repoName) {
+    const repos = await azureApiGit.getRepositories();
+    const repo = getRepoByName(repoName, repos);
+    repoId = repo.id;
+  } else {
+    repoId = config.repoId;
+  }
+
+  const buf = await azureApiGit.getItemContent(repoId, fileName);
+  const str = await streamToString(buf);
+  return str;
+}
+
+export async function getJsonFile(
+  fileName: string,
+  repoName?: string
+): Promise<any | null> {
+  const raw = await getRawFile(fileName, repoName);
+  return JSON.parse(raw);
 }
 
 export async function initRepo({
   repository,
   localDir,
-  azureWorkItemId,
-  optimizeForDisabled,
-}: RepoParams) {
+  cloneSubmodules,
+}: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
-  config = { repository, azureWorkItemId } as any;
+  config = { repository } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  const names = azureHelper.getProjectAndRepo(repository);
-  const repo = repos.filter(
-    c =>
-      c.name!.toLowerCase() === names.repo.toLowerCase() &&
-      c.project!.name!.toLowerCase() === names.project.toLowerCase()
-  )[0];
+  const repo = getRepoByName(repository, repos);
   logger.debug({ repositoryDetails: repo }, 'Repository details');
-  config.repoId = repo.id!;
+  // istanbul ignore if
+  if (!repo.defaultBranch) {
+    logger.debug('Repo is empty');
+    throw new Error(REPOSITORY_EMPTY);
+  }
+  config.repoId = repo.id;
+  config.project = repo.project.name;
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
-  // Use default branch as PR target unless later overridden
-  config.defaultBranch = repo.defaultBranch!.replace('refs/heads/', '');
-  config.baseBranch = config.defaultBranch;
-  logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-  config.baseCommitSHA = await getBranchCommit(config.baseBranch);
-  config.mergeMethod = 'merge';
+  const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
+  config.defaultBranch = defaultBranch;
+  logger.debug(`${repository} default branch = ${defaultBranch}`);
+  const names = getProjectAndRepo(repository);
+  config.defaultMergeMethod = await azureHelper.getMergeMethod(
+    repo.id,
+    names.project
+  );
+  config.mergeMethods = {};
   config.repoForceRebase = false;
 
-  if (optimizeForDisabled) {
-    interface RenovateConfig {
-      enabled: boolean;
-    }
-    let renovateConfig: RenovateConfig;
-    try {
-      const json = await azureHelper.getFile(
-        repo.id,
-        'renovate.json',
-        config.defaultBranch
-      );
-      renovateConfig = JSON.parse(json);
-    } catch {
-      // Do nothing
-    }
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error('disabled');
-    }
-  }
-
-  config.storage = new GitStorage();
   const [projectName, repoName] = repository.split('/');
   const opts = hostRules.find({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  const url =
-    defaults.endpoint.replace('https://', `https://token:${opts.token}@`) +
+  const manualUrl =
+    defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
-  await config.storage.initRepo({
+  const url = repo.remoteUrl || manualUrl;
+  await git.initRepo({
     ...config,
     localDir,
     url,
+    extraCloneOpts: getStorageExtraCloneOpts(opts),
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
-  const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+  const repoConfig: RepoResult = {
+    defaultBranch,
     isFork: false,
   };
   return repoConfig;
 }
 
-export function getRepoForceRebase() {
-  return false;
+export function getRepoForceRebase(): Promise<boolean> {
+  return Promise.resolve(config.repoForceRebase === true);
 }
 
-export /* istanbul ignore next */ async function setBaseBranch(
-  branchName = config.baseBranch
-) {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
-  delete config.baseCommitSHA;
-  delete config.fileList;
-  await config.storage.setBaseBranch(branchName);
-  await getFileList(branchName);
-}
-
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-) {
-  return config.storage.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
-export /* istanbul ignore next */ function getFileList(branchName: string) {
-  return config.storage.getFileList(branchName);
-}
-
-// Branch
-
-export /* istanbul ignore next */ function branchExists(branchName: string) {
-  return config.storage.branchExists(branchName);
-}
-
-export /* istanbul ignore next */ function getAllRenovateBranches(
-  branchPrefix: string
-) {
-  return config.storage.getAllRenovateBranches(branchPrefix);
-}
-
-export /* istanbul ignore next */ function isBranchStale(branchName: string) {
-  return config.storage.isBranchStale(branchName);
-}
-
-export /* istanbul ignore next */ function getFile(
-  filePath: string,
-  branchName: string
-) {
-  return config.storage.getFile(filePath, branchName);
-}
-
-export /* istanbul ignore next */ async function deleteBranch(
-  branchName: string,
-  abandonAssociatedPr = false
-) {
-  await config.storage.deleteBranch(branchName);
-  if (abandonAssociatedPr) {
-    const pr = await getBranchPr(branchName);
-    await abandonPr(pr.number);
-  }
-}
-
-export /* istanbul ignore next */ function getBranchLastCommitTime(
-  branchName: string
-) {
-  return config.storage.getBranchLastCommitTime(branchName);
-}
-
-export /* istanbul ignore next */ function getRepoStatus() {
-  return config.storage.getRepoStatus();
-}
-
-export /* istanbul ignore next */ function mergeBranch(branchName: string) {
-  return config.storage.mergeBranch(branchName);
-}
-
-export /* istanbul ignore next */ function commitFilesToBranch(
-  branchName: string,
-  files: any[],
-  message: string,
-  parentBranch = config.baseBranch
-) {
-  return config.storage.commitFilesToBranch(
-    branchName,
-    files,
-    message,
-    parentBranch
-  );
-}
-
-export /* istanbul ignore next */ function getCommitMessages() {
-  return config.storage.getCommitMessages();
-}
-
-async function getBranchCommit(fullBranchName: string) {
-  const azureApiGit = await azureApi.gitApi();
-  const commit = await azureApiGit.getBranch(
-    config.repoId,
-    azureHelper.getBranchNameWithoutRefsheadsPrefix(fullBranchName)!
-  );
-  return commit.commit!.commitId;
-}
-
-export function getPrList() {
-  return [];
-}
-
-export async function findPr(
-  branchName: string,
-  prTitle: string | null,
-  state = 'all'
-) {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  let prsFiltered: any[] = [];
-  try {
+export async function getPrList(): Promise<AzurePr[]> {
+  logger.debug('getPrList()');
+  if (!config.prList) {
     const azureApiGit = await azureApi.gitApi();
-    const prs = await azureApiGit.getPullRequests(config.repoId, { status: 4 });
+    let prs: GitPullRequest[] = [];
+    let fetchedPrs: GitPullRequest[];
+    let skip = 0;
+    do {
+      fetchedPrs = await azureApiGit.getPullRequests(
+        config.repoId,
+        { status: 4 },
+        config.project,
+        0,
+        skip,
+        100
+      );
+      prs = prs.concat(fetchedPrs);
+      skip += 100;
+    } while (fetchedPrs.length > 0);
+
+    config.prList = prs.map(getRenovatePRFormat);
+    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+  }
+  return config.prList;
+}
+
+export async function getPr(pullRequestId: number): Promise<Pr | null> {
+  logger.debug(`getPr(${pullRequestId})`);
+  if (!pullRequestId) {
+    return null;
+  }
+  const azurePr = (await getPrList()).find(
+    (item) => item.number === pullRequestId
+  );
+
+  if (!azurePr) {
+    return null;
+  }
+
+  const azureApiGit = await azureApi.gitApi();
+  const labels = await azureApiGit.getPullRequestLabels(
+    config.repoId,
+    pullRequestId
+  );
+
+  azurePr.labels = labels
+    .filter((label) => label.active)
+    .map((label) => label.name);
+  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
+  return azurePr;
+}
+
+export async function findPr({
+  branchName,
+  prTitle,
+  state = PrState.All,
+}: FindPRConfig): Promise<Pr | null> {
+  let prsFiltered: Pr[] = [];
+  try {
+    const prs = await getPrList();
 
     prsFiltered = prs.filter(
-      item => item.sourceRefName === azureHelper.getNewBranchName(branchName)
+      (item) => item.sourceRefName === getNewBranchName(branchName)
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter(item => item.title === prTitle);
+      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
     }
-
-    // update format
-    prsFiltered = prsFiltered.map(item =>
-      azureHelper.getRenovatePRFormat(item)
-    );
 
     switch (state) {
-      case 'all':
+      case PrState.All:
         // no more filter needed, we can go further...
         break;
-      case '!open':
-        prsFiltered = prsFiltered.filter(item => item.state !== 'open');
+      case PrState.NotOpen:
+        prsFiltered = prsFiltered.filter((item) => item.state !== PrState.Open);
         break;
       default:
-        prsFiltered = prsFiltered.filter(item => item.state === state);
+        prsFiltered = prsFiltered.filter((item) => item.state === state);
         break;
     }
-  } catch (error) {
-    logger.error('findPr ' + error);
+  } catch (err) {
+    logger.error({ err }, 'findPr error');
   }
   if (prsFiltered.length === 0) {
     return null;
@@ -278,236 +285,472 @@ export async function findPr(
   return prsFiltered[0];
 }
 
-export async function getBranchPr(branchName: string) {
+export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, null, 'open');
-  return existingPr ? getPr(existingPr.pullRequestId) : null;
+  const existingPr = await findPr({
+    branchName,
+    state: PrState.Open,
+  });
+  return existingPr ? getPr(existingPr.number) : null;
+}
+
+async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
+  const azureApiGit = await azureApi.gitApi();
+  const branch = await azureApiGit.getBranch(
+    config.repoId,
+    getBranchNameWithoutRefsheadsPrefix(branchName)
+  );
+  // only grab the latest statuses, it will group any by context
+  return azureApiGit.getStatuses(
+    branch.commit.commitId,
+    config.repoId,
+    undefined,
+    undefined,
+    undefined,
+    true
+  );
+}
+
+const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
+  [GitStatusState.Succeeded]: BranchStatus.green,
+  [GitStatusState.NotApplicable]: BranchStatus.green,
+  [GitStatusState.NotSet]: BranchStatus.yellow,
+  [GitStatusState.Pending]: BranchStatus.yellow,
+  [GitStatusState.Error]: BranchStatus.red,
+  [GitStatusState.Failed]: BranchStatus.red,
+};
+
+export async function getBranchStatusCheck(
+  branchName: string,
+  context: string
+): Promise<BranchStatus | null> {
+  const res = await getStatusCheck(branchName);
+  for (const check of res) {
+    if (getGitStatusContextCombinedName(check.context) === context) {
+      return azureToRenovateStatusMapping[check.state] || BranchStatus.yellow;
+    }
+  }
+  return null;
 }
 
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks: any
-) {
+  requiredStatusChecks: string[]
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return 'success';
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BranchStatus.red;
   }
-  const branchStatusCheck = await getBranchStatusCheck(branchName);
-  return branchStatusCheck;
+  const statuses = await getStatusCheck(branchName);
+  logger.debug({ branch: branchName, statuses }, 'branch status check result');
+  if (!statuses.length) {
+    logger.debug('empty branch status check result = returning "pending"');
+    return BranchStatus.yellow;
+  }
+  const noOfFailures = statuses.filter(
+    (status: GitStatus) =>
+      status.state === GitStatusState.Error ||
+      status.state === GitStatusState.Failed
+  ).length;
+  if (noOfFailures) {
+    return BranchStatus.red;
+  }
+  const noOfPending = statuses.filter(
+    (status: GitStatus) =>
+      status.state === GitStatusState.NotSet ||
+      status.state === GitStatusState.Pending
+  ).length;
+  if (noOfPending) {
+    return BranchStatus.yellow;
+  }
+  return BranchStatus.green;
 }
 
-export async function getBranchStatusCheck(
-  branchName: string,
-  context?: string
-) {
-  logger.trace(`getBranchStatusCheck(${branchName}, ${context})`);
-  const azureApiGit = await azureApi.gitApi();
-  const branch = await azureApiGit.getBranch(
-    config.repoId,
-    azureHelper.getBranchNameWithoutRefsheadsPrefix(branchName)!
-  );
-  if (branch.aheadCount === 0) {
-    return 'success';
-  }
-  return 'pending';
-}
-
-export async function getPr(pullRequestId: number) {
-  logger.debug(`getPr(${pullRequestId})`);
-  if (!pullRequestId) {
-    return null;
-  }
-  const azureApiGit = await azureApi.gitApi();
-  const prs = await azureApiGit.getPullRequests(config.repoId, { status: 4 });
-  const azurePr: any = prs.find(item => item.pullRequestId === pullRequestId);
-  if (!azurePr) {
-    return null;
-  }
-  const labels = await azureApiGit.getPullRequestLabels(
-    config.repoId,
-    pullRequestId
-  );
-  azurePr.labels = labels
-    .filter(label => label.active)
-    .map(label => label.name);
-  logger.debug(`pr: (${azurePr})`);
-  const pr = azureHelper.getRenovatePRFormat(azurePr);
-  return pr;
-}
-
-export async function createPr(
-  branchName: string,
-  title: string,
-  body: string,
-  labels: string[],
-  useDefaultBranch?: boolean,
-  platformOptions: any = {}
-) {
-  const sourceRefName = azureHelper.getNewBranchName(branchName);
-  const targetRefName = azureHelper.getNewBranchName(
-    useDefaultBranch ? config.defaultBranch : config.baseBranch
-  );
-  const description = azureHelper.max4000Chars(body);
+export async function createPr({
+  sourceBranch,
+  targetBranch,
+  prTitle: title,
+  prBody: body,
+  labels,
+  draftPR = false,
+  platformOptions,
+}: CreatePRConfig): Promise<Pr> {
+  const sourceRefName = getNewBranchName(sourceBranch);
+  const targetRefName = getNewBranchName(targetBranch);
+  const description = max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
-      id: config.azureWorkItemId,
+      id: platformOptions?.azureWorkItemId?.toString(),
     },
   ];
-  let pr: any = await azureApiGit.createPullRequest(
+  let pr: GitPullRequest = await azureApiGit.createPullRequest(
     {
       sourceRefName,
       targetRefName,
       title,
       description,
       workItemRefs,
+      isDraft: draftPR,
     },
     config.repoId
   );
-  if (platformOptions.azureAutoComplete) {
+  if (platformOptions?.azureAutoComplete) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
-          id: pr.createdBy!.id,
+          id: pr.createdBy.id,
         },
         completionOptions: {
-          squashMerge: true,
+          mergeStrategy: config.defaultMergeMethod,
           deleteSourceBranch: true,
         },
       },
       config.repoId,
-      pr.pullRequestId!
+      pr.pullRequestId
     );
   }
-  await labels.forEach(async label => {
-    await azureApiGit.createPullRequestLabel(
-      {
-        name: label,
-      },
-      config.repoId,
-      pr.pullRequestId!
-    );
-  });
-  pr.branchName = branchName;
-  return azureHelper.getRenovatePRFormat(pr);
+  await Promise.all(
+    labels.map((label) =>
+      azureApiGit.createPullRequestLabel(
+        {
+          name: label,
+        },
+        config.repoId,
+        pr.pullRequestId
+      )
+    )
+  );
+  return getRenovatePRFormat(pr);
 }
 
-export async function updatePr(prNo: number, title: string, body?: string) {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: body,
+  state,
+}: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+
   const azureApiGit = await azureApi.gitApi();
-  const objToUpdate: any = {
+  const objToUpdate: GitPullRequest = {
     title,
   };
+
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(body);
+    objToUpdate.description = max4000Chars(sanitize(body));
   }
+
+  if (state === PrState.Open) {
+    await azureApiGit.updatePullRequest(
+      { status: PullRequestStatus.Active },
+      config.repoId,
+      prNo
+    );
+  } else if (state === PrState.Closed) {
+    objToUpdate.status = PullRequestStatus.Abandoned;
+  }
+
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null,
-  content: string
-) {
-  logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
-  const body = `### ${topic}\n\n${content}`;
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
+  logger.debug(`ensureComment(${number}, ${topic}, content)`);
+  const header = topic ? `### ${topic}\n\n` : '';
+  const body = `${header}${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
-  await azureApiGit.createThread(
-    {
-      comments: [{ content: body, commentType: 1, parentCommentId: 0 }],
-      status: 1,
-    },
-    config.repoId,
-    issueNo
-  );
+
+  const threads = await azureApiGit.getThreads(config.repoId, number);
+  let threadIdFound = null;
+  let commentIdFound = null;
+  let commentNeedsUpdating = false;
+  threads.forEach((thread) => {
+    const firstCommentContent = thread.comments[0].content;
+    if (
+      (topic && firstCommentContent?.startsWith(header)) ||
+      (!topic && firstCommentContent === body)
+    ) {
+      threadIdFound = thread.id;
+      commentIdFound = thread.comments[0].id;
+      commentNeedsUpdating = firstCommentContent !== body;
+    }
+  });
+
+  if (!threadIdFound) {
+    await azureApiGit.createThread(
+      {
+        comments: [{ content: body, commentType: 1, parentCommentId: 0 }],
+        status: 1,
+      },
+      config.repoId,
+      number
+    );
+    logger.info(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment added'
+    );
+  } else if (commentNeedsUpdating) {
+    await azureApiGit.updateComment(
+      {
+        content: body,
+      },
+      config.repoId,
+      number,
+      threadIdFound,
+      commentIdFound
+    );
+    logger.debug(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment updated'
+    );
+  } else {
+    logger.debug(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment is already update-to-date'
+    );
+  }
+
+  return true;
 }
 
-export async function ensureCommentRemoval(issueNo: number, topic: string) {
-  logger.debug(`ensureCommentRemoval(issueNo, topic)(${issueNo}, ${topic})`);
-  if (issueNo) {
-    const azureApiGit = await azureApi.gitApi();
-    const threads = await azureApiGit.getThreads(config.repoId, issueNo);
-    let threadIdFound = null;
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+  content,
+}: EnsureCommentRemovalConfig): Promise<void> {
+  logger.debug(
+    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
+  );
 
-    threads.forEach(thread => {
-      if (thread.comments![0].content!.startsWith(`### ${topic}\n\n`)) {
-        threadIdFound = thread.id;
-      }
-    });
+  const azureApiGit = await azureApi.gitApi();
+  const threads = await azureApiGit.getThreads(config.repoId, issueNo);
 
-    if (threadIdFound) {
-      await azureApiGit.updateThread(
-        {
-          status: 4, // close
-        },
-        config.repoId,
-        issueNo,
-        threadIdFound
-      );
-    }
+  const byTopic = (thread: GitPullRequestCommentThread): boolean =>
+    thread.comments[0].content.startsWith(`### ${topic}\n\n`);
+  const byContent = (thread: GitPullRequestCommentThread): boolean =>
+    thread.comments[0].content.trim() === content;
+
+  let threadIdFound: number | null = null;
+
+  if (topic) {
+    threadIdFound = threads.find(byTopic)?.id;
+  } else if (content) {
+    threadIdFound = threads.find(byContent)?.id;
+  }
+
+  if (threadIdFound) {
+    await azureApiGit.updateThread(
+      {
+        status: 4, // close
+      },
+      config.repoId,
+      issueNo,
+      threadIdFound
+    );
   }
 }
 
-// istanbul ignore next
-async function abandonPr(prNo: number) {
-  logger.debug(`abandonPr(prNo)(${prNo})`);
-  const azureApiGit = await azureApi.gitApi();
-  await azureApiGit.updatePullRequest(
-    {
-      status: 2,
-    },
-    config.repoId,
-    prNo
-  );
-}
+const renovateToAzureStatusMapping: Record<BranchStatus, GitStatusState> = {
+  [BranchStatus.green]: [GitStatusState.Succeeded],
+  [BranchStatus.green]: GitStatusState.Succeeded,
+  [BranchStatus.yellow]: GitStatusState.Pending,
+  [BranchStatus.red]: GitStatusState.Failed,
+};
 
-export function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl: string
-) {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   logger.debug(
-    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl}) - Not supported by Azure DevOps (yet!)`
+    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl})`
   );
+  const azureApiGit = await azureApi.gitApi();
+  const branch = await azureApiGit.getBranch(
+    config.repoId,
+    getBranchNameWithoutRefsheadsPrefix(branchName)
+  );
+  const statusToCreate: GitStatus = {
+    description,
+    context: getGitStatusContextFromCombinedName(context),
+    state: renovateToAzureStatusMapping[state],
+    targetUrl,
+  };
+  await azureApiGit.createCommitStatus(
+    statusToCreate,
+    branch.commit.commitId,
+    config.repoId
+  );
+  logger.trace(`Created commit status of ${state} on branch ${branchName}`);
 }
 
-export async function mergePr(pr: number) {
-  logger.info(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
-  await null;
+export async function mergePr(
+  pullRequestId: number,
+  branchName: string
+): Promise<boolean> {
+  logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
+  const azureApiGit = await azureApi.gitApi();
+
+  let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
+
+  const mergeMethod =
+    config.mergeMethods[pr.targetRefName] ??
+    (config.mergeMethods[pr.targetRefName] = await azureHelper.getMergeMethod(
+      config.repoId,
+      config.project,
+      pr.targetRefName
+    ));
+
+  const objToUpdate: GitPullRequest = {
+    status: PullRequestStatus.Completed,
+    lastMergeSourceCommit: pr.lastMergeSourceCommit,
+    completionOptions: {
+      mergeStrategy: mergeMethod,
+      deleteSourceBranch: true,
+    },
+  };
+
+  logger.trace(
+    `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
+      PullRequestStatus[PullRequestStatus.Completed]
+    }) with lastMergeSourceCommit ${
+      pr.lastMergeSourceCommit.commitId
+    } using mergeStrategy ${mergeMethod} (${
+      GitPullRequestMergeStrategy[mergeMethod]
+    })`
+  );
+
+  try {
+    const response = await azureApiGit.updatePullRequest(
+      objToUpdate,
+      config.repoId,
+      pullRequestId
+    );
+
+    let retries = 0;
+    let isClosed = response.status === PullRequestStatus.Completed;
+    while (!isClosed && retries < 5) {
+      retries += 1;
+      const sleepMs = retries * 1000;
+      logger.trace(
+        { pullRequestId, status: pr.status, retries },
+        `Updated PR to closed status but change has not taken effect yet. Retrying...`
+      );
+
+      await delay(sleepMs);
+      pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
+      isClosed = pr.status === PullRequestStatus.Completed;
+    }
+
+    if (!isClosed) {
+      logger.warn(
+        { pullRequestId, status: pr.status },
+        `Expected PR to have status ${
+          PullRequestStatus[PullRequestStatus.Completed]
+        }, however it is ${PullRequestStatus[pr.status]}.`
+      );
+    }
+    return true;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to set the PR as completed.');
+    return false;
+  }
 }
 
-export function getPrBody(input: string) {
+export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return input
-    .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
+  return smartTruncate(input, 4000)
+    .replace(
+      'you tick the rebase/retry checkbox',
+      'rename PR to start with "rebase!"'
+    )
+    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace('<summary>', '**')
     .replace('</summary>', '**')
     .replace('<details>', '')
     .replace('</details>', '');
 }
 
-export /* istanbul ignore next */ function findIssue() {
+/* istanbul ignore next */
+export function findIssue(): Promise<Issue | null> {
   logger.warn(`findIssue() is not implemented`);
+  return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue() {
+/* istanbul ignore next */
+export function ensureIssue(): Promise<EnsureIssueResult | null> {
   logger.warn(`ensureIssue() is not implemented`);
+  return Promise.resolve(null);
 }
 
-export /* istanbul ignore next */ function ensureIssueClosing() {}
+/* istanbul ignore next */
+export function ensureIssueClosing(): Promise<void> {
+  return Promise.resolve();
+}
 
-export /* istanbul ignore next */ function getIssueList() {
+/* istanbul ignore next */
+export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
-  return [];
+  return Promise.resolve([]);
+}
+
+async function getUserIds(users: string[]): Promise<User[]> {
+  const azureApiGit = await azureApi.gitApi();
+  const azureApiCore = await azureApi.coreApi();
+  const repos = await azureApiGit.getRepositories();
+  const repo = repos.filter((c) => c.id === config.repoId)[0];
+  const teams = await azureApiCore.getTeams(repo.project.id);
+  const members = await Promise.all(
+    teams.map(
+      async (t) =>
+        /* eslint-disable no-return-await,@typescript-eslint/return-await */
+        await azureApiCore.getTeamMembersWithExtendedProperties(
+          repo.project.id,
+          t.id
+        )
+    )
+  );
+
+  const ids: { id: string; name: string }[] = [];
+  members.forEach((listMembers) => {
+    listMembers.forEach((m) => {
+      users.forEach((r) => {
+        if (
+          r.toLowerCase() === m.identity.displayName.toLowerCase() ||
+          r.toLowerCase() === m.identity.uniqueName.toLowerCase()
+        ) {
+          if (ids.filter((c) => c.id === m.identity.id).length === 0) {
+            ids.push({ id: m.identity.id, name: r });
+          }
+        }
+      });
+    });
+  });
+
+  teams.forEach((t) => {
+    users.forEach((r) => {
+      if (r.toLowerCase() === t.name.toLowerCase()) {
+        if (ids.filter((c) => c.id === t.id).length === 0) {
+          ids.push({ id: t.id, name: r });
+        }
+      }
+    });
+  });
+
+  return ids;
 }
 
 /**
@@ -515,13 +758,17 @@ export /* istanbul ignore next */ function getIssueList() {
  * @param {number} issueNo
  * @param {string[]} assignees
  */
-export async function addAssignees(issueNo: number, assignees: string[]) {
-  logger.trace(`addAssignees(${issueNo}, ${assignees})`);
-  await ensureComment(
-    issueNo,
-    'Add Assignees',
-    assignees.map(a => `@<${a}>`).join(', ')
-  );
+export async function addAssignees(
+  issueNo: number,
+  assignees: string[]
+): Promise<void> {
+  logger.trace(`addAssignees(${issueNo}, [${assignees.join(', ')}])`);
+  const ids = await getUserIds(assignees);
+  await ensureComment({
+    number: issueNo,
+    topic: 'Add Assignees',
+    content: ids.map((a) => `@<${a.id}>`).join(', '),
+  });
 }
 
 /**
@@ -529,88 +776,37 @@ export async function addAssignees(issueNo: number, assignees: string[]) {
  * @param {number} prNo
  * @param {string[]} reviewers
  */
-export async function addReviewers(prNo: number, reviewers: string[]) {
-  logger.trace(`addReviewers(${prNo}, ${reviewers})`);
+export async function addReviewers(
+  prNo: number,
+  reviewers: string[]
+): Promise<void> {
+  logger.trace(`addReviewers(${prNo}, [${reviewers.join(', ')}])`);
   const azureApiGit = await azureApi.gitApi();
-  const azureApiCore = await azureApi.getCoreApi();
-  const repos = await azureApiGit.getRepositories();
-  const repo = repos.filter(c => c.id === config.repoId)[0];
-  const teams = await azureApiCore.getTeams(repo!.project!.id!);
-  const members = await Promise.all(
-    teams.map(
-      async t =>
-        /* eslint-disable no-return-await */
-        await azureApiCore.getTeamMembersWithExtendedProperties(
-          repo!.project!.id!,
-          t.id!
-        )
-    )
-  );
 
-  const ids: any[] = [];
-  members.forEach(listMembers => {
-    listMembers.forEach(m => {
-      reviewers.forEach(r => {
-        if (
-          r.toLowerCase() === m.identity!.displayName!.toLowerCase() ||
-          r.toLowerCase() === m.identity!.uniqueName!.toLowerCase()
-        ) {
-          if (ids.filter(c => c.id === m.identity!.id).length === 0) {
-            ids.push({ id: m.identity!.id, name: r });
-          }
-        }
-      });
-    });
-  });
-
-  teams.forEach(t => {
-    reviewers.forEach(r => {
-      if (r.toLowerCase() === t.name!.toLowerCase()) {
-        if (ids.filter(c => c.id === t.id).length === 0) {
-          ids.push({ id: t.id, name: r });
-        }
-      }
-    });
-  });
+  const ids = await getUserIds(reviewers);
 
   await Promise.all(
-    ids.map(async obj => {
+    ids.map(async (obj) => {
       await azureApiGit.createPullRequestReviewer(
         {},
         config.repoId,
         prNo,
         obj.id
       );
-      logger.info(`Reviewer added: ${obj.name}`);
+      logger.debug(`Reviewer added: ${obj.name}`);
     })
   );
 }
 
-export /* istanbul ignore next */ async function deleteLabel(
+export async function deleteLabel(
   prNumber: number,
   label: string
-) {
+): Promise<void> {
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
 }
 
-// to become async?
-export function getPrFiles(prNo: number) {
-  logger.info(
-    `getPrFiles(prNo)(${prNo}) - Not supported by Azure DevOps (yet!)`
-  );
-  return [];
-}
-
-export function getVulnerabilityAlerts() {
-  return [];
-}
-
-export function cleanRepo() {
-  // istanbul ignore if
-  if (config.storage && config.storage.cleanRepo) {
-    config.storage.cleanRepo();
-  }
-  config = {} as any;
+export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  return Promise.resolve([]);
 }

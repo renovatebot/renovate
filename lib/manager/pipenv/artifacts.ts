@@ -1,65 +1,121 @@
-import { ensureDir, outputFile, readFile } from 'fs-extra';
-import { join, dirname } from 'upath';
-import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
+import { quote } from 'shlex';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { UpdateArtifactsResult, UpdateArtifactsConfig } from '../common';
+import { ExecOptions, exec } from '../../util/exec';
+import {
+  deleteLocalFile,
+  ensureCacheDir,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
 
-export async function updateArtifacts(
-  pipfileName: string,
-  _updatedDeps: string[],
-  newPipfileContent: string,
+function getPythonConstraint(
+  existingLockFileContent: string,
   config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+): string | undefined | null {
+  const { constraints = {} } = config;
+  const { python } = constraints;
+
+  if (python) {
+    logger.debug('Using python constraint from config');
+    return python;
+  }
+  try {
+    const pipfileLock = JSON.parse(existingLockFileContent);
+    if (pipfileLock?._meta?.requires?.python_version) {
+      const pythonVersion: string = pipfileLock._meta.requires.python_version;
+      return `== ${pythonVersion}.*`;
+    }
+    if (pipfileLock?._meta?.requires?.python_full_version) {
+      const pythonFullVersion: string =
+        pipfileLock._meta.requires.python_full_version;
+      return `== ${pythonFullVersion}`;
+    }
+  } catch (err) {
+    // Do nothing
+  }
+  return undefined;
+}
+
+function getPipenvConstraint(
+  existingLockFileContent: string,
+  config: UpdateArtifactsConfig
+): string | null {
+  const { constraints = {} } = config;
+  const { pipenv } = constraints;
+
+  if (pipenv) {
+    logger.debug('Using pipenv constraint from config');
+    return pipenv;
+  }
+  try {
+    const pipfileLock = JSON.parse(existingLockFileContent);
+    if (pipfileLock?.default?.pipenv?.version) {
+      const pipenvVersion: string = pipfileLock.default.pipenv.version;
+      return pipenvVersion;
+    }
+    if (pipfileLock?.develop?.pipenv?.version) {
+      const pipenvVersion: string = pipfileLock.develop.pipenv.version;
+      return pipenvVersion;
+    }
+  } catch (err) {
+    // Do nothing
+  }
+  return '';
+}
+
+export async function updateArtifacts({
+  packageFileName: pipfileName,
+  newPackageFileContent: newPipfileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
-  process.env.PIPENV_CACHE_DIR =
-    process.env.PIPENV_CACHE_DIR || join(config.cacheDir, './others/pipenv');
-  await ensureDir(process.env.PIPENV_CACHE_DIR);
-  logger.debug('Using pipenv cache ' + process.env.PIPENV_CACHE_DIR);
+
+  const cacheDir = await ensureCacheDir('./others/pipenv', 'PIPENV_CACHE_DIR');
+  logger.debug('Using pipenv cache ' + cacheDir);
+
   const lockFileName = pipfileName + '.lock';
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Pipfile.lock found');
     return null;
   }
-  const cwd = join(config.localDir, dirname(pipfileName));
-  let stdout: string;
-  let stderr: string;
   try {
-    const localPipfileFileName = join(config.localDir, pipfileName);
-    await outputFile(localPipfileFileName, newPipfileContent);
-    const localLockFileName = join(config.localDir, lockFileName);
-    const env = getChildProcessEnv(['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR']);
-    const startTime = process.hrtime();
-    let cmd: string;
-    if (config.binarySource === 'docker') {
-      logger.info('Running pipenv via docker');
-      cmd = `docker run --rm `;
-      const volumes = [config.localDir, process.env.PIPENV_CACHE_DIR];
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
-      const envVars = ['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR'];
-      cmd += envVars.map(e => `-e ${e} `).join('');
-      cmd += `-w ${cwd} `;
-      cmd += `renovate/pipenv pipenv`;
-    } else {
-      logger.info('Running pipenv via global command');
-      cmd = 'pipenv';
+    await writeLocalFile(pipfileName, newPipfileContent);
+    if (config.isLockFileMaintenance) {
+      await deleteLocalFile(lockFileName);
     }
-    const args = 'lock';
-    logger.debug({ cmd, args }, 'pipenv lock command');
-    ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
-      cwd,
-      env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    stdout = stdout ? stdout.replace(/(Locking|Running)[^\s]*?\s/g, '') : null;
-    logger.info(
-      { seconds, type: 'Pipfile.lock', stdout, stderr },
-      'Generated lockfile'
+    const cmd = 'pipenv lock';
+    const tagConstraint = getPythonConstraint(existingLockFileContent, config);
+    const pipenvConstraint = getPipenvConstraint(
+      existingLockFileContent,
+      config
     );
-    const status = await platform.getRepoStatus();
-    if (!(status && status.modified.includes(lockFileName))) {
+    const execOptions: ExecOptions = {
+      cwdFile: pipfileName,
+      extraEnv: {
+        PIPENV_CACHE_DIR: cacheDir,
+      },
+      docker: {
+        image: 'python',
+        tagConstraint,
+        tagScheme: 'pep440',
+        preCommands: [
+          `pip install --user ${quote(`pipenv${pipenvConstraint}`)}`,
+        ],
+        volumes: [cacheDir],
+      },
+    };
+    logger.debug({ cmd }, 'pipenv lock command');
+    await exec(cmd, execOptions);
+    const status = await getRepoStatus();
+    if (!status?.modified.includes(lockFileName)) {
       return null;
     }
     logger.debug('Returning updated Pipfile.lock');
@@ -67,12 +123,16 @@ export async function updateArtifacts(
       {
         file: {
           name: lockFileName,
-          contents: await readFile(localLockFileName, 'utf8'),
+          contents: await readLocalFile(lockFileName, 'utf8'),
         },
       },
     ];
   } catch (err) {
-    logger.warn({ err }, 'Failed to update Pipfile.lock');
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
+    logger.debug({ err }, 'Failed to update Pipfile.lock');
     return [
       {
         artifactError: {

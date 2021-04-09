@@ -1,0 +1,295 @@
+{
+  "homepage": "https://d3js.org/d3-force/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d3/d3-force.git"
+  },
+  "assets": [
+    {
+      "version": "1.1.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-gp0SbnQfnXL6TyrP5b7JAifyBupTdBDiYpRArpdhIKg=",
+        "d3-force.min.js": "sha256-fXvqx6BMrmrNPsEbCbVn0ABWVE0Oyv/gkQscFLx1J+w="
+      }
+    },
+    {
+      "version": "1.0.6",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-5D0Nfdo36KQmwzPqSzwmgaB81NzrlAAenDn9CXxO9eA=",
+        "d3-force.min.js": "sha256-YsvdiZz1+06xnsmO/dcy/6oPe76ZJYH2mLsQOCPT8m8="
+      }
+    },
+    {
+      "version": "1.0.5",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-NqhhKDL7mFceODpyCsdd1vUHIgOK96DJNDUKtYJyHo8=",
+        "d3-force.min.js": "sha256-sqTZZsQcY2MWdMB/MPigRvcLxqIKhiM67KeAW7Z3imc="
+      }
+    },
+    {
+      "version": "1.0.4",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-T7VhvwL3G9POw0nHoRgl4OP0PmfiAHZObfHza0Lbp3s=",
+        "d3-force.min.js": "sha256-CRAbrJ8WtPmeIe/7tdGnM1l5NT4HtrwWNp8/V8XoZVI="
+      }
+    },
+    {
+      "version": "1.0.3",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-Pco5eBqSA/Wozq5wQVuZ5YuRC8Zn4EfBbht4kK09hms=",
+        "d3-force.min.js": "sha256-RaVSELLEPiSZSg9PGpLDFaG18eCP+7OFG2qscWQW4YI="
+      }
+    },
+    {
+      "version": "1.0.2",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-a2jXPrguES4/PmuoJJaVi+Qev/ZUGmIOJmG0/LIIcME=",
+        "d3-force.min.js": "sha256-Au6DV8G3g+2QsAMU4ZlVaRxS6QApao5plSungOoxVzs="
+      }
+    },
+    {
+      "version": "1.0.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-BkiOgLEeo2ERn7/yYgsU+t97dOXWuUP8nOc6T7sf4aQ=",
+        "d3-force.min.js": "sha256-hkttlmSMhFUFZeU+elS5DhAJqjuUNX1VVoWy6OhEe1A="
+      }
+    },
+    {
+      "version": "1.0.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-hRMRHUxlb4+aq13/P/Fk7RmVGX8r0n7psFs7cysjtQo=",
+        "d3-force.min.js": "sha256-JeMSB0vYijvTRUp6J/Zk8w4xLMsuovZdmrTSmmmSgns="
+      }
+    },
+    {
+      "version": "0.7.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-C4xhHucs90cw3YQ2Kry4IjovxF6hzXIXlt7XLSgn4uw=",
+        "d3-force.min.js": "sha256-gHNSgLjwLAZRo6w9Ga9AiwRSvRBC6a4/w15bsLqOjyI="
+      }
+    },
+    {
+      "version": "0.7.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-U93AQ12JgwO+Crpoop0f4VVtgo5EWyy5Ac/VDbr9nrw=",
+        "d3-force.min.js": "sha256-6N3BTqE/cUrcMS0ABzxSqq8ljwxFLVzjzY61oeYawN0="
+      }
+    },
+    {
+      "version": "0.6.3",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-3/LnH5zecwn1jl4B8/VwDUKLxHvD4tQv9pecq4I+lY0=",
+        "d3-force.min.js": "sha256-anFjoj3JrkmBNGyGOfjkNMTK7YOCqIGbEHpF3My+pys="
+      }
+    },
+    {
+      "version": "0.6.2",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-SG9SrF1YlltbriU+Z6Q7bvTgRJPw4XZBW4KjulEHiFQ=",
+        "d3-force.min.js": "sha256-6p2cfzJjQ0jdqtrb7rnwXj+yQeJ+hvnGJEXDi25ZmzE="
+      }
+    },
+    {
+      "version": "0.6.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-SYfALXpqoQWY7PB5stjN2B10R0t6B8OizEug3nV5hgk=",
+        "d3-force.min.js": "sha256-tuQU+X7+WeN6wqdiJJ6Padc45t9LZiKZ58oYMGr1uMo="
+      }
+    },
+    {
+      "version": "0.6.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-b07xptMLcxLFDYrlbaq7z9oD+Qe5X0jNjEqpRArWPJU=",
+        "d3-force.min.js": "sha256-cnOp3O9r4MlTvHFqvpdeaG/IwjS091dmqwHBAnFuc0g="
+      }
+    },
+    {
+      "version": "0.5.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-FEYdY1bzDtPA2tvvyXVSgl/y9EIjF/L5+de3tD4OTF4=",
+        "d3-force.min.js": "sha256-94L4/qOXNt6h6vhYolt0ukEnf1HjctqSd4HBth0OgJg="
+      }
+    },
+    {
+      "version": "0.4.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-nqSSxi5zHLx8IDv465yKPl7iQa9bKmB1tO1CYwHfORI=",
+        "d3-force.min.js": "sha256-6q2kj+Wndz0v3g+0IxzqiZ8Ilmi6QqFsWmZqVMS5nYU="
+      }
+    },
+    {
+      "version": "0.4.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-h5Ap2n1itK1bTRb5syvo31u3huhwOvIvv8YAq45SMHE=",
+        "d3-force.min.js": "sha256-Z+yWONCIFUqIdpFiXo0zggYxX/TMpyXYf5GW2SC4tog="
+      }
+    },
+    {
+      "version": "0.3.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-v/EpI8zylc/rx6tNiqL631j1d1C2BbPJGpgyJHIidt0=",
+        "d3-force.min.js": "sha256-lI3/m84DU88hxv49lzy/maO5glfV+80XK4WEmNa9YR8="
+      }
+    },
+    {
+      "version": "0.2.2",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-4jWVeft3EbQiO6mOzBN5gQISLLtiVk1gjk3sTBzxqWE=",
+        "d3-force.min.js": "sha256-BoVy0gQ+DQiYRwXOUnGWFbaxojy2X0dJn01uCuR4bRA="
+      }
+    },
+    {
+      "version": "0.2.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-R5hN8fDqziJDFPXVYztdJ0VcuA4NVaiMmYpIO7QkHMc=",
+        "d3-force.min.js": "sha256-LKaqpRLJ9Dm/duWf7SVRpEgR5/o6q7eXDDpEy/qX8lg="
+      }
+    },
+    {
+      "version": "0.2.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-VRq0I3f7XeNjPc3fa/jPoCVWii+1VAMS5GSc98yOjeQ=",
+        "d3-force.min.js": "sha256-uJV0fvOphwVSnweSYF0+6X0yR1jsfpP0k8gRK4RNjpY="
+      }
+    },
+    {
+      "version": "0.1.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-otPu46hPGgaRCnEkZuH3VQ9dKT6H7uzcAmrjvtCXIzQ=",
+        "d3-force.min.js": "sha256-csgvQYdPPjcKsIakaSeqE02/Wl54T3mStgKQsYkI1zs="
+      }
+    },
+    {
+      "version": "0.0.4",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-7hyoFVueIL/RLbMcV01X6kfVEB0/WpEWKyf7W716Pqs=",
+        "d3-force.min.js": "sha256-jw3G+KYLKmYEPZIQRVIIXUDULmlS0yJ4SvyBqZNwQMg="
+      }
+    },
+    {
+      "version": "0.0.3",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-NuLk1K9PD9BeilzdXFVmimrPbt5kURq5mhCqb8WQ8qk=",
+        "d3-force.min.js": "sha256-WYmckBv0+sEr0YsPm2Z3OC2WfCZIcD045KlXN/tbBmA="
+      }
+    },
+    {
+      "version": "0.0.2",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-yrh9ylv/W7CahimBrLMhf4X7uVuO3pTHHRKASy4nmt8=",
+        "d3-force.min.js": "sha256-CczIvgT14ZuOfCe40K647R5MlbnqEKfWBZJv2T4vrcI="
+      }
+    },
+    {
+      "version": "0.0.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ],
+      "sri": {
+        "d3-force.js": "sha256-DNKhvPNPQByxMloPGL2GfmxYsbWDcrznYp+/r4eXs+o=",
+        "d3-force.min.js": "sha256-UlCqIE7wnu4y7TDeQsl91i7Wxmhr4E7vy7VYi2XFqk8="
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/onboarding/pr/base-branch getBaseBranchDesc() describes baseBranch 1`] = `
+"You have configured Renovate to use branch \`some-branch\` as base branch.
+
+"
+`;
+
+exports[`workers/repository/onboarding/pr/base-branch getBaseBranchDesc() describes baseBranches 1`] = `"You have configured Renovate to use the following baseBranches: \`some-branch\`, \`some-other-branch\`."`;

@@ -1,22 +1,23 @@
-import { DateTime } from 'luxon';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import type { UpdateDependencyConfig } from '../types';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+function getDepNameWithNoVersion(depName: string): string {
+  let depNameNoVersion = depName.split('/').slice(0, 3).join('/');
+  if (depNameNoVersion.startsWith('gopkg.in')) {
+    depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
+  }
+  return depNameNoVersion;
+}
+
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depName, depType } = upgrade;
-    let depNameNoVersion = depName
-      .split('/')
-      .slice(0, 3)
-      .join('/');
-    if (depNameNoVersion.startsWith('gopkg.in')) {
-      depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
-    }
-    const lines = currentFileContent.split('\n');
+    const depNameNoVersion = getDepNameWithNoVersion(depName);
+    const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
@@ -40,7 +41,7 @@ export function updateDependency(
         updateLineExp = new RegExp(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
       }
     }
-    if (!lineToChange.match(updateLineExp)) {
+    if (updateLineExp && !updateLineExp.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }
@@ -51,15 +52,16 @@ export function updateDependency(
         upgrade.currentDigest.length
       );
       if (lineToChange.includes(newDigestRightSized)) {
-        return currentFileContent;
+        return fileContent;
       }
       logger.debug(
         { depName, lineToChange, newDigestRightSized },
         'gomod: need to update digest'
       );
-      const currentDateTime = DateTime.local().toFormat('yyyyMMddHHmmss');
-      const newValue = `v0.0.0-${currentDateTime}-${newDigestRightSized}`;
-      newLine = lineToChange.replace(updateLineExp, `$1$2${newValue}`);
+      newLine = lineToChange.replace(
+        updateLineExp,
+        `$1$2${newDigestRightSized}`
+      );
     } else {
       newLine = lineToChange.replace(updateLineExp, `$1$2${upgrade.newValue}`);
     }
@@ -77,12 +79,9 @@ export function updateDependency(
         upgrade.newMajor > 1 &&
         !newLine.includes(`/v${upgrade.newMajor}`)
       ) {
-        if (upgrade.currentValue.match(/^v(0|1)\./)) {
-          // Add version
-          newLine = newLine.replace(
-            updateLineExp,
-            `$1/v${upgrade.newMajor}$2$3`
-          );
+        if (depName === depNameNoVersion) {
+          // If package currently has no version, pin to latest one.
+          newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
         } else {
           // Replace version
           const [oldV] = upgrade.currentValue.split('.');
@@ -94,16 +93,21 @@ export function updateDependency(
       }
     }
     if (lineToChange.endsWith('+incompatible')) {
-      newLine += '+incompatible';
+      let toAdd = '+incompatible';
+
+      if (upgrade.updateType === 'major' && upgrade.newMajor >= 2) {
+        toAdd = '';
+      }
+      newLine += toAdd;
     }
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new go.mod version');
+    logger.debug({ err }, 'Error setting new go.mod version');
     return null;
   }
 }

@@ -1,6 +1,10 @@
-import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
+import { LANGUAGE_DOCKER } from '../../constants/languages';
+import { extractAllPackageFiles, extractPackageFile } from './extract';
 
-const language = 'docker';
+const language = LANGUAGE_DOCKER;
 
-export { extractPackageFile, language, updateDependency };
+export { extractAllPackageFiles, extractPackageFile, language };
+
+export const defaultConfig = {
+  fileMatch: ['\\.gitlab-ci\\.yml$'],
+};

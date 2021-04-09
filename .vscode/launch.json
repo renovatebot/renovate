@@ -8,9 +8,7 @@
       "program": "${workspaceFolder}/lib/renovate.ts",
       "env": { "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
-      "disableOptimisticBPs": true,
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
-      "runtimeArgs": ["--nolazy", "--extensions", ".ts,.js"],
+      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
@@ -22,15 +20,15 @@
       "args": [
         "--runInBand",
         "--collectCoverage=false",
-        "${fileBasenameNoExtension}"
+        "--runTestsByPath",
+        "${relativeFile}"
       ],
       "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
-      "disableOptimisticBPs": true,
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
       },
-      "runtimeArgs": ["--nolazy", "--preserve-symlinks"],
+      "runtimeArgs": ["--preserve-symlinks"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
@@ -42,11 +40,10 @@
       "args": ["--runInBand", "--collectCoverage=false"],
       "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
-      "disableOptimisticBPs": true,
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
       },
-      "runtimeArgs": ["--nolazy", "--preserve-symlinks"],
+      "runtimeArgs": ["--preserve-symlinks"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     }

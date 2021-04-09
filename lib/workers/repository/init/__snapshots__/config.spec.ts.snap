@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/init/config detectRepoFileConfig() finds .github/renovate.json 1`] = `Promise {}`;
+
+exports[`workers/repository/init/config detectRepoFileConfig() finds .gitlab/renovate.json 1`] = `Promise {}`;
+
+exports[`workers/repository/init/config detectRepoFileConfig() finds .renovaterc.json 1`] = `Promise {}`;
+
+exports[`workers/repository/init/config detectRepoFileConfig() finds and parse renovate.json5 1`] = `Promise {}`;
+
+exports[`workers/repository/init/config detectRepoFileConfig() returns config if not found 1`] = `Promise {}`;
+
+exports[`workers/repository/init/config detectRepoFileConfig() returns error if cannot parse 1`] = `Promise {}`;
+
+exports[`workers/repository/init/config detectRepoFileConfig() throws error if duplicate keys 1`] = `Promise {}`;
+
+exports[`workers/repository/init/config detectRepoFileConfig() uses package.json config if found 1`] = `Promise {}`;
+
+exports[`workers/repository/init/config mergeRenovateConfig() throws error if misconfigured 1`] = `[Error: config-validation]`;

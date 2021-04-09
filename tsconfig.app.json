@@ -1,11 +1,24 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
+    "declaration": true,
     "resolveJsonModule": false,
-    "isolatedModules": true,
+    "noImplicitAny": false,
     "sourceMap": true,
     "inlineSources": true,
+    "allowJs": false,
+    "checkJs": false,
     "types": ["node"]
   },
-  "include": ["lib/**/*"]
+  "exclude": [
+    "./.cache",
+    "./dist",
+    "**/__mocks__/**",
+    "**/__fixtures__/**",
+    "**/__testutil__/**",
+    "**/*.spec.ts",
+    "jest.config.ts",
+    "./test",
+    "./tools"
+  ]
 }

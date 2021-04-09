@@ -1,12 +1,17 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import { RangeStrategy, VersioningApi } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
+
+export const id = 'semver';
+export const displayName = 'Semantic';
+export const urls = ['https://semver.org/'];
+export const supportsRanges = false;
 
 const { is: isStable } = stable;
 
 const {
   compare: sortVersions,
-  maxSatisfying: maxSatisfyingVersion,
+  maxSatisfying: getSatisfyingVersion,
   minSatisfying: minSatisfyingVersion,
   major: getMajor,
   minor: getMinor,
@@ -19,17 +24,12 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string) => valid(input);
+export const isVersion = (input: string): string => valid(input);
 
-export { isVersion as isValid, maxSatisfyingVersion };
+export { isVersion as isValid, getSatisfyingVersion };
 
-function getNewValue(
-  _currentValue: string,
-  _rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-) {
-  return toVersion;
+function getNewValue({ newVersion }: NewValueConfig): string {
+  return newVersion;
 }
 
 export const api: VersioningApi = {
@@ -45,7 +45,7 @@ export const api: VersioningApi = {
   isValid: isVersion,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,

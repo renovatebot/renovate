@@ -1,0 +1,216 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in autoReplace managers 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "version: 0.0.2",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in updateDependency managers 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new version",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace base updated 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "updated-file",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch needs update 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": false,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "updated-file",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch no update 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles content change 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": false,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "some new content",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles empty 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles git submodules 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "existing content",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles isRemediation rebase 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": false,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new contents",
+      "name": "package-lock.json",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles isRemediation success 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new contents",
+      "name": "package-lock.json",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock file errors 1`] = `
+Object {
+  "artifactErrors": Array [
+    Object {
+      "lockFile": "composer.lock",
+      "stderr": "some error",
+    },
+  ],
+  "reuseExistingBranch": true,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "some new content",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock files 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": true,
+  "updatedArtifacts": Array [
+    Object {
+      "contents": "some contents",
+      "name": "composer.json",
+    },
+  ],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "some new content",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [
+    Object {
+      "contents": "some contents",
+      "name": "composer.json",
+    },
+  ],
+  "updatedPackageFiles": Array [],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance error 1`] = `
+Object {
+  "artifactErrors": Array [
+    Object {
+      "lockFile": "composer.lock",
+      "stderr": "some error",
+    },
+  ],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [
+    Object {
+      "contents": "some contents",
+      "name": "composer.lock",
+    },
+  ],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "existing content",
+      "name": "undefined",
+    },
+  ],
+}
+`;

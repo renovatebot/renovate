@@ -1,54 +1,51 @@
-import got from '../../util/got';
-import { logger } from '../../logger';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import { Http, HttpResponse } from '../../util/http';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-export async function getPkgReleases({
+export const id = 'dart';
+export const defaultRegistryUrls = ['https://pub.dartlang.org/'];
+export const customRegistrySupport = false;
+
+const http = new Http(id);
+
+export async function getReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+  registryUrl,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   let result: ReleaseResult = null;
-  const pkgUrl = `https://pub.dartlang.org/api/packages/${lookupName}`;
+  const pkgUrl = `${registryUrl}api/packages/${lookupName}`;
   interface DartResult {
     versions?: {
       version: string;
+      published?: string;
     }[];
     latest?: {
       pubspec?: { homepage?: string; repository?: string };
     };
   }
 
-  let raw: {
-    body: DartResult;
-  } = null;
+  let raw: HttpResponse<DartResult> = null;
   try {
-    raw = await got(pkgUrl, {
-      json: true,
-    });
+    raw = await http.getJson<DartResult>(pkgUrl);
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ lookupName }, `Dependency lookup failure: not found`);
-      logger.debug({ err }, 'Dart lookup error');
-      return null;
-    }
     if (
       err.statusCode === 429 ||
-      (err.statusCode > 500 && err.statusCode < 600)
+      (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      logger.warn({ lookupName, err }, `pub.dartlang.org registry failure`);
-      throw new Error('registry-failure');
+      throw new ExternalHostError(err);
     }
-    logger.warn(
-      { err, lookupName },
-      'pub.dartlang.org lookup failure: Unknown error'
-    );
-    return null;
+    throw err;
   }
 
-  const body = raw && raw.body;
+  const body = raw?.body;
   if (body) {
     const { versions, latest } = body;
     if (versions && latest) {
       result = {
-        releases: body.versions.map(({ version }) => ({ version })),
+        releases: body.versions.map(({ version, published }) => ({
+          version,
+          releaseTimestamp: published,
+        })),
       };
 
       const pubspec = latest.pubspec;

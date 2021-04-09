@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`nuget. isStable 1.0.0+c30d7625 1`] = `true`;
+
+exports[`nuget. isStable 1.2019.3.22 1`] = `true`;
+
+exports[`nuget. isStable 2.0.2-pre20191018090318 1`] = `false`;
+
+exports[`nuget. isStable 2.3.4-beta+1990ef74 1`] = `false`;
+
+exports[`nuget. isStable 3.0.0-beta 1`] = `false`;
+
+exports[`nuget. isStable 9.0.3 1`] = `true`;
+
+exports[`nuget. isVersion and isValid 1.0.0+c30d7625 1`] = `"1.0.0+c30d7625"`;
+
+exports[`nuget. isVersion and isValid 1.0.0+c30d7625 2`] = `"1.0.0+c30d7625"`;
+
+exports[`nuget. isVersion and isValid 1.2019.3.22 1`] = `"1.2019.3.22"`;
+
+exports[`nuget. isVersion and isValid 1.2019.3.22 2`] = `"1.2019.3.22"`;
+
+exports[`nuget. isVersion and isValid 2.0.2-pre20191018090318 1`] = `"2.0.2-pre20191018090318"`;
+
+exports[`nuget. isVersion and isValid 2.0.2-pre20191018090318 2`] = `"2.0.2-pre20191018090318"`;
+
+exports[`nuget. isVersion and isValid 2.3.4-beta+1990ef74 1`] = `"2.3.4-beta+1990ef74"`;
+
+exports[`nuget. isVersion and isValid 2.3.4-beta+1990ef74 2`] = `"2.3.4-beta+1990ef74"`;
+
+exports[`nuget. isVersion and isValid 3.0.0.beta 1`] = `null`;
+
+exports[`nuget. isVersion and isValid 3.0.0.beta 2`] = `null`;
+
+exports[`nuget. isVersion and isValid 3.0.0-beta 1`] = `"3.0.0-beta"`;
+
+exports[`nuget. isVersion and isValid 3.0.0-beta 2`] = `"3.0.0-beta"`;
+
+exports[`nuget. isVersion and isValid 5.1.2-+ 1`] = `null`;
+
+exports[`nuget. isVersion and isValid 5.1.2-+ 2`] = `null`;
+
+exports[`nuget. isVersion and isValid 9.0.3 1`] = `"9.0.3"`;
+
+exports[`nuget. isVersion and isValid 9.0.3 2`] = `"9.0.3"`;
+
+exports[`nuget. isVersion and isValid 17.04 1`] = `"17.04"`;
+
+exports[`nuget. isVersion and isValid 17.04 2`] = `"17.04"`;

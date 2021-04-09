@@ -1,0 +1,227 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`updateArtifacts aborts if lock file is unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts aborts if no lock file found 1`] = `Array []`;
+
+exports[`updateArtifacts authenticates at registries 1`] = `
+Array [
+  Object {
+    "cmd": "dotnet nuget add source https://my-registry.example.org/ --configfile others/nuget/not-so-random/nuget.config --name myRegistry --username some-username --password some-password --store-password-in-clear-text",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts catches errors 1`] = `
+Array [
+  Object {
+    "artifactError": Object {
+      "lockFile": "packages.lock.json",
+      "stderr": "not found",
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts does not update lock file when no deps changed 1`] = `Array []`;
+
+exports[`updateArtifacts does not update lock file when non-proj file is changed 1`] = `Array []`;
+
+exports[`updateArtifacts performs lock file maintenance 1`] = `
+Array [
+  Object {
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts strips protocol version from feed url 1`] = `
+Array [
+  Object {
+    "cmd": "dotnet nuget add source https://my-registry.example.org/ --configfile others/nuget/not-so-random/nuget.config --name myRegistry",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts supports docker mode 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/dotnet",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_dotnet -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts supports global mode 1`] = `
+Array [
+  Object {
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts updates lock file 1`] = `
+Array [
+  Object {
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;

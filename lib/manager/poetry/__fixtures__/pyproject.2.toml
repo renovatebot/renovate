@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "example 2"
+version = "0.1.0"
+description = ""
+authors = ["John Doe <john.doe@gmail.com>"]
+
+[tool.poetry.dependencies]
+dep1 = { version =  "*" }
+dep2 = { version = "^0.6.0" }
+dep3 = { path = "/some/path/", version = '^0.33.6' }
+dep4 = { path = "/some/path/" }
+
+[tool.poetry.extras]
+extra_dep1 = "^0.8.3"
+extra_dep2 = "^0.9.4"
+extra_dep3 = '^0.4.0'
+
+[build-system]
+requires = ["poetry>=1.0", "wheel"]
+build-backend = "poetry.core.masonry.api"

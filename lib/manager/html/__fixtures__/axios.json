@@ -1,0 +1,735 @@
+{
+  "homepage": null,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mzabriskie/axios.git"
+  },
+  "assets": [
+    {
+      "version": "0.19.2",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-bd8XIKzrtyJ1O5Sh3Xp3GiuMIzWC42ZekvrMMD4GxRg=",
+        "axios.min.js": "sha256-T/f7Sju1ZfNNfBh7skWn0idlCBcI3RwdLSS4/I7NQKQ="
+      }
+    },
+    {
+      "version": "0.19.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-J6UlS3kpnhiSiNQ9lGoV9Q94ZpIPff3UZcR0dDwIT6g=",
+        "axios.min.js": "sha256-Hhwv1ElzvrH6ZuiIDWEO6xBYW3lmFYrapwcjgXhpL6g="
+      }
+    },
+    {
+      "version": "0.19.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-XmdRbTre/3RulhYk/cOBUMpYlaAp2Rpo/s556u0OIKk=",
+        "axios.min.js": "sha256-S1J4GVHHDMiirir9qsXWc8ZWw74PHHafpsHp5PXtjTs="
+      }
+    },
+    {
+      "version": "0.19.0-beta.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-ZqHpIRQ/P2PzIkK170Ic9ShWNHUMEXSriS6hJqHgPCk=",
+        "axios.min.js": "sha256-bSwKRQoEtdFJL3fX5RL+avJulcL+rFloJfRecbn/pNY="
+      }
+    },
+    {
+      "version": "0.18.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-31i7lDZ6fiW6ZFO5j7kMPG9dmM8zPbs8ZzdeffTeKPg=",
+        "axios.min.js": "sha256-S1ZKMF2XMLympjZScWBS5TzFKKKRQ+UQYsbw6ioZY/s="
+      }
+    },
+    {
+      "version": "0.18.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-lrZTgsdM1iVdRigETFOU8u8/BmLX1ysQ8bzrULbuVFU=",
+        "axios.min.js": "sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM="
+      }
+    },
+    {
+      "version": "0.17.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-hz0JuA8OZxhBijQKyIdMoVRE9lnBt+0phoPt4PiAnQc=",
+        "axios.min.js": "sha256-A83FHt22LbSOPYN9dGs74h/J0jqc3TZapHUplf2uupI="
+      }
+    },
+    {
+      "version": "0.17.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-dA/IRPLskb4wlHpyPNPPI0GNBX3lFbvLYiLy5laCewY=",
+        "axios.min.js": "sha256-ReCG8xthuE96rBkv5Cr/V+Wg42Gst+HCf0kNQufB9as="
+      }
+    },
+    {
+      "version": "0.16.2",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-JXU9bC6uJttvR5dnFkXWImMeNfVl0MwHM8OdBtdGtJs=",
+        "axios.min.js": "sha256-aXHOBRCjmgqoEhY6VBWs3Bc+E3447Iuywezt+nkgeZk="
+      }
+    },
+    {
+      "version": "0.16.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-ypSziIupDDkOvNExCPbqq+U4ufKgLB9B0P7oFQPeXoc=",
+        "axios.min.js": "sha256-ayEUoFCu1J9KJCN9TR9De3XKEMb8hiPq4jwFWMU6fiE="
+      }
+    },
+    {
+      "version": "0.16.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-T+17oIAlzSvCwsm50V4ByFrFWtmGIlE3rJdob1AbARs=",
+        "axios.min.js": "sha256-ObAJM4i2OoNkYK9RdcsPGm9+dsHUOAY1r8PYR7XoEVw="
+      }
+    },
+    {
+      "version": "0.15.3",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-CoA7Q6Hwn87/erPTxiI0k/susrtAfkh8i84ZdSWAzAM=",
+        "axios.min.js": "sha256-xEofWHiBewJOBXBSH5JHWuwCYpBKOQ8KSGSVLbEVYyo="
+      }
+    },
+    {
+      "version": "0.15.2",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-iWv6d2qgmadTj3wBUhvWE0bHAca0Dqh9r4FJ3A7fnmQ=",
+        "axios.min.js": "sha256-HGV3LcrrHFFi+8L71R2WxfVzKUwvYSorfbhpBnBSdeI="
+      }
+    },
+    {
+      "version": "0.15.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-K4sDedAxh0HyQN871EEZyOSUysqEW2IHYti4ZqMSSNA=",
+        "axios.min.js": "sha256-lls3OSV8iEyV3Dh3Q3OjYJpT0rxp/GD/j+j4PKyrezc="
+      }
+    },
+    {
+      "version": "0.15.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-Rt/oYNvoXxDtdMzNkafEhu4c8VQXQBZ3S7X35p+XQP8=",
+        "axios.min.js": "sha256-8Jg6SAzzes9UsrOJAOi5bB9YWSe6ymy9CRcTGaOXCic="
+      }
+    },
+    {
+      "version": "0.14.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-Vm0pP8VEIOlB2rjV0g1w9KRwMsxp22W1poig8qTunEk=",
+        "axios.min.js": "sha256-SJPIVv+jVR0706q0zyyv+nvh3S+uDLtE88MX0paHRTI="
+      }
+    },
+    {
+      "version": "0.13.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-tCjUyThC4mGL5FnYcRim6jOIRL7dHT+C2N8LbpYuCGk=",
+        "axios.min.js": "sha256-DgCivPJ94y8Rey1b9I2xjEZI6anDVb1tPfKQ/7Fc6Y0="
+      }
+    },
+    {
+      "version": "0.13.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-Nc1U012U+5QcuH4YWwzOOYBjNDQ5LwVG4m6PWUeBRnM=",
+        "axios.min.js": "sha256-G+DsWAnEuvDYcg7/r++UTlY6XTLa9PF3YqWYtpKSHJI="
+      }
+    },
+    {
+      "version": "0.12.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-PMzk0phP+2zPylqWAu5emj2zZK5vRpcHbNum+36fIz0=",
+        "axios.min.js": "sha256-csxVtQ9PWNN5RZXL1dB8In2Lcl3Y4RHpeIjOcmsL5jo="
+      }
+    },
+    {
+      "version": "0.11.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-dmt8/T+OHZGsyiFyegLBcu64wcwYBmkLWYXZSZjxgyg=",
+        "axios.min.js": "sha256-WJav8RK+T2ICcOk8vtuOqG1Ou6juy3MKd7OLQBXHIIw="
+      }
+    },
+    {
+      "version": "0.11.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-QfDStqy65wvLD4DwLkZA//VnPvrw984nkkgEtNbXgkg=",
+        "axios.min.js": "sha256-VSuBJZeVAKgx0qYnY9I3FJzl2qWdnZNtpNR4oBs1RlQ="
+      }
+    },
+    {
+      "version": "0.10.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-Yald8dk0loah6tTZzkndi//0F7M1aEBu3HZkTXH+v48=",
+        "axios.min.js": "sha256-kaXZv9ANyLjWnN68PmNky9uze4/aWMkwTrvpBxFtwlc="
+      }
+    },
+    {
+      "version": "0.9.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-83oF3gfsUBp0ghAHDTN0RWODjqwm0YXSeqncGsditTg=",
+        "axios.min.js": "sha256-h7EClez70bXfUgOmH6/kkHxD1R00CnjhKwqtrhTP5aw="
+      }
+    },
+    {
+      "version": "0.9.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-efCF1BCwDzHU8Uq+PRXluTIShRQoTVXbq0ZgSjVOrE0=",
+        "axios.min.js": "sha256-Ps3e+n52Zpzcsk0lAU9yy/NAt5E70iySkC9dCUVmfjA="
+      }
+    },
+    {
+      "version": "0.8.1",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-7WFK995Wu+4FASmH9mNWaZM0wDVREo2QkMxxRSnq41c=",
+        "axios.min.js": "sha256-UyoNsJudoxoA30F8HgsoLYr7I7lp3aRC/+MozU9bW5E="
+      }
+    },
+    {
+      "version": "0.8.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-OAjlZ/feZOd2wVVnF6F0pEHkW8y2GNDGJLMgurXHc2c=",
+        "axios.min.js": "sha256-eR5iyxOlAv10LOIaAFAeJm0zCyzW9B4vk39uB/OTen8="
+      }
+    },
+    {
+      "version": "0.7.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-saQTyR4zi5l7TVRUxptHQMqBGOx7fD5SKKfat55ruZ4=",
+        "axios.min.js": "sha256-oNArrP+cvywx4l1Pq1aF3RsFxNiQ3tQw85I+5ezYRhY="
+      }
+    },
+    {
+      "version": "0.6.0",
+      "files": [
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.js": "sha256-LOe2iPuwjadzSFU/6zmcriOw6IjjRXmw4niNoyBGeLs=",
+        "axios.min.js": "sha256-4CH9pIWieQh2Ec9P0asKveu6bKRWvyTKsbGmZBN2gfA="
+      }
+    },
+    {
+      "version": "0.5.4",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.amd.standalone.js",
+        "axios.amd.standalone.map",
+        "axios.amd.standalone.min.js",
+        "axios.amd.standalone.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map",
+        "axios.standalone.js",
+        "axios.standalone.map",
+        "axios.standalone.min.js",
+        "axios.standalone.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-sOaBEQwUg29tJQD8dbLu/KILpD4DUL8VcYaU2uINxOc=",
+        "axios.amd.min.js": "sha256-dQDGJXqS4BPeiJOBImGsVCDANDbfaDEeYV3HmM3tX80=",
+        "axios.amd.standalone.js": "sha256-hkH91dJSTBFMDypqAMAn98yglc6nAsfqqqcb0DoOGjA=",
+        "axios.amd.standalone.min.js": "sha256-vHnhp3Z+YK5/bEvHdv0nmJ5pfPxXgukjTpZDhVrGif8=",
+        "axios.js": "sha256-GUtcBGSxIowk1OaIuj7BJYoYFjGb05BOtz18I8a83eE=",
+        "axios.min.js": "sha256-S88N3SCdTfPsj0EbuTxLTmcXF/Nyk4CEMyHQFHIvsZk=",
+        "axios.standalone.js": "sha256-fRhO4mk5kMBw9wWqJbPO41u+OAIkMfA4GysGMIBc+nw=",
+        "axios.standalone.min.js": "sha256-7a3wJ0QTMnoOgadW7sIVGi0niQwd0NpcmlC4cUdPIOU="
+      }
+    },
+    {
+      "version": "0.5.3",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.amd.standalone.js",
+        "axios.amd.standalone.map",
+        "axios.amd.standalone.min.js",
+        "axios.amd.standalone.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map",
+        "axios.standalone.js",
+        "axios.standalone.map",
+        "axios.standalone.min.js",
+        "axios.standalone.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-sCpgdK85mLhxJQ6qyRJEwVZmc7oF5LxanvCOZq8aVUw=",
+        "axios.amd.min.js": "sha256-7zVb1BvJAF1usTlEbPbNvu2zC4rBgwVfCl98f1Dim6E=",
+        "axios.amd.standalone.js": "sha256-5Tng3+o4N/yXEwcyk+97YFpIZW2aMqrJ+hh2SUTAQUo=",
+        "axios.amd.standalone.min.js": "sha256-vfdXazOpXgPmMPodjecf/MddNCY8x25JSgu9scwvzcM=",
+        "axios.js": "sha256-Ua1CfWsJlrjxIAmqLa5wbGdDc4UctQjBjkLPI1CwI+I=",
+        "axios.min.js": "sha256-tlCdmGzflQbn0gzGieVQObRUYo3Mti6Tou6xtMSGDVE=",
+        "axios.standalone.js": "sha256-i+ZQ0DfACTXPVzLCRZ5dAlpPR5Xvs7CpHl8bzI2ctxk=",
+        "axios.standalone.min.js": "sha256-GUg8pDD1NPN8kbGdMKgvu1ygRGY7lDwtI6gaKYgCXkw="
+      }
+    },
+    {
+      "version": "0.5.2",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.amd.standalone.js",
+        "axios.amd.standalone.map",
+        "axios.amd.standalone.min.js",
+        "axios.amd.standalone.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map",
+        "axios.standalone.js",
+        "axios.standalone.map",
+        "axios.standalone.min.js",
+        "axios.standalone.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-WKQvVN5DUioGsmOgFUTrfc3lCh9JRjvbsMif509nuk8=",
+        "axios.amd.min.js": "sha256-JRWYXs4+OofAsf3WhWuZY01hDEU+lSvzt/PoR9VogLc=",
+        "axios.amd.standalone.js": "sha256-+R0Cbj6oag/Fzl12fIc9aNMs+EjeEcDevODga+oQeo8=",
+        "axios.amd.standalone.min.js": "sha256-mqGU7g/G0q/QfUHZFidO6tgeFpuGbQgVBLazIu9nXNM=",
+        "axios.js": "sha256-MYs6yGKRVKAYdsROXwLLfVhpZ8lBzoIx6SjfJX3FN+Y=",
+        "axios.min.js": "sha256-zKXcsOre8tgitwkcgGRc1sHMgvEw0pFwtYcop/o2S/8=",
+        "axios.standalone.js": "sha256-RsB2QYN9V4ofc98KlqOIQxBEknYqRVMnbEWbjoN8phw=",
+        "axios.standalone.min.js": "sha256-ZP1TKRktCKF7TlW/QtxQVWhuE08DNElhowAz3/Hd6zk="
+      }
+    },
+    {
+      "version": "0.5.1",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.amd.standalone.js",
+        "axios.amd.standalone.map",
+        "axios.amd.standalone.min.js",
+        "axios.amd.standalone.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map",
+        "axios.standalone.js",
+        "axios.standalone.map",
+        "axios.standalone.min.js",
+        "axios.standalone.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-AdoAC/wOuoojkniCeWE3Ya4Li5ZqLZy+MFZDFaOo35w=",
+        "axios.amd.min.js": "sha256-veB8njUVlmL4vx4Xggx1xPR9+vX0bAlccRMlQSKj8yI=",
+        "axios.amd.standalone.js": "sha256-QPhnt2+R6K+WoMSnuc/+oH9G0bfmMX4sajBhTBa2oSU=",
+        "axios.amd.standalone.min.js": "sha256-m2P300LwJ56H1GiuyqMMXSV1Gv1XZptvnI5xXzxh/v8=",
+        "axios.js": "sha256-wvRDymtx/Y0GbT2GKg8FJL5bCNf/uhRF3DbPxFPFDac=",
+        "axios.min.js": "sha256-z5tToupgSYDS4I9fJqXS3HGFRDzqSJ1j+DlffypzPZc=",
+        "axios.standalone.js": "sha256-5H+f9ePwTUT/COh5rUwZWPrJCFC+378YfRDOHqBJhyM=",
+        "axios.standalone.min.js": "sha256-zVZYO5XLlV15BBD74wC3ug7lqcv6jwxrbl5TBkG8aaw="
+      }
+    },
+    {
+      "version": "0.5.0",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.amd.standalone.js",
+        "axios.amd.standalone.map",
+        "axios.amd.standalone.min.js",
+        "axios.amd.standalone.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map",
+        "axios.standalone.js",
+        "axios.standalone.map",
+        "axios.standalone.min.js",
+        "axios.standalone.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-Jo4eK49MGwCgwsSLYYpLrQkfKL5y+62VPTa5LGFyNCI=",
+        "axios.amd.min.js": "sha256-RbPdz8juY0+5CgjiusZLpRbsHbDwucz6MdWOLE2QDQw=",
+        "axios.amd.standalone.js": "sha256-UhbAjgU2ulf0m7s377RFj1h2yMTL1ddt8FQ/+Wfxmtw=",
+        "axios.amd.standalone.min.js": "sha256-uua9134hcuhlIbT5X3aOZSIDIxECjWVCmdI5ERpULhc=",
+        "axios.js": "sha256-fcaYzMAfYg3yiP/LcZgMvrLf/+Tbmeak2pgLD5vuogU=",
+        "axios.min.js": "sha256-Vlr5MzIHMo3xs69Xil4eSmFoQGqCpFm8AtdCBjjDQds=",
+        "axios.standalone.js": "sha256-tGcO6GbEvKbSv0J/KtNrPK9MBpgJCr36u0EmBxAZNNw=",
+        "axios.standalone.min.js": "sha256-N7MjtQqiO9QdZxcwzXgndDCQlpegqWN62n1bZpZiPcg="
+      }
+    },
+    {
+      "version": "0.4.2",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.amd.standalone.js",
+        "axios.amd.standalone.map",
+        "axios.amd.standalone.min.js",
+        "axios.amd.standalone.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map",
+        "axios.standalone.js",
+        "axios.standalone.map",
+        "axios.standalone.min.js",
+        "axios.standalone.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-XGL7P8Qo2Vs6m/MjCag5JCoNjlt3+kUIhKKeeyC9C1U=",
+        "axios.amd.min.js": "sha256-hVzh6bTdyXXIey+ZUNMFaVzz8PG0MzUaSUZs14Aop9I=",
+        "axios.amd.standalone.js": "sha256-p77AbisCqmu2bTY+RqyaIdLitqUcDhU13l4f5H1MA8I=",
+        "axios.amd.standalone.min.js": "sha256-ue+UbzUfyIsOk/csooZxid4tiEIdiJsAKgaqgYF9J+8=",
+        "axios.js": "sha256-KCUXSHgZqPmReBtsLPwUDm8OgPaupK7bPAllTyXOFkQ=",
+        "axios.min.js": "sha256-G5meWybNofoQcianhTk+YD1Fv3kuz56Ggp+uaW5wGlM=",
+        "axios.standalone.js": "sha256-6k2R8GRelLqOL56m4nH6wsgVEpKA3RHpX6nC4YDGvxA=",
+        "axios.standalone.min.js": "sha256-LsR4anEOthPDJ8IgugrhUyRWOw4j8u878nHIkLDNISI="
+      }
+    },
+    {
+      "version": "0.4.1",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.amd.standalone.js",
+        "axios.amd.standalone.map",
+        "axios.amd.standalone.min.js",
+        "axios.amd.standalone.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map",
+        "axios.standalone.js",
+        "axios.standalone.map",
+        "axios.standalone.min.js",
+        "axios.standalone.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-VrHZHqx3eQfjjb2U7X2RSrFgXp4Jt5ytghfpWyAKSbk=",
+        "axios.amd.min.js": "sha256-Q7o/soA/Dg284+MhOPK8oAUGmCkFKXp2G/97EOG7YG8=",
+        "axios.amd.standalone.js": "sha256-pcNWqLcQAN7V4kcBIGTFLJTq5KkhrU0E/q4qqjb32s0=",
+        "axios.amd.standalone.min.js": "sha256-o5DzCzTel3TPoCbyqV770yZCoIy6Wq6iozOhC/BFt/0=",
+        "axios.js": "sha256-d+ozccBT3SOii8qnnMplRF+lLpEAX+cbCnpEZ6+By70=",
+        "axios.min.js": "sha256-Wz0es0IFZx02G899aJG20WOIa2JwKlDKZjz502J0Gk4=",
+        "axios.standalone.js": "sha256-FbhL3JuEx/QancTaUF3CfAvAm+sGiTeaKxmBmFpXJwM=",
+        "axios.standalone.min.js": "sha256-W9HY7fDSlUty5hr5hNdB7s3bMm/+1sdh7sOFb9QfuHU="
+      }
+    },
+    {
+      "version": "0.4.0",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.amd.standalone.js",
+        "axios.amd.standalone.map",
+        "axios.amd.standalone.min.js",
+        "axios.amd.standalone.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map",
+        "axios.standalone.js",
+        "axios.standalone.map",
+        "axios.standalone.min.js",
+        "axios.standalone.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-VrHZHqx3eQfjjb2U7X2RSrFgXp4Jt5ytghfpWyAKSbk=",
+        "axios.amd.min.js": "sha256-uFv/CHFO8JXCt9ItCcTWpLf3D2eF0OoyvzRvJV+3LwA=",
+        "axios.amd.standalone.js": "sha256-pcNWqLcQAN7V4kcBIGTFLJTq5KkhrU0E/q4qqjb32s0=",
+        "axios.amd.standalone.min.js": "sha256-492XMFTsHTHz9GLbPrGDd3U0eSAjKfzcSxuzypcBG7o=",
+        "axios.js": "sha256-d+ozccBT3SOii8qnnMplRF+lLpEAX+cbCnpEZ6+By70=",
+        "axios.min.js": "sha256-TrKSJDNI8PpMqPX1n7Ti0ixZUcUwOiMKlTwjVP84kiA=",
+        "axios.standalone.js": "sha256-FbhL3JuEx/QancTaUF3CfAvAm+sGiTeaKxmBmFpXJwM=",
+        "axios.standalone.min.js": "sha256-kLNSBcupJKbLvzfSiOsuHEIo5Dzy9FIr0laugQE6kkM="
+      }
+    },
+    {
+      "version": "0.3.1",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-ytZfb6ETyqVVhnLdhby3+rWTt6GK7uuL/3IiSlD5Ros=",
+        "axios.amd.min.js": "sha256-MmF2qd+Svi22/N6+KIsIjKL4DSLLrbU/Rr+NKxznG9Q=",
+        "axios.js": "sha256-Cu3lPIJNitm3o8Lfdjk1kbD4mQdSr8WcQp9doWFy6Pc=",
+        "axios.min.js": "sha256-YkZWt1pzs6AXP2AI1lQgw7uVmUN6mxOoCpgUs3zsQ3U="
+      }
+    },
+    {
+      "version": "0.3.0",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-istZoqHbUelguVMqKUSc3Sfxs7HNtmexHr77HkUys4M=",
+        "axios.amd.min.js": "sha256-pouRkAFfxMDOgelC1R5ZTdm9Y1CtuqE5J/ukX2OA/so=",
+        "axios.js": "sha256-VgCS0XhnH+fAKqw4QIR3wDrq6CFCOjLtTMdkKnA7/DU=",
+        "axios.min.js": "sha256-B74j9ffhoGXojFL96VJYSuFiRVI+02ZEOlb4ZSi6Qt8="
+      }
+    },
+    {
+      "version": "0.2.2",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-sZT5WJ8xk8oehL8q93lalAVo3u4bAG9jR46gg8rKGzE=",
+        "axios.amd.min.js": "sha256-0Ex63KsanSd/AwxaYdJ08KwTq+CPlIdBJeYI2ZJug6M=",
+        "axios.js": "sha256-Fwba+Y4iG/IlfTBUVlie/SImG/46hgsoWP3lOdVTATs=",
+        "axios.min.js": "sha256-+W/p3P+2uahykgCnBj5OoumtqohkAijkWQCAuOxTFgk="
+      }
+    },
+    {
+      "version": "0.2.1",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-sZT5WJ8xk8oehL8q93lalAVo3u4bAG9jR46gg8rKGzE=",
+        "axios.amd.min.js": "sha256-IeZM3agJwVsjozOE7kbQd1YobMk4cgqMqFvfuNUDoLo=",
+        "axios.js": "sha256-Fwba+Y4iG/IlfTBUVlie/SImG/46hgsoWP3lOdVTATs=",
+        "axios.min.js": "sha256-XqCScc27q1doCKzdXUIZLdPQLg6smR8eHk6OMd8eg9k="
+      }
+    },
+    {
+      "version": "0.2.0",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-OGdJK8h4ZiJGwADF+EVMb08ikc+QCQB3wqAx2GFqPM0=",
+        "axios.amd.min.js": "sha256-3fHLlzw/h4S/Pm5dNl5+2qtiAgSFVJY3n+T7ut//3t8=",
+        "axios.js": "sha256-kukqmgfj39Y+Km2LJJspgNqyZCMaHiz4jurzFi5IGzA=",
+        "axios.min.js": "sha256-LAwrvWRsNpgH3aC2RQ2oM0v/pry4S6LDolujdBmVzpw="
+      }
+    },
+    {
+      "version": "0.1.0",
+      "files": [
+        "axios.amd.js",
+        "axios.amd.map",
+        "axios.amd.min.js",
+        "axios.amd.min.map",
+        "axios.js",
+        "axios.map",
+        "axios.min.js",
+        "axios.min.map"
+      ],
+      "sri": {
+        "axios.amd.js": "sha256-wD7lK/ShXIHR99KWXprW8JrMZQ2W58k0bbn5yWfNxLw=",
+        "axios.amd.min.js": "sha256-J9ZMsmGjh9igOEU5hudw/npiimIeOLiY50clicYczLE=",
+        "axios.js": "sha256-/c9uhxbedN+Vpm+NIgwtkDoA1bOdUTk9/Ql8Rm+Phv4=",
+        "axios.min.js": "sha256-h8uKNfZwiaVkmQYDB9j8o599E5U4C1XaKzBJclapLO8="
+      }
+    }
+  ]
+}

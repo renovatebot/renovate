@@ -1,6 +1,11 @@
+import { LANGUAGE_GOLANG } from '../../constants/languages';
+import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
-import { updateArtifacts } from './artifacts';
 
-export const language = 'golang';
+export const language = LANGUAGE_GOLANG;
 export { extractPackageFile, updateDependency, updateArtifacts };
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)go.mod$'],
+};
