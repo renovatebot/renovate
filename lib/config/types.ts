@@ -114,10 +114,12 @@ export interface LegacyAdminConfig {
   platform?: string;
   requireConfig?: boolean;
 }
+export type ExecutionMode = 'branch' | 'update';
 
 export type PostUpgradeTasks = {
   commands?: string[];
   fileFilters?: string[];
+  executionMode: ExecutionMode;
 };
 
 type UpdateConfig<

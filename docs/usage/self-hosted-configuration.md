@@ -11,7 +11,7 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPostUpgradeCommandTemplating
 
-Set to true to allow templating of post-upgrade commands.
+Set to true to allow templating of dependency level post-upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
