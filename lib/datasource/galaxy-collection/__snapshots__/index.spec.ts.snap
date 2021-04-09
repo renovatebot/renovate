@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/galaxy-collection getReleases processes real data 1`] = `
+exports[`datasource/galaxy-collection/index getReleases processes real data 1`] = `
 Object {
   "registryUrl": "https://galaxy.ansible.com/",
   "releases": Array [
@@ -39,7 +39,7 @@ Object {
 }
 `;
 
-exports[`datasource/galaxy-collection getReleases processes real data 2`] = `
+exports[`datasource/galaxy-collection/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -94,7 +94,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy-collection getReleases returns null for 404 result 1`] = `
+exports[`datasource/galaxy-collection/index getReleases returns null for 404 result 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -109,13 +109,13 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy-collection getReleases returns null for empty lookup 1`] = `Array []`;
+exports[`datasource/galaxy-collection/index getReleases returns null for empty lookup 1`] = `Array []`;
 
-exports[`datasource/galaxy-collection getReleases returns null for null lookupName  1`] = `Array []`;
+exports[`datasource/galaxy-collection/index getReleases returns null for null lookupName  1`] = `Array []`;
 
-exports[`datasource/galaxy-collection getReleases returns null for remote host error 1`] = `[Error: external-host-error]`;
+exports[`datasource/galaxy-collection/index getReleases returns null for remote host error 1`] = `[Error: external-host-error]`;
 
-exports[`datasource/galaxy-collection getReleases returns null for remote host error 2`] = `
+exports[`datasource/galaxy-collection/index getReleases returns null for remote host error 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -130,7 +130,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy-collection getReleases returns null for unexpected data at base 1`] = `
+exports[`datasource/galaxy-collection/index getReleases returns null for unexpected data at base 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -145,7 +145,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy-collection getReleases returns null for unexpected data at versions 1`] = `
+exports[`datasource/galaxy-collection/index getReleases returns null for unexpected data at versions 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -170,7 +170,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy-collection getReleases returns null for unknown error 1`] = `
+exports[`datasource/galaxy-collection/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -185,7 +185,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy-collection getReleases returns only valid versions if a version detail fails 1`] = `
+exports[`datasource/galaxy-collection/index getReleases returns only valid versions if a version detail fails 1`] = `
 Object {
   "registryUrl": "https://galaxy.ansible.com/",
   "releases": Array [
@@ -207,7 +207,7 @@ Object {
 }
 `;
 
-exports[`datasource/galaxy-collection getReleases returns only valid versions if a version detail fails 2`] = `
+exports[`datasource/galaxy-collection/index getReleases returns only valid versions if a version detail fails 2`] = `
 Array [
   Object {
     "headers": Object {

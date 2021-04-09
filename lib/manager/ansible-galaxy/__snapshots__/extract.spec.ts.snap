@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/ansible-galaxy/extract extractPackageFile() check collection style requirements file 1`] = `
+exports[`manager/ansible-galaxy/extract extractPackageFile() check collection style requirements file 1`] = `
 Array [
   Object {
     "currentValue": "0.9.3",
@@ -97,7 +97,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/ansible-galaxy/extract extractPackageFile() check collection style requirements file in reverse order and missing empty line 1`] = `
+exports[`manager/ansible-galaxy/extract extractPackageFile() check collection style requirements file in reverse order and missing empty line 1`] = `
 Array [
   Object {
     "currentValue": "0.9.3",
@@ -131,7 +131,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/ansible-galaxy/extract extractPackageFile() check galaxy definition file 1`] = `
+exports[`manager/ansible-galaxy/extract extractPackageFile() check galaxy definition file 1`] = `
 Array [
   Object {
     "currentValue": "1.4.0",
@@ -148,7 +148,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/ansible-galaxy/extract extractPackageFile() extracts dependencies from a not beautified requirements file 1`] = `
+exports[`manager/ansible-galaxy/extract extractPackageFile() extracts dependencies from a not beautified requirements file 1`] = `
 Array [
   Object {
     "currentValue": "0.1.0",
@@ -167,7 +167,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/ansible-galaxy/extract extractPackageFile() extracts multiple dependencies from requirements.yml 1`] = `
+exports[`manager/ansible-galaxy/extract extractPackageFile() extracts multiple dependencies from requirements.yml 1`] = `
 Array [
   Object {
     "currentValue": "0.1.0",
