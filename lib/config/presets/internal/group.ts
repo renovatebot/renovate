@@ -29,10 +29,24 @@ const staticGroups = {
       },
     ],
   },
+  nodeJs: {
+    description:
+      "Group anything that looks like Node.js together so that it's updated together",
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: ['node'],
+        matchPackagePatterns: ['/node$'],
+        excludePackageNames: ['calico/node'],
+        commitMessageTopic: 'Node.js',
+      },
+    ],
+  },
   recommended: {
     description:
       'Use curated list of recommended non-monorepo package groupings',
     extends: [
+      'group:nodeJs',
       'group:allApollographql',
       'group:fortawesome',
       'group:fusionjs',

@@ -67,7 +67,6 @@ Array [
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
     "currentValue": "6",
     "datasource": "docker",
