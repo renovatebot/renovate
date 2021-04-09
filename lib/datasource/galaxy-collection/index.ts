@@ -4,7 +4,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import {
+import type {
   BaseProjectResult,
   VersionsDetailResult,
   VersionsProjectResult,
@@ -90,9 +90,9 @@ export async function getReleases({
                 newestVersionDetails = versionDetails;
               }
               return release;
-            } catch (e) {
+            } catch (err) {
               logger.warn(
-                { dependency: lookupName },
+                { dependency: lookupName, err },
                 `Received invalid data from ${versionsUrl}${basicRelease.version}/`
               );
               return null;
