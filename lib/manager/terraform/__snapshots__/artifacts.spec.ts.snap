@@ -14,7 +14,25 @@ Array [
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "terraform providers lock",
+    "cmd": "terraform providers mirror -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64 /tmp/terraform/providers",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "terraform providers lock -fs-mirror=/tmp/terraform/providers -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -37,7 +55,25 @@ Array [
 exports[`.updateArtifacts() returns updated .terraform.lock.hcl 1`] = `
 Array [
   Object {
-    "cmd": "terraform providers lock",
+    "cmd": "terraform providers mirror -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64 /tmp/terraform/providers",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "terraform providers lock -fs-mirror=/tmp/terraform/providers -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -60,7 +96,25 @@ Array [
 exports[`.updateArtifacts() returns updated .terraform.lock.hcl for lockfile maintenance 1`] = `
 Array [
   Object {
-    "cmd": "terraform providers lock",
+    "cmd": "terraform providers mirror -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64 /tmp/terraform/providers",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "terraform providers lock -fs-mirror=/tmp/terraform/providers -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -83,19 +137,43 @@ Array [
 exports[`.updateArtifacts() returns updated .terraform.lock.hcl with docker 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/terraform",
+    "cmd": "docker pull renovate/renovate/terraform",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_terraform -aq",
+    "cmd": "docker ps --filter name=renovate_renovate_terraform -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_terraform --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/terraform bash -l -c \\"terraform providers lock\\"",
+    "cmd": "docker run --rm --name=renovate_renovate_terraform --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/renovate/terraform bash -l -c \\"terraform providers mirror -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64 /tmp/terraform/providers\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_renovate_terraform -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_renovate_terraform --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/renovate/terraform bash -l -c \\"terraform providers lock -fs-mirror=/tmp/terraform/providers -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
