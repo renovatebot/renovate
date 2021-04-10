@@ -23,7 +23,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             logger.debug('orbNoop');
             foundOrbOrNoop = true;
             lineNumber += 1;
-            continue;
+            continue; // eslint-disable-line no-continue
           }
           const orbMatch = /^\s+([^:]+):\s(.+)$/.exec(orbLine);
           if (orbMatch) {
