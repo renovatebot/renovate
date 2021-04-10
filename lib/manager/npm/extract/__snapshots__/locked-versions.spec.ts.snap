@@ -126,7 +126,7 @@ exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock
 Array [
   Object {
     "constraints": Object {
-      "yarn": ">= 2.0.0",
+      "yarn": "^2.0.0",
     },
     "deps": Array [
       Object {
@@ -153,7 +153,7 @@ exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock
 Array [
   Object {
     "constraints": Object {
-      "yarn": ">= 2.2.0",
+      "yarn": "^2.2.0",
     },
     "deps": Array [
       Object {
