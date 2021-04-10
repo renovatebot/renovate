@@ -126,11 +126,11 @@ describe('manager/npm/extract', () => {
       );
       expect(res.npmrc).toBeUndefined();
     });
-    it('finds and discards .npmrc', async () => {
+    it('finds and filters .npmrc with variables', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           // eslint-disable-next-line
-          return '//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
+          return 'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
         }
         return null;
       });
@@ -139,7 +139,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toEqual('');
+      expect(res.npmrc).toEqual('registry=https://registry.npmjs.org\n');
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
