@@ -27,7 +27,6 @@ describe('generateLockFile', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const artifactUpdateApproach = 'deep';
-    const dockerMapDotfiles = true;
     const postUpdateOptions = ['npmDedupe'];
     const updates = [
       { depName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
@@ -36,7 +35,7 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { dockerMapDotfiles, artifactUpdateApproach, postUpdateOptions },
+      { artifactUpdateApproach, postUpdateOptions },
       updates
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
