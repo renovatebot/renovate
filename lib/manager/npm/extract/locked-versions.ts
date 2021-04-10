@@ -34,6 +34,9 @@ export async function getLockedVersions(
           lockFileCache[yarnLock].lockedVersions[
             `${dep.depName}@${dep.currentValue}`
           ];
+        if (dep.depType === 'engines' && dep.depName === 'yarn' && !isYarn1) {
+          dep.lookupName = '@yarnpkg/cli';
+        }
       }
     } else if (npmLock) {
       logger.debug('Found ' + npmLock + ' for ' + packageFile.packageFile);
