@@ -742,7 +742,7 @@ describe('workers/branch', () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 
@@ -822,7 +822,7 @@ describe('workers/branch', () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 
@@ -891,7 +891,7 @@ describe('workers/branch', () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
       const result = await branchWorker.processBranch({
@@ -971,7 +971,7 @@ describe('workers/branch', () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 

@@ -78,6 +78,8 @@ Array [
 exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`] = `
 Object {
   "additionalBranchPrefix": "{{parentDir}}-",
+  "allowCustomCrateRegistries": true,
+  "allowScripts": true,
   "autodiscover": true,
   "automerge": false,
   "automergeType": "branch",
@@ -94,6 +96,7 @@ Object {
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "foo",
   "enabled": true,
+  "exposeAllEnv": true,
   "extends": Array [
     "config:js-app",
     "config:js-lib",
@@ -108,8 +111,8 @@ Object {
   "includeForks": true,
   "lockFileMaintenance": Object {
     "automerge": true,
+    "exposeAllEnv": false,
     "schedule": "before 5am",
-    "trustLevel": "low",
   },
   "major": Object {
     "automerge": false,
@@ -233,7 +236,6 @@ Object {
   "travis": Object {
     "enabled": true,
   },
-  "trustLevel": "high",
 }
 `;
 
