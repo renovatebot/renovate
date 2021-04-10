@@ -54,12 +54,6 @@ export async function generateLockFile(
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
-    if (config.dockerMapDotfiles) {
-      const homeDir =
-        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-      const homeNpmrc = join(homeDir, '.npmrc');
-      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
-    }
     cmd = 'pnpm';
     let args = 'install --recursive --lockfile-only';
     if (!getAdminConfig().allowScripts || config.ignoreScripts) {
