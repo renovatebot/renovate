@@ -106,8 +106,14 @@ export async function extractPackageFile(
         npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
       }
       if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
-        logger.debug('Overriding .npmrc file with variables');
-        npmrc = '';
+        logger.debug(
+          { npmrcFileName },
+          'Stripping .npmrc file of lines with variables'
+        );
+        npmrc = npmrc
+          .split('\n')
+          .filter((line) => !line.includes('=${'))
+          .join('\n');
       }
     }
   }
