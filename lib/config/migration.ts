@@ -5,6 +5,7 @@ import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { clone } from '../util/clone';
 import { getOptions } from './definitions';
+import { removedPresets } from './presets';
 import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
 
 const options = getOptions();
@@ -244,22 +245,15 @@ export function migrateConfig(
         }
         const presets = migratedConfig.extends;
         for (let i = 0; i < presets.length; i += 1) {
-          let preset = presets[i];
+          const preset = presets[i];
           if (is.string(preset)) {
-            if (preset === 'config:application' || preset === ':js-app') {
-              preset = 'config:js-app';
-            } else if (preset === ':library' || preset === 'config:library') {
-              preset = 'config:js-lib';
-            } else if (preset.startsWith(':masterIssue')) {
-              preset = preset.replace('masterIssue', 'dependencyDashboard');
-            } else if (
-              [':unpublishSafe', 'default:unpublishSafe'].includes(preset)
-            ) {
-              preset = 'npm:unpublishSafe';
+            const newPreset = removedPresets[preset];
+            if (newPreset !== undefined) {
+              presets[i] = newPreset;
             }
-            presets[i] = preset;
           }
         }
+        migratedConfig.extends = migratedConfig.extends.filter(Boolean);
       } else if (key === 'unpublishSafe') {
         if (val === true) {
           migratedConfig.extends = migratedConfig.extends || [];

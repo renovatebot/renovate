@@ -29,7 +29,13 @@ describe('config/migration', () => {
         compatibility: {
           python: '3.7',
         },
-        extends: [':js-app', 'config:library', ':masterIssue'],
+        extends: [
+          ':automergeBranchMergeCommit',
+          'default:js-app',
+          'config:library',
+          ':masterIssue',
+          'helpers:oddIsUnstable',
+        ],
         maintainYarnLock: true,
         onboarding: 'false' as never,
         multipleMajorPrs: true,
