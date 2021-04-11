@@ -20,7 +20,6 @@ import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { RepoFileConfig } from './common';
-import { flattenPackageRules } from './flatten';
 import { detectSemanticCommits } from './semantic';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
@@ -222,7 +221,6 @@ export async function mergeRenovateConfig(
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
   returnConfig.renovateJsonPresent = true;
-  returnConfig.packageRules = flattenPackageRules(returnConfig.packageRules);
   // istanbul ignore if
   if (returnConfig.ignorePaths?.length) {
     logger.debug(

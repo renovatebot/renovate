@@ -104,6 +104,15 @@ describe('config/migration', () => {
             packageNames: ['guava'],
             versionScheme: 'maven',
           },
+          {
+            packageNames: ['foo'],
+            packageRules: [
+              {
+                depTypeList: ['bar'],
+                automerge: true,
+              },
+            ],
+          },
         ],
         exposeEnv: true,
         lockFileMaintenance: {
@@ -144,7 +153,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.automerge).toEqual(false);
-      expect(migratedConfig.packageRules).toHaveLength(8);
+      expect(migratedConfig.packageRules).toHaveLength(9);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
     it('migrates before and after schedules', () => {
