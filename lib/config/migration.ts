@@ -7,6 +7,7 @@ import { clone } from '../util/clone';
 import { getOptions } from './definitions';
 import { removedPresets } from './presets/common';
 import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
+import { mergeChildConfig } from './utils';
 
 const options = getOptions();
 
@@ -542,6 +543,34 @@ export function migrateConfig(
           }
         }
       }
+    }
+    // Migrate nested packageRules
+    if (is.nonEmptyArray(migratedConfig.packageRules)) {
+      for (const packageRule of migratedConfig.packageRules) {
+        if (is.array(packageRule.packageRules)) {
+          logger.debug('Flattening nested packageRules');
+          // merge each subrule and add to the parent list
+          for (const subrule of packageRule.packageRules) {
+            const combinedRule = mergeChildConfig(packageRule, subrule);
+            delete combinedRule.packageRules;
+            migratedConfig.packageRules.push(combinedRule);
+          }
+          // delete the nested packageRules
+          delete packageRule.packageRules;
+          // mark the original rule for deletion if it's now pointless
+          if (
+            !Object.keys(packageRule).some(
+              (key) => !key.startsWith('match') && !key.startsWith('exclude')
+            )
+          ) {
+            packageRule._delete = true;
+          }
+        }
+      }
+      // filter out any rules which were marked for deletion in the previous step
+      migratedConfig.packageRules = migratedConfig.packageRules.filter(
+        (rule) => !rule._delete
+      );
     }
     const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {

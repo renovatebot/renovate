@@ -268,8 +268,7 @@ export async function validateConfig(
               'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
-              for (const packageRule of val) {
-                let hasSelector = false;
+              for (const [subIndex, packageRule] of val.entries()) {
                 if (is.object(packageRule)) {
                   const resolvedRule = await resolveConfigPresets(
                     packageRule as RenovateConfig,
@@ -278,16 +277,23 @@ export async function validateConfig(
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
-                  for (const pKey of Object.keys(resolvedRule)) {
-                    if (selectors.includes(pKey)) {
-                      hasSelector = true;
-                    }
-                  }
-                  if (!hasSelector) {
-                    const message = `${currentPath}: Each packageRule must contain at least one selector (${selectors.join(
-                      ', '
-                    )}). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.`;
+                  const selectorLength = Object.keys(
+                    resolvedRule
+                  ).filter((ruleKey) => selectors.includes(ruleKey)).length;
+                  if (!selectorLength) {
+                    const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
+                      packageRule
+                    )}`;
                     errors.push({
+                      topic: 'Configuration Error',
+                      message,
+                    });
+                  }
+                  if (selectorLength === Object.keys(resolvedRule).length) {
+                    const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
+                      packageRule
+                    )}`;
+                    warnings.push({
                       topic: 'Configuration Error',
                       message,
                     });

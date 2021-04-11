@@ -496,9 +496,8 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:jsUnitTest',
-        minor: {
-          groupName: 'JS unit test packages',
-        },
+        matchUpdateTypes: ['minor', 'patch'],
+        groupName: 'JS unit test packages',
       },
     ],
   },
@@ -516,9 +515,8 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:unitTest',
-        minor: {
-          groupName: 'unit test packages',
-        },
+        matchUpdateTypes: ['minor', 'patch'],
+        groupName: 'unit test packages',
       },
     ],
   },
@@ -536,9 +534,8 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:jsTest',
-        minor: {
-          groupName: 'JS test packages',
-        },
+        matchUpdateTypes: ['minor', 'patch'],
+        groupName: 'JS test packages',
       },
     ],
   },
@@ -556,9 +553,8 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:test',
-        minor: {
-          groupName: 'test packages',
-        },
+        matchUpdateTypes: ['minor', 'patch'],
+        groupName: 'test packages',
       },
     ],
   },
