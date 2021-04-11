@@ -507,5 +507,20 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
+
+    it('warns if only selectors in packageRules', async () => {
+      const config = {
+        packageRules: [
+          { matchDepTypes: ['foo'], excludePackageNames: ['bar'] },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(1);
+      expect(warnings).toMatchSnapshot();
+      expect(errors).toHaveLength(0);
+    });
   });
 });

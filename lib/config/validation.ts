@@ -289,6 +289,15 @@ export async function validateConfig(
                       message,
                     });
                   }
+                  if (selectorLength === Object.keys(resolvedRule).length) {
+                    const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
+                      packageRule
+                    )}`;
+                    warnings.push({
+                      topic: 'Configuration Error',
+                      message,
+                    });
+                  }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
