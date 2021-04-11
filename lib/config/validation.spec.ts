@@ -501,7 +501,7 @@ describe('config/validation', () => {
             },
           },
         },
-      };
+      } as never;
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
