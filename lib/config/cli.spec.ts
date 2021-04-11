@@ -103,6 +103,35 @@ describe('config/cli', () => {
         hostRules: [],
       });
     });
+    it('parses json lists correctly as a list of packageRules', () => {
+      argv.push(
+        `--package-rules=[{"excludePackageNames":["react"],"enabled":false},{"matchPackageNames":["angular"],"rangeStrategy":"pin"}]`
+      );
+      expect(cli.getConfig(argv)).toEqual({
+        packageRules: [
+          {
+            excludePackageNames: ['react'],
+            enabled: false,
+          },
+          {
+            matchPackageNames: ['angular'],
+            rangeStrategy: 'pin',
+          },
+        ],
+      });
+    });
+    it('parses [] correctly as empty list of packageRules', () => {
+      argv.push(`--package-rules=[]`);
+      expect(cli.getConfig(argv)).toEqual({
+        packageRules: [],
+      });
+    });
+    it('parses an empty string correctly as empty list of packageRules', () => {
+      argv.push(`--package-rules=`);
+      expect(cli.getConfig(argv)).toEqual({
+        packageRules: [],
+      });
+    });
     it('migrates --endpoints', () => {
       argv.push(`--endpoints=`);
       expect(cli.getConfig(argv)).toEqual({
