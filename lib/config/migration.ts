@@ -5,7 +5,7 @@ import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { clone } from '../util/clone';
 import { getOptions } from './definitions';
-import { removedPresets } from './presets';
+import { removedPresets } from './presets/common';
 import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
 
 const options = getOptions();

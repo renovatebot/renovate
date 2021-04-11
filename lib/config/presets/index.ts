@@ -10,6 +10,7 @@ import * as massage from '../massage';
 import * as migration from '../migration';
 import type { GlobalConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
+import { removedPresets } from './common';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -153,30 +154,6 @@ export function parsePreset(input: string): ParsedPreset {
   }
   return { presetSource, presetPath, packageName, presetName, params };
 }
-
-export const removedPresets = {
-  ':automergeBranchMergeCommit': ':automergeBranch',
-  ':automergeBranchPush': ':automergeBranch',
-  ':base': 'config:base',
-  ':app': 'config:js-app',
-  ':js-app': 'config:js-app',
-  ':library': 'config:js-lib',
-  ':masterIssue': ':dependencyDashboard',
-  ':masterIssueApproval': ':dependencyDashboardApproval',
-  ':unpublishSafe': 'npm:unpublishSafe',
-  'config:application': 'config:js-app',
-  'config:base-js': 'config:base',
-  'config:library': 'config:js-lib',
-  'default:automergeBranchMergeCommit': ':automergeBranch',
-  'default:automergeBranchPush': ':automergeBranch',
-  'default:base': 'config:base',
-  'default:app': 'config:js-app',
-  'default:js-app': 'config:js-app',
-  'default:library': 'config:js-lib',
-  'default:unpublishSafe': 'npm:unpublishSafe',
-  'helpers:oddIsUnstable': null,
-  'helpers:oddIsUnstablePackages': null,
-};
 
 export async function getPreset(
   preset: string,
