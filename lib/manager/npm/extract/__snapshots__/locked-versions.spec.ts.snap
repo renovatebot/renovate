@@ -112,6 +112,12 @@ Array [
         "depName": "b",
         "lockedVersion": "2.0.0",
       },
+      Object {
+        "currentValue": "^1.22.0",
+        "depName": "yarn",
+        "depType": "engines",
+        "lockedVersion": undefined,
+      },
     ],
     "lockFiles": Array [
       "yarn.lock",
@@ -139,6 +145,13 @@ Array [
         "depName": "b",
         "lockedVersion": "2.0.0",
       },
+      Object {
+        "currentValue": "^2.1.0",
+        "depName": "yarn",
+        "depType": "engines",
+        "lockedVersion": undefined,
+        "lookupName": "@yarnpkg/cli",
+      },
     ],
     "lockFiles": Array [
       "yarn.lock",
@@ -165,6 +178,13 @@ Array [
         "currentValue": "2.0.0",
         "depName": "b",
         "lockedVersion": "2.0.0",
+      },
+      Object {
+        "currentValue": "^2.2.0",
+        "depName": "yarn",
+        "depType": "engines",
+        "lockedVersion": undefined,
+        "lookupName": "@yarnpkg/cli",
       },
     ],
     "lockFiles": Array [

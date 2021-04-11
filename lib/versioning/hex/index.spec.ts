@@ -215,4 +215,14 @@ describe('lib/versioning/hex', () => {
       })
     ).toEqual('== 2.0.7');
   });
+  it('handles short range replace', () => {
+    expect(
+      hexScheme.getNewValue({
+        currentValue: '~> 0.4',
+        rangeStrategy: 'replace',
+        currentVersion: '0.4.2',
+        newVersion: '0.6.0',
+      })
+    ).toEqual('~> 0.6');
+  });
 });

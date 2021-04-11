@@ -36,6 +36,11 @@ describe('manager/npm/extract/locked-versions', () => {
                 depName: 'b',
                 currentValue: '2.0.0',
               },
+              {
+                depType: 'engines',
+                depName: 'yarn',
+                currentValue: `^${yarnVersion}`,
+              },
             ],
           },
         ];
