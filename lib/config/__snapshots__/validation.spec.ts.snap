@@ -137,6 +137,19 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors if language or manager objects are nested 1`] = `
+Array [
+  Object {
+    "message": "The \\"docker\\" object can only be configured at the top level of a config but was found inside \\"major.minor\\"",
+    "topic": "Configuration Error",
+  },
+  Object {
+    "message": "The \\"gradle\\" object can only be configured at the top level of a config but was found inside \\"java\\"",
+    "topic": "Configuration Error",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) errors if regexManager fields are missing 1`] = `
 Array [
   Object {

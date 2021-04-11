@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getManagerList } from '../manager';
+import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -40,6 +40,8 @@ export function getParentName(parentPath: string): string {
         .pop()
     : '.';
 }
+
+const topLevelObjects = getLanguageList().concat(getManagerList());
 
 export async function validateConfig(
   config: RenovateConfig,
@@ -114,6 +116,12 @@ export async function validateConfig(
         message: '__proto__',
       });
       continue; // eslint-disable-line
+    }
+    if (parentPath && topLevelObjects.includes(key)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
+      });
     }
     if (key === 'fileMatch') {
       if (parentPath === undefined) {
