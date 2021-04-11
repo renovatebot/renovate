@@ -268,7 +268,7 @@ export async function validateConfig(
               'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
-              for (const packageRule of val) {
+              for (const [subIndex, packageRule] of val.entries()) {
                 let hasSelector = false;
                 if (is.object(packageRule)) {
                   const resolvedRule = await resolveConfigPresets(
@@ -284,9 +284,9 @@ export async function validateConfig(
                     }
                   }
                   if (!hasSelector) {
-                    const message = `${currentPath}: Each packageRule must contain at least one selector (${selectors.join(
-                      ', '
-                    )}). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.`;
+                    const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
+                      packageRule
+                    )}`;
                     errors.push({
                       topic: 'Configuration Error',
                       message,

@@ -78,7 +78,7 @@ Array [
     "topic": "Configuration Error",
   },
   Object {
-    "message": "packageRules: Each packageRule must contain at least one selector (matchFiles, matchPaths, matchLanguages, matchBaseBranches, matchManagers, matchDatasources, matchDepTypes, matchPackageNames, matchPackagePatterns, matchPackagePrefixes, excludePackageNames, excludePackagePatterns, excludePackagePrefixes, matchCurrentVersion, matchSourceUrlPrefixes, matchUpdateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "packageRules[1]: Each packageRule must contain at least one match* or exclude* selector. Rule: {\\"foo\\":1}",
     "topic": "Configuration Error",
   },
   Object {
