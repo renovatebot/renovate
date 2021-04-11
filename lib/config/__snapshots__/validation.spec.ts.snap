@@ -219,3 +219,12 @@ Array [
   },
 ]
 `;
+
+exports[`config/validation validateConfig(config) warns if only selectors in packageRules 1`] = `
+Array [
+  Object {
+    "message": "packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {\\"matchDepTypes\\":[\\"foo\\"],\\"excludePackageNames\\":[\\"bar\\"]}",
+    "topic": "Configuration Error",
+  },
+]
+`;
