@@ -269,7 +269,6 @@ export async function validateConfig(
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
-                let hasSelector = false;
                 if (is.object(packageRule)) {
                   const resolvedRule = await resolveConfigPresets(
                     packageRule as RenovateConfig,
@@ -278,12 +277,10 @@ export async function validateConfig(
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
-                  for (const pKey of Object.keys(resolvedRule)) {
-                    if (selectors.includes(pKey)) {
-                      hasSelector = true;
-                    }
-                  }
-                  if (!hasSelector) {
+                  const selectorLength = Object.keys(
+                    resolvedRule
+                  ).filter((ruleKey) => selectors.includes(ruleKey)).length;
+                  if (!selectorLength) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
                       packageRule
                     )}`;
