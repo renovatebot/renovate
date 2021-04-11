@@ -462,7 +462,7 @@ describe('config/validation', () => {
         fileMatch: ['foo'],
         npm: {
           fileMatch: ['package\\.json'],
-          gradle: {
+          minor: {
             fileMatch: ['bar'],
           },
         },

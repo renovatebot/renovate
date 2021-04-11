@@ -131,7 +131,7 @@ Array [
 exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 2`] = `
 Array [
   Object {
-    "message": "\\"fileMatch\\" must be configured in a manager block and not here: npm.gradle",
+    "message": "\\"fileMatch\\" must be configured in a manager block and not here: npm.minor",
     "topic": "Config warning",
   },
 ]
