@@ -46,9 +46,7 @@ Object {
   ],
   "packageRules": Array [
     Object {
-      "extends": Array [
-        "",
-      ],
+      "extends": Array [],
       "groupName": "{{arg1}}",
     },
   ],
