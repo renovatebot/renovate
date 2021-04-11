@@ -2049,7 +2049,9 @@ Take a random sample of given size from reviewers.
 
 ## rollbackPrs
 
-Configure this to `false` either globally, per-language, or per-package if you want to disable Renovate's behavior of generating rollback PRs when it can't find the current version on the registry anymore.
+Renovate does not create rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
+
+You can configure the `rollbackPrs` property globally, per-lanuage, or per-package to override the default behavior.
 
 ## ruby
 
