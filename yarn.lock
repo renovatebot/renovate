@@ -1525,10 +1525,10 @@
   resolved "https://registry.yarnpkg.com/@types/linkify-markdown/-/linkify-markdown-1.0.0.tgz#50c357a0a60bb220209f19310a79b939e1b8e2a3"
   integrity sha512-p3rl2HtugwjkH8qjEjUi5JByoZkVc2lz6E7D96X5/FqNyj2/jlgIrMlyrbck0U+HyjhOIy0XyTwES3RRz+1koQ==
 
-"@types/luxon@1.26.2":
-  version "1.26.2"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.26.2.tgz#656c24c1af3d41b8854700dc94ed556b9b6ce2f8"
-  integrity sha512-2pvzy4LuxBMBBLAbml6PDcJPiIeZQ0Hqj3PE31IxkNI250qeoRMDovTrHXeDkIL4auvtarSdpTkLHs+st43EYQ==
+"@types/luxon@1.26.3":
+  version "1.26.3"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.26.3.tgz#3d548f5f6f59723c292a8545da97631a85738b95"
+  integrity sha512-2TELN+Pd3Ocde87sKJMSQ9Wdj0zc/okHK3/+fOQHr3CaWv4jtVtcMzmt1Foww1+5YvPd9B5vL3XR6u5KF0daEA==
 
 "@types/markdown-it@12.0.1":
   version "12.0.1"
