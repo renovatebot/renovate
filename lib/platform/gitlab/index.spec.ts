@@ -1257,43 +1257,55 @@ describe('platform/gitlab', () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('auto-accepts the MR when requested', async () => {
-      await initPlatform('13.3.6-ee');
-      httpMock
-        .scope(gitlabApiHost)
-        .post('/api/v4/projects/undefined/merge_requests')
-        .reply(200, {
-          id: 1,
-          iid: 12345,
-          title: 'some title',
-        })
-        .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
-        .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {
-          merge_status: 'can_be_merged',
-          pipeline: {
-            id: 29626725,
-            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
-            ref: 'patch-28',
-            status: 'success',
+    it.each`
+      squash
+      ${true}
+      ${false}
+    `(
+      'auto-accepts the MR when requested when squash is $squash',
+      async ({ squash }) => {
+        await initPlatform('13.3.6-ee');
+        httpMock
+          .scope(gitlabApiHost)
+          .post('/api/v4/projects/undefined/merge_requests')
+          .reply(200, {
+            id: 1,
+            iid: 12345,
+            title: 'some title',
+          })
+          .get(
+            '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          )
+          .reply(200)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          )
+          .reply(200, {
+            merge_status: 'can_be_merged',
+            squash,
+            pipeline: {
+              id: 29626725,
+              sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
+              ref: 'patch-28',
+              status: 'success',
+            },
+          })
+          .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+          .reply(200);
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            azureAutoComplete: false,
+            gitLabAutomerge: true,
           },
-        })
-        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
-        .reply(200);
-      await gitlab.createPr({
-        sourceBranch: 'some-branch',
-        targetBranch: 'master',
-        prTitle: 'some-title',
-        prBody: 'the-body',
-        labels: [],
-        platformOptions: {
-          azureAutoComplete: false,
-          gitLabAutomerge: true,
-        },
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
+        });
+        expect(httpMock.getTrace()).toMatchSnapshot();
+      }
+    );
   });
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {
@@ -1503,9 +1515,17 @@ describe('platform/gitlab', () => {
   });
   describe('mergePr(pr)', () => {
     jest.resetAllMocks();
-    it('merges the PR', async () => {
+    it.each`
+      squash
+      ${true}
+      ${false}
+    `('merges the PR when squash is $squash', async ({ squash }) => {
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests/1?include_diverged_commits_count=1'
+        )
+        .reply(200, { squash })
         .put('/api/v4/projects/undefined/merge_requests/1/merge')
         .reply(200);
       await gitlab.mergePr(1, undefined);

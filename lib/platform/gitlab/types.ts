@@ -27,11 +27,21 @@ export interface GitLabMergeRequest {
   reviewers?: GitLabUser[];
   labels: string[];
   sha: string;
+  created_at: string;
+  pipeline: null | {
+    id: number;
+    sha: string;
+    ref: string;
+    status: string;
+    web_url: string;
+  };
+  squash: boolean;
 }
 
 export interface UpdateMergeRequest {
   target_branch?: string;
   title?: string;
+  description?: string;
   assignee_id?: number;
   assignee_ids?: number[];
   reviewer_ids?: number[];
