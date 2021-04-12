@@ -1,7 +1,8 @@
+import { getName } from '../../test/util';
 import { applyEnabledManagersFilter } from './enabled-managers';
-import { RenovateConfig } from './types';
+import type { RenovateConfig } from './types';
 
-describe('config/enabled-managers', () => {
+describe(getName(__filename), () => {
   const config: RenovateConfig = {
     npm: {
       enabled: true,
@@ -10,12 +11,14 @@ describe('config/enabled-managers', () => {
       enabled: false,
     },
   };
+
   it('ignores config changes when enabledManagers is empty', () => {
     expect(applyEnabledManagersFilter(config)).toStrictEqual(config);
     expect(
       applyEnabledManagersFilter({ ...config, enabledManagers: ['foobar'] })
     ).toStrictEqual({ ...config, enabledManagers: ['foobar'] });
   });
+
   it('changes enabled flag for enabled managers', () => {
     expect(
       applyEnabledManagersFilter({
