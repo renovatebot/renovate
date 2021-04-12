@@ -80,7 +80,6 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
       CI: 'true',
-      YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
     };
 
     if (isYarn1 && config.skipInstalls !== false) {
@@ -100,6 +99,7 @@ export async function generateLockFile(
       cmdOptions +=
         '--ignore-engines --ignore-platform --network-timeout 100000';
     } else {
+      extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
     }
     if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {
