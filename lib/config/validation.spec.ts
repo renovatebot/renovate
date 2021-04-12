@@ -484,6 +484,32 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
+    it('errors if language or manager objects are nested', async () => {
+      const config = {
+        python: {
+          enabled: false,
+        },
+        java: {
+          gradle: {
+            enabled: false,
+          },
+        },
+        major: {
+          minor: {
+            docker: {
+              automerge: true,
+            },
+          },
+        },
+      } as never;
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(errors).toHaveLength(2);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+    });
+
     it('warns if hostType has the wrong parent', async () => {
       const config = {
         hostType: 'npm',
