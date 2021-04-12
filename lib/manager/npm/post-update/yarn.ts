@@ -80,6 +80,7 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
       CI: 'true',
+      YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
     };
 
     if (isYarn1 && config.skipInstalls !== false) {
