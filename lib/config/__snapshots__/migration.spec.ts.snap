@@ -199,6 +199,15 @@ Object {
       "respectLatest": false,
       "schedule": "before 5am on Monday",
     },
+    Object {
+      "automerge": true,
+      "matchDepTypes": Array [
+        "bar",
+      ],
+      "matchPackageNames": Array [
+        "foo",
+      ],
+    },
   ],
   "patch": Object {
     "automerge": true,

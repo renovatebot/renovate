@@ -65,18 +65,22 @@ describe('config/validation', () => {
           {
             matchPackageNames: ['foo'],
             matchCurrentVersion: '/^2/',
+            enabled: true,
           },
           {
             matchPackageNames: ['bar'],
             matchCurrentVersion: '/***$}{]][/',
+            enabled: true,
           },
           {
             matchPackageNames: ['baz'],
             matchCurrentVersion: '!/^2/',
+            enabled: true,
           },
           {
             matchPackageNames: ['quack'],
             matchCurrentVersion: '!/***$}{]][/',
+            enabled: true,
           },
         ],
       };
@@ -93,6 +97,7 @@ describe('config/validation', () => {
           {
             matchPackagePatterns: ['*'],
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            enabled: true,
           },
         ],
         lockFileMaintenance: {
@@ -112,6 +117,7 @@ describe('config/validation', () => {
         packageRules: [
           {
             matchManagers: ['foo'],
+            enabled: true,
           },
         ],
       };
@@ -127,6 +133,7 @@ describe('config/validation', () => {
         packageRules: [
           {
             matchManagers: 'string not an array',
+            enabled: true,
           },
         ],
       };
@@ -178,6 +185,7 @@ describe('config/validation', () => {
           packageRules: [
             {
               matchPackageNames: ['meteor'],
+              enabled: true,
             },
           ],
         },
@@ -454,7 +462,7 @@ describe('config/validation', () => {
         fileMatch: ['foo'],
         npm: {
           fileMatch: ['package\\.json'],
-          gradle: {
+          minor: {
             fileMatch: ['bar'],
           },
         },
@@ -474,6 +482,32 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
       expect(warnings).toMatchSnapshot();
+    });
+
+    it('errors if language or manager objects are nested', async () => {
+      const config = {
+        python: {
+          enabled: false,
+        },
+        java: {
+          gradle: {
+            enabled: false,
+          },
+        },
+        major: {
+          minor: {
+            docker: {
+              automerge: true,
+            },
+          },
+        },
+      } as never;
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(errors).toHaveLength(2);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
     });
 
     it('warns if hostType has the wrong parent', async () => {
@@ -498,6 +532,21 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
+    });
+
+    it('warns if only selectors in packageRules', async () => {
+      const config = {
+        packageRules: [
+          { matchDepTypes: ['foo'], excludePackageNames: ['bar'] },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(1);
+      expect(warnings).toMatchSnapshot();
+      expect(errors).toHaveLength(0);
     });
   });
 });
