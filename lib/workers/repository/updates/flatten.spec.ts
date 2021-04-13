@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../../test/util';
+import { RenovateConfig, getConfig, getName } from '../../../../test/util';
 
 import { LANGUAGE_DOCKER } from '../../../constants/languages';
 import { flattenUpdates } from './flatten';
@@ -11,7 +11,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe('workers/repository/updates/flatten', () => {
+describe(getName(__filename), () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       config.lockFileMaintenance.enabled = true;

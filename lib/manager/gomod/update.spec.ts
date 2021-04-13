@@ -1,11 +1,12 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { UpdateType } from '../../config';
 import { updateDependency } from './update';
 
 const gomod1 = readFileSync('lib/manager/gomod/__fixtures__/1/go.mod', 'utf8');
 const gomod2 = readFileSync('lib/manager/gomod/__fixtures__/2/go.mod', 'utf8');
 
-describe('manager/gomod/update', () => {
+describe(getName(__filename), () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {

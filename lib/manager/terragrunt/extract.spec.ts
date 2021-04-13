@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const tg1 = readFileSync('lib/manager/terragrunt/__fixtures__/2.hcl', 'utf8');
@@ -7,7 +8,7 @@ const tg2 = `terragrunt {
 }
 `;
 
-describe('lib/manager/terragrunt/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
-import { fs } from '../../../../test/util';
+import { fs, getName } from '../../../../test/util';
 import { getNpmLock } from './npm';
 
 jest.mock('../../../util/fs');
 
-describe('manager/npm/extract/npm', () => {
+describe(getName(__filename), () => {
   describe('.getNpmLock()', () => {
     it('returns empty if failed to parse', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');

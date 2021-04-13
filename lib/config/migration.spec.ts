@@ -1,3 +1,4 @@
+import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
@@ -10,7 +11,7 @@ interface RenovateConfig extends _RenovateConfig {
   node?: RenovateSharedConfig & { supportPolicy?: unknown };
 }
 
-describe('config/migration', () => {
+describe(getName(__filename), () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
       const config: RenovateConfig = {

@@ -1,3 +1,4 @@
+import { getName } from '../../test/util';
 import {
   PLATFORM_TYPE_BITBUCKET,
   PLATFORM_TYPE_GITLAB,
@@ -5,7 +6,7 @@ import {
 import * as env from './env';
 import type { RenovateOptions } from './types';
 
-describe('config/env', () => {
+describe(getName(__filename), () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
       expect(env.getConfig({})).toEqual({ hostRules: [] });

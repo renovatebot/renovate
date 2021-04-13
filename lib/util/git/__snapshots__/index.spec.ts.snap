@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/git getBranchFiles(branchName) detects changed files compared to current base branch 1`] = `
+exports[`util/git/index getBranchFiles(branchName) detects changed files compared to current base branch 1`] = `
 Array [
   "some-new-file",
 ]
 `;
 
-exports[`platform/git getCommitMessages() returns commit messages 1`] = `
+exports[`util/git/index getCommitMessages() returns commit messages 1`] = `
 Array [
   "master message",
   "past message",
 ]
 `;
 
-exports[`platform/git getFileList() should exclude submodules 1`] = `
+exports[`util/git/index getFileList() should exclude submodules 1`] = `
 Array [
   ".gitmodules",
   "file_to_delete",
@@ -22,7 +22,7 @@ Array [
 ]
 `;
 
-exports[`platform/git getFileList() should return the correct files 1`] = `
+exports[`util/git/index getFileList() should return the correct files 1`] = `
 Array [
   "file_to_delete",
   "master_file",
@@ -30,14 +30,14 @@ Array [
 ]
 `;
 
-exports[`platform/git initRepo()) should fetch latest 1`] = `
+exports[`util/git/index initRepo()) should fetch latest 1`] = `
 Array [
   "master message",
   "past message",
 ]
 `;
 
-exports[`platform/git initRepo()) should fetch latest 2`] = `
+exports[`util/git/index initRepo()) should fetch latest 2`] = `
 Array [
   "past message2",
   "master message",

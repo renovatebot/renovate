@@ -1,5 +1,11 @@
 import * as _fs from 'fs-extra';
-import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import {
+  defaultConfig,
+  getName,
+  git,
+  mocked,
+  platform,
+} from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import {
   MANAGER_LOCKFILE_ERROR,
@@ -53,7 +59,7 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-describe('workers/branch', () => {
+describe(getName(__filename), () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],

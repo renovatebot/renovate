@@ -1,7 +1,8 @@
 import yaml from 'js-yaml';
+import { getName } from '../../../test/util';
 import * as helmv3Updater from './update';
 
-describe('lib/manager/helmv3/update', () => {
+describe(getName(__filename), () => {
   describe('.bumpPackageVersion()', () => {
     const content = yaml.safeDump({
       apiVersion: 'v2',

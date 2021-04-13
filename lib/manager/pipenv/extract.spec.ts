@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { fs as fsutil } from '../../../test/util';
+import { fs as fsutil, getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -25,7 +25,7 @@ const pipfile5 = fs.readFileSync(
   'utf8'
 );
 
-describe('lib/manager/pipenv/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('[packages]\r\n', 'Pipfile')).toBeNull();

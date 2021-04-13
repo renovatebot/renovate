@@ -1,11 +1,16 @@
-import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  getName,
+  platform,
+} from '../../../../test/util';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
 } from '../../../constants/error-messages';
 import { initApis } from './apis';
 
-describe('workers/repository/init/apis', () => {
+describe(getName(__filename), () => {
   describe('initApis', () => {
     let config: RenovateConfig;
     beforeEach(() => {

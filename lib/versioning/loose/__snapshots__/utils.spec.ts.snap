@@ -1,27 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`loose/utils GenericVersioningApi equals 1`] = `true`;
+exports[`versioning/loose/utils GenericVersioningApi equals 1`] = `true`;
 
-exports[`loose/utils GenericVersioningApi getMajor 1`] = `1`;
+exports[`versioning/loose/utils GenericVersioningApi getMajor 1`] = `1`;
 
-exports[`loose/utils GenericVersioningApi getMinor 1`] = `0`;
+exports[`versioning/loose/utils GenericVersioningApi getMinor 1`] = `0`;
 
-exports[`loose/utils GenericVersioningApi getNewValue 1`] = `undefined`;
+exports[`versioning/loose/utils GenericVersioningApi getNewValue 1`] = `undefined`;
 
-exports[`loose/utils GenericVersioningApi getPatch 1`] = `0`;
+exports[`versioning/loose/utils GenericVersioningApi getPatch 1`] = `0`;
 
-exports[`loose/utils GenericVersioningApi isCompatible 1`] = `true`;
+exports[`versioning/loose/utils GenericVersioningApi isCompatible 1`] = `true`;
 
-exports[`loose/utils GenericVersioningApi isGreaterThan 1`] = `false`;
+exports[`versioning/loose/utils GenericVersioningApi isGreaterThan 1`] = `false`;
 
-exports[`loose/utils GenericVersioningApi isSingleVersion 1`] = `true`;
+exports[`versioning/loose/utils GenericVersioningApi isSingleVersion 1`] = `true`;
 
-exports[`loose/utils GenericVersioningApi isStable 1`] = `true`;
+exports[`versioning/loose/utils GenericVersioningApi isStable 1`] = `true`;
 
-exports[`loose/utils GenericVersioningApi isValid 1`] = `true`;
+exports[`versioning/loose/utils GenericVersioningApi isValid 1`] = `true`;
 
-exports[`loose/utils GenericVersioningApi isVersion 1`] = `true`;
+exports[`versioning/loose/utils GenericVersioningApi isVersion 1`] = `true`;
 
-exports[`loose/utils GenericVersioningApi matches 1`] = `true`;
+exports[`versioning/loose/utils GenericVersioningApi matches 1`] = `true`;
 
-exports[`loose/utils GenericVersioningApi sortVersions 1`] = `0`;
+exports[`versioning/loose/utils GenericVersioningApi sortVersions 1`] = `0`;

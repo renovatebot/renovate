@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const aalib = fs.readFileSync(
@@ -19,7 +20,7 @@ const ibazel = fs.readFileSync(
   'utf8'
 );
 
-describe('lib/manager/homebrew/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
       const res = extractPackageFile(aalib);
