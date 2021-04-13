@@ -1,4 +1,10 @@
-import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  getName,
+  git,
+  mocked,
+} from '../../../../test/util';
 import * as _branchWorker from '../../branch';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, ProcessBranchResult } from '../../types';
@@ -21,7 +27,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe('workers/repository/write', () => {
+describe(getName(__filename), () => {
   describe('writeUpdates()', () => {
     it('skips branches blocked by pin', async () => {
       const branches: BranchConfig[] = [

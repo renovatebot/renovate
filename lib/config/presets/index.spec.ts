@@ -1,5 +1,5 @@
 import { RenovateConfig } from '..';
-import { mocked } from '../../../test/util';
+import { getName, mocked } from '../../../test/util';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
 import * as _local from './local';
 import * as _npm from './npm';
@@ -33,7 +33,7 @@ npm.getPreset = jest.fn(({ packageName, presetName }) => {
   return null;
 });
 
-describe('config/presets', () => {
+describe(getName(__filename), () => {
   describe('resolvePreset', () => {
     let config: RenovateConfig;
     beforeEach(() => {

@@ -1,3 +1,4 @@
+import { getName } from '../../../test/util';
 import {
   Limit,
   incLimitedValue,
@@ -6,7 +7,7 @@ import {
   setMaxLimit,
 } from './limits';
 
-describe('lib/workers/global/limits', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     resetAllLimits();
   });

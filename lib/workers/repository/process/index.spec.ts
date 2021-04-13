@@ -1,4 +1,10 @@
-import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  getName,
+  git,
+  mocked,
+} from '../../../../test/util';
 import * as _extractUpdate from './extract-update';
 import { extractDependencies, updateRepo } from '.';
 
@@ -13,7 +19,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe('workers/repository/process/index', () => {
+describe(getName(__filename), () => {
   describe('processRepo()', () => {
     it('processes single branches', async () => {
       const res = await extractDependencies(config);
