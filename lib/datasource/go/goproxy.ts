@@ -1,9 +1,11 @@
+import is from '@sindresorhus/is';
 import moo from 'moo';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { http } from './common';
+import { GoproxyFallback, GoproxyHost, VersionInfo } from './types';
 
 export function encodeCase(input: string): string {
   return input.replace(/([A-Z])/g, (x) => `!${x.toLowerCase()}`);
@@ -19,11 +21,6 @@ export async function listVersions(
     .split(/\s+/)
     .filter(Boolean)
     .filter((x) => x.indexOf('+') === -1);
-}
-
-interface VersionInfo {
-  Version: string;
-  Time?: string;
 }
 
 export async function versionInfo(
@@ -45,19 +42,8 @@ export async function versionInfo(
   return result;
 }
 
-enum GoproxyFallback {
-  WhenNotFoundOrGone = ',',
-  Always = '|',
-}
-
-interface GoproxyHost {
-  url: string;
-  fallback: GoproxyFallback;
-  disabled?: true;
-}
-
 export function parseGoproxy(input: unknown): GoproxyHost[] | null {
-  if (!input || typeof input !== 'string') {
+  if (!is.string(input)) {
     return null;
   }
 
@@ -168,13 +154,16 @@ export async function getReleases(
           return { releases };
         }
       } catch (err) {
-        logger.debug({ err }, 'Goproxy error');
         const statusCode = err?.response?.statusCode;
-        if (
-          fallback === GoproxyFallback.WhenNotFoundOrGone &&
-          statusCode !== 404 &&
-          statusCode !== 410
-        ) {
+        const continueFallback =
+          fallback === GoproxyFallback.Always
+            ? true
+            : statusCode !== 404 && statusCode !== 410;
+        const msg = continueFallback
+          ? 'Goproxy error: trying next URL provided with GOPROXY'
+          : 'Goproxy error: skipping other URLs provided with GOPROXY';
+        logger.debug({ err }, msg);
+        if (!continueFallback) {
           break;
         }
       }

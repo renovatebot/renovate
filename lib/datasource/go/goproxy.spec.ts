@@ -1,4 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import {
   encodeCase,
   getProxyList,
@@ -8,7 +9,7 @@ import {
   versionInfo,
 } from './goproxy';
 
-describe('datasource/go/utils', () => {
+describe(getName(__filename), () => {
   it('encodeCase', () => {
     expect(encodeCase('foo')).toBe('foo');
     expect(encodeCase('Foo')).toBe('!foo');
