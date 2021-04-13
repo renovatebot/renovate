@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { id as datasource } from '.';
 
 const consulData: any = fs.readFileSync(
@@ -16,7 +17,7 @@ const serviceDiscoveryCustomResult: any = fs.readFileSync(
 const baseUrl = 'https://registry.terraform.io';
 const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
-describe('datasource/terraform-module', () => {
+describe(getName(__filename), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
