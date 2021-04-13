@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/extract .extractPackageFile() updates internal packages 1`] = `
+exports[`manager/npm/extract/monorepo .extractPackageFile() updates internal packages 1`] = `
 Array [
   Object {
     "deps": Array [
@@ -62,7 +62,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses lerna package settings 1`] = `
+exports[`manager/npm/extract/monorepo .extractPackageFile() uses lerna package settings 1`] = `
 Array [
   Object {
     "deps": Array [
@@ -127,7 +127,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings with lerna 1`] = `
+exports[`manager/npm/extract/monorepo .extractPackageFile() uses yarn workspaces package settings with lerna 1`] = `
 Array [
   Object {
     "lernaClient": "yarn",
@@ -165,7 +165,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings without lerna 1`] = `
+exports[`manager/npm/extract/monorepo .extractPackageFile() uses yarn workspaces package settings without lerna 1`] = `
 Array [
   Object {
     "packageFile": "package.json",
