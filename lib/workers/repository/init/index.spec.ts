@@ -1,4 +1,4 @@
-import { mocked } from '../../../../test/util';
+import { getName, mocked } from '../../../../test/util';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
@@ -18,7 +18,7 @@ const config = mocked(_config);
 const onboarding = mocked(_onboarding);
 const secrets = mocked(_secrets);
 
-describe('workers/repository/init', () => {
+describe(getName(__filename), () => {
   describe('initRepo', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue({} as never);

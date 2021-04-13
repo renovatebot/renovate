@@ -1,6 +1,7 @@
 import {
   RenovateConfig,
   getConfig,
+  getName,
   git,
   platform,
 } from '../../../../test/util';
@@ -19,7 +20,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe('workers/repository/finalise/prune', () => {
+describe(getName(__filename), () => {
   describe('pruneStaleBranches()', () => {
     beforeEach(() => {
       setAdminConfig();

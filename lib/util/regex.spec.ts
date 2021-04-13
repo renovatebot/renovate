@@ -1,9 +1,10 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import RE2 from 're2';
+import { getName } from '../../test/util';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { regEx } from './regex';
 
-describe('util/regex', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetModules();
   });
