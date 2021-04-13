@@ -2049,7 +2049,13 @@ Take a random sample of given size from reviewers.
 
 ## rollbackPrs
 
-Configure this to `false` either globally, per-language, or per-package if you want to disable Renovate's behavior of generating rollback PRs when it can't find the current version on the registry anymore.
+There are times when a dependency version in use by a project gets removed from the registry.
+For some registries, existing releases or even whole packages can be removed or "yanked" at any time, while for some registries only very new or unused releases can be removed.
+Renovate's "rollback" feature exists to propose a downgrade to the next-highest release if the current release is no longer found in the registry.
+
+Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
+
+You can configure the `rollbackPrs` property globally, per-lanuage, or per-package to override the default behavior.
 
 ## ruby
 
