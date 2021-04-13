@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import URL from 'url';
 import pMap from 'p-map';
 import { logger } from '../../logger';
@@ -7,8 +8,11 @@ import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { hashOfZipContent } from './hash';
-import type { TerraformBuild, TerraformProvider } from './types';
-import { TerraformProviderReleaseBackend } from './types';
+import type {
+  TerraformBuild,
+  TerraformProvider,
+  TerraformProviderReleaseBackend,
+} from './types';
 
 export const id = 'terraform-provider';
 export const customRegistrySupport = true;
@@ -52,6 +56,8 @@ export function getHashes(
 
 export async function createReleases(
   lookupName: string,
+  registryURL: string,
+  repository: string,
   versions: string[]
 ): Promise<Release[]> {
   const backendLookUpName = `terraform-provider-${lookupName}`;
@@ -61,6 +67,16 @@ export async function createReleases(
   return pMap(
     versions,
     async (version) => {
+      // check cache
+      const cacheKey = `${registryURL}/${repository}/${lookupName}-${version}`;
+      const cachedRelease = await packageCache.get<Release>(
+        'terraform-provider-release',
+        cacheKey
+      );
+      if (cachedRelease) {
+        return cachedRelease;
+      }
+
       const versionsBackend = res[backendLookUpName].versions;
       const versionReleaseBackend = versionsBackend[version];
       if (versionReleaseBackend == null) {
@@ -77,6 +93,14 @@ export async function createReleases(
         version,
         hashes,
       };
+
+      // save to cache
+      await packageCache.set(
+        'terraform-provider-release',
+        cacheKey,
+        release,
+        10080
+      ); // cache for a week
       return release;
     },
     { concurrency: 2 }
@@ -103,7 +127,12 @@ async function queryRegistry(
     version,
   }));
   // add a release per version with build hashes
-  dep.releases = await createReleases(lookupName, res.versions);
+  dep.releases = await createReleases(
+    lookupName,
+    registryURL,
+    repository,
+    res.versions
+  );
 
   // set published date for latest release
   const latestVersion = dep.releases.find(
@@ -138,7 +167,12 @@ async function queryReleaseBackend(
   // get list of all versions
   const versions = Object.keys(res[backendLookUpName].versions);
   // add a release per version with build hashes
-  dep.releases = await createReleases(lookupName, versions);
+  dep.releases = await createReleases(
+    lookupName,
+    registryURL,
+    repository,
+    versions
+  );
   logger.trace({ dep }, 'dep');
   return dep;
 }
