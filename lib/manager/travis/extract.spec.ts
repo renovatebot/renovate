@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const invalidYAML = readFileSync(
@@ -7,7 +8,7 @@ const invalidYAML = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/travis/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');
