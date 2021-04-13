@@ -19,6 +19,8 @@ describe('applyPackageRules()', () => {
     packageRules: [
       {
         matchPackageNames: ['a', 'b'],
+        matchPackagePrefixes: ['xyz/'],
+        excludePackagePrefixes: ['xyz/foo'],
         x: 2,
       },
       {
@@ -84,6 +86,21 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
     expect(res.y).toBe(2);
+  });
+  it('applies matchPackagePrefixes', () => {
+    const dep = {
+      depName: 'xyz/abc',
+    };
+    const res = applyPackageRules({ ...config1, ...dep });
+    expect(res.x).toBe(2);
+    expect(res.y).toBe(2);
+  });
+  it('applies excludePackagePrefixes', () => {
+    const dep = {
+      depName: 'xyz/foo-a',
+    };
+    const res = applyPackageRules({ ...config1, ...dep });
+    expect(res.x).toBeUndefined();
   });
   it('applies the second second rule', () => {
     const dep = {

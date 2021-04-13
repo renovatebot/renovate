@@ -32,6 +32,7 @@ const options: RenovateOptions[] = [
     default: {
       commands: [],
       fileFilters: [],
+      executionMode: 'update',
     },
   },
   {
@@ -52,6 +53,16 @@ const options: RenovateOptions[] = [
     subType: 'string',
     parent: 'postUpgradeTasks',
     default: [],
+    cli: false,
+  },
+  {
+    name: 'executionMode',
+    description:
+      'Controls whether the post upgrade tasks runs for every update or once per upgrade branch',
+    type: 'string',
+    parent: 'postUpgradeTasks',
+    allowedValues: ['update', 'branch'],
+    default: 'update',
     cli: false,
   },
   {
@@ -250,6 +261,14 @@ const options: RenovateOptions[] = [
     admin: true,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'dockerChildPrefix',
+    description:
+      'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
+    type: 'string',
+    admin: true,
+    default: 'renovate_',
   },
   {
     name: 'dockerImagePrefix',
@@ -801,6 +820,32 @@ const options: RenovateOptions[] = [
     name: 'excludePackageNames',
     description:
       'Package names to exclude. Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchPackagePrefixes',
+    description:
+      'Package name prefixes to match. Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludePackagePrefixes',
+    description:
+      'Package name prefixes to exclude. Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,

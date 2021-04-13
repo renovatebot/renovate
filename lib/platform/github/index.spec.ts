@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
 import { mocked } from '../../../test/util';
 import {
@@ -540,6 +541,7 @@ describe('platform/github', () => {
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             title: 'old title - autoclosed',
             state: PrState.Closed,
+            closed_at: DateTime.now().minus({ days: 6 }).toISO(),
           },
         ])
         .post('/repos/some/repo/git/refs')
@@ -566,6 +568,31 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('aborts reopen if PR is too old', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
+        {
+          number: 90,
+          head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+          state: PrState.Open,
+        },
+        {
+          number: 91,
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          title: 'old title - autoclosed',
+          state: PrState.Closed,
+          closed_at: DateTime.now().minus({ days: 7 }).toISO(),
+        },
+      ]);
+
+      await github.initRepo({
+        repository: 'some/repo',
+      } as any);
+      const pr = await github.getBranchPr('somebranch');
+      expect(pr).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('aborts reopening if branch recreation fails', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -577,6 +604,7 @@ describe('platform/github', () => {
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             title: 'old title - autoclosed',
             state: PrState.Closed,
+            closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
         .post('/repos/some/repo/git/refs')
@@ -602,6 +630,7 @@ describe('platform/github', () => {
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             title: 'old title - autoclosed',
             state: PrState.Closed,
+            closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
         .post('/repos/some/repo/git/refs')
@@ -2123,7 +2152,17 @@ describe('platform/github', () => {
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null on errors', async () => {
+    it('throws on malformed JSON', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.get('/repos/some/repo/contents/file.json').reply(200, {
+        content: Buffer.from('!@#').toString('base64'),
+      });
+      await expect(github.getJsonFile('file.json')).rejects.toThrow();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('throws on errors', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
@@ -2131,8 +2170,7 @@ describe('platform/github', () => {
         .get('/repos/some/repo/contents/file.json')
         .replyWithError('some error');
 
-      const res = await github.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
