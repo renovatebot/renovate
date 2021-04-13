@@ -145,6 +145,18 @@ describe(getName(__filename), () => {
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
+    it('warning if included not supported enabled managers', async () => {
+      const config = {
+        enabledManagers: ['foo'],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(1);
+      expect(errors).toHaveLength(0);
+      expect(warnings).toMatchSnapshot();
+    });
     it('errors for all types', async () => {
       const config: RenovateConfig = {
         allowedVersions: 'foo',
