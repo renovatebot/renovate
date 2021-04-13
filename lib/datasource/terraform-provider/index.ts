@@ -1,10 +1,14 @@
 import URL from 'url';
+import pMap from 'p-map';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { hashOfZipContent } from './hash';
+import type { TerraformBuild, TerraformProvider } from './types';
+import { TerraformProviderReleaseBackend } from './types';
 
 export const id = 'terraform-provider';
 export const customRegistrySupport = true;
@@ -17,25 +21,66 @@ export const registryStrategy = 'hunt';
 
 const http = new Http(id);
 
-interface TerraformProvider {
-  namespace: string;
-  name: string;
-  provider: string;
-  source?: string;
-  versions: string[];
-  version: string;
-  published_at: string;
+async function getReleaseBackendIndex(): Promise<TerraformProviderReleaseBackend> {
+  return (
+    await http.getJson<TerraformProviderReleaseBackend>(
+      `${defaultRegistryUrls[1]}/index.json`
+    )
+  ).body;
 }
 
-interface TerraformProviderReleaseBackend {
-  [key: string]: {
-    name: string;
-    versions: VersionsReleaseBackend;
-  };
+export function getHashes(
+  builds: TerraformBuild[]
+): Promise<Record<string, string>[]> {
+  // TODO replace hard coded cache
+  const cacheDir = '/tmp/download';
+
+  // for each build download ZIP, extract content and generate hash for all containing files
+  return pMap(
+    builds,
+    async (build) => {
+      const downloadPath = `${cacheDir}/${build.filename}`;
+      // TODO implement download
+      const hash = await hashOfZipContent(downloadPath);
+      const buildName = `${build.os}_${build.arch}`;
+      const record: Record<string, string> = { [buildName]: hash };
+      return record;
+    },
+    { concurrency: 2 } // allow to look up 2 builds for this version in parallel
+  );
 }
 
-interface VersionsReleaseBackend {
-  [key: string]: Record<string, any>;
+export async function createReleases(
+  lookupName: string,
+  versions: string[]
+): Promise<Release[]> {
+  const backendLookUpName = `terraform-provider-${lookupName}`;
+  const res = await getReleaseBackendIndex();
+
+  // allow to look up 2 builds for this version in parallel
+  return pMap(
+    versions,
+    async (version) => {
+      const versionsBackend = res[backendLookUpName].versions;
+      const versionReleaseBackend = versionsBackend[version];
+      if (versionReleaseBackend == null) {
+        logger.debug(
+          { versions: versionsBackend },
+          `Could not find find ${version}`
+        );
+        return null;
+      }
+      const builds = versionReleaseBackend.builds;
+      // TODO implement hash caching
+      const hashes = await getHashes(builds);
+      const release: Release = {
+        version,
+        hashes,
+      };
+      return release;
+    },
+    { concurrency: 2 }
+  ); // allow to look up builds for 2 versions in parallel
 }
 
 async function queryRegistry(
@@ -57,6 +102,9 @@ async function queryRegistry(
   dep.releases = res.versions.map((version) => ({
     version,
   }));
+  // add a release per version with build hashes
+  dep.releases = await createReleases(lookupName, res.versions);
+
   // set published date for latest release
   const latestVersion = dep.releases.find(
     (release) => res.version === release.version
@@ -77,9 +125,7 @@ async function queryReleaseBackend(
   repository: string
 ): Promise<ReleaseResult> {
   const backendLookUpName = `terraform-provider-${lookupName}`;
-  const backendURL = registryURL + `/index.json`;
-  const res = (await http.getJson<TerraformProviderReleaseBackend>(backendURL))
-    .body;
+  const res = await getReleaseBackendIndex();
 
   if (!res[backendLookUpName]) {
     return null;
@@ -89,11 +135,10 @@ async function queryReleaseBackend(
     releases: null,
     sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
   };
-  dep.releases = Object.keys(res[backendLookUpName].versions).map(
-    (version) => ({
-      version,
-    })
-  );
+  // get list of all versions
+  const versions = Object.keys(res[backendLookUpName].versions);
+  // add a release per version with build hashes
+  dep.releases = await createReleases(lookupName, versions);
   logger.trace({ dep }, 'dep');
   return dep;
 }
