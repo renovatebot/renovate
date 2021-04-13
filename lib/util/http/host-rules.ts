@@ -39,10 +39,26 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   return options;
 }
 
-export function getRequestLimit(url: string): number | null {
-  const hostRule = hostRules.find({
-    url,
-  });
+export interface QueueOptions {
+  concurrency?: number;
+  interval?: number;
+  intervalCap?: number;
+}
+
+export function getQueueOptions(url: string): QueueOptions {
+  const options: QueueOptions = {};
+
+  const hostRule = hostRules.find({ url });
   const limit = hostRule.concurrentRequestLimit;
-  return typeof limit === 'number' && limit > 0 ? limit : null;
+  if (typeof limit === 'number' && limit > 0) {
+    options.concurrency = limit;
+  }
+
+  if (url.startsWith('https://crates.io/')) {
+    // see https://crates.io/policies#crawlers
+    options.interval = 1000;
+    options.intervalCap = 1;
+  }
+
+  return options;
 }

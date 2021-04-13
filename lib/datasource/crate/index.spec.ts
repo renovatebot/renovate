@@ -5,9 +5,11 @@ import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import * as memCache from '../../util/cache/memory';
 import { setFsConfig } from '../../util/fs';
+import * as _hostRules from '../../util/http/host-rules';
 import {
   RegistryFlavor,
   RegistryInfo,
@@ -16,10 +18,17 @@ import {
   getIndexSuffix,
 } from '.';
 
+jest.mock('../../util/http/host-rules');
+const hostRules = mocked(_hostRules);
+
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
 const res1 = fs.readFileSync('lib/datasource/crate/__fixtures__/libc', 'utf8');
+const libcApiRes = fs.readFileSync(
+  'lib/datasource/crate/__fixtures__/libc.api',
+  'utf8'
+);
 const res2 = fs.readFileSync(
   'lib/datasource/crate/__fixtures__/amethyst',
   'utf8'
@@ -98,6 +107,13 @@ describe('datasource/crate', () => {
       simpleGit.mockReset();
       memCache.init();
       setAdminConfig();
+
+      // run tests without rate limit
+      const { applyHostRules } = jest.requireActual(
+        '../../util/http/host-rules'
+      );
+      hostRules.applyHostRules.mockImplementation(applyHostRules);
+      hostRules.getQueueOptions.mockReturnValue({});
     });
 
     afterEach(() => {
@@ -128,6 +144,11 @@ describe('datasource/crate', () => {
     });
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, {});
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/non_existent_crate')
+        .reply(200, undefined);
+
       expect(
         await getPkgReleases({
           datasource,
@@ -142,6 +163,11 @@ describe('datasource/crate', () => {
         .scope(baseUrl)
         .get('/no/n_/non_existent_crate')
         .reply(200, undefined);
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/non_existent_crate')
+        .reply(200, undefined);
+
       expect(
         await getPkgReleases({
           datasource,
@@ -153,6 +179,11 @@ describe('datasource/crate', () => {
     });
     it('returns null for empty list', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, '\n');
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/non_existent_crate')
+        .reply(200, undefined);
+
       expect(
         await getPkgReleases({
           datasource,
@@ -200,8 +231,14 @@ describe('datasource/crate', () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data: libc', async () => {
       httpMock.scope(baseUrl).get('/li/bc/libc').reply(200, res1);
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/libc')
+        .reply(200, libcApiRes);
+
       const res = await getPkgReleases({
         datasource,
         depName: 'libc',
@@ -212,8 +249,32 @@ describe('datasource/crate', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('processes real data: libc (with failing API call)', async () => {
+      httpMock.scope(baseUrl).get('/li/bc/libc').reply(200, res1);
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/libc')
+        .reply(500, '');
+
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'libc',
+        registryUrls: ['https://crates.io'],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('processes real data: amethyst', async () => {
       httpMock.scope(baseUrl).get('/am/et/amethyst').reply(200, res2);
+      httpMock
+        .scope('https://crates.io/')
+        .get('/api/v1/crates/amethyst')
+        .reply(200, undefined);
+
       const res = await getPkgReleases({
         datasource,
         depName: 'amethyst',
