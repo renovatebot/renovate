@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/homebrew/extract extractPackageFile() extracts "archive" github dependency 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() extracts "archive" github dependency 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -18,7 +18,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() extracts "releases" github dependency 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() extracts "releases" github dependency 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -36,7 +36,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() handles no space before class header 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() handles no space before class header 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -54,7 +54,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips github dependency with wrong format 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips github dependency with wrong format 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -73,7 +73,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips if invalid url 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips if invalid url 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -92,7 +92,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips if invalid url extension 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips if invalid url extension 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -110,7 +110,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips if invalid url protocol 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips if invalid url protocol 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -129,7 +129,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips if invalid url version 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips if invalid url version 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -147,7 +147,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips if sha256 field is invalid 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips if sha256 field is invalid 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -166,7 +166,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips if there is no sha256 field 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips if there is no sha256 field 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -185,7 +185,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips if there is no url field 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips if there is no url field 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -204,7 +204,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips sourceforge dependency 1 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips sourceforge dependency 1 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -223,7 +223,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/homebrew/extract extractPackageFile() skips sourceforge dependency 2 1`] = `
+exports[`manager/homebrew/extract extractPackageFile() skips sourceforge dependency 2 1`] = `
 Object {
   "deps": Array [
     Object {

@@ -1,4 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
@@ -20,7 +21,7 @@ function artifactForPath(
   };
 }
 
-describe('lib/manager/batect-wrapper/artifacts', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     httpMock.setup();
 

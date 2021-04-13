@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { id as githubReleaseDatasource } from '../../datasource/github-releases';
 import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
@@ -14,7 +15,7 @@ const malformedWrapperContent = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/batect-wrapper/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty wrapper file', () => {
       expect(extractPackageFile('')).toBeNull();

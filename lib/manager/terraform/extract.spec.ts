@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const tf1 = readFileSync('lib/manager/terraform/__fixtures__/1.tf', 'utf8');
@@ -8,7 +9,7 @@ const tf2 = `module "relative" {
 `;
 const helm = readFileSync('lib/manager/terraform/__fixtures__/helm.tf', 'utf8');
 
-describe('lib/manager/terraform/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
