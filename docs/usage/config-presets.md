@@ -108,7 +108,7 @@ Here is how you would use these in your Renovate config:
 
 ```json
   "extends": [
-    ":labels(depedendencies,devops)",
+    ":labels(dependencies,devops)",
     ":assignee(rarkins)"
   ]
 ```
