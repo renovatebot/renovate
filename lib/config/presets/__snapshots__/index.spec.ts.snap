@@ -65,6 +65,15 @@ exports[`config/presets/index getPreset handles preset not found 2`] = `undefine
 
 exports[`config/presets/index getPreset handles preset not found 3`] = `undefined`;
 
+exports[`config/presets/index getPreset handles removed presets with a migration 1`] = `
+Object {
+  "dependencyDashboard": true,
+  "description": Array [
+    "Enable Renovate Dependency Dashboard creation",
+  ],
+}
+`;
+
 exports[`config/presets/index getPreset handles throw errors 1`] = `undefined`;
 
 exports[`config/presets/index getPreset handles throw errors 2`] = `undefined`;

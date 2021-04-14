@@ -387,6 +387,14 @@ describe(getName(__filename), () => {
     });
   });
   describe('getPreset', () => {
+    it('handles removed presets with a migration', async () => {
+      const res = await presets.getPreset(':masterIssue', {});
+      expect(res).toMatchSnapshot();
+    });
+    it('handles removed presets with no migration', async () => {
+      const res = await presets.getPreset('helpers:oddIsUnstable', {});
+      expect(res).toEqual({});
+    });
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
