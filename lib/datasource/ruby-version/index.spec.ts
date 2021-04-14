@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { id as datasource } from '.';
 
 const rubyReleasesHtml = fs.readFileSync(
@@ -8,7 +9,7 @@ const rubyReleasesHtml = fs.readFileSync(
   'utf8'
 );
 
-describe('datasource/gradle', () => {
+describe(getName(__filename), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

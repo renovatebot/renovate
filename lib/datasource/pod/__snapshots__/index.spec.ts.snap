@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/cocoapods getReleases processes real data from CDN 1`] = `
+exports[`datasource/pod/index getReleases processes real data from CDN 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -14,7 +14,7 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases processes real data from Github 1`] = `
+exports[`datasource/pod/index getReleases processes real data from Github 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -39,7 +39,7 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases returns null for 401 1`] = `
+exports[`datasource/pod/index getReleases returns null for 401 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -53,7 +53,7 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases returns null for 404 1`] = `
+exports[`datasource/pod/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -78,7 +78,7 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases returns null for unknown error 1`] = `
+exports[`datasource/pod/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -92,7 +92,7 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases throws for 429 1`] = `
+exports[`datasource/pod/index getReleases throws for 429 1`] = `
 Array [
   Object {
     "headers": Object {

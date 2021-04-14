@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/gradle getReleases parses real data 1`] = `
+exports[`datasource/ruby-version/index getReleases parses real data 1`] = `
 Object {
   "homepage": "https://www.ruby-lang.org",
   "registryUrl": "https://www.ruby-lang.org/",
@@ -675,7 +675,7 @@ Object {
 }
 `;
 
-exports[`datasource/gradle getReleases parses real data 2`] = `
+exports[`datasource/ruby-version/index getReleases parses real data 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -689,7 +689,7 @@ Array [
 ]
 `;
 
-exports[`datasource/gradle getReleases throws for 404 1`] = `
+exports[`datasource/ruby-version/index getReleases throws for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -703,7 +703,7 @@ Array [
 ]
 `;
 
-exports[`datasource/gradle getReleases throws for empty result 1`] = `
+exports[`datasource/ruby-version/index getReleases throws for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
