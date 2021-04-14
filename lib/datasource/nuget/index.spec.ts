@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { id as datasource, parseRegistryUrl } from '.';
@@ -128,7 +129,7 @@ const configV3Multiple = {
   ],
 };
 
-describe('datasource/nuget', () => {
+describe(getName(__filename), () => {
   describe('parseRegistryUrl', () => {
     beforeEach(() => {
       jest.resetAllMocks();

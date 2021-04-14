@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/galaxy getReleases processes real data 1`] = `
+exports[`datasource/galaxy/index getReleases processes real data 1`] = `
 Object {
   "dependencyUrl": "https://galaxy.ansible.com/yatesr/timezone",
   "registryUrl": "https://galaxy.ansible.com/",
@@ -22,7 +22,7 @@ Object {
 }
 `;
 
-exports[`datasource/galaxy getReleases processes real data 2`] = `
+exports[`datasource/galaxy/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -36,7 +36,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases return null if searching random username and project name 1`] = `
+exports[`datasource/galaxy/index getReleases return null if searching random username and project name 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -50,7 +50,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for 404 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -64,7 +64,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for empty list 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for empty list 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -78,7 +78,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for empty result 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -92,7 +92,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for missing fields 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for missing fields 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -106,7 +106,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for unknown error 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -120,9 +120,9 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
+exports[`datasource/galaxy/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
 
-exports[`datasource/galaxy getReleases throws for 5xx 2`] = `
+exports[`datasource/galaxy/index getReleases throws for 5xx 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -136,7 +136,7 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases throws for 404 1`] = `
+exports[`datasource/galaxy/index getReleases throws for 404 1`] = `
 Array [
   Object {
     "headers": Object {
