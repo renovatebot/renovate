@@ -12,17 +12,11 @@ export async function checkAutoMerge(
   logger.trace({ config }, 'checkAutoMerge');
   const {
     branchName,
-    automerge,
     automergeType,
     automergeComment,
     requiredStatusChecks,
     rebaseRequested,
   } = config;
-  if (!automerge) {
-    logger.debug('No automerge');
-    return false;
-  }
-  logger.debug('PR is configured for automerge');
   // Return if PR not ready for automerge
   if (pr.isConflicted) {
     logger.debug('PR is conflicted');

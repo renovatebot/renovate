@@ -599,12 +599,15 @@ export async function processBranch(
             });
           }
         }
-      } else {
+      } else if (config.automerge) {
+        logger.debug('PR is configured for automerge');
         const prAutomerged = await checkAutoMerge(pr, config);
         if (prAutomerged && config.automergeType !== 'pr-comment') {
           await deleteBranchSilently(config.branchName);
           return ProcessBranchResult.Automerged;
         }
+      } else {
+        logger.debug('PR is not configured for automerge');
       }
     }
   } catch (err) /* istanbul ignore next */ {

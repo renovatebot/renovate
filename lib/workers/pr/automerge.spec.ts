@@ -24,10 +24,6 @@ describe(getName(__filename), () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
-    it('should not automerge if not configured', async () => {
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
