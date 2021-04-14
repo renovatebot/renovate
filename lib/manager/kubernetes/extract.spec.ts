@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const kubernetesImagesFile = readFileSync(
@@ -21,7 +22,7 @@ const otherYamlFile = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/kubernetes/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile(kubernetesConfigMapFile)).toBeNull();

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/helm getReleases adds trailing slash to subdirectories 1`] = `
+exports[`datasource/helm/index getReleases adds trailing slash to subdirectories 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -14,7 +14,7 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases returns list of versions for normal response 1`] = `
+exports[`datasource/helm/index getReleases returns list of versions for normal response 1`] = `
 Object {
   "homepage": "https://www.getambassador.io/",
   "registryUrl": "https://example-repository.com",
@@ -132,7 +132,7 @@ Object {
 }
 `;
 
-exports[`datasource/helm getReleases returns list of versions for normal response 2`] = `
+exports[`datasource/helm/index getReleases returns list of versions for normal response 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -146,7 +146,7 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases returns null for 404 1`] = `
+exports[`datasource/helm/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -160,7 +160,7 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases returns null for empty response 1`] = `
+exports[`datasource/helm/index getReleases returns null for empty response 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -174,7 +174,7 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases returns null for missing response body 1`] = `
+exports[`datasource/helm/index getReleases returns null for missing response body 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -188,7 +188,7 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases returns null for unknown error 1`] = `
+exports[`datasource/helm/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -202,7 +202,7 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases returns null if index.yaml in response is empty 1`] = `
+exports[`datasource/helm/index getReleases returns null if index.yaml in response is empty 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -216,7 +216,7 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases returns null if index.yaml in response is invalid 1`] = `
+exports[`datasource/helm/index getReleases returns null if index.yaml in response is invalid 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -230,7 +230,7 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases returns null if lookupName is not in index.yaml 1`] = `
+exports[`datasource/helm/index getReleases returns null if lookupName is not in index.yaml 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -244,9 +244,9 @@ Array [
 ]
 `;
 
-exports[`datasource/helm getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
+exports[`datasource/helm/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
 
-exports[`datasource/helm getReleases throws for 5xx 2`] = `
+exports[`datasource/helm/index getReleases throws for 5xx 2`] = `
 Array [
   Object {
     "headers": Object {

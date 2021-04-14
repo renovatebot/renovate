@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getManagerList } from '../manager';
+import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -40,6 +40,8 @@ export function getParentName(parentPath: string): string {
         .pop()
     : '.';
 }
+
+const topLevelObjects = getLanguageList().concat(getManagerList());
 
 export async function validateConfig(
   config: RenovateConfig,
@@ -114,6 +116,12 @@ export async function validateConfig(
         message: '__proto__',
       });
       continue; // eslint-disable-line
+    }
+    if (parentPath && topLevelObjects.includes(key)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
+      });
     }
     if (key === 'fileMatch') {
       if (parentPath === undefined) {
@@ -268,8 +276,7 @@ export async function validateConfig(
               'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
-              for (const packageRule of val) {
-                let hasSelector = false;
+              for (const [subIndex, packageRule] of val.entries()) {
                 if (is.object(packageRule)) {
                   const resolvedRule = await resolveConfigPresets(
                     packageRule as RenovateConfig,
@@ -278,16 +285,23 @@ export async function validateConfig(
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
-                  for (const pKey of Object.keys(resolvedRule)) {
-                    if (selectors.includes(pKey)) {
-                      hasSelector = true;
-                    }
-                  }
-                  if (!hasSelector) {
-                    const message = `${currentPath}: Each packageRule must contain at least one selector (${selectors.join(
-                      ', '
-                    )}). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.`;
+                  const selectorLength = Object.keys(
+                    resolvedRule
+                  ).filter((ruleKey) => selectors.includes(ruleKey)).length;
+                  if (!selectorLength) {
+                    const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
+                      packageRule
+                    )}`;
                     errors.push({
+                      topic: 'Configuration Error',
+                      message,
+                    });
+                  }
+                  if (selectorLength === Object.keys(resolvedRule).length) {
+                    const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
+                      packageRule
+                    )}`;
+                    warnings.push({
                       topic: 'Configuration Error',
                       message,
                     });

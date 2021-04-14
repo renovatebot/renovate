@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/pub extractPackageFile should return valid dependencies 1`] = `
+exports[`manager/pub/extract extractPackageFile should return valid dependencies 1`] = `
 Object {
   "datasource": "dart",
   "deps": Array [

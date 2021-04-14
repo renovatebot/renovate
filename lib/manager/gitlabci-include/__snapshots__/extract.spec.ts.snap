@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/gitlabci-include/extract extractPackageFile() extracts multiple include blocks 1`] = `
+exports[`manager/gitlabci-include/extract extractPackageFile() extracts multiple include blocks 1`] = `
 Array [
   Object {
     "currentValue": "1.0.0",

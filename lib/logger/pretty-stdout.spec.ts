@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { getName } from '../../test/util';
 import * as prettyStdout from './pretty-stdout';
 import type { BunyanRecord } from './utils';
 
@@ -9,7 +10,7 @@ jest.mock('chalk', () =>
   )
 );
 
-describe('logger/pretty-stdout', () => {
+describe(getName(__filename), () => {
   describe('getMeta(rec)', () => {
     it('returns empty string if null rec', () => {
       expect(prettyStdout.getMeta(null as any)).toEqual('');

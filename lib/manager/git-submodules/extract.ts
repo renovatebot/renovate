@@ -114,7 +114,13 @@ export default async function extractPackageFile(
           // Find HTTP URL, then apply token
           let httpSubModuleUrl = getHttpUrl(subModuleUrl);
           const hostRule = hostRules.find({ url: httpSubModuleUrl });
-          httpSubModuleUrl = getHttpUrl(subModuleUrl, hostRule?.token);
+          if (hostRule?.token) {
+            logger.debug(
+              { httpSubModuleUrl },
+              'Found hostRules token for submodule'
+            );
+            httpSubModuleUrl = getHttpUrl(subModuleUrl, hostRule.token);
+          }
           const currentValue = await getBranch(
             gitModulesPath,
             name,
@@ -122,7 +128,7 @@ export default async function extractPackageFile(
           );
           return {
             depName: path,
-            lookupName: httpSubModuleUrl,
+            lookupName: getHttpUrl(subModuleUrl),
             currentValue,
             currentDigest,
           };

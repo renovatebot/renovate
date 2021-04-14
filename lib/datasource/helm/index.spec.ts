@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { id as datasource } from '.';
 
 // Truncated index.yaml file
@@ -9,7 +10,7 @@ const indexYaml = fs.readFileSync(
   'utf8'
 );
 
-describe('datasource/helm', () => {
+describe(getName(__filename), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();

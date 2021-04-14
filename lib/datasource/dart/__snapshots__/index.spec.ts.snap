@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/dart getReleases processes real data 1`] = `
+exports[`datasource/dart/index getReleases processes real data 1`] = `
 Object {
   "registryUrl": "https://pub.dartlang.org/",
   "releases": Array [
@@ -185,7 +185,7 @@ Object {
 }
 `;
 
-exports[`datasource/dart getReleases processes real data 2`] = `
+exports[`datasource/dart/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -200,7 +200,7 @@ Array [
 ]
 `;
 
-exports[`datasource/dart getReleases returns null for 404 1`] = `
+exports[`datasource/dart/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -215,7 +215,7 @@ Array [
 ]
 `;
 
-exports[`datasource/dart getReleases returns null for empty fields 1`] = `
+exports[`datasource/dart/index getReleases returns null for empty fields 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -240,7 +240,7 @@ Array [
 ]
 `;
 
-exports[`datasource/dart getReleases returns null for empty result 1`] = `
+exports[`datasource/dart/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -255,7 +255,7 @@ Array [
 ]
 `;
 
-exports[`datasource/dart getReleases returns null for unknown error 1`] = `
+exports[`datasource/dart/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -270,9 +270,9 @@ Array [
 ]
 `;
 
-exports[`datasource/dart getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
+exports[`datasource/dart/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
 
-exports[`datasource/dart getReleases throws for 5xx 2`] = `
+exports[`datasource/dart/index getReleases throws for 5xx 2`] = `
 Array [
   Object {
     "headers": Object {

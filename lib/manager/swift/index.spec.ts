@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const pkgContent = readFileSync(
@@ -7,7 +8,7 @@ const pkgContent = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/swift', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty content', () => {
       expect(extractPackageFile(null)).toBeNull();

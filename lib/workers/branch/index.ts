@@ -27,7 +27,8 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { Limit, isLimitReached } from '../global/limits';
-import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
+import { ensurePr, getPlatformPrOptions } from '../pr';
+import { checkAutoMerge } from '../pr/automerge';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../types';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';

@@ -1,3 +1,4 @@
+import { getName } from '../../../test/util';
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
@@ -24,7 +25,7 @@ function createGitDependency(repo: string, version: string): PackageDependency {
   };
 }
 
-describe('lib/manager/batect/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns empty array for empty configuration file', async () => {
       expect(

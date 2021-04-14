@@ -1,5 +1,11 @@
 import * as _fs from 'fs-extra';
-import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import {
+  defaultConfig,
+  getName,
+  git,
+  mocked,
+  platform,
+} from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import {
   MANAGER_LOCKFILE_ERROR,
@@ -14,6 +20,7 @@ import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
 import type { EnsurePrResult } from '../pr';
+import * as _prAutomerge from '../pr/automerge';
 import type { Pr } from '../repository/onboarding/branch/check';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import { PrResult, ProcessBranchResult } from '../types';
@@ -34,6 +41,7 @@ jest.mock('../../manager/npm/post-update');
 jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
+jest.mock('../pr/automerge');
 jest.mock('../../util/exec');
 jest.mock('../../util/sanitize');
 jest.mock('../../util/git');
@@ -47,13 +55,14 @@ const reuse = mocked(_reuse);
 const npmPostExtract = mocked(_npmPostExtract);
 const automerge = mocked(_automerge);
 const commit = mocked(_commit);
+const prAutomerge = mocked(_prAutomerge);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-describe('workers/branch', () => {
+describe(getName(__filename), () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],
@@ -63,7 +72,7 @@ describe('workers/branch', () => {
     let config: BranchConfig;
     beforeEach(() => {
       prWorker.ensurePr = jest.fn();
-      prWorker.checkAutoMerge = jest.fn();
+      prAutomerge.checkAutoMerge = jest.fn();
       config = {
         ...defaultConfig,
         branchName: 'renovate/some-branch',
@@ -442,12 +451,12 @@ describe('workers/branch', () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
-      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
     it('ensures PR and adds lock file error comment if no releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -463,12 +472,12 @@ describe('workers/branch', () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
-      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
     it('ensures PR and adds lock file error comment if old releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -484,13 +493,13 @@ describe('workers/branch', () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
-      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
     it('ensures PR and adds lock file error comment if new releaseTimestamp and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -506,13 +515,13 @@ describe('workers/branch', () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
-      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
     it('throws error if lock file errors and new releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -528,7 +537,7 @@ describe('workers/branch', () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
         Error(MANAGER_LOCKFILE_ERROR)
@@ -549,12 +558,12 @@ describe('workers/branch', () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
-      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
     it('swallows branch errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockImplementationOnce(() => {

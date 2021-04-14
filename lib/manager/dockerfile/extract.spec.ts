@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile, getDep } from './extract';
 
 const d1 = readFileSync(
@@ -11,7 +12,7 @@ const d2 = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/dockerfile/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('handles no FROM', () => {
       const res = extractPackageFile('no from!');

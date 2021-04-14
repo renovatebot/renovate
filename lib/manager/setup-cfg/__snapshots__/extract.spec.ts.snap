@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
+exports[`manager/setup-cfg/extract extractPackageFile() extracts dependencies 1`] = `
 Object {
   "deps": Array [
     Object {
