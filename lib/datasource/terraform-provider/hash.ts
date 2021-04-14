@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import extract from 'extract-zip';
 import { logger } from '../../logger';
 
-export function hashOfFiles(files: string[]): string {
+export function hashFiles(files: string[]): string {
   const rootHash = crypto.createHash('sha256');
 
   files.forEach((file) => {
@@ -30,20 +30,20 @@ export function hashOfFiles(files: string[]): string {
   return `h1:${result}`;
 }
 
-export async function hashOfZipContent(zipFilePath: string): Promise<string> {
-  // TODO replace with cache dir
-  const extractPath = '/tmp/extract';
-
+export async function hashOfZipContent(
+  zipFilePath: string,
+  extractPath: string
+): Promise<string> {
   await extract(zipFilePath, { dir: extractPath });
   const files = fs.readdirSync(extractPath);
-  const sortedFiles = files
-    .sort((a, b) => a.localeCompare(b))
-    .map((file) => `${extractPath}/${file}`);
+  // the h1 hashing algorithms requires that the files are sorted by filename
+  const sortedFiles = files.sort((a, b) => a.localeCompare(b));
+  const filesWithPath = sortedFiles.map((file) => `${extractPath}/${file}`);
 
-  const result = hashOfFiles(sortedFiles);
+  const result = hashFiles(filesWithPath);
 
   // delete extracted files
-  files.forEach((value) =>
+  filesWithPath.forEach((value) =>
     fs.unlink(value, (err) =>
       logger.warn({ err }, 'Failed to delete extracted file')
     )

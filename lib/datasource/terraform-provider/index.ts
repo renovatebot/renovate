@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { createWriteStream } from 'fs';
 import URL from 'url';
 import pMap from 'p-map';
 import { logger } from '../../logger';
@@ -13,6 +14,7 @@ import type {
   TerraformProvider,
   TerraformProviderReleaseBackend,
 } from './types';
+import { RepositoryRegex } from './util';
 
 export const id = 'terraform-provider';
 export const customRegistrySupport = true;
@@ -37,18 +39,45 @@ export function getHashes(
   builds: TerraformBuild[]
 ): Promise<Record<string, string>[]> {
   // TODO replace hard coded cache
-  const cacheDir = '/tmp/download';
+  const cacheDir = '/tmp/provider';
 
   // for each build download ZIP, extract content and generate hash for all containing files
   return pMap(
     builds,
     async (build) => {
-      const downloadPath = `${cacheDir}/${build.filename}`;
-      // TODO implement download
-      const hash = await hashOfZipContent(downloadPath);
-      const buildName = `${build.os}_${build.arch}`;
-      const record: Record<string, string> = { [buildName]: hash };
-      return record;
+      const downloadFileName = `${cacheDir}/${build.filename}`;
+      try {
+        const stream = http.stream(build.url);
+        const writeStream = createWriteStream(downloadFileName);
+        stream.pipe(writeStream);
+        writeStream.on('error', (err) => {
+          logger.error({ err }, 'write stream error');
+        });
+        // eslint-disable-next-line promise/param-names
+        const streamPromise = new Promise((fulfill, reject) => {
+          writeStream.on('finish', fulfill);
+          stream.on('error', reject);
+        });
+        await streamPromise;
+
+        const hash = await hashOfZipContent(
+          downloadFileName,
+          `${cacheDir}/extract/${build.filename}`
+        );
+        const buildName = `${build.os}_${build.arch}`;
+        const record: Record<string, string> = { [buildName]: hash };
+        return record;
+      } catch (e) {
+        logger.error(e);
+        return null;
+      } finally {
+        // delete zip file
+        fs.unlink(downloadFileName, (err) => {
+          if (err) {
+            logger.debug({ err }, `Failed to delete file ${downloadFileName}`);
+          }
+        });
+      }
     },
     { concurrency: 2 } // allow to look up 2 builds for this version in parallel
   );
@@ -58,53 +87,81 @@ export async function createReleases(
   lookupName: string,
   registryURL: string,
   repository: string,
-  versions: string[]
+  versions: string[],
+  releaseBackendResponse?: TerraformProviderReleaseBackend
 ): Promise<Release[]> {
-  const backendLookUpName = `terraform-provider-${lookupName}`;
-  const res = await getReleaseBackendIndex();
+  // if versions are not defined return null
+  if (!versions) {
+    return new Promise((resolve) => resolve(null));
+  }
 
-  // allow to look up 2 builds for this version in parallel
-  return pMap(
-    versions,
-    async (version) => {
-      // check cache
-      const cacheKey = `${registryURL}/${repository}/${lookupName}-${version}`;
-      const cachedRelease = await packageCache.get<Release>(
-        'terraform-provider-release',
-        cacheKey
-      );
-      if (cachedRelease) {
-        return cachedRelease;
-      }
+  let result: Promise<Release[]> = null;
+  const repositoryRegexResult = RepositoryRegex.exec(repository);
+  // only lookup builds if we are in the hashicorp namespace. We do not support custom backends atm
+  if (
+    repositoryRegexResult &&
+    repositoryRegexResult.groups.namespace === 'hashicorp'
+  ) {
+    const backendLookUpName = `terraform-provider-${repositoryRegexResult.groups.dependency}`;
+    try {
+      // reuse backend response if supplied
+      const res = releaseBackendResponse || (await getReleaseBackendIndex());
+      result = pMap(
+        versions,
+        async (version) => {
+          // check cache for hashes
+          const cacheKey = `${registryURL}/${repository}/${lookupName}-${version}`;
+          const cachedRelease = await packageCache.get<Release>(
+            'terraform-provider-release',
+            cacheKey
+          );
+          if (cachedRelease) {
+            return cachedRelease;
+          }
 
-      const versionsBackend = res[backendLookUpName].versions;
-      const versionReleaseBackend = versionsBackend[version];
-      if (versionReleaseBackend == null) {
-        logger.debug(
-          { versions: versionsBackend },
-          `Could not find find ${version}`
-        );
-        return null;
-      }
-      const builds = versionReleaseBackend.builds;
-      // TODO implement hash caching
-      const hashes = await getHashes(builds);
+          const versionsBackend = res[backendLookUpName].versions;
+          const versionReleaseBackend = versionsBackend[version];
+          if (versionReleaseBackend == null) {
+            logger.debug(
+              { versions: versionsBackend },
+              `Could not find find ${version}`
+            );
+            return null;
+          }
+          const builds = versionReleaseBackend.builds;
+          const hashes = await getHashes(builds);
+          const release: Release = {
+            version,
+            hashes,
+          };
+
+          // save to cache
+          await packageCache.set(
+            'terraform-provider-release',
+            cacheKey,
+            release,
+            10080
+          ); // cache for a week
+          return release;
+        },
+        { concurrency: 2 }
+      ); // allow to look up builds for 2 versions in parallel
+    } catch (err) {
+      // if we can not get the builds only return the versions
+      logger.debug({ err }, 'Failed to get detailed Releases');
+    }
+  }
+  if (result === null) {
+    const releases = versions.map((version) => {
       const release: Release = {
         version,
-        hashes,
       };
-
-      // save to cache
-      await packageCache.set(
-        'terraform-provider-release',
-        cacheKey,
-        release,
-        10080
-      ); // cache for a week
       return release;
-    },
-    { concurrency: 2 }
-  ); // allow to look up builds for 2 versions in parallel
+    });
+    result = new Promise((resolve) => resolve(releases));
+  }
+
+  return result;
 }
 
 async function queryRegistry(
@@ -123,9 +180,6 @@ async function queryRegistry(
   if (res.source) {
     dep.sourceUrl = res.source;
   }
-  dep.releases = res.versions.map((version) => ({
-    version,
-  }));
   // add a release per version with build hashes
   dep.releases = await createReleases(
     lookupName,
@@ -133,6 +187,10 @@ async function queryRegistry(
     repository,
     res.versions
   );
+  // if no releases are returned abort
+  if (!dep.releases) {
+    return null;
+  }
 
   // set published date for latest release
   const latestVersion = dep.releases.find(
@@ -147,7 +205,6 @@ async function queryRegistry(
   return dep;
 }
 
-// TODO: add long term cache
 async function queryReleaseBackend(
   lookupName: string,
   registryURL: string,
@@ -171,7 +228,8 @@ async function queryReleaseBackend(
     lookupName,
     registryURL,
     repository,
-    versions
+    versions,
+    res
   );
   logger.trace({ dep }, 'dep');
   return dep;
