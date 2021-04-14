@@ -38,7 +38,7 @@ describe(getName(__filename), () => {
     afterEach(() => {
       httpMock.reset();
     });
-    it('testing', async () => {
+    it('complete walk through', async () => {
       httpMock
         .scope(secondaryUrl)
         .get('/index.json')
@@ -64,12 +64,38 @@ describe(getName(__filename), () => {
       );
       expect(result).not.toBeNull();
       expect(result).toBeArrayOfSize(1);
-      expect(result[0].hashes).toBeArrayOfSize(3);
-      expect(result[0].hashes).toEqual([
-        { linux_amd64: 'h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=' },
-        { linux_arm64: 'h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=' },
-        { windows_amd64: 'h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=' },
-      ]);
+      expect(result[0].hashes).toEqual({
+        linux_amd64: 'h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=',
+        linux_arm64: 'h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=',
+        windows_amd64: 'h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=',
+      });
+    });
+    it('request not available version', async () => {
+      httpMock
+        .scope(secondaryUrl)
+        .get('/index.json')
+        .reply(200, releaseBackend)
+        .get(
+          '/terraform-provider-azurerm/2.53.0/terraform-provider-azurerm_2.53.0_linux_amd64.zip'
+        )
+        .reply(200, randomLinuxAmd64)
+        .get(
+          '/terraform-provider-azurerm/2.53.0/terraform-provider-azurerm_2.53.0_linux_arm64.zip'
+        )
+        .reply(200, randomLinuxAmd64)
+        .get(
+          '/terraform-provider-azurerm/2.53.0/terraform-provider-azurerm_2.53.0_windows_amd64.zip'
+        )
+        .reply(200, randomLinuxAmd64);
+
+      const result = await createReleases(
+        'azurerm',
+        defaultRegistryUrls[1],
+        'hashicorp/azurerm',
+        ['2.54.0']
+      );
+      expect(result).toBeArrayOfSize(1);
+      expect(result[0]).toBeNull();
     });
   });
   describe('hashOfZipContent()', () => {
@@ -183,7 +209,7 @@ describe(getName(__filename), () => {
       expect(res).not.toBeNull();
     });
 
-    it('processes real data from lookupName, only return not all versions', async () => {
+    it('processes real data from lookupName, return not all versions', async () => {
       httpMock
         .scope('https://registry.company.com')
         .get('/v1/providers/hashicorp/azurerm')

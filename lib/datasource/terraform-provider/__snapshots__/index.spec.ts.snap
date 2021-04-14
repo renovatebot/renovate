@@ -1,49 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/terraform getReleases processes data with alternative backend 1`] = `
+exports[`test getReleases processes data with alternative backend 1`] = `
 Object {
   "registryUrl": "https://releases.hashicorp.com",
   "releases": Array [
     Object {
-      "hashes": Array [
-        Object {
-          "darwin_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "freebsd_386": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "freebsd_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-      ],
+      "hashes": Object {
+        "darwin_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "freebsd_386": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "freebsd_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+      },
       "version": "1.19.0",
     },
     Object {
-      "hashes": Array [
-        Object {
-          "darwin_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "freebsd_386": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "freebsd_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-      ],
+      "hashes": Object {
+        "darwin_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "freebsd_386": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "freebsd_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+      },
       "version": "1.20.0",
     },
     Object {
-      "hashes": Array [
-        Object {
-          "darwin_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "freebsd_386": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "freebsd_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-      ],
+      "hashes": Object {
+        "darwin_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "freebsd_386": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "freebsd_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+      },
       "version": "2.0.0",
     },
   ],
@@ -51,37 +33,25 @@ Object {
 }
 `;
 
-exports[`datasource/terraform getReleases processes real data 1`] = `
+exports[`test getReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/providers/hashicorp/azurerm",
   "registryUrl": "https://registry.terraform.io",
   "releases": Array [
     Object {
-      "hashes": Array [
-        Object {
-          "linux_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "linux_arm64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "windows_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-      ],
+      "hashes": Object {
+        "linux_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "linux_arm64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "windows_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+      },
       "version": "2.52.0",
     },
     Object {
-      "hashes": Array [
-        Object {
-          "linux_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "linux_arm64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "windows_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-      ],
+      "hashes": Object {
+        "linux_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "linux_arm64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "windows_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+      },
       "releaseTimestamp": "2019-11-26T08:22:56.000Z",
       "version": "2.53.0",
     },
@@ -90,31 +60,21 @@ Object {
 }
 `;
 
-exports[`datasource/terraform getReleases processes real data from lookupName, only return not all versions 1`] = `
+exports[`test getReleases processes real data from lookupName, only return not all versions 1`] = `
 Object {
   "homepage": "https://registry.company.com/providers/hashicorp/azurerm",
   "registryUrl": "https://registry.company.com",
   "releases": Array [
     Object {
-      "hashes": Array [
-        null,
-        null,
-        null,
-      ],
+      "hashes": Object {},
       "version": "2.52.0",
     },
     Object {
-      "hashes": Array [
-        Object {
-          "linux_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "linux_arm64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-        Object {
-          "windows_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
-        },
-      ],
+      "hashes": Object {
+        "linux_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "linux_arm64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "windows_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+      },
       "releaseTimestamp": "2019-11-26T08:22:56.000Z",
       "version": "2.53.0",
     },
@@ -123,7 +83,30 @@ Object {
 }
 `;
 
-exports[`datasource/terraform getReleases returns null for 404 1`] = `
+exports[`test getReleases processes real data from lookupName, return not all versions 1`] = `
+Object {
+  "homepage": "https://registry.company.com/providers/hashicorp/azurerm",
+  "registryUrl": "https://registry.company.com",
+  "releases": Array [
+    Object {
+      "hashes": Object {},
+      "version": "2.52.0",
+    },
+    Object {
+      "hashes": Object {
+        "linux_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "linux_arm64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+        "windows_amd64": "h1:CgObCCvnD/qDmF6aOYQ2KvB2arDbcBURxARZfYB9Mvc=",
+      },
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
+      "version": "2.53.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/terraform-providers/terraform-provider-azurerm",
+}
+`;
+
+exports[`test getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -158,7 +141,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform getReleases returns null for empty result 1`] = `
+exports[`test getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -193,7 +176,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform getReleases returns null for error in service discovery 1`] = `
+exports[`test getReleases returns null for error in service discovery 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -218,7 +201,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform getReleases returns null for unknown error 1`] = `
+exports[`test getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -253,4 +236,4 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform getReleases simulate failing secondary release source 1`] = `null`;
+exports[`test getReleases simulate failing secondary release source 1`] = `null`;

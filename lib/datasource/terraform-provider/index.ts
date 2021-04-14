@@ -35,44 +35,43 @@ async function getReleaseBackendIndex(): Promise<TerraformProviderReleaseBackend
   ).body;
 }
 
-export function getHashes(
+export async function getHashes(
   builds: TerraformBuild[]
-): Promise<Record<string, string>[]> {
+): Promise<Record<string, string>> {
   // TODO replace hard coded cache
   const cacheDir = '/tmp/provider';
 
   // for each build download ZIP, extract content and generate hash for all containing files
-  return pMap(
+  const hashes = await pMap(
     builds,
     async (build) => {
       const downloadFileName = `${cacheDir}/${build.filename}`;
+      const extractPath = `${cacheDir}/extract/${build.filename}`;
       try {
         const stream = http.stream(build.url);
         const writeStream = createWriteStream(downloadFileName);
         stream.pipe(writeStream);
+        /* istanbul ignore next */
         writeStream.on('error', (err) => {
           logger.error({ err }, 'write stream error');
         });
-        // eslint-disable-next-line promise/param-names
-        const streamPromise = new Promise((fulfill, reject) => {
-          writeStream.on('finish', fulfill);
+
+        const streamPromise = new Promise((resolve, reject) => {
+          writeStream.on('finish', resolve);
           stream.on('error', reject);
         });
         await streamPromise;
 
-        const hash = await hashOfZipContent(
-          downloadFileName,
-          `${cacheDir}/extract/${build.filename}`
-        );
+        const hash = await hashOfZipContent(downloadFileName, extractPath);
         const buildName = `${build.os}_${build.arch}`;
-        const record: Record<string, string> = { [buildName]: hash };
-        return record;
+        return { buildName, hash };
       } catch (e) {
         logger.error(e);
         return null;
       } finally {
         // delete zip file
         fs.unlink(downloadFileName, (err) => {
+          /* istanbul ignore next */
           if (err) {
             logger.debug({ err }, `Failed to delete file ${downloadFileName}`);
           }
@@ -81,6 +80,14 @@ export function getHashes(
     },
     { concurrency: 2 } // allow to look up 2 builds for this version in parallel
   );
+  const result: Record<string, string> = {};
+  // filter out null values and push to record
+  hashes
+    .filter((value) => value)
+    .forEach((value) => {
+      result[value.buildName] = value.hash;
+    });
+  return result;
 }
 
 export async function createReleases(
@@ -115,6 +122,7 @@ export async function createReleases(
             'terraform-provider-release',
             cacheKey
           );
+          // istanbul ignore if
           if (cachedRelease) {
             return cachedRelease;
           }
@@ -148,19 +156,10 @@ export async function createReleases(
       ); // allow to look up builds for 2 versions in parallel
     } catch (err) {
       // if we can not get the builds only return the versions
+      /* istanbul ignore next */
       logger.debug({ err }, 'Failed to get detailed Releases');
     }
   }
-  if (result === null) {
-    const releases = versions.map((version) => {
-      const release: Release = {
-        version,
-      };
-      return release;
-    });
-    result = new Promise((resolve) => resolve(releases));
-  }
-
   return result;
 }
 
