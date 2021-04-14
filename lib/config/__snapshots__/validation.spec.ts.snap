@@ -227,7 +227,7 @@ exports[`config/validation validateConfig(config) validates valid alias objects 
 exports[`config/validation validateConfig(config) warning if included not supported enabled managers 1`] = `
 Array [
   Object {
-    "message": "The following managers are not supported: \\"foo\\"",
+    "message": "The following managers configured in enabledManagers are not supported: \\"foo\\"",
     "topic": "Configuration Error",
   },
 ]

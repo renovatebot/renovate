@@ -134,9 +134,9 @@ export async function validateConfig(
         val as string[]
       );
       if (is.nonEmptyArray(unsupportedManagers)) {
-        warnings.push({
+        errors.push({
           topic: 'Configuration Error',
-          message: `The following managers are not supported: "${unsupportedManagers.join(
+          message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
             ', '
           )}"`,
         });

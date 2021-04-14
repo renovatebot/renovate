@@ -153,9 +153,9 @@ describe(getName(__filename), () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(1);
-      expect(errors).toHaveLength(0);
-      expect(warnings).toMatchSnapshot();
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
     });
     it('errors for all types', async () => {
       const config: RenovateConfig = {
