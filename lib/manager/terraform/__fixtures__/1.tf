@@ -92,6 +92,7 @@ module "addons_aws" {
   aws-ebs-csi-driver = {
     enabled          = true
     is_default_class = true
+    version = "1.0.0"
   }
 
 

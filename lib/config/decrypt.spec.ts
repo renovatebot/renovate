@@ -1,11 +1,12 @@
 import fs from 'fs';
+import { getName } from '../../test/util';
 import { setAdminConfig } from './admin';
 import { decryptConfig } from './decrypt';
 import { RenovateConfig } from '.';
 
 const privateKey = fs.readFileSync('lib/config/keys/__fixtures__/private.pem');
 
-describe('config/decrypt', () => {
+describe(getName(__filename), () => {
   describe('decryptConfig()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

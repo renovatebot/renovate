@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const pipeline1 = readFileSync(
@@ -18,7 +19,7 @@ const pipeline4 = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/buildkite/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

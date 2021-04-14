@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import extractPackageFile from './extract';
 
 const yamlFile1 = readFileSync(
@@ -10,7 +11,7 @@ const yamlFile2 = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/ansible/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

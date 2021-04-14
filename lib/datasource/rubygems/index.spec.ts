@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import * as rubyVersioning from '../../versioning/ruby';
 import railsInfo from './__fixtures__/rails/info.json';
 import railsVersions from './__fixtures__/rails/versions.json';
@@ -25,7 +26,7 @@ const rubygemsOrgVersions = `created_at: 2017-03-27T04:38:13+00:00
 1pass -0.1.2 abcdef
 21-day-challenge-countdown 0.1.0,0.1.1,0.1.2 57e8873fe713063f4e54e85bbbd709bb`;
 
-describe('datasource/rubygems', () => {
+describe(getName(__filename), () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 

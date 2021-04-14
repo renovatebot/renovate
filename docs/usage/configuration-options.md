@@ -1552,12 +1552,13 @@ e.g.
 {
   "postUpgradeTasks": {
     "commands": ["tslint --fix"],
-    "fileFilters": ["yarn.lock", "**/*.js"]
+    "fileFilters": ["yarn.lock", "**/*.js"],
+    "executionMode": "update"
   }
 }
 ```
 
-The `postUpgradeTasks` configuration consists of two fields:
+The `postUpgradeTasks` configuration consists of three fields:
 
 ### commands
 
@@ -1566,6 +1567,11 @@ A list of commands that are executed after Renovate has updated a dependency but
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
+
+### executionMode
+
+Defaults to `update`, but can also be set to `branch`. This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask
+will be executed for every dependency on the branch. If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 ## prBodyColumns
 
@@ -2043,7 +2049,13 @@ Take a random sample of given size from reviewers.
 
 ## rollbackPrs
 
-Configure this to `false` either globally, per-language, or per-package if you want to disable Renovate's behavior of generating rollback PRs when it can't find the current version on the registry anymore.
+There are times when a dependency version in use by a project gets removed from the registry.
+For some registries, existing releases or even whole packages can be removed or "yanked" at any time, while for some registries only very new or unused releases can be removed.
+Renovate's "rollback" feature exists to propose a downgrade to the next-highest release if the current release is no longer found in the registry.
+
+Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
+
+You can configure the `rollbackPrs` property globally, per-lanuage, or per-package to override the default behavior.
 
 ## ruby
 

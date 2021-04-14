@@ -1,7 +1,8 @@
+import { getName } from '../../../test/util';
 import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
 import { api } from '.';
 
-describe('versioning/gradle/compare', () => {
+describe(getName(__filename), () => {
   it('returns equality', () => {
     expect(compare('1', '1')).toEqual(0);
     expect(compare('a', 'a')).toEqual(0);
@@ -112,7 +113,7 @@ describe('versioning/gradle/compare', () => {
   });
 });
 
-describe('versioning/gradle', () => {
+describe(getName(__filename), () => {
   it('isValid', () => {
     expect(api.isValid('1.0.0')).toBe(true);
     expect(api.isValid('[1.12.6,1.18.6]')).toBe(true);

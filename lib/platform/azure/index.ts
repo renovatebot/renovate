@@ -40,7 +40,11 @@ import {
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getNewBranchName,
+  getProjectAndRepo,
   getRenovatePRFormat,
+  getRepoByName,
+  getStorageExtraCloneOpts,
+  max4000Chars,
   streamToString,
 } from './util';
 
@@ -106,28 +110,30 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repoId
+  repoName?: string
 ): Promise<string | null> {
-  try {
-    const azureApiGit = await azureApi.gitApi();
-    const buf = await azureApiGit.getItemContent(repo, fileName);
-    const str = await streamToString(buf);
-    return str;
-  } catch (err) {
-    return null;
+  const azureApiGit = await azureApi.gitApi();
+
+  let repoId: string;
+  if (repoName) {
+    const repos = await azureApiGit.getRepositories();
+    const repo = getRepoByName(repoName, repos);
+    repoId = repo.id;
+  } else {
+    repoId = config.repoId;
   }
+
+  const buf = await azureApiGit.getItemContent(repoId, fileName);
+  const str = await streamToString(buf);
+  return str;
 }
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repoId
+  repoName?: string
 ): Promise<any | null> {
-  try {
-    const raw = await getRawFile(fileName, repo);
-    return raw && JSON.parse(raw);
-  } catch (err) {
-    return null;
-  }
+  const raw = await getRawFile(fileName, repoName);
+  return JSON.parse(raw);
 }
 
 export async function initRepo({
@@ -139,12 +145,7 @@ export async function initRepo({
   config = { repository } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  const names = azureHelper.getProjectAndRepo(repository);
-  const repo = repos.filter(
-    (c) =>
-      c.name.toLowerCase() === names.repo.toLowerCase() &&
-      c.project.name.toLowerCase() === names.project.toLowerCase()
-  )[0];
+  const repo = getRepoByName(repository, repos);
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   // istanbul ignore if
   if (!repo.defaultBranch) {
@@ -158,6 +159,7 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
+  const names = getProjectAndRepo(repository);
   config.defaultMergeMethod = await azureHelper.getMergeMethod(
     repo.id,
     names.project
@@ -178,7 +180,7 @@ export async function initRepo({
     ...config,
     localDir,
     url,
-    extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
+    extraCloneOpts: getStorageExtraCloneOpts(opts),
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
     cloneSubmodules,
@@ -381,7 +383,7 @@ export async function createPr({
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = getNewBranchName(sourceBranch);
   const targetRefName = getNewBranchName(targetBranch);
-  const description = azureHelper.max4000Chars(sanitize(body));
+  const description = max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
@@ -442,7 +444,7 @@ export async function updatePr({
   };
 
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
+    objToUpdate.description = max4000Chars(sanitize(body));
   }
 
   if (state === PrState.Open) {

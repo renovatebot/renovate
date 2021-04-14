@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/process/lookup .lookupUpdates() disables major release separation (major) 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() disables major release separation (major) 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -63,7 +63,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() disables major release separation (minor) 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() disables major release separation (minor) 1`] = `
 Array [
   Object {
     "bucket": "latest",
@@ -89,7 +89,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles PEP440 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles PEP440 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -141,7 +141,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -173,7 +173,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin for non-version 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin for non-version 1`] = `
 Object {
   "updates": Array [
     Object {
@@ -187,7 +187,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin for up to date version 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin for up to date version 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -206,7 +206,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles digest update 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest update 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -237,7 +237,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles digest update for non-version 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest update for non-version 1`] = `
 Object {
   "updates": Array [
     Object {
@@ -251,7 +251,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles git submodule update 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles git submodule update 1`] = `
 Object {
   "updates": Array [
     Object {
@@ -267,13 +267,13 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles github 404 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles github 404 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles packagist 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles packagist 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles pypi 404 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles pypi 404 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -306,9 +306,9 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles unknown datasource 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles unknown datasource 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() ignores deprecated 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() ignores deprecated 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -337,7 +337,7 @@ Marking the latest version of an npm package as deprecated results in the entire
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -371,7 +371,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() is deprecated 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() is deprecated 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -399,7 +399,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() pins minor ranged versions 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() pins minor ranged versions 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -410,15 +410,15 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() rejects complex range in-range updates 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() rejects complex range in-range updates 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() rejects in-range unsupported operator 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() rejects in-range unsupported operator 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() rejects non-fully specified in-range updates 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() rejects non-fully specified in-range updates 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() rejects reverse ordered less than greater than 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() rejects reverse ordered less than greater than 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() replaces major complex ranged versions if configured 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() replaces major complex ranged versions if configured 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -454,7 +454,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() replaces minor complex ranged versions if configured 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() replaces minor complex ranged versions if configured 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -474,7 +474,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() replaces non-range in-range updates 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() replaces non-range in-range updates 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -500,7 +500,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns additional update if grouping but separateMinorPatch=true 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns additional update if grouping but separateMinorPatch=true 1`] = `
 Array [
   Object {
     "bucket": "patch",
@@ -583,7 +583,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns both updates if automerging minor 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns both updates if automerging minor 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -659,7 +659,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns complex object 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns complex object 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -686,7 +686,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns minor update if automerging both patch and minor 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns minor update if automerging both patch and minor 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -732,7 +732,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns minor update if separate patches not configured 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns minor update if separate patches not configured 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -778,7 +778,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns multiple updates if grouping but separateMajorMinor=true 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns multiple updates if grouping but separateMajorMinor=true 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -849,7 +849,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns one update if grouping and separateMajorMinor=false 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns one update if grouping and separateMajorMinor=false 1`] = `
 Array [
   Object {
     "bucket": "latest",
@@ -908,7 +908,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns patch minor and major 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns patch minor and major 1`] = `
 Array [
   Object {
     "bucket": "patch",
@@ -979,7 +979,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns patch update if separateMinorPatch 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns patch update if separateMinorPatch 1`] = `
 Array [
   Object {
     "bucket": "patch",
@@ -1025,7 +1025,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns rollback for pinned version 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns rollback for pinned version 1`] = `
 Array [
   Object {
     "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
@@ -1061,7 +1061,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() returns rollback for ranged version 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns rollback for ranged version 1`] = `
 Array [
   Object {
     "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
@@ -1075,7 +1075,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should allow unstable versions if the current version is unstable 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should allow unstable versions if the current version is unstable 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1101,7 +1101,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should allow unstable versions if the ignoreUnstable=false 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should allow unstable versions if the ignoreUnstable=false 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1117,7 +1117,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should downgrade from missing versions 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should downgrade from missing versions 1`] = `
 Object {
   "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
   "commitMessageAction": "Roll back",
@@ -1129,7 +1129,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should follow dist-tag even if newer version exists 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should follow dist-tag even if newer version exists 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1145,7 +1145,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should ignore unstable versions from datasource 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should ignore unstable versions from datasource 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -1160,7 +1160,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should jump unstable versions if followTag 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should jump unstable versions if followTag 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1176,7 +1176,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should not jump unstable versions 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should not jump unstable versions 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1192,7 +1192,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should roll back to dist-tag if current version is higher 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should roll back to dist-tag if current version is higher 1`] = `
 Array [
   Object {
     "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
@@ -1206,7 +1206,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should treat zero zero caret ranges as pinned 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() should treat zero zero caret ranges as pinned 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1223,9 +1223,9 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() should warn if no version matches dist-tag 1`] = `Array []`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() should warn if no version matches dist-tag 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible versions for 8 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -1248,7 +1248,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible versions for 8.1 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8.1 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -1281,7 +1281,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible versions for 8.1.0 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8.1.0 1`] = `
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
@@ -1308,7 +1308,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() skips undefined values 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() skips undefined values 1`] = `
 Object {
   "skipReason": "invalid-value",
   "updates": Array [],
@@ -1316,7 +1316,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() skips unsupported values 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() skips unsupported values 1`] = `
 Object {
   "skipReason": "invalid-value",
   "updates": Array [],
@@ -1324,7 +1324,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports > latest versions if configured 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports > latest versions if configured 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -1345,7 +1345,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports complex major hyphen ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports complex major hyphen ranges 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -1381,7 +1381,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports complex major ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports complex major ranges 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -1417,7 +1417,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports complex ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports complex ranges 1`] = `
 Object {
   "bucket": "non-major",
   "currentVersion": "0.8.12",
@@ -1441,7 +1441,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports complex tilde ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports complex tilde ranges 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1461,7 +1461,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports in-range caret updates 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range caret updates 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1489,7 +1489,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports in-range gte updates 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range gte updates 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1517,7 +1517,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports in-range tilde patch updates 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range tilde patch updates 1`] = `
 Array [
   Object {
     "bucket": "patch",
@@ -1556,7 +1556,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports in-range tilde updates 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range tilde updates 1`] = `
 Array [
   Object {
     "bucket": "patch",
@@ -1595,7 +1595,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports lock file updates mixed with regular updates 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports lock file updates mixed with regular updates 1`] = `
 Array [
   Object {
     "bucket": "patch",
@@ -1684,7 +1684,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports majorgte updates 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports majorgte updates 1`] = `
 Array [
   Object {
     "bucket": "latest",
@@ -1720,7 +1720,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports minor and major upgrades for ranged versions 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports minor and major upgrades for ranged versions 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -1796,7 +1796,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() supports minor and major upgrades for tilde ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports minor and major upgrades for tilde ranges 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -1872,7 +1872,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades .x complex minor ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x complex minor ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1892,7 +1892,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades .x major ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x major ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -1920,7 +1920,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades .x minor ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x minor ranges 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -1946,7 +1946,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades .x minor ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x minor ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1966,7 +1966,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades equal minor ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades equal minor ranges 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -1986,7 +1986,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than equal major ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than equal major ranges 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -2008,7 +2008,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than equal minor ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than equal minor ranges 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2028,7 +2028,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than equal ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than equal ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2090,7 +2090,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than major ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than major ranges 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -2118,7 +2118,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2181,7 +2181,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades major greater than less than ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades major greater than less than ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -2209,7 +2209,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades major less than equal ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades major less than equal ranges 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2236,7 +2236,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades major less than ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades major less than ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -2264,7 +2264,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades minor greater than less than equals ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades minor greater than less than equals ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2325,7 +2325,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades minor greater than less than ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades minor greater than less than ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2387,7 +2387,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades minor ranged versions 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades minor ranged versions 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -2419,7 +2419,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades multiple caret ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades multiple caret ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2481,7 +2481,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades multiple tilde ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades multiple tilde ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2543,7 +2543,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades shorthand major ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades shorthand major ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -2571,7 +2571,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades shorthand minor ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades shorthand minor ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2591,7 +2591,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades tilde ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades tilde ranges 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -2617,7 +2617,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() upgrades tilde ranges without pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades tilde ranges without pinning 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2637,7 +2637,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() uses minimum version for vulnerabilityAlerts 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() uses minimum version for vulnerabilityAlerts 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2653,7 +2653,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() uses the locked version for pinning 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() uses the locked version for pinning 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -2686,7 +2686,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() widens .x OR ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() widens .x OR ranges 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -2722,7 +2722,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() widens major ranged versions if configured 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() widens major ranged versions if configured 1`] = `
 Array [
   Object {
     "bucket": "major",
@@ -2758,7 +2758,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() widens minor ranged versions if configured 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() widens minor ranged versions if configured 1`] = `
 Array [
   Object {
     "bucket": "non-major",
@@ -2778,7 +2778,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/process/lookup .lookupUpdates() widens stanndalone major OR ranges 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() widens stanndalone major OR ranges 1`] = `
 Array [
   Object {
     "bucket": "major",

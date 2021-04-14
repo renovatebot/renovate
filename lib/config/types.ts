@@ -87,6 +87,7 @@ export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
   customEnvVariables?: Record<string, string>;
+  dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
@@ -113,10 +114,12 @@ export interface LegacyAdminConfig {
   platform?: string;
   requireConfig?: boolean;
 }
+export type ExecutionMode = 'branch' | 'update';
 
 export type PostUpgradeTasks = {
   commands?: string[];
   fileFilters?: string[];
+  executionMode: ExecutionMode;
 };
 
 type UpdateConfig<

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/azure createPr() should create and return a PR object 1`] = `
+exports[`platform/azure/index createPr() should create and return a PR object 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -14,7 +14,7 @@ Object {
 }
 `;
 
-exports[`platform/azure createPr() should create and return a PR object from base branch 1`] = `
+exports[`platform/azure/index createPr() should create and return a PR object from base branch 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -28,7 +28,7 @@ Object {
 }
 `;
 
-exports[`platform/azure createPr() should create and return a PR object with auto-complete set 1`] = `
+exports[`platform/azure/index createPr() should create and return a PR object with auto-complete set 1`] = `
 Object {
   "autoCompleteSetBy": Object {
     "id": 123,
@@ -52,14 +52,14 @@ Object {
 }
 `;
 
-exports[`platform/azure deleteLabel() Should delete a label 1`] = `
+exports[`platform/azure/index deleteLabel() Should delete a label 1`] = `
 Array [
   Array [],
   Array [],
 ]
 `;
 
-exports[`platform/azure ensureComment adds comment if missing 1`] = `
+exports[`platform/azure/index ensureComment adds comment if missing 1`] = `
 Array [
   Array [
     Object {
@@ -81,19 +81,19 @@ content",
 ]
 `;
 
-exports[`platform/azure ensureComment adds comment if missing 2`] = `Array []`;
+exports[`platform/azure/index ensureComment adds comment if missing 2`] = `Array []`;
 
-exports[`platform/azure ensureComment does nothing if comment exists and is the same 1`] = `Array []`;
+exports[`platform/azure/index ensureComment does nothing if comment exists and is the same 1`] = `Array []`;
 
-exports[`platform/azure ensureComment does nothing if comment exists and is the same 2`] = `Array []`;
+exports[`platform/azure/index ensureComment does nothing if comment exists and is the same 2`] = `Array []`;
 
-exports[`platform/azure ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `Array []`;
+exports[`platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `Array []`;
 
-exports[`platform/azure ensureComment does nothing if comment exists and is the same when there is no topic 2`] = `Array []`;
+exports[`platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 2`] = `Array []`;
 
-exports[`platform/azure ensureComment updates comment if missing 1`] = `Array []`;
+exports[`platform/azure/index ensureComment updates comment if missing 1`] = `Array []`;
 
-exports[`platform/azure ensureComment updates comment if missing 2`] = `
+exports[`platform/azure/index ensureComment updates comment if missing 2`] = `
 Array [
   Array [
     Object {
@@ -111,7 +111,7 @@ content",
 ]
 `;
 
-exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
+exports[`platform/azure/index findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -128,7 +128,7 @@ Object {
 }
 `;
 
-exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
+exports[`platform/azure/index findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -145,7 +145,7 @@ Object {
 }
 `;
 
-exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
+exports[`platform/azure/index findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -162,7 +162,7 @@ Object {
 }
 `;
 
-exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
+exports[`platform/azure/index findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -179,9 +179,18 @@ Object {
 }
 `;
 
-exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null`;
+exports[`platform/azure/index getBranchPr(branchName) should return the pr 1`] = `null`;
 
-exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
+exports[`platform/azure/index getJsonFile() supports fetch from another repo 1`] = `
+Array [
+  Array [
+    "123456",
+    "file.json",
+  ],
+]
+`;
+
+exports[`platform/azure/index getPr(prNo) should return a pr in the right format 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -199,45 +208,45 @@ Object {
 }
 `;
 
-exports[`platform/azure massageMarkdown(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)"`;
-
-exports[`platform/azure getRepos() should return an array of repos 1`] = `
+exports[`platform/azure/index getRepos() should return an array of repos 1`] = `
 Array [
   Array [],
 ]
 `;
 
-exports[`platform/azure getRepos() should return an array of repos 2`] = `
+exports[`platform/azure/index getRepos() should return an array of repos 2`] = `
 Array [
   "prj1/repo1",
   "prj1/repo2",
 ]
 `;
 
-exports[`platform/azure initPlatform() should init 1`] = `
+exports[`platform/azure/index initPlatform() should init 1`] = `
 Object {
   "endpoint": "https://dev.azure.com/renovate12345/",
 }
 `;
 
-exports[`platform/azure initRepo should initialise the config for a repo 1`] = `
+exports[`platform/azure/index initRepo should initialise the config for a repo 1`] = `
 Array [
   Array [],
 ]
 `;
 
-exports[`platform/azure initRepo should initialise the config for a repo 2`] = `
+exports[`platform/azure/index initRepo should initialise the config for a repo 2`] = `
 Object {
   "defaultBranch": "defBr",
   "isFork": false,
 }
 `;
 
-exports[`platform/azure updatePr(prNo, title, body) should close the PR 1`] = `
+exports[`platform/azure/index massageMarkdown(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)"`;
+
+exports[`platform/azure/index updatePr(prNo, title, body) should close the PR 1`] = `
 Array [
   Array [
     Object {
-      "description": undefined,
+      "description": "Hello world again",
       "status": 2,
       "title": "The New Title",
     },
@@ -247,7 +256,7 @@ Array [
 ]
 `;
 
-exports[`platform/azure updatePr(prNo, title, body) should reopen the PR 1`] = `
+exports[`platform/azure/index updatePr(prNo, title, body) should reopen the PR 1`] = `
 Array [
   Array [
     Object {
@@ -258,7 +267,7 @@ Array [
   ],
   Array [
     Object {
-      "description": undefined,
+      "description": "Hello world again",
       "title": "The New Title",
     },
     "1",
@@ -267,11 +276,11 @@ Array [
 ]
 `;
 
-exports[`platform/azure updatePr(prNo, title, body) should update the PR 1`] = `
+exports[`platform/azure/index updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [
     Object {
-      "description": undefined,
+      "description": "Hello world again",
       "title": "The New Title",
     },
     "1",
@@ -280,7 +289,7 @@ Array [
 ]
 `;
 
-exports[`platform/azure updatePr(prNo, title, body) should update the PR without description 1`] = `
+exports[`platform/azure/index updatePr(prNo, title, body) should update the PR without description 1`] = `
 Array [
   Array [
     Object {

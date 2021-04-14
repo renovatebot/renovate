@@ -7,6 +7,7 @@ import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
+import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
 import {
   CONFIG_VALIDATION,
@@ -19,7 +20,6 @@ import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { RepoFileConfig } from './common';
-import { flattenPackageRules } from './flatten';
 import { detectSemanticCommits } from './semantic';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
@@ -186,10 +186,16 @@ export async function mergeRenovateConfig(
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
-  const resolvedConfig = decryptConfig(
+  let resolvedConfig = decryptConfig(
     await presets.resolveConfigPresets(decryptedConfig, config)
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
+  const migrationResult = migrateConfig(resolvedConfig);
+  if (migrationResult.isMigrated) {
+    logger.debug('Resolved config needs migrating');
+    logger.trace({ config: resolvedConfig }, 'resolved config after migrating');
+    resolvedConfig = migrationResult.migratedConfig;
+  }
   // istanbul ignore if
   if (is.string(resolvedConfig.npmrc)) {
     logger.debug(
@@ -215,7 +221,6 @@ export async function mergeRenovateConfig(
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
   returnConfig.renovateJsonPresent = true;
-  returnConfig.packageRules = flattenPackageRules(returnConfig.packageRules);
   // istanbul ignore if
   if (returnConfig.ignorePaths?.length) {
     logger.debug(

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/sbt parses Maven index directory 1`] = `
+exports[`datasource/sbt-package/index parses Maven index directory 1`] = `
 Array [
   "autofix-3.0.6_2.11",
   "autofix-3.0.6_2.12",
@@ -188,7 +188,7 @@ Array [
 ]
 `;
 
-exports[`datasource/sbt parses sbt index directory 1`] = `
+exports[`datasource/sbt-package/index parses sbt index directory 1`] = `
 Array [
   "au.com.onegeek",
   "bavadim",

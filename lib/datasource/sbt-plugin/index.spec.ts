@@ -2,6 +2,7 @@ import fs from 'fs';
 import nock from 'nock';
 import upath from 'upath';
 import { getPkgReleases } from '..';
+import { getName } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from './util';
@@ -17,7 +18,7 @@ const sbtPluginIndex = fs.readFileSync(
   'utf8'
 );
 
-describe('datasource/sbt', () => {
+describe(getName(__filename), () => {
   it('parses Maven index directory', () => {
     expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
   });

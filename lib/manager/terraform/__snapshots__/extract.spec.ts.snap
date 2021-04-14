@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/terraform/extract extractPackageFile() extract helm releases 1`] = `
+exports[`manager/terraform/extract extractPackageFile() extract helm releases 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -61,7 +61,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/terraform/extract extractPackageFile() extracts 1`] = `
+exports[`manager/terraform/extract extractPackageFile() extracts 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -270,7 +270,7 @@ Object {
       "datasource": "github-tags",
       "depName": "hashicorp/terraform",
       "extractVersion": "v(?<version>.*)$",
-      "lineNumber": 229,
+      "lineNumber": 230,
     },
     Object {
       "currentValue": "2.7.2",

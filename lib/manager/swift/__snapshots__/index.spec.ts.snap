@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/swift extractPackageFile() parses multiple packages 1`] = `
+exports[`manager/swift/index extractPackageFile() parses multiple packages 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -59,7 +59,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/swift extractPackageFile() parses package descriptions 1`] = `
+exports[`manager/swift/index extractPackageFile() parses package descriptions 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -73,7 +73,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/swift extractPackageFile() parses package descriptions 2`] = `
+exports[`manager/swift/index extractPackageFile() parses package descriptions 2`] = `
 Object {
   "deps": Array [
     Object {
@@ -87,7 +87,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/swift extractPackageFile() parses package descriptions 3`] = `
+exports[`manager/swift/index extractPackageFile() parses package descriptions 3`] = `
 Object {
   "deps": Array [
     Object {
@@ -101,7 +101,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/swift extractPackageFile() parses package descriptions 4`] = `
+exports[`manager/swift/index extractPackageFile() parses package descriptions 4`] = `
 Object {
   "deps": Array [
     Object {
@@ -115,7 +115,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/swift extractPackageFile() parses package descriptions 5`] = `
+exports[`manager/swift/index extractPackageFile() parses package descriptions 5`] = `
 Object {
   "deps": Array [
     Object {
@@ -129,7 +129,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/swift extractPackageFile() parses package descriptions 6`] = `
+exports[`manager/swift/index extractPackageFile() parses package descriptions 6`] = `
 Object {
   "deps": Array [
     Object {

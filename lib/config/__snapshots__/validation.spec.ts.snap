@@ -78,7 +78,7 @@ Array [
     "topic": "Configuration Error",
   },
   Object {
-    "message": "packageRules: Each packageRule must contain at least one selector (matchFiles, matchPaths, matchLanguages, matchBaseBranches, matchManagers, matchDatasources, matchDepTypes, matchPackageNames, matchPackagePatterns, matchPackagePrefixes, excludePackageNames, excludePackagePatterns, excludePackagePrefixes, matchCurrentVersion, matchSourceUrlPrefixes, matchUpdateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "packageRules[1]: Each packageRule must contain at least one match* or exclude* selector. Rule: {\\"foo\\":1}",
     "topic": "Configuration Error",
   },
   Object {
@@ -131,8 +131,21 @@ Array [
 exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 2`] = `
 Array [
   Object {
-    "message": "\\"fileMatch\\" must be configured in a manager block and not here: npm.gradle",
+    "message": "\\"fileMatch\\" must be configured in a manager block and not here: npm.minor",
     "topic": "Config warning",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if language or manager objects are nested 1`] = `
+Array [
+  Object {
+    "message": "The \\"docker\\" object can only be configured at the top level of a config but was found inside \\"major.minor\\"",
+    "topic": "Configuration Error",
+  },
+  Object {
+    "message": "The \\"gradle\\" object can only be configured at the top level of a config but was found inside \\"java\\"",
+    "topic": "Configuration Error",
   },
 ]
 `;
@@ -216,6 +229,15 @@ Array [
   Object {
     "message": "hostType should only be configured within a \\"hostRules\\" object. Was found in .",
     "topic": "hostType",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) warns if only selectors in packageRules 1`] = `
+Array [
+  Object {
+    "message": "packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {\\"matchDepTypes\\":[\\"foo\\"],\\"excludePackageNames\\":[\\"bar\\"]}",
+    "topic": "Configuration Error",
   },
 ]
 `;
