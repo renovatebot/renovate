@@ -15,7 +15,7 @@ export default async function updateDependency({
     await submoduleGit.checkout([upgrade.newDigest]);
     return fileContent;
   } catch (err) {
-    logger.debug(err);
+    logger.debug({ err }, ‘submodule checkout error’);
     return null;
   }
 }
