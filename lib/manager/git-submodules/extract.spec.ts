@@ -1,6 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { getName, partial } from '../../../test/util';
+import * as hostRules from '../../util/host-rules';
 import type { PackageFile } from '../types';
 import extractPackageFile from './extract';
 
@@ -44,6 +45,7 @@ describe(getName(__filename), () => {
   });
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
+      hostRules.add({ hostName: 'github.com', token: 'abc123' });
       let res: PackageFile;
       expect(
         await extractPackageFile('', '.gitmodules.1', { localDir })
