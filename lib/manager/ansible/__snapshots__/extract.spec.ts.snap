@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_container 1`] = `
+exports[`manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_container 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -86,7 +86,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_service 1`] = `
+exports[`manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_service 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",

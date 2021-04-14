@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/terraform-module getReleases processes real data 1`] = `
+exports[`datasource/terraform-module/index getReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
   "registryUrl": "https://registry.terraform.io",
@@ -80,7 +80,7 @@ Object {
 }
 `;
 
-exports[`datasource/terraform-module getReleases processes real data 2`] = `
+exports[`datasource/terraform-module/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -105,7 +105,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases processes real data on changed subpath 1`] = `
+exports[`datasource/terraform-module/index getReleases processes real data on changed subpath 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -130,7 +130,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases processes real data on changed subpath 2`] = `
+exports[`datasource/terraform-module/index getReleases processes real data on changed subpath 2`] = `
 Object {
   "registryUrl": "https://terraform.foo.bar",
   "releases": Array [
@@ -209,7 +209,7 @@ Object {
 }
 `;
 
-exports[`datasource/terraform-module getReleases processes with registry in name 1`] = `
+exports[`datasource/terraform-module/index getReleases processes with registry in name 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
   "registryUrl": "https://registry.terraform.io",
@@ -289,7 +289,7 @@ Object {
 }
 `;
 
-exports[`datasource/terraform-module getReleases processes with registry in name 2`] = `
+exports[`datasource/terraform-module/index getReleases processes with registry in name 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -314,7 +314,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases rejects mismatch 1`] = `
+exports[`datasource/terraform-module/index getReleases rejects mismatch 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -339,7 +339,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases rejects servicediscovery 1`] = `
+exports[`datasource/terraform-module/index getReleases rejects servicediscovery 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -354,7 +354,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases returns null for 404 1`] = `
+exports[`datasource/terraform-module/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -379,7 +379,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases returns null for empty result 1`] = `
+exports[`datasource/terraform-module/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -404,7 +404,7 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases returns null for unknown error 1`] = `
+exports[`datasource/terraform-module/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {

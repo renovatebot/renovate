@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/travis/package getPackageUpdates detects pinning 1`] = `
+exports[`manager/travis/package getPackageUpdates detects pinning 1`] = `
 Array [
   Object {
     "isRange": true,
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/travis/package getPackageUpdates returns result if needing updates 1`] = `
+exports[`manager/travis/package getPackageUpdates returns result if needing updates 1`] = `
 Array [
   Object {
     "isRange": true,

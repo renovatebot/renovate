@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/hex getReleases process public repo without auth 1`] = `
+exports[`datasource/hex/index getReleases process public repo without auth 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/certifi",
   "registryUrl": "https://hex.pm/",
@@ -89,7 +89,7 @@ Object {
 }
 `;
 
-exports[`datasource/hex getReleases process public repo without auth 2`] = `
+exports[`datasource/hex/index getReleases process public repo without auth 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -104,7 +104,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases processes real data 1`] = `
+exports[`datasource/hex/index getReleases processes real data 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/certifi",
   "registryUrl": "https://hex.pm/",
@@ -193,7 +193,7 @@ Object {
 }
 `;
 
-exports[`datasource/hex getReleases processes real data 2`] = `
+exports[`datasource/hex/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -208,7 +208,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for 401 1`] = `
+exports[`datasource/hex/index getReleases returns null for 401 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -223,7 +223,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for 404 1`] = `
+exports[`datasource/hex/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -238,7 +238,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for empty result 1`] = `
+exports[`datasource/hex/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -253,7 +253,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for missing fields 1`] = `
+exports[`datasource/hex/index getReleases returns null for missing fields 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -268,7 +268,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for unknown error 1`] = `
+exports[`datasource/hex/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -283,7 +283,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null with wrong auth token 1`] = `
+exports[`datasource/hex/index getReleases returns null with wrong auth token 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -299,7 +299,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases throws for 5xx 1`] = `
+exports[`datasource/hex/index getReleases throws for 5xx 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -314,7 +314,7 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases throws for 429 1`] = `
+exports[`datasource/hex/index getReleases throws for 429 1`] = `
 Array [
   Object {
     "headers": Object {

@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const workspaceFile = readFileSync(
@@ -21,7 +22,7 @@ const fileWithBzlExtension = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/bazel/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

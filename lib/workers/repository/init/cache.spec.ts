@@ -1,7 +1,7 @@
-import { RenovateConfig, getConfig } from '../../../../test/util';
+import { RenovateConfig, getConfig, getName } from '../../../../test/util';
 import { initializeCaches } from './cache';
 
-describe('workers/repository/init/cache', () => {
+describe(getName(__filename), () => {
   describe('initializeCaches()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

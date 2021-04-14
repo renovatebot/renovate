@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import upath from 'upath';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from '.';
 
 const sample = fs.readFileSync(
@@ -7,7 +8,7 @@ const sample = fs.readFileSync(
   'utf-8'
 );
 
-describe('lib/manager/mix/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns empty for invalid dependency file', async () => {
       expect(

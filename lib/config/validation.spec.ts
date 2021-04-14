@@ -1,7 +1,8 @@
+import { getName } from '../../test/util';
 import * as configValidation from './validation';
 import { RenovateConfig } from '.';
 
-describe('config/validation', () => {
+describe(getName(__filename), () => {
   describe('getParentName()', () => {
     it('ignores encrypted in root', () => {
       expect(configValidation.getParentName('encrypted')).toEqual('');
@@ -482,6 +483,32 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
       expect(warnings).toMatchSnapshot();
+    });
+
+    it('errors if language or manager objects are nested', async () => {
+      const config = {
+        python: {
+          enabled: false,
+        },
+        java: {
+          gradle: {
+            enabled: false,
+          },
+        },
+        major: {
+          minor: {
+            docker: {
+              automerge: true,
+            },
+          },
+        },
+      } as never;
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(errors).toHaveLength(2);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
     });
 
     it('warns if hostType has the wrong parent', async () => {

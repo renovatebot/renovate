@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import upath from 'upath';
 
+import { getName } from '../../../test/util';
 import { extractPackageFile } from '.';
 
 const simplePodfile = fs.readFileSync(
@@ -13,7 +14,7 @@ const complexPodfile = fs.readFileSync(
   'utf-8'
 );
 
-describe('lib/manager/cocoapods/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('extracts all dependencies', async () => {
       const simpleResult = (await extractPackageFile(simplePodfile, 'Podfile'))

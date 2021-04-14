@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { getConfig, mocked, partial } from '../../../../../test/util';
+import { getConfig, getName, mocked, partial } from '../../../../../test/util';
 import qJson from '../../../../config/npm/__fixtures__/01.json';
 import helmetJson from '../../../../config/npm/__fixtures__/02.json';
 import coffeelintJson from '../../../../config/npm/__fixtures__/coffeelint.json';
@@ -40,7 +40,7 @@ Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
 
 let config: LookupUpdateConfig;
 
-describe('workers/repository/process/lookup', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     // TODO: fix types
     config = partial<LookupUpdateConfig>(getConfig());

@@ -2,6 +2,7 @@ import {
   RenovateConfig,
   fs,
   getConfig,
+  getName,
   git,
   mocked,
 } from '../../../../test/util';
@@ -30,7 +31,7 @@ beforeEach(() => {
 jest.mock('../../../config/migration');
 jest.mock('../../../config/migrate-validate');
 
-describe('workers/repository/init/config', () => {
+describe(getName(__filename), () => {
   describe('detectRepoFileConfig()', () => {
     it('returns config if not found', () => {
       git.getFileList.mockResolvedValue(['package.json']);

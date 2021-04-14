@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/extract .extractPackageFile() catches invalid names 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() catches invalid names 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -30,7 +30,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts engines 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts engines 1`] = `
 Object {
   "constraints": Object {
     "node": ">= 8.9.2",
@@ -154,7 +154,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts non-npmjs 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts non-npmjs 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -318,7 +318,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts npm package alias 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts npm package alias 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -368,7 +368,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts volta 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts volta 1`] = `
 Object {
   "constraints": Object {
     "node": "8.9.2",
@@ -429,7 +429,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts volta yarn unknown-version 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts volta yarn unknown-version 1`] = `
 Object {
   "constraints": Object {
     "node": "8.9.2",
@@ -484,7 +484,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -621,7 +621,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds "npmClient":"yarn" in lerna.json 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds "npmClient":"yarn" in lerna.json 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -758,7 +758,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds a lock file 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds a lock file 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -895,7 +895,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds complex yarn workspaces 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds complex yarn workspaces 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [],
@@ -920,7 +920,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds lerna 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds lerna 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -1057,7 +1057,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [],
@@ -1082,7 +1082,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [],
@@ -1107,7 +1107,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() returns an array of dependencies 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [

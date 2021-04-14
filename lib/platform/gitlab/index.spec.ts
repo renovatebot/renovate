@@ -2,6 +2,7 @@
 import nock from 'nock';
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -16,7 +17,7 @@ import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
 
-describe('platform/gitlab', () => {
+describe(getName(__filename), () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
