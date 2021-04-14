@@ -1,9 +1,10 @@
+import { getName } from '../../test/util';
 import * as datasourceMaven from './maven';
 import { addMetaData } from './metadata';
 import * as datasourceNpm from './npm';
 import * as datasourcePypi from './pypi';
 
-describe('datasource/metadata', () => {
+describe(getName(__filename), () => {
   it('Should do nothing if dep is not specified', () => {
     expect(addMetaData()).toBeUndefined();
   });
