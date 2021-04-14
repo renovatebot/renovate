@@ -88,9 +88,10 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       // get server base url from import url
       const parsedUrl = URL.parse(goSourceUrl);
 
-      // split the go module from the URL: host/go/module -> go/module
-      const split = goModule.split('/');
-      const lookupName = split[1] + '/' + split[2];
+      // split the goSourceUrl: https://host/go/module -> go/module
+      const split = goSourceUrl.split('/');
+      const lookupName = split[3] + '/' + split[4];
+
 
       const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
