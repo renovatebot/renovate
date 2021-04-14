@@ -78,4 +78,22 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('>= 1.0.0, <= 2.0.7');
   });
+  it('updates short ranges', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '0.14',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.2',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('0.15');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.2',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('~> 0.15');
+  });
 });
