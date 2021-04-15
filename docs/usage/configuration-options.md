@@ -1661,7 +1661,7 @@ This setting tells Renovate when you would like it to raise PRs:
 
 Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
 
-With prCreation set to `immediate`, you'll get a GitHub notification right away when a new Renovate bot PR is avaiable.
+With prCreation set to `immediate`, you'll get a GitHub notification right away when a new Renovate bot PR is available.
 Your test suite takes a bit of time to complete, so if you go look at the new PR right away, you don't know if your tests pass or fail.
 You're basically waiting until you have the test results, before you can decide if you want to merge the PR or not.
 
