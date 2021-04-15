@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../config';
+import { applyEnabledManagersFilter } from '../../../config/enabled-managers';
 import { applySecretsToConfig } from '../../../config/secrets';
 import { logger } from '../../../logger';
 import { clone } from '../../../util/clone';
@@ -21,6 +22,7 @@ export async function initRepo(
   config = await initApis(config);
   config = await getRepoConfig(config);
   checkIfConfigured(config);
+  config = applyEnabledManagersFilter(config);
   config = applySecretsToConfig(config);
   await setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);

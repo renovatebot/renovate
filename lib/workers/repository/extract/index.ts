@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import {
   RenovateConfig,
   getManagerConfig,
@@ -14,17 +13,15 @@ import { getManagerPackageFiles } from './manager-files';
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
-  let managerList = getManagerList();
-  if (is.nonEmptyArray(config.enabledManagers)) {
-    logger.debug('Applying enabledManagers filtering');
-    managerList = managerList.filter((manager) =>
-      config.enabledManagers.includes(manager)
-    );
-  }
+  const managerList = getManagerList();
   const extractList: RenovateConfig[] = [];
   const fileList = await getFileList();
 
   const tryConfig = (extractConfig: RenovateConfig): void => {
+    if (extractConfig.enabled === false) {
+      return;
+    }
+
     const matchingFileList = getMatchingFiles(extractConfig, fileList);
     if (matchingFileList.length) {
       extractList.push({ ...extractConfig, fileList: matchingFileList });
@@ -34,6 +31,7 @@ export async function extractAllDependencies(
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
+
     if (manager === 'regex') {
       for (const regexManager of config.regexManagers) {
         tryConfig(mergeChildConfig(managerConfig, regexManager));
