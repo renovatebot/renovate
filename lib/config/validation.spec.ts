@@ -161,6 +161,7 @@ describe(getName(__filename), () => {
       const config: RenovateConfig = {
         allowedVersions: 'foo',
         enabled: 1 as any,
+        enabledManagers: ['npm'],
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
         labels: 5 as any,
