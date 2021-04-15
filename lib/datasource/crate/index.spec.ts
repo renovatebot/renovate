@@ -225,7 +225,7 @@ describe(getName(__filename), () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('refuses to clone if trustLevel is not high', async () => {
+    it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
@@ -240,7 +240,7 @@ describe(getName(__filename), () => {
     });
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
@@ -254,7 +254,7 @@ describe(getName(__filename), () => {
     });
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -268,7 +268,7 @@ describe(getName(__filename), () => {
     });
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
       await getPkgReleases({
         datasource,
@@ -284,7 +284,7 @@ describe(getName(__filename), () => {
     });
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       await Promise.all([
@@ -310,7 +310,7 @@ describe(getName(__filename), () => {
     });
     it('returns null when git clone fails', async () => {
       setupErrorGitMock();
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       const result = await getPkgReleases({
