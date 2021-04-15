@@ -451,7 +451,7 @@ describe(getName(__filename), () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch({ ...config, automerge: true });
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
@@ -472,7 +472,7 @@ describe(getName(__filename), () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
@@ -493,7 +493,7 @@ describe(getName(__filename), () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -515,7 +515,7 @@ describe(getName(__filename), () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -537,7 +537,7 @@ describe(getName(__filename), () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
         Error(MANAGER_LOCKFILE_ERROR)
@@ -558,7 +558,7 @@ describe(getName(__filename), () => {
         prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce(true);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
