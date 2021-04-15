@@ -602,8 +602,7 @@ export async function processBranch(
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
         const prAutomerged = await checkAutoMerge(pr, config);
-        if (prAutomerged && config.automergeType !== 'pr-comment') {
-          await deleteBranchSilently(config.branchName);
+        if (prAutomerged) {
           return ProcessBranchResult.Automerged;
         }
       } else {
