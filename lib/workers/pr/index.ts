@@ -10,11 +10,7 @@ import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
-import {
-  deleteBranch,
-  getBranchLastCommitTime,
-  isBranchModified,
-} from '../../util/git';
+import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import * as template from '../../util/template';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
 import { BranchConfig, PrResult } from '../types';
@@ -485,89 +481,4 @@ export async function ensurePr(
     logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
   }
   return { prResult: PrResult.Error };
-}
-
-export async function checkAutoMerge(
-  pr: Pr,
-  config: BranchConfig
-): Promise<boolean> {
-  logger.trace({ config }, 'checkAutoMerge');
-  const {
-    branchName,
-    automerge,
-    automergeType,
-    automergeComment,
-    requiredStatusChecks,
-    rebaseRequested,
-  } = config;
-  logger.debug(
-    { automerge, automergeType, automergeComment },
-    `Checking #${pr.number} for automerge`
-  );
-  if (automerge) {
-    logger.debug('PR is configured for automerge');
-    // Return if PR not ready for automerge
-    if (pr.isConflicted) {
-      logger.debug('PR is conflicted');
-      logger.debug({ pr });
-      return false;
-    }
-    if (requiredStatusChecks && pr.canMerge !== true) {
-      logger.debug(
-        { canMergeReason: pr.canMergeReason },
-        'PR is not ready for merge'
-      );
-      return false;
-    }
-    const branchStatus = await platform.getBranchStatus(
-      branchName,
-      requiredStatusChecks
-    );
-    if (branchStatus !== BranchStatus.green) {
-      logger.debug(
-        `PR is not ready for merge (branch status is ${branchStatus})`
-      );
-      return false;
-    }
-    // Check if it's been touched
-    if (await isBranchModified(branchName)) {
-      logger.debug('PR is ready for automerge but has been modified');
-      return false;
-    }
-    if (automergeType === 'pr-comment') {
-      logger.debug(`Applying automerge comment: ${automergeComment}`);
-      // istanbul ignore if
-      if (getAdminConfig().dryRun) {
-        logger.info(
-          `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
-        );
-        return false;
-      }
-      if (rebaseRequested) {
-        await platform.ensureCommentRemoval({
-          number: pr.number,
-          content: automergeComment,
-        });
-      }
-      return platform.ensureComment({
-        number: pr.number,
-        topic: null,
-        content: automergeComment,
-      });
-    }
-    // Let's merge this
-    logger.debug(`Automerging #${pr.number}`);
-    // istanbul ignore if
-    if (getAdminConfig().dryRun) {
-      logger.info(`DRY-RUN: Would merge PR #${pr.number}`);
-      return false;
-    }
-    const res = await platform.mergePr(pr.number, branchName);
-    if (res) {
-      logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
-    }
-    return res;
-  }
-  logger.debug('No automerge');
-  return false;
 }

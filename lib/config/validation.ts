@@ -107,6 +107,12 @@ export async function validateConfig(
     return true;
   }
 
+  function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
+    return enabledManagers.filter(
+      (manager) => !getManagerList().includes(manager)
+    );
+  }
+
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     // istanbul ignore if
@@ -122,6 +128,19 @@ export async function validateConfig(
         topic: 'Configuration Error',
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
+    }
+    if (key === 'enabledManagers' && val) {
+      const unsupportedManagers = getUnsupportedEnabledManagers(
+        val as string[]
+      );
+      if (is.nonEmptyArray(unsupportedManagers)) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
+            ', '
+          )}"`,
+        });
+      }
     }
     if (key === 'fileMatch') {
       if (parentPath === undefined) {

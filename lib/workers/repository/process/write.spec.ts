@@ -7,7 +7,7 @@ import {
 } from '../../../../test/util';
 import * as _branchWorker from '../../branch';
 import { Limit, isLimitReached } from '../../global/limits';
-import { BranchConfig, ProcessBranchResult } from '../../types';
+import { BranchConfig, BranchResult } from '../../types';
 import * as _limits from './limits';
 import { writeUpdates } from './write';
 
@@ -49,27 +49,27 @@ describe(getName(__filename), () => {
         {},
       ] as never;
       git.branchExists.mockReturnValue(true);
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.PrCreated
-      );
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.AlreadyExisted
-      );
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.Automerged
-      );
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.Automerged
-      );
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.PrCreated,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.AlreadyExisted,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.Automerged,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.Automerged,
+      });
       const res = await writeUpdates(config, branches);
       expect(res).toEqual('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
     it('increments branch counter', async () => {
       const branches: BranchConfig[] = [{}] as never;
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.PrCreated
-      );
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.PrCreated,
+      });
       git.branchExists.mockReturnValueOnce(false);
       git.branchExists.mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockReturnValueOnce(1);
