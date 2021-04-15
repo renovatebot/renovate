@@ -35,7 +35,13 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
-  // handle specia. ~> 1.2 case
+  if (/~>\s*0\.\d+/.test(currentValue) && npm.getMajor(newVersion) === 0) {
+    return currentValue.replace(
+      /(~>\s*0\.).*$/,
+      `$1${npm.getMinor(newVersion)}`
+    );
+  }
+  // handle special ~> 1.2 case
   if (/(~>\s*)\d+\.\d+$/.test(currentValue)) {
     return currentValue.replace(
       /(~>\s*)\d+\.\d+$/,
