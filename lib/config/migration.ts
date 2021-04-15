@@ -191,11 +191,14 @@ export function migrateConfig(
           migratedConfig.rebaseWhen = 'never';
         }
       } else if (key === 'exposeEnv') {
+        migratedConfig.exposeAllEnv = val;
         delete migratedConfig.exposeEnv;
-        if (val === true) {
-          migratedConfig.trustLevel = 'high';
-        } else if (val === false) {
-          migratedConfig.trustLevel = 'low';
+      } else if (key === 'trustLevel') {
+        delete migratedConfig.trustLevel;
+        if (val === 'high') {
+          migratedConfig.allowCustomCrateRegistries ??= true;
+          migratedConfig.allowScripts ??= true;
+          migratedConfig.exposeAllEnv ??= true;
         }
       } else if (
         key === 'branchName' &&

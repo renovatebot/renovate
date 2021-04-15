@@ -56,6 +56,7 @@ describe(getName(__filename), () => {
         masterIssueTitle: 'foo',
         gomodTidy: true,
         upgradeInRange: true,
+        trustLevel: 'high',
         automergeType: 'branch-push',
         branchName:
           '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
