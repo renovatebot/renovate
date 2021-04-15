@@ -24,7 +24,7 @@ Reducing the config to a minimum to reproduce the bug helps discover exactly whi
 
 ## Why we require a minimal reproduction
 
-A debuggable reproduction repository is usually needed, and it makes most sense for the issue reporter to create it.
+A debuggable reproduction repository is usually needed, and it makes the most sense for the issue reporter to create it.
 We prefer that you use GitHub to host your reproduction, but if it requires GitLab or Bitbucket to be reproduced then creating a public repository on those instead is fine.
 
 ### Making a reproduction repository is too much work for me
