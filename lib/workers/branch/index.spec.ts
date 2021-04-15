@@ -106,14 +106,14 @@ describe(getName(__filename), () => {
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.NotScheduled);
+      expect(res).toEqual({ result: BranchResult.NotScheduled });
     });
     it('skips branch if not scheduled and not updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = false;
       git.branchExists.mockReturnValue(true);
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.NotScheduled);
+      expect(res).toEqual({ result: BranchResult.NotScheduled });
     });
     it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
@@ -136,7 +136,7 @@ describe(getName(__filename), () => {
 
       git.branchExists.mockReturnValue(false);
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.Pending);
+      expect(res).toEqual({ result: BranchResult.Pending });
     });
     it('skips branch if not stabilityDays not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
@@ -148,7 +148,7 @@ describe(getName(__filename), () => {
         },
       ];
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.Pending);
+      expect(res).toEqual({ result: BranchResult.Pending });
     });
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -223,7 +223,7 @@ describe(getName(__filename), () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
-      expect(res).not.toEqual(BranchResult.PrEdited);
+      expect(res).not.toEqual({ result: BranchResult.PrEdited });
     });
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -234,7 +234,7 @@ describe(getName(__filename), () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.PrEdited);
+      expect(res).toEqual({ result: BranchResult.PrEdited });
     });
     it('skips branch if target branch changed', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -246,13 +246,13 @@ describe(getName(__filename), () => {
       git.isBranchModified.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.PrEdited);
+      expect(res).toEqual({ result: BranchResult.PrEdited });
     });
     it('skips branch if branch edited and no PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.PrEdited);
+      expect(res).toEqual({ result: BranchResult.PrEdited });
     });
     it('continues branch if branch edited and but PR found', async () => {
       git.branchExists.mockReturnValue(true);
@@ -260,7 +260,7 @@ describe(getName(__filename), () => {
       git.getBranchCommit.mockReturnValueOnce('abc123');
       platform.findPr.mockResolvedValueOnce({ sha: 'abc123' } as any);
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.Error);
+      expect(res).toEqual({ result: BranchResult.Error });
     });
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       git.branchExists.mockReturnValue(true);
@@ -268,7 +268,7 @@ describe(getName(__filename), () => {
       git.getBranchCommit.mockReturnValueOnce('abc123');
       platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual(BranchResult.PrEdited);
+      expect(res).toEqual({ result: BranchResult.PrEdited });
     });
     it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -280,9 +280,9 @@ describe(getName(__filename), () => {
       });
       limits.isLimitReached.mockReturnValueOnce(true);
       limits.isLimitReached.mockReturnValueOnce(false);
-      expect(await branchWorker.processBranch(config)).toEqual(
-        BranchResult.BranchLimitReached
-      );
+      expect(await branchWorker.processBranch(config)).toEqual({
+        result: BranchResult.BranchLimitReached,
+      });
     });
     it('returns if pr creation limit exceeded and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -297,9 +297,9 @@ describe(getName(__filename), () => {
         prResult: PrResult.LimitReached,
       });
       limits.isLimitReached.mockReturnValue(false);
-      expect(await branchWorker.processBranch(config)).toEqual(
-        BranchResult.PrLimitReached
-      );
+      expect(await branchWorker.processBranch(config)).toEqual({
+        result: BranchResult.PrLimitReached,
+      });
     });
     it('returns if commit limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -312,9 +312,9 @@ describe(getName(__filename), () => {
       git.branchExists.mockReturnValue(false);
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
-      expect(await branchWorker.processBranch(config)).toEqual(
-        BranchResult.CommitLimitReached
-      );
+      expect(await branchWorker.processBranch(config)).toEqual({
+        result: BranchResult.CommitLimitReached,
+      });
     });
     it('returns if no work', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -326,9 +326,9 @@ describe(getName(__filename), () => {
       });
       git.branchExists.mockReturnValue(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(await branchWorker.processBranch(config)).toEqual(
-        BranchResult.NoWork
-      );
+      expect(await branchWorker.processBranch(config)).toEqual({
+        result: BranchResult.NoWork,
+      });
     });
     it('returns if branch automerged', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -394,9 +394,9 @@ describe(getName(__filename), () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.AwaitingApproval,
       });
-      expect(await branchWorker.processBranch(config)).toEqual(
-        BranchResult.NeedsPrApproval
-      );
+      expect(await branchWorker.processBranch(config)).toEqual({
+        result: BranchResult.NeedsPrApproval,
+      });
     });
     it('returns if branch exists but pending', async () => {
       expect.assertions(1);
@@ -413,9 +413,9 @@ describe(getName(__filename), () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.AwaitingNotPending,
       });
-      expect(await branchWorker.processBranch(config)).toEqual(
-        BranchResult.Pending
-      );
+      expect(await branchWorker.processBranch(config)).toEqual({
+        result: BranchResult.Pending,
+      });
     });
     it('returns if branch exists but updated', async () => {
       expect.assertions(3);
@@ -432,7 +432,7 @@ describe(getName(__filename), () => {
           requiredStatusChecks: null,
           prCreation: 'not-pending',
         })
-      ).toEqual(BranchResult.Pending);
+      ).toEqual({ result: BranchResult.Pending });
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -606,9 +606,9 @@ describe(getName(__filename), () => {
         state: PrState.Closed,
       } as Pr);
       setAdminConfig({ dryRun: true });
-      expect(await branchWorker.processBranch(config)).toEqual(
-        BranchResult.AlreadyExisted
-      );
+      expect(await branchWorker.processBranch(config)).toEqual({
+        result: BranchResult.AlreadyExisted,
+      });
     });
 
     it('branch pr no rebase (dry run)', async () => {
@@ -618,9 +618,9 @@ describe(getName(__filename), () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       setAdminConfig({ dryRun: true });
-      expect(await branchWorker.processBranch(config)).toEqual(
-        BranchResult.PrEdited
-      );
+      expect(await branchWorker.processBranch(config)).toEqual({
+        result: BranchResult.PrEdited,
+      });
     });
 
     it('branch pr no schedule lockfile (dry run)', async () => {
@@ -649,7 +649,7 @@ describe(getName(__filename), () => {
           reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
-      ).toEqual(BranchResult.Done);
+      ).toEqual({ result: BranchResult.Done });
     });
 
     it('branch pr no schedule (dry run)', async () => {
@@ -680,7 +680,7 @@ describe(getName(__filename), () => {
           ...config,
           artifactErrors: [{}],
         })
-      ).toEqual(BranchResult.Done);
+      ).toEqual({ result: BranchResult.Done });
     });
 
     it('branch pr no schedule', async () => {
@@ -708,7 +708,7 @@ describe(getName(__filename), () => {
           reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
-      ).toEqual(BranchResult.Done);
+      ).toEqual({ result: BranchResult.Done });
     });
 
     it('executes post-upgrade tasks if trust is high', async () => {
@@ -776,7 +776,7 @@ describe(getName(__filename), () => {
         ],
       });
 
-      expect(result).toEqual(BranchResult.Done);
+      expect(result).toEqual({ result: BranchResult.Done });
       expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
       });
@@ -924,7 +924,7 @@ describe(getName(__filename), () => {
         ],
       });
 
-      expect(result).toEqual(BranchResult.Done);
+      expect(result).toEqual({ result: BranchResult.Done });
       expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
         cwd: '/localDir',
       });
@@ -1031,7 +1031,7 @@ describe(getName(__filename), () => {
 
       const result = await branchWorker.processBranch(inconfig);
 
-      expect(result).toEqual(BranchResult.Done);
+      expect(result).toEqual({ result: BranchResult.Done });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
       });
@@ -1160,7 +1160,7 @@ describe(getName(__filename), () => {
       };
 
       const result = await branchWorker.processBranch(inconfig);
-      expect(result).toEqual(BranchResult.Done);
+      expect(result).toEqual({ result: BranchResult.Done });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
       });

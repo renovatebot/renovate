@@ -44,9 +44,9 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     const res = await processBranch(branch);
-    branch.result = res;
+    branch.result = res?.result;
     if (
-      res === BranchResult.Automerged &&
+      branch.result === BranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
     ) {
       // Stop processing other branches because base branch has been changed

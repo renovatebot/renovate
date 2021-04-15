@@ -49,19 +49,27 @@ describe(getName(__filename), () => {
         {},
       ] as never;
       git.branchExists.mockReturnValue(true);
-      branchWorker.processBranch.mockResolvedValueOnce(BranchResult.PrCreated);
-      branchWorker.processBranch.mockResolvedValueOnce(
-        BranchResult.AlreadyExisted
-      );
-      branchWorker.processBranch.mockResolvedValueOnce(BranchResult.Automerged);
-      branchWorker.processBranch.mockResolvedValueOnce(BranchResult.Automerged);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.PrCreated,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.AlreadyExisted,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.Automerged,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.Automerged,
+      });
       const res = await writeUpdates(config, branches);
       expect(res).toEqual('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
     it('increments branch counter', async () => {
       const branches: BranchConfig[] = [{}] as never;
-      branchWorker.processBranch.mockResolvedValueOnce(BranchResult.PrCreated);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        result: BranchResult.PrCreated,
+      });
       git.branchExists.mockReturnValueOnce(false);
       git.branchExists.mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockReturnValueOnce(1);
