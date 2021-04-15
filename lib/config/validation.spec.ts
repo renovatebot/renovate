@@ -154,7 +154,7 @@ describe(getName(__filename), () => {
         'multiple enabled managers',
         { enabledManagers: ['npm', 'gradle', 'maven'] },
       ],
-    ])('validates enabledManager for %s', async (_case, config) => {
+    ])('validates enabled managers for %s', async (_case, config) => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
