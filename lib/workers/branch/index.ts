@@ -35,6 +35,7 @@ import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import executePostUpgradeCommands from './execute-post-upgrade-commands';
 import { getUpdatedPackageFiles } from './get-updated';
+import { handlepr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setStability } from './status-checks';
@@ -63,38 +64,20 @@ export async function processBranch(
   branchConfig: BranchConfig
 ): Promise<BranchResult> {
   let config: BranchConfig = { ...branchConfig };
-  const dependencies = config.upgrades
-    .map((upgrade) => upgrade.depName)
-    .filter((v) => v) // remove nulls (happens for lock file maintenance)
-    .filter((value, i, list) => list.indexOf(value) === i); // remove duplicates
-  logger.debug(
-    { dependencies },
-    `processBranch with ${branchConfig.upgrades.length} upgrades`
-  );
-  logger.trace({ config }, 'branch config');
+  logger.trace({ config }, 'processBranch()');
   await checkoutBranch(config.baseBranch);
   const branchExists = gitBranchExists(config.branchName);
   const branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
-  const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[
-    config.branchName
-  ];
-  // istanbul ignore if
-  if (dependencyDashboardCheck) {
-    logger.debug(
-      'Branch has been checked in Dependency Dashboard: ' +
-        dependencyDashboardCheck
-    );
-  }
+  const dependencyDashboardCheck =
+    config.dependencyDashboardChecks?.[config.branchName];
+  logger.debug(`dependencyDashboardCheck=${dependencyDashboardCheck}`);
   if (branchPr) {
     config.rebaseRequested = rebaseCheck(config, branchPr);
-    logger.debug(`Branch pr rebase requested: ${config.rebaseRequested}`);
+    logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
-  const ignoreTopic = `Renovate Ignore Notification`;
   try {
-    logger.debug(`Branch has ${dependencies.length} upgrade(s)`);
-
     // Check if branch already existed
     const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
     if (existingPr && !dependencyDashboardCheck) {
@@ -102,43 +85,7 @@ export async function processBranch(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
       );
-      if (existingPr.state === PrState.Closed) {
-        let content;
-        if (config.updateType === 'major') {
-          content = `As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then Renovate will then reenable updates for minor and patch updates automatically.`;
-        } else if (config.updateType === 'digest') {
-          content = `As this PR has been closed unmerged, Renovate will ignore this upgrade updateType and you will not receive PRs for *any* future ${config.depName}:${config.currentValue} digest updates. Digest updates will resume if you update the specified tag at any time.`;
-        } else {
-          content = `As this PR has been closed unmerged, Renovate will now ignore this update (${config.newValue}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the \`ignoreDeps\` array of your renovate config.`;
-        }
-        content +=
-          '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
-        if (!config.suppressNotifications.includes('prIgnoreNotification')) {
-          if (getAdminConfig().dryRun) {
-            logger.info(
-              `DRY-RUN: Would ensure closed PR comment in PR #${existingPr.number}`
-            );
-          } else {
-            await platform.ensureComment({
-              number: existingPr.number,
-              topic: ignoreTopic,
-              content,
-            });
-          }
-        }
-        if (branchExists) {
-          if (getAdminConfig().dryRun) {
-            logger.info('DRY-RUN: Would delete branch ' + config.branchName);
-          } else {
-            await deleteBranch(config.branchName);
-          }
-        }
-      } else if (existingPr.state === PrState.Merged) {
-        logger.debug(
-          { pr: existingPr.number },
-          'Merged PR is blocking this branch'
-        );
-      }
+      await handlepr(config, existingPr);
       return BranchResult.AlreadyExisted;
     }
     // istanbul ignore if
