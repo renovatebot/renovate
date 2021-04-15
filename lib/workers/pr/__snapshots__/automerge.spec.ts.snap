@@ -14,6 +14,13 @@ Object {
 }
 `;
 
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should indicate if automerge failed 1`] = `
+Object {
+  "automerged": false,
+  "prAutomergeBlockReason": "PlatformRejection",
+}
+`;
+
 exports[`workers/pr/automerge checkAutoMerge(pr, config) should not automerge if enabled and pr is mergeable but branch status is not success 1`] = `
 Object {
   "automerged": false,
