@@ -601,8 +601,8 @@ export async function processBranch(
         }
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
-        const prAutomerged = await checkAutoMerge(pr, config);
-        if (prAutomerged) {
+        const prAutomergeResult = await checkAutoMerge(pr, config);
+        if (prAutomergeResult?.automerged) {
           return ProcessBranchResult.Automerged;
         }
       } else {

@@ -32,6 +32,14 @@ describe(getName(__filename), () => {
       expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
+    it('should indicate if automerge failed', async () => {
+      config.automerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.mergePr.mockResolvedValueOnce(false);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
+      expect(platform.mergePr).toHaveBeenCalledTimes(1);
+    });
     it('should automerge comment', async () => {
       config.automerge = true;
       config.automergeType = 'pr-comment';
