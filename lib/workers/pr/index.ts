@@ -33,8 +33,11 @@ async function addCodeOwners(
   return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
 }
 
-function filterUnavailableUsers(users: string[]): Promise<string[]> {
-  return platform.filterUnavailableUsers
+function filterUnavailableUsers(
+  config: RenovateConfig,
+  users: string[]
+): Promise<string[]> {
+  return config.filterUnavailableUsers && platform.filterUnavailableUsers
     ? platform.filterUnavailableUsers(users)
     : Promise.resolve(users);
 }
@@ -47,7 +50,7 @@ export async function addAssigneesReviewers(
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(assignees, pr);
   }
-  assignees = await filterUnavailableUsers(assignees);
+  assignees = await filterUnavailableUsers(config, assignees);
   if (assignees.length > 0) {
     try {
       assignees = assignees.map(noLeadingAtSymbol);
@@ -77,7 +80,7 @@ export async function addAssigneesReviewers(
   if (config.additionalReviewers.length > 0) {
     reviewers = reviewers.concat(config.additionalReviewers);
   }
-  reviewers = await filterUnavailableUsers(reviewers);
+  reviewers = await filterUnavailableUsers(config, reviewers);
   if (reviewers.length > 0) {
     try {
       reviewers = [...new Set(reviewers.map(noLeadingAtSymbol))];

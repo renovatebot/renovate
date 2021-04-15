@@ -413,6 +413,7 @@ describe(getName(__filename), () => {
     it('should filter assignees and reviewers based on their availability', async () => {
       config.assignees = ['foo', 'bar'];
       config.reviewers = ['foo', 'bar'];
+      config.filterUnavailableUsers = true;
       platform.filterUnavailableUsers = jest.fn();
       platform.filterUnavailableUsers.mockResolvedValue(['foo']);
       await prWorker.ensurePr(config);
