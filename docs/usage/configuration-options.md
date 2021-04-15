@@ -1665,7 +1665,7 @@ With prCreation set to `immediate`, you'll get a GitHub notification right away 
 Your test suite takes a bit of time to complete, so if you go look at the new PR right away, you don't know if your tests pass or fail.
 You're basically waiting until you have the test results, before you can decide if you want to merge the PR or not.
 
-With prCreation set to `not-pending`, Renovate waits untill all test have finished running, and only then creates the PR.
+With prCreation set to `not-pending`, Renovate waits until all test have finished running, and only then creates the PR.
 When you receive the PR notification, you can take action immediately, as you have the full test results.
 
 When you set prCreation to `not-pending` you're reducing the "noise" but get notified of new PRs a bit later.
