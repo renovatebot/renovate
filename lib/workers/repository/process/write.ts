@@ -3,7 +3,7 @@ import { addMeta, logger, removeMeta } from '../../../logger';
 import { branchExists } from '../../../util/git';
 import { processBranch } from '../../branch';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import { BranchConfig, ProcessBranchResult } from '../../types';
+import { BranchConfig, BranchResult } from '../../types';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
@@ -44,9 +44,9 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     const res = await processBranch(branch);
-    branch.res = res;
+    branch.result = res;
     if (
-      res === ProcessBranchResult.Automerged &&
+      res === BranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
     ) {
       // Stop processing other branches because base branch has been changed
