@@ -1067,3 +1067,33 @@ export async function ensureCommentRemoval({
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }
+
+// See https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/user_status_type.rb
+interface GitlabUserStatus {
+  message?: string;
+  message_html?: string;
+  emoji?: string;
+  availability: 'not_set' | 'busy';
+}
+
+async function isUserBusy(user: string): Promise<boolean> {
+  try {
+    const url = `/users/${user}/status`;
+    const userStatus = (await gitlabApi.getJson<GitlabUserStatus>(url)).body;
+    return userStatus.availability === 'busy';
+  } catch (err) {
+    logger.warn({ err }, 'Failed to get user status');
+    return false;
+  }
+}
+export async function filterUnavailableUsers(
+  users: string[]
+): Promise<string[]> {
+  const filteredUsers = [];
+  for (const user of users) {
+    if (!(await isUserBusy(user))) {
+      filteredUsers.push(user);
+    }
+  }
+  return filteredUsers;
+}
