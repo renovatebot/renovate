@@ -145,10 +145,46 @@ describe(getName(__filename), () => {
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
+
+    it.each([
+      ['empty configuration', {}],
+      ['configuration with enabledManagers empty', { enabledManagers: [] }],
+      ['single enabled manager', { enabledManagers: ['npm'] }],
+      [
+        'multiple enabled managers',
+        { enabledManagers: ['npm', 'gradle', 'maven'] },
+      ],
+    ])('validates enabled managers for %s', async (_case, config) => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it.each([
+      ['single not supported manager', { enabledManagers: ['foo'] }],
+      ['multiple not supported managers', { enabledManagers: ['foo', 'bar'] }],
+      [
+        'combined supported and not supported managers',
+        { enabledManagers: ['foo', 'npm', 'gradle', 'maven'] },
+      ],
+    ])(
+      'errors if included not supported enabled managers for %s',
+      async (_case, config) => {
+        const { warnings, errors } = await configValidation.validateConfig(
+          config
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(1);
+        expect(errors).toMatchSnapshot();
+      }
+    );
     it('errors for all types', async () => {
       const config: RenovateConfig = {
         allowedVersions: 'foo',
         enabled: 1 as any,
+        enabledManagers: ['npm'],
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
         labels: 5 as any,

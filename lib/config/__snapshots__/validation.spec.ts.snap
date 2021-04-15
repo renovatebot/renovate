@@ -137,6 +137,33 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors if included not supported enabled managers for combined supported and not supported managers 1`] = `
+Array [
+  Object {
+    "message": "The following managers configured in enabledManagers are not supported: \\"foo\\"",
+    "topic": "Configuration Error",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if included not supported enabled managers for multiple not supported managers 1`] = `
+Array [
+  Object {
+    "message": "The following managers configured in enabledManagers are not supported: \\"foo, bar\\"",
+    "topic": "Configuration Error",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if included not supported enabled managers for single not supported manager 1`] = `
+Array [
+  Object {
+    "message": "The following managers configured in enabledManagers are not supported: \\"foo\\"",
+    "topic": "Configuration Error",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) errors if language or manager objects are nested 1`] = `
 Array [
   Object {
