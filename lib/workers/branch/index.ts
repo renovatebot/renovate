@@ -27,7 +27,8 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { Limit, isLimitReached } from '../global/limits';
-import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
+import { ensurePr, getPlatformPrOptions } from '../pr';
+import { checkAutoMerge } from '../pr/automerge';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../types';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -598,12 +599,15 @@ export async function processBranch(
             });
           }
         }
-      } else {
+      } else if (config.automerge) {
+        logger.debug('PR is configured for automerge');
         const prAutomerged = await checkAutoMerge(pr, config);
         if (prAutomerged && config.automergeType !== 'pr-comment') {
           await deleteBranchSilently(config.branchName);
           return ProcessBranchResult.Automerged;
         }
+      } else {
+        logger.debug('PR is not configured for automerge');
       }
     }
   } catch (err) /* istanbul ignore next */ {
