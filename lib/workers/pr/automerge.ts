@@ -2,7 +2,7 @@ import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { isBranchModified } from '../../util/git';
+import { deleteBranch, isBranchModified } from '../../util/git';
 import { BranchConfig } from '../types';
 
 export async function checkAutoMerge(
@@ -76,6 +76,11 @@ export async function checkAutoMerge(
   const res = await platform.mergePr(pr.number, branchName);
   if (res) {
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
+    try {
+      await deleteBranch(branchName);
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ branchName, err }, 'Branch auto-remove failed');
+    }
   }
   return res;
 }
