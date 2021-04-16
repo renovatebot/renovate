@@ -1,5 +1,6 @@
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
+import * as memCache from '../../util/cache/memory';
 import {
   encodeCase,
   getProxyList,
@@ -18,11 +19,13 @@ describe(getName(__filename), () => {
 
   describe('requests', () => {
     beforeEach(() => {
+      memCache.init();
       httpMock.setup();
     });
 
     afterEach(() => {
       httpMock.reset();
+      memCache.reset();
     });
 
     const baseUrl = 'https://proxy.golang.org';

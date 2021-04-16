@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/go/utils requests listVersions 1`] = `
+exports[`datasource/go/goproxy requests listVersions 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -14,7 +14,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/utils requests versionInfo 1`] = `
+exports[`datasource/go/goproxy requests versionInfo 1`] = `
 Array [
   Object {
     "headers": Object {

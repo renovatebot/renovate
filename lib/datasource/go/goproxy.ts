@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import moo from 'moo';
 import pAll from 'p-all';
 import { logger } from '../../logger';
+import * as memCache from '../../util/cache/memory';
 import { regEx } from '../../util/regex';
 import { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { http } from './common';
@@ -42,8 +43,17 @@ export async function versionInfo(
   return result;
 }
 
+/**
+ * @example
+ * // [
+ * //   { url: 'foo', fallback: '|' },
+ * //   { url: 'bar', fallback: ',' },
+ * //   { url: 'baz', fallback: '|' },
+ * // ]
+ * parseGoproxy('foo|bar,baz')
+ */
 export function parseGoproxy(input: unknown): GoproxyHost[] | null {
-  if (!is.string(input)) {
+  if (!input || !is.string(input)) {
     return null;
   }
 
@@ -114,20 +124,26 @@ export function getProxyList(
   proxy: string = process.env.GOPROXY,
   noproxy: string = process.env.GONOPROXY || process.env.GOPRIVATE
 ): GoproxyHost[] {
-  const proxyList = parseGoproxy(proxy);
-  if (!proxyList) {
-    return [];
+  const cacheKey = `${proxy}::${noproxy}`;
+  const cachedResult = memCache.get<GoproxyHost[]>(cacheKey);
+  if (cachedResult) {
+    return cachedResult;
   }
 
-  const noproxyRegex = parseNoproxy(noproxy);
+  let result: GoproxyHost[] = [];
 
-  const result: GoproxyHost[] = proxyList.map((x) => {
-    if (noproxyRegex?.test(x.url)) {
-      return { ...x, disabled: true };
-    }
-    return x;
-  });
+  const proxyList = parseGoproxy(proxy);
+  if (proxyList) {
+    const noproxyRegex = parseNoproxy(noproxy);
+    result = proxyList.map((x) => {
+      if (noproxyRegex?.test(x.url)) {
+        return { ...x, disabled: true };
+      }
+      return x;
+    });
+  }
 
+  memCache.set(cacheKey, result);
   return result;
 }
 
@@ -155,15 +171,15 @@ export async function getReleases(
         }
       } catch (err) {
         const statusCode = err?.response?.statusCode;
-        const continueFallback =
+        const canFallback =
           fallback === GoproxyFallback.Always
             ? true
-            : statusCode !== 404 && statusCode !== 410;
-        const msg = continueFallback
+            : statusCode === 404 || statusCode === 410;
+        const msg = canFallback
           ? 'Goproxy error: trying next URL provided with GOPROXY'
           : 'Goproxy error: skipping other URLs provided with GOPROXY';
         logger.debug({ err }, msg);
-        if (!continueFallback) {
+        if (!canFallback) {
           break;
         }
       }
