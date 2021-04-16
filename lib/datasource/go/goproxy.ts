@@ -57,16 +57,17 @@ export function parseGoproxy(input: unknown): GoproxyHost[] | null {
     return null;
   }
 
-  const split = input.split(/(,|\|)/);
-  const result: GoproxyHost[] = [];
-  while (split.length) {
-    const [url, separator] = split.splice(0, 2);
-    const fallback =
-      separator === ','
-        ? GoproxyFallback.WhenNotFoundOrGone
-        : GoproxyFallback.Always;
-    result.push({ url, fallback });
-  }
+  const result: GoproxyHost[] = input
+    .split(/([^,|]*(?:,|\|))/)
+    .filter(Boolean)
+    .map((s) => s.split(/(?=,|\|)/))
+    .map(([url, separator]) => ({
+      url,
+      fallback:
+        separator === ','
+          ? GoproxyFallback.WhenNotFoundOrGone
+          : GoproxyFallback.Always,
+    }));
 
   return result.length ? result : null;
 }
