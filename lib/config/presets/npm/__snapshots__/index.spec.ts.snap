@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/presets/npm should return preset 1`] = `
+exports[`config/presets/npm/index should return preset 1`] = `
 Object {
   "rangeStrategy": "auto",
 }

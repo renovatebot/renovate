@@ -1,7 +1,13 @@
-import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  getName,
+  git,
+  mocked,
+} from '../../../../test/util';
 import * as _branchWorker from '../../branch';
 import { Limit, isLimitReached } from '../../global/limits';
-import { BranchConfig, ProcessBranchResult } from '../../types';
+import { BranchConfig, BranchResult } from '../../types';
 import * as _limits from './limits';
 import { writeUpdates } from './write';
 
@@ -21,7 +27,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe('workers/repository/write', () => {
+describe(getName(__filename), () => {
   describe('writeUpdates()', () => {
     it('skips branches blocked by pin', async () => {
       const branches: BranchConfig[] = [
@@ -43,27 +49,32 @@ describe('workers/repository/write', () => {
         {},
       ] as never;
       git.branchExists.mockReturnValue(true);
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.PrCreated
-      );
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.AlreadyExisted
-      );
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.Automerged
-      );
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.Automerged
-      );
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.PrCreated,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: false,
+        result: BranchResult.AlreadyExisted,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: false,
+        result: BranchResult.Automerged,
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: false,
+        result: BranchResult.Automerged,
+      });
       const res = await writeUpdates(config, branches);
       expect(res).toEqual('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
     it('increments branch counter', async () => {
       const branches: BranchConfig[] = [{}] as never;
-      branchWorker.processBranch.mockResolvedValueOnce(
-        ProcessBranchResult.PrCreated
-      );
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.PrCreated,
+      });
       git.branchExists.mockReturnValueOnce(false);
       git.branchExists.mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockReturnValueOnce(1);

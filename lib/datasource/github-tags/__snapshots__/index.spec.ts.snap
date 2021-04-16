@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/github-tags getDigest returns commit digest 1`] = `
+exports[`datasource/github-tags/index getDigest returns commit digest 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -16,7 +16,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-tags getDigest returns digest 1`] = `
+exports[`datasource/github-tags/index getDigest returns digest 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -32,7 +32,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-tags getDigest returns null for missed tagged digest 1`] = `
+exports[`datasource/github-tags/index getDigest returns null for missed tagged digest 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -48,7 +48,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-tags getDigest returns null if no token 1`] = `
+exports[`datasource/github-tags/index getDigest returns null if no token 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -64,7 +64,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-tags getDigest returns tagged commit digest 1`] = `
+exports[`datasource/github-tags/index getDigest returns tagged commit digest 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -91,7 +91,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-tags getDigest supports ghe 1`] = `
+exports[`datasource/github-tags/index getDigest supports ghe 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -118,7 +118,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-tags getDigest warns if unknown ref 1`] = `
+exports[`datasource/github-tags/index getDigest warns if unknown ref 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -134,7 +134,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-tags getReleases returns tags 1`] = `
+exports[`datasource/github-tags/index getReleases returns tags 1`] = `
 Object {
   "registryUrl": "https://github.com",
   "releases": Array [
@@ -154,7 +154,7 @@ Object {
 }
 `;
 
-exports[`datasource/github-tags getReleases returns tags 2`] = `
+exports[`datasource/github-tags/index getReleases returns tags 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -181,7 +181,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-tags getReleases supports ghe 1`] = `
+exports[`datasource/github-tags/index getReleases supports ghe 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -197,7 +197,7 @@ Object {
 }
 `;
 
-exports[`datasource/github-tags getReleases supports ghe 2`] = `
+exports[`datasource/github-tags/index getReleases supports ghe 2`] = `
 Array [
   Object {
     "headers": Object {

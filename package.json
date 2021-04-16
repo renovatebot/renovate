@@ -103,7 +103,8 @@
     "Vladimir Starkov <iamstarkov@gmail.com>",
     "Mikhail Yakushin <driver733@gmail.com>",
     "Sebastian Poxhofer <sebastian@poxhofer.at>",
-    "Henry Sachs <henrysachs@gmail.com>"
+    "Henry Sachs <henrysachs@gmail.com>",
+    "Arkadiusz Kosmala <kosmala.arkadiusz@gmail.com>"
   ],
   "license": "AGPL-3.0",
   "bugs": {
@@ -260,7 +261,7 @@
     "ts-jest": "26.5.4",
     "ts-node": "9.1.1",
     "type-fest": "0.21.3",
-    "typescript": "4.2.3"
+    "typescript": "4.2.4"
   },
   "resolutions": {
     "underscore": "^1.12.1",

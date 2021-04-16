@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/circleci/extract extractPackageFile() extracts image without leading dash 1`] = `
+exports[`manager/circleci/extract extractPackageFile() extracts image without leading dash 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -16,7 +16,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/circleci/extract extractPackageFile() extracts multiple image lines 1`] = `
+exports[`manager/circleci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -65,7 +65,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/circleci/extract extractPackageFile() extracts orbs too 1`] = `
+exports[`manager/circleci/extract extractPackageFile() extracts orbs too 1`] = `
 Array [
   Object {
     "commitMessageTopic": "{{{depName}}} orb",

@@ -1,7 +1,8 @@
 import fs from 'fs-extra';
+import { getName } from '../../../test/util';
 import { readOnlyIssueBody } from './read-only-issue-body';
 
-describe('platform/utils/read-only-issue-body', () => {
+describe(getName(__filename), () => {
   let issueBody: string;
   beforeAll(async () => {
     issueBody = await fs.readFile(

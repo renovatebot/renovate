@@ -1,12 +1,12 @@
 import { mock } from 'jest-mock-extended';
-import { fs, git } from '../../../test/util';
+import { fs, getName, git } from '../../../test/util';
 import { Pr } from '../../platform';
 import { codeOwnersForPr } from './code-owners';
 
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
 
-describe('workers/pr/code-owners', () => {
+describe(getName(__filename), () => {
   describe('codeOwnersForPr', () => {
     let pr: Pr;
     beforeEach(() => {

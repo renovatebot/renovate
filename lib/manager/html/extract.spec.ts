@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from '.';
 
 const sample = readFileSync(
@@ -11,7 +12,7 @@ const nothing = readFileSync(
   'utf8'
 );
 
-describe('manager/html/extract', () => {
+describe(getName(__filename), () => {
   it('extractPackageFile', () => {
     expect(extractPackageFile(sample)).toMatchSnapshot();
   });

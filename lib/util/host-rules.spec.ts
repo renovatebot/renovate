@@ -1,8 +1,9 @@
+import { getName } from '../../test/util';
 import { PLATFORM_TYPE_AZURE } from '../constants/platforms';
 import * as datasourceNuget from '../datasource/nuget';
 import { add, clear, find, findAll, hosts } from './host-rules';
 
-describe('util/host-rules', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     clear();
   });

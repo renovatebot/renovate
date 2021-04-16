@@ -1,7 +1,8 @@
+import { getName } from '../../../test/util';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import * as _hostRules from '../../util/host-rules';
 
-describe('platform/azure/azure-got-wrapper', () => {
+describe(getName(__filename), () => {
   let azure: typeof import('./azure-got-wrapper');
   let hostRules: typeof _hostRules;
   beforeEach(() => {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/rubygems getReleases returns a dep for rubygems.org package hit 1`] = `
+exports[`datasource/rubygems/index getReleases returns a dep for rubygems.org package hit 1`] = `
 Object {
   "registryUrl": "https://rubygems.org",
   "releases": Array [
@@ -14,7 +14,7 @@ Object {
 }
 `;
 
-exports[`datasource/rubygems getReleases returns a dep for rubygems.org package hit 2`] = `
+exports[`datasource/rubygems/index getReleases returns a dep for rubygems.org package hit 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -29,7 +29,7 @@ Array [
 ]
 `;
 
-exports[`datasource/rubygems getReleases returns null for missing pkg 1`] = `
+exports[`datasource/rubygems/index getReleases returns null for missing pkg 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -56,7 +56,7 @@ Array [
 ]
 `;
 
-exports[`datasource/rubygems getReleases returns null for rubygems.org package miss 1`] = `
+exports[`datasource/rubygems/index getReleases returns null for rubygems.org package miss 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -71,7 +71,7 @@ Array [
 ]
 `;
 
-exports[`datasource/rubygems getReleases returns null if mismatched name 1`] = `
+exports[`datasource/rubygems/index getReleases returns null if mismatched name 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -98,7 +98,7 @@ Array [
 ]
 `;
 
-exports[`datasource/rubygems getReleases uses multiple source urls 1`] = `
+exports[`datasource/rubygems/index getReleases uses multiple source urls 1`] = `
 Object {
   "homepage": "http://rubyonrails.org",
   "registryUrl": "https://firstparty.com/basepath/",
@@ -2481,7 +2481,7 @@ Object {
 }
 `;
 
-exports[`datasource/rubygems getReleases uses multiple source urls 2`] = `
+exports[`datasource/rubygems/index getReleases uses multiple source urls 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2519,7 +2519,7 @@ Array [
 ]
 `;
 
-exports[`datasource/rubygems getReleases uses rubygems.org if no registry urls were provided 1`] = `
+exports[`datasource/rubygems/index getReleases uses rubygems.org if no registry urls were provided 1`] = `
 Object {
   "registryUrl": "https://rubygems.org",
   "releases": Array [
@@ -2533,7 +2533,7 @@ Object {
 }
 `;
 
-exports[`datasource/rubygems getReleases uses rubygems.org if no registry urls were provided 2`] = `
+exports[`datasource/rubygems/index getReleases uses rubygems.org if no registry urls were provided 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2548,7 +2548,7 @@ Array [
 ]
 `;
 
-exports[`datasource/rubygems getReleases works with real data 1`] = `
+exports[`datasource/rubygems/index getReleases works with real data 1`] = `
 Object {
   "homepage": "http://rubyonrails.org",
   "registryUrl": "https://thirdparty.com",
@@ -4931,7 +4931,7 @@ Object {
 }
 `;
 
-exports[`datasource/rubygems getReleases works with real data 2`] = `
+exports[`datasource/rubygems/index getReleases works with real data 2`] = `
 Array [
   Object {
     "headers": Object {

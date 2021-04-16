@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 function readFixture(fixture: string) {
@@ -8,7 +9,7 @@ function readFixture(fixture: string) {
 
 const input01Content = readFixture('package-1.js');
 
-describe('lib/manager/meteor/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

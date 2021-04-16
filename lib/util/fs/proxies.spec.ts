@@ -1,9 +1,10 @@
 import * as fs from 'fs-extra';
+import { getName } from '../../../test/util';
 import { remove } from './proxies';
 
 jest.mock('fs-extra');
 
-describe('utils/fs/proxies', () => {
+describe(getName(__filename), () => {
   describe('remove', () => {
     it('should call remove in fs-extra', async () => {
       (fs.remove as jest.Mock).mockResolvedValue(undefined);

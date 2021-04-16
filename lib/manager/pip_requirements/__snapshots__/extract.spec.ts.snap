@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
+exports[`manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -28,7 +28,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
+exports[`manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
 Array [
   Object {
     "currentValue": "==1",
@@ -63,7 +63,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
+exports[`manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
 Array [
   Object {
     "currentValue": "==1.11.23",
@@ -99,7 +99,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/pip_requirements/extract extractPackageFile() handles extra index url 1`] = `
+exports[`manager/pip_requirements/extract extractPackageFile() handles extra index url 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -145,7 +145,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to config 1`] = `
+exports[`manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to config 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -191,7 +191,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to pypi 1`] = `
+exports[`manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to pypi 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -237,7 +237,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/pip_requirements/extract extractPackageFile() handles extras and complex index url 1`] = `
+exports[`manager/pip_requirements/extract extractPackageFile() handles extras and complex index url 1`] = `
 Object {
   "deps": Array [
     Object {

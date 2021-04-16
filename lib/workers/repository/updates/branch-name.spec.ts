@@ -1,7 +1,8 @@
+import { getName } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import { generateBranchName } from './branch-name';
 
-describe('workers/repository/updates/branch-name', () => {
+describe(getName(__filename), () => {
   describe('getBranchName()', () => {
     it('uses groupName if no slug defined', () => {
       const upgrade: RenovateConfig = {
