@@ -11,7 +11,8 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { http } from './common';
 import * as goproxy from './goproxy';
 
-export const id = 'go';
+export { id } from './common';
+
 export const customRegistrySupport = false;
 
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
