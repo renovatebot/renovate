@@ -112,7 +112,7 @@ const pathGlobLexer = {
 };
 
 export function parseNoproxy(input: unknown): RegExp | null {
-  if (!input || typeof input !== 'string') {
+  if (!input || !is.string(input)) {
     return null;
   }
   const lexer = moo.states(pathGlobLexer);
