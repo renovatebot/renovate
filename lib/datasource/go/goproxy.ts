@@ -163,6 +163,7 @@ export async function getReleases(
           try {
             return await versionInfo(url, lookupName, version);
           } catch (err) {
+            logger.trace({ err }, `Can't obtain data from ${url}`);
             return { version };
           }
         });
