@@ -1376,7 +1376,7 @@ const options: RenovateOptions[] = [
     description:
       'Any text added here will be placed last in the PR body, with a divider separator before it.',
     type: 'string',
-    default: `This PR has been brought to you by [Renovate Bot](https://github.com/renovatebot/renovate) gang`,
+    default: `This PR has been brought to you by the [Renovate Bot](https://github.com/renovatebot/renovate) gang`,
   },
   {
     name: 'lockFileMaintenance',
