@@ -24,15 +24,20 @@ describe(getName(__filename), () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
-    it('should not automerge if not configured', async () => {
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
-      await prAutomerge.checkAutoMerge(pr, config);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
+      expect(platform.mergePr).toHaveBeenCalledTimes(1);
+    });
+    it('should indicate if automerge failed', async () => {
+      config.automerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.mergePr.mockResolvedValueOnce(false);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
     it('should automerge comment', async () => {
@@ -40,7 +45,9 @@ describe(getName(__filename), () => {
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prAutomerge.checkAutoMerge(pr, config);
+      platform.ensureComment.mockResolvedValueOnce(true);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -50,7 +57,9 @@ describe(getName(__filename), () => {
       config.automergeComment = '!merge';
       config.rebaseRequested = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prAutomerge.checkAutoMerge(pr, config);
+      platform.ensureComment.mockResolvedValueOnce(true);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -58,25 +67,29 @@ describe(getName(__filename), () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       git.isBranchModified.mockResolvedValueOnce(true);
-      await prAutomerge.checkAutoMerge(pr, config);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      await prAutomerge.checkAutoMerge(pr, config);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
       pr.canMerge = undefined;
-      await prAutomerge.checkAutoMerge(pr, config);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
       pr.isConflicted = true;
-      await prAutomerge.checkAutoMerge(pr, config);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
   });
