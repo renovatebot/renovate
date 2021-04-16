@@ -11,6 +11,14 @@ import {
 } from './goproxy';
 
 describe(getName(__filename), () => {
+  beforeEach(() => {
+    memCache.init();
+  });
+
+  afterEach(() => {
+    memCache.reset();
+  });
+
   it('encodeCase', () => {
     expect(encodeCase('foo')).toBe('foo');
     expect(encodeCase('Foo')).toBe('!foo');
@@ -19,13 +27,11 @@ describe(getName(__filename), () => {
 
   describe('requests', () => {
     beforeEach(() => {
-      memCache.init();
       httpMock.setup();
     });
 
     afterEach(() => {
       httpMock.reset();
-      memCache.reset();
     });
 
     const baseUrl = 'https://proxy.golang.org';
@@ -115,5 +121,7 @@ describe(getName(__filename), () => {
       { fallback: ',', url: 'foo' },
       { fallback: '|', url: 'bar', disabled: true },
     ]);
+
+    expect(getProxyList('foo|bar|baz')).toBe(getProxyList('foo|bar|baz'));
   });
 });
