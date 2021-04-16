@@ -1,13 +1,55 @@
+import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../../types';
+import { get } from '../../../versioning';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../../types';
 import { createHashes } from './hash';
-import { ProviderLockUpdate } from './types';
+import { ProviderLock, ProviderLockUpdate } from './types';
 import {
   extractLocks,
   isPinnedVersion,
   readLockFile,
   writeLockUpdates,
 } from './util';
+
+async function updateAllLocks(
+  locks: ProviderLock[],
+  config: UpdateArtifactsConfig
+): Promise<ProviderLockUpdate[]> {
+  const result = await Promise.all(
+    locks.map(async (lock) => {
+      const updateConfig: GetPkgReleasesConfig = {
+        versioning: 'hashicorp',
+        datasource: 'terraform-provider',
+        depName: lock.lookupName,
+      };
+      const releasesResult = await getPkgReleases(updateConfig);
+      const releases = releasesResult.releases;
+      const versioning = get(updateConfig.versioning);
+      const versionsList = releases.map((release) => release.version);
+      const newVersion = versioning.getSatisfyingVersion(
+        versionsList,
+        lock.constraints
+      );
+
+      const update: ProviderLockUpdate = {
+        newVersion,
+        newConstraint: lock.constraints,
+        newHashes: await createHashes(
+          lock.lookupName,
+          newVersion,
+          config.cacheDir
+        ),
+        ...lock,
+      };
+      return update;
+    })
+  );
+  return new Promise((resolve) => resolve(result));
+}
 
 export async function updateArtifacts({
   packageFileName,
@@ -27,15 +69,18 @@ export async function updateArtifacts({
     logger.debug('No Locks in .terraform.lock.hcl found');
     return null;
   }
-  const lookupName = updatedDeps[0];
-  const repository = lookupName.includes('/')
-    ? lookupName
-    : `hashicorp/${lookupName}`;
 
   const updates: ProviderLockUpdate[] = [];
   if (config.updateType === 'lockFileMaintenance') {
-    // TODO update lock file independent of updates
+    // update all locks in the file during maintenance --> only update version in constraints
+    const maintenanceUpdates = await updateAllLocks(locks, config);
+    updates.push(...maintenanceUpdates);
   } else {
+    // update only specific locks but with constrain updates
+    const lookupName = updatedDeps[0];
+    const repository = lookupName.includes('/')
+      ? lookupName
+      : `hashicorp/${lookupName}`;
     const newConstraint = isPinnedVersion(config.newValue)
       ? config.newVersion
       : config.newValue;
@@ -51,6 +96,10 @@ export async function updateArtifacts({
       ...updateLock,
     };
     updates.push(update);
+  }
+
+  if (updates.length === 0) {
+    return null;
   }
 
   const result = writeLockUpdates(updates, lockFileContent);
