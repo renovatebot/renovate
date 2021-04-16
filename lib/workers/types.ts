@@ -24,7 +24,7 @@ export interface BranchUpgradeConfig
   artifactErrors?: ArtifactError[];
   autoReplaceStringTemplate?: string;
   baseDeps?: PackageDependency[];
-  branchName: string;
+  branchName?: string;
   commitBody?: string;
   commitMessage?: string;
   commitMessageExtra?: string;
@@ -111,6 +111,6 @@ export interface BranchConfig
   forceCommit?: boolean;
   rebaseRequested?: boolean;
   res?: ProcessBranchResult;
-  upgrades: BranchUpgradeConfig[];
+  upgrades?: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;
 }

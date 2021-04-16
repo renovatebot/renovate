@@ -42,7 +42,6 @@ export interface Release {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;
-  hashes?: Record<string, string>;
 }
 
 export interface ReleaseResult {

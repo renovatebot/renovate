@@ -1,8 +1,11 @@
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 
-export { updateArtifacts } from './artifacts';
+import { updateArtifacts } from './lockfile';
+
+export { updateArtifacts };
 export { extractPackageFile } from './extract';
 
+export const supportsLockFileMaintenance = true;
 export const defaultConfig = {
   commitMessageTopic:
     'Terraform {{managerData.terraformDependencyType}} {{depName}}',
