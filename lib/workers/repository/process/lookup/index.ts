@@ -328,13 +328,6 @@ export async function lookupUpdates(
       if (pinDigests || currentDigest) {
         update.newDigest =
           update.newDigest || (await getDigest(config, update.newValue));
-        if (update.newDigest) {
-          update.newDigestShort = update.newDigest
-            .replace('sha256:', '')
-            .substring(0, 7);
-        } else {
-          logger.debug({ newValue: update.newValue }, 'Could not getDigest');
-        }
       }
     }
   }

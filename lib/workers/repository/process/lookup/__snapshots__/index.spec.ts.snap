@@ -147,7 +147,6 @@ Object {
       "blockedByPin": true,
       "bucket": "non-major",
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
@@ -156,7 +155,6 @@ Object {
     },
     Object {
       "newDigest": "sha256:0123456789abcdef",
-      "newDigestShort": "0123456",
       "newValue": "8.0.0",
       "updateType": "pin",
     },
@@ -170,7 +168,6 @@ Object {
   "updates": Array [
     Object {
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newValue": "alpine",
       "updateType": "pin",
     },
@@ -190,7 +187,6 @@ Object {
   "updates": Array [
     Object {
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newValue": "8.1.0",
       "updateType": "pin",
     },
@@ -212,7 +208,6 @@ Object {
     Object {
       "bucket": "non-major",
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
@@ -221,7 +216,6 @@ Object {
     },
     Object {
       "newDigest": "sha256:0123456789abcdef",
-      "newDigestShort": "0123456",
       "newValue": "8.0.0",
       "updateType": "digest",
     },
@@ -235,7 +229,6 @@ Object {
   "updates": Array [
     Object {
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newValue": "alpine",
       "updateType": "digest",
     },
@@ -250,7 +243,6 @@ Object {
   "updates": Array [
     Object {
       "newDigest": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-      "newDigestShort": "4b825dc",
       "newValue": undefined,
       "newVersion": undefined,
       "updateType": "digest",
