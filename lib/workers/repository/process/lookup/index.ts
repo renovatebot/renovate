@@ -318,8 +318,8 @@ export async function lookupUpdates(
       }
     }
     if (versioning.valueToVersion) {
+      res.currentVersion = versioning.valueToVersion(res.currentVersion);
       for (const update of res.updates || []) {
-        res.currentVersion = versioning.valueToVersion(res.currentVersion);
         update.newVersion = versioning.valueToVersion(update.newVersion);
       }
     }
