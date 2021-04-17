@@ -138,6 +138,7 @@ export async function lookupUpdates(
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
     const currentVersion =
+      lockedVersion ||
       getCurrentVersion(
         config,
         versioning,
@@ -239,7 +240,6 @@ export async function lookupUpdates(
           );
           continue; // eslint-disable-line no-continue
         }
-        res.currentVersion = lockedVersion;
         res.isSingleVersion = true;
         update.displayFrom = lockedVersion;
         update.displayTo = newVersion;
