@@ -59,6 +59,11 @@ export interface PackageUpdateConfig {
   supportPolicy?: string[];
 }
 
+export interface PackageUpdateResult {
+  sourceUrl?: string;
+  updates: LookupUpdate[];
+}
+
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
@@ -151,7 +156,6 @@ export interface LookupUpdate {
   skippedOverVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
-  sourceUrl?: string;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -260,7 +264,7 @@ export interface ManagerApi {
     config?: ExtractConfig
   ): Result<PackageFile | null>;
 
-  getPackageUpdates?(config: PackageUpdateConfig): Result<LookupUpdate[]>;
+  getPackageUpdates?(config: PackageUpdateConfig): Result<PackageUpdateResult>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
