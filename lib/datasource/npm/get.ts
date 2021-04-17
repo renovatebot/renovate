@@ -133,7 +133,7 @@ export async function getDependency(
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 15;
-    // TODO: use dynamic detection of public repos instead of a static list
+    // See: #9587
     const whitelistedPublicScopes = [
       '@graphql-codegen',
       '@storybook',

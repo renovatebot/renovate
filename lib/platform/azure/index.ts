@@ -89,7 +89,7 @@ export function initPlatform({
       'Init: You must configure an Azure DevOps token, or a username and password'
     );
   }
-  // TODO: Add a connection check that endpoint/token combination are valid
+  // #9593
   const res = {
     endpoint: ensureTrailingSlash(endpoint),
   };
@@ -703,7 +703,7 @@ export function ensureIssueClosing(): Promise<void> {
 /* istanbul ignore next */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
-  // TODO: Needs implementation
+  // #9592
   return Promise.resolve([]);
 }
 

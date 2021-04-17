@@ -36,7 +36,7 @@ function envReplace(value: any, env = process.env): any {
 }
 
 const envRe = /(\\*)\$\{([^}]+)\}/;
-// TODO: better add to host rules
+// See: #9588
 function sanitize(key: string, val: string): void {
   if (!val || envRe.test(val)) {
     return;

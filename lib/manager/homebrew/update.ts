@@ -135,7 +135,7 @@ function updateSha256(
   return newContent;
 }
 
-// TODO: Refactor
+// See: #9591
 export async function updateDependency({
   fileContent,
   upgrade,

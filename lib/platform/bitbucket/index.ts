@@ -78,7 +78,7 @@ export async function initPlatform({
       logger.debug({ err }, 'Unknown error fetching Bitbucket user identity');
     }
   }
-  // TODO: Add a connection check that endpoint/username/password combination are valid
+  // #9594
   const platformConfig: PlatformResult = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
   };

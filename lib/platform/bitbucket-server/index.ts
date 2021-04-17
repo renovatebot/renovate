@@ -90,7 +90,7 @@ export function initPlatform({
       'Init: You must configure a Bitbucket Server username/password'
     );
   }
-  // TODO: Add a connection check that endpoint/username/password combination are valid
+  // #9595
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
   const platformConfig: PlatformResult = {
