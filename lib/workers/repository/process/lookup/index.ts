@@ -78,10 +78,9 @@ export async function lookupUpdates(
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
     res.dependencyUrl = dependency?.dependencyUrl;
-    const { releases } = dependency;
     const latestVersion = dependency.tags?.latest;
     // Filter out any results from datasource that don't comply with our versioning
-    let allVersions = releases.filter((release) =>
+    let allVersions = dependency.releases.filter((release) =>
       versioning.isVersion(release.version)
     );
     // istanbul ignore if
@@ -135,7 +134,7 @@ export async function lookupUpdates(
     ) {
       rangeStrategy = 'bump';
     }
-    const nonDeprecatedVersions = releases
+    const nonDeprecatedVersions = dependency.releases
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
     const currentVersion =
@@ -176,7 +175,7 @@ export async function lookupUpdates(
       filterStart = lockedVersion;
     }
     // Filter latest, unstable, etc
-    let filteredVersions = filterVersions(
+    let filteredReleases = filterVersions(
       config,
       filterStart,
       latestVersion,
@@ -186,10 +185,10 @@ export async function lookupUpdates(
       versioning.isCompatible(v.version, currentValue)
     );
     if (isVulnerabilityAlert) {
-      filteredVersions = filteredVersions.slice(0, 1);
+      filteredReleases = filteredReleases.slice(0, 1);
     }
     const buckets: Record<string, [Release]> = {};
-    for (const release of filteredVersions) {
+    for (const release of filteredReleases) {
       const bucket = getBucket(
         config,
         currentVersion,
@@ -202,12 +201,12 @@ export async function lookupUpdates(
         buckets[bucket] = [release];
       }
     }
-    for (const [bucket, bucketReleases] of Object.entries(buckets)) {
-      const sortedReleases = bucketReleases.sort((r1, r2) =>
+    for (const [bucket, releases] of Object.entries(buckets)) {
+      const sortedReleases = releases.sort((r1, r2) =>
         versioning.sortVersions(r1.version, r2.version)
       );
-      const bucketRelease = sortedReleases.pop();
-      const newVersion = bucketRelease.version;
+      const release = sortedReleases.pop();
+      const newVersion = release.version;
       const update: LookupUpdate = {
         currentVersion,
         newVersion,
@@ -262,8 +261,8 @@ export async function lookupUpdates(
         'releaseTimestamp',
       ];
       releaseFields.forEach((field) => {
-        if (bucketRelease[field] !== undefined) {
-          update[field] = bucketRelease[field];
+        if (release[field] !== undefined) {
+          update[field] = release[field];
         }
       });
       if (sortedReleases.length) {
