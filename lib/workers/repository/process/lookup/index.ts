@@ -321,7 +321,6 @@ export async function lookupUpdates(
     }
     if (versioning.valueToVersion) {
       for (const update of res.updates || []) {
-        update.newVersion = versioning.valueToVersion(update.newValue);
         res.currentVersion = versioning.valueToVersion(res.currentVersion);
         update.newVersion = versioning.valueToVersion(update.newVersion);
       }
