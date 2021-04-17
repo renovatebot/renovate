@@ -979,12 +979,10 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns rollback for pinned version 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-    "commitMessageAction": "Roll back",
-    "isRollback": true,
+    "bucket": "rollback",
     "newMajor": 0,
     "newValue": "0.9.7",
-    "semanticCommitType": "fix",
+    "newVersion": "0.9.7",
     "updateType": "rollback",
   },
   Object {
@@ -1013,12 +1011,10 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns rollback for ranged version 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-    "commitMessageAction": "Roll back",
-    "isRollback": true,
+    "bucket": "rollback",
     "newMajor": 0,
     "newValue": "^0.9.7",
-    "semanticCommitType": "fix",
+    "newVersion": "0.9.7",
     "updateType": "rollback",
   },
 ]
@@ -1064,12 +1060,10 @@ Array [
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() should downgrade from missing versions 1`] = `
 Object {
-  "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-  "commitMessageAction": "Roll back",
-  "isRollback": true,
+  "bucket": "rollback",
   "newMajor": 1,
   "newValue": "1.16.0",
-  "semanticCommitType": "fix",
+  "newVersion": "1.16.0",
   "updateType": "rollback",
 }
 `;
@@ -1132,12 +1126,10 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() should roll back to dist-tag if current version is higher 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-    "commitMessageAction": "Roll back",
-    "isRollback": true,
+    "bucket": "rollback",
     "newMajor": 3,
     "newValue": "3.0.1-insiders.20180726",
-    "semanticCommitType": "fix",
+    "newVersion": "3.0.1-insiders.20180726",
     "updateType": "rollback",
   },
 ]
