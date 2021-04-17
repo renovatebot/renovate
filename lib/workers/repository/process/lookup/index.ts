@@ -152,6 +152,7 @@ export async function lookupUpdates(
         latestVersion,
         allVersions.map((v) => v.version)
       );
+    res.currentVersion = currentVersion;
     if (
       currentVersion &&
       rangeStrategy === 'pin' &&
@@ -208,7 +209,6 @@ export async function lookupUpdates(
       const release = sortedReleases.pop();
       const newVersion = release.version;
       const update: LookupUpdate = {
-        currentVersion,
         newVersion,
         newValue: null,
       };
@@ -239,18 +239,18 @@ export async function lookupUpdates(
           );
           continue; // eslint-disable-line no-continue
         }
-        update.currentVersion = lockedVersion;
+        res.currentVersion = lockedVersion;
+        res.isSingleVersion = true;
         update.displayFrom = lockedVersion;
         update.displayTo = newVersion;
-        update.isSingleVersion = true;
       }
       update.newMajor = versioning.getMajor(newVersion);
       update.newMinor = versioning.getMinor(newVersion);
       update.updateType =
         update.updateType ||
         getUpdateType(config, versioning, currentVersion, newVersion);
-      update.isSingleVersion =
-        update.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
+      res.isSingleVersion =
+        res.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
       if (!versioning.isVersion(update.newValue)) {
         update.isRange = true;
       }
@@ -322,9 +322,7 @@ export async function lookupUpdates(
     if (versioning.valueToVersion) {
       for (const update of res.updates || []) {
         update.newVersion = versioning.valueToVersion(update.newValue);
-        update.currentVersion = versioning.valueToVersion(
-          update.currentVersion
-        );
+        res.currentVersion = versioning.valueToVersion(res.currentVersion);
         update.newVersion = versioning.valueToVersion(update.newVersion);
       }
     }
