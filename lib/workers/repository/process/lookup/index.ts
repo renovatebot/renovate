@@ -241,8 +241,6 @@ export async function lookupUpdates(
           continue; // eslint-disable-line no-continue
         }
         res.isSingleVersion = true;
-        update.displayFrom = lockedVersion;
-        update.displayTo = newVersion;
       }
       update.newMajor = versioning.getMajor(newVersion);
       update.newMinor = versioning.getMinor(newVersion);

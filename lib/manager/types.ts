@@ -138,8 +138,6 @@ export interface LookupUpdate {
   blockedByPin?: boolean;
   branchName?: string;
   commitMessageAction?: string;
-  displayFrom?: string;
-  displayTo?: string;
   isBump?: boolean;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
@@ -163,8 +161,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
-  displayFrom?: string;
-  displayTo?: string;
   fixedVersion?: string;
   currentVersion?: string;
   lockedVersion?: string;

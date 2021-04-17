@@ -51,8 +51,6 @@ describe(getName(__filename), () => {
           lockedVersion: '1.0.0',
           newValue: '^1.0.0',
           newVersion: '1.0.1',
-          displayFrom: '1.0.0',
-          displayTo: '1.0.1',
         },
       ];
       const res = generateBranchConfig(branch);

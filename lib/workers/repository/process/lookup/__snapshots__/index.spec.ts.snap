@@ -1502,8 +1502,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports lock 
 Array [
   Object {
     "bucket": "patch",
-    "displayFrom": "0.4.0",
-    "displayTo": "0.4.4",
     "isLockfileUpdate": true,
     "isRange": true,
     "newMajor": 0,
