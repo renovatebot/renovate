@@ -145,8 +145,6 @@ export interface LookupUpdate {
   isPin?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
-  isSingleVersion?: boolean;
-  currentVersion?: string;
   newDigest?: string;
   newDigestShort?: string;
   newMajor?: number;
