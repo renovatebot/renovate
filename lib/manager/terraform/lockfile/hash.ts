@@ -41,7 +41,7 @@ export function hashFiles(files: string[]): string {
   rootHash.end();
   const rootData = rootHash.read();
   const result: string = rootData.toString('base64');
-  return `h1:${result}`;
+  return result;
 }
 
 export async function hashOfZipContent(
@@ -175,8 +175,14 @@ export default async function createHashes(
 
   const builds = versionReleaseBackend.builds;
   const hashes = await calculateHashes(builds, cacheDir);
-
+  // sorting the hash alphabetically as terraform does this as well
+  const sortedHashes = hashes.sort().map((hash) => `h1:${hash}`);
   // save to cache
-  await packageCache.set('terraform-provider-release', cacheKey, hashes, 10080); // cache for a week
-  return hashes;
+  await packageCache.set(
+    'terraform-provider-release',
+    cacheKey,
+    sortedHashes,
+    10080
+  ); // cache for a week
+  return sortedHashes;
 }
