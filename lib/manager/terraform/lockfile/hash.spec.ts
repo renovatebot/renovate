@@ -40,8 +40,7 @@ describe(getName(__filename), () => {
     const result = await createHashes(
       'hashicorp/azurerm',
       '2.59.0',
-      //      '/tmp/renovate/cache',
-      '/tmp'
+      '/tmp/renovate/cache'
     );
     expect(result).toBeNull();
   });
