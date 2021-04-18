@@ -263,9 +263,6 @@ export async function lookupUpdates(
           update[field] = release[field];
         }
       });
-      if (sortedReleases.length) {
-        update.skippedOverVersions = sortedReleases.map((r) => r.version);
-      }
       if (
         rangeStrategy === 'update-lockfile' &&
         currentValue === update.newValue
