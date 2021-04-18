@@ -631,7 +631,7 @@ Because `fileMatch` is mergeable, you don't need to duplicate the defaults and c
 If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
 The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
 
-## filterUnavailableUsers
+## filterOutUnavailableUsers
 
 When this option is enabled PRs are not assigned to users that are unavailable.
 Please note that this will only have an effect when the platform supports the concept of user availabity (currently supported by GitLab).
