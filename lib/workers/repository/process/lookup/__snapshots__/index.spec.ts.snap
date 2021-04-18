@@ -9,7 +9,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "latest",
     "newMajor": 1,
     "newMinor": 4,
@@ -94,7 +93,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "non-major",
     "isRange": true,
     "newMajor": 0,
@@ -109,7 +107,6 @@ Array [
     "updateType": "minor",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "major",
     "isRange": true,
     "newMajor": 1,
@@ -144,7 +141,6 @@ Object {
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
-      "blockedByPin": true,
       "bucket": "non-major",
       "newDigest": "sha256:abcdef1234567890",
       "newMajor": 8,
@@ -331,7 +327,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "major",
     "newMajor": 1,
     "newMinor": 4,
@@ -563,7 +558,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "non-major",
     "newMajor": 0,
     "newMinor": 9,
@@ -603,7 +597,6 @@ Array [
     "updateType": "minor",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "major",
     "newMajor": 1,
     "newMinor": 4,
@@ -1614,7 +1607,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "non-major",
     "newMajor": 0,
     "newMinor": 9,
@@ -1654,7 +1646,6 @@ Array [
     "updateType": "minor",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "major",
     "newMajor": 1,
     "newMinor": 4,
@@ -1686,7 +1677,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "non-major",
     "newMajor": 0,
     "newMinor": 9,
@@ -1726,7 +1716,6 @@ Array [
     "updateType": "minor",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "major",
     "newMajor": 1,
     "newMinor": 4,
@@ -1802,7 +1791,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "non-major",
     "newMajor": 1,
     "newMinor": 4,
@@ -2235,7 +2223,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "non-major",
     "newMajor": 1,
     "newMinor": 4,
@@ -2425,7 +2412,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "non-major",
     "newMajor": 1,
     "newMinor": 4,
@@ -2481,7 +2467,6 @@ Array [
     "updateType": "pin",
   },
   Object {
-    "blockedByPin": true,
     "bucket": "non-major",
     "newMajor": 1,
     "newMinor": 4,

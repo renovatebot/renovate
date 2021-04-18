@@ -6,7 +6,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
 Object {
   "addLabels": Array [],
   "automerge": false,
-  "blockedByPin": false,
   "branchName": "some-branch",
   "commitMessage": "",
   "constraints": Object {},
@@ -77,7 +76,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
 Object {
   "addLabels": Array [],
   "automerge": false,
-  "blockedByPin": false,
   "branchName": "some-branch",
   "commitBodyTable": true,
   "commitMessage": "\\n\\n| datasource | package         | from  | to    |\\n| ---------- | --------------- | ----- | ----- |\\n| npm        | @types/some-dep | 0.5.7 | 0.5.8 |\\n",
