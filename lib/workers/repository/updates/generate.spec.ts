@@ -29,6 +29,33 @@ describe(getName(__filename), () => {
       expect(res.groupName).toBeUndefined();
       expect(res.releaseTimestamp).toBeDefined();
     });
+    it('handles lockFileMaintenance', () => {
+      const branch = [
+        {
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          isLockFileMaintenance: true,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles lockFileUpdate', () => {
+      const branch = [
+        {
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          isLockfileUpdate: true,
+          currentValue: '^1.0.0',
+          currentVersion: '1.0.0',
+          lockedVersion: '1.0.0',
+          newValue: '^1.0.0',
+          newVersion: '1.0.1',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchSnapshot();
+    });
     it('does not group same upgrades', () => {
       const branch = [
         {
@@ -371,6 +398,7 @@ describe(getName(__filename), () => {
           prTitle: 'some-title',
           currentValue: '0.5.7',
           currentVersion: '0.5.7',
+          newValue: '0.5.8',
           newVersion: '0.5.8',
           group: {},
         },

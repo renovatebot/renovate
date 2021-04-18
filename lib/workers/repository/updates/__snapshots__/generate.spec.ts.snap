@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/updates/generate generateBranchConfig() adds commit message body 1`] = `
-"Update dependency some-dep to v1.2.0
-
-[skip-ci]"
-`;
+exports[`workers/repository/updates/generate generateBranchConfig() adds commit message body 1`] = `"Update dependency some-dep to v1.2.0\\n\\n[skip-ci]"`;
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
 Object {
@@ -84,12 +80,7 @@ Object {
   "blockedByPin": false,
   "branchName": "some-branch",
   "commitBodyTable": true,
-  "commitMessage": "
-
-| datasource | package         | from  | to    |
-| ---------- | --------------- | ----- | ----- |
-| npm        | @types/some-dep | 0.5.7 | 0.5.8 |
-",
+  "commitMessage": "\\n\\n| datasource | package         | from  | to    |\\n| ---------- | --------------- | ----- | ----- |\\n| npm        | @types/some-dep | 0.5.7 | 0.5.8 |\\n",
   "constraints": Object {},
   "datasource": "npm",
   "depName": "some-dep",
@@ -145,7 +136,84 @@ Object {
       "displayFrom": "0.5.7",
       "displayTo": "0.5.8",
       "isRange": false,
+      "newValue": "0.5.8",
       "newVersion": "0.5.8",
+      "prTitle": "some-title",
+      "prettyDepType": "dependency",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/updates/generate generateBranchConfig() handles lockFileMaintenance 1`] = `
+Object {
+  "addLabels": Array [],
+  "automerge": false,
+  "blockedByPin": false,
+  "branchName": "some-branch",
+  "commitMessage": "",
+  "constraints": Object {},
+  "dependencyDashboardApproval": false,
+  "dependencyDashboardPrApproval": false,
+  "displayFrom": "",
+  "displayTo": "",
+  "isLockFileMaintenance": true,
+  "labels": Array [],
+  "prTitle": "some-title",
+  "prettyDepType": "dependency",
+  "releaseTimestamp": undefined,
+  "reuseLockFiles": true,
+  "upgrades": Array [
+    Object {
+      "branchName": "some-branch",
+      "commitMessage": "",
+      "displayFrom": "",
+      "displayTo": "",
+      "isLockFileMaintenance": true,
+      "prTitle": "some-title",
+      "prettyDepType": "dependency",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/updates/generate generateBranchConfig() handles lockFileUpdate 1`] = `
+Object {
+  "addLabels": Array [],
+  "automerge": false,
+  "blockedByPin": false,
+  "branchName": "some-branch",
+  "commitMessage": "",
+  "constraints": Object {},
+  "currentValue": "^1.0.0",
+  "currentVersion": "1.0.0",
+  "dependencyDashboardApproval": false,
+  "dependencyDashboardPrApproval": false,
+  "displayFrom": "1.0.0",
+  "displayTo": "1.0.1",
+  "isLockfileUpdate": true,
+  "isRange": false,
+  "labels": Array [],
+  "lockedVersion": "1.0.0",
+  "newValue": "^1.0.0",
+  "newVersion": "1.0.1",
+  "prTitle": "some-title",
+  "prettyDepType": "dependency",
+  "releaseTimestamp": undefined,
+  "reuseLockFiles": true,
+  "upgrades": Array [
+    Object {
+      "branchName": "some-branch",
+      "commitMessage": "",
+      "currentValue": "^1.0.0",
+      "currentVersion": "1.0.0",
+      "displayFrom": "1.0.0",
+      "displayTo": "1.0.1",
+      "isLockfileUpdate": true,
+      "isRange": false,
+      "lockedVersion": "1.0.0",
+      "newValue": "^1.0.0",
+      "newVersion": "1.0.1",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
     },

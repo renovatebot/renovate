@@ -11,8 +11,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "latest",
-    "currentVersion": "0.4.4",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -67,8 +65,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() disables major
 Array [
   Object {
     "bucket": "latest",
-    "currentVersion": "1.0.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -100,9 +96,7 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "currentVersion": "0.9.4",
     "isRange": true,
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "==0.9.7",
@@ -117,9 +111,7 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "currentVersion": "0.9.4",
     "isRange": true,
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "==1.4.1",
@@ -144,18 +136,17 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "8.0.0",
   "dependencyUrl": undefined,
   "fixedVersion": "8.0.0",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "blockedByPin": true,
       "bucket": "non-major",
-      "currentVersion": "8.0.0",
-      "isSingleVersion": true,
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
@@ -164,7 +155,6 @@ Object {
     },
     Object {
       "newDigest": "sha256:0123456789abcdef",
-      "newDigestShort": "0123456",
       "newValue": "8.0.0",
       "updateType": "pin",
     },
@@ -178,7 +168,6 @@ Object {
   "updates": Array [
     Object {
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newValue": "alpine",
       "updateType": "pin",
     },
@@ -190,6 +179,7 @@ Object {
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin for up to date version 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "8.1.0",
   "dependencyUrl": undefined,
   "fixedVersion": "8.1.0",
   "homepage": undefined,
@@ -197,7 +187,6 @@ Object {
   "updates": Array [
     Object {
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newValue": "8.1.0",
       "updateType": "pin",
     },
@@ -209,17 +198,16 @@ Object {
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest update 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "8.0.0",
   "dependencyUrl": undefined,
   "fixedVersion": "8.0.0",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "currentVersion": "8.0.0",
-      "isSingleVersion": true,
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
@@ -228,7 +216,6 @@ Object {
     },
     Object {
       "newDigest": "sha256:0123456789abcdef",
-      "newDigestShort": "0123456",
       "newValue": "8.0.0",
       "updateType": "digest",
     },
@@ -242,7 +229,6 @@ Object {
   "updates": Array [
     Object {
       "newDigest": "sha256:abcdef1234567890",
-      "newDigestShort": "abcdef1",
       "newValue": "alpine",
       "updateType": "digest",
     },
@@ -253,11 +239,10 @@ Object {
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles git submodule update 1`] = `
 Object {
+  "currentVersion": undefined,
   "updates": Array [
     Object {
-      "currentVersion": undefined,
       "newDigest": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-      "newDigestShort": "4b825dc",
       "newValue": undefined,
       "newVersion": undefined,
       "updateType": "digest",
@@ -276,15 +261,15 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles pypi 4
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "0.9.99",
   "dependencyUrl": undefined,
   "fixedVersion": "0.9.99",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
       "bucket": "major",
-      "currentVersion": "0.9.99",
-      "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 3,
       "newValue": "1.3.0",
@@ -311,6 +296,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles unknow
 exports[`workers/repository/process/lookup/index .lookupUpdates() ignores deprecated 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "1.3.0",
   "dependencyUrl": undefined,
   "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`q2\` has the following deprecation notice:
 
@@ -319,12 +305,11 @@ Object {
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "fixedVersion": "1.3.0",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "currentVersion": "1.3.0",
-      "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 4,
       "newValue": "1.4.0",
@@ -348,8 +333,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "currentVersion": "0.9.7",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -374,16 +357,16 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() is deprecated 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "1.3.0",
   "dependencyUrl": undefined,
   "fixedVersion": "1.3.0",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceDirectory": "test",
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "currentVersion": "1.3.0",
-      "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 4,
       "newValue": "1.4.1",
@@ -422,9 +405,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() replaces major
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "2.7.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^3.0.0",
@@ -458,9 +439,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() replaces minor
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
@@ -478,8 +457,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() replaces non-r
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.0.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -504,8 +481,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns additi
 Array [
   Object {
     "bucket": "patch",
-    "currentVersion": "0.4.0",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 4,
     "newValue": "0.4.4",
@@ -519,8 +494,6 @@ Array [
   },
   Object {
     "bucket": "minor",
-    "currentVersion": "0.4.0",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -560,8 +533,6 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.4.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -594,8 +565,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "currentVersion": "0.4.4",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -636,8 +605,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "currentVersion": "0.4.4",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -662,15 +629,15 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns complex object 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "1.3.0",
   "dependencyUrl": undefined,
   "fixedVersion": "1.3.0",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "currentVersion": "1.3.0",
-      "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 4,
       "newValue": "1.4.1",
@@ -690,8 +657,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns minor 
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.9.0",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -709,8 +674,6 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -736,8 +699,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns minor 
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.9.0",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -755,8 +716,6 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -782,8 +741,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns multip
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.4.0",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -826,8 +783,6 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.4.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -853,8 +808,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns one up
 Array [
   Object {
     "bucket": "latest",
-    "currentVersion": "0.4.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -912,8 +865,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns patch 
 Array [
   Object {
     "bucket": "patch",
-    "currentVersion": "0.8.0",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 8,
     "newValue": "0.8.12",
@@ -936,8 +887,6 @@ Array [
   },
   Object {
     "bucket": "minor",
-    "currentVersion": "0.8.0",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -956,8 +905,6 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.8.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -983,8 +930,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns patch 
 Array [
   Object {
     "bucket": "patch",
-    "currentVersion": "0.9.0",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -1002,8 +947,6 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -1028,18 +971,14 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns rollback for pinned version 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-    "commitMessageAction": "Roll back",
-    "isRollback": true,
+    "bucket": "rollback",
     "newMajor": 0,
     "newValue": "0.9.7",
-    "semanticCommitType": "fix",
+    "newVersion": "0.9.7",
     "updateType": "rollback",
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.99",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -1064,12 +1003,10 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns rollback for ranged version 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-    "commitMessageAction": "Roll back",
-    "isRollback": true,
+    "bucket": "rollback",
     "newMajor": 0,
     "newValue": "^0.9.7",
-    "semanticCommitType": "fix",
+    "newVersion": "0.9.7",
     "updateType": "rollback",
   },
 ]
@@ -1079,8 +1016,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should allow u
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "3.1.0-dev.20180731",
-    "isSingleVersion": true,
     "newMajor": 3,
     "newMinor": 1,
     "newValue": "3.1.0-dev.20180813",
@@ -1105,8 +1040,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should allow u
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "2.5.16",
-    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 5,
     "newValue": "2.5.17-beta.0",
@@ -1119,12 +1052,10 @@ Array [
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() should downgrade from missing versions 1`] = `
 Object {
-  "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-  "commitMessageAction": "Roll back",
-  "isRollback": true,
+  "bucket": "rollback",
   "newMajor": 1,
   "newValue": "1.16.0",
-  "semanticCommitType": "fix",
+  "newVersion": "1.16.0",
   "updateType": "rollback",
 }
 `;
@@ -1133,8 +1064,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should follow 
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "3.0.1-insiders.20180713",
-    "isSingleVersion": true,
     "newMajor": 3,
     "newMinor": 0,
     "newValue": "3.0.1-insiders.20180726",
@@ -1149,8 +1078,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should ignore 
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "1.4.4",
-    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "2.0.0",
@@ -1164,8 +1091,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should jump un
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "3.0.0-insiders.20180706",
-    "isSingleVersion": true,
     "newMajor": 3,
     "newMinor": 0,
     "newValue": "3.0.1-insiders.20180726",
@@ -1180,8 +1105,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should not jum
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "3.0.1-insiders.20180726",
-    "isSingleVersion": true,
     "newMajor": 3,
     "newMinor": 0,
     "newValue": "3.0.1",
@@ -1195,12 +1118,10 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() should roll back to dist-tag if current version is higher 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-    "commitMessageAction": "Roll back",
-    "isRollback": true,
+    "bucket": "rollback",
     "newMajor": 3,
     "newValue": "3.0.1-insiders.20180726",
-    "semanticCommitType": "fix",
+    "newVersion": "3.0.1-insiders.20180726",
     "updateType": "rollback",
   },
 ]
@@ -1210,9 +1131,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should treat z
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.0.34",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 0,
     "newValue": "^0.0.35",
@@ -1228,15 +1147,15 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should warn if
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "8",
   "dependencyUrl": undefined,
   "fixedVersion": "8",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "bucket": "major",
-      "currentVersion": "8",
-      "isSingleVersion": true,
       "newMajor": 9,
       "newMinor": null,
       "newValue": "9",
@@ -1251,15 +1170,15 @@ Object {
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8.1 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "8.1",
   "dependencyUrl": undefined,
   "fixedVersion": "8.1",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "currentVersion": "8.1",
-      "isSingleVersion": true,
       "newMajor": 8,
       "newMinor": 2,
       "newValue": "8.2",
@@ -1268,8 +1187,6 @@ Object {
     },
     Object {
       "bucket": "major",
-      "currentVersion": "8.1",
-      "isSingleVersion": true,
       "newMajor": 9,
       "newMinor": 0,
       "newValue": "9.0",
@@ -1284,15 +1201,15 @@ Object {
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8.1.0 1`] = `
 Object {
   "changelogUrl": undefined,
+  "currentVersion": "8.1.0",
   "dependencyUrl": undefined,
   "fixedVersion": "8.1.0",
   "homepage": undefined,
+  "isSingleVersion": true,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "bucket": "non-major",
-      "currentVersion": "8.1.0",
-      "isSingleVersion": true,
       "newMajor": 8,
       "newMinor": 2,
       "newValue": "8.2.5",
@@ -1328,8 +1245,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports > lat
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "1.4.1",
-    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "2.0.3",
@@ -1349,9 +1264,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports compl
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "2.7.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1.x - 3.x",
@@ -1385,9 +1298,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports compl
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "2.7.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^1.0.0 || ^2.0.0 || ^3.0.0",
@@ -1420,9 +1331,7 @@ Array [
 exports[`workers/repository/process/lookup/index .lookupUpdates() supports complex ranges 1`] = `
 Object {
   "bucket": "non-major",
-  "currentVersion": "0.8.12",
   "isRange": true,
-  "isSingleVersion": false,
   "newMajor": 0,
   "newMinor": 9,
   "newValue": "^0.7.0 || ^0.8.0 || ^0.9.0",
@@ -1445,9 +1354,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports compl
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.2.0 || ~1.3.0 || ~1.4.0",
@@ -1465,10 +1372,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-ra
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.0.0",
     "isBump": true,
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.4.1",
@@ -1493,10 +1398,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-ra
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.0.0",
     "isBump": true,
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">=1.4.1",
@@ -1521,10 +1424,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-ra
 Array [
   Object {
     "bucket": "patch",
-    "currentVersion": "1.0.0",
     "isBump": true,
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 0,
     "newValue": "~1.0.1",
@@ -1534,9 +1435,7 @@ Array [
   },
   Object {
     "bucket": "minor",
-    "currentVersion": "1.0.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.1",
@@ -1560,10 +1459,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-ra
 Array [
   Object {
     "bucket": "patch",
-    "currentVersion": "1.0.0",
     "isBump": true,
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 0,
     "newValue": "~1.0.1",
@@ -1573,9 +1470,7 @@ Array [
   },
   Object {
     "bucket": "minor",
-    "currentVersion": "1.0.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.1",
@@ -1599,12 +1494,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports lock 
 Array [
   Object {
     "bucket": "patch",
-    "currentVersion": "0.4.0",
-    "displayFrom": "0.4.0",
-    "displayTo": "0.4.4",
     "isLockfileUpdate": true,
     "isRange": true,
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 4,
     "newValue": "^0.4.0",
@@ -1618,9 +1509,7 @@ Array [
   },
   Object {
     "bucket": "minor",
-    "currentVersion": "0.4.4",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "^0.9.0",
@@ -1660,9 +1549,7 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.4.4",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.0.0",
@@ -1688,10 +1575,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports major
 Array [
   Object {
     "bucket": "latest",
-    "currentVersion": "0.9.0",
     "isBump": true,
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">=1.4.1",
@@ -1731,8 +1616,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "currentVersion": "0.4.4",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -1773,8 +1656,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "currentVersion": "0.4.4",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -1807,8 +1688,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "currentVersion": "0.4.4",
-    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -1849,8 +1728,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "major",
-    "currentVersion": "0.4.4",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -1876,9 +1753,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x co
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.2.x - 1.4.x",
@@ -1896,9 +1771,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x ma
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.7",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.x",
@@ -1931,8 +1804,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -1950,9 +1821,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x mi
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.x",
@@ -1970,9 +1839,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades equal
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.1",
     "isRange": true,
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "=1.4.1",
@@ -1990,9 +1857,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less 
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "1.4.1",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "<= 2",
@@ -2012,9 +1877,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less 
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4",
@@ -2032,9 +1895,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less 
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.7.2",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "<= 0.9.7",
@@ -2066,9 +1927,7 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.7.2",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4.1",
@@ -2094,9 +1953,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less 
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.7",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 2",
@@ -2122,9 +1979,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less 
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.7.1",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "< 0.9.8",
@@ -2157,9 +2012,7 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.7.1",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 1.4.2",
@@ -2185,9 +2038,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades major
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.7",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 < 2.0.0",
@@ -2213,9 +2064,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades major
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.0.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4.1",
@@ -2240,9 +2089,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades major
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.7",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 2.0.0",
@@ -2268,9 +2115,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades minor
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.8.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": ">= 0.5.0 <= 0.9.7",
@@ -2301,9 +2146,7 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.8.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 <= 1.4.1",
@@ -2329,9 +2172,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades minor
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.7.2",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": ">= 0.5.0 <0.10",
@@ -2363,9 +2204,7 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.7.2",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 <1.5",
@@ -2398,8 +2237,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "currentVersion": "1.0.1",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -2423,9 +2260,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades multi
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.7.2",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "^0.9.0",
@@ -2457,9 +2292,7 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.7.2",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.0.0",
@@ -2485,9 +2318,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades multi
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "0.7.2",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "~0.9.0",
@@ -2519,9 +2350,7 @@ Array [
   },
   Object {
     "bucket": "major",
-    "currentVersion": "0.7.2",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
@@ -2547,9 +2376,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades short
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "0.9.7",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1",
@@ -2575,9 +2402,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades short
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4",
@@ -2602,8 +2427,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -2621,9 +2444,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades tilde
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
@@ -2641,8 +2462,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() uses minimum v
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.0.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 0,
     "newValue": "1.0.1",
@@ -2664,8 +2483,6 @@ Array [
   Object {
     "blockedByPin": true,
     "bucket": "non-major",
-    "currentVersion": "1.0.0",
-    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -2690,9 +2507,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() widens .x OR r
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "2.7.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1.x || 2.x || 3.x",
@@ -2726,9 +2541,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() widens major r
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "2.7.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^2.0.0 || ^3.0.0",
@@ -2762,9 +2575,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() widens minor r
 Array [
   Object {
     "bucket": "non-major",
-    "currentVersion": "1.3.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.3.0 || ~1.4.0",
@@ -2782,9 +2593,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() widens stannda
 Array [
   Object {
     "bucket": "major",
-    "currentVersion": "2.7.0",
     "isRange": true,
-    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1 || 2 || 3",
