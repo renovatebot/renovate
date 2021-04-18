@@ -59,6 +59,7 @@ export async function hashOfZipContent(
   // delete extracted files
   filesWithPath.forEach((value) =>
     fs.unlink(value, (err) => {
+      /* istanbul ignore next */
       if (err) {
         logger.warn({ err }, 'Failed to delete extracted file');
       }
@@ -88,42 +89,43 @@ export async function calculateHashes(
     async (build) => {
       const downloadFileName = `${cacheDir}/${build.filename}`;
       const extractPath = `${cacheDir}/extract/${build.filename}`;
-      try {
-        logger.trace(
-          `Downloading archive and generating hash for ${build.name}-${build.version}...`
-        );
-        const stream = http.stream(build.url);
-        const writeStream = createWriteStream(downloadFileName);
-        stream.pipe(writeStream);
+      logger.trace(
+        `Downloading archive and generating hash for ${build.name}-${build.version}...`
+      );
+      const stream = http.stream(build.url);
+      const writeStream = createWriteStream(downloadFileName);
+      stream.pipe(writeStream);
+
+      const streamPromise = new Promise((resolve, reject) => {
+        writeStream.on('finish', resolve);
         /* istanbul ignore next */
         writeStream.on('error', (err) => {
           logger.error({ err }, 'write stream error');
         });
+        stream.on('error', reject);
+      });
+      await streamPromise;
 
-        const streamPromise = new Promise((resolve, reject) => {
-          writeStream.on('finish', resolve);
-          stream.on('error', reject);
-        });
-        await streamPromise;
+      const hash = await hashOfZipContent(downloadFileName, extractPath);
+      logger.trace(
+        { hash },
+        `Generated hash for ${build.name}-${build.version}`
+      );
 
-        const hash = await hashOfZipContent(downloadFileName, extractPath);
-        logger.trace(
-          { hash },
-          `Generated hash for ${build.name}-${build.version}`
-        );
-        return hash;
-      } catch (e) {
-        logger.error(e);
-        return null;
-      } finally {
-        // delete zip file
-        fs.unlink(downloadFileName, (err) => {
-          /* istanbul ignore next */
-          if (err) {
-            logger.debug({ err }, `Failed to delete file ${downloadFileName}`);
-          }
-        });
-      }
+      // delete zip file
+      fs.unlink(downloadFileName, (err) => {
+        /* istanbul ignore next */
+        if (err) {
+          logger.debug({ err }, `Failed to delete file ${downloadFileName}`);
+        }
+      });
+      fs.rmdir(extractPath, (err) => {
+        /* istanbul ignore next */
+        if (err) {
+          logger.debug({ err }, `Failed to delete directory ${extractPath}`);
+        }
+      });
+      return hash;
     },
     { concurrency: 4 } // allow to look up 4 builds for this version in parallel
   );
@@ -131,7 +133,7 @@ export async function calculateHashes(
   return hashes.filter((value) => value);
 }
 
-export async function createHashes(
+export default async function createHashes(
   repository: string,
   version: string,
   cacheDir: string
@@ -156,18 +158,21 @@ export async function createHashes(
   if (cachedRelease) {
     return cachedRelease;
   }
-
-  const versionReleaseBackend = await getReleaseBackendIndex(
-    backendLookUpName,
-    version
-  );
-  if (versionReleaseBackend == null) {
+  let versionReleaseBackend;
+  try {
+    versionReleaseBackend = await getReleaseBackendIndex(
+      backendLookUpName,
+      version
+    );
+    /* istanbul ignore next */
+  } catch (err) {
     logger.debug(
-      { backendLookUpName, version },
+      { err, backendLookUpName, version },
       `Failed to retrieve builds for ${backendLookUpName} ${version}`
     );
     return null;
   }
+
   const builds = versionReleaseBackend.builds;
   const hashes = await calculateHashes(builds, cacheDir);
 

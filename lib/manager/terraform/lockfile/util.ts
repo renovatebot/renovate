@@ -1,4 +1,5 @@
 import { readLocalFile } from '../../../util/fs';
+import { get as getVersioning } from '../../../versioning';
 import { UpdateArtifactsResult } from '../../types';
 import type { LineNumbers, ProviderLock, ProviderSlice } from './types';
 import { ProviderLockUpdate } from './types';
@@ -7,7 +8,6 @@ const providerStartLineRegex = /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[
 const versionLineRegex = /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/;
 const constraintLineRegex = /^(?<prefix>[\s]*constraints[\s]*=[\s]*")(?<constraint>[^"']+)(?<suffix>".*)$/;
 const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/;
-const pinnedVersionRegex = /^[\w.]+$/;
 
 const lockFile = '.terraform.lock.hcl';
 
@@ -95,16 +95,6 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
       }
     });
 
-    // // rewrite slice lineNumber to file lineNumbers
-    // const lineNumbers: LineNumbers = {
-    //   block: slice.block,
-    //   constraint: relativeLineNumbers.constraint + slice.block.start,
-    //   version: relativeLineNumbers.version + slice.block.start,
-    //   hashes: {
-    //     start: relativeLineNumbers.hashes.start + slice.block.start,
-    //     end: relativeLineNumbers.hashes.end + slice.block.start
-    //   }
-    // }
     const lock: ProviderLock = {
       lookupName,
       registryUrl,
@@ -123,7 +113,8 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
 }
 
 export function isPinnedVersion(value: string): boolean {
-  return !!pinnedVersionRegex.exec(value);
+  const versioning = getVersioning('hashicorp');
+  return <boolean>versioning.isSingleVersion(value);
 }
 
 export function writeLockUpdates(
@@ -208,5 +199,5 @@ export function writeLockUpdates(
       contents: newContent,
     },
   };
-  return Promise.resolve([result]);
+  return new Promise<UpdateArtifactsResult[]>((resolve) => resolve([result]));
 }

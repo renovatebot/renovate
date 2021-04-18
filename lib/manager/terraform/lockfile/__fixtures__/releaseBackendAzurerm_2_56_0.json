@@ -1,0 +1,24 @@
+{
+  "name": "terraform-provider-azurerm",
+  "version": "2.56.0",
+  "shasums": "terraform-provider-azurerm_2.56.0_SHA256SUMS",
+  "shasums_signature": "terraform-provider-azurerm_2.56.0_SHA256SUMS.sig",
+  "builds": [
+    {
+      "name": "terraform-provider-azurerm",
+      "version": "2.56.0",
+      "os": "darwin",
+      "arch": "amd64",
+      "filename": "terraform-provider-azurerm_2.56.0_darwin_amd64.zip",
+      "url": "https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip"
+    },
+    {
+      "name": "terraform-provider-azurerm",
+      "version": "2.56.0",
+      "os": "linux",
+      "arch": "amd64",
+      "filename": "terraform-provider-azurerm_2.56.0_linux_amd64.zip",
+      "url": "https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip"
+    }
+  ]
+}
