@@ -302,9 +302,6 @@ export function generateBranchConfig(
   if (config.upgrades.some((upgrade) => upgrade.updateType === 'major')) {
     config.updateType = 'major';
   }
-  config.blockedByPin = config.upgrades.every(
-    (upgrade) => upgrade.blockedByPin
-  );
   config.constraints = {};
   for (const upgrade of config.upgrades || []) {
     if (upgrade.constraints) {

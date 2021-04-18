@@ -1082,7 +1082,6 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      recreateClosed: true,
       rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',

@@ -12,7 +12,7 @@ export async function writeUpdates(
   config: RenovateConfig,
   allBranches: BranchConfig[]
 ): Promise<WriteUpdateResult> {
-  let branches = allBranches;
+  const branches = allBranches;
   logger.debug(
     `Processing ${branches.length} branch${
       branches.length === 1 ? '' : 'es'
@@ -21,14 +21,6 @@ export async function writeUpdates(
       .sort()
       .join(', ')}`
   );
-  branches = branches.filter((branchConfig) => {
-    if (branchConfig.blockedByPin) {
-      logger.debug(`Branch ${branchConfig.branchName} is blocked by a Pin PR`);
-      return false;
-    }
-    return true;
-  });
-
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining);
