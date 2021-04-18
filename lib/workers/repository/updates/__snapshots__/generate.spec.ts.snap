@@ -147,7 +147,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
 Object {
   "addLabels": Array [],
   "automerge": false,
-  "blockedByPin": false,
   "branchName": "some-branch",
   "commitMessage": "",
   "constraints": Object {},
@@ -179,7 +178,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
 Object {
   "addLabels": Array [],
   "automerge": false,
-  "blockedByPin": false,
   "branchName": "some-branch",
   "commitMessage": "",
   "constraints": Object {},
