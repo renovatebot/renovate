@@ -1109,6 +1109,19 @@ const options: RenovateOptions[] = [
     cli: false,
     mergeable: true,
   },
+  {
+    name: 'rollback',
+    description: 'Configuration to apply when rolling back a version.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      branchTopic: '{{{depNameSanitized}}}-rollback',
+      commitMessageAction: 'Roll back',
+      semanticCommitType: 'fix',
+    },
+    cli: false,
+    mergeable: true,
+  },
   // Semantic commit / Semantic release
   {
     name: 'semanticCommits',

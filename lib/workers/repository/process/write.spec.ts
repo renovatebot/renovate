@@ -50,15 +50,19 @@ describe(getName(__filename), () => {
       ] as never;
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
         result: BranchResult.PrCreated,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: false,
         result: BranchResult.AlreadyExisted,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: false,
         result: BranchResult.Automerged,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: false,
         result: BranchResult.Automerged,
       });
       const res = await writeUpdates(config, branches);
@@ -68,6 +72,7 @@ describe(getName(__filename), () => {
     it('increments branch counter', async () => {
       const branches: BranchConfig[] = [{}] as never;
       branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
         result: BranchResult.PrCreated,
       });
       git.branchExists.mockReturnValueOnce(false);

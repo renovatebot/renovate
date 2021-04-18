@@ -443,7 +443,7 @@ They are then collated as part of the onboarding description.
 
 ## digest
 
-Add to this object if you wish to define rules that apply only to PRs that update Docker digests.
+Add to this object if you wish to define rules that apply only to PRs that update digests.
 
 ## docker
 
@@ -2057,6 +2057,10 @@ See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-re
 ## reviewersSampleSize
 
 Take a random sample of given size from reviewers.
+
+## rollback
+
+Add to this object if you wish to define rules that apply only to PRs that roll back versions.
 
 ## rollbackPrs
 
