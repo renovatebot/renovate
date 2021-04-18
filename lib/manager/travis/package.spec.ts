@@ -31,17 +31,17 @@ describe(getName(__filename), () => {
     });
     it('returns empty if missing supportPolicy', async () => {
       config.currentValue = ['6', '8'];
-      expect(await getPackageUpdates(config)).toEqual([]);
+      expect(await getPackageUpdates(config)).toEqual({ updates: [] });
     });
     it('returns empty if invalid supportPolicy', async () => {
       config.currentValue = ['6', '8'];
       config.supportPolicy = ['foo'];
-      expect(await getPackageUpdates(config)).toEqual([]);
+      expect(await getPackageUpdates(config)).toEqual({ updates: [] });
     });
     it('returns empty if matching', async () => {
       config.currentValue = ['12', '14'];
       config.supportPolicy = ['lts_active'];
-      expect(await getPackageUpdates(config)).toEqual([]);
+      expect(await getPackageUpdates(config)).toEqual({ updates: [] });
     });
     it('returns result if needing updates', async () => {
       config.currentValue = ['6', '8', '10'];

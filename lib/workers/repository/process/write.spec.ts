@@ -29,17 +29,6 @@ beforeEach(() => {
 
 describe(getName(__filename), () => {
   describe('writeUpdates()', () => {
-    it('skips branches blocked by pin', async () => {
-      const branches: BranchConfig[] = [
-        { updateType: 'pin' },
-        { blockedByPin: true },
-        {},
-      ] as never;
-      git.branchExists.mockReturnValueOnce(false);
-      const res = await writeUpdates(config, branches);
-      expect(res).toEqual('done');
-      expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
-    });
     it('stops after automerge', async () => {
       const branches: BranchConfig[] = [
         {},
