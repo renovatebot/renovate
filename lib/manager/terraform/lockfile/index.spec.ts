@@ -79,7 +79,7 @@ describe(getName(__filename), () => {
     ).toBeNull();
   });
   it('returns null if .terraform.lock.hcl is empty', async () => {
-    fs.readFile.mockResolvedValueOnce('empty');
+    fs.readFile.mockResolvedValueOnce('empty' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'main.tf',
@@ -90,7 +90,7 @@ describe(getName(__filename), () => {
     ).toBeNull();
   });
   it('update single dependency with exact constraint', async () => {
-    fs.readFile.mockResolvedValueOnce(validLockfile);
+    fs.readFile.mockResolvedValueOnce(validLockfile as any);
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -122,7 +122,7 @@ describe(getName(__filename), () => {
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
   it('update single dependency with range constraint and minor update', async () => {
-    fs.readFile.mockResolvedValueOnce(validLockfile);
+    fs.readFile.mockResolvedValueOnce(validLockfile as any);
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -154,7 +154,7 @@ describe(getName(__filename), () => {
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
   it('update single dependency with range constraint and major update', async () => {
-    fs.readFile.mockResolvedValueOnce(validLockfile);
+    fs.readFile.mockResolvedValueOnce(validLockfile as any);
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -191,7 +191,7 @@ describe(getName(__filename), () => {
       .get('/.well-known/terraform.json')
       .reply(200, serviceDiscoveryResult);
 
-    fs.readFile.mockResolvedValueOnce(validLockfile);
+    fs.readFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
       .mockResolvedValueOnce(
@@ -276,7 +276,7 @@ describe(getName(__filename), () => {
       .get('/.well-known/terraform.json')
       .reply(200, serviceDiscoveryResult);
 
-    fs.readFile.mockResolvedValueOnce(validLockfile);
+    fs.readFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
       .mockResolvedValueOnce(

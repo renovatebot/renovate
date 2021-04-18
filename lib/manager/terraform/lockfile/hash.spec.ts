@@ -1,5 +1,4 @@
 import { createReadStream, readFileSync } from 'fs';
-import { expect } from '@jest/globals';
 import * as httpMock from '../../../../test/http-mock';
 import { getName } from '../../../../test/util';
 import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
