@@ -49,7 +49,7 @@ jobs:
         uses: actions/setup-java@v2.0.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'zulu'
+          distribution: 'adopt'
           java-package: jdk
 
       - name: Skip Java tests
