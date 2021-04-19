@@ -1,4 +1,4 @@
-import { UpdateType } from '../config';
+import { PackageRuleInputConfig, UpdateType } from '../config';
 import {
   LANGUAGE_DOCKER,
   LANGUAGE_JAVASCRIPT,
@@ -8,7 +8,7 @@ import {
 
 import * as datasourceDocker from '../datasource/docker';
 import * as datasourceOrb from '../datasource/orb';
-import { PackageRuleInputConfig, applyPackageRules } from './package-rules';
+import { applyPackageRules } from './package-rules';
 
 type TestConfig = PackageRuleInputConfig & { x?: number; y?: number };
 
