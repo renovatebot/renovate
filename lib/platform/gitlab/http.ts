@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { GitlabHttp } from '../../util/http/gitlab';
-import { GitlabUserStatus } from './types';
+import type { GitlabUserStatus } from './types';
 
 export const gitlabApi = new GitlabHttp();
 

@@ -1,4 +1,4 @@
-import { UpdateType } from '../config';
+import type { PackageRuleInputConfig, UpdateType } from '../config';
 import {
   LANGUAGE_DOCKER,
   LANGUAGE_JAVASCRIPT,
@@ -8,9 +8,9 @@ import {
 
 import * as datasourceDocker from '../datasource/docker';
 import * as datasourceOrb from '../datasource/orb';
-import { Config, applyPackageRules } from './package-rules';
+import { applyPackageRules } from './package-rules';
 
-type TestConfig = Config & { x?: number; y?: number };
+type TestConfig = PackageRuleInputConfig & { x?: number; y?: number };
 
 describe('applyPackageRules()', () => {
   const config1: TestConfig = {
@@ -32,7 +32,7 @@ describe('applyPackageRules()', () => {
     ],
   };
   it('applies', () => {
-    const config: Config = {
+    const config: PackageRuleInputConfig = {
       depName: 'a',
       isBump: true,
       currentValue: '1.0.0',

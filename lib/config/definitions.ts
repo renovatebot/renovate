@@ -579,7 +579,9 @@ const options: RenovateOptions[] = [
     name: 'autodiscoverFilter',
     description: 'Filter the list of autodiscovered repositories.',
     stage: 'global',
-    type: 'string',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
     default: null,
   },
   {
@@ -1082,7 +1084,6 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      recreateClosed: true,
       rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',

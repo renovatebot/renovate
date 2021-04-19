@@ -263,9 +263,6 @@ export async function lookupUpdates(
           update[field] = release[field];
         }
       });
-      if (sortedReleases.length) {
-        update.skippedOverVersions = sortedReleases.map((r) => r.version);
-      }
       if (
         rangeStrategy === 'update-lockfile' &&
         currentValue === update.newValue
@@ -343,16 +340,5 @@ export async function lookupUpdates(
         update.isLockfileUpdate ||
         (update.newDigest && !update.newDigest.startsWith(currentDigest))
     );
-  if (res.updates.some((update) => update.updateType === 'pin')) {
-    for (const update of res.updates) {
-      if (
-        update.updateType !== 'pin' &&
-        update.updateType !== 'rollback' &&
-        !isVulnerabilityAlert
-      ) {
-        update.blockedByPin = true;
-      }
-    }
-  }
   return res;
 }
