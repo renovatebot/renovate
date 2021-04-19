@@ -50,7 +50,7 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
-          java-package: jdk
+          java-package: jre
           check-latest: false
 
       - name: Skip Java tests
