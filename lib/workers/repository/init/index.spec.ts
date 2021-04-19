@@ -1,4 +1,4 @@
-import { getName, mocked } from '../../../../test/util';
+import { getName, logger, mocked } from '../../../../test/util';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
@@ -28,6 +28,17 @@ describe(getName(__filename), () => {
       secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toMatchSnapshot();
+    });
+    it('warns on unsupported options', async () => {
+      apis.initApis.mockResolvedValue({} as never);
+      onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
+      config.getRepoConfig.mockResolvedValueOnce({
+        filterOutUnavailableUsers: true,
+      });
+      config.mergeRenovateConfig.mockResolvedValueOnce({});
+      secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
+      await initRepo({});
+      expect(logger.logger.warn).toHaveBeenCalled();
     });
   });
 });
