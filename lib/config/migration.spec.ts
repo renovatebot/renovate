@@ -3,7 +3,10 @@ import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
 import { MigratedConfig } from './migration';
-import { RenovateSharedConfig, RenovateConfig as _RenovateConfig } from '.';
+import {
+  RenovateSharedConfig,
+  RenovateConfig as _RenovateConfig,
+} from './types';
 
 const defaultConfig = getConfig();
 

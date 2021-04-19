@@ -1,5 +1,5 @@
 import { getName } from '../../../../test/util';
-import { UpdateType } from '../../../config';
+import type { UpdateType } from '../../../config/types';
 import { sortBranches } from './sort';
 
 describe(getName(__filename), () => {

@@ -3,12 +3,13 @@ import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 import upath from 'upath';
 
-import { RenovateConfig, mergeChildConfig } from '../../../config';
+import { mergeChildConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
+import type { RenovateConfig } from '../../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,

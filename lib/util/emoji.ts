@@ -1,5 +1,5 @@
 import emoji from 'node-emoji';
-import { RenovateConfig } from '../config';
+import type { RenovateConfig } from '../config/types';
 
 let unicodeEmoji = false;
 

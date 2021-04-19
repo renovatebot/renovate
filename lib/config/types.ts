@@ -350,3 +350,8 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }
+
+export interface ManagerConfig extends RenovateConfig {
+  language: string;
+  manager: string;
+}

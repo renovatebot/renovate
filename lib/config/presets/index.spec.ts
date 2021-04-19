@@ -1,5 +1,5 @@
-import { RenovateConfig } from '..';
 import { getName, mocked } from '../../../test/util';
+import type { RenovateConfig } from '../types';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
 import * as _local from './local';
 import * as _npm from './npm';
