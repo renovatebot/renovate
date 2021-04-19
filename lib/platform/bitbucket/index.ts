@@ -696,7 +696,7 @@ export async function createPr({
   };
 
   try {
-    const prInfo = (
+    const prRes = (
       await bitbucketHttp.postJson<PrResponse>(
         `/2.0/repositories/${config.repository}/pullrequests`,
         {
@@ -704,11 +704,7 @@ export async function createPr({
         }
       )
     ).body;
-    // TODO: fix types
-    const pr: Pr = {
-      number: prInfo.id,
-      displayNumber: `Pull Request #${prInfo.id}`,
-    } as any;
+    const pr = utils.prInfo(prRes);
     // istanbul ignore if
     if (config.prList) {
       config.prList.push(pr);
