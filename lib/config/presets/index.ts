@@ -10,6 +10,7 @@ import * as massage from '../massage';
 import * as migration from '../migration';
 import type { GlobalConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
+import { removedPresets } from './common';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -165,6 +166,14 @@ export async function getPreset(
   baseConfig?: RenovateConfig
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
+  // Check if the preset has been removed or replaced
+  const newPreset = removedPresets[preset];
+  if (newPreset) {
+    return getPreset(newPreset, baseConfig);
+  }
+  if (newPreset === null) {
+    return {};
+  }
   const {
     presetSource,
     packageName,
