@@ -331,3 +331,22 @@ export type RenovateOptions =
   | RenovateBooleanOption
   | RenovateArrayOption
   | RenovateObjectOption;
+
+export interface PackageRuleInputConfig extends Record<string, unknown> {
+  versioning?: string;
+  packageFile?: string;
+  depType?: string;
+  depTypes?: string[];
+  depName?: string;
+  currentValue?: string;
+  currentVersion?: string;
+  lockedVersion?: string;
+  updateType?: UpdateType;
+  isBump?: boolean;
+  sourceUrl?: string;
+  language?: string;
+  baseBranch?: string;
+  manager?: string;
+  datasource?: string;
+  packageRules?: (PackageRule & PackageRuleInputConfig)[];
+}

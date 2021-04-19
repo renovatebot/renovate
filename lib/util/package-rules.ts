@@ -1,30 +1,18 @@
+import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { PackageRule, UpdateType, mergeChildConfig } from '../config';
+import {
+  PackageRule,
+  PackageRuleInputConfig,
+  mergeChildConfig,
+} from '../config';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
 import { configRegexPredicate, isConfigRegex, regEx } from './regex';
 
-// TODO: move to `../config`
-export interface Config extends Record<string, any> {
-  versioning?: string;
-  packageFile?: string;
-  depType?: string;
-  depTypes?: string[];
-  depName?: string;
-  currentValue?: string;
-  currentVersion?: string;
-  lockedVersion?: string;
-  updateType?: UpdateType;
-  isBump?: boolean;
-  sourceUrl?: string;
-  language?: string;
-  baseBranch?: string;
-  manager?: string;
-  datasource?: string;
-  packageRules?: (PackageRule & Config)[];
-}
-
-function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
+function matchesRule(
+  inputConfig: PackageRuleInputConfig,
+  packageRule: PackageRule
+): boolean {
   const {
     versioning,
     packageFile,
@@ -70,7 +58,9 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   }
   if (matchFiles.length) {
     const isMatch = matchFiles.some(
-      (fileName) => packageFile === fileName || lockFiles?.includes(fileName)
+      (fileName) =>
+        packageFile === fileName ||
+        (is.array(lockFiles) && lockFiles?.includes(fileName))
     );
     if (!isMatch) {
       return false;
@@ -256,7 +246,9 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   return positiveMatch;
 }
 
-export function applyPackageRules<T extends Config>(inputConfig: T): T {
+export function applyPackageRules<T extends PackageRuleInputConfig>(
+  inputConfig: T
+): T {
   let config = { ...inputConfig };
   const packageRules = config.packageRules || [];
   logger.trace(
