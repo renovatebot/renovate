@@ -51,6 +51,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
           java-package: jdk
+          check-latest: false
 
       - name: Skip Java tests
         if: env.NODE_VERSION != '14'
