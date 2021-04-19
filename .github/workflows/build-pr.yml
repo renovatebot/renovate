@@ -99,6 +99,8 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - uses: actions/checkout@v2.3.4
+        with:
+          lfs: true
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
