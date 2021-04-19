@@ -135,7 +135,6 @@ export interface Package<T> extends ManagerData<T> {
 
 export interface LookupUpdate {
   bucket?: string;
-  blockedByPin?: boolean;
   branchName?: string;
   commitMessageAction?: string;
   isBump?: boolean;
@@ -148,7 +147,6 @@ export interface LookupUpdate {
   newMinor?: number;
   newValue: string;
   semanticCommitType?: string;
-  skippedOverVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
 }
