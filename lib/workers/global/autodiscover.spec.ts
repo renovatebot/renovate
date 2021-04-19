@@ -49,18 +49,36 @@ describe(getName(__filename), () => {
   });
   it('filters autodiscovered github repos', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = 'project/re*';
+    config.autodiscoverFilter = ['project/re*', 'new/prj*'];
     config.platform = PLATFORM_TYPE_GITHUB;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['project/repo', 'project/another-repo'])
+      Promise.resolve([
+        'project/repo',
+        'project/another-repo',
+        'new/prj-test',
+        'new/not-matched',
+      ])
     );
     const res = await autodiscoverRepositories(config);
-    expect(res.repositories).toEqual(['project/repo']);
+    expect(res.repositories).toEqual(['project/repo', 'new/prj-test']);
   });
   it('filters autodiscovered github repos but nothing matches', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = ['project/re*'];
+    config.platform = 'github';
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['another-project/repo', 'another-project/another-repo'])
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res).toEqual(config);
+  });
+  it('filters autodiscovered github repos with string variable', async () => {
     config.autodiscover = true;
     config.autodiscoverFilter = 'project/re*';
     config.platform = 'github';
