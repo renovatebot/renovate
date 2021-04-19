@@ -138,6 +138,7 @@ export async function lookupUpdates(
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
     const currentVersion =
+      lockedVersion ||
       getCurrentVersion(
         config,
         versioning,
@@ -239,10 +240,7 @@ export async function lookupUpdates(
           );
           continue; // eslint-disable-line no-continue
         }
-        res.currentVersion = lockedVersion;
         res.isSingleVersion = true;
-        update.displayFrom = lockedVersion;
-        update.displayTo = newVersion;
       }
       update.newMajor = versioning.getMajor(newVersion);
       update.newMinor = versioning.getMinor(newVersion);
@@ -265,9 +263,6 @@ export async function lookupUpdates(
           update[field] = release[field];
         }
       });
-      if (sortedReleases.length) {
-        update.skippedOverVersions = sortedReleases.map((r) => r.version);
-      }
       if (
         rangeStrategy === 'update-lockfile' &&
         currentValue === update.newValue
@@ -320,8 +315,8 @@ export async function lookupUpdates(
       }
     }
     if (versioning.valueToVersion) {
+      res.currentVersion = versioning.valueToVersion(res.currentVersion);
       for (const update of res.updates || []) {
-        res.currentVersion = versioning.valueToVersion(res.currentVersion);
         update.newVersion = versioning.valueToVersion(update.newVersion);
       }
     }
@@ -330,13 +325,6 @@ export async function lookupUpdates(
       if (pinDigests || currentDigest) {
         update.newDigest =
           update.newDigest || (await getDigest(config, update.newValue));
-        if (update.newDigest) {
-          update.newDigestShort = update.newDigest
-            .replace('sha256:', '')
-            .substring(0, 7);
-        } else {
-          logger.debug({ newValue: update.newValue }, 'Could not getDigest');
-        }
       }
     }
   }
@@ -352,16 +340,5 @@ export async function lookupUpdates(
         update.isLockfileUpdate ||
         (update.newDigest && !update.newDigest.startsWith(currentDigest))
     );
-  if (res.updates.some((update) => update.updateType === 'pin')) {
-    for (const update of res.updates) {
-      if (
-        update.updateType !== 'pin' &&
-        update.updateType !== 'rollback' &&
-        !isVulnerabilityAlert
-      ) {
-        update.blockedByPin = true;
-      }
-    }
-  }
   return res;
 }

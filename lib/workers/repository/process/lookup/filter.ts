@@ -39,8 +39,10 @@ export function filterVersions(
   }
 
   // Leave only versions greater than current
-  let filteredVersions = releases.filter((v) =>
-    versioning.isGreaterThan(v.version, currentVersion)
+  let filteredVersions = releases.filter(
+    (v) =>
+      versioning.isVersion(v.version) &&
+      versioning.isGreaterThan(v.version, currentVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
