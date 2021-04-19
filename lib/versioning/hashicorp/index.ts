@@ -37,8 +37,8 @@ function getNewValue({
 }: NewValueConfig): string {
   if (/~>\s*0\.\d+/.test(currentValue) && npm.getMajor(newVersion) === 0) {
     return currentValue.replace(
-      /(~>\s*0\.).*$/,
-      `$1${npm.getMinor(newVersion)}`
+      /(~>\s*0\.)(\d+)(.*)$/,
+      `$1${npm.getMinor(newVersion)}$3`
     );
   }
   // handle special ~> 1.2 case
