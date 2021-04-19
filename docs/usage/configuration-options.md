@@ -634,7 +634,8 @@ The full list of supported managers can be found [here](https://docs.renovatebot
 ## filterOutUnavailableUsers
 
 When this option is enabled PRs are not assigned to users that are unavailable.
-Please note that this will only have an effect when the platform supports the concept of user availability (currently supported by GitLab).
+This option only works on platforms that support the concept of user availability.
+For now, you can only use this option on the GitLab platform.
 
 ## followTag
 
