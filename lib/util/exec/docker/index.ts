@@ -72,11 +72,9 @@ async function getDockerTag(
   constraint: string,
   scheme: string
 ): Promise<string> {
-  // TODO: fixme
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  const { isValid, isVersion, matches, sortVersions } = versioning.get(scheme);
+  const ver = versioning.get(scheme);
 
-  if (!isValid(constraint)) {
+  if (!ver.isValid(constraint)) {
     logger.warn({ constraint }, `Invalid ${scheme} version constraint`);
     return 'latest';
   }
@@ -93,9 +91,9 @@ async function getDockerTag(
   if (imageReleases?.releases) {
     let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
-      (version) => isVersion(version) && matches(version, constraint)
+      (version) => ver.isVersion(version) && ver.matches(version, constraint)
     );
-    versions = versions.sort(sortVersions);
+    versions = versions.sort(ver.sortVersions.bind(ver));
     if (versions.length) {
       const version = versions.pop();
       logger.debug(
