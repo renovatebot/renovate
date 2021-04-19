@@ -382,6 +382,7 @@ exports[`platform/bitbucket/index findPr() finds pr 1`] = `
 Object {
   "body": "summary",
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #5",
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -1158,6 +1159,7 @@ Array [
   Object {
     "body": undefined,
     "createdAt": undefined,
+    "displayNumber": "Pull Request #1",
     "number": 1,
     "sourceBranch": "branch-a",
     "state": "open",
