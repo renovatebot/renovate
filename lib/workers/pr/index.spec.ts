@@ -5,6 +5,7 @@ import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import * as _limits from '../global/limits';
 import { BranchConfig, PrResult } from '../types';
+import * as prAutomerge from './automerge';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
 import * as codeOwners from './code-owners';
@@ -114,14 +115,14 @@ describe(getName(__filename), () => {
       jest.clearAllMocks();
     });
     it('should not automerge if not configured', async () => {
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
     it('should automerge comment', async () => {
@@ -129,7 +130,7 @@ describe(getName(__filename), () => {
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -139,7 +140,7 @@ describe(getName(__filename), () => {
       config.automergeComment = '!merge';
       config.rebaseRequested = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -147,25 +148,25 @@ describe(getName(__filename), () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       git.isBranchModified.mockResolvedValueOnce(true);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
       pr.canMerge = undefined;
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
       pr.isConflicted = true;
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
   });

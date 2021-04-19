@@ -18,7 +18,13 @@ import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
 import type { PresetApi } from './types';
-import { PRESET_DEP_NOT_FOUND } from './util';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID,
+  PRESET_NOT_FOUND,
+  PRESET_PROHIBITED_SUBPRESET,
+  PRESET_RENOVATE_CONFIG_NOT_FOUND,
+} from './util';
 
 const presetSources: Record<string, PresetApi> = {
   github,
@@ -135,10 +141,10 @@ export function parsePreset(input: string): ParsedPreset {
 
     // Validation
     if (str.includes(':')) {
-      throw new Error('prohibited sub-preset');
+      throw new Error(PRESET_PROHIBITED_SUBPRESET);
     }
     if (!re.test(str)) {
-      throw new Error('invalid preset');
+      throw new Error(PRESET_INVALID);
     }
     [, packageName, presetPath, presetName] = re.exec(str);
   } else {
@@ -264,13 +270,13 @@ export async function resolveConfigPresets(
           const error = new Error(CONFIG_VALIDATION);
           if (err.message === PRESET_DEP_NOT_FOUND) {
             error.validationError = `Cannot find preset's package (${preset})`;
-          } else if (err.message === 'preset renovate-config not found') {
+          } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
             error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
-          } else if (err.message === 'preset not found') {
+          } else if (err.message === PRESET_NOT_FOUND) {
             error.validationError = `Preset name not found within published preset config (${preset})`;
-          } else if (err.message === 'invalid preset') {
+          } else if (err.message === PRESET_INVALID) {
             error.validationError = `Preset is invalid (${preset})`;
-          } else if (err.message === 'prohibited sub-preset') {
+          } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
             error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
           }
           // istanbul ignore if

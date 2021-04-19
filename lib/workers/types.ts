@@ -79,7 +79,7 @@ export enum PrResult {
   LimitReached = 'LimitReached',
 }
 
-export enum ProcessBranchResult {
+export enum BranchResult {
   AlreadyExisted = 'already-existed',
   Automerged = 'automerged',
   Done = 'done',
@@ -110,7 +110,7 @@ export interface BranchConfig
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;
-  res?: ProcessBranchResult;
+  result?: BranchResult;
   upgrades: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;
 }
