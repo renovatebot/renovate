@@ -332,7 +332,7 @@ export type RenovateOptions =
   | RenovateArrayOption
   | RenovateObjectOption;
 
-export interface PackageRuleInputConfig extends Record<string, any> {
+export interface PackageRuleInputConfig extends Record<string, unknown> {
   versioning?: string;
   packageFile?: string;
   depType?: string;

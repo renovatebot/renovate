@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import {
   PackageRule,
@@ -57,7 +58,9 @@ function matchesRule(
   }
   if (matchFiles.length) {
     const isMatch = matchFiles.some(
-      (fileName) => packageFile === fileName || lockFiles?.includes(fileName)
+      (fileName) =>
+        packageFile === fileName ||
+        (is.array(lockFiles) && lockFiles?.includes(fileName))
     );
     if (!isMatch) {
       return false;
