@@ -1,4 +1,4 @@
-import { PackageRuleInputConfig, UpdateType } from '../config';
+import type { PackageRuleInputConfig, UpdateType } from '../config';
 import {
   LANGUAGE_DOCKER,
   LANGUAGE_JAVASCRIPT,
