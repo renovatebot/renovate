@@ -14,8 +14,6 @@ import type { GotOptions, OutgoingHttpHeaders, RequestStats } from './types';
 // TODO: refactor code to remove this
 import './legacy';
 
-export * from './types';
-
 export interface HttpOptions {
   body?: any;
   username?: string;
