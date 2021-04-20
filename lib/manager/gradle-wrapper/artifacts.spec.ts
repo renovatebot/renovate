@@ -156,7 +156,7 @@ describe(getName(__filename), () => {
     expect(httpMock.getTrace()).toEqual([
       {
         headers: {
-          'accept-encoding': 'gzip, deflate',
+          'accept-encoding': 'gzip, deflate, br',
           host: 'services.gradle.org',
           'user-agent': 'https://github.com/renovatebot/renovate',
         },
@@ -191,7 +191,7 @@ describe(getName(__filename), () => {
     expect(httpMock.getTrace()).toEqual([
       {
         headers: {
-          'accept-encoding': 'gzip, deflate',
+          'accept-encoding': 'gzip, deflate, br',
           host: 'services.gradle.org',
           'user-agent': 'https://github.com/renovatebot/renovate',
         },
