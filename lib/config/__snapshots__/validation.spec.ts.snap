@@ -164,6 +164,15 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors if invalid combinations in packageRules 1`] = `
+Array [
+  Object {
+    "message": "packageRules[0]: packageRules cannot contain both matchUpdateTypes and matchRegistryUrls. Rule: {\\"matchUpdateTypes\\":[\\"major\\"],\\"registryUrls\\":[\\"https://registry.npmjs.org\\"]}",
+    "topic": "Configuration Error",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) errors if language or manager objects are nested 1`] = `
 Array [
   Object {
