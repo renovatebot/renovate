@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import merge from 'deepmerge';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -89,13 +90,16 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
-    // TODO: deep merge in order to merge headers
-    let options: GotOptions = {
-      method: 'get',
-      ...this.options,
-      hostType: this.hostType,
-      ...httpOptions,
-    };
+
+    let options: GotOptions = merge<GotOptions>(
+      {
+        method: 'get',
+        ...this.options,
+        hostType: this.hostType,
+      },
+      httpOptions
+    );
+
     if (process.env.NODE_ENV === 'test') {
       options.retry = 0;
     }
