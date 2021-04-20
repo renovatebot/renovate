@@ -110,7 +110,7 @@ describe(getName(__filename), () => {
     };
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
-      updatedDeps: ['aws'],
+      updatedDeps: ['hashicorp/aws'],
       newPackageFileContent: '',
       config: localConfig,
     });

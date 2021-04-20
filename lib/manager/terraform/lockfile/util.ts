@@ -67,10 +67,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
           relativeLineNumbers.hashes.start === -1
             ? index
             : relativeLineNumbers.hashes.start;
-        relativeLineNumbers.hashes.end =
-          index > relativeLineNumbers.hashes.end
-            ? index
-            : relativeLineNumbers.hashes.end;
+        relativeLineNumbers.hashes.end = index;
         return;
       }
 
