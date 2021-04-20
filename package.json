@@ -191,7 +191,7 @@
     "re2": "1.15.9"
   },
   "devDependencies": {
-    "@actions/core": "1.2.6",
+    "@actions/core": "1.2.7",
     "@jest/globals": "26.6.2",
     "@jest/reporters": "26.6.2",
     "@jest/test-result": "26.6.2",

@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@actions/core": "1.2.6",
+    "@actions/core": "1.2.7",
     "@jest/reporters": "26.6.2",
     "@jest/test-result": "26.6.2",
     "commander": "6.2.1",
