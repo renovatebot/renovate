@@ -94,7 +94,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // TODO: deep merge in order to merge headers
     let options: GotOptions = {
       method: 'get',
-      // ...this.options,
+      ...this.options,
       hostType: this.hostType,
       ...httpOptions,
     };
