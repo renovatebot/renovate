@@ -68,7 +68,7 @@ export interface RenovateSharedConfig {
 // The below should contain config options where stage=global
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
-  autodiscoverFilter?: string[];
+  autodiscoverFilter?: string;
   baseDir?: string;
   forceCli?: boolean;
   gitPrivateKey?: string;
@@ -349,4 +349,9 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+}
+
+export interface ManagerConfig extends RenovateConfig {
+  language: string;
+  manager: string;
 }

@@ -18,6 +18,16 @@ export function add(params: HostRule): void {
   }
   hostRules.push(params);
   const confidentialFields = ['password', 'token'];
+  const ruleMatch = params.baseUrl || params.hostName || params.domainName;
+  if (ruleMatch) {
+    confidentialFields.forEach((field) => {
+      if (params[field]) {
+        logger.debug(
+          `Adding ${field} authentication for ${ruleMatch} to hostRules`
+        );
+      }
+    });
+  }
   confidentialFields.forEach((field) => {
     const secret = params[field];
     if (secret && secret.length > 3) {
@@ -163,6 +173,7 @@ export function findAll({ hostType }: { hostType: string }): HostRule[] {
 }
 
 export function clear(): void {
+  logger.debug('Clearing hostRules');
   hostRules = [];
   sanitize.clear();
 }

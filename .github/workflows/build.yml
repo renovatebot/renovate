@@ -94,7 +94,7 @@ jobs:
         run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@v1.3.2
+        uses: codecov/codecov-action@v1.4.0
         if: always() && env.coverage == 'true'
 
       # build after tests to exclude files

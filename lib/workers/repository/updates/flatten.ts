@@ -1,9 +1,9 @@
 import {
-  RenovateConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { LANGUAGE_DOCKER } from '../../../constants/languages';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';

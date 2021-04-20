@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../../../config';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
 import type { BranchConfig } from '../../../types';

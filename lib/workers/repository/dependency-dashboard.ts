@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
