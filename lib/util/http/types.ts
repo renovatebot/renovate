@@ -24,6 +24,6 @@ export interface RequestStats {
   queueDuration: number;
 }
 
-export interface OutgoingHttpHeaders {
+export interface OutgoingHttpHeaders extends Record<string, unknown> {
   [header: string]: string | string[] | undefined;
 }
