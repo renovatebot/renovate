@@ -5,7 +5,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -16,7 +16,7 @@ Array [
     "body": "{\\"content\\":{\\"raw\\":\\"### topic\\\\n\\\\ncontent\\"}}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "42",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
@@ -33,7 +33,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -44,7 +44,7 @@ Array [
     "body": "{\\"content\\":{\\"raw\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "55",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
@@ -61,7 +61,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -76,7 +76,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -91,7 +91,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -101,7 +101,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -116,7 +116,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -126,7 +126,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -141,7 +141,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -156,7 +156,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

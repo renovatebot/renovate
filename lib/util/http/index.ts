@@ -60,8 +60,6 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
 function applyDefaultHeaders(options: Options): void {
   // eslint-disable-next-line no-param-reassign
   options.headers = {
-    // TODO: remove. Will be "gzip, deflate, br" by new got default
-    'accept-encoding': 'gzip, deflate',
     ...options.headers,
     'user-agent':
       process.env.RENOVATE_USER_AGENT ||
