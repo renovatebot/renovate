@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,

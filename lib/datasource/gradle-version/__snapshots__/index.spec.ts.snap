@@ -1523,7 +1523,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "foo.bar",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1533,7 +1533,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "baz.qux",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1548,7 +1548,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "services.gradle.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1563,7 +1563,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "services.gradle.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1573,7 +1573,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "baz.qux",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2799,7 +2799,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "services.gradle.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

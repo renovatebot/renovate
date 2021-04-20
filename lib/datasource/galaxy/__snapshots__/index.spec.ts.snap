@@ -26,7 +26,7 @@ exports[`datasource/galaxy/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -40,7 +40,7 @@ exports[`datasource/galaxy/index getReleases return null if searching random use
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -54,7 +54,7 @@ exports[`datasource/galaxy/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -68,7 +68,7 @@ exports[`datasource/galaxy/index getReleases returns null for empty list 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -82,7 +82,7 @@ exports[`datasource/galaxy/index getReleases returns null for empty result 1`] =
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -96,7 +96,7 @@ exports[`datasource/galaxy/index getReleases returns null for missing fields 1`]
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -110,7 +110,7 @@ exports[`datasource/galaxy/index getReleases returns null for unknown error 1`] 
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -126,7 +126,7 @@ exports[`datasource/galaxy/index getReleases throws for 5xx 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -140,7 +140,7 @@ exports[`datasource/galaxy/index getReleases throws for 404 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

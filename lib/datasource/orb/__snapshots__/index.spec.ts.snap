@@ -69,7 +69,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "128",
       "content-type": "application/json",
       "host": "circleci.com",
@@ -150,7 +150,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "128",
       "content-type": "application/json",
       "host": "circleci.com",
@@ -182,7 +182,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "128",
       "content-type": "application/json",
       "host": "circleci.com",
@@ -214,7 +214,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "128",
       "content-type": "application/json",
       "host": "circleci.com",
@@ -246,7 +246,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "128",
       "content-type": "application/json",
       "host": "circleci.com",
@@ -278,7 +278,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "128",
       "content-type": "application/json",
       "host": "circleci.com",

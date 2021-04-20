@@ -1,6 +1,6 @@
 import mockDate from 'mockdate';
 import { getName } from '../../../test/util';
-import { RenovateConfig } from '../../config';
+import type { RenovateConfig } from '../../config/types';
 import * as schedule from './schedule';
 
 describe(getName(__filename), () => {
