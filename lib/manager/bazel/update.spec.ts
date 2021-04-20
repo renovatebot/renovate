@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
-import { UpdateType } from '../../config';
+import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
 const content = readFileSync(

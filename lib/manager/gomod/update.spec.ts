@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { getName } from '../../../test/util';
-import { UpdateType } from '../../config';
+import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
 const gomod1 = readFileSync('lib/manager/gomod/__fixtures__/1/go.mod', 'utf8');
