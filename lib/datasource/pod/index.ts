@@ -3,8 +3,9 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { Http, HttpError } from '../../util/http';
+import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
+import type { HttpError } from '../../util/http/types';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'pod';
