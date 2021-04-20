@@ -1,3 +1,2 @@
 * text=auto eol=lf
 *.bat text eol=crlf
-lib/manager/terraform/lockfile/__fixtures__/test.zip filter=lfs diff=lfs merge=lfs -text
