@@ -75,6 +75,9 @@ export function getNewValue({
   const parsedRange = parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
   if (rangeStrategy === 'widen') {
+    if (satisfies(newVersion, currentValue)) {
+      return currentValue;
+    }
     const newValue = getNewValue({
       currentValue,
       rangeStrategy: 'replace',

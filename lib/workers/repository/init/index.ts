@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../../config';
 import { applySecretsToConfig } from '../../../config/secrets';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { clone } from '../../../util/clone';
 import { setUserRepoConfig } from '../../../util/git';

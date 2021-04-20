@@ -1,7 +1,7 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { RenovateConfig } from '../../config';
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 
 const scheduleMappings: Record<string, string> = {
