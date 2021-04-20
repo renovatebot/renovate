@@ -7,7 +7,7 @@ import type {
   UpdateArtifactsResult,
 } from '../../types';
 import hash from './hash';
-import { ProviderLock, ProviderLockUpdate } from './types';
+import type { ProviderLock, ProviderLockUpdate } from './types';
 import {
   extractLocks,
   isPinnedVersion,

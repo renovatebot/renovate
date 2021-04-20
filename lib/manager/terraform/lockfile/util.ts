@@ -1,8 +1,12 @@
 import { readLocalFile } from '../../../util/fs';
 import { get as getVersioning } from '../../../versioning';
-import { UpdateArtifactsResult } from '../../types';
-import type { LineNumbers, ProviderLock, ProviderSlice } from './types';
-import { ProviderLockUpdate } from './types';
+import type { UpdateArtifactsResult } from '../../types';
+import type {
+  LineNumbers,
+  ProviderLock,
+  ProviderLockUpdate,
+  ProviderSlice,
+} from './types';
 
 const providerStartLineRegex = /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/;
 const versionLineRegex = /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/;

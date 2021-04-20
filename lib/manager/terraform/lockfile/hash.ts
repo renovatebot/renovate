@@ -7,7 +7,7 @@ import {
   defaultRegistryUrls,
   id,
 } from '../../../datasource/terraform-provider';
-import {
+import type {
   TerraformBuild,
   VersionDetailResponse,
 } from '../../../datasource/terraform-provider/types';
