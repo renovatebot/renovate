@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -18,6 +18,7 @@ import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { Pr, platform } from '../../platform';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getElapsedDays } from '../../util/date';
 import { emojify } from '../../util/emoji';
 import {
   checkoutBranch,
@@ -213,14 +214,9 @@ export async function processBranch(
       // both a stabilityDays setting and a releaseTimestamp
       config.stabilityStatus = BranchStatus.green;
       // Default to 'success' but set 'pending' if any update is pending
-      const oneDay = 24 * 60 * 60 * 1000;
       for (const upgrade of config.upgrades) {
         if (upgrade.stabilityDays && upgrade.releaseTimestamp) {
-          const daysElapsed = Math.floor(
-            (new Date().getTime() -
-              new Date(upgrade.releaseTimestamp).getTime()) /
-              oneDay
-          );
+          const daysElapsed = getElapsedDays(upgrade.releaseTimestamp);
           if (
             !dependencyDashboardCheck &&
             daysElapsed < upgrade.stabilityDays

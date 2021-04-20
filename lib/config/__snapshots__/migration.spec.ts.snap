@@ -95,6 +95,7 @@ Object {
   "dependencyDashboardTitle": "foo",
   "enabled": true,
   "extends": Array [
+    ":automergeBranch",
     "config:js-app",
     "config:js-lib",
     ":dependencyDashboard",

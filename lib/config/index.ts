@@ -10,18 +10,13 @@ import * as fileParser from './file';
 import { resolveConfigPresets } from './presets';
 import type {
   GlobalConfig,
+  ManagerConfig,
   RenovateConfig,
   RenovateConfigStage,
 } from './types';
 import { mergeChildConfig } from './utils';
 
-export * from './types';
 export { mergeChildConfig };
-
-export interface ManagerConfig extends RenovateConfig {
-  language: string;
-  manager: string;
-}
 
 export function getManagerConfig(
   config: RenovateConfig,

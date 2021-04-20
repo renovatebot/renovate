@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { GlobalConfig } from '../../config';
+import type { GlobalConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 

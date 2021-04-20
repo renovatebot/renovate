@@ -5,8 +5,12 @@ import { satisfies } from 'semver';
 import upath from 'upath';
 import * as pkg from '../../../package.json';
 import * as configParser from '../../config';
-import { GlobalConfig } from '../../config';
 import { validateConfigSecrets } from '../../config/secrets';
+import type {
+  GlobalConfig,
+  RenovateConfig,
+  RenovateRepository,
+} from '../../config/types';
 import { getProblems, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
@@ -14,9 +18,6 @@ import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { globalFinalize, globalInitialize } from './initialize';
 import { Limit, isLimitReached } from './limits';
-
-type RenovateConfig = configParser.RenovateConfig;
-type RenovateRepository = configParser.RenovateRepository;
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,

@@ -2,7 +2,7 @@ import fs from 'fs';
 import { getName } from '../../test/util';
 import { setAdminConfig } from './admin';
 import { decryptConfig } from './decrypt';
-import { RenovateConfig } from '.';
+import type { RenovateConfig } from './types';
 
 const privateKey = fs.readFileSync('lib/config/keys/__fixtures__/private.pem');
 

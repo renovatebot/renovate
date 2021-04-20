@@ -347,6 +347,15 @@ describe(getName(__filename), () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
     });
+    it('ignores minor ranged versions when locked', async () => {
+      config.rangeStrategy = 'replace';
+      config.currentValue = '^1.0.0';
+      config.lockedVersion = '1.1.0';
+      config.depName = 'q';
+      config.datasource = datasourceNpmId;
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
+    });
     it('upgrades tilde ranges', async () => {
       config.rangeStrategy = 'pin';
       config.currentValue = '~1.3.0';

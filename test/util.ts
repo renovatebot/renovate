@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { expect } from '@jest/globals';
-import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
+import type { RenovateConfig as _RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
 import { platform as _platform } from '../lib/platform';
 import * as _env from '../lib/util/exec/env';

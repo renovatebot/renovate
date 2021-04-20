@@ -1,6 +1,6 @@
-import { RenovateConfig } from '../../../../config';
 import { getAdminConfig } from '../../../../config/admin';
 import { configFileNames } from '../../../../config/app-strings';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';
 import { formatCommitMessagePrefix } from '../../util/commit-message';
