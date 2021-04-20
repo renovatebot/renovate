@@ -23,3 +23,7 @@ export interface RequestStats {
   duration: number;
   queueDuration: number;
 }
+
+export interface OutgoingHttpHeaders {
+  [header: string]: string | string[] | undefined;
+}

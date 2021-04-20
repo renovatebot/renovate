@@ -9,16 +9,12 @@ import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import { GotOptions, RequestStats } from './types';
+import type { GotOptions, OutgoingHttpHeaders, RequestStats } from './types';
 
 // TODO: refactor code to remove this
 import './legacy';
 
 export * from './types';
-
-interface OutgoingHttpHeaders {
-  [header: string]: number | string | string[] | undefined;
-}
 
 export interface HttpOptions {
   body?: any;
@@ -98,10 +94,10 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // TODO: deep merge in order to merge headers
     let options: GotOptions = {
       method: 'get',
-      ...this.options,
+      // ...this.options,
       hostType: this.hostType,
       ...httpOptions,
-    } as unknown; // TODO: fixme
+    };
     if (process.env.NODE_ENV === 'test') {
       options.retry = 0;
     }
