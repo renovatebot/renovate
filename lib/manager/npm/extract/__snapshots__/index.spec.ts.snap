@@ -14,7 +14,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -23,6 +22,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -137,7 +137,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": true,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -146,6 +145,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "library",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": false,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -300,7 +300,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -309,6 +308,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -349,7 +349,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -358,6 +357,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -409,7 +409,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -418,6 +417,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "library",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -463,7 +463,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -472,6 +471,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "library",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -599,7 +599,6 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
@@ -608,6 +607,7 @@ Object {
   "packageJsonName": "renovate",
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -735,7 +735,6 @@ Object {
   "lernaClient": "yarn",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
@@ -744,6 +743,7 @@ Object {
   "packageJsonName": "renovate",
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -871,7 +871,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -880,6 +879,7 @@ Object {
   "packageJsonName": "renovate",
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": "yarn.lock",
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -893,7 +893,6 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
@@ -902,6 +901,7 @@ Object {
   "packageJsonName": "@a/b",
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": Array [
     "packages/*",
@@ -1031,7 +1031,6 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
@@ -1040,6 +1039,7 @@ Object {
   "packageJsonName": "renovate",
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -1053,7 +1053,6 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": "lerna.json",
   },
   "npmLock": undefined,
@@ -1062,6 +1061,7 @@ Object {
   "packageJsonName": "@a/b",
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": Array [
     "packages/*",
@@ -1077,7 +1077,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -1086,6 +1085,7 @@ Object {
   "packageJsonName": "@a/b",
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": Array [
     "packages/*",
@@ -1215,7 +1215,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasFileRefs": false,
     "lernaJsonFile": undefined,
   },
   "npmLock": undefined,
@@ -1224,6 +1223,7 @@ Object {
   "packageJsonName": "renovate",
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,

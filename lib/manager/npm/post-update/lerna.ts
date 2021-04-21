@@ -32,7 +32,7 @@ export async function generateLockFiles(
   cwd: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
-  artifactUpdateApproach?: string
+  skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
   const lernaClient = lernaPackageFile.lernaClient;
   if (!lernaClient) {
@@ -51,7 +51,7 @@ export async function generateLockFiles(
         installYarn += `@${quote(yarnCompatibility)}`;
       }
       preCommands.push(installYarn);
-      if (artifactUpdateApproach !== 'deep') {
+      if (skipInstalls !== false) {
         preCommands.push(getOptimizeCommand());
       }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
@@ -63,7 +63,7 @@ export async function generateLockFiles(
       }
       preCommands.push(installNpm, 'hash -d npm');
       cmdOptions = '--ignore-scripts  --no-audit';
-      if (artifactUpdateApproach !== 'deep') {
+      if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
       }
     } else {
