@@ -1,5 +1,5 @@
 import { fs, getConfig, getName, mocked } from '../../../../test/util';
-import { RenovateConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import * as _html from '../../../manager/html';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';

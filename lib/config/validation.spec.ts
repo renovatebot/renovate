@@ -1,6 +1,6 @@
 import { getName } from '../../test/util';
+import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
-import { RenovateConfig } from '.';
 
 describe(getName(__filename), () => {
   describe('getParentName()', () => {

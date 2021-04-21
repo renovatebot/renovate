@@ -1,10 +1,6 @@
 import pAll from 'p-all';
-import {
-  ManagerConfig,
-  RenovateConfig,
-  getManagerConfig,
-  mergeChildConfig,
-} from '../../../config';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
+import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';

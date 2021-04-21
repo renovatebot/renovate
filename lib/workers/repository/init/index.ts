@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../../config';
 import { applySecretsToConfig } from '../../../config/secrets';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { clone } from '../../../util/clone';
