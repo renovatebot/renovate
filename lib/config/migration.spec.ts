@@ -1,8 +1,12 @@
+import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
 import { MigratedConfig } from './migration';
-import { RenovateSharedConfig, RenovateConfig as _RenovateConfig } from '.';
+import type {
+  RenovateSharedConfig,
+  RenovateConfig as _RenovateConfig,
+} from './types';
 
 const defaultConfig = getConfig();
 
@@ -10,7 +14,7 @@ interface RenovateConfig extends _RenovateConfig {
   node?: RenovateSharedConfig & { supportPolicy?: unknown };
 }
 
-describe('config/migration', () => {
+describe(getName(__filename), () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
       const config: RenovateConfig = {
@@ -29,7 +33,13 @@ describe('config/migration', () => {
         compatibility: {
           python: '3.7',
         },
-        extends: [':js-app', 'config:library', ':masterIssue'],
+        extends: [
+          ':automergeBranchMergeCommit',
+          'default:js-app',
+          'config:library',
+          ':masterIssue',
+          'helpers:oddIsUnstable',
+        ],
         maintainYarnLock: true,
         onboarding: 'false' as never,
         multipleMajorPrs: true,
@@ -104,6 +114,15 @@ describe('config/migration', () => {
             packageNames: ['guava'],
             versionScheme: 'maven',
           },
+          {
+            packageNames: ['foo'],
+            packageRules: [
+              {
+                depTypeList: ['bar'],
+                automerge: true,
+              },
+            ],
+          },
         ],
         exposeEnv: true,
         lockFileMaintenance: {
@@ -144,7 +163,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.automerge).toEqual(false);
-      expect(migratedConfig.packageRules).toHaveLength(8);
+      expect(migratedConfig.packageRules).toHaveLength(9);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
     it('migrates before and after schedules', () => {

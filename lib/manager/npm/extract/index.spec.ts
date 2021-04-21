@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import upath from 'upath';
+import { getName } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
@@ -22,7 +23,7 @@ const workspacesSimpleContent = readFixture('inputs/workspaces-simple.json');
 const vendorisedContent = readFixture('is-object.json');
 const invalidNameContent = readFixture('invalid-name.json');
 
-describe('manager/npm/extract', () => {
+describe(getName(__filename), () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
       fs.readLocalFile = jest.fn(() => null);
@@ -80,7 +81,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { ...defaultConfig, npmrc: 'some-npmrc' }
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -94,7 +95,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { ...defaultConfig, ignoreNpmrcFile: true }
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -125,7 +126,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toEqual('');
+      expect(res.npmrc).toBeUndefined();
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {

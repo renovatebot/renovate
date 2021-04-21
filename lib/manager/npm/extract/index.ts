@@ -6,7 +6,11 @@ import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -51,7 +55,7 @@ export async function extractPackageFile(
   }
   if (fileName !== 'package.json' && packageJson.renovate) {
     const error = new Error(CONFIG_VALIDATION);
-    error.configFile = fileName;
+    error.location = fileName;
     error.validationError =
       'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
@@ -91,30 +95,23 @@ export async function extractPackageFile(
   delete lockFiles.shrinkwrapJson;
 
   let npmrc: string;
+  let ignoreNpmrcFile: boolean;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  if (is.string(config.npmrc)) {
-    logger.debug('Using configured npmrc');
-  } else if (config.ignoreNpmrcFile) {
-    npmrc = '';
+  // istanbul ignore if
+  if (config.ignoreNpmrcFile) {
+    await deleteLocalFile(npmrcFileName);
   } else {
     npmrc = await readLocalFile(npmrcFileName, 'utf8');
+    if (npmrc?.includes('package-lock')) {
+      logger.debug('Stripping package-lock setting from npmrc');
+      npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
+    }
     if (is.string(npmrc)) {
-      if (npmrc.includes('package-lock')) {
-        logger.debug(
-          { npmrcFileName },
-          'Stripping package-lock setting from .npmrc'
-        );
-        npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
-      }
       if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
-        logger.debug(
-          { npmrcFileName },
-          'Discarding .npmrc lines with variables'
-        );
-        npmrc = npmrc
-          .split('\n')
-          .filter((line) => !line.includes('=${'))
-          .join('\n');
+        logger.debug('Discarding .npmrc file with variables');
+        ignoreNpmrcFile = true;
+        npmrc = undefined;
+        await deleteLocalFile(npmrcFileName);
       }
     } else {
       npmrc = undefined;
@@ -129,7 +126,7 @@ export async function extractPackageFile(
   let lernaJsonFile: string;
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
-  let hasFileRefs = false;
+  let hasFancyRefs = false;
   let lernaJson: {
     packages: string[];
     npmClient: string;
@@ -227,6 +224,7 @@ export async function extractPackageFile(
 
     if (dep.currentValue.startsWith('npm:')) {
       dep.npmPackageAlias = true;
+      hasFancyRefs = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
         dep.lookupName = valSplit[0];
@@ -240,7 +238,7 @@ export async function extractPackageFile(
     }
     if (dep.currentValue.startsWith('file:')) {
       dep.skipReason = SkipReason.File;
-      hasFileRefs = true;
+      hasFancyRefs = true;
       return dep;
     }
     if (isValid(dep.currentValue)) {
@@ -348,11 +346,11 @@ export async function extractPackageFile(
   }
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
-    if (hasFileRefs) {
+    if (hasFancyRefs) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
-      //  - npm install --package-lock-only is buggy for transitive deps in file: references
-      //  - So we set skipInstalls to false if file: refs are found *and* the user hasn't explicitly set the value already
+      //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
+      //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
       logger.debug('Automatically setting skipInstalls to false');
       skipInstalls = false;
     } else {
@@ -361,12 +359,12 @@ export async function extractPackageFile(
   }
 
   return {
-    packageFile: fileName,
     deps,
     packageJsonName,
     packageFileVersion,
     packageJsonType,
     npmrc,
+    ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
     managerData: {
@@ -394,13 +392,15 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const npmFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
-    // const npmrc = ini.parse((config.npmrc || '').replace(/\\n/g, '\n'));
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      const res = await extractPackageFile(content, packageFile, config);
-      if (res) {
-        npmFiles.push(res);
+      const deps = await extractPackageFile(content, packageFile, config);
+      if (deps) {
+        npmFiles.push({
+          packageFile,
+          ...deps,
+        });
       }
     } else {
       logger.debug({ packageFile }, 'packageFile has no content');

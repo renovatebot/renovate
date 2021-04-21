@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const content = readFileSync(
@@ -6,7 +7,7 @@ const content = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/pip_requirements/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

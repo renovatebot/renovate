@@ -1,12 +1,19 @@
+import { Readable } from 'stream';
+import { getName } from '../../../test/util';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getNewBranchName,
+  getProjectAndRepo,
   getRenovatePRFormat,
+  getRepoByName,
+  getStorageExtraCloneOpts,
+  max4000Chars,
+  streamToString,
 } from './util';
 
-describe('platform/azure/helpers', () => {
+describe(getName(__filename), () => {
   describe('getNewBranchName', () => {
     it('should add refs/heads', () => {
       const res = getNewBranchName('testBB');
@@ -105,6 +112,119 @@ describe('platform/azure/helpers', () => {
     it('should be formated (isConflicted)', () => {
       const res = getRenovatePRFormat({ mergeStatus: 2 } as any);
       expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('streamToString', () => {
+    it('converts Readable stream to string', async () => {
+      const res = await streamToString(Readable.from('foobar'));
+      expect(res).toEqual('foobar');
+    });
+    it('handles error', async () => {
+      const stream = Readable.from('foobar');
+      const res = streamToString(stream);
+      stream.destroy(new Error('some unknown error'));
+      await expect(res).rejects.toThrow('some unknown error');
+    });
+  });
+
+  describe('getStorageExtraCloneOpts', () => {
+    it('should configure basic auth', () => {
+      const res = getStorageExtraCloneOpts({
+        username: 'user',
+        password: 'pass',
+      });
+      expect(res).toMatchSnapshot();
+    });
+    it('should configure personal access token', () => {
+      const res = getStorageExtraCloneOpts({
+        token: '1234567890123456789012345678901234567890123456789012',
+      });
+      expect(res).toMatchSnapshot();
+    });
+    it('should configure bearer token', () => {
+      const res = getStorageExtraCloneOpts({ token: 'token' });
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('max4000Chars', () => {
+    it('should be the same', () => {
+      const res = max4000Chars('Hello');
+      expect(res).toMatchSnapshot();
+    });
+    it('should be truncated', () => {
+      let str = '';
+      for (let i = 0; i < 5000; i += 1) {
+        str += 'a';
+      }
+      const res = max4000Chars(str);
+      expect(res).toHaveLength(3999);
+    });
+  });
+
+  describe('getProjectAndRepo', () => {
+    it('should return the object with same strings', () => {
+      const res = getProjectAndRepo('myRepoName');
+      expect(res).toMatchSnapshot();
+    });
+    it('should return the object with project and repo', () => {
+      const res = getProjectAndRepo('prjName/myRepoName');
+      expect(res).toMatchSnapshot();
+    });
+    it('should return an error', () => {
+      expect(() => getProjectAndRepo('prjName/myRepoName/blalba')).toThrow(
+        Error(
+          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
+        )
+      );
+    });
+  });
+
+  describe('getRepoByName', () => {
+    it('returns null when repos array is empty', () => {
+      expect(getRepoByName('foo/bar', [])).toBeNull();
+      expect(getRepoByName('foo/bar', undefined)).toBeNull();
+      expect(getRepoByName('foo/bar', null)).toBeNull();
+    });
+    it('returns null when repo is not found', () => {
+      expect(
+        getRepoByName('foo/foo', [{ name: 'bar', project: { name: 'bar' } }])
+      ).toBeNull();
+    });
+    it('finds repo', () => {
+      expect(
+        getRepoByName('foo/bar', [
+          { id: '1', name: 'baz', project: { name: 'qux' } },
+          null,
+          undefined,
+          { id: '2', name: 'bar' },
+          { id: '3', name: 'bar', project: { name: 'foo' } },
+          { id: '4', name: 'bar', project: { name: 'foo' } },
+        ])
+      ).toMatchObject({ id: '3' });
+    });
+    it('supports shorthand names', () => {
+      expect(
+        getRepoByName('foo', [
+          { id: '1', name: 'bar', project: { name: 'bar' } },
+          { id: '2', name: 'foo', project: { name: 'foo' } },
+        ])
+      ).toMatchObject({ id: '2' });
+    });
+    it('is case-independent', () => {
+      const repos = [
+        { id: '1', name: 'FOO', project: { name: 'FOO' } },
+        { id: '2', name: 'foo', project: { name: 'foo' } },
+      ];
+      expect(getRepoByName('FOO/foo', repos)).toMatchObject({ id: '1' });
+      expect(getRepoByName('foo/FOO', repos)).toMatchObject({ id: '1' });
+      expect(getRepoByName('foo/foo', repos)).toMatchObject({ id: '1' });
+    });
+    it('throws when repo name is invalid', () => {
+      expect(() => getRepoByName(undefined, [])).toThrow();
+      expect(() => getRepoByName(null, [])).toThrow();
+      expect(() => getRepoByName('foo/bar/baz', [])).toThrow();
     });
   });
 });

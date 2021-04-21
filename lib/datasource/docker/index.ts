@@ -1,4 +1,3 @@
-import { OutgoingHttpHeaders } from 'http';
 import URL from 'url';
 import { ECR } from '@aws-sdk/client-ecr';
 import hasha from 'hasha';
@@ -11,6 +10,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -351,7 +351,10 @@ async function getConfigDigest(
     return null;
   }
 
-  if (manifest.mediaType === MediaType.manifestListV2) {
+  if (
+    manifest.mediaType === MediaType.manifestListV2 &&
+    manifest.manifests.length
+  ) {
     logger.trace(
       { registry, dockerRepository, tag },
       'Found manifest list, using first image'
@@ -364,7 +367,7 @@ async function getConfigDigest(
   }
 
   if (manifest.mediaType === MediaType.manifestV2) {
-    return manifest.config.digest;
+    return manifest.config?.digest || null;
   }
 
   logger.debug({ manifest }, 'Invalid manifest - returning');

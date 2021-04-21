@@ -1,5 +1,6 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http, HttpError } from '../../util/http';
+import { Http } from '../../util/http';
+import { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import * as gradleVersioning from '../../versioning/gradle';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';

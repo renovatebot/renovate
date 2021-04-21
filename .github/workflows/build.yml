@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - v24
 
   workflow_dispatch:
 
@@ -40,15 +41,18 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2.2.1
+        uses: actions/setup-python@v2.2.2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
         if: env.NODE_VERSION == '14'
-        uses: actions/setup-java@v1.4.3
+        uses: actions/setup-java@v2.0.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+          java-package: jre
+          check-latest: false
 
       - name: Skip Java tests
         if: env.NODE_VERSION != '14'
@@ -72,7 +76,7 @@ jobs:
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -91,7 +95,7 @@ jobs:
         run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@v1.3.1
+        uses: codecov/codecov-action@v1.4.1
         if: always() && env.coverage == 'true'
 
       # build after tests to exclude files
@@ -127,7 +131,7 @@ jobs:
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -181,7 +185,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache Yarn packages
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}

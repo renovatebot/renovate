@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/github addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
+exports[`platform/github/index addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -27,7 +27,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -41,7 +41,7 @@ Array [
     "body": "{\\"assignees\\":[\\"someuser\\",\\"someotheruser\\"]}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "42",
       "content-type": "application/json",
@@ -54,7 +54,7 @@ Array [
 ]
 `;
 
-exports[`platform/github addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `
+exports[`platform/github/index addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -81,7 +81,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -95,7 +95,7 @@ Array [
     "body": "{\\"reviewers\\":[\\"someuser\\",\\"someotheruser\\"],\\"team_reviewers\\":[\\"someteam\\"]}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "72",
       "content-type": "application/json",
@@ -108,7 +108,7 @@ Array [
 ]
 `;
 
-exports[`platform/github createPr() should create a draftPR if set in the settings 1`] = `
+exports[`platform/github/index createPr() should create a draftPR if set in the settings 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
   "head": Object {
@@ -122,7 +122,7 @@ Object {
 }
 `;
 
-exports[`platform/github createPr() should create a draftPR if set in the settings 2`] = `
+exports[`platform/github/index createPr() should create a draftPR if set in the settings 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -149,7 +149,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -163,7 +163,7 @@ Array [
     "body": "{\\"title\\":\\"PR draft\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"This is a result of a draft\\",\\"draft\\":true}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "112",
       "content-type": "application/json",
@@ -176,7 +176,7 @@ Array [
 ]
 `;
 
-exports[`platform/github createPr() should create and return a PR object 1`] = `
+exports[`platform/github/index createPr() should create and return a PR object 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
   "head": Object {
@@ -190,7 +190,7 @@ Object {
 }
 `;
 
-exports[`platform/github createPr() should create and return a PR object 2`] = `
+exports[`platform/github/index createPr() should create and return a PR object 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -217,7 +217,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -231,7 +231,7 @@ Array [
     "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"dev\\",\\"body\\":\\"Hello world\\",\\"draft\\":false}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "95",
       "content-type": "application/json",
@@ -245,7 +245,7 @@ Array [
     "body": "[\\"deps\\",\\"renovate\\"]",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "19",
       "content-type": "application/json",
@@ -258,7 +258,7 @@ Array [
 ]
 `;
 
-exports[`platform/github createPr() should use defaultBranch 1`] = `
+exports[`platform/github/index createPr() should use defaultBranch 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
   "head": Object {
@@ -272,7 +272,7 @@ Object {
 }
 `;
 
-exports[`platform/github createPr() should use defaultBranch 2`] = `
+exports[`platform/github/index createPr() should use defaultBranch 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -299,7 +299,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -313,7 +313,7 @@ Array [
     "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"Hello world\\",\\"draft\\":false}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "98",
       "content-type": "application/json",
@@ -326,7 +326,7 @@ Array [
 ]
 `;
 
-exports[`platform/github deleteLabel(issueNo, label) should delete the label 1`] = `
+exports[`platform/github/index deleteLabel(issueNo, label) should delete the label 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -353,7 +353,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -366,7 +366,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -377,7 +377,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureComment add comment if not found 1`] = `
+exports[`platform/github/index ensureComment add comment if not found 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -404,7 +404,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -451,7 +451,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -464,7 +464,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -476,7 +476,7 @@ Array [
     "body": "{\\"body\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "44",
       "content-type": "application/json",
@@ -489,7 +489,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureComment add updates comment if necessary 1`] = `
+exports[`platform/github/index ensureComment add updates comment if necessary 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -516,7 +516,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -563,7 +563,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -576,7 +576,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -588,7 +588,7 @@ Array [
     "body": "{\\"body\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "44",
       "content-type": "application/json",
@@ -601,7 +601,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureComment adds comment if found in closed PR list 1`] = `
+exports[`platform/github/index ensureComment adds comment if found in closed PR list 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -628,7 +628,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -675,7 +675,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -689,7 +689,7 @@ Array [
     "body": "{\\"body\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "44",
       "content-type": "application/json",
@@ -702,7 +702,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureComment handles comment with no description 1`] = `
+exports[`platform/github/index ensureComment handles comment with no description 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -729,7 +729,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -776,7 +776,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -789,7 +789,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -800,7 +800,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureComment skips comment 1`] = `
+exports[`platform/github/index ensureComment skips comment 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -827,7 +827,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -874,7 +874,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -887,7 +887,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -898,7 +898,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureCommentRemoval deletes comment by content if found 1`] = `
+exports[`platform/github/index ensureCommentRemoval deletes comment by content if found 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -925,7 +925,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -972,7 +972,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -985,7 +985,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -996,7 +996,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1007,7 +1007,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureCommentRemoval deletes comment by topic if found 1`] = `
+exports[`platform/github/index ensureCommentRemoval deletes comment by topic if found 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1034,7 +1034,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -1081,7 +1081,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -1094,7 +1094,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1105,7 +1105,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1116,7 +1116,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() closes others if ensuring only once 1`] = `
+exports[`platform/github/index ensureIssue() closes others if ensuring only once 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1146,7 +1146,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1159,7 +1159,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1170,7 +1170,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() creates issue 1`] = `
+exports[`platform/github/index ensureIssue() creates issue 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1200,7 +1200,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1214,7 +1214,7 @@ Array [
     "body": "{\\"title\\":\\"new-title\\",\\"body\\":\\"new-content\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "42",
       "content-type": "application/json",
@@ -1227,7 +1227,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() creates issue if not ensuring only once 1`] = `
+exports[`platform/github/index ensureIssue() creates issue if not ensuring only once 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1257,7 +1257,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1270,7 +1270,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1281,7 +1281,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() creates issue if reopen flag false and issue is not open 1`] = `
+exports[`platform/github/index ensureIssue() creates issue if reopen flag false and issue is not open 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1311,7 +1311,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1324,7 +1324,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1336,7 +1336,7 @@ Array [
     "body": "{\\"title\\":\\"title-2\\",\\"body\\":\\"new-content\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "40",
       "content-type": "application/json",
@@ -1349,7 +1349,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() deletes if duplicate 1`] = `
+exports[`platform/github/index ensureIssue() deletes if duplicate 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1379,7 +1379,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1393,7 +1393,7 @@ Array [
     "body": "{\\"state\\":\\"closed\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "18",
       "content-type": "application/json",
@@ -1406,7 +1406,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1417,7 +1417,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() does not create issue if ensuring only once 1`] = `
+exports[`platform/github/index ensureIssue() does not create issue if ensuring only once 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1447,7 +1447,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1460,7 +1460,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() does not create issue if reopen flag false and issue is already open 1`] = `
+exports[`platform/github/index ensureIssue() does not create issue if reopen flag false and issue is already open 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1490,7 +1490,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1503,7 +1503,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1514,7 +1514,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() skips update if unchanged 1`] = `
+exports[`platform/github/index ensureIssue() skips update if unchanged 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1544,7 +1544,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1557,7 +1557,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1568,7 +1568,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssue() updates issue 1`] = `
+exports[`platform/github/index ensureIssue() updates issue 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1598,7 +1598,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1611,7 +1611,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1623,7 +1623,7 @@ Array [
     "body": "{\\"body\\":\\"newer-content\\",\\"state\\":\\"open\\",\\"title\\":\\"title-3\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "57",
       "content-type": "application/json",
@@ -1636,7 +1636,7 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureIssueClosing() closes issue 1`] = `
+exports[`platform/github/index ensureIssueClosing() closes issue 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1666,7 +1666,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1680,7 +1680,7 @@ Array [
     "body": "{\\"state\\":\\"closed\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "18",
       "content-type": "application/json",
@@ -1693,7 +1693,7 @@ Array [
 ]
 `;
 
-exports[`platform/github findIssue() finds issue 1`] = `
+exports[`platform/github/index findIssue() finds issue 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1723,7 +1723,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1736,7 +1736,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1747,7 +1747,7 @@ Array [
 ]
 `;
 
-exports[`platform/github findIssue() returns null if no issue 1`] = `
+exports[`platform/github/index findIssue() returns null if no issue 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1777,7 +1777,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "425",
       "content-type": "application/json",
@@ -1790,12 +1790,12 @@ Array [
 ]
 `;
 
-exports[`platform/github findPr(branchName, prTitle, state) caches pr list 1`] = `
+exports[`platform/github/index findPr(branchName, prTitle, state) caches pr list 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1806,7 +1806,7 @@ Array [
 ]
 `;
 
-exports[`platform/github findPr(branchName, prTitle, state) returns true if no title and all state 1`] = `
+exports[`platform/github/index findPr(branchName, prTitle, state) returns true if no title and all state 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1833,7 +1833,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -1846,7 +1846,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1857,12 +1857,12 @@ Array [
 ]
 `;
 
-exports[`platform/github findPr(branchName, prTitle, state) returns true if not open 1`] = `
+exports[`platform/github/index findPr(branchName, prTitle, state) returns true if not open 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1873,7 +1873,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchPr(branchName) aborts reopening if PR reopening fails 1`] = `
+exports[`platform/github/index getBranchPr(branchName) aborts reopen if PR is too old 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1900,7 +1900,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -1913,7 +1913,58 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+  },
+]
+`;
+
+exports[`platform/github/index getBranchPr(branchName) aborts reopening if PR reopening fails 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "330",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1925,7 +1976,7 @@ Array [
     "body": "{\\"ref\\":\\"refs/heads/somebranch\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "31",
       "content-type": "application/json",
@@ -1938,7 +1989,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchPr(branchName) aborts reopening if branch recreation fails 1`] = `
+exports[`platform/github/index getBranchPr(branchName) aborts reopening if branch recreation fails 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -1965,7 +2016,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -1978,7 +2029,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1990,7 +2041,7 @@ Array [
     "body": "{\\"ref\\":\\"refs/heads/somebranch\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "31",
       "content-type": "application/json",
@@ -2004,7 +2055,7 @@ Array [
     "body": "{\\"state\\":\\"open\\",\\"title\\":\\"old title\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "36",
       "content-type": "application/json",
@@ -2017,7 +2068,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchPr(branchName) should reopen an autoclosed PR 1`] = `
+exports[`platform/github/index getBranchPr(branchName) should reopen an autoclosed PR 1`] = `
 Object {
   "additions": 1,
   "base": Object {
@@ -2041,7 +2092,7 @@ Object {
 }
 `;
 
-exports[`platform/github getBranchPr(branchName) should reopen an autoclosed PR 2`] = `
+exports[`platform/github/index getBranchPr(branchName) should reopen an autoclosed PR 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -2068,7 +2119,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -2081,7 +2132,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2093,7 +2144,7 @@ Array [
     "body": "{\\"ref\\":\\"refs/heads/somebranch\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "31",
       "content-type": "application/json",
@@ -2107,7 +2158,7 @@ Array [
     "body": "{\\"state\\":\\"open\\",\\"title\\":\\"old title\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "36",
       "content-type": "application/json",
@@ -2196,7 +2247,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -2243,7 +2294,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -2256,7 +2307,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2267,7 +2318,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchPr(branchName) should return null if no PR exists 1`] = `
+exports[`platform/github/index getBranchPr(branchName) should return null if no PR exists 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -2294,7 +2345,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -2307,7 +2358,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2318,7 +2369,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchPr(branchName) should return the PR object 1`] = `
+exports[`platform/github/index getBranchPr(branchName) should return the PR object 1`] = `
 Object {
   "additions": 1,
   "base": Object {
@@ -2342,7 +2393,7 @@ Object {
 }
 `;
 
-exports[`platform/github getBranchPr(branchName) should return the PR object 2`] = `
+exports[`platform/github/index getBranchPr(branchName) should return the PR object 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -2369,7 +2420,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -2382,7 +2433,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2469,7 +2520,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -2516,7 +2567,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -2529,7 +2580,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2540,7 +2591,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchPr(branchName) should return the PR object in fork mode 1`] = `
+exports[`platform/github/index getBranchPr(branchName) should return the PR object in fork mode 1`] = `
 Object {
   "additions": 1,
   "base": Object {
@@ -2564,7 +2615,7 @@ Object {
 }
 `;
 
-exports[`platform/github getBranchPr(branchName) should return the PR object in fork mode 2`] = `
+exports[`platform/github/index getBranchPr(branchName) should return the PR object in fork mode 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -2591,7 +2642,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -2604,7 +2655,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2615,7 +2666,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2627,7 +2678,7 @@ Array [
     "body": "{\\"sha\\":\\"1234\\",\\"force\\":true}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "27",
       "content-type": "application/json",
@@ -2640,7 +2691,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2727,7 +2778,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -2774,7 +2825,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -2787,7 +2838,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2798,7 +2849,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() defaults to pending 1`] = `
+exports[`platform/github/index getBranchStatus() defaults to pending 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -2825,7 +2876,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -2838,7 +2889,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2849,7 +2900,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2860,7 +2911,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() return failed if unsupported requiredStatusChecks 1`] = `
+exports[`platform/github/index getBranchStatus() return failed if unsupported requiredStatusChecks 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -2887,7 +2938,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -2900,7 +2951,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() returns success if requiredStatusChecks null 1`] = `
+exports[`platform/github/index getBranchStatus() returns success if requiredStatusChecks null 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -2927,7 +2978,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -2940,7 +2991,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() should fail if a check run has failed 1`] = `
+exports[`platform/github/index getBranchStatus() should fail if a check run has failed 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -2967,7 +3018,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -2980,7 +3031,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2991,7 +3042,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3002,7 +3053,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() should fail if a check run is pending 1`] = `
+exports[`platform/github/index getBranchStatus() should fail if a check run is pending 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3029,7 +3080,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3042,7 +3093,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3053,7 +3104,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3064,7 +3115,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() should pass through failed 1`] = `
+exports[`platform/github/index getBranchStatus() should pass through failed 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3091,7 +3142,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3104,7 +3155,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3115,7 +3166,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3126,7 +3177,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() should pass through success 1`] = `
+exports[`platform/github/index getBranchStatus() should pass through success 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3153,7 +3204,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3166,7 +3217,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3177,7 +3228,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3188,7 +3239,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() should succeed if no status and all passed check runs 1`] = `
+exports[`platform/github/index getBranchStatus() should succeed if no status and all passed check runs 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3215,7 +3266,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3228,7 +3279,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3239,7 +3290,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3250,7 +3301,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatusCheck returns null 1`] = `
+exports[`platform/github/index getBranchStatusCheck returns null 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3277,7 +3328,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3290,7 +3341,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3301,7 +3352,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatusCheck returns state if found 1`] = `
+exports[`platform/github/index getBranchStatusCheck returns state if found 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3328,7 +3379,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3341,7 +3392,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3352,7 +3403,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getJsonFile() returns file content 1`] = `
+exports[`platform/github/index getJsonFile() returns file content 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3379,7 +3430,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3392,7 +3443,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3403,7 +3454,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getJsonFile() returns null on errors 1`] = `
+exports[`platform/github/index getJsonFile() throws on errors 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3430,7 +3481,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3443,7 +3494,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3454,7 +3505,58 @@ Array [
 ]
 `;
 
-exports[`platform/github getPr(prNo) should return PR from closed graphql result 1`] = `
+exports[`platform/github/index getJsonFile() throws on malformed JSON 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "330",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/contents/file.json",
+  },
+]
+`;
+
+exports[`platform/github/index getPr(prNo) should return PR from closed graphql result 1`] = `
 Object {
   "body": "dummy body",
   "comments": Array [
@@ -3477,7 +3579,7 @@ Your **[semantic-release](https://github.com/semantic-release/semantic-release)*
 }
 `;
 
-exports[`platform/github getPr(prNo) should return PR from closed graphql result 2`] = `
+exports[`platform/github/index getPr(prNo) should return PR from closed graphql result 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3504,7 +3606,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3593,7 +3695,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -3640,7 +3742,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -3653,7 +3755,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
+exports[`platform/github/index getPr(prNo) should return PR from graphql result 1`] = `
 Object {
   "canMerge": false,
   "canMergeReason": "mergeStateStatus = DIRTY",
@@ -3669,7 +3771,7 @@ Object {
 }
 `;
 
-exports[`platform/github getPr(prNo) should return PR from graphql result 2`] = `
+exports[`platform/github/index getPr(prNo) should return PR from graphql result 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3696,7 +3798,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3785,7 +3887,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -3798,7 +3900,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getPr(prNo) should return a PR object - 0 1`] = `
+exports[`platform/github/index getPr(prNo) should return a PR object - 0 1`] = `
 Object {
   "base": Object {
     "sha": "1234",
@@ -3811,7 +3913,7 @@ Object {
 }
 `;
 
-exports[`platform/github getPr(prNo) should return a PR object - 0 2`] = `
+exports[`platform/github/index getPr(prNo) should return a PR object - 0 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -3838,7 +3940,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -3927,7 +4029,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -3974,7 +4076,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -3987,7 +4089,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3998,7 +4100,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getPr(prNo) should return a PR object - 1 1`] = `
+exports[`platform/github/index getPr(prNo) should return a PR object - 1 1`] = `
 Object {
   "base": Object {
     "sha": "1234",
@@ -4016,7 +4118,7 @@ Object {
 }
 `;
 
-exports[`platform/github getPr(prNo) should return a PR object - 1 2`] = `
+exports[`platform/github/index getPr(prNo) should return a PR object - 1 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -4043,7 +4145,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -4132,7 +4234,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -4179,7 +4281,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -4192,7 +4294,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4203,7 +4305,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getPr(prNo) should return a PR object - 2 1`] = `
+exports[`platform/github/index getPr(prNo) should return a PR object - 2 1`] = `
 Object {
   "base": Object {
     "sha": "5678",
@@ -4219,7 +4321,7 @@ Object {
 }
 `;
 
-exports[`platform/github getPr(prNo) should return a PR object - 2 2`] = `
+exports[`platform/github/index getPr(prNo) should return a PR object - 2 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -4246,7 +4348,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -4335,7 +4437,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -4382,7 +4484,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -4395,7 +4497,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4406,7 +4508,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getPr(prNo) should return null if no PR is returned from GitHub 1`] = `
+exports[`platform/github/index getPr(prNo) should return null if no PR is returned from GitHub 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -4433,7 +4535,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -4522,7 +4624,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "1504",
       "content-type": "application/json",
@@ -4569,7 +4671,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "604",
       "content-type": "application/json",
@@ -4582,7 +4684,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4593,12 +4695,12 @@ Array [
 ]
 `;
 
-exports[`platform/github getRepoForceRebase should detect repoForceRebase 1`] = `
+exports[`platform/github/index getRepoForceRebase should detect repoForceRebase 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4609,12 +4711,12 @@ Array [
 ]
 `;
 
-exports[`platform/github getRepoForceRebase should handle 403 1`] = `
+exports[`platform/github/index getRepoForceRebase should handle 403 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4625,12 +4727,12 @@ Array [
 ]
 `;
 
-exports[`platform/github getRepoForceRebase should handle 404 1`] = `
+exports[`platform/github/index getRepoForceRebase should handle 404 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4641,14 +4743,14 @@ Array [
 ]
 `;
 
-exports[`platform/github getRepoForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
+exports[`platform/github/index getRepoForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
 
-exports[`platform/github getRepoForceRebase should throw 401 2`] = `
+exports[`platform/github/index getRepoForceRebase should throw 401 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4659,19 +4761,19 @@ Array [
 ]
 `;
 
-exports[`platform/github getRepos should return an array of repos 1`] = `
+exports[`platform/github/index getRepos should return an array of repos 1`] = `
 Array [
   "a/b",
   "c/d",
 ]
 `;
 
-exports[`platform/github getRepos should return an array of repos 2`] = `
+exports[`platform/github/index getRepos should return an array of repos 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4682,7 +4784,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getVulnerabilityAlerts() handles network error 1`] = `
+exports[`platform/github/index getVulnerabilityAlerts() handles network error 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -4731,7 +4833,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "697",
       "content-type": "application/json",
@@ -4744,7 +4846,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getVulnerabilityAlerts() returns array if found 1`] = `
+exports[`platform/github/index getVulnerabilityAlerts() returns array if found 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -4793,7 +4895,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "697",
       "content-type": "application/json",
@@ -4806,7 +4908,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getVulnerabilityAlerts() returns empty if disabled 1`] = `
+exports[`platform/github/index getVulnerabilityAlerts() returns empty if disabled 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -4855,7 +4957,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "697",
       "content-type": "application/json",
@@ -4868,7 +4970,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getVulnerabilityAlerts() returns empty if error 1`] = `
+exports[`platform/github/index getVulnerabilityAlerts() returns empty if error 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -4917,7 +5019,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "697",
       "content-type": "application/json",
@@ -4930,7 +5032,7 @@ Array [
 ]
 `;
 
-exports[`platform/github initPlatform() should support custom endpoint 1`] = `
+exports[`platform/github/index initPlatform() should support custom endpoint 1`] = `
 Object {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
@@ -4938,12 +5040,12 @@ Object {
 }
 `;
 
-exports[`platform/github initPlatform() should support custom endpoint 2`] = `
+exports[`platform/github/index initPlatform() should support custom endpoint 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "ghe.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4954,7 +5056,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "ghe.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4965,7 +5067,7 @@ Array [
 ]
 `;
 
-exports[`platform/github initPlatform() should support default endpoint no email access 1`] = `
+exports[`platform/github/index initPlatform() should support default endpoint no email access 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
@@ -4973,12 +5075,12 @@ Object {
 }
 `;
 
-exports[`platform/github initPlatform() should support default endpoint no email access 2`] = `
+exports[`platform/github/index initPlatform() should support default endpoint no email access 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4989,7 +5091,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5000,7 +5102,7 @@ Array [
 ]
 `;
 
-exports[`platform/github initPlatform() should support default endpoint no email result 1`] = `
+exports[`platform/github/index initPlatform() should support default endpoint no email result 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
@@ -5008,12 +5110,12 @@ Object {
 }
 `;
 
-exports[`platform/github initPlatform() should support default endpoint no email result 2`] = `
+exports[`platform/github/index initPlatform() should support default endpoint no email result 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5024,7 +5126,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5035,7 +5137,7 @@ Array [
 ]
 `;
 
-exports[`platform/github initPlatform() should support default endpoint with email 1`] = `
+exports[`platform/github/index initPlatform() should support default endpoint with email 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
@@ -5043,12 +5145,12 @@ Object {
 }
 `;
 
-exports[`platform/github initPlatform() should support default endpoint with email 2`] = `
+exports[`platform/github/index initPlatform() should support default endpoint with email 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5059,7 +5161,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5070,7 +5172,7 @@ Array [
 ]
 `;
 
-exports[`platform/github initPlatform() should support gitAuthor and username 1`] = `
+exports[`platform/github/index initPlatform() should support gitAuthor and username 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
@@ -5078,12 +5180,12 @@ Object {
 }
 `;
 
-exports[`platform/github initPlatform() should throw if user failure 1`] = `
+exports[`platform/github/index initPlatform() should throw if user failure 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5094,14 +5196,14 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo detects fork default branch mismatch 1`] = `
+exports[`platform/github/index initRepo detects fork default branch mismatch 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/github initRepo detects fork default branch mismatch 2`] = `
+exports[`platform/github/index initRepo detects fork default branch mismatch 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5128,7 +5230,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5141,7 +5243,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5152,7 +5254,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5164,7 +5266,7 @@ Array [
     "body": "{\\"ref\\":\\"refs/heads/master\\",\\"sha\\":\\"1234\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "40",
       "content-type": "application/json",
@@ -5178,7 +5280,7 @@ Array [
     "body": "{\\"name\\":\\"repo\\",\\"default_branch\\":\\"master\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "41",
       "content-type": "application/json",
@@ -5192,7 +5294,7 @@ Array [
     "body": "{\\"sha\\":\\"1234\\",\\"force\\":true}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "27",
       "content-type": "application/json",
@@ -5205,14 +5307,14 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should fork when forkMode 1`] = `
+exports[`platform/github/index initRepo should fork when forkMode 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/github initRepo should fork when forkMode 2`] = `
+exports[`platform/github/index initRepo should fork when forkMode 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5239,7 +5341,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5252,7 +5354,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5263,7 +5365,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5274,14 +5376,14 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should merge 1`] = `
+exports[`platform/github/index initRepo should merge 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/github initRepo should merge 2`] = `
+exports[`platform/github/index initRepo should merge 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5308,7 +5410,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5321,14 +5423,14 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should not guess at merge 1`] = `
+exports[`platform/github/index initRepo should not guess at merge 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/github initRepo should not guess at merge 2`] = `
+exports[`platform/github/index initRepo should not guess at merge 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5355,7 +5457,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5368,14 +5470,14 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should rebase 1`] = `
+exports[`platform/github/index initRepo should rebase 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/github initRepo should rebase 2`] = `
+exports[`platform/github/index initRepo should rebase 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5402,7 +5504,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5415,14 +5517,14 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should squash 1`] = `
+exports[`platform/github/index initRepo should squash 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/github initRepo should squash 2`] = `
+exports[`platform/github/index initRepo should squash 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5449,7 +5551,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5462,7 +5564,7 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should throw error if archived 1`] = `
+exports[`platform/github/index initRepo should throw error if archived 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5489,7 +5591,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5502,7 +5604,7 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should throw error if renamed 1`] = `
+exports[`platform/github/index initRepo should throw error if renamed 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5529,7 +5631,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5542,14 +5644,14 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should update fork when forkMode 1`] = `
+exports[`platform/github/index initRepo should update fork when forkMode 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/github initRepo should update fork when forkMode 2`] = `
+exports[`platform/github/index initRepo should update fork when forkMode 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5576,7 +5678,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5589,7 +5691,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5600,7 +5702,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5612,7 +5714,7 @@ Array [
     "body": "{\\"sha\\":\\"1234\\",\\"force\\":true}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "27",
       "content-type": "application/json",
@@ -5625,7 +5727,7 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo throws not-found 1`] = `
+exports[`platform/github/index initRepo throws not-found 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5652,7 +5754,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5665,12 +5767,12 @@ Array [
 ]
 `;
 
-exports[`platform/github massageMarkdown(input) returns not-updated pr body for GHE 1`] = `
+exports[`platform/github/index massageMarkdown(input) returns not-updated pr body for GHE 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "github.company.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5681,7 +5783,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "github.company.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5714,7 +5816,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5727,9 +5829,9 @@ Array [
 ]
 `;
 
-exports[`platform/github massageMarkdown(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://togithub.com/foo/bar/issues/5)"`;
+exports[`platform/github/index massageMarkdown(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://togithub.com/foo/bar/issues/5)"`;
 
-exports[`platform/github mergePr(prNo) - autodetection should give up 1`] = `
+exports[`platform/github/index mergePr(prNo) - autodetection should give up 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5756,7 +5858,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5770,7 +5872,7 @@ Array [
     "body": "{\\"merge_method\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -5784,7 +5886,7 @@ Array [
     "body": "{\\"merge_method\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -5798,7 +5900,7 @@ Array [
     "body": "{\\"merge_method\\":\\"squash\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -5812,7 +5914,7 @@ Array [
     "body": "{\\"merge_method\\":\\"merge\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "24",
       "content-type": "application/json",
@@ -5825,7 +5927,7 @@ Array [
 ]
 `;
 
-exports[`platform/github mergePr(prNo) - autodetection should try merge after squash 1`] = `
+exports[`platform/github/index mergePr(prNo) - autodetection should try merge after squash 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5852,7 +5954,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5866,7 +5968,7 @@ Array [
     "body": "{\\"merge_method\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -5880,7 +5982,7 @@ Array [
     "body": "{\\"merge_method\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -5894,7 +5996,7 @@ Array [
     "body": "{\\"merge_method\\":\\"squash\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -5907,7 +6009,7 @@ Array [
 ]
 `;
 
-exports[`platform/github mergePr(prNo) - autodetection should try rebase first 1`] = `
+exports[`platform/github/index mergePr(prNo) - autodetection should try rebase first 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5934,7 +6036,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -5948,7 +6050,7 @@ Array [
     "body": "{\\"merge_method\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -5961,7 +6063,7 @@ Array [
 ]
 `;
 
-exports[`platform/github mergePr(prNo) - autodetection should try squash after rebase 1`] = `
+exports[`platform/github/index mergePr(prNo) - autodetection should try squash after rebase 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5988,7 +6090,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -6002,7 +6104,7 @@ Array [
     "body": "{\\"merge_method\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -6015,7 +6117,7 @@ Array [
 ]
 `;
 
-exports[`platform/github mergePr(prNo) should handle merge error 1`] = `
+exports[`platform/github/index mergePr(prNo) should handle merge error 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -6042,7 +6144,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -6056,7 +6158,7 @@ Array [
     "body": "{\\"merge_method\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -6069,7 +6171,7 @@ Array [
 ]
 `;
 
-exports[`platform/github mergePr(prNo) should merge the PR 1`] = `
+exports[`platform/github/index mergePr(prNo) should merge the PR 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -6096,7 +6198,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -6110,7 +6212,7 @@ Array [
     "body": "{\\"merge_method\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "25",
       "content-type": "application/json",
@@ -6123,7 +6225,7 @@ Array [
 ]
 `;
 
-exports[`platform/github setBranchStatus returns if already set 1`] = `
+exports[`platform/github/index setBranchStatus returns if already set 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -6150,7 +6252,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -6163,7 +6265,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6174,7 +6276,7 @@ Array [
 ]
 `;
 
-exports[`platform/github setBranchStatus sets branch status 1`] = `
+exports[`platform/github/index setBranchStatus sets branch status 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -6201,7 +6303,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -6214,7 +6316,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6226,7 +6328,7 @@ Array [
     "body": "{\\"state\\":\\"success\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "101",
       "content-type": "application/json",
@@ -6239,7 +6341,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6250,7 +6352,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6261,7 +6363,7 @@ Array [
 ]
 `;
 
-exports[`platform/github updatePr(prNo, title, body) should update and close the PR 1`] = `
+exports[`platform/github/index updatePr(prNo, title, body) should update and close the PR 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -6288,7 +6390,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -6302,7 +6404,7 @@ Array [
     "body": "{\\"title\\":\\"The New Title\\",\\"body\\":\\"Hello world again\\",\\"state\\":\\"closed\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "69",
       "content-type": "application/json",
@@ -6315,7 +6417,7 @@ Array [
 ]
 `;
 
-exports[`platform/github updatePr(prNo, title, body) should update the PR 1`] = `
+exports[`platform/github/index updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -6342,7 +6444,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "330",
       "content-type": "application/json",
@@ -6356,7 +6458,7 @@ Array [
     "body": "{\\"title\\":\\"The New Title\\",\\"body\\":\\"Hello world again\\"}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "52",
       "content-type": "application/json",

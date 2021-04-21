@@ -87,6 +87,7 @@ export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
   customEnvVariables?: Record<string, string>;
+  dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
@@ -113,10 +114,12 @@ export interface LegacyAdminConfig {
   platform?: string;
   requireConfig?: boolean;
 }
+export type ExecutionMode = 'branch' | 'update';
 
 export type PostUpgradeTasks = {
   commands?: string[];
   fileFilters?: string[];
+  executionMode: ExecutionMode;
 };
 
 type UpdateConfig<
@@ -232,15 +235,17 @@ export interface PackageRule
   matchDepTypes?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
+  matchPackagePrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
+  excludePackagePrefixes?: string[];
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchUpdateTypes?: UpdateType[];
 }
 
 export interface ValidationMessage {
-  depName: string;
+  topic: string;
   message: string;
 }
 
@@ -326,3 +331,27 @@ export type RenovateOptions =
   | RenovateBooleanOption
   | RenovateArrayOption
   | RenovateObjectOption;
+
+export interface PackageRuleInputConfig extends Record<string, unknown> {
+  versioning?: string;
+  packageFile?: string;
+  depType?: string;
+  depTypes?: string[];
+  depName?: string;
+  currentValue?: string;
+  currentVersion?: string;
+  lockedVersion?: string;
+  updateType?: UpdateType;
+  isBump?: boolean;
+  sourceUrl?: string;
+  language?: string;
+  baseBranch?: string;
+  manager?: string;
+  datasource?: string;
+  packageRules?: (PackageRule & PackageRuleInputConfig)[];
+}
+
+export interface ManagerConfig extends RenovateConfig {
+  language: string;
+  manager: string;
+}

@@ -13,7 +13,7 @@
       "@semantic-release/exec",
       {
         "verifyConditionsCmd": "run-s verify",
-        "publishCmd": "run-s \"release -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead}"
+        "publishCmd": "run-s \"release -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}"
       }
     ]
   ],
@@ -83,5 +83,15 @@
       }
     ]
   },
-  "tagFormat": "${version}"
+  "tagFormat": "${version}",
+  "branches": [
+    {
+      "name": "v24",
+      "range": "24.x",
+      "channel": "v24"
+    },
+    {
+      "name": "master"
+    }
+  ]
 }

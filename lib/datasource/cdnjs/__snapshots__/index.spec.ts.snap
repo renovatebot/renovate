@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/cdnjs getReleases filters releases by asset presence 1`] = `
+exports[`datasource/cdnjs/index getReleases filters releases by asset presence 1`] = `
 Object {
   "homepage": "http://bulma.io",
   "registryUrl": "https://api.cdnjs.com/",
@@ -13,12 +13,12 @@ Object {
 }
 `;
 
-exports[`datasource/cdnjs getReleases filters releases by asset presence 2`] = `
+exports[`datasource/cdnjs/index getReleases filters releases by asset presence 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -28,7 +28,7 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases processes real data 1`] = `
+exports[`datasource/cdnjs/index getReleases processes real data 1`] = `
 Object {
   "homepage": "https://d3js.org/d3-force/",
   "registryUrl": "https://api.cdnjs.com/",
@@ -142,12 +142,12 @@ Object {
 }
 `;
 
-exports[`datasource/cdnjs getReleases processes real data 2`] = `
+exports[`datasource/cdnjs/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -157,12 +157,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases returns null for 404 1`] = `
+exports[`datasource/cdnjs/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -172,12 +172,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases returns null for empty 200 OK 1`] = `
+exports[`datasource/cdnjs/index getReleases returns null for empty 200 OK 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -187,12 +187,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases returns null for unknown error 1`] = `
+exports[`datasource/cdnjs/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -202,12 +202,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases throws for 5xx 1`] = `
+exports[`datasource/cdnjs/index getReleases throws for 5xx 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -217,12 +217,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases throws for 401 1`] = `
+exports[`datasource/cdnjs/index getReleases throws for 401 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -232,12 +232,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases throws for 429 1`] = `
+exports[`datasource/cdnjs/index getReleases throws for 429 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -247,12 +247,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases throws for empty result 1`] = `
+exports[`datasource/cdnjs/index getReleases throws for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -262,12 +262,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs getReleases throws for error 1`] = `
+exports[`datasource/cdnjs/index getReleases throws for error 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.cdnjs.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

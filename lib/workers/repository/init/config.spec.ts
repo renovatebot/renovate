@@ -2,10 +2,12 @@ import {
   RenovateConfig,
   fs,
   getConfig,
+  getName,
   git,
   mocked,
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
+import * as _migrate from '../../../config/migration';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
@@ -15,6 +17,7 @@ import {
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 
+const migrate = mocked(_migrate);
 const migrateAndValidate = mocked(_migrateAndValidate);
 
 let config: RenovateConfig;
@@ -25,9 +28,10 @@ beforeEach(() => {
   config.warnings = [];
 });
 
+jest.mock('../../../config/migration');
 jest.mock('../../../config/migrate-validate');
 
-describe('workers/repository/init/config', () => {
+describe(getName(__filename), () => {
   describe('detectRepoFileConfig()', () => {
     it('returns config if not found', () => {
       git.getFileList.mockResolvedValue(['package.json']);
@@ -99,11 +103,17 @@ describe('workers/repository/init/config', () => {
     });
   });
   describe('mergeRenovateConfig()', () => {
+    beforeEach(() => {
+      migrate.migrateConfig.mockReturnValue({
+        isMigrated: false,
+        migratedConfig: {},
+      });
+    });
     it('throws error if misconfigured', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       migrateAndValidate.migrateAndValidate.mockResolvedValueOnce({
-        errors: [{ depName: 'dep', message: 'test error' }],
+        errors: [{ topic: 'dep', message: 'test error' }],
       });
       let e: Error;
       try {
@@ -113,6 +123,20 @@ describe('workers/repository/init/config', () => {
       }
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
+    });
+    it('migrates nested config', async () => {
+      git.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockReturnValueOnce({
+        isMigrated: true,
+        migratedConfig: {},
+      });
+      config.extends = [':automergeDisabled'];
+      expect(await mergeRenovateConfig(config)).not.toBeUndefined();
     });
     it('continues if no errors', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);

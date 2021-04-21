@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import _simpleGit from 'simple-git';
 import { getPkgReleases } from '..';
+import { getName } from '../../../test/util';
 import { id as datasource, getDigest } from '.';
 
 jest.mock('simple-git');
@@ -13,7 +14,7 @@ const lsRemote1 = fs.readFileSync(
   'utf8'
 );
 
-describe('datasource/git-tags', () => {
+describe(getName(__filename), () => {
   describe('getReleases', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({

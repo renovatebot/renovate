@@ -1,4 +1,3 @@
-import { OutgoingHttpHeaders } from 'http';
 import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
@@ -6,6 +5,7 @@ import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
+import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
 
@@ -87,7 +87,8 @@ export function setNpmrc(input?: string): void {
       npmrc[key] = envReplace(npmrc[key]);
       sanitize(key, npmrc[key]);
     }
-  } else {
+  } else if (npmrc) {
+    logger.debug('Resetting npmrc');
     npmrc = null;
     npmrcRaw = null;
   }
@@ -129,9 +130,8 @@ export function resolvePackage(packageName: string): PackageResolution {
       'Using auth (via npmrc) for npm lookup'
     );
   } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
-    logger.trace(
-      { token: maskToken(process.env.NPM_TOKEN), npmName: packageName },
-      'Using auth (via process.env.NPM_TOKEN) for npm lookup'
+    logger.warn(
+      'Support for NPM_TOKEN in env will be dropped in the next major release'
     );
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
   }

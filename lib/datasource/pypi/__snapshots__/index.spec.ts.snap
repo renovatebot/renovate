@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/pypi getReleases fall back from json and process data from simple endpoint 1`] = `
+exports[`datasource/pypi/index getReleases fall back from json and process data from simple endpoint 1`] = `
 Object {
   "registryUrl": "https://custom.pypi.net/foo",
   "releases": Array [
@@ -42,12 +42,12 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases fall back from json and process data from simple endpoint 2`] = `
+exports[`datasource/pypi/index getReleases fall back from json and process data from simple endpoint 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "custom.pypi.net",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -56,7 +56,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "custom.pypi.net",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -66,12 +66,12 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases find url from project_urls 1`] = `
+exports[`datasource/pypi/index getReleases find url from project_urls 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -81,7 +81,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases parses data-requires-python and respects constraints from simple endpoint 1`] = `
+exports[`datasource/pypi/index getReleases parses data-requires-python and respects constraints from simple endpoint 1`] = `
 Object {
   "registryUrl": "https://pypi.org/simple/",
   "releases": Array [
@@ -107,11 +107,11 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases parses data-requires-python and respects constraints from simple endpoint 2`] = `
+exports[`datasource/pypi/index getReleases parses data-requires-python and respects constraints from simple endpoint 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -121,7 +121,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases process data from +simple endpoint 1`] = `
+exports[`datasource/pypi/index getReleases process data from +simple endpoint 1`] = `
 Object {
   "registryUrl": "https://some.registry.org/+simple/",
   "releases": Array [
@@ -163,11 +163,11 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases process data from +simple endpoint 2`] = `
+exports[`datasource/pypi/index getReleases process data from +simple endpoint 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "some.registry.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -177,7 +177,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases process data from simple endpoint 1`] = `
+exports[`datasource/pypi/index getReleases process data from simple endpoint 1`] = `
 Object {
   "registryUrl": "https://pypi.org/simple/",
   "releases": Array [
@@ -219,11 +219,11 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases process data from simple endpoint 2`] = `
+exports[`datasource/pypi/index getReleases process data from simple endpoint 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -233,7 +233,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
+exports[`datasource/pypi/index getReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
 Object {
   "registryUrl": "https://pypi.org/simple/",
   "releases": Array [
@@ -244,11 +244,11 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases process data from simple endpoint with hyphens replaced with underscores 2`] = `
+exports[`datasource/pypi/index getReleases process data from simple endpoint with hyphens replaced with underscores 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -258,7 +258,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases processes real data 1`] = `
+exports[`datasource/pypi/index getReleases processes real data 1`] = `
 Object {
   "registryUrl": "https://pypi.org/pypi/",
   "releases": Array [
@@ -356,12 +356,12 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases processes real data 2`] = `
+exports[`datasource/pypi/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -371,7 +371,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases respects constraints 1`] = `
+exports[`datasource/pypi/index getReleases respects constraints 1`] = `
 Object {
   "registryUrl": "https://pypi.org/pypi/",
   "releases": Array [
@@ -391,12 +391,12 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases respects constraints 2`] = `
+exports[`datasource/pypi/index getReleases respects constraints 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -406,14 +406,14 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases returns non-github home_page 1`] = `"https://microsoft.com"`;
+exports[`datasource/pypi/index getReleases returns non-github home_page 1`] = `"https://microsoft.com"`;
 
-exports[`datasource/pypi getReleases returns non-github home_page 2`] = `
+exports[`datasource/pypi/index getReleases returns non-github home_page 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -423,12 +423,12 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases returns null for 404 1`] = `
+exports[`datasource/pypi/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -437,7 +437,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -447,11 +447,11 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases returns null for 404 response from simple endpoint 1`] = `
+exports[`datasource/pypi/index getReleases returns null for 404 response from simple endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -461,11 +461,11 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases returns null for empty response 1`] = `
+exports[`datasource/pypi/index getReleases returns null for empty response 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -475,12 +475,12 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases returns null for empty result 1`] = `
+exports[`datasource/pypi/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -490,12 +490,12 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases returns null if mismatched name 1`] = `
+exports[`datasource/pypi/index getReleases returns null if mismatched name 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "pypi.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -505,12 +505,12 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases supports custom datasource url 1`] = `
+exports[`datasource/pypi/index getReleases supports custom datasource url 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "custom.pypi.net",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -520,12 +520,12 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases supports multiple custom datasource urls 1`] = `
+exports[`datasource/pypi/index getReleases supports multiple custom datasource urls 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "custom.pypi.net",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -535,7 +535,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "second-index",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -545,7 +545,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "third-index",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

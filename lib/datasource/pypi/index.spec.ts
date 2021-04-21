@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 
@@ -25,7 +26,7 @@ const mixedHyphensResponse = fs.readFileSync(
 
 const baseUrl = 'https://pypi.org/pypi';
 
-describe('datasource/pypi', () => {
+describe(getName(__filename), () => {
   describe('getReleases', () => {
     const OLD_ENV = process.env;
 

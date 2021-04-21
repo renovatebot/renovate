@@ -39,8 +39,10 @@ export function filterVersions(
   }
 
   // Leave only versions greater than current
-  let filteredVersions = releases.filter((v) =>
-    versioning.isGreaterThan(v.version, currentVersion)
+  let filteredVersions = releases.filter(
+    (v) =>
+      versioning.isVersion(v.version) &&
+      versioning.isGreaterThan(v.version, currentVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
@@ -96,7 +98,7 @@ export function filterVersions(
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
-      error.configFile = 'config';
+      error.location = 'config';
       error.validationError = 'Invalid `allowedVersions`';
       error.validationMessage =
         'The following allowedVersions does not parse as a valid version or range: ' +

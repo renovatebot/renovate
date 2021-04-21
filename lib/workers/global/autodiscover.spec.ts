@@ -1,4 +1,5 @@
-import { RenovateConfig } from '../../config';
+import { getName } from '../../../test/util';
+import type { RenovateConfig } from '../../config/types';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import * as platform from '../../platform';
 import * as _ghApi from '../../platform/github';
@@ -12,7 +13,7 @@ jest.unmock('../../platform');
 const hostRules = _hostRules;
 const ghApi: jest.Mocked<typeof _ghApi> = _ghApi as never;
 
-describe('lib/workers/global/autodiscover', () => {
+describe(getName(__filename), () => {
   let config: RenovateConfig;
   beforeEach(async () => {
     jest.resetAllMocks();

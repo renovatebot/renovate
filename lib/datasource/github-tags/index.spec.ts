@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as github from '.';
 
@@ -9,7 +10,7 @@ const hostRules: any = _hostRules;
 const githubApiHost = 'https://api.github.com';
 const githubEnterpriseApiHost = 'https://git.enterprise.com';
 
-describe('datasource/github-tags', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     httpMock.reset();
     httpMock.setup();
