@@ -5,7 +5,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -15,7 +15,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -30,7 +30,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -40,7 +40,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -55,7 +55,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "my-registry",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -83,7 +83,7 @@ exports[`datasource/nuget/index getReleases handles paginated results (v2) 2`] =
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -92,7 +92,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -295,7 +295,7 @@ exports[`datasource/nuget/index getReleases processes real data (v2) 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -501,7 +501,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -511,7 +511,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -521,7 +521,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -530,7 +530,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -735,7 +735,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "myprivatefeed",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -745,7 +745,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -755,7 +755,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "myprivatefeed",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -764,7 +764,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1501,7 +1501,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1511,7 +1511,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1521,7 +1521,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1531,7 +1531,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1541,7 +1541,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1551,7 +1551,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1560,7 +1560,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1574,7 +1574,7 @@ exports[`datasource/nuget/index getReleases processes real data no relase (v2) 1
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1600,7 +1600,7 @@ exports[`datasource/nuget/index getReleases processes real data with no github p
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1751,7 +1751,7 @@ exports[`datasource/nuget/index getReleases processes real data without project 
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2001,7 +2001,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2011,7 +2011,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2021,7 +2021,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2030,7 +2030,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2040,7 +2040,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "myprivatefeed",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2050,7 +2050,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2060,7 +2060,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "myprivatefeed",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2069,7 +2069,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2083,7 +2083,7 @@ exports[`datasource/nuget/index getReleases returns null for empty result (v2) 1
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2098,7 +2098,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2113,7 +2113,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2122,7 +2122,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2136,7 +2136,7 @@ exports[`datasource/nuget/index getReleases returns null for non 200 (v2) 1`] = 
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2151,7 +2151,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2166,7 +2166,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2175,7 +2175,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2189,7 +2189,7 @@ exports[`datasource/nuget/index getReleases returns null for unknown error (v2) 
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2204,7 +2204,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2213,7 +2213,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2228,7 +2228,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2238,7 +2238,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2253,7 +2253,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
