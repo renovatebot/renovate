@@ -1,5 +1,4 @@
 {
-  "branches": ["main"],
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -91,7 +90,7 @@
       "channel": "v24"
     },
     {
-      "name": "master"
+      "name": "main"
     }
   ]
 }
