@@ -37,7 +37,7 @@ function filterUnavailableUsers(
   config: RenovateConfig,
   users: string[]
 ): Promise<string[]> {
-  return config.filterOutUnavailableUsers && platform.filterUnavailableUsers
+  return config.filterUnavailableUsers && platform.filterUnavailableUsers
     ? platform.filterUnavailableUsers(users)
     : Promise.resolve(users);
 }

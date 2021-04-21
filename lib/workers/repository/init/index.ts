@@ -15,9 +15,9 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 }
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
-  if (config.filterOutUnavailableUsers && !platform.filterUnavailableUsers) {
+  if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
     logger.warn(
-      `Configuration option 'filterOutUnavailableUsers' is not supported on the current platform '${config.platform}'.`
+      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${config.platform}'.`
     );
   }
 }

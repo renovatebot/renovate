@@ -33,7 +33,7 @@ describe(getName(__filename), () => {
       apis.initApis.mockResolvedValue({} as never);
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
       config.getRepoConfig.mockResolvedValueOnce({
-        filterOutUnavailableUsers: true,
+        filterUnavailableUsers: true,
       });
       config.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce({} as never);

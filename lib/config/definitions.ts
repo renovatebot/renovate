@@ -1506,7 +1506,7 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'filterOutUnavailableUsers',
+    name: 'filterUnavailableUsers',
     description: 'Filter reviewers and assignees based on their availability.',
     type: 'boolean',
     default: false,
