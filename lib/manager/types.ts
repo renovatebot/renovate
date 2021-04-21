@@ -25,7 +25,6 @@ export interface ExtractConfig extends ManagerConfig {
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
   yarnrc?: string;
-  skipInstalls?: boolean;
   versioning?: string;
   updateInternalDeps?: boolean;
 }
@@ -100,7 +99,6 @@ export interface PackageFile<T = Record<string, any>>
   packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
   parent?: string;
-  skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
@@ -277,8 +275,7 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   cacheDir?: string;
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
-  skipInstalls?: boolean;
-
+  artifactUpdateApproach?: 'auto' | 'deep' | 'shallow';
   platform?: string;
   upgrades?: Upgrade[];
   npmLock?: string;

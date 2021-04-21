@@ -18,6 +18,7 @@ Array [
     "lernaClient": undefined,
     "lernaPackages": undefined,
     "managerData": Object {
+      "hasFileRefs": false,
       "lernaJsonFile": undefined,
     },
     "npmLock": undefined,
@@ -27,7 +28,6 @@ Array [
     "packageJsonName": undefined,
     "packageJsonType": "app",
     "pnpmShrinkwrap": undefined,
-    "skipInstalls": undefined,
     "yarnLock": undefined,
     "yarnWorkspacesPackages": undefined,
     "yarnrc": undefined,

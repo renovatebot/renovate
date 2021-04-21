@@ -82,7 +82,7 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    if (isYarn1 && config.skipInstalls !== false) {
+    if (isYarn1 && config.artifactUpdateApproach !== 'deep') {
       const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
       if (!offlineMirror) {
         logger.debug('Updating yarn.lock only - skipping node_modules');

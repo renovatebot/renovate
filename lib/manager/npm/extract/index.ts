@@ -126,7 +126,7 @@ export async function extractPackageFile(
   let lernaJsonFile: string;
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
-  let hasFancyRefs = false;
+  let hasFileRefs = false;
   let lernaJson: {
     packages: string[];
     npmClient: string;
@@ -224,7 +224,6 @@ export async function extractPackageFile(
 
     if (dep.currentValue.startsWith('npm:')) {
       dep.npmPackageAlias = true;
-      hasFancyRefs = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
         dep.lookupName = valSplit[0];
@@ -238,7 +237,11 @@ export async function extractPackageFile(
     }
     if (dep.currentValue.startsWith('file:')) {
       dep.skipReason = SkipReason.File;
-      hasFancyRefs = true;
+      // https://github.com/npm/cli/issues/1432
+      // Explanation:
+      //  - npm install --package-lock-only is buggy for transitive deps in file: references
+      //  - So we set artifactUpdateApproach to false if file: refs are found *and* the user hasn't explicitly set the value already
+      hasFileRefs = true;
       return dep;
     }
     if (isValid(dep.currentValue)) {
@@ -344,19 +347,6 @@ export async function extractPackageFile(
       return null;
     }
   }
-  let skipInstalls = config.skipInstalls;
-  if (skipInstalls === null) {
-    if (hasFancyRefs) {
-      // https://github.com/npm/cli/issues/1432
-      // Explanation:
-      //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
-      //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
-      logger.debug('Automatically setting skipInstalls to false');
-      skipInstalls = false;
-    } else {
-      skipInstalls = true;
-    }
-  }
 
   return {
     deps,
@@ -368,11 +358,11 @@ export async function extractPackageFile(
     yarnrc,
     ...lockFiles,
     managerData: {
+      hasFileRefs,
       lernaJsonFile,
     },
     lernaClient,
     lernaPackages,
-    skipInstalls,
     yarnWorkspacesPackages,
     constraints,
   };

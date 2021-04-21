@@ -80,6 +80,7 @@ Object {
   "additionalBranchPrefix": "{{parentDir}}-",
   "allowCustomCrateRegistries": true,
   "allowScripts": true,
+  "artifactUpdateApproach": "shallow",
   "autodiscover": true,
   "automerge": false,
   "automergeType": "branch",
@@ -173,6 +174,7 @@ Object {
       "versioning": "maven",
     },
     Object {
+      "artifactUpdateApproach": "deep",
       "matchDepTypes": Array [
         "peerDependencies",
       ],
