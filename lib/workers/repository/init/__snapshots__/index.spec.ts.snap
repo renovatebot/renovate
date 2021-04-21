@@ -1,3 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/init/index initRepo runs 1`] = `Object {}`;
+
+exports[`workers/repository/init/index initRepo warns on unsupported options 1`] = `
+Array [
+  Array [
+    "Configuration option 'filterUnavailableUsers' is not supported on the current platform 'undefined'.",
+  ],
+]
+`;
