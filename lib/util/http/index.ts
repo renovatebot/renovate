@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import merge from 'deepmerge';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -9,16 +10,10 @@ import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import { GotOptions, RequestStats } from './types';
+import type { GotOptions, OutgoingHttpHeaders, RequestStats } from './types';
 
 // TODO: refactor code to remove this
 import './legacy';
-
-export * from './types';
-
-interface OutgoingHttpHeaders {
-  [header: string]: number | string | string[] | undefined;
-}
 
 export interface HttpOptions {
   body?: any;
@@ -60,8 +55,6 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
 function applyDefaultHeaders(options: Options): void {
   // eslint-disable-next-line no-param-reassign
   options.headers = {
-    // TODO: remove. Will be "gzip, deflate, br" by new got default
-    'accept-encoding': 'gzip, deflate',
     ...options.headers,
     'user-agent':
       process.env.RENOVATE_USER_AGENT ||
@@ -97,13 +90,16 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
-    // TODO: deep merge in order to merge headers
-    let options: GotOptions = {
-      method: 'get',
-      ...this.options,
-      hostType: this.hostType,
-      ...httpOptions,
-    } as unknown; // TODO: fixme
+
+    let options: GotOptions = merge<GotOptions>(
+      {
+        method: 'get',
+        ...this.options,
+        hostType: this.hostType,
+      },
+      httpOptions
+    );
+
     if (process.env.NODE_ENV === 'test') {
       options.retry = 0;
     }
