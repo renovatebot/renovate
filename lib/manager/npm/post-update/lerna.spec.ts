@@ -47,26 +47,26 @@ describe(getName(__filename), () => {
     });
     it('generates package-lock.json files', async () => {
       const execSnapshots = mockExecAll(exec);
-      const artifactUpdateApproach = 'shallow';
+      const skipInstalls = true;
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
         {},
         {},
-        artifactUpdateApproach
+        skipInstalls
       );
       expect(res.error).toBe(false);
       expect(execSnapshots).toMatchSnapshot();
     });
     it('performs full npm install', async () => {
       const execSnapshots = mockExecAll(exec);
-      const artifactUpdateApproach = 'deep';
+      const skipInstalls = false;
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
         {},
         {},
-        artifactUpdateApproach
+        skipInstalls
       );
       expect(res.error).toBe(false);
       expect(execSnapshots).toMatchSnapshot();

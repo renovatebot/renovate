@@ -556,12 +556,11 @@ const options: RenovateOptions[] = [
     type: 'boolean',
   },
   {
-    name: 'artifactUpdateApproach',
+    name: 'skipInstalls',
     description:
-      'Whether to employ a deep or shallow approach to artifact updating.',
-    type: 'string',
-    allowedValues: ['auto', 'deep', 'shallow'],
-    default: 'auto',
+      'Skip installing modules/dependencies if lock file updating is possible alone.',
+    type: 'boolean',
+    default: null,
     admin: true,
   },
   {

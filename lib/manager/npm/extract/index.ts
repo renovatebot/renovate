@@ -237,10 +237,6 @@ export async function extractPackageFile(
     }
     if (dep.currentValue.startsWith('file:')) {
       dep.skipReason = SkipReason.File;
-      // https://github.com/npm/cli/issues/1432
-      // Explanation:
-      //  - npm install --package-lock-only is buggy for transitive deps in file: references
-      //  - So we set artifactUpdateApproach to false if file: refs are found *and* the user hasn't explicitly set the value already
       hasFileRefs = true;
       return dep;
     }
@@ -347,6 +343,19 @@ export async function extractPackageFile(
       return null;
     }
   }
+  let skipInstalls = config.skipInstalls;
+  if (skipInstalls === null) {
+    if (hasFileRefs) {
+      // https://github.com/npm/cli/issues/1432
+      // Explanation:
+      //  - npm install --package-lock-only is buggy for transitive deps in file: references
+      //  - So we set skipInstalls to false if file: refs are found *and* the user hasn't explicitly set the value already
+      logger.debug('Automatically setting skipInstalls to false');
+      skipInstalls = false;
+    } else {
+      skipInstalls = true;
+    }
+  }
 
   return {
     deps,
@@ -357,11 +366,11 @@ export async function extractPackageFile(
     yarnrc,
     ...lockFiles,
     managerData: {
-      hasFileRefs,
       lernaJsonFile,
     },
     lernaClient,
     lernaPackages,
+    skipInstalls,
     yarnWorkspacesPackages,
     constraints,
   };
