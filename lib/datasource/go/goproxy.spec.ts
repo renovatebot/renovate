@@ -3,9 +3,9 @@ import { getName } from '../../../test/util';
 import * as memCache from '../../util/cache/memory';
 import {
   encodeCase,
-  getProxyList,
   listVersions,
   parseGoproxy,
+  parseGoproxyEnv,
   parseNoproxy,
   versionInfo,
 } from './goproxy';
@@ -106,22 +106,22 @@ describe(getName(__filename), () => {
   });
 
   it('getProxyList', () => {
-    expect(getProxyList('')).toEqual([]);
-    expect(getProxyList('foo')).toEqual([{ fallback: '|', url: 'foo' }]);
-    expect(getProxyList('foo,bar')).toEqual([
+    expect(parseGoproxyEnv('')).toEqual([]);
+    expect(parseGoproxyEnv('foo')).toEqual([{ fallback: '|', url: 'foo' }]);
+    expect(parseGoproxyEnv('foo,bar')).toEqual([
       { fallback: ',', url: 'foo' },
       { fallback: '|', url: 'bar' },
     ]);
-    expect(getProxyList('foo|bar')).toEqual([
+    expect(parseGoproxyEnv('foo|bar')).toEqual([
       { fallback: '|', url: 'foo' },
       { fallback: '|', url: 'bar' },
     ]);
 
-    expect(getProxyList('foo,bar', 'bar')).toEqual([
+    expect(parseGoproxyEnv('foo,bar', 'bar')).toEqual([
       { fallback: ',', url: 'foo' },
       { fallback: '|', url: 'bar', disabled: true },
     ]);
 
-    expect(getProxyList('foo|bar|baz')).toBe(getProxyList('foo|bar|baz'));
+    expect(parseGoproxyEnv('foo|bar|baz')).toBe(parseGoproxyEnv('foo|bar|baz'));
   });
 });

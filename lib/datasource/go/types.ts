@@ -8,7 +8,7 @@ export enum GoproxyFallback {
   Always = '|',
 }
 
-export interface GoproxyHost {
+export interface GoproxyItem {
   url: string;
   fallback: GoproxyFallback;
   disabled?: true;

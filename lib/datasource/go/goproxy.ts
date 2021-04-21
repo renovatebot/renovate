@@ -6,58 +6,27 @@ import * as memCache from '../../util/cache/memory';
 import { regEx } from '../../util/regex';
 import { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { http } from './common';
-import { GoproxyFallback, GoproxyHost, VersionInfo } from './types';
-
-export function encodeCase(input: string): string {
-  return input.replace(/([A-Z])/g, (x) => `!${x.toLowerCase()}`);
-}
-
-export async function listVersions(
-  baseUrl: string,
-  lookupName: string
-): Promise<string[]> {
-  const url = `${baseUrl}/${encodeCase(lookupName)}/@v/list`;
-  const { body } = await http.get(url);
-  return body
-    .split(/\s+/)
-    .filter(Boolean)
-    .filter((x) => x.indexOf('+') === -1);
-}
-
-export async function versionInfo(
-  baseUrl: string,
-  lookupName: string,
-  version: string
-): Promise<Release> {
-  const url = `${baseUrl}/${encodeCase(lookupName)}/@v/${version}.info`;
-  const res = await http.getJson<VersionInfo>(url);
-
-  const result: Release = {
-    version: res.body.Version,
-  };
-
-  if (res.body.Time) {
-    result.releaseTimestamp = res.body.Time;
-  }
-
-  return result;
-}
+import { GoproxyFallback, GoproxyItem, VersionInfo } from './types';
 
 /**
+ * Parse `GOPROXY` to the sequence of url + fallback strategy tags.
+ *
  * @example
+ * parseGoproxy('foo.example.com|bar.example.com,baz.example.com')
  * // [
- * //   { url: 'foo', fallback: '|' },
- * //   { url: 'bar', fallback: ',' },
- * //   { url: 'baz', fallback: '|' },
+ * //   { url: 'foo.example.com', fallback: '|' },
+ * //   { url: 'bar.example.com', fallback: ',' },
+ * //   { url: 'baz.example.com', fallback: '|' },
  * // ]
- * parseGoproxy('foo|bar,baz')
+ *
+ * @see https://golang.org/ref/mod#goproxy-protocol
  */
-export function parseGoproxy(input: unknown): GoproxyHost[] | null {
+export function parseGoproxy(input: unknown): GoproxyItem[] | null {
   if (!input || !is.string(input)) {
     return null;
   }
 
-  const result: GoproxyHost[] = input
+  const result: GoproxyItem[] = input
     .split(/([^,|]*(?:,|\|))/)
     .filter(Boolean)
     .map((s) => s.split(/(?=,|\|)/))
@@ -121,17 +90,20 @@ export function parseNoproxy(input: unknown): RegExp | null {
   return noproxyPattern ? regEx(noproxyPattern) : null;
 }
 
-export function getProxyList(
+/**
+ * Parse `GOPROXY` and disable elements that match `GONOPROXY` pattern.
+ */
+export function parseGoproxyEnv(
   proxy: string = process.env.GOPROXY,
   noproxy: string = process.env.GONOPROXY || process.env.GOPRIVATE
-): GoproxyHost[] {
+): GoproxyItem[] {
   const cacheKey = `${proxy}::${noproxy}`;
-  const cachedResult = memCache.get<GoproxyHost[]>(cacheKey);
+  const cachedResult = memCache.get<GoproxyItem[]>(cacheKey);
   if (cachedResult) {
     return cachedResult;
   }
 
-  let result: GoproxyHost[] = [];
+  let result: GoproxyItem[] = [];
 
   const proxyList = parseGoproxy(proxy);
   if (proxyList) {
@@ -148,12 +120,52 @@ export function getProxyList(
   return result;
 }
 
+/**
+ * Avoid ambiguity when serving from case-insensitive file systems.
+ *
+ * @see https://golang.org/ref/mod#goproxy-protocol
+ */
+export function encodeCase(input: string): string {
+  return input.replace(/([A-Z])/g, (x) => `!${x.toLowerCase()}`);
+}
+
+export async function listVersions(
+  baseUrl: string,
+  lookupName: string
+): Promise<string[]> {
+  const url = `${baseUrl}/${encodeCase(lookupName)}/@v/list`;
+  const { body } = await http.get(url);
+  return body
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((x) => x.indexOf('+') === -1);
+}
+
+export async function versionInfo(
+  baseUrl: string,
+  lookupName: string,
+  version: string
+): Promise<Release> {
+  const url = `${baseUrl}/${encodeCase(lookupName)}/@v/${version}.info`;
+  const res = await http.getJson<VersionInfo>(url);
+
+  const result: Release = {
+    version: res.body.Version,
+  };
+
+  if (res.body.Time) {
+    result.releaseTimestamp = res.body.Time;
+  }
+
+  return result;
+}
+
 export async function getReleases(
   config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
   const { lookupName } = config;
 
-  const proxyList = getProxyList();
+  const proxyList = parseGoproxyEnv();
 
   for (const { url, fallback, disabled } of proxyList) {
     if (!disabled) {
