@@ -51,6 +51,6 @@ jobs:
       - name: Publish ${{ github.event.client_payload.version }}
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-          npm publish
+          npm publish --tag ${{ github.event.client_payload.tag }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
