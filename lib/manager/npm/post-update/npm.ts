@@ -26,7 +26,7 @@ export async function generateLockFile(
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
-  const { skipInstalls, postUpdateOptions } = config;
+  const { artifactUpdateApproach } = config;
 
   let lockFile = null;
   try {
@@ -49,7 +49,7 @@ export async function generateLockFile(
     const preCommands = [installNpm, 'hash -d npm'];
     const commands = [];
     let cmdOptions = '';
-    if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
+    if (artifactUpdateApproach === 'deep') {
       logger.debug('Performing node_modules install');
       cmdOptions += '--ignore-scripts --no-audit';
     } else {

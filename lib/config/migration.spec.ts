@@ -52,6 +52,7 @@ describe(getName(__filename), () => {
         binarySource: 'auto',
         automergeMinor: true,
         automergePatch: true,
+        skipInstalls: true,
         masterIssue: 'true',
         masterIssueTitle: 'foo',
         gomodTidy: true,
@@ -95,6 +96,7 @@ describe(getName(__filename), () => {
         ],
         peerDependencies: {
           versionStrategy: 'widen',
+          skipInstalls: false,
         },
         packageRules: [
           {
