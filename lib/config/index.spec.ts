@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { getName } from '../../test/util';
 import { readFile } from '../util/fs';
 import getArgv from './config/__fixtures__/argv';
 import { getConfig } from './defaults';
@@ -12,7 +13,7 @@ try {
 
 const defaultConfig = getConfig();
 
-describe('config/index', () => {
+describe(getName(__filename), () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];
@@ -44,7 +45,6 @@ describe('config/index', () => {
         ['token', 'abc'],
         ['prFooter', 'custom'],
         ['logContext', 'abc123'],
-        ['customPrFooter', true],
       ]);
     });
 

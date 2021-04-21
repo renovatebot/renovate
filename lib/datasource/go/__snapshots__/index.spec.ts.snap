@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/go getDigest gitlab digest is not supported at the moment 1`] = `
+exports[`datasource/go/index getDigest gitlab digest is not supported at the moment 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -14,11 +14,11 @@ Array [
 ]
 `;
 
-exports[`datasource/go getDigest returns digest 1`] = `
+exports[`datasource/go/index getDigest returns digest 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -28,7 +28,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -38,11 +38,11 @@ Array [
 ]
 `;
 
-exports[`datasource/go getDigest returns null for no go-source tag 1`] = `
+exports[`datasource/go/index getDigest returns null for no go-source tag 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -52,11 +52,11 @@ Array [
 ]
 `;
 
-exports[`datasource/go getDigest returns null for wrong name 1`] = `
+exports[`datasource/go/index getDigest returns null for wrong name 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -66,14 +66,14 @@ Array [
 ]
 `;
 
-exports[`datasource/go getDigest support bitbucket digest 1`] = `"123"`;
+exports[`datasource/go/index getDigest support bitbucket digest 1`] = `"123"`;
 
-exports[`datasource/go getDigest support bitbucket digest 2`] = `
+exports[`datasource/go/index getDigest support bitbucket digest 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -83,7 +83,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -93,57 +93,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases falls back to old behaviour 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/x/text/tags?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/x/text/releases?per_page=100",
-  },
-]
-`;
-
-exports[`datasource/go getReleases falls back to old behaviour 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/x/text/tags?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/x/text/releases?per_page=100",
-  },
-]
-`;
-
-exports[`datasource/go getReleases handles fyne.io 1`] = `
+exports[`datasource/go/index getReleases handles fyne.io 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -159,11 +109,11 @@ Object {
 }
 `;
 
-exports[`datasource/go getReleases handles fyne.io 2`] = `
+exports[`datasource/go/index getReleases handles fyne.io 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "fyne.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -173,7 +123,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -183,7 +133,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -193,7 +143,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases processes real data 1`] = `
+exports[`datasource/go/index getReleases processes real data 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -209,11 +159,11 @@ Object {
 }
 `;
 
-exports[`datasource/go getReleases processes real data 2`] = `
+exports[`datasource/go/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -223,7 +173,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -233,7 +183,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -243,11 +193,61 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases returns null for 404 1`] = `
+exports[`datasource/go/index getReleases returns none if no tags match submodules 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/x/text/tags?per_page=100",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/x/text/releases?per_page=100",
+  },
+]
+`;
+
+exports[`datasource/go/index getReleases returns none if no tags match submodules 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/x/text/tags?per_page=100",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/x/text/releases?per_page=100",
+  },
+]
+`;
+
+exports[`datasource/go/index getReleases returns null for 404 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -257,11 +257,11 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases returns null for empty result 1`] = `
+exports[`datasource/go/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -271,11 +271,11 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases returns null for go-import prefix mismatch 1`] = `
+exports[`datasource/go/index getReleases returns null for go-import prefix mismatch 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "git.enterprise.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -285,11 +285,11 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases returns null for unknown error 1`] = `
+exports[`datasource/go/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -299,11 +299,11 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases skips unsupported platform 1`] = `
+exports[`datasource/go/index getReleases skips unsupported platform 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -313,11 +313,11 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases skips wrong package 1`] = `
+exports[`datasource/go/index getReleases skips wrong package 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -327,7 +327,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases support bitbucket tags 1`] = `
+exports[`datasource/go/index getReleases support bitbucket tags 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -343,12 +343,12 @@ Object {
 }
 `;
 
-exports[`datasource/go getReleases support bitbucket tags 2`] = `
+exports[`datasource/go/index getReleases support bitbucket tags 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -358,7 +358,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases support ghe 1`] = `
+exports[`datasource/go/index getReleases support ghe 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -374,11 +374,11 @@ Object {
 }
 `;
 
-exports[`datasource/go getReleases support ghe 2`] = `
+exports[`datasource/go/index getReleases support ghe 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "git.enterprise.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -388,7 +388,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "git.enterprise.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -398,7 +398,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "git.enterprise.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -408,7 +408,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases support gitlab 1`] = `
+exports[`datasource/go/index getReleases support gitlab 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -424,11 +424,11 @@ Object {
 }
 `;
 
-exports[`datasource/go getReleases support gitlab 2`] = `
+exports[`datasource/go/index getReleases support gitlab 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "golang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -438,7 +438,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -448,7 +448,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases support self hosted gitlab private repositories 1`] = `
+exports[`datasource/go/index getReleases support self hosted gitlab private repositories 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -464,11 +464,11 @@ Object {
 }
 `;
 
-exports[`datasource/go getReleases support self hosted gitlab private repositories 2`] = `
+exports[`datasource/go/index getReleases support self hosted gitlab private repositories 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer some-token",
       "host": "my.custom.domain",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -479,7 +479,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer some-token",
       "host": "my.custom.domain",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -490,13 +490,13 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases unknown datasource returns null 1`] = `null`;
+exports[`datasource/go/index getReleases unknown datasource returns null 1`] = `null`;
 
-exports[`datasource/go getReleases unknown datasource returns null 2`] = `
+exports[`datasource/go/index getReleases unknown datasource returns null 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "some.unknown.website",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -506,12 +506,12 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases works for known servers 1`] = `
+exports[`datasource/go/index getReleases works for known servers 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -521,7 +521,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -531,7 +531,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -541,7 +541,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -551,7 +551,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -561,7 +561,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -571,12 +571,12 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases works for nested modules on github 1`] = `
+exports[`datasource/go/index getReleases works for nested modules on github 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -586,7 +586,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -596,12 +596,12 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases works for nested modules on github 2`] = `
+exports[`datasource/go/index getReleases works for nested modules on github 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -611,7 +611,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -621,12 +621,12 @@ Array [
 ]
 `;
 
-exports[`datasource/go getReleases works for nested modules on github v2+ major upgrades 1`] = `
+exports[`datasource/go/index getReleases works for nested modules on github v2+ major upgrades 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -636,7 +636,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

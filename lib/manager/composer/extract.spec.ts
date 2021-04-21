@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { fs } from '../../../test/util';
+import { fs, getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -29,7 +29,7 @@ const requirements5Lock = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/composer/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     let packageFile;
     beforeEach(() => {

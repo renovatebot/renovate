@@ -122,31 +122,24 @@ export async function getRawFile(
   fileName: string,
   repo: string = config.repository
 ): Promise<string | null> {
-  try {
-    const [project, slug] = repo.split('/');
-    const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
-    const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
-    const { isLastPage, lines, size } = res.body;
-    if (isLastPage) {
-      return lines.map(({ text }) => text).join('');
-    }
-    logger.warn({ size }, `The file is too big`);
-  } catch (err) {
-    // no-op
+  const [project, slug] = repo.split('/');
+  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
+  const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
+  const { isLastPage, lines, size } = res.body;
+  if (isLastPage) {
+    return lines.map(({ text }) => text).join('');
   }
-  return null;
+  const msg = `The file is too big (${size}B)`;
+  logger.warn({ size }, msg);
+  throw new Error(msg);
 }
 
 export async function getJsonFile(
   fileName: string,
   repo: string = config.repository
 ): Promise<any | null> {
-  try {
-    const raw = await getRawFile(fileName, repo);
-    return raw && JSON.parse(raw);
-  } catch (err) {
-    return null;
-  }
+  const raw = await getRawFile(fileName, repo);
+  return JSON.parse(raw);
 }
 
 // Initialize BitBucket Server by getting base branch

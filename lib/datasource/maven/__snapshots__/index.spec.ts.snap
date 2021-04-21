@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/maven getReleases should return all versions from a custom repository 1`] = `
+exports[`datasource/maven/index getReleases should return all versions from a custom repository 1`] = `
 Object {
   "display": "mysql:mysql-connector-java",
   "group": "mysql",
@@ -34,7 +34,7 @@ Object {
 }
 `;
 
-exports[`datasource/maven getReleases should return all versions of a specific library if a repository fails 1`] = `
+exports[`datasource/maven/index getReleases should return all versions of a specific library if a repository fails 1`] = `
 Array [
   Object {
     "releaseTimestamp": "2020-01-01T00:00:00.650Z",
@@ -59,7 +59,7 @@ Array [
 ]
 `;
 
-exports[`datasource/maven getReleases should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository 1`] = `
+exports[`datasource/maven/index getReleases should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository 1`] = `
 Object {
   "display": "mysql:mysql-connector-java",
   "group": "mysql",
@@ -90,7 +90,7 @@ Object {
 }
 `;
 
-exports[`datasource/maven getReleases should return all versions of a specific library if a repository fails because invalid protocol 1`] = `
+exports[`datasource/maven/index getReleases should return all versions of a specific library if a repository fails because invalid protocol 1`] = `
 Array [
   Object {
     "releaseTimestamp": "2020-01-01T00:00:00.650Z",
@@ -115,7 +115,7 @@ Array [
 ]
 `;
 
-exports[`datasource/maven getReleases should return versions in all repositories for a specific library 1`] = `
+exports[`datasource/maven/index getReleases should return versions in all repositories for a specific library 1`] = `
 Object {
   "display": "mysql:mysql-connector-java",
   "group": "mysql",
@@ -159,7 +159,7 @@ Object {
 }
 `;
 
-exports[`datasource/maven getReleases should simply return all versions of a specific library 1`] = `
+exports[`datasource/maven/index getReleases should simply return all versions of a specific library 1`] = `
 Array [
   Object {
     "version": "1.1",

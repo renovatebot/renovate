@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/cake/index extracts 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.1.1",
+      "datasource": "nuget",
+      "depName": "Foo.Foo",
+    },
+    Object {
+      "currentValue": "2.2.2",
+      "datasource": "nuget",
+      "depName": "Bar.Bar",
+      "registryUrls": Array [
+        "https://example.com",
+      ],
+    },
+    Object {
+      "currentValue": "3.3.3",
+      "datasource": "nuget",
+      "depName": "Baz.Baz",
+      "skipReason": "unsupported-url",
+    },
+  ],
+}
+`;

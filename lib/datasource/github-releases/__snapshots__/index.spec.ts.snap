@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/github-releases getReleases returns releases 1`] = `
+exports[`datasource/github-releases/index getReleases returns releases 1`] = `
 Object {
   "registryUrl": "https://github.com",
   "releases": Array [
@@ -27,12 +27,12 @@ Object {
 }
 `;
 
-exports[`datasource/github-releases getReleases returns releases 2`] = `
+exports[`datasource/github-releases/index getReleases returns releases 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token some-token",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -43,7 +43,7 @@ Array [
 ]
 `;
 
-exports[`datasource/github-releases getReleases supports ghe 1`] = `
+exports[`datasource/github-releases/index getReleases supports ghe 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -81,12 +81,12 @@ Object {
 }
 `;
 
-exports[`datasource/github-releases getReleases supports ghe 2`] = `
+exports[`datasource/github-releases/index getReleases supports ghe 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token some-token",
       "host": "git.enterprise.com",
       "user-agent": "https://github.com/renovatebot/renovate",

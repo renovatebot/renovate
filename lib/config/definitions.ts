@@ -32,6 +32,7 @@ const options: RenovateOptions[] = [
     default: {
       commands: [],
       fileFilters: [],
+      executionMode: 'update',
     },
   },
   {
@@ -52,6 +53,16 @@ const options: RenovateOptions[] = [
     subType: 'string',
     parent: 'postUpgradeTasks',
     default: [],
+    cli: false,
+  },
+  {
+    name: 'executionMode',
+    description:
+      'Controls whether the post upgrade tasks runs for every update or once per upgrade branch',
+    type: 'string',
+    parent: 'postUpgradeTasks',
+    allowedValues: ['update', 'branch'],
+    default: 'update',
     cli: false,
   },
   {
@@ -250,6 +261,14 @@ const options: RenovateOptions[] = [
     admin: true,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'dockerChildPrefix',
+    description:
+      'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
+    type: 'string',
+    admin: true,
+    default: 'renovate_',
   },
   {
     name: 'dockerImagePrefix',
@@ -1063,7 +1082,6 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      recreateClosed: true,
       rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
@@ -1086,6 +1104,19 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
       commitMessageTopic: '{{{depName}}} commit hash',
+    },
+    cli: false,
+    mergeable: true,
+  },
+  {
+    name: 'rollback',
+    description: 'Configuration to apply when rolling back a version.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      branchTopic: '{{{depNameSanitized}}}-rollback',
+      commitMessageAction: 'Roll back',
+      semanticCommitType: 'fix',
     },
     cli: false,
     mergeable: true,

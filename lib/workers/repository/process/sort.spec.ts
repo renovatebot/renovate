@@ -1,7 +1,8 @@
-import { UpdateType } from '../../../config';
+import { getName } from '../../../../test/util';
+import type { UpdateType } from '../../../config/types';
 import { sortBranches } from './sort';
 
-describe('workers/repository/process/sort', () => {
+describe(getName(__filename), () => {
   describe('sortBranches()', () => {
     it('sorts based on updateType and prTitle', () => {
       const branches = [

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines from yaml configuration file 1`] = `
+exports[`manager/github-actions/extract extractPackageFile() extracts multiple action tag lines from yaml configuration file 1`] = `
 Array [
   Object {
     "commitMessageTopic": "{{{depName}}} action",
@@ -33,7 +33,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
+exports[`manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
 Array [
   Object {
     "commitMessageTopic": "{{{depName}}} action",

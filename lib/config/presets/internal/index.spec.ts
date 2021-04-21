@@ -1,4 +1,4 @@
-import { mocked } from '../../../../test/util';
+import { getName, mocked } from '../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { massageConfig } from '../../massage';
 import { validateConfig } from '../../validation';
@@ -14,7 +14,7 @@ npm.getPreset = jest.fn((_) => null);
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 
-describe('config/presets/internal', () => {
+describe(getName(__filename), () => {
   it('fails for undefined internal preset', async () => {
     const preset = 'foo:bar';
     const presetConfig = { extends: [preset] };

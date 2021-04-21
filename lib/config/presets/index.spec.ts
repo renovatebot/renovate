@@ -1,8 +1,13 @@
-import { RenovateConfig } from '..';
-import { mocked } from '../../../test/util';
+import { getName, mocked } from '../../../test/util';
+import type { RenovateConfig } from '../types';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
 import * as _local from './local';
 import * as _npm from './npm';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_NOT_FOUND,
+  PRESET_RENOVATE_CONFIG_NOT_FOUND,
+} from './util';
 import * as presets from '.';
 
 jest.mock('./npm');
@@ -19,21 +24,21 @@ npm.getPreset = jest.fn(({ packageName, presetName }) => {
     ][presetName];
   }
   if (packageName === 'renovate-config-notfound') {
-    throw new Error('dep not found');
+    throw new Error(PRESET_DEP_NOT_FOUND);
   }
   if (packageName === 'renovate-config-noconfig') {
-    throw new Error('preset renovate-config not found');
+    throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);
   }
   if (packageName === 'renovate-config-throw') {
     throw new Error('whoops');
   }
   if (packageName === 'renovate-config-wrongpreset') {
-    throw new Error('preset not found');
+    throw new Error(PRESET_NOT_FOUND);
   }
   return null;
 });
 
-describe('config/presets', () => {
+describe(getName(__filename), () => {
   describe('resolvePreset', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -387,6 +392,14 @@ describe('config/presets', () => {
     });
   });
   describe('getPreset', () => {
+    it('handles removed presets with a migration', async () => {
+      const res = await presets.getPreset(':masterIssue', {});
+      expect(res).toMatchSnapshot();
+    });
+    it('handles removed presets with no migration', async () => {
+      const res = await presets.getPreset('helpers:oddIsUnstable', {});
+      expect(res).toEqual({});
+    });
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();

@@ -99,6 +99,7 @@ export async function generateLockFile(
       cmdOptions +=
         '--ignore-engines --ignore-platform --network-timeout 100000';
     } else {
+      extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
     }
     if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {

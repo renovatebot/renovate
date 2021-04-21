@@ -1,5 +1,5 @@
-import { defaultConfig, git, mocked } from '../../../../test/util';
-import { RenovateConfig } from '../../../config';
+import { defaultConfig, getName, git, mocked } from '../../../../test/util';
+import type { RenovateConfig } from '../../../config/types';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
 
@@ -8,7 +8,7 @@ jest.mock('../../../util/git');
 
 const managerFiles = mocked(_managerFiles);
 
-describe('workers/repository/extract/index', () => {
+describe(getName(__filename), () => {
   describe('extractAllDependencies()', () => {
     let config: RenovateConfig;
     const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];

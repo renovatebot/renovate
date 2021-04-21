@@ -1,6 +1,7 @@
+import { getName } from '../../../test/util';
 import { api as hexScheme } from '.';
 
-describe('lib/versioning/hex', () => {
+describe(getName(__filename), () => {
   describe('hexScheme.matches()', () => {
     it('handles tilde greater than', () => {
       expect(hexScheme.matches('4.2.0', '~> 4.0')).toBe(true);
@@ -197,7 +198,7 @@ describe('lib/versioning/hex', () => {
         currentVersion: '1.2.3',
         newVersion: '2.0.7',
       })
-    ).toEqual('>= 1.0.0 or <= 2.0.7');
+    ).toEqual('>= 1.0.0 or <= 2.0.0');
     expect(
       hexScheme.getNewValue({
         currentValue: '>= 1.0.0 or <= 2.0.0',
@@ -214,5 +215,15 @@ describe('lib/versioning/hex', () => {
         newVersion: '2.0.7',
       })
     ).toEqual('== 2.0.7');
+  });
+  it('handles short range replace', () => {
+    expect(
+      hexScheme.getNewValue({
+        currentValue: '~> 0.4',
+        rangeStrategy: 'replace',
+        currentVersion: '0.4.2',
+        newVersion: '0.6.0',
+      })
+    ).toEqual('~> 0.6');
   });
 });
