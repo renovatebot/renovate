@@ -91,6 +91,13 @@ describe(getName(__filename), () => {
         { url: 'qux' },
       ]);
     });
+    it('ignores everything starting from "direct" and "off" keywords', () => {
+      expect(parseGoproxy('off')).toBeNull();
+      expect(parseGoproxy('direct')).toBeNull();
+      expect(parseGoproxy('foo,off|direct,qux')).toMatchObject([
+        { url: 'foo', fallback: ',' },
+      ]);
+    });
   });
 
   it('parseNoproxy', () => {

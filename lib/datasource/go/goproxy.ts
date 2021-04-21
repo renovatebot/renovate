@@ -26,7 +26,7 @@ export function parseGoproxy(input: unknown): GoproxyItem[] | null {
     return null;
   }
 
-  const result: GoproxyItem[] = input
+  let result: GoproxyItem[] = input
     .split(/([^,|]*(?:,|\|))/)
     .filter(Boolean)
     .map((s) => s.split(/(?=,|\|)/))
@@ -37,6 +37,15 @@ export function parseGoproxy(input: unknown): GoproxyItem[] | null {
           ? GoproxyFallback.WhenNotFoundOrGone
           : GoproxyFallback.Always,
     }));
+
+  // Ignore hosts after any keyword
+  for (let idx = 0; idx < result.length; idx += 1) {
+    const { url } = result[idx];
+    if (['off', 'direct'].includes(url)) {
+      result = result.slice(0, idx);
+      break;
+    }
+  }
 
   return result.length ? result : null;
 }
