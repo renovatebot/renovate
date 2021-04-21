@@ -167,7 +167,7 @@ Array [
 exports[`config/validation validateConfig(config) errors if invalid combinations in packageRules 1`] = `
 Array [
   Object {
-    "message": "packageRules[0]: packageRules cannot contain both matchUpdateTypes and matchRegistryUrls. Rule: {\\"matchUpdateTypes\\":[\\"major\\"],\\"registryUrls\\":[\\"https://registry.npmjs.org\\"]}",
+    "message": "packageRules[0]: packageRules cannot combine both matchUpdateTypes and registryUrls. Rule: {\\"matchUpdateTypes\\":[\\"major\\"],\\"registryUrls\\":[\\"https://registry.npmjs.org\\"]}",
     "topic": "Configuration Error",
   },
 ]
