@@ -7,7 +7,6 @@ jest.mock('registry-auth-token');
 jest.mock('delay');
 
 describe(getName(__filename), () => {
-  delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
     setAdminConfig();
