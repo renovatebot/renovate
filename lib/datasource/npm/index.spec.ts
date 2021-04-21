@@ -15,7 +15,6 @@ const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> = _registr
 let npmResponse: any;
 
 describe(getName(__filename), () => {
-  delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
     httpMock.setup();
@@ -265,21 +264,6 @@ describe(getName(__filename), () => {
       .get('/@foobar%2Fcore')
       .reply(200, { ...npmResponse, name: '@foobar/core' });
     const res = await getPkgReleases({ datasource, depName: '@foobar/core' });
-    expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
-  });
-
-  it('should use NPM_TOKEN if provided', async () => {
-    httpMock
-      .scope('https://registry.npmjs.org', {
-        reqheaders: { authorization: 'Bearer some-token' },
-      })
-      .get('/@foobar%2Fcore')
-      .reply(200, { ...npmResponse, name: '@foobar/core' });
-    const oldToken = process.env.NPM_TOKEN;
-    process.env.NPM_TOKEN = 'some-token';
-    const res = await getPkgReleases({ datasource, depName: '@foobar/core' });
-    process.env.NPM_TOKEN = oldToken;
     expect(res).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
