@@ -1077,8 +1077,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'patch',
-    description:
-      'Configuration to apply when an update type is patch. Only applies if `separateMinorPatch` is set to true.',
+    description: 'Configuration to apply when an update type is patch.',
     stage: 'package',
     type: 'object',
     default: {},
