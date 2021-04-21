@@ -17,16 +17,6 @@ const upper = (str: string): string =>
 export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   const updateConfig = { ...input };
   delete updateConfig.packageRules;
-  // TODO: Remove next line once #8075 is complete
-  updateConfig.depNameSanitized = updateConfig.depName
-    ? updateConfig.depName
-        .replace('@types/', '')
-        .replace('@', '')
-        .replace(/\//g, '-')
-        .replace(/\s+/g, '-')
-        .replace(/-+/, '-')
-        .toLowerCase()
-    : undefined;
   if (
     updateConfig.language === LANGUAGE_DOCKER &&
     /(^|\/)node$/.exec(updateConfig.depName) &&
