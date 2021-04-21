@@ -1,5 +1,5 @@
 import { defaultConfig, getName, git, mocked } from '../../../../test/util';
-import { RenovateConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
 

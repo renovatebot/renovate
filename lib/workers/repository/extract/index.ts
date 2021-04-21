@@ -1,9 +1,6 @@
 import is from '@sindresorhus/is';
-import {
-  RenovateConfig,
-  getManagerConfig,
-  mergeChildConfig,
-} from '../../../config';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
 import type { PackageFile } from '../../../manager/types';

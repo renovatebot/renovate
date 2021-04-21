@@ -1,4 +1,3 @@
-import { OutgoingHttpHeaders } from 'http';
 import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
@@ -6,6 +5,7 @@ import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
+import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
 

@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../config';
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';

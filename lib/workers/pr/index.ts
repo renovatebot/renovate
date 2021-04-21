@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,

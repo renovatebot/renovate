@@ -1,10 +1,7 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import {
-  PackageRule,
-  PackageRuleInputConfig,
-  mergeChildConfig,
-} from '../config';
+import { mergeChildConfig } from '../config';
+import type { PackageRule, PackageRuleInputConfig } from '../config/types';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
 import { configRegexPredicate, isConfigRegex, regEx } from './regex';

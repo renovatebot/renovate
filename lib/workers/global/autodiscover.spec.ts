@@ -1,5 +1,5 @@
 import { getName } from '../../../test/util';
-import { RenovateConfig } from '../../config';
+import type { RenovateConfig } from '../../config/types';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import * as platform from '../../platform';
 import * as _ghApi from '../../platform/github';
@@ -49,36 +49,18 @@ describe(getName(__filename), () => {
   });
   it('filters autodiscovered github repos', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = ['project/re*', 'new/prj*'];
+    config.autodiscoverFilter = 'project/re*';
     config.platform = PLATFORM_TYPE_GITHUB;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve([
-        'project/repo',
-        'project/another-repo',
-        'new/prj-test',
-        'new/not-matched',
-      ])
+      Promise.resolve(['project/repo', 'project/another-repo'])
     );
     const res = await autodiscoverRepositories(config);
-    expect(res.repositories).toEqual(['project/repo', 'new/prj-test']);
+    expect(res.repositories).toEqual(['project/repo']);
   });
   it('filters autodiscovered github repos but nothing matches', async () => {
-    config.autodiscover = true;
-    config.autodiscoverFilter = ['project/re*'];
-    config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
-      token: 'abc',
-    }));
-    ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['another-project/repo', 'another-project/another-repo'])
-    );
-    const res = await autodiscoverRepositories(config);
-    expect(res).toEqual(config);
-  });
-  it('filters autodiscovered github repos with string variable', async () => {
     config.autodiscover = true;
     config.autodiscoverFilter = 'project/re*';
     config.platform = 'github';

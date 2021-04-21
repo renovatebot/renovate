@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { GlobalConfig } from '../../config';
+import type { GlobalConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 
@@ -30,14 +30,7 @@ export async function autodiscoverRepositories(
     return config;
   }
   if (config.autodiscoverFilter) {
-    const matched = new Set<string>();
-
-    for (const filter of config.autodiscoverFilter) {
-      const res = minimatch.match(discovered, filter);
-      res.forEach((e) => matched.add(e));
-    }
-
-    discovered = [...matched];
+    discovered = discovered.filter(minimatch.filter(config.autodiscoverFilter));
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
       logger.debug('None of the discovered repositories matched the filter');
