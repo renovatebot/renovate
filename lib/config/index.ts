@@ -1,4 +1,4 @@
-import { addStream, levels, logger, setContext } from '../logger';
+import { addStream, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
 import { ensureDir, getSubDirectory, readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
@@ -7,7 +7,6 @@ import * as defaultsParser from './defaults';
 import * as definitions from './definitions';
 import * as envParser from './env';
 import * as fileParser from './file';
-import { resolveConfigPresets } from './presets';
 import type {
   GlobalConfig,
   ManagerConfig,
@@ -47,10 +46,10 @@ export async function parseConfigs(
   logger.debug('Parsing configs');
 
   // Get configs
-  const defaultConfig = await resolveConfigPresets(defaultsParser.getConfig());
-  const fileConfig = await resolveConfigPresets(fileParser.getConfig(env));
-  const cliConfig = await resolveConfigPresets(cliParser.getConfig(argv));
-  const envConfig = await resolveConfigPresets(envParser.getConfig(env));
+  const defaultConfig = defaultsParser.getConfig();
+  const fileConfig = fileParser.getConfig(env);
+  const cliConfig = cliParser.getConfig(argv);
+  const envConfig = envParser.getConfig(env);
 
   let config: GlobalConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
@@ -73,15 +72,6 @@ export async function parseConfigs(
   if (!config.privateKey && config.privateKeyPath) {
     config.privateKey = await readFile(config.privateKeyPath);
     delete config.privateKeyPath;
-  }
-
-  // Deprecated set log level: https://github.com/renovatebot/renovate/issues/8291
-  // istanbul ignore if
-  if (config.logLevel) {
-    logger.warn(
-      'Configuring logLevel in CLI or file is deprecated. Use LOG_LEVEL environment variable instead'
-    );
-    levels('stdout', config.logLevel);
   }
 
   if (config.logContext) {

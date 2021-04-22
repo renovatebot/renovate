@@ -75,7 +75,6 @@ The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package ma
 
 To ensure everything is working properly on your end, you must:
 
-1. Make sure you don't have a local `.npmrc` file that overrides npm's default registry
 1. Install all dependencies with `yarn install`
 1. Make a build with `yarn build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`

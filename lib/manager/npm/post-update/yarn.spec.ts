@@ -54,7 +54,6 @@ describe(getName(__filename), () => {
         );
       });
       const config = {
-        dockerMapDotfiles: true,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -140,7 +139,6 @@ describe(getName(__filename), () => {
         );
       });
       const config = {
-        dockerMapDotfiles: true,
         constraints: {
           yarn: yarnCompatibility,
         },

@@ -15,7 +15,6 @@ const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> = _registr
 let npmResponse: any;
 
 describe(getName(__filename), () => {
-  delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
     httpMock.setup();
@@ -269,21 +268,6 @@ describe(getName(__filename), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('should use NPM_TOKEN if provided', async () => {
-    httpMock
-      .scope('https://registry.npmjs.org', {
-        reqheaders: { authorization: 'Bearer some-token' },
-      })
-      .get('/@foobar%2Fcore')
-      .reply(200, { ...npmResponse, name: '@foobar/core' });
-    const oldToken = process.env.NPM_TOKEN;
-    process.env.NPM_TOKEN = 'some-token';
-    const res = await getPkgReleases({ datasource, depName: '@foobar/core' });
-    process.env.NPM_TOKEN = oldToken;
-    expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
-  });
-
   it('should use host rules by hostName if provided', async () => {
     hostRules.add({
       hostType: 'npm',
@@ -330,7 +314,7 @@ describe(getName(__filename), () => {
     setNpmrc(npmrcContent);
     setNpmrc(npmrcContent);
     setNpmrc();
-    expect(getNpmrc()).toBeNull();
+    expect(getNpmrc()).toEqual({});
   });
 
   it('should use default registry if missing from npmrc', async () => {
@@ -375,7 +359,7 @@ describe(getName(__filename), () => {
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
     process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
-    setAdminConfig({ trustLevel: 'high' });
+    setAdminConfig({ exposeAllEnv: true });
     // eslint-disable-next-line no-template-curly-in-string
     const npmrc = 'registry=${REGISTRY}';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
@@ -384,7 +368,7 @@ describe(getName(__filename), () => {
   });
 
   it('should throw error if necessary env var is not present', () => {
-    setAdminConfig({ trustLevel: 'high' });
+    setAdminConfig({ exposeAllEnv: true });
     // eslint-disable-next-line no-template-curly-in-string
     expect(() => setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
       Error('env-replace')
