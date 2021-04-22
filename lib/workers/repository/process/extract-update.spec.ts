@@ -1,5 +1,5 @@
 import hasha from 'hasha';
-import { getName, git, mocked } from '../../../../test/util';
+import { git, mocked, testName } from '../../../../test/util';
 import type { PackageFile } from '../../../manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
@@ -21,7 +21,7 @@ branchify.branchifyUpgrades.mockResolvedValueOnce({
   branchList: ['branchName'],
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extract()', () => {
     it('runs with no baseBranches', async () => {
       const config = {

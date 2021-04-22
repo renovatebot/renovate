@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const aalib = fs.readFileSync(
@@ -20,7 +20,7 @@ const ibazel = fs.readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
       const res = extractPackageFile(aalib);

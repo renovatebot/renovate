@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName, mocked } from '../../../../test/util';
+import { mocked, testName } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
@@ -12,7 +12,7 @@ const hostRules = mocked(_hostRules);
 const giteaApiHost = gitea.Endpoint;
 const basePath = '/repos/some/repo/contents';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });

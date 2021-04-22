@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { getName, mocked } from '../../../test/util';
+import { mocked, testName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { extractPackageFile } from './extract';
 
@@ -38,7 +38,7 @@ const enterpriseGitPrecommitConfig = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

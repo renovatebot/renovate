@@ -1,4 +1,4 @@
-import { getName, git, mocked } from '../../../../test/util';
+import { git, mocked, testName } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _lockFiles from '../../../manager/npm/post-update';
 import * as _lerna from '../../../manager/npm/post-update/lerna';
@@ -27,7 +27,7 @@ hostRules.find = jest.fn((_) => ({
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('writeUpdatedPackageFiles', () => {
     let config: PostUpdateConfig;
     beforeEach(() => {

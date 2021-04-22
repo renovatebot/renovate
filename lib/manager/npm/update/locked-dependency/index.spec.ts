@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
-import { getName } from '../../../../../test/util';
+import { testName } from '../../../../../test/util';
 import { clone } from '../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 import { updateLockedDependency } from '.';
@@ -39,7 +39,7 @@ const typeIsJson = JSON.parse(
   readFileSync(resolve(__dirname, './__fixtures__/type-is.json'), 'utf8')
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
     beforeEach(() => {

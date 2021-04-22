@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { GetPkgReleasesConfig, GetReleasesConfig, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, partial } from '../../../test/util';
+import { partial, testName } from '../../../test/util';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { id as versioning } from '../../versioning/gradle';
 import { id as datasource, getReleases } from '.';
@@ -12,7 +12,7 @@ const allResponse: any = fs.readFileSync(
 
 let config: GetPkgReleasesConfig;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       config = {

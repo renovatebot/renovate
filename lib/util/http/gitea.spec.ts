@@ -1,8 +1,8 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { GiteaHttp, setBaseUrl } from './gitea';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
   let giteaHttp: GiteaHttp;

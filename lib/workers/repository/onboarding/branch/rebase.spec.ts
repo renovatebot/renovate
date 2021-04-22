@@ -1,14 +1,14 @@
 import {
   RenovateConfig,
   defaultConfig,
-  getName,
   git,
+  testName,
 } from '../../../../../test/util';
 import { rebaseOnboardingBranch } from './rebase';
 
 jest.mock('../../../../util/git');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { extractPackageFile } from './extract';
 
@@ -36,7 +36,7 @@ const requirements7 = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
     setAdminConfig();

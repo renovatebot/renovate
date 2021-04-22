@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const yamlFile1 = readFileSync(
@@ -17,7 +17,7 @@ const yamlFile3NoVersion = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('')).toBeNull();

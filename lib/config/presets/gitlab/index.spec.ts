@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName } from '../../../../test/util';
+import { testName } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { PRESET_DEP_NOT_FOUND } from '../util';
 import * as gitlab from '.';
@@ -7,7 +7,7 @@ import * as gitlab from '.';
 const gitlabApiHost = 'https://gitlab.com';
 const basePath = '/api/v4/projects/some%2Frepo/repository';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     httpMock.setup();

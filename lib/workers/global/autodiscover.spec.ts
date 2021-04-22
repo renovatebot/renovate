@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import type { RenovateConfig } from '../../config/types';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import * as platform from '../../platform';
@@ -13,7 +13,7 @@ jest.unmock('../../platform');
 const hostRules = _hostRules;
 const ghApi: jest.Mocked<typeof _ghApi> = _ghApi as never;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   let config: RenovateConfig;
   beforeEach(async () => {
     jest.resetAllMocks();

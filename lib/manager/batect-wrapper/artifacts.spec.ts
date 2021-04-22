@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
@@ -21,7 +21,7 @@ function artifactForPath(
   };
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     httpMock.setup();
 

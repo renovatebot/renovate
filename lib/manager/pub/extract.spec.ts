@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from '.';
 
 const brokenYaml = readFileSync(
@@ -12,7 +12,7 @@ const packageFile = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile', () => {
     it('should return null if package does not contain any deps', () => {
       const res = extractPackageFile('foo: bar', 'pubspec.yaml');

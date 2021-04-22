@@ -2,9 +2,9 @@ import { DateTime } from 'luxon';
 import {
   RenovateConfig,
   getConfig,
-  getName,
   git,
   platform,
+  testName,
 } from '../../../../test/util';
 import { PrState } from '../../../types';
 import type { BranchConfig } from '../../types';
@@ -18,7 +18,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getPrHourlyRemaining()', () => {
     it('calculates hourly limit remaining', async () => {
       const time = DateTime.local();

@@ -1,7 +1,7 @@
-import { getName } from '../../../../test/util';
+import { testName } from '../../../../test/util';
 import { detectMonorepos } from './monorepo';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('.extractPackageFile()', () => {
     it('uses lerna package settings', () => {
       const packageFiles = [

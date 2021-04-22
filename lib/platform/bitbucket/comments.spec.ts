@@ -1,11 +1,11 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import * as comments from './comments';
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   const config: comments.CommentsConfig = { repository: 'some/repo' };
 
   beforeEach(() => {

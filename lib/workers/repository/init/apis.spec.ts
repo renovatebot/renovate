@@ -1,8 +1,8 @@
 import {
   RenovateConfig,
   getConfig,
-  getName,
   platform,
+  testName,
 } from '../../../../test/util';
 import {
   REPOSITORY_DISABLED,
@@ -10,7 +10,7 @@ import {
 } from '../../../constants/error-messages';
 import { initApis } from './apis';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('initApis', () => {
     let config: RenovateConfig;
     beforeEach(() => {

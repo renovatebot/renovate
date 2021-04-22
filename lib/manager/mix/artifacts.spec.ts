@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
-import { env, fs, getName } from '../../../test/util';
+import { env, fs, testName } from '../../../test/util';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
@@ -15,7 +15,7 @@ const config = {
   localDir: join('/tmp/github/some/repo'),
 };
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();

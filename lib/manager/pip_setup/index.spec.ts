@@ -6,7 +6,7 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../test/exec-util';
-import { env, getName } from '../../../test/util';
+import { env, testName } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
@@ -39,7 +39,7 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
     cmd: snapshot.cmd.replace(/^.*extract\.py"\s+/, '<extract.py> '),
   }));
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(async () => {
       jest.resetAllMocks();

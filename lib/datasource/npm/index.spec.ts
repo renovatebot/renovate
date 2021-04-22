@@ -2,7 +2,7 @@ import mockDate from 'mockdate';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
@@ -14,7 +14,7 @@ jest.mock('delay');
 const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> = _registryAuthToken as never;
 let npmResponse: any;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     httpMock.setup();

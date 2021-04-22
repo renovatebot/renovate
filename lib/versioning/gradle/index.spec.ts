@@ -1,8 +1,8 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
 import { api } from '.';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('returns equality', () => {
     expect(compare('1', '1')).toEqual(0);
     expect(compare('a', 'a')).toEqual(0);
@@ -113,7 +113,7 @@ describe(getName(__filename), () => {
   });
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('isValid', () => {
     expect(api.isValid('1.0.0')).toBe(true);
     expect(api.isValid('[1.12.6,1.18.6]')).toBe(true);

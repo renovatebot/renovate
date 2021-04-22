@@ -1,10 +1,10 @@
 import {
   RenovateConfig,
   defaultConfig,
-  getName,
   git,
   partial,
   platform,
+  testName,
 } from '../../../../../test/util';
 import { setAdminConfig } from '../../../../config/admin';
 import { logger } from '../../../../logger';
@@ -15,7 +15,7 @@ import { ensureOnboardingPr } from '.';
 
 jest.mock('../../../../util/git');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;
     let packageFiles: Record<string, PackageFile[]>;

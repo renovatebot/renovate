@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import * as hostRules from '../host-rules';
@@ -12,7 +12,7 @@ hostRules.add({
 
 const gitlabApiHost = 'https://gitlab.com';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   let gitlabApi: GitlabHttp;
 
   beforeEach(() => {

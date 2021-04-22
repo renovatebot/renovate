@@ -1,5 +1,5 @@
 import { withDir } from 'tmp-promise';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   findLocalSiblingOrParent,
   getSubDirectory,
@@ -9,7 +9,7 @@ import {
   writeLocalFile,
 } from '.';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('readLocalFile', () => {
     it('reads buffer', async () => {
       expect(await readLocalFile(__filename)).toBeInstanceOf(Buffer);
@@ -25,7 +25,7 @@ describe(getName(__filename), () => {
   });
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('localPathExists', () => {
     it('returns true for file', async () => {
       expect(await localPathExists(__filename)).toBe(true);
@@ -41,7 +41,7 @@ describe(getName(__filename), () => {
   });
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('findLocalSiblingOrParent', () => {
     it('returns path for file', async () => {
       await withDir(

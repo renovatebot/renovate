@@ -1,6 +1,6 @@
 import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { getName, mocked } from '../../../../test/util';
+import { mocked, testName } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
 import * as _env from '../../../util/exec/env';
 import * as _lernaHelper from './lerna';
@@ -25,7 +25,7 @@ function lernaPkgFileWithoutLernaDep(lernaClient: string) {
     lernaClient,
   };
 }
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('generateLockFiles()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as rubyVersioning from '../../versioning/ruby';
 import * as pod from '.';
@@ -15,7 +15,7 @@ const config = {
 const githubApiHost = 'https://api.github.com';
 const cocoapodsHost = 'https://cdn.cocoapods.org';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();

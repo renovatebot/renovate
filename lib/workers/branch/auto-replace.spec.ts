@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
-import { defaultConfig, getName } from '../../../test/util';
+import { defaultConfig, testName } from '../../../test/util';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
 import type { BranchUpgradeConfig } from '../types';
@@ -13,7 +13,7 @@ const sampleHtml = readFileSync(
 
 jest.mock('../../util/fs');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;

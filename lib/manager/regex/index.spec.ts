@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { logger } from '../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
@@ -18,7 +18,7 @@ const exampleJsonContent = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
       pinDigests: false,

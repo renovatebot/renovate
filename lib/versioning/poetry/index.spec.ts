@@ -1,7 +1,7 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { api as versionig } from '.';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('equals', () => {
     it.each([
       ['1', '1'],

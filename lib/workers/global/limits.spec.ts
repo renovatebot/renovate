@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   Limit,
   incLimitedValue,
@@ -7,7 +7,7 @@ import {
   setMaxLimit,
 } from './limits';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     resetAllLimits();
   });

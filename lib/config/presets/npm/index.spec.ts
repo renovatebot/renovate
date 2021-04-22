@@ -1,12 +1,12 @@
 import nock from 'nock';
-import { getName } from '../../../../test/util';
+import { testName } from '../../../../test/util';
 import { setAdminConfig } from '../../admin';
 import * as npm from '.';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     setAdminConfig();

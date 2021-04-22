@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { setFsConfig, writeLocalFile } from '../../util/fs';
 import { extractPackageFile } from './extract';
 
@@ -35,7 +35,7 @@ const cargo6toml = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {

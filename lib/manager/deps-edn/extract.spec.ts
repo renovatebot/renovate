@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const depsEdn = readFileSync(
@@ -9,7 +9,7 @@ const depsEdn = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('extractPackageFile', () => {
     expect(extractPackageFile(depsEdn)).toMatchSnapshot();
   });

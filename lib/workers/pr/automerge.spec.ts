@@ -1,4 +1,4 @@
-import { getConfig, getName, git, mocked, partial } from '../../../test/util';
+import { getConfig, git, mocked, partial, testName } from '../../../test/util';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { BranchConfig } from '../types';
@@ -9,7 +9,7 @@ jest.mock('../../util/git');
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;

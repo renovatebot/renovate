@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   extractContainer,
   extractPackageFile,
@@ -22,7 +22,7 @@ const azurePipelinesNoDependency = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('should parse a valid azure-pipelines file', () => {
     const file = parseAzurePipelines(azurePipelines, 'some-file');
     expect(file).not.toBeNull();

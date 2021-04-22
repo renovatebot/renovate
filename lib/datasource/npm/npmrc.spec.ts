@@ -1,4 +1,4 @@
-import { getName, mocked } from '../../../test/util';
+import { mocked, testName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import * as _sanitize from '../../util/sanitize';
 import { getNpmrc, setNpmrc } from './npmrc';
@@ -7,7 +7,7 @@ jest.mock('../../util/sanitize');
 
 const sanitize = mocked(_sanitize);
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     setNpmrc('');
     setAdminConfig();

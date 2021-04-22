@@ -1,10 +1,10 @@
 import * as _fs from 'fs-extra';
 import {
   defaultConfig,
-  getName,
   git,
   mocked,
   platform,
+  testName,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import {
@@ -62,7 +62,7 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],

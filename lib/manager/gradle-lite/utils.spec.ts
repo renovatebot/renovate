@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { TokenType } from './common';
 import {
   getVars,
@@ -10,7 +10,7 @@ import {
   versionLikeSubstring,
 } from './utils';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('versionLikeSubstring', () => {
     [
       '1.2.3',

@@ -2,8 +2,8 @@ import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   getConfig,
-  getName,
   platform,
+  testName,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
@@ -19,7 +19,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('raiseConfigWarningIssue()', () => {
     beforeEach(() => {
       setAdminConfig();

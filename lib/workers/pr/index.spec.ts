@@ -1,4 +1,4 @@
-import { getName, git, mocked, partial } from '../../../test/util';
+import { git, mocked, partial, testName } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
@@ -99,7 +99,7 @@ function setupGitlabChangelogMock() {
   gitlabChangelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;

@@ -1,4 +1,4 @@
-import { getName, git, platform } from '../../../test/util';
+import { git, platform, testName } from '../../../test/util';
 import type { RenovateConfig } from '../../config/types';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';
@@ -6,7 +6,7 @@ import { shouldReuseExistingBranch } from './reuse';
 
 jest.mock('../../util/git');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('shouldReuseExistingBranch(config)', () => {
     const pr: Pr = {
       sourceBranch: 'master',

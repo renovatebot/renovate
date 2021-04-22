@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackage } from './extract';
 
 const minimumContent = readFileSync(
@@ -14,7 +14,7 @@ const simpleContent = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractDependencies', () => {
     it('returns null for invalid XML', () => {
       expect(extractPackage(undefined)).toBeNull();

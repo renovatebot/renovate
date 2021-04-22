@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { HostRule } from '../../types';
 import { add, clear } from '../../util/host-rules';
 
@@ -8,7 +8,7 @@ import {
   getDomain,
 } from './host-rules';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     clear();
   });

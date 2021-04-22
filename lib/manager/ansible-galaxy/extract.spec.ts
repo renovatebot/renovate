@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import extractPackageFile, { getSliceEndNumber } from './extract';
 
 const yamlFile1 = readFileSync(
@@ -27,7 +27,7 @@ const galaxy = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', 'requirements.yml')).toBeNull();

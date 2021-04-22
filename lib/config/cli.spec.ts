@@ -1,10 +1,10 @@
-import { getName } from '../../test/util';
+import { testName } from '../../test/util';
 import * as datasourceDocker from '../datasource/docker';
 import * as cli from './cli';
 import getArgv from './config/__fixtures__/argv';
 import type { RenovateOptions } from './types';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   let argv: string[];
   beforeEach(() => {
     argv = getArgv();

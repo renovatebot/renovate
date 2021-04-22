@@ -8,9 +8,9 @@ import {
   addReplacingSerializer,
   env,
   fs,
-  getName,
   git,
   partial,
+  testName,
 } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
@@ -38,7 +38,7 @@ function readString(...paths: string[]): Promise<string> {
   return readFile(resolve(fixtures, ...paths), 'utf8');
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     httpMock.setup();

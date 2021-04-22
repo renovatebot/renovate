@@ -1,7 +1,7 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import updateArtifacts from './artifacts';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('updateArtifacts()', () => {
     it('returns empty content', () => {
       expect(

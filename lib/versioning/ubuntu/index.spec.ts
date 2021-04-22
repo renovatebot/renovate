@@ -1,7 +1,7 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { api as ubuntu } from '.';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   // validation
 
   it('isValid', () => {

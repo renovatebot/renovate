@@ -1,11 +1,11 @@
 import fs from 'fs';
 import { DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
-import { getName } from '../../test/util';
+import { testName } from '../../test/util';
 import customConfig from './config/__fixtures__/file';
 import * as file from './file';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   let tmp: DirectoryResult;
 
   beforeAll(async () => {

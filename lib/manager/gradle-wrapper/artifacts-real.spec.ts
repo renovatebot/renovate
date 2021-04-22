@@ -2,7 +2,7 @@ import { readFile, readFileSync } from 'fs-extra';
 import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
-import { getName, git, partial } from '../../../test/util';
+import { git, partial, testName } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
@@ -30,7 +30,7 @@ function compareFile(file: string, path: string) {
   );
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   ifSystemSupportsGradle(6).describe('real tests', () => {
     jest.setTimeout(60 * 1000);
 

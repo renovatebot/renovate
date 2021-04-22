@@ -39,7 +39,34 @@ export const defaultConfig = getConfig();
 
 export { getConfig };
 
-export function getName(file: string): string {
+function getCallerFileName(): string | null {
+  let result = null;
+
+  const originalFunc = Error.prepareStackTrace;
+  Error.prepareStackTrace = (_err, stack) => stack;
+
+  try {
+    const err: Error = new Error();
+
+    const stack = (err.stack as unknown) as NodeJS.CallSite[];
+    const currentFile = stack.shift().getFileName();
+
+    while (err.stack.length) {
+      result = stack.shift().getFileName();
+
+      if (currentFile !== result) {
+        break;
+      }
+    }
+  } finally {
+    Error.prepareStackTrace = originalFunc;
+  }
+
+  return result;
+}
+
+export function testName(): string {
+  const file = getCallerFileName();
   const [, name] = /lib\/(.*?)\.spec\.ts$/.exec(file.replace(/\\/g, '/'));
   return name;
 }

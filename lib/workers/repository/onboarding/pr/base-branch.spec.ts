@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig, testName } from '../../../../../test/util';
 
 import { getBaseBranchDesc } from './base-branch';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getBaseBranchDesc()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

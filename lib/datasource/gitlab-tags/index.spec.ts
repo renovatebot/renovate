@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { id as datasource } from '.';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     httpMock.reset();
     httpMock.setup();

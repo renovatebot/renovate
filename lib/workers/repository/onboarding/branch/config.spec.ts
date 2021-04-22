@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig, testName } from '../../../../../test/util';
 import * as presets from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { getOnboardingConfig } from './config';
@@ -7,7 +7,7 @@ jest.mock('../../../../config/presets/local');
 
 const mockedPresets = presets as jest.Mocked<typeof presets>;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   let config: RenovateConfig;
   let onboardingConfig: string;
   beforeEach(() => {

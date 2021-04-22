@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 function readFixture(fixture: string) {
@@ -9,7 +9,7 @@ function readFixture(fixture: string) {
 
 const input01Content = readFixture('package-1.js');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

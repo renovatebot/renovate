@@ -1,6 +1,6 @@
 import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import type { ExtractConfig } from '../types';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import * as manager from '.';
@@ -13,7 +13,7 @@ const baseConfig = {
   },
 };
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   ifSystemSupportsGradle(6).describe('executeGradle integration', () => {
     const SUCCESS_FILE_NAME = 'success.indicator';
     let workingDir: DirectoryResult;

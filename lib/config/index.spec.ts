@@ -1,5 +1,5 @@
 import upath from 'upath';
-import { getName } from '../../test/util';
+import { testName } from '../../test/util';
 import { readFile } from '../util/fs';
 import getArgv from './config/__fixtures__/argv';
 import { getConfig } from './defaults';
@@ -13,7 +13,7 @@ try {
 
 const defaultConfig = getConfig();
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];

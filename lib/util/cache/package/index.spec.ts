@@ -1,10 +1,10 @@
-import { getName } from '../../../../test/util';
+import { testName } from '../../../../test/util';
 import { cleanup, get, init, set } from '.';
 
 jest.mock('./file');
 jest.mock('./redis');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('returns undefined if not initialized', async () => {
     expect(await get('test', 'missing-key')).toBeUndefined();
     expect(await set('test', 'some-key', 'some-value', 5)).toBeUndefined();

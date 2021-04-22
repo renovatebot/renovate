@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
-import { getName, mocked } from '../../../../test/util';
+import { mocked, testName } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import {
   addReleaseNotes,
@@ -59,7 +59,7 @@ const gitlabTreeResponse = [
   { path: 'README.md', type: 'blob' },
 ];
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({});

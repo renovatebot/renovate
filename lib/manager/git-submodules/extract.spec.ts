@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
-import { getName, partial } from '../../../test/util';
+import { partial, testName } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
 import type { PackageFile } from '../types';
 import extractPackageFile from './extract';
@@ -11,7 +11,7 @@ const Git: typeof _simpleGit = jest.requireActual('simple-git');
 
 const localDir = `${__dirname}/__fixtures__`;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   // flaky ci tests
   jest.setTimeout(10 * 1000);
 

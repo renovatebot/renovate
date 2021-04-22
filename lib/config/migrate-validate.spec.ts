@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, getName } from '../../test/util';
+import { RenovateConfig, getConfig, testName } from '../../test/util';
 import { migrateAndValidate } from './migrate-validate';
 
 let config: RenovateConfig;
@@ -7,7 +7,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('migrateAndValidate()', () => {
     it('handles empty', async () => {
       const res = await migrateAndValidate(config, {});

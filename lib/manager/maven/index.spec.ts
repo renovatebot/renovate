@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { fs, getName } from '../../../test/util';
+import { fs, testName } from '../../../test/util';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
@@ -27,7 +27,7 @@ function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);

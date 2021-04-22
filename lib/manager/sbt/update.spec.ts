@@ -1,7 +1,7 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import * as sbtUpdater from './update';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('.bumpPackageVersion()', () => {
     const content =
       'name := "test"\n' +

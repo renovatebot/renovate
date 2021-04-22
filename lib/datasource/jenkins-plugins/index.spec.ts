@@ -1,13 +1,13 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import * as versioning from '../../versioning/docker';
 import jenkinsPluginsVersions from './__fixtures__/plugin-versions.json';
 import jenkinsPluginsInfo from './__fixtures__/update-center.actual.json';
 import { resetCache } from './get';
 import * as jenkins from '.';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 

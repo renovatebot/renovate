@@ -1,11 +1,11 @@
-import { defaultConfig, getName, git, partial } from '../../../test/util';
+import { defaultConfig, git, partial, testName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { BranchConfig } from '../types';
 import { commitFilesToBranch } from './commit';
 
 jest.mock('../../util/git');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('commitFilesToBranch', () => {
     let config: BranchConfig;
     beforeEach(() => {

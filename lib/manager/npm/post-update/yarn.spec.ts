@@ -4,7 +4,7 @@ import {
   envMock,
   mockExecAll,
 } from '../../../../test/exec-util';
-import { fs, getName, mocked } from '../../../../test/util';
+import { fs, mocked, testName } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _yarnHelper from './yarn';
 
@@ -26,7 +26,7 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

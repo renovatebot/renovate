@@ -4,9 +4,9 @@ import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   getConfig,
-  getName,
   logger,
   platform,
+  testName,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
@@ -46,7 +46,7 @@ async function dryRun(
   expect(platform.findPr).toHaveBeenCalledTimes(findPrCalls);
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('ensureMasterIssue()', () => {
     beforeEach(() => {
       setAdminConfig();

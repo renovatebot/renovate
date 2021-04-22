@@ -1,8 +1,8 @@
-import { getName } from '../../test/util';
+import { testName } from '../../test/util';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getParentName()', () => {
     it('ignores encrypted in root', () => {
       expect(configValidation.getParentName('encrypted')).toEqual('');

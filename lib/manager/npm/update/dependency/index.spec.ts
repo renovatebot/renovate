@@ -1,7 +1,7 @@
 import fs from 'fs';
 import upath from 'upath';
 
-import { getName } from '../../../../../test/util';
+import { testName } from '../../../../../test/util';
 import * as npmUpdater from '.';
 
 function readFixture(fixture: string) {
@@ -14,7 +14,7 @@ function readFixture(fixture: string) {
 const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {

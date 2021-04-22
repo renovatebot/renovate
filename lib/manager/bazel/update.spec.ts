@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { Readable } from 'stream';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
@@ -29,7 +29,7 @@ git_repository(
 )
 */
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('updateDependency', () => {
     beforeEach(() => {
       jest.resetAllMocks();

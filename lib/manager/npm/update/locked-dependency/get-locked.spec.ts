@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
-import { getName } from '../../../../../test/util';
+import { testName } from '../../../../../test/util';
 import { getLockedDependencies } from './get-locked';
 
 jest.mock('../../../../util/fs');
@@ -9,7 +9,7 @@ const packageLockJson = JSON.parse(
   readFileSync(resolve(__dirname, './__fixtures__/package-lock.json'), 'utf8')
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getLockedDependencies()', () => {
     it('handles error', () => {
       expect(getLockedDependencies(null as any, 'some-dep', '1.0.0')).toEqual(

@@ -1,4 +1,4 @@
-import { getName } from '../../../../test/util';
+import { testName } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
@@ -29,7 +29,7 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       hostRules.clear();

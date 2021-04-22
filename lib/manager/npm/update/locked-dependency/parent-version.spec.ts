@@ -1,14 +1,14 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
-import { getName } from '../../../../../test/util';
+import { testName } from '../../../../../test/util';
 import { findFirstParentVersion } from './parent-version';
 
 const expressJson = JSON.parse(
   readFileSync(resolve(__dirname, './__fixtures__/express.json'), 'utf8')
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getLockedDependencies()', () => {
     beforeEach(() => {
       httpMock.setup();

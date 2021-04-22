@@ -1,4 +1,4 @@
-import { getName } from '../../test/util';
+import { testName } from '../../test/util';
 import {
   parseUrl,
   resolveBaseUrl,
@@ -6,7 +6,7 @@ import {
   validateUrl,
 } from './url';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   test.each([
     ['http://foo.io', '', 'http://foo.io'],
     ['http://foo.io/', '', 'http://foo.io'],

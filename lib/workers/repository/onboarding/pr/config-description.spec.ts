@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig, testName } from '../../../../../test/util';
 import type { PackageFile } from '../../../../manager/types';
 import { getConfigDesc } from './config-description';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getConfigDesc()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

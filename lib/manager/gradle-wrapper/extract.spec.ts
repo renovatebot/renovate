@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const propertiesFile1 = readFileSync(
@@ -24,7 +24,7 @@ const whitespacePropertiesFile = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

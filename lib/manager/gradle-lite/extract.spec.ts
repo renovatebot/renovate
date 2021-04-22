@@ -1,4 +1,4 @@
-import { fs, getName } from '../../../test/util';
+import { fs, testName } from '../../../test/util';
 import { extractAllPackageFiles } from '.';
 
 jest.mock('../../util/fs');
@@ -14,7 +14,7 @@ function mockFs(files: Record<string, string>): void {
   );
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeAll(() => {});
   afterAll(() => {
     jest.resetAllMocks();

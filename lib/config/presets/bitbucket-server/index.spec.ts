@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName, mocked } from '../../../../test/util';
+import { mocked, testName } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as bitbucketServer from '.';
@@ -11,7 +11,7 @@ const hostRules = mocked(_hostRules);
 const bitbucketApiHost = 'https://git.company.org';
 const basePath = '/rest/api/1.0/projects/some/repos/repo/browse';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });

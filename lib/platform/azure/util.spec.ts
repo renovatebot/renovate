@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -13,7 +13,7 @@ import {
   streamToString,
 } from './util';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getNewBranchName', () => {
     it('should add refs/heads', () => {
       const res = getNewBranchName('testBB');

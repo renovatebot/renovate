@@ -1,11 +1,11 @@
 import * as httpMock from '../../test/http-mock';
-import { getName, partial } from '../../test/util';
+import { partial, testName } from '../../test/util';
 import * as hostRules from '../util/host-rules';
 import { Http } from '../util/http';
 import errSerializer from './err-serializer';
 import { sanitizeValue } from './utils';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('expands errors', () => {
     const err = partial<Error & Record<string, unknown>>({
       a: 1,

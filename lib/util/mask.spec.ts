@@ -1,7 +1,7 @@
-import { getName } from '../../test/util';
+import { testName } from '../../test/util';
 import { maskToken } from './mask';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('.maskToken', () => {
     it('returns value if passed value is falsy', () => {
       expect(maskToken('')).toEqual('');

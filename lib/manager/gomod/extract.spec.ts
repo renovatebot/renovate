@@ -1,12 +1,12 @@
 import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const gomod1 = readFileSync('lib/manager/gomod/__fixtures__/1/go.mod', 'utf8');
 const gomod2 = readFileSync('lib/manager/gomod/__fixtures__/2/go.mod', 'utf8');
 const gomod3 = readFileSync('lib/manager/gomod/__fixtures__/3/go.mod', 'utf8');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

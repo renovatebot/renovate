@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
-import { getName, mocked } from '../../../test/util';
+import { mocked, testName } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -12,7 +12,7 @@ import type { Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;

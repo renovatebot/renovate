@@ -1,5 +1,5 @@
 import { NormalizedOptions } from 'got';
-import { getName, partial } from '../../../test/util';
+import { partial, testName } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITEA,
   PLATFORM_TYPE_GITLAB,
@@ -7,7 +7,7 @@ import {
 import { applyAuthorization, removeAuthorization } from './auth';
 import { GotOptions } from './types';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('applyAuthorization', () => {
     it('does nothing', () => {
       const opts: GotOptions = {

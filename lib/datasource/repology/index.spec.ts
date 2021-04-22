@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import { RepologyPackage, id as datasource } from '.';
@@ -67,7 +67,7 @@ const fixtureJdk = fs.readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { TokenType } from './common';
 import { extractRawTokens, tokenize } from './tokenizer';
 
@@ -6,7 +6,7 @@ function tokenTypes(input): string[] {
   return extractRawTokens(input).map((token) => token.type);
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('extractTokens', () => {
     const samples = {
       ' ': [TokenType.Space],

@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   autoExtendMavenRange,
   compare,
@@ -18,7 +18,7 @@ const {
   getNewValue,
 } = maven;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('returns equality', () => {
     expect(compare('1.0.0', '1')).toEqual(0);
     expect(compare('1-a1', '1-alpha-1')).toEqual(0);
@@ -286,7 +286,7 @@ describe(getName(__filename), () => {
   });
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('returns valid', () => {
     expect(isValid('1.0.0')).toBe(true);
     expect(isValid('[1.12.6,1.18.6]')).toBe(true);

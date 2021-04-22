@@ -1,9 +1,9 @@
 import {
   RenovateConfig,
   getConfig,
-  getName,
   git,
   mocked,
+  testName,
 } from '../../../../test/util';
 import * as _branchWorker from '../../branch';
 import { Limit, isLimitReached } from '../../global/limits';
@@ -27,7 +27,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
       const branches: BranchConfig[] = [

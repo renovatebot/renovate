@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import * as memCache_ from '../../util/cache/memory';
 import { printRequestStats } from './stats';
 
@@ -6,7 +6,7 @@ jest.mock('../../util/cache/memory');
 
 const memCache: any = memCache_ as any;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('printRequestStats()', () => {
     it('runs', () => {
       memCache.get = jest.fn(() => [

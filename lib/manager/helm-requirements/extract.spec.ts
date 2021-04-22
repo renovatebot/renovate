@@ -1,10 +1,10 @@
-import { fs, getName } from '../../../test/util';
+import { fs, testName } from '../../../test/util';
 import { SkipReason } from '../../types';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

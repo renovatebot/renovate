@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { id as datasource } from '.';
 
 const rubyReleasesHtml = fs.readFileSync(
@@ -9,7 +9,7 @@ const rubyReleasesHtml = fs.readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

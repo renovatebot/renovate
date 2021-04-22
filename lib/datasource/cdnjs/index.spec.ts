@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as datasource } from '.';
 
@@ -22,7 +22,7 @@ const baseUrl = 'https://api.cdnjs.com/';
 const pathFor = (s: string): string =>
   `/libraries/${s.split('/').shift()}?fields=homepage,repository,assets`;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

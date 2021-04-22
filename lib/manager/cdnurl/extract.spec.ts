@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from '.';
 
 const input = readFileSync(
@@ -8,7 +8,7 @@ const input = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('extractPackageFile', () => {
     expect(extractPackageFile(input)).toMatchSnapshot();
   });

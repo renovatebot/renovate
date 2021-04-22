@@ -1,6 +1,6 @@
 import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -35,7 +35,7 @@ lxml==3.6.0
 mccabe==0.6.1
 `;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;

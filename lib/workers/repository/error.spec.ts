@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, getName } from '../../../test/util';
+import { RenovateConfig, getConfig, testName } from '../../../test/util';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -38,7 +38,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('handleError()', () => {
     const errors = [
       REPOSITORY_UNINITIATED,

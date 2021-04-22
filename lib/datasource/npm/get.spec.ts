@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as hostRules from '../../util/host-rules';
 import { getDependency, resetMemCache } from './get';
@@ -11,7 +11,7 @@ function getPath(s = ''): string {
   return `${prePath}/@myco%2Ftest`;
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetMemCache();

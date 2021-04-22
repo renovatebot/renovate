@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, logger, mocked } from '../../../test/util';
+import { logger, mocked, testName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource, getDigest } from '.';
 
@@ -46,7 +46,7 @@ const resGitHubEnterprise = `<!DOCTYPE html>
 </body>
 </html>`;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({});

@@ -1,7 +1,7 @@
 import * as _AWS from '@aws-sdk/client-ecr';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, mocked, partial } from '../../../test/util';
+import { mocked, partial, testName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import { MediaType } from './types';
@@ -41,7 +41,7 @@ function mockEcrAuthReject(msg: string) {
   );
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({

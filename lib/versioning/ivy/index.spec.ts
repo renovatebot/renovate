@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   REV_TYPE_LATEST,
   REV_TYPE_RANGE,
@@ -9,7 +9,7 @@ import ivy from '.';
 
 const { getNewValue, isValid, isVersion, matches } = ivy;
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('parses dynamic revisions', () => {
     expect(parseDynamicRevision(null)).toBeNull();
     expect(parseDynamicRevision('')).toBeNull();
@@ -61,7 +61,7 @@ describe(getName(__filename), () => {
   });
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('isValid', () => {
     expect(isValid('')).toBe(false);
     expect(isValid('1.0.0')).toBe(true);

@@ -1,7 +1,7 @@
-import { getName } from '../../test/util';
+import { testName } from '../../test/util';
 import { addSplit, getSplits, splitInit } from './split';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('adds splits and returns results', () => {
     splitInit();
     addSplit('one');

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { id as datasource, defaultRegistryUrls } from '.';
 
 const consulData: any = fs.readFileSync(
@@ -17,7 +17,7 @@ const serviceDiscoveryResult: any = fs.readFileSync(
 const primaryUrl = defaultRegistryUrls[0];
 const secondaryUrl = defaultRegistryUrls[1];
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

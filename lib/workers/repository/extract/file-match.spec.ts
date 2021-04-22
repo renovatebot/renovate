@@ -1,9 +1,9 @@
-import { RenovateConfig, getName } from '../../../../test/util';
+import { RenovateConfig, testName } from '../../../../test/util';
 import * as fileMatch from './file-match';
 
 jest.mock('../../../util/git');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   const fileList = ['package.json', 'frontend/package.json'];
   describe('getIncludedFiles()', () => {
     it('returns fileList if no includePaths', () => {

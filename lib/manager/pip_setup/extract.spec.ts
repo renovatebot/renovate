@@ -1,5 +1,5 @@
 import { envMock, exec, mockExecSequence } from '../../../test/exec-util';
-import { env, getName } from '../../../test/util';
+import { env, testName } from '../../../test/util';
 import {
   getPythonAlias,
   parsePythonVersion,
@@ -10,7 +10,7 @@ import {
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

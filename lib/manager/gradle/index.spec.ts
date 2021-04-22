@@ -6,8 +6,8 @@ import * as upath from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import {
   addReplacingSerializer,
-  getName,
   replacingSerializer,
+  testName,
 } from '../../../test/util';
 import * as _util from '../../util';
 import { BinarySource } from '../../util/exec/common';
@@ -68,7 +68,7 @@ async function setupMocks() {
   return [require('.'), exec, util];
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile', () => {
     let manager: typeof _manager;
     let exec: jest.Mock<typeof _exec>;

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
@@ -23,7 +23,7 @@ const mailchimpJson: any = fs.readFileSync(
 
 const baseUrl = 'https://packagist.org';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getReleases', () => {
     let config: any;
     beforeEach(() => {

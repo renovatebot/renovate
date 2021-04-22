@@ -2,9 +2,9 @@ import {
   RenovateConfig,
   fs,
   getConfig,
-  getName,
   git,
   mocked,
+  testName,
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
@@ -31,7 +31,7 @@ beforeEach(() => {
 jest.mock('../../../config/migration');
 jest.mock('../../../config/migrate-validate');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('detectRepoFileConfig()', () => {
     it('returns config if not found', () => {
       git.getFileList.mockResolvedValue(['package.json']);

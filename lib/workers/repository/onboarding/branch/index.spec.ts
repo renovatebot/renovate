@@ -3,9 +3,9 @@ import {
   RenovateConfig,
   fs,
   getConfig,
-  getName,
   git,
   platform,
+  testName,
 } from '../../../../../test/util';
 import { Pr } from '../../../../platform';
 import { PrState } from '../../../../types';
@@ -18,7 +18,7 @@ jest.mock('../../../../workers/repository/onboarding/branch/rebase');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('checkOnboardingBranch', () => {
     let config: RenovateConfig;
     beforeEach(() => {

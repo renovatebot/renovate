@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, getName } from '../../../test/util';
+import { RenovateConfig, getConfig, testName } from '../../../test/util';
 import { checkIfConfigured } from './configured';
 
 let config: RenovateConfig;
@@ -7,7 +7,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('checkIfConfigured()', () => {
     it('returns', () => {
       expect(() => checkIfConfigured(config)).not.toThrow();

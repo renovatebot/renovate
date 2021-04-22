@@ -1,7 +1,7 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { updateDependency } from './update';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   it('replaces', () => {
     expect(
       updateDependency({

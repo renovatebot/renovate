@@ -2,7 +2,7 @@ import fs from 'fs';
 import nock from 'nock';
 import { resolve } from 'upath';
 import { Release, getPkgReleases } from '..';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import * as mavenVersioning from '../../versioning/maven';
@@ -46,7 +46,7 @@ function generateReleases(versions: string[], ts = false): Release[] {
   });
 }
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     hostRules.add({
       hostType: datasource,

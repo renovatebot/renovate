@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const invalidYamlFile = readFileSync(
@@ -25,7 +25,7 @@ const pluginsEmptyYamlFile = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     it('returns empty list for an empty text file', () => {
       const res = extractPackageFile(pluginsEmptyTextFile, 'path/file.txt');

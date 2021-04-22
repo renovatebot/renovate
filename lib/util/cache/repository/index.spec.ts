@@ -1,12 +1,12 @@
 import * as _fs from 'fs-extra';
-import { getName, mocked } from '../../../../test/util';
+import { mocked, testName } from '../../../../test/util';
 import * as repositoryCache from '.';
 
 jest.mock('fs-extra');
 
 const fs = mocked(_fs);
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });

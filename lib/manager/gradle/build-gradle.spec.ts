@@ -1,11 +1,11 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   collectVersionVariables,
   init,
   updateGradleVersion,
 } from './build-gradle';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeEach(() => {
     init();
   });

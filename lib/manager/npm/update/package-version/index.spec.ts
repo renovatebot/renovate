@@ -1,7 +1,7 @@
-import { getName } from '../../../../../test/util';
+import { testName } from '../../../../../test/util';
 import * as npmUpdater from '.';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('.bumpPackageVersion()', () => {
     const content = JSON.stringify({
       name: 'some-package',

@@ -1,8 +1,8 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import type { RangeConfig } from '../types';
 import { getRangeStrategy } from '.';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getRangeStrategy()', () => {
     it('returns replace when rangeStrategy is auto', () => {
       const config: RangeConfig = { rangeStrategy: 'auto' };

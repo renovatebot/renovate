@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
 import * as upath from 'upath';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('extractPackageFile()', () => {
     let config: ExtractConfig;
     beforeEach(() => {

@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITEA,
   PLATFORM_TYPE_GITHUB,
@@ -12,7 +12,7 @@ const url = 'https://github.com';
 
 jest.mock('global-agent');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   const options = {
     hostType: PLATFORM_TYPE_GITHUB,
   };

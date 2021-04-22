@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import { getPackageUpdates } from './package';
@@ -8,7 +8,7 @@ const getPkgReleases: any = _getPkgReleases;
 
 jest.mock('../../datasource');
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('getPackageUpdates', () => {
     // TODO: should be `PackageUpdateConfig`
     let config: any;

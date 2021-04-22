@@ -1,9 +1,9 @@
 import {
   RenovateConfig,
   getConfig,
-  getName,
   git,
   platform,
+  testName,
 } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
@@ -20,7 +20,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('pruneStaleBranches()', () => {
     beforeEach(() => {
       setAdminConfig();

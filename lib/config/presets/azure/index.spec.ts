@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { getName, mocked } from '../../../../test/util';
+import { mocked, testName } from '../../../../test/util';
 import { setPlatformApi } from '../../../platform';
 import * as _azureApi from '../../../platform/azure/azure-got-wrapper';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
@@ -10,7 +10,7 @@ jest.mock('../../../platform/azure/azure-got-wrapper');
 
 const azureApi = mocked(_azureApi);
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   beforeAll(() => {
     setPlatformApi('azure');
   });

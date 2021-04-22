@@ -1,7 +1,7 @@
-import { getName } from '../../../../test/util';
+import { testName } from '../../../../test/util';
 import { mightBeABrowserLibrary } from './type';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   describe('.mightBeABrowserLibrary()', () => {
     it('is not a library if private', () => {
       const isLibrary = mightBeABrowserLibrary({ private: true });

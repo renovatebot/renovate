@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { getName } from '../../../test/util';
+import { testName } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -10,7 +10,7 @@ import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
 
-describe(getName(__filename), () => {
+describe(testName(), () => {
   let http: Http;
 
   beforeEach(() => {
