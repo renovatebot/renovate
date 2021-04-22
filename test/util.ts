@@ -42,19 +42,24 @@ export { getConfig };
 function getCallerFileName(): string | null {
   let result = null;
 
-  const originalFunc = Error.prepareStackTrace;
+  const prepareStackTrace = Error.prepareStackTrace;
+  const stackTraceLimit = Error.stackTraceLimit;
+
   Error.prepareStackTrace = (_err, stack) => stack;
+  Error.stackTraceLimit = 5; // 1 + max call depth (for this file)
 
   try {
-    const err: Error = new Error();
+    const err = new Error();
 
     const stack = (err.stack as unknown) as NodeJS.CallSite[];
-    const currentFile = stack.shift().getFileName();
 
-    while (err.stack.length) {
-      result = stack.shift().getFileName();
-
-      if (currentFile !== result) {
+    let currentFile = null;
+    for (const frame of stack) {
+      const fileName = frame.getFileName();
+      if (!currentFile) {
+        currentFile = fileName;
+      } else if (currentFile !== fileName) {
+        result = fileName;
         break;
       }
     }
@@ -62,7 +67,8 @@ function getCallerFileName(): string | null {
     // no-op
   }
 
-  Error.prepareStackTrace = originalFunc;
+  Error.prepareStackTrace = prepareStackTrace;
+  Error.stackTraceLimit = stackTraceLimit;
 
   return result;
 }
