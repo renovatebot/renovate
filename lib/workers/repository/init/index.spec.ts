@@ -38,7 +38,9 @@ describe(getName(__filename), () => {
       config.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
       await initRepo({});
-      expect(logger.logger.warn.mock.calls).toMatchSnapshot();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        "Configuration option 'filterUnavailableUsers' is not supported on the current platform 'undefined'."
+      );
     });
   });
 });
