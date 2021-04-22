@@ -5,12 +5,14 @@ import { satisfies } from 'semver';
 import upath from 'upath';
 import * as pkg from '../../../package.json';
 import * as configParser from '../../config';
+import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
 import type {
   GlobalConfig,
   RenovateConfig,
   RenovateRepository,
 } from '../../config/types';
+import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { getProblems, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
@@ -70,6 +72,14 @@ function checkEnv(): void {
   }
 }
 
+export async function validatePresets(config: GlobalConfig): Promise<void> {
+  try {
+    await resolveConfigPresets(config);
+  } catch (err) /* istanbul ignore next */ {
+    throw new Error(CONFIG_PRESETS_INVALID);
+  }
+}
+
 export async function start(): Promise<number> {
   let config: GlobalConfig;
   try {
@@ -77,6 +87,8 @@ export async function start(): Promise<number> {
     config = await getGlobalConfig();
     // initialize all submodules
     config = await globalInitialize(config);
+
+    await validatePresets(config);
 
     checkEnv();
 

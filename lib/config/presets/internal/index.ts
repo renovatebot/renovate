@@ -1,4 +1,5 @@
 import type { Preset, PresetConfig } from '../types';
+import * as compatibilityPreset from './compatibility';
 import * as configPreset from './config';
 import * as defaultPreset from './default';
 import * as dockerPreset from './docker';
@@ -13,6 +14,7 @@ import * as schedulePreset from './schedule';
 import * as workaroundsPreset from './workarounds';
 
 export const groups: Record<string, Record<string, Preset>> = {
+  compatibility: compatibilityPreset.presets,
   config: configPreset.presets,
   default: defaultPreset.presets,
   docker: dockerPreset.presets,
