@@ -6,6 +6,7 @@ Object {
   "registryUrl": "https://api.cdnjs.com/",
   "releases": Array [
     Object {
+      "newDigest": undefined,
       "version": "0.7.5",
     },
   ],
