@@ -3,7 +3,7 @@ import shell from 'shelljs';
 import { options } from './utils.mjs';
 
 const version = options.release;
-const tag = options.tag;
+const tag = options.tag || 'latest';
 const dry = options.dryRun;
 
 shell.echo(`Dispatching version: ${version}`);
