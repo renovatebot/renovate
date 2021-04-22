@@ -58,9 +58,11 @@ function getCallerFileName(): string | null {
         break;
       }
     }
-  } finally {
-    Error.prepareStackTrace = originalFunc;
+  } catch (e) {
+    // no-op
   }
+
+  Error.prepareStackTrace = originalFunc;
 
   return result;
 }
