@@ -607,6 +607,7 @@ export type CommitFilesConfig = {
   files: File[];
   message: string;
   force?: boolean;
+  noVerify?: ('commit' | 'push')[];
 };
 
 export async function commitFiles({
@@ -614,6 +615,7 @@ export async function commitFiles({
   files,
   message,
   force = false,
+  noVerify = [],
 }: CommitFilesConfig): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
@@ -664,9 +666,13 @@ export async function commitFiles({
         }
       }
     }
-    const commitRes = await git.commit(message, [], {
-      '--no-verify': null,
-    });
+
+    const commitOptions = {};
+    if (noVerify.includes('commit')) {
+      commitOptions['--no-verify'] = null;
+    }
+
+    const commitRes = await git.commit(message, [], commitOptions);
     if (
       commitRes.summary &&
       commitRes.summary.changes === 0 &&
@@ -685,11 +691,20 @@ export async function commitFiles({
       );
       return null;
     }
-    const pushRes = await git.push('origin', `${branchName}:${branchName}`, {
+
+    const pushOptions = {
       '--force': null,
       '-u': null,
-      '--no-verify': null,
-    });
+    };
+    if (noVerify.includes('push')) {
+      pushOptions['--no-verify'] = null;
+    }
+
+    const pushRes = await git.push(
+      'origin',
+      `${branchName}:${branchName}`,
+      pushOptions
+    );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     // Fetch it after create

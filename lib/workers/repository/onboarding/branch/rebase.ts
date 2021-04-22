@@ -68,5 +68,6 @@ export async function rebaseOnboardingBranch(
       },
     ],
     message: commitMessage,
+    noVerify: config.gitNoVerify,
   });
 }

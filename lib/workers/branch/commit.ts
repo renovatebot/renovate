@@ -49,5 +49,6 @@ export function commitFilesToBranch(
     files: updatedFiles,
     message: config.commitMessage,
     force: !!config.forceCommit,
+    noVerify: config.noVerify,
   });
 }

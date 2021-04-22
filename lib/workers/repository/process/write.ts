@@ -33,6 +33,9 @@ export async function writeUpdates(
   setMaxLimit(Limit.Branches, branchesRemaining);
 
   for (const branch of branches) {
+    // TODO: This isn't correct
+    branch.noVerify = config.gitNoVerify;
+
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     const res = await processBranch(branch);

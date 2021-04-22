@@ -160,6 +160,7 @@ export interface RenovateConfig
   errors?: ValidationMessage[];
 
   gitAuthor?: string;
+  gitNoVerify?: ('commit' | 'push')[];
 
   hostRules?: HostRule[];
 

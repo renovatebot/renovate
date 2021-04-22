@@ -57,5 +57,6 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
+    noVerify: config.gitNoVerify,
   });
 }

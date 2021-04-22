@@ -1952,6 +1952,19 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'gitNoVerify',
+    description:
+      'Which git commands will be run with the `--no-verify` option.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    allowedValues: ['commit', 'push'],
+    default: [],
+    stage: 'repository',
+    cli: false,
+    env: false,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

@@ -107,6 +107,7 @@ export interface BranchConfig
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
+  noVerify?: ('commit' | 'push')[];
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;
