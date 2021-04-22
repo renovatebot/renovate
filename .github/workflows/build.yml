@@ -99,12 +99,13 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Unit tests
-        run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+      # TODO: reenable afzer testing
+      # - name: Unit tests
+      #   run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
-      - name: Codecov
-        uses: codecov/codecov-action@v1.4.1
-        if: always() && env.coverage == 'true'
+      # - name: Codecov
+      #   uses: codecov/codecov-action@v1.4.1
+      #   if: always() && env.coverage == 'true'
 
       # build after tests to exclude files
       - name: Build
