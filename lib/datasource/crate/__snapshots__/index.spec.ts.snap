@@ -331,7 +331,7 @@ Array [
 ]
 `;
 
-exports[`datasource/crate/index getReleases refuses to clone if trustLevel is not high 1`] = `null`;
+exports[`datasource/crate/index getReleases refuses to clone if allowCustomCrateRegistries is not true 1`] = `null`;
 
 exports[`datasource/crate/index getReleases returns null for 404 1`] = `
 Array [

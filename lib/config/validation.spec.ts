@@ -585,5 +585,22 @@ describe(getName(__filename), () => {
       expect(warnings).toMatchSnapshot();
       expect(errors).toHaveLength(0);
     });
+    it('errors if invalid combinations in packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            registryUrls: ['https://registry.npmjs.org'],
+          },
+        ],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
+    });
   });
 });
