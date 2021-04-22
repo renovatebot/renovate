@@ -325,6 +325,34 @@ export async function validateConfig(
                       message,
                     });
                   }
+                  // It's too late to apply any of these options once you already have updates determined
+                  const preLookupOptions = [
+                    'extractVersion',
+                    'followTag',
+                    'ignoreDeps',
+                    'ignoreUnstable',
+                    'rangeStrategy',
+                    'registryUrls',
+                    'respectLatest',
+                    'rollbackPrs',
+                    'separateMajorMinor',
+                    'separateMinorPatch',
+                    'separateMultipleMajor',
+                    'versioning',
+                  ];
+                  if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {
+                    for (const option of preLookupOptions) {
+                      if (resolvedRule[option] !== undefined) {
+                        const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
+                          packageRule
+                        )}`;
+                        errors.push({
+                          topic: 'Configuration Error',
+                          message,
+                        });
+                      }
+                    }
+                  }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',

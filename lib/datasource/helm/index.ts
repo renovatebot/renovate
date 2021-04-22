@@ -17,7 +17,6 @@ export const defaultRegistryUrls = ['https://charts.helm.sh/stable'];
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
-  additionalBranchPrefix: 'helm-',
   commitMessageTopic: 'Helm release {{depName}}',
   group: {
     commitMessageTopic: '{{{groupName}}} Helm releases',

@@ -44,6 +44,7 @@ describe(getName(__filename), () => {
         onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
+        ignoreNpmrcFile: true,
         separateMajorReleases: true,
         separatePatchReleases: true,
         suppressNotifications: ['lockFileErrors', 'prEditNotification'],
@@ -56,6 +57,7 @@ describe(getName(__filename), () => {
         masterIssueTitle: 'foo',
         gomodTidy: true,
         upgradeInRange: true,
+        trustLevel: 'high',
         automergeType: 'branch-push',
         branchName:
           '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
