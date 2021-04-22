@@ -18,10 +18,6 @@ const config = mocked(_config);
 const onboarding = mocked(_onboarding);
 const secrets = mocked(_secrets);
 
-const warn = logger.logger.warn as jest.MockedFunction<
-  typeof logger.logger.warn
->;
-
 describe(getName(__filename), () => {
   describe('initRepo', () => {
     it('runs', async () => {
@@ -42,7 +38,7 @@ describe(getName(__filename), () => {
       config.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
       await initRepo({});
-      expect(warn.mock.calls).toMatchSnapshot();
+      expect(logger.logger.warn.mock.calls).toMatchSnapshot();
     });
   });
 });
