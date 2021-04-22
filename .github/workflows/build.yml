@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - v24
-      - v23
 
   workflow_dispatch:
     inputs:
@@ -99,15 +98,15 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
-      # TODO: reenable afzer testing
-      # - name: Unit tests
-      #   run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+      - name: Unit tests
+        run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
-      # - name: Codecov
-      #   uses: codecov/codecov-action@v1.4.1
-      #   if: always() && env.coverage == 'true'
+      - name: Codecov
+        uses: codecov/codecov-action@v1.4.1
+        if: always() && env.coverage == 'true'
 
-      # build after tests to exclude files
+      # build after tests to exclude build files from tests
+      # TODO: check if build before test speeds up tests
       - name: Build
         run: yarn build
 
@@ -212,12 +211,10 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
-      # TODO: remove dry-run echo and replace true with env
       - name: semantic-release
         run: |
-          echo "DRY_RUN: ${DRY_RUN}"
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-          npx semantic-release --dry-run true
+          npx semantic-release --dry-run ${{env.DRY_RUN}}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
