@@ -128,7 +128,7 @@
     "@sindresorhus/is": "4.0.0",
     "@yarnpkg/core": "2.4.0",
     "@yarnpkg/parsers": "2.3.0",
-    "azure-devops-node-api": "10.2.1",
+    "azure-devops-node-api": "10.2.2",
     "bunyan": "1.8.15",
     "cacache": "15.0.6",
     "chalk": "4.1.0",
