@@ -10,7 +10,7 @@ on:
     inputs:
       dryRun:
         description: 'Dry-Run'
-        default: 'false'
+        default: 'true'
 
 env:
   # Currently no way to detect automatically (#8153)
