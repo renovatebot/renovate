@@ -357,7 +357,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
-  "skipInstalls": true,
+  "skipInstalls": false,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
