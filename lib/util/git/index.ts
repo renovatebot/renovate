@@ -488,7 +488,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   ).trim();
   const { gitAuthorEmail } = config;
   if (
-    lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
     lastAuthor === gitAuthorEmail ||
     config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {

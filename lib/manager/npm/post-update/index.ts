@@ -144,9 +144,6 @@ export async function writeExistingFiles(
       } catch (err) /* istanbul ignore next */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
-    } else if (config.ignoreNpmrcFile) {
-      logger.debug('Removing ignored .npmrc file before artifact generation');
-      await remove(npmrcFilename);
     }
     if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);

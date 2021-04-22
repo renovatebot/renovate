@@ -163,9 +163,9 @@ async function fetchRegistryInfo(
   };
 
   if (flavor !== RegistryFlavor.CratesIo) {
-    if (getAdminConfig().trustLevel !== 'high') {
+    if (!getAdminConfig().allowCustomCrateRegistries) {
       logger.warn(
-        'crate datasource: trustLevel=high is required for registries other than crates.io, bailing out'
+        'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
       );
       return null;
     }

@@ -30,6 +30,7 @@ const config = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
   composerIgnorePlatformReqs: true,
+  ignoreScripts: false,
 };
 
 const repoStatus = partial<StatusResult>({
@@ -46,7 +47,7 @@ describe('.updateArtifacts()', () => {
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    setAdminConfig();
+    setAdminConfig({ allowScripts: false });
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -63,7 +64,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
     git.getRepoStatus.mockResolvedValue(repoStatus);
-    setAdminConfig({ trustLevel: 'high' });
+    setAdminConfig({ allowScripts: true });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
