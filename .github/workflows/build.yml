@@ -14,7 +14,7 @@ on:
 
 env:
   # Currently no way to detect automatically (#8153)
-  DEFAULT_BRANCH: master
+  DEFAULT_BRANCH: main
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
