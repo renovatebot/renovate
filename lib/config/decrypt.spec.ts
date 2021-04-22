@@ -1,10 +1,9 @@
-import fs from 'fs';
-import { getName } from '../../test/util';
+import { getName, loadFixture } from '../../test/util';
 import { setAdminConfig } from './admin';
 import { decryptConfig } from './decrypt';
 import type { RenovateConfig } from './types';
 
-const privateKey = fs.readFileSync('lib/config/keys/__fixtures__/private.pem');
+const privateKey = loadFixture(__filename, 'private.pem', 'keys');
 
 describe(getName(__filename), () => {
   describe('decryptConfig()', () => {

@@ -1,18 +1,9 @@
 /* eslint-disable no-template-curly-in-string */
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackage } from './extract';
 
-const minimumContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/minimum.pom.xml`),
-  'utf8'
-);
-
-const simpleContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/simple.pom.xml`),
-  'utf8'
-);
+const minimumContent = loadFixture(__filename, `minimum.pom.xml`);
+const simpleContent = loadFixture(__filename, `simple.pom.xml`);
 
 describe(getName(__filename), () => {
   describe('extractDependencies', () => {

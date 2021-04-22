@@ -1,29 +1,19 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const sbt = readFileSync(
-  resolve(__dirname, `./__fixtures__/sample.sbt`),
-  'utf8'
+const sbt = loadFixture(__filename, `sample.sbt`);
+const sbtScalaVersionVariable = loadFixture(
+  __filename,
+  `scala-version-variable.sbt`
 );
-const sbtScalaVersionVariable = readFileSync(
-  resolve(__dirname, `./__fixtures__/scala-version-variable.sbt`),
-  'utf8'
+const sbtMissingScalaVersion = loadFixture(
+  __filename,
+  `missing-scala-version.sbt`
 );
-const sbtMissingScalaVersion = readFileSync(
-  resolve(__dirname, `./__fixtures__/missing-scala-version.sbt`),
-  'utf8'
-);
-
-const sbtDependencyFile = readFileSync(
-  resolve(__dirname, `./__fixtures__/dependency-file.scala`),
-  'utf8'
-);
-
-const sbtPrivateVariableDependencyFile = readFileSync(
-  resolve(__dirname, `./__fixtures__/private-variable-dependency-file.scala`),
-  'utf8'
+const sbtDependencyFile = loadFixture(__filename, `dependency-file.scala`);
+const sbtPrivateVariableDependencyFile = loadFixture(
+  __filename,
+  `private-variable-dependency-file.scala`
 );
 
 describe(getName(__filename), () => {

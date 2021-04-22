@@ -208,7 +208,7 @@ describe(getName(__filename), () => {
   describe('GraphQL', () => {
     const query = `
       query {
-        repository(owner: "testOwner", name: "testName") {
+        repository(owner: "testOwner", name: "getName") {
           testItem (orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "someone"}) {
             pageInfo {
               endCursor

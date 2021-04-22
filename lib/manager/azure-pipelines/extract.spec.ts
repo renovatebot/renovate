@@ -1,5 +1,4 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import {
   extractContainer,
   extractPackageFile,
@@ -7,19 +6,16 @@ import {
   parseAzurePipelines,
 } from './extract';
 
-const azurePipelines = readFileSync(
-  'lib/manager/azure-pipelines/__fixtures__/azure-pipelines.yaml',
-  'utf8'
+const azurePipelines = loadFixture(__filename, 'azure-pipelines.yaml');
+
+const azurePipelinesInvalid = loadFixture(
+  __filename,
+  'azure-pipelines-invalid.yaml'
 );
 
-const azurePipelinesInvalid = readFileSync(
-  'lib/manager/azure-pipelines/__fixtures__/azure-pipelines-invalid.yaml',
-  'utf8'
-);
-
-const azurePipelinesNoDependency = readFileSync(
-  'lib/manager/azure-pipelines/__fixtures__/azure-pipelines-no-dependency.yaml',
-  'utf8'
+const azurePipelinesNoDependency = loadFixture(
+  __filename,
+  'azure-pipelines-no-dependency.yaml'
 );
 
 describe(getName(__filename), () => {
