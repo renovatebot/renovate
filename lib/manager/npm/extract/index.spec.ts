@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import upath from 'upath';
+import { getName } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
@@ -22,7 +23,7 @@ const workspacesSimpleContent = readFixture('inputs/workspaces-simple.json');
 const vendorisedContent = readFixture('is-object.json');
 const invalidNameContent = readFixture('invalid-name.json');
 
-describe('manager/npm/extract', () => {
+describe(getName(__filename), () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
       fs.readLocalFile = jest.fn(() => null);
@@ -112,11 +113,25 @@ describe('manager/npm/extract', () => {
       );
       expect(res.npmrc).toBeDefined();
     });
-    it('finds and discards .npmrc', async () => {
+    it('ignores .npmrc when config.npmrc is defined', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.npmrc') {
+          return 'some-npmrc\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { npmrc: 'some-configured-npmrc' }
+      );
+      expect(res.npmrc).toBeUndefined();
+    });
+    it('finds and filters .npmrc with variables', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           // eslint-disable-next-line
-          return '//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
+          return 'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
         }
         return null;
       });
@@ -125,7 +140,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBeUndefined();
+      expect(res.npmrc).toEqual('registry=https://registry.npmjs.org\n');
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {

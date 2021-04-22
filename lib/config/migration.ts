@@ -5,7 +5,9 @@ import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { clone } from '../util/clone';
 import { getOptions } from './definitions';
+import { removedPresets } from './presets/common';
 import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
+import { mergeChildConfig } from './utils';
 
 const options = getOptions();
 
@@ -189,11 +191,19 @@ export function migrateConfig(
           migratedConfig.rebaseWhen = 'never';
         }
       } else if (key === 'exposeEnv') {
+        migratedConfig.exposeAllEnv = val;
         delete migratedConfig.exposeEnv;
-        if (val === true) {
-          migratedConfig.trustLevel = 'high';
-        } else if (val === false) {
-          migratedConfig.trustLevel = 'low';
+      } else if (key === 'trustLevel') {
+        delete migratedConfig.trustLevel;
+        if (val === 'high') {
+          migratedConfig.allowCustomCrateRegistries ??= true;
+          migratedConfig.allowScripts ??= true;
+          migratedConfig.exposeAllEnv ??= true;
+        }
+      } else if (key === 'ignoreNpmrcFile') {
+        delete migratedConfig.ignoreNpmrcFile;
+        if (!is.string(migratedConfig.npmrc)) {
+          migratedConfig.npmrc = '';
         }
       } else if (
         key === 'branchName' &&
@@ -244,22 +254,15 @@ export function migrateConfig(
         }
         const presets = migratedConfig.extends;
         for (let i = 0; i < presets.length; i += 1) {
-          let preset = presets[i];
+          const preset = presets[i];
           if (is.string(preset)) {
-            if (preset === 'config:application' || preset === ':js-app') {
-              preset = 'config:js-app';
-            } else if (preset === ':library' || preset === 'config:library') {
-              preset = 'config:js-lib';
-            } else if (preset.startsWith(':masterIssue')) {
-              preset = preset.replace('masterIssue', 'dependencyDashboard');
-            } else if (
-              [':unpublishSafe', 'default:unpublishSafe'].includes(preset)
-            ) {
-              preset = 'npm:unpublishSafe';
+            const newPreset = removedPresets[preset];
+            if (newPreset !== undefined) {
+              presets[i] = newPreset;
             }
-            presets[i] = preset;
           }
         }
+        migratedConfig.extends = migratedConfig.extends.filter(Boolean);
       } else if (key === 'unpublishSafe') {
         if (val === true) {
           migratedConfig.extends = migratedConfig.extends || [];
@@ -548,6 +551,34 @@ export function migrateConfig(
           }
         }
       }
+    }
+    // Migrate nested packageRules
+    if (is.nonEmptyArray(migratedConfig.packageRules)) {
+      for (const packageRule of migratedConfig.packageRules) {
+        if (is.array(packageRule.packageRules)) {
+          logger.debug('Flattening nested packageRules');
+          // merge each subrule and add to the parent list
+          for (const subrule of packageRule.packageRules) {
+            const combinedRule = mergeChildConfig(packageRule, subrule);
+            delete combinedRule.packageRules;
+            migratedConfig.packageRules.push(combinedRule);
+          }
+          // delete the nested packageRules
+          delete packageRule.packageRules;
+          // mark the original rule for deletion if it's now pointless
+          if (
+            !Object.keys(packageRule).some(
+              (key) => !key.startsWith('match') && !key.startsWith('exclude')
+            )
+          ) {
+            packageRule._delete = true;
+          }
+        }
+      }
+      // filter out any rules which were marked for deletion in the previous step
+      migratedConfig.packageRules = migratedConfig.packageRules.filter(
+        (rule) => !rule._delete
+      );
     }
     const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {

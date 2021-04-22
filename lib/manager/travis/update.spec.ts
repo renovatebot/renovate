@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
+import { getName } from '../../../test/util';
 import { updateDependency } from './update';
 
 const content = readFileSync(
@@ -7,7 +8,7 @@ const content = readFileSync(
   'utf8'
 );
 
-describe('manager/travis/update', () => {
+describe(getName(__filename), () => {
   describe('updateDependency', () => {
     it('updates values', () => {
       // TODO: should be `Upgrade`

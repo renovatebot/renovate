@@ -1,3 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`util/template filters out disallowed fields 1`] = `"github token = \\"\\""`;
+exports[`util/template/index filters out disallowed fields 1`] = `"github token = \\"\\""`;

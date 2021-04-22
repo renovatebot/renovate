@@ -4,14 +4,17 @@ let adminConfig: RepoAdminConfig = {};
 
 // TODO: once admin config work is complete, add a test to make sure this list includes all options with admin=true
 export const repoAdminOptions = [
+  'allowCustomCrateRegistries',
   'allowPostUpgradeCommandTemplating',
+  'allowScripts',
   'allowedPostUpgradeCommands',
   'customEnvVariables',
+  'dockerChildPrefix',
   'dockerImagePrefix',
   'dockerUser',
   'dryRun',
+  'exposeAllEnv',
   'privateKey',
-  'trustLevel',
 ];
 
 export function setAdminConfig(config: RenovateConfig = {}): void {

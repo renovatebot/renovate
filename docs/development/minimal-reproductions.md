@@ -18,12 +18,13 @@ Why not use that to debug?
 A production repository uses many dependencies, and can have a large list of custom rules in the Renovate configuration file.
 This makes it very hard to debug the repository, because there are many moving parts and debug statements could be triggered potentially hundreds of times.
 
-Also, it's quite common when configs are large that what people think a problem is simple but it's caused by two or more features interacting.
+When people have a large Renovate configuration, they tend to think the root cause is simple.
+But often the bug is caused by two or more features interacting.
 Reducing the config to a minimum to reproduce the bug helps discover exactly which config elements are required to interact to trigger the bug.
 
 ## Why we require a minimal reproduction
 
-Except for very simple bugs like typos, a debuggable reproduction repository is usually needed, and it makes most sense for the issue reporter to create it.
+A debuggable reproduction repository is usually needed, and it makes the most sense for the issue reporter to create it.
 We prefer that you use GitHub to host your reproduction, but if it requires GitLab or Bitbucket to be reproduced then creating a public repository on those instead is fine.
 
 ### Making a reproduction repository is too much work for me

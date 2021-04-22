@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { Readable } from 'stream';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { updateDependency } from './update';
 
 const aide = fs.readFileSync(
@@ -14,7 +15,7 @@ const ibazel = fs.readFileSync(
 
 const baseUrl = 'https://github.com';
 
-describe('manager/homebrew/update', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

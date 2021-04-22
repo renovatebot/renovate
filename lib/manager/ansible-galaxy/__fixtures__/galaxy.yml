@@ -1,0 +1,19 @@
+---
+namespace: "foo"
+name: "bar"
+version: "1.2.7"
+readme: "readme_galaxy.md"
+authors:
+  - ""
+  - ""
+description: Administer Veeam Software
+license_file: "LICENSE"
+tags:
+  - availability
+  - suite
+  - backup
+dependencies:
+  ansible.windows: '1.4.0'
+  community.windows: '>=1.0.0,<2.0.0'
+repository: "https://github.com/foo/bar"
+issues: "https://github.com/foo/bar/issues"

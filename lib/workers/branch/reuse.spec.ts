@@ -1,5 +1,5 @@
 import { getName, git, platform } from '../../../test/util';
-import { RenovateConfig } from '../../config';
+import type { RenovateConfig } from '../../config/types';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';
 import { shouldReuseExistingBranch } from './reuse';

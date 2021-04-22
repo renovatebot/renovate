@@ -1,6 +1,5 @@
 import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
-import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -72,10 +71,7 @@ export async function generateLockFiles(
       return { error: false };
     }
     let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
-    if (
-      getAdminConfig().trustLevel === 'high' &&
-      config.ignoreScripts !== false
-    ) {
+    if (getAdminConfig().allowScripts && config.ignoreScripts !== false) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
@@ -96,16 +92,9 @@ export async function generateLockFiles(
       },
     };
     // istanbul ignore if
-    if (getAdminConfig().trustLevel === 'high') {
+    if (getAdminConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
-      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
-    }
-    if (config.dockerMapDotfiles) {
-      const homeDir =
-        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-      const homeNpmrc = join(homeDir, '.npmrc');
-      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
     const lernaVersion = getLernaVersion(lernaPackageFile);
     logger.debug('Using lerna version ' + lernaVersion);

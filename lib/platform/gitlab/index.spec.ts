@@ -2,6 +2,7 @@
 import nock from 'nock';
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -16,7 +17,7 @@ import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
 
-describe('platform/gitlab', () => {
+describe(getName(__filename), () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
@@ -1512,6 +1513,7 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   const prBody = `https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
 
   Pull Requests are the best, here are some PRs.
@@ -1522,11 +1524,28 @@ These updates have all been created already. Click a checkbox below to force a r
 
  - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\`gh-got\`, \`gl-got\`, \`got\`)
 `;
+
   describe('massageMarkdown(input)', () => {
-    it('returns updated pr body', () => {
+    it('returns updated pr body', async () => {
+      jest.mock('../utils/pr-body');
+      const { smartTruncate } = require('../utils/pr-body');
+
+      await initFakePlatform('13.4.0');
       expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
+      expect(smartTruncate).not.toHaveBeenCalled();
+    });
+
+    it('truncates description if too low API version', async () => {
+      jest.mock('../utils/pr-body');
+      const { smartTruncate } = require('../utils/pr-body');
+
+      await initFakePlatform('13.3.0');
+      gitlab.massageMarkdown(prBody);
+      expect(smartTruncate).toHaveBeenCalledTimes(1);
+      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 25000);
     });
   });
+
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty', async () => {
       const res = await gitlab.getVulnerabilityAlerts();

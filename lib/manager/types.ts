@@ -23,7 +23,7 @@ export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
-  ignoreNpmrcFile?: boolean;
+  npmrc?: string;
   yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
@@ -59,6 +59,11 @@ export interface PackageUpdateConfig {
   supportPolicy?: string[];
 }
 
+export interface PackageUpdateResult {
+  sourceUrl?: string;
+  updates: LookupUpdate[];
+}
+
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
@@ -85,7 +90,6 @@ export interface PackageFile<T = Record<string, any>>
   datasource?: string;
   registryUrls?: string[];
   deps: PackageDependency[];
-  ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
   mavenProps?: Record<string, any>;
@@ -130,28 +134,20 @@ export interface Package<T> extends ManagerData<T> {
 
 export interface LookupUpdate {
   bucket?: string;
-  blockedByPin?: boolean;
   branchName?: string;
   commitMessageAction?: string;
-  displayFrom?: string;
-  displayTo?: string;
   isBump?: boolean;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
-  isSingleVersion?: boolean;
-  currentVersion?: string;
   newDigest?: string;
-  newDigestShort?: string;
   newMajor?: number;
   newMinor?: number;
   newValue: string;
   semanticCommitType?: string;
-  skippedOverVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
-  sourceUrl?: string;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -161,8 +157,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
-  displayFrom?: string;
-  displayTo?: string;
   fixedVersion?: string;
   currentVersion?: string;
   lockedVersion?: string;
@@ -260,7 +254,7 @@ export interface ManagerApi {
     config?: ExtractConfig
   ): Result<PackageFile | null>;
 
-  getPackageUpdates?(config: PackageUpdateConfig): Result<LookupUpdate[]>;
+  getPackageUpdates?(config: PackageUpdateConfig): Result<PackageUpdateResult>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

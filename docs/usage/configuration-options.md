@@ -69,7 +69,7 @@ With the above config:
 ## additionalBranchPrefix
 
 This value defaults to an empty string, and is typically not necessary.
-Some managers populate this field for historical reasons, for example we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
+Some managers previously populated this field, but they no longer do so by default.
 You normally don't need to configure this, but one example where it can be useful is combining with `parentDir` in monorepos to split PRs based on where the package definition is located, e.g.
 
 ```json
@@ -443,7 +443,7 @@ They are then collated as part of the onboarding description.
 
 ## digest
 
-Add to this object if you wish to define rules that apply only to PRs that update Docker digests.
+Add to this object if you wish to define rules that apply only to PRs that update digests.
 
 ## docker
 
@@ -968,13 +968,6 @@ The above is the same as if you wrote this package rule:
   ]
 }
 ```
-
-## ignoreNpmrcFile
-
-By default, Renovate will look for and use any `.npmrc` file it finds in a repository.
-Additionally, it will be read in by `npm` or `yarn` at the time of lock file generation.
-Sometimes this causes problems, for example if the file contains placeholder values, so you can configure this to `true` and Renovate will ignore any `.npmrc` files it finds and temporarily remove the file before running `npm install` or `yarn install`.
-Renovate will try to configure this to `true` also if you have configured any `npmrc` string within your config file.
 
 ## ignorePaths
 
@@ -1517,7 +1510,6 @@ For example to apply a special label for Major updates:
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
-Only applies if `separateMinorPatch` is set to true.
 
 ## php
 
@@ -1542,7 +1534,6 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
-This is only available on Renovate instances that have a `trustLevel` of 'high'.
 Each command must match at least one of the patterns defined in `allowedPostUpgradeTasks` in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
 
@@ -1552,12 +1543,13 @@ e.g.
 {
   "postUpgradeTasks": {
     "commands": ["tslint --fix"],
-    "fileFilters": ["yarn.lock", "**/*.js"]
+    "fileFilters": ["yarn.lock", "**/*.js"],
+    "executionMode": "update"
   }
 }
 ```
 
-The `postUpgradeTasks` configuration consists of two fields:
+The `postUpgradeTasks` configuration consists of three fields:
 
 ### commands
 
@@ -1566,6 +1558,11 @@ A list of commands that are executed after Renovate has updated a dependency but
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
+
+### executionMode
+
+Defaults to `update`, but can also be set to `branch`. This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask
+will be executed for every dependency on the branch. If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 ## prBodyColumns
 
@@ -1653,10 +1650,16 @@ This setting tells Renovate when you would like it to raise PRs:
 - `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
 - `status-success`: Renovate won't raise PRs unless tests pass
 
-Renovate defaults to `immediate` but some like to change to `not-pending`.
-If you configure to immediate, it means you will usually get GitHub notifications that a new PR is available but if you view it immediately then it will still have "pending" tests so you can't take any action.
-With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately.
-Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
+Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
+
+With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
+Your test suite takes a bit of time to complete, so if you go look at the new PR right away, you don't know if your tests pass or fail.
+You're basically waiting until you have the test results, before you can decide if you want to merge the PR or not.
+
+With prCreation set to `not-pending`, Renovate waits until all tests have finished running, and only then creates the PR.
+When you receive the PR notification, you can take action immediately, as you have the full test results.
+
+When you set prCreation to `not-pending` you're reducing the "noise" but get notified of new PRs a bit later.
 
 ## prFooter
 
@@ -2041,9 +2044,19 @@ See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-re
 
 Take a random sample of given size from reviewers.
 
+## rollback
+
+Add to this object if you wish to define rules that apply only to PRs that roll back versions.
+
 ## rollbackPrs
 
-Configure this to `false` either globally, per-language, or per-package if you want to disable Renovate's behavior of generating rollback PRs when it can't find the current version on the registry anymore.
+There are times when a dependency version in use by a project gets removed from the registry.
+For some registries, existing releases or even whole packages can be removed or "yanked" at any time, while for some registries only very new or unused releases can be removed.
+Renovate's "rollback" feature exists to propose a downgrade to the next-highest release if the current release is no longer found in the registry.
+
+Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
+
+You can configure the `rollbackPrs` property globally, per-lanuage, or per-package to override the default behavior.
 
 ## ruby
 

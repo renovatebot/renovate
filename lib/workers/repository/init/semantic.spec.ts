@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, git } from '../../../../test/util';
+import { RenovateConfig, getConfig, getName, git } from '../../../../test/util';
 import { detectSemanticCommits } from './semantic';
 
 jest.mock('../../../util/git');
@@ -11,7 +11,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe('workers/repository/init/semantic', () => {
+describe(getName(__filename), () => {
   describe('detectSemanticCommits()', () => {
     it('detects false if unknown', async () => {
       config.semanticCommits = null;

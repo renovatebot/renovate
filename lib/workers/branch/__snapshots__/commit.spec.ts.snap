@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/branch/automerge commitFilesToBranch commits files 1`] = `
+exports[`workers/branch/commit commitFilesToBranch commits files 1`] = `
 Array [
   Array [
     Object {

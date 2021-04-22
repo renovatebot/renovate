@@ -1,0 +1,204 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch/index processBranch branch pr no rebase (dry run) 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pr-edited",
+}
+`;
+
+exports[`workers/branch/index processBranch branch pr no schedule (dry run) 1`] = `
+Object {
+  "branchExists": true,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch branch pr no schedule 1`] = `
+Object {
+  "branchExists": true,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch branch pr no schedule lockfile (dry run) 1`] = `
+Object {
+  "branchExists": true,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch closed pr (dry run) 1`] = `
+Object {
+  "branchExists": false,
+  "result": "already-existed",
+}
+`;
+
+exports[`workers/branch/index processBranch continues branch if branch edited and but PR found 1`] = `
+Object {
+  "branchExists": true,
+  "result": "error",
+}
+`;
+
+exports[`workers/branch/index processBranch does not skip branch if edited PR found with rebaseLabel 1`] = `
+Object {
+  "branchExists": true,
+  "result": "error",
+}
+`;
+
+exports[`workers/branch/index processBranch executes post-upgrade tasks if trust is high 1`] = `
+Object {
+  "branchExists": true,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch executes post-upgrade tasks once when set to branch mode 1`] = `
+Object {
+  "branchExists": true,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch executes post-upgrade tasks with disabled post-upgrade command templating 1`] = `
+Object {
+  "branchExists": true,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch executes post-upgrade tasks with multiple dependecy in one branch 1`] = `
+Object {
+  "branchExists": true,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if branch creation limit exceeded 1`] = `
+Object {
+  "branchExists": false,
+  "result": "branch-limit-reached",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if branch exists and prCreation set to approval 1`] = `
+Object {
+  "branchExists": true,
+  "result": "needs-pr-approval",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if branch exists but pending 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pending",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if branch exists but updated 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pending",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if commit limit exceeded 1`] = `
+Object {
+  "branchExists": false,
+  "result": "commit-limit-reached",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if no work 1`] = `
+Object {
+  "branchExists": false,
+  "result": "no-work",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if pr creation limit exceeded and branch exists 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pr-limit-reached",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch for fresh release with stabilityDays 1`] = `
+Object {
+  "branchExists": false,
+  "result": "pending",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if branch edited and and PR found with sha mismatch 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pr-edited",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if branch edited and no PR found 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pr-edited",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if edited PR found 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pr-edited",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if not scheduled and branch does not exist 1`] = `
+Object {
+  "branchExists": false,
+  "result": "not-scheduled",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if not scheduled and not updating out of schedule 1`] = `
+Object {
+  "branchExists": true,
+  "result": "not-scheduled",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if not stabilityDays not met 1`] = `
+Object {
+  "branchExists": false,
+  "result": "pending",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if target branch changed 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pr-edited",
+}
+`;
+
+exports[`workers/branch/index processBranch swallows branch errors 1`] = `
+Object {
+  "branchExists": false,
+  "result": "error",
+}
+`;
+
+exports[`workers/branch/index processBranch swallows pr errors 1`] = `
+Object {
+  "branchExists": true,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch throws and swallows branch errors 1`] = `
+Object {
+  "branchExists": true,
+  "result": "pr-created",
+}
+`;

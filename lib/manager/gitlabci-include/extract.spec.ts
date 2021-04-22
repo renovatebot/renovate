@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const yamlFile = fs.readFileSync(
@@ -6,7 +7,7 @@ const yamlFile = fs.readFileSync(
   'utf8'
 );
 
-describe('lib/manager/gitlabci-include/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(

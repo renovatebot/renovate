@@ -84,7 +84,7 @@ export function extractPackageFile(
     res.registryUrls = registryUrls.map((url) => {
       // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
       const cleaned = url.replace(/^"/, '').replace(/"$/, '');
-      if (getAdminConfig().trustLevel !== 'high') {
+      if (!getAdminConfig().exposeAllEnv) {
         return cleaned;
       }
       // interpolate any environment variables
