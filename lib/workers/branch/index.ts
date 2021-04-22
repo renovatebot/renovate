@@ -372,7 +372,11 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
-        await deleteBranchSilently(config.branchName);
+        if (getAdminConfig().dryRun) {
+          logger.info('DRY-RUN: Would delete branch' + config.branchName);
+        } else {
+          await deleteBranchSilently(config.branchName);
+        }
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
       }
