@@ -85,7 +85,7 @@ If configured like this, Renovate will use this to authenticate with npm and wil
 
 ### Add npmToken to Renovate config
 
-If you are using the main npmjs registry then you can configure just the npmToken instead:
+If you are using the main npmjs registry then you can configure just the `npmToken` instead:
 
 ```json
 {
@@ -99,7 +99,7 @@ If you don't want all users of the repository to see the unencrypted token, you 
 
 Go to <https://renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
 
-Add the encrypted result inside an `encrypted` object like this:
+Paste the encrypted result inside an `encrypted` object like this:
 
 ```json
 {
@@ -129,7 +129,7 @@ Renovate will then use the following logic:
 
 ### Encrypted entire .npmrc file into config
 
-Copy the entire `.npmrc`, replace newlines with `\n` chars, and then try encrypting it at <https://renovatebot.com/encrypt>
+Copy the entire `.npmrc`, replace newlines with `\n` characters , and then try encrypting it at <https://renovatebot.com/encrypt>.
 
 You will then get an encrypted string that you can substitute into your `renovate.json` instead.
 The end-result looks like this:
