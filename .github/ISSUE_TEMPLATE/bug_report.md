@@ -37,7 +37,7 @@ Copy/paste any log here, between the starting and ending backticks
 
 **Have you created a minimal reproduction repository?**
 
-Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
+Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
 
 - [ ] I have provided a minimal reproduction repository
 - [ ] I don't have time for that, but it happens in a public repository I have linked to
