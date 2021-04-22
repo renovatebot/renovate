@@ -217,7 +217,7 @@
     "@types/markdown-table": "2.0.0",
     "@types/moo": "0.5.4",
     "@types/nock": "10.0.3",
-    "@types/node": "14.14.37",
+    "@types/node": "14.14.41",
     "@types/node-emoji": "1.8.1",
     "@types/parse-link-header": "1.0.0",
     "@types/registry-auth-token": "4.2.0",
