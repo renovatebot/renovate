@@ -155,8 +155,6 @@ function parseContent(content: string): string[] {
     token = lexer.next();
   }
 
-  lexer.reset();
-
   return result;
 }
 

@@ -214,11 +214,9 @@ function filterTokens({ type }: Token): boolean {
 
 export function extractRawTokens(input: string): Token[] {
   lexer.reset(input);
-  const result = Array.from(lexer).map(
+  return Array.from(lexer).map(
     ({ type, offset, value }) => ({ type, offset, value } as Token)
   );
-  lexer.reset();
-  return result;
 }
 
 export function processTokens(tokens: Token[]): Token[] {

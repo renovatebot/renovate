@@ -66,6 +66,5 @@ export function extractPackageFile(content: string): PackageFile {
     }
     token = lexer.next();
   }
-  lexer.reset();
   return { deps };
 }
