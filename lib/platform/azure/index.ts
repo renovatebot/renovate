@@ -417,10 +417,12 @@ export async function createPr({
     );
   }
   if (platformOptions?.azureAutoApprove) {
-    pr = await azureApiGit.updatePullRequestReviewer(
+    pr = await azureApiGit.createPullRequestReviewer(
       {
-        id: pr.createdBy.id,
+        reviewerUrl: pr.createdBy.url,
         vote: 10,
+        isFlagged: false,
+        isRequired: false,
       },
       config.repoId,
       pr.pullRequestId,
