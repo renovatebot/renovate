@@ -1,8 +1,10 @@
 import is from '@sindresorhus/is';
 
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import * as datasourceDocker from '../datasource/docker';
+import { getDatasourceList } from '../datasource';
 import { logger } from '../logger';
+import { HostRule } from '../types';
+import { regEx } from '../util/regex';
 import { getOptions } from './definitions';
 import type { GlobalConfig, RenovateOptions } from './types';
 
@@ -86,13 +88,69 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     });
   }
 
-  if (env.DOCKER_USERNAME && env.DOCKER_PASSWORD) {
-    config.hostRules.push({
-      hostType: datasourceDocker.id,
-      username: env.DOCKER_USERNAME,
-      password: env.DOCKER_PASSWORD,
-    });
+  const datasources = getDatasourceList();
+  const fields = ['token', 'username', 'password'];
+
+  const hostRules: HostRule[] = [];
+
+  for (const envName of Object.keys(env).sort()) {
+    const splitEnv = envName.toLowerCase().split('_').filter(Boolean);
+    const prefix = splitEnv.shift();
+    if (datasources.includes(prefix)) {
+      const suffix = splitEnv.pop();
+      if (fields.includes(suffix)) {
+        if (splitEnv.length === 0) {
+          const existingRule = hostRules.find(
+            (rule) =>
+              rule.hostType === prefix && !rule.hostName && !rule.domainName
+          );
+          if (existingRule) {
+            existingRule[suffix] = env[envName];
+          } else {
+            const newRule: HostRule = {
+              hostType: prefix,
+            };
+            newRule[suffix] = env[envName];
+            hostRules.push(newRule);
+          }
+        } else if (splitEnv.length === 1) {
+          logger.warn(`Cannot parse ${envName} env`);
+        } else if (splitEnv.length === 2) {
+          const domainName = splitEnv.join('.');
+          const existingRule = hostRules.find(
+            (rule) => rule.hostType === prefix && rule.domainName === domainName
+          );
+          if (existingRule) {
+            existingRule[suffix] = env[envName];
+          } else {
+            const newRule: HostRule = {
+              hostType: prefix,
+              domainName,
+            };
+            newRule[suffix] = env[envName];
+            hostRules.push(newRule);
+          }
+        } else {
+          const hostName = splitEnv.join('.');
+          const existingRule = hostRules.find(
+            (rule) => rule.hostType === prefix && rule.hostName === hostName
+          );
+          if (existingRule) {
+            existingRule[suffix] = env[envName];
+          } else {
+            const newRule: HostRule = {
+              hostType: prefix,
+              hostName,
+            };
+            newRule[suffix] = env[envName];
+            hostRules.push(newRule);
+          }
+        }
+      }
+    }
   }
+
+  config.hostRules = [...config.hostRules, ...hostRules];
 
   // These env vars are deprecated and deleted to make sure they're not used
   const unsupportedEnv = [
