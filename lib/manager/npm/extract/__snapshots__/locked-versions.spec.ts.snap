@@ -112,6 +112,12 @@ Array [
         "depName": "b",
         "lockedVersion": "2.0.0",
       },
+      Object {
+        "currentValue": "^1.22.0",
+        "depName": "yarn",
+        "depType": "engines",
+        "lockedVersion": undefined,
+      },
     ],
     "lockFiles": Array [
       "yarn.lock",
@@ -126,7 +132,7 @@ exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock
 Array [
   Object {
     "constraints": Object {
-      "yarn": ">= 2.0.0",
+      "yarn": "^2.0.0",
     },
     "deps": Array [
       Object {
@@ -138,6 +144,13 @@ Array [
         "currentValue": "2.0.0",
         "depName": "b",
         "lockedVersion": "2.0.0",
+      },
+      Object {
+        "currentValue": "^2.1.0",
+        "depName": "yarn",
+        "depType": "engines",
+        "lockedVersion": undefined,
+        "lookupName": "@yarnpkg/cli",
       },
     ],
     "lockFiles": Array [
@@ -153,7 +166,7 @@ exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock
 Array [
   Object {
     "constraints": Object {
-      "yarn": ">= 2.2.0",
+      "yarn": "^2.2.0",
     },
     "deps": Array [
       Object {
@@ -165,6 +178,13 @@ Array [
         "currentValue": "2.0.0",
         "depName": "b",
         "lockedVersion": "2.0.0",
+      },
+      Object {
+        "currentValue": "^2.2.0",
+        "depName": "yarn",
+        "depType": "engines",
+        "lockedVersion": undefined,
+        "lookupName": "@yarnpkg/cli",
       },
     ],
     "lockFiles": Array [

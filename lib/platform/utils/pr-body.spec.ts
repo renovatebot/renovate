@@ -1,7 +1,8 @@
 import fs from 'fs-extra';
+import { getName } from '../../../test/util';
 import { smartTruncate } from './pr-body';
 
-describe('platform/utils/pr-body', () => {
+describe(getName(__filename), () => {
   let prBody: string;
   beforeAll(async () => {
     prBody = await fs.readFile(

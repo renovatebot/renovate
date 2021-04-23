@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple dependencies advanced 1`] = `
+exports[`manager/cargo/extract extractPackageFile() extracts multiple dependencies advanced 1`] = `
 Array [
   Object {
     "currentValue": "0.2.0",
@@ -242,7 +242,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple dependencies simple 1`] = `
+exports[`manager/cargo/extract extractPackageFile() extracts multiple dependencies simple 1`] = `
 Array [
   Object {
     "currentValue": "=0.2.43",
@@ -391,7 +391,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() extracts platform specific dependencies 1`] = `
+exports[`manager/cargo/extract extractPackageFile() extracts platform specific dependencies 1`] = `
 Array [
   Object {
     "currentValue": "0.2.37",
@@ -437,7 +437,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config (legacy path) 1`] = `
+exports[`manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config (legacy path) 1`] = `
 Array [
   Object {
     "currentValue": "0.1.0",
@@ -475,7 +475,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config.toml 1`] = `
+exports[`manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config.toml 1`] = `
 Array [
   Object {
     "currentValue": "0.1.0",
@@ -513,7 +513,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() fails to parse cargo config with invalid TOML 1`] = `
+exports[`manager/cargo/extract extractPackageFile() fails to parse cargo config with invalid TOML 1`] = `
 Array [
   Object {
     "currentValue": "0.1.0",
@@ -547,7 +547,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() handles inline tables 1`] = `
+exports[`manager/cargo/extract extractPackageFile() handles inline tables 1`] = `
 Array [
   Object {
     "currentValue": "0.1",
@@ -629,7 +629,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() handles standard tables 1`] = `
+exports[`manager/cargo/extract extractPackageFile() handles standard tables 1`] = `
 Array [
   Object {
     "currentValue": "1.2",
@@ -694,7 +694,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() ignore cargo config registries with missing index 1`] = `
+exports[`manager/cargo/extract extractPackageFile() ignore cargo config registries with missing index 1`] = `
 Array [
   Object {
     "currentValue": "0.1.0",
@@ -728,7 +728,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cargo/extract extractPackageFile() skips unknown registries 1`] = `
+exports[`manager/cargo/extract extractPackageFile() skips unknown registries 1`] = `
 Array [
   Object {
     "currentValue": "0.1.0",

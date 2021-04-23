@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const helmDefaultChartInitValues = readFileSync(
@@ -11,7 +12,7 @@ const helmMultiAndNestedImageValues = readFileSync(
   'utf8'
 );
 
-describe('lib/manager/helm-values/extract', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

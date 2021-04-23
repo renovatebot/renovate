@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
-import { fs } from '../../../../test/util';
+import { fs, getName } from '../../../../test/util';
 import { getYarnLock } from './yarn';
 
 jest.mock('../../../util/fs');
 
-describe('manager/npm/extract/yarn', () => {
+describe(getName(__filename), () => {
   describe('.getYarnLock()', () => {
     it('returns empty if exception parsing', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');

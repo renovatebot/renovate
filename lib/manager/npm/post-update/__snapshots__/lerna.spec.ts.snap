@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
+
 exports[`manager/npm/post-update/lerna generateLockFiles() allows scripts for trust level high 1`] = `
 Array [
   Object {
-    "cmd": "lerna info",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -61,7 +62,7 @@ Array [
 exports[`manager/npm/post-update/lerna generateLockFiles() defaults to latest if lerna version unspecified 1`] = `
 Array [
   Object {
-    "cmd": "lerna info",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -120,7 +121,7 @@ Array [
 exports[`manager/npm/post-update/lerna generateLockFiles() generates package-lock.json files 1`] = `
 Array [
   Object {
-    "cmd": "lerna info",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -179,7 +180,7 @@ Array [
 exports[`manager/npm/post-update/lerna generateLockFiles() generates yarn.lock files 1`] = `
 Array [
   Object {
-    "cmd": "lerna info",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -238,7 +239,7 @@ Array [
 exports[`manager/npm/post-update/lerna generateLockFiles() maps dot files 1`] = `
 Array [
   Object {
-    "cmd": "lerna info",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -297,7 +298,7 @@ Array [
 exports[`manager/npm/post-update/lerna generateLockFiles() performs full npm install 1`] = `
 Array [
   Object {
-    "cmd": "lerna info",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -352,4 +353,3 @@ Array [
   },
 ]
 `;
-

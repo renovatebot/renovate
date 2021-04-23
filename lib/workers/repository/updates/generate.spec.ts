@@ -1,4 +1,4 @@
-import { defaultConfig, partial } from '../../../../test/util';
+import { defaultConfig, getName, partial } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import * as datasourceNpm from '../../../datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
@@ -8,7 +8,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('workers/repository/updates/generate', () => {
+describe(getName(__filename), () => {
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade', () => {
       const branch = [

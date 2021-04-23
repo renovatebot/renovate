@@ -37,15 +37,19 @@ export function extractTerraformProvider(
     const closedBrackets = (line.match(/\}/g) || []).length;
     braceCounter = braceCounter + openBrackets - closedBrackets;
 
-    const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
-      if (kvMatch.groups.key === 'version') {
-        dep.currentValue = kvMatch.groups.value;
-      } else if (kvMatch.groups.key === 'source') {
-        dep.managerData.source = kvMatch.groups.value;
-        dep.managerData.sourceLine = lineNumber;
+    // only update fields inside the root block
+    if (braceCounter === 1) {
+      const kvMatch = keyValueExtractionRegex.exec(line);
+      if (kvMatch) {
+        if (kvMatch.groups.key === 'version') {
+          dep.currentValue = kvMatch.groups.value;
+        } else if (kvMatch.groups.key === 'source') {
+          dep.managerData.source = kvMatch.groups.value;
+          dep.managerData.sourceLine = lineNumber;
+        }
       }
     }
+
     lineNumber += 1;
   } while (braceCounter !== 0);
   deps.push(dep);

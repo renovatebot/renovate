@@ -11,7 +11,7 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPostUpgradeCommandTemplating
 
-Set to true to allow templating of post-upgrade commands.
+Set to true to allow templating of dependency level post-upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
@@ -36,7 +36,7 @@ The command to install dependencies (`npm ci --ignore-scripts`) is necessary bec
       "postUpgradeTasks": {
         "commands": [
           "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrateOnly --allowDirty --force"
+          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
         ],
         "fileFilters": ["**/**"]
       }
@@ -49,7 +49,7 @@ With this configuration, the executable command for `@angular/core` looks like t
 
 ```bash
 npm ci --ignore-scripts
-npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty --force
+npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
 ## allowedPostUpgradeCommands
@@ -131,6 +131,14 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer pack
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
+
+## dockerChildPrefix
+
+Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
+
+If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
+
+Note that dangling containers will not be removed until Renovate is run with the same prefix again.
 
 ## dockerImagePrefix
 

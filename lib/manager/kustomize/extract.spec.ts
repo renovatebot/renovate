@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { getName } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
@@ -52,7 +53,7 @@ const kustomizeDepsInResources = readFileSync(
 
 const sha = readFileSync('lib/manager/kustomize/__fixtures__/sha.yaml', 'utf8');
 
-describe('manager/kustomize/extract', () => {
+describe(getName(__filename), () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
     expect(file).not.toBeNull();

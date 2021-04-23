@@ -1,11 +1,16 @@
-import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  getName,
+  platform,
+} from '../../../../test/util';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
 } from '../../../constants/error-messages';
 import { initApis } from './apis';
 
-describe('workers/repository/init/apis', () => {
+describe(getName(__filename), () => {
   describe('initApis', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -52,6 +57,21 @@ describe('workers/repository/init/apis', () => {
           includeForks: false,
         })
       ).rejects.toThrow(REPOSITORY_FORKED);
+    });
+    it('ignores platform.getJsonFile() failures', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+      });
+      platform.getJsonFile.mockRejectedValue(new Error());
+      await expect(
+        initApis({
+          ...config,
+          optimizeForDisabled: true,
+          includeForks: false,
+          isFork: true,
+        })
+      ).resolves.not.toThrow();
     });
     it('uses the onboardingConfigFileName if set', async () => {
       platform.initRepo.mockResolvedValueOnce({

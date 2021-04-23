@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { Readable } from 'stream';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { UpdateType } from '../../config';
 import { updateDependency } from './update';
 
@@ -28,7 +29,7 @@ git_repository(
 )
 */
 
-describe('manager/bazel/update', () => {
+describe(getName(__filename), () => {
   describe('updateDependency', () => {
     beforeEach(() => {
       jest.resetAllMocks();

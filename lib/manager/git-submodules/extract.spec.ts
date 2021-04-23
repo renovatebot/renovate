@@ -1,6 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
-import { partial } from '../../../test/util';
+import { getName, partial } from '../../../test/util';
+import * as hostRules from '../../util/host-rules';
 import type { PackageFile } from '../types';
 import extractPackageFile from './extract';
 
@@ -10,7 +11,7 @@ const Git: typeof _simpleGit = jest.requireActual('simple-git');
 
 const localDir = `${__dirname}/__fixtures__`;
 
-describe('lib/manager/gitsubmodules/extract', () => {
+describe(getName(__filename), () => {
   // flaky ci tests
   jest.setTimeout(10 * 1000);
 
@@ -44,6 +45,7 @@ describe('lib/manager/gitsubmodules/extract', () => {
   });
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
+      hostRules.add({ hostName: 'github.com', token: 'abc123' });
       let res: PackageFile;
       expect(
         await extractPackageFile('', '.gitmodules.1', { localDir })
