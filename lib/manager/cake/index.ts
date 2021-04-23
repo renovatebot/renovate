@@ -19,6 +19,7 @@ const lexerStates = {
     },
     dependencyQuoted: {
       match: /^#(?:addin|tool|module)\s+"(?:nuget|dotnet):[^"]+"\s*$/,
+      value: (s: string) => s.trim().slice(1, -1),
     },
     unknown: { match: /[^]/, lineBreaks: true },
   },
@@ -26,13 +27,9 @@ const lexerStates = {
 
 function parseDependencyLine(line: string): PackageDependency | null {
   try {
-    let url = line.replace(/^[^:]*:/, '').trimEnd();
+    let url = line.replace(/^[^:]*:/, '');
     const isEmptyHost = url.startsWith('?');
     url = isEmptyHost ? `http://localhost/${url}` : url;
-
-    if (url.endsWith('"')) {
-      url = url.slice(0, -1);
-    }
 
     const { origin: registryUrl, protocol, searchParams } = new URL(url);
 
