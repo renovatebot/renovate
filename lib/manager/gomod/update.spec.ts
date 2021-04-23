@@ -1,10 +1,9 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
-const gomod1 = readFileSync('lib/manager/gomod/__fixtures__/1/go.mod', 'utf8');
-const gomod2 = readFileSync('lib/manager/gomod/__fixtures__/2/go.mod', 'utf8');
+const gomod1 = loadFixture(__filename, '1/go.mod');
+const gomod2 = loadFixture(__filename, '2/go.mod');
 
 describe(getName(__filename), () => {
   describe('updateDependency', () => {

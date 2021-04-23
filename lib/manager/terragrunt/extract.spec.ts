@@ -1,8 +1,7 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const tg1 = readFileSync('lib/manager/terragrunt/__fixtures__/2.hcl', 'utf8');
+const tg1 = loadFixture(__filename, '2.hcl');
 const tg2 = `terragrunt {
   source = "../../modules/fe"
 }

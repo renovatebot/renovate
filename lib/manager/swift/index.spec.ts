@@ -1,12 +1,7 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const pkgContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/SamplePackage.swift`),
-  'utf8'
-);
+const pkgContent = loadFixture(__filename, `SamplePackage.swift`);
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

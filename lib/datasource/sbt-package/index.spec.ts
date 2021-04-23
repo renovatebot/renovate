@@ -1,22 +1,13 @@
-import fs from 'fs';
 import nock from 'nock';
-import upath from 'upath';
 import { getPkgReleases } from '..';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-plugin/util';
 import * as sbtPlugin from '.';
 
-const mavenIndexHtml = fs.readFileSync(
-  upath.resolve(__dirname, `./__fixtures__/maven-index.html`),
-  'utf8'
-);
-
-const sbtPluginIndex = fs.readFileSync(
-  upath.resolve(__dirname, `./__fixtures__/sbt-plugins-index.html`),
-  'utf8'
-);
+const mavenIndexHtml = loadFixture(__filename, `maven-index.html`);
+const sbtPluginIndex = loadFixture(__filename, `sbt-plugins-index.html`);
 
 describe(getName(__filename), () => {
   it('parses Maven index directory', () => {

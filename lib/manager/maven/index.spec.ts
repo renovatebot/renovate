@@ -1,27 +1,14 @@
-import { readFileSync } from 'fs';
-import { fs, getName } from '../../../test/util';
+import { fs, getName, loadFixture } from '../../../test/util';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('../../util/fs');
 
-const pomContent = readFileSync(
-  'lib/manager/maven/__fixtures__/simple.pom.xml',
-  'utf8'
-);
-const pomParent = readFileSync(
-  'lib/manager/maven/__fixtures__/parent.pom.xml',
-  'utf8'
-);
-const pomChild = readFileSync(
-  'lib/manager/maven/__fixtures__/child.pom.xml',
-  'utf8'
-);
-const origContent = readFileSync(
-  'lib/manager/maven/__fixtures__/grouping.pom.xml',
-  'utf8'
-);
+const pomContent = loadFixture(__filename, 'simple.pom.xml');
+const pomParent = loadFixture(__filename, 'parent.pom.xml');
+const pomChild = loadFixture(__filename, 'child.pom.xml');
+const origContent = loadFixture(__filename, 'grouping.pom.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);

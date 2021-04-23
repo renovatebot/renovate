@@ -1,7 +1,6 @@
-import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
-import { getName, mocked } from '../../../test/util';
+import { getName, loadFixture, mocked } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -42,13 +41,13 @@ describe(getName(__filename), () => {
     httpMock.reset();
   });
 
-  const graphqlOpenPullRequests = fs.readFileSync(
-    'lib/platform/github/__fixtures__/graphql/pullrequest-1.json',
-    'utf8'
+  const graphqlOpenPullRequests = loadFixture(
+    __filename,
+    'graphql/pullrequest-1.json'
   );
-  const graphqlClosedPullRequests = fs.readFileSync(
-    'lib/platform/github/__fixtures__/graphql/pullrequests-closed.json',
-    'utf8'
+  const graphqlClosedPullRequests = loadFixture(
+    __filename,
+    'graphql/pullrequests-closed.json'
   );
 
   describe('initPlatform()', () => {

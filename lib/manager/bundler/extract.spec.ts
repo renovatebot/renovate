@@ -1,67 +1,33 @@
-import { readFileSync } from 'fs';
-import { fs, getName } from '../../../test/util';
+import { fs, getName, loadFixture } from '../../../test/util';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-const railsGemfile = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.rails',
-  'utf8'
-);
-const railsGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.rails.lock',
-  'utf8'
-);
+const railsGemfile = loadFixture(__filename, 'Gemfile.rails');
+const railsGemfileLock = loadFixture(__filename, 'Gemfile.rails.lock');
 
-const sourceGroupGemfile = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.sourceGroup',
-  'utf8'
-);
-const webPackerGemfile = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.webpacker',
-  'utf8'
-);
-const webPackerGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.webpacker.lock',
-  'utf8'
-);
-const mastodonGemfile = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.mastodon',
-  'utf8'
-);
-const mastodonGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.mastodon.lock',
-  'utf8'
-);
-const rubyCIGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.rubyci.lock',
-  'utf8'
-);
+const sourceGroupGemfile = loadFixture(__filename, 'Gemfile.sourceGroup');
+const webPackerGemfile = loadFixture(__filename, 'Gemfile.webpacker');
+const webPackerGemfileLock = loadFixture(__filename, 'Gemfile.webpacker.lock');
+const mastodonGemfile = loadFixture(__filename, 'Gemfile.mastodon');
+const mastodonGemfileLock = loadFixture(__filename, 'Gemfile.mastodon.lock');
+const rubyCIGemfileLock = loadFixture(__filename, 'Gemfile.rubyci.lock');
 
-const rubyCIGemfile = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.rubyci',
-  'utf8'
+const rubyCIGemfile = loadFixture(__filename, 'Gemfile.rubyci');
+const gitlabFossGemfileLock = loadFixture(
+  __filename,
+  'Gemfile.gitlab-foss.lock'
 );
-const gitlabFossGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.gitlab-foss.lock',
-  'utf8'
+const gitlabFossGemfile = loadFixture(__filename, 'Gemfile.gitlab-foss');
+const sourceBlockGemfile = loadFixture(__filename, 'Gemfile.sourceBlock');
+const sourceBlockWithNewLinesGemfileLock = loadFixture(
+  __filename,
+  'Gemfile.sourceBlockWithNewLines.lock'
 );
-const gitlabFossGemfile = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.gitlab-foss',
-  'utf8'
-);
-const sourceBlockGemfile = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.sourceBlock',
-  'utf8'
-);
-const sourceBlockWithNewLinesGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.sourceBlockWithNewLines.lock',
-  'utf8'
-);
-const sourceBlockWithNewLinesGemfile = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.sourceBlockWithNewLines',
-  'utf8'
+const sourceBlockWithNewLinesGemfile = loadFixture(
+  __filename,
+  'Gemfile.sourceBlockWithNewLines'
 );
 
 function validateGems(raw, parsed) {

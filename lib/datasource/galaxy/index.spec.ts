@@ -1,18 +1,11 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 
 import { id as datasource } from '.';
 
-const res1 = fs.readFileSync(
-  'lib/datasource/galaxy/__fixtures__/timezone',
-  'utf8'
-);
-const empty = fs.readFileSync(
-  'lib/datasource/galaxy/__fixtures__/empty',
-  'utf8'
-);
+const res1 = loadFixture(__filename, 'timezone');
+const empty = loadFixture(__filename, 'empty');
 
 const baseUrl = 'https://galaxy.ansible.com/';
 
