@@ -277,6 +277,7 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
+  ignoreScripts?: boolean;
 
   platform?: string;
   upgrades?: Upgrade[];
