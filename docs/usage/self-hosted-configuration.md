@@ -193,6 +193,13 @@ It will also override any settings in `packageRules`.
 ## forkMode
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
+However, if this is set to true then Renovate will clone the repository before working on the clone and creating Pull Requests on the parent (GitHub only).
+
+## forkToken
+
+You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
+This should be set to a personal access token (GitHub only) when `forkMode` is set to `true`.
+Renovate will use this token to clone the repository and to create Pull Requests on the parent.
 
 ## gitAuthor
 
