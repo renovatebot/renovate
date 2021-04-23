@@ -10,7 +10,7 @@ export const defaultConfig = {
   fileMatch: ['\\.cake$'],
 };
 
-const lexerStates = {
+const lexer = moo.states({
   main: {
     lineComment: { match: /\/\/.*?$/ },
     multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true },
@@ -23,7 +23,7 @@ const lexerStates = {
     },
     unknown: { match: /[^]/, lineBreaks: true },
   },
-};
+});
 
 function parseDependencyLine(line: string): PackageDependency | null {
   try {
@@ -54,7 +54,6 @@ function parseDependencyLine(line: string): PackageDependency | null {
 
 export function extractPackageFile(content: string): PackageFile {
   const deps = [];
-  const lexer = moo.states(lexerStates);
   lexer.reset(content);
   let token = lexer.next();
   while (token) {
