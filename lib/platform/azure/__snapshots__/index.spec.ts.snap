@@ -64,9 +64,9 @@ Object {
   "pullRequestId": 456,
   "reviewers": Array [
     Object {
-      "id": prResult.createdBy.id,
-      "vote": 10
-    }
+      "id": 123,
+      "vote": 10,
+    },
   ],
   "sourceBranch": undefined,
   "sourceRefName": undefined,
