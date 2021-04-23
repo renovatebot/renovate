@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { logger } from '../logger';
+import { massageConfig } from './massage';
 import { migrateConfig } from './migration';
 import type { GlobalConfig } from './types';
 
@@ -30,5 +31,5 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     );
     config = migratedConfig;
   }
-  return config;
+  return massageConfig(migratedConfig);
 }
