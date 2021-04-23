@@ -337,6 +337,15 @@ const options: RenovateOptions[] = [
     admin: true,
   },
   {
+    name: 'forkToken',
+    description:
+      'Will be used on GitHub when `forkMode` is set to `true` to clone the repositories.',
+    stage: 'repository',
+    type: 'string',
+    default: '',
+    admin: true,
+  },
+  {
     name: 'requireConfig',
     description: 'Set to true if repositories must have a config to activate.',
     stage: 'repository',
