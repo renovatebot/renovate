@@ -26,7 +26,7 @@ Don't be afraid to ask for help.
 ### Apply labels to issues
 
 All issues should have labels attached to them.
-Read the [issue-labeling guide](https://github.com/renovatebot/renovate/blob/master/docs/development/issue-labeling.md) to get all the necessary info.
+Read the [issue-labeling guide](https://github.com/renovatebot/renovate/blob/main/docs/development/issue-labeling.md) to get all the necessary info.
 
 In general try to make a good-faith effort to label things correctly.
 
