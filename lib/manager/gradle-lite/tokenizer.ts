@@ -19,7 +19,7 @@ const escapedChars = {
   },
 };
 
-export const rawLexer = {
+const lexer = moo.states({
   // Top-level Groovy lexemes
   main: {
     [TokenType.LineComment]: { match: /\/\/.*?$/ },
@@ -104,7 +104,7 @@ export const rawLexer = {
     [TokenType.RightBrace]: { match: '}', pop: 1 },
     [TokenType.UnknownLexeme]: { match: /[^]/, lineBreaks: true },
   },
-};
+});
 
 /*
   Turn UnknownLexeme chars to UnknownFragment strings
@@ -213,11 +213,12 @@ function filterTokens({ type }: Token): boolean {
 }
 
 export function extractRawTokens(input: string): Token[] {
-  const lexer = moo.states(rawLexer);
   lexer.reset(input);
-  return Array.from(lexer).map(
+  const result = Array.from(lexer).map(
     ({ type, offset, value }) => ({ type, offset, value } as Token)
   );
+  lexer.reset();
+  return result;
 }
 
 export function processTokens(tokens: Token[]): Token[] {

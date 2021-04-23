@@ -53,7 +53,7 @@ function parseUrl(urlString: string): UrlParsedResult | null {
   return null;
 }
 
-const dummyLexer = {
+const lexer = moo.states({
   main: {
     lineComment: { match: /#.*?$/ },
     leftParen: { match: '(' },
@@ -103,11 +103,11 @@ const dummyLexer = {
     stringFinish: { match: "'", pop: 1 },
     char: { match: /[^]/, lineBreaks: true },
   },
-};
+});
 
 function parseContent(content: string): string[] {
-  const lexer = moo.states(dummyLexer);
   lexer.reset(content);
+
   let balance = 0;
 
   let def: null | string = null;
@@ -154,6 +154,8 @@ function parseContent(content: string): string[] {
 
     token = lexer.next();
   }
+
+  lexer.reset();
 
   return result;
 }
