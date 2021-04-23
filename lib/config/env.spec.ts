@@ -120,6 +120,12 @@ describe(getName(__filename), () => {
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
+    it('rejects incomplete datasource env token', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        PYPI_FOO_TOKEN: 'some-token',
+      };
+      expect(env.getConfig(envParam).hostRules).toHaveLength(0);
+    });
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: PLATFORM_TYPE_BITBUCKET,

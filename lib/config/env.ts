@@ -107,6 +107,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
           // host-less rule
         } else if (splitEnv.length === 1) {
           logger.warn(`Cannot parse ${envName} env`);
+          continue; // eslint-disable-line no-continue
         } else if (splitEnv.length === 2) {
           domainName = splitEnv.join('.');
         } else {
