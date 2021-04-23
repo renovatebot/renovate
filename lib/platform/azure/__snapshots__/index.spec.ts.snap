@@ -64,7 +64,7 @@ Object {
   "pullRequestId": 456,
   "reviewers": Array [
     Object {
-      "id": 123,
+      "reviewerUrl": "user-url",
       "vote": 10,
     },
   ],
