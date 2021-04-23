@@ -206,7 +206,8 @@ However, if this is set to true then Renovate will clone the repository before w
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
 This should be set to a Personal Access Token (GitHub only) when `forkMode` is set to `true`.
-Renovate will use this token to clone the repository and to create Pull Requests on the parent.
+Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
+Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitAuthor
 
