@@ -7,7 +7,7 @@ import { id as datasource } from '.';
 
 const hostRules: any = _hostRules;
 
-const res1 = loadJsonFixture('certifi.json');
+const res1 = loadJsonFixture(__filename, 'certifi.json');
 
 jest.mock('../../util/host-rules');
 

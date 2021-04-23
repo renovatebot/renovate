@@ -3,7 +3,7 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadJsonFixture } from '../../../test/util';
 import { id as datasource } from '.';
 
-const body = loadJsonFixture('shared_preferences.json');
+const body = loadJsonFixture(__filename, 'shared_preferences.json');
 
 const baseUrl = 'https://pub.dartlang.org/api/packages/';
 

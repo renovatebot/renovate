@@ -6,8 +6,8 @@ import { resetCache } from './get-rubygems-org';
 import * as rubygems from '.';
 
 const rubygemsOrgVersions = loadFixture(__filename, 'rubygems-org.txt');
-const railsInfo = loadJsonFixture('rails/info.json');
-const railsVersions = loadJsonFixture('rails/versions.json');
+const railsInfo = loadJsonFixture(__filename, 'rails/info.json');
+const railsVersions = loadJsonFixture(__filename, 'rails/versions.json');
 
 describe(getName(__filename), () => {
   describe('getReleases', () => {

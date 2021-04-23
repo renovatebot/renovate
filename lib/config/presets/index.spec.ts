@@ -16,7 +16,10 @@ jest.mock('./local');
 const npm = mocked(_npm);
 const local = mocked(_local);
 
-const presetIkatyang = loadJsonFixture('renovate-config-ikatyang.json');
+const presetIkatyang = loadJsonFixture(
+  __filename,
+  'renovate-config-ikatyang.json'
+);
 
 npm.getPreset = jest.fn(({ packageName, presetName }) => {
   if (packageName === 'renovate-config-ikatyang') {

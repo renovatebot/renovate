@@ -10,9 +10,9 @@ jest.mock('../../util/host-rules');
 
 const hostRules = _hostRules;
 
-const includesJson: any = loadJsonFixture('includes.json');
-const beytJson: any = loadJsonFixture('1beyt.json');
-const mailchimpJson: any = loadJsonFixture('mailchimp-api.json');
+const includesJson: any = loadJsonFixture(__filename, 'includes.json');
+const beytJson: any = loadJsonFixture(__filename, '1beyt.json');
+const mailchimpJson: any = loadJsonFixture(__filename, 'mailchimp-api.json');
 
 const baseUrl = 'https://packagist.org';
 
