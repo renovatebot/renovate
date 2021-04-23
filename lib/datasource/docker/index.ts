@@ -1,4 +1,3 @@
-import { OutgoingHttpHeaders } from 'http';
 import URL from 'url';
 import { ECR } from '@aws-sdk/client-ecr';
 import hasha from 'hasha';
@@ -11,6 +10,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -26,9 +26,7 @@ export const defaultVersioning = dockerVersioning.id;
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
-  additionalBranchPrefix: 'docker-',
   commitMessageTopic: '{{{depName}}} Docker tag',
-  major: { enabled: false },
   commitMessageExtra:
     'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
   digest: {

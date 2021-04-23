@@ -177,4 +177,5 @@ export interface Platform {
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
+  filterUnavailableUsers?(users: string[]): Promise<string[]>;
 }

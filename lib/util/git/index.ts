@@ -1,6 +1,5 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import GitUrlParse from 'git-url-parse';
 import Git, {
   DiffResult as DiffResult_,
   ResetMode,
@@ -489,7 +488,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   ).trim();
   const { gitAuthorEmail } = config;
   if (
-    lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
     lastAuthor === gitAuthorEmail ||
     config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
@@ -761,10 +759,4 @@ export function getUrl({
     host,
     pathname: repository + '.git',
   });
-}
-
-export function getHttpUrl(url: string, token?: string): string {
-  const parsedUrl = GitUrlParse(url);
-  parsedUrl.token = token;
-  return parsedUrl.toString('https');
 }

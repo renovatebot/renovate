@@ -11,7 +11,6 @@ Object {
       "skipReason": "invalid-name",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -135,7 +134,6 @@ Object {
       "prettyDepType": "engine",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -299,7 +297,6 @@ Object {
       "sourceUrl": "https://github.com/owner/n",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -349,7 +346,6 @@ Object {
       "skipReason": "unknown-version",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -361,7 +357,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
-  "skipInstalls": true,
+  "skipInstalls": false,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -410,7 +406,6 @@ Object {
       "skipReason": "unknown-volta",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -465,7 +460,6 @@ Object {
       "skipReason": "unknown-version",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -602,7 +596,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -739,7 +732,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "yarn",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -876,7 +868,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -899,7 +890,6 @@ exports[`manager/npm/extract/index .extractPackageFile() finds complex yarn work
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -1038,7 +1028,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -1061,7 +1050,6 @@ exports[`manager/npm/extract/index .extractPackageFile() finds simple yarn works
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
@@ -1086,7 +1074,6 @@ exports[`manager/npm/extract/index .extractPackageFile() finds simple yarn works
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
@@ -1225,7 +1212,6 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {

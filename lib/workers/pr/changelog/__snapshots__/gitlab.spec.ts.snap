@@ -48,7 +48,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -59,7 +59,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -70,7 +70,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -81,7 +81,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -92,7 +92,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -103,7 +103,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -114,7 +114,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -125,7 +125,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -136,7 +136,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -297,7 +297,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -308,7 +308,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -319,7 +319,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -330,7 +330,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -341,7 +341,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -352,7 +352,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -363,7 +363,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -374,7 +374,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -385,7 +385,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -444,7 +444,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -455,7 +455,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -466,7 +466,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -477,7 +477,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -488,7 +488,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -499,7 +499,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -510,7 +510,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -521,7 +521,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -532,7 +532,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",

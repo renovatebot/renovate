@@ -5,7 +5,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -43,7 +43,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "npm.mycustomregistry.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -81,7 +81,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -119,7 +119,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -156,7 +156,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -194,7 +194,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -227,7 +227,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -260,7 +260,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -298,7 +298,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.from-env.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -350,7 +350,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -365,7 +365,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -380,7 +380,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -395,7 +395,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -433,7 +433,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic 1234",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -449,7 +449,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -464,7 +464,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -479,7 +479,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -494,7 +494,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -509,7 +509,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -519,49 +519,10 @@ Array [
 ]
 `;
 
-exports[`datasource/npm/index should use NPM_TOKEN if provided 1`] = `
-Object {
-  "name": "@foobar/core",
-  "registryUrl": "https://registry.npmjs.org/",
-  "releases": Array [
-    Object {
-      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
-      "version": "0.0.1",
-    },
-    Object {
-      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
-      "version": "0.0.2",
-    },
-  ],
-  "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
-  "tags": Object {
-    "latest": "0.0.1",
-  },
-  "versions": Object {},
-}
-`;
-
-exports[`datasource/npm/index should use NPM_TOKEN if provided 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "registry.npmjs.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/@foobar%2Fcore",
-  },
-]
-`;
-
 exports[`datasource/npm/index should use default registry if missing from npmrc 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org",
+  "registryUrl": "https://registry.npmjs.org/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -586,7 +547,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.npmjs.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -624,7 +585,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abcde",
       "host": "npm.mycustomregistry.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -663,7 +624,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abcde",
       "host": "npm.mycustomregistry.com",
       "user-agent": "https://github.com/renovatebot/renovate",

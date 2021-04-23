@@ -194,7 +194,7 @@ describe(getName(__filename), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { trustLevel: 'high' },
+        adminConfig: { exposeAllEnv: true },
       },
     ],
 

@@ -15,10 +15,10 @@ import type { RangeStrategy } from '../types';
 import managers from './api';
 import type {
   ExtractConfig,
-  LookupUpdate,
   ManagerApi,
   PackageFile,
   PackageUpdateConfig,
+  PackageUpdateResult,
   RangeConfig,
   Result,
 } from './types';
@@ -72,7 +72,7 @@ export async function extractAllPackageFiles(
 export function getPackageUpdates(
   manager: string,
   config: PackageUpdateConfig
-): Result<LookupUpdate[]> | null {
+): Result<PackageUpdateResult> | null {
   if (!managers.has(manager)) {
     return null;
   }

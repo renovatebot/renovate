@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
-import { RenovateConfig } from '../../config';
 import { setAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';

@@ -3,8 +3,7 @@ import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
 import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
-import { getHttpUrl } from '../../util/git';
-import * as hostRules from '../../util/host-rules';
+import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
 import type { ManagerConfig, PackageFile } from '../types';
 
 type GitModule = {
@@ -113,14 +112,7 @@ export default async function extractPackageFile(
           // hostRules only understands HTTP URLs
           // Find HTTP URL, then apply token
           let httpSubModuleUrl = getHttpUrl(subModuleUrl);
-          const hostRule = hostRules.find({ url: httpSubModuleUrl });
-          if (hostRule?.token) {
-            logger.debug(
-              { httpSubModuleUrl },
-              'Found hostRules token for submodule'
-            );
-            httpSubModuleUrl = getHttpUrl(subModuleUrl, hostRule.token);
-          }
+          httpSubModuleUrl = getRemoteUrlWithToken(httpSubModuleUrl);
           const currentValue = await getBranch(
             gitModulesPath,
             name,

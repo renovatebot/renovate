@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -18,6 +18,7 @@ import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { Pr, platform } from '../../platform';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getElapsedDays } from '../../util/date';
 import { emojify } from '../../util/emoji';
 import {
   checkoutBranch,
@@ -213,14 +214,9 @@ export async function processBranch(
       // both a stabilityDays setting and a releaseTimestamp
       config.stabilityStatus = BranchStatus.green;
       // Default to 'success' but set 'pending' if any update is pending
-      const oneDay = 24 * 60 * 60 * 1000;
       for (const upgrade of config.upgrades) {
         if (upgrade.stabilityDays && upgrade.releaseTimestamp) {
-          const daysElapsed = Math.floor(
-            (new Date().getTime() -
-              new Date(upgrade.releaseTimestamp).getTime()) /
-              oneDay
-          );
+          const daysElapsed = getElapsedDays(upgrade.releaseTimestamp);
           if (
             !dependencyDashboardCheck &&
             daysElapsed < upgrade.stabilityDays
@@ -376,7 +372,11 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
-        await deleteBranchSilently(config.branchName);
+        if (getAdminConfig().dryRun) {
+          logger.info('DRY-RUN: Would delete branch' + config.branchName);
+        } else {
+          await deleteBranchSilently(config.branchName);
+        }
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
       }

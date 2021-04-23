@@ -4,7 +4,7 @@ exports[`datasource/helm/index getReleases adds trailing slash to subdirectories
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -136,7 +136,7 @@ exports[`datasource/helm/index getReleases returns list of versions for normal r
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -150,7 +150,7 @@ exports[`datasource/helm/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -164,7 +164,7 @@ exports[`datasource/helm/index getReleases returns null for empty response 1`] =
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -178,7 +178,7 @@ exports[`datasource/helm/index getReleases returns null for missing response bod
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -192,7 +192,7 @@ exports[`datasource/helm/index getReleases returns null for unknown error 1`] = 
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -206,7 +206,7 @@ exports[`datasource/helm/index getReleases returns null if index.yaml in respons
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -220,7 +220,7 @@ exports[`datasource/helm/index getReleases returns null if index.yaml in respons
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -234,7 +234,7 @@ exports[`datasource/helm/index getReleases returns null if lookupName is not in 
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -250,7 +250,7 @@ exports[`datasource/helm/index getReleases throws for 5xx 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

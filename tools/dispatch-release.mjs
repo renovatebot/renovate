@@ -1,9 +1,10 @@
 import got from 'got';
 import shell from 'shelljs';
-import { program } from './utils.mjs';
+import { options } from './utils.mjs';
 
-const version = program.release;
-const dry = program.dryRun;
+const version = options.release;
+const tag = options.tag || 'latest';
+const dry = options.dryRun;
 
 shell.echo(`Dispatching version: ${version}`);
 
@@ -27,6 +28,7 @@ shell.echo(`Dispatching version: ${version}`);
           sha: process.env.GITHUB_SHA,
           ref: process.env.GITHUB_REF,
           version,
+          tag,
         },
       },
     }

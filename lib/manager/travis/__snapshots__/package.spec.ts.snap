@@ -1,23 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`manager/travis/package getPackageUpdates detects pinning 1`] = `
-Array [
-  Object {
-    "isRange": true,
-    "newMajor": 14,
-    "newValue": "10.0.1,12.3.0,null",
-    "sourceUrl": "https://github.com/nodejs/node",
-  },
-]
+Object {
+  "sourceUrl": "https://github.com/nodejs/node",
+  "updates": Array [
+    Object {
+      "isRange": true,
+      "newMajor": 14,
+      "newValue": "10.0.1,12.3.0,null",
+    },
+  ],
+}
 `;
 
 exports[`manager/travis/package getPackageUpdates returns result if needing updates 1`] = `
-Array [
-  Object {
-    "isRange": true,
-    "newMajor": 14,
-    "newValue": "10,12,14",
-    "sourceUrl": "https://github.com/nodejs/node",
-  },
-]
+Object {
+  "sourceUrl": "https://github.com/nodejs/node",
+  "updates": Array [
+    Object {
+      "isRange": true,
+      "newMajor": 14,
+      "newValue": "10,12,14",
+    },
+  ],
+}
 `;

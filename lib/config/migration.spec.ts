@@ -3,7 +3,10 @@ import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
 import { MigratedConfig } from './migration';
-import { RenovateSharedConfig, RenovateConfig as _RenovateConfig } from '.';
+import type {
+  RenovateSharedConfig,
+  RenovateConfig as _RenovateConfig,
+} from './types';
 
 const defaultConfig = getConfig();
 
@@ -30,11 +33,18 @@ describe(getName(__filename), () => {
         compatibility: {
           python: '3.7',
         },
-        extends: [':js-app', 'config:library', ':masterIssue'],
+        extends: [
+          ':automergeBranchMergeCommit',
+          'default:js-app',
+          'config:library',
+          ':masterIssue',
+          'helpers:oddIsUnstable',
+        ],
         maintainYarnLock: true,
         onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
+        ignoreNpmrcFile: true,
         separateMajorReleases: true,
         separatePatchReleases: true,
         suppressNotifications: ['lockFileErrors', 'prEditNotification'],
@@ -47,6 +57,7 @@ describe(getName(__filename), () => {
         masterIssueTitle: 'foo',
         gomodTidy: true,
         upgradeInRange: true,
+        trustLevel: 'high',
         automergeType: 'branch-push',
         branchName:
           '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',

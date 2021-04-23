@@ -372,6 +372,7 @@ describe(getName(__filename), () => {
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
     });
     it('returns if branch exists and prCreation set to approval', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -736,7 +737,7 @@ describe(getName(__filename), () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 
@@ -816,7 +817,7 @@ describe(getName(__filename), () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 
@@ -885,7 +886,7 @@ describe(getName(__filename), () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
       const result = await branchWorker.processBranch({
@@ -965,7 +966,7 @@ describe(getName(__filename), () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 
