@@ -107,10 +107,12 @@ describe(getName(__filename), () => {
     });
     it('supports domain and host names with case insensitivity', () => {
       const envParam: NodeJS.ProcessEnv = {
-        PYPI_GITHUB_COM_TOKEN: 'some-token',
+        GITHUB__TAGS_GITHUB_COM_TOKEN: 'some-token',
         pypi_my_CUSTOM_HOST_passWORD: 'some-password',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      const res = env.getConfig(envParam);
+      expect(res).toMatchSnapshot();
+      expect(res.hostRules).toHaveLength(2);
     });
     it('supports datasource env token', () => {
       const envParam: NodeJS.ProcessEnv = {

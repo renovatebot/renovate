@@ -4,7 +4,6 @@ import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getDatasourceList } from '../datasource';
 import { logger } from '../logger';
 import { HostRule } from '../types';
-import { regEx } from '../util/regex';
 import { getOptions } from './definitions';
 import type { GlobalConfig, RenovateOptions } from './types';
 
@@ -94,21 +93,22 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
   const hostRules: HostRule[] = [];
 
   for (const envName of Object.keys(env).sort()) {
-    const splitEnv = envName.toLowerCase().split('_').filter(Boolean);
-    const prefix = splitEnv.shift();
-    if (datasources.includes(prefix)) {
+    // Double underscore __ is used in place of hyphen -
+    const splitEnv = envName.toLowerCase().replace('__', '-').split('_');
+    const hostType = splitEnv.shift();
+    if (datasources.includes(hostType)) {
       const suffix = splitEnv.pop();
       if (fields.includes(suffix)) {
         if (splitEnv.length === 0) {
           const existingRule = hostRules.find(
             (rule) =>
-              rule.hostType === prefix && !rule.hostName && !rule.domainName
+              rule.hostType === hostType && !rule.hostName && !rule.domainName
           );
           if (existingRule) {
             existingRule[suffix] = env[envName];
           } else {
             const newRule: HostRule = {
-              hostType: prefix,
+              hostType,
             };
             newRule[suffix] = env[envName];
             hostRules.push(newRule);
@@ -118,13 +118,14 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
         } else if (splitEnv.length === 2) {
           const domainName = splitEnv.join('.');
           const existingRule = hostRules.find(
-            (rule) => rule.hostType === prefix && rule.domainName === domainName
+            (rule) =>
+              rule.hostType === hostType && rule.domainName === domainName
           );
           if (existingRule) {
             existingRule[suffix] = env[envName];
           } else {
             const newRule: HostRule = {
-              hostType: prefix,
+              hostType,
               domainName,
             };
             newRule[suffix] = env[envName];
@@ -133,13 +134,13 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
         } else {
           const hostName = splitEnv.join('.');
           const existingRule = hostRules.find(
-            (rule) => rule.hostType === prefix && rule.hostName === hostName
+            (rule) => rule.hostType === hostType && rule.hostName === hostName
           );
           if (existingRule) {
             existingRule[suffix] = env[envName];
           } else {
             const newRule: HostRule = {
-              hostType: prefix,
+              hostType,
               hostName,
             };
             newRule[suffix] = env[envName];
