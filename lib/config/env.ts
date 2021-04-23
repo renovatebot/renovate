@@ -99,53 +99,40 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     if (datasources.includes(hostType)) {
       const suffix = splitEnv.pop();
       if (fields.includes(suffix)) {
+        let hostName: string;
+        let domainName: string;
+        const rule: HostRule = {};
+        rule[suffix] = env[envName];
         if (splitEnv.length === 0) {
-          const existingRule = hostRules.find(
-            (rule) =>
-              rule.hostType === hostType && !rule.hostName && !rule.domainName
-          );
-          if (existingRule) {
-            existingRule[suffix] = env[envName];
-          } else {
-            const newRule: HostRule = {
-              hostType,
-            };
-            newRule[suffix] = env[envName];
-            hostRules.push(newRule);
-          }
+          // host-less rule
         } else if (splitEnv.length === 1) {
           logger.warn(`Cannot parse ${envName} env`);
         } else if (splitEnv.length === 2) {
-          const domainName = splitEnv.join('.');
-          const existingRule = hostRules.find(
-            (rule) =>
-              rule.hostType === hostType && rule.domainName === domainName
-          );
-          if (existingRule) {
-            existingRule[suffix] = env[envName];
-          } else {
-            const newRule: HostRule = {
-              hostType,
-              domainName,
-            };
-            newRule[suffix] = env[envName];
-            hostRules.push(newRule);
-          }
+          domainName = splitEnv.join('.');
         } else {
-          const hostName = splitEnv.join('.');
-          const existingRule = hostRules.find(
-            (rule) => rule.hostType === hostType && rule.hostName === hostName
-          );
-          if (existingRule) {
-            existingRule[suffix] = env[envName];
-          } else {
-            const newRule: HostRule = {
-              hostType,
-              hostName,
-            };
-            newRule[suffix] = env[envName];
-            hostRules.push(newRule);
+          hostName = splitEnv.join('.');
+        }
+        const existingRule = hostRules.find(
+          (hr) =>
+            hr.hostType === hostType &&
+            hr.hostName === hostName &&
+            hr.domainName === domainName
+        );
+        if (existingRule) {
+          // Add current field to existing rule
+          existingRule[suffix] = env[envName];
+        } else {
+          // Create a new rule
+          const newRule: HostRule = {
+            hostType,
+          };
+          if (hostName) {
+            newRule.hostName = hostName;
+          } else if (domainName) {
+            newRule.domainName = domainName;
           }
+          newRule[suffix] = env[envName];
+          hostRules.push(newRule);
         }
       }
     }
