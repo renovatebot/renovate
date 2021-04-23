@@ -1,6 +1,4 @@
-import { readFileSync } from 'fs';
-import upath from 'upath';
-import { getName } from '../../../../test/util';
+import { getName, loadFixture } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
@@ -10,18 +8,19 @@ const fs: any = _fs;
 // TODO: fix types
 const defaultConfig = getConfig();
 
-function readFixture(fixture: string) {
-  return readFileSync(
-    upath.resolve(__dirname, `../__fixtures__/${fixture}`),
-    'utf8'
-  );
-}
-
-const input01Content = readFixture('inputs/01.json');
-const workspacesContent = readFixture('inputs/workspaces.json');
-const workspacesSimpleContent = readFixture('inputs/workspaces-simple.json');
-const vendorisedContent = readFixture('is-object.json');
-const invalidNameContent = readFixture('invalid-name.json');
+const input01Content = loadFixture(__filename, 'inputs/01.json', '..');
+const workspacesContent = loadFixture(
+  __filename,
+  'inputs/workspaces.json',
+  '..'
+);
+const workspacesSimpleContent = loadFixture(
+  __filename,
+  'inputs/workspaces-simple.json',
+  '..'
+);
+const vendorisedContent = loadFixture(__filename, 'is-object.json', '..');
+const invalidNameContent = loadFixture(__filename, 'invalid-name.json', '..');
 
 describe(getName(__filename), () => {
   describe('.extractPackageFile()', () => {
