@@ -98,6 +98,7 @@ export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
 ): PlatformPrOptions {
   return {
+    azureAutoApprove: config.azureAutoApprove,
     azureAutoComplete: config.azureAutoComplete,
     azureWorkItemId: config.azureWorkItemId,
     bbUseDefaultReviewers: config.bbUseDefaultReviewers,

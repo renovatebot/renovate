@@ -58,6 +58,7 @@ Array [
     "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
+      "azureAutoApprove": false,
       "azureAutoComplete": false,
       "azureWorkItemId": 0,
       "bbUseDefaultReviewers": true,
@@ -90,6 +91,7 @@ Array [
     "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
+      "azureAutoApprove": false,
       "azureAutoComplete": false,
       "azureWorkItemId": 0,
       "bbUseDefaultReviewers": true,
@@ -109,6 +111,7 @@ Array [
     "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
+      "azureAutoApprove": false,
       "azureAutoComplete": false,
       "azureWorkItemId": 0,
       "bbUseDefaultReviewers": true,
@@ -128,6 +131,7 @@ Array [
     "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
+      "azureAutoApprove": false,
       "azureAutoComplete": false,
       "azureWorkItemId": 0,
       "bbUseDefaultReviewers": true,
@@ -147,6 +151,7 @@ Array [
     "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
+      "azureAutoApprove": false,
       "azureAutoComplete": false,
       "azureWorkItemId": 0,
       "bbUseDefaultReviewers": true,

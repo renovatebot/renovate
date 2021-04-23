@@ -1289,6 +1289,7 @@ describe(getName(__filename), () => {
         prBody: 'the-body',
         labels: [],
         platformOptions: {
+          azureAutoApprove: false,
           azureAutoComplete: false,
           gitLabAutomerge: true,
         },

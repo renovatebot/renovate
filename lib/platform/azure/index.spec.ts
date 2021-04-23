@@ -665,6 +665,46 @@ describe(getName(__filename), () => {
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
+    it('should create and return an approved PR object', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        displayNumber: `Pull Request #456`,
+        createdBy: {
+          id: 123,
+        },
+      };
+      const prUpdateResult = {
+        ...prResult,
+        reviewers: [
+          {
+            id: prResult.createdBy.id,
+            vote: 10,
+          },
+        ],
+      };
+      const updateFn = jest
+        .fn(() => prUpdateResult)
+        .mockName('updatePullRequestReviewer');
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            createPullRequest: jest.fn(() => prResult),
+            createPullRequestLabel: jest.fn(() => ({})),
+            updatePullRequestReviewer: updateFn,
+          } as any)
+      );
+      const pr = await azure.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'dev',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        platformOptions: { azureAutoApprove: true },
+      });
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
+    });
   });
 
   describe('updatePr(prNo, title, body)', () => {

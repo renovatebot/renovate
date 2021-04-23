@@ -707,6 +707,13 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  {
+    name: 'azureAutoApprove',
+    description:
+      'If set to true, Azure DevOps PRs will be automatically approved.',
+    type: 'boolean',
+    default: false,
+  },
   // depType
   {
     name: 'ignoreDeps',

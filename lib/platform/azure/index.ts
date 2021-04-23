@@ -416,16 +416,16 @@ export async function createPr({
       pr.pullRequestId
     );
   }
-  if(platformOptions?.azureAutoApprove) {
-      await azureApiGit.updatePullRequestReviewer(
-        reviewer: {
-          id: pr.createdBy.id,
-          vote: 10
-        },
-        repositoryId: config.repoId,
-        pullRequestId: pr.pullRequestId,
-        reviewerId: pr.createdBy.id
-      );
+  if (platformOptions?.azureAutoApprove) {
+    pr = await azureApiGit.updatePullRequestReviewer(
+      {
+        id: pr.createdBy.id,
+        vote: 10,
+      },
+      config.repoId,
+      pr.pullRequestId,
+      pr.createdBy.id
+    );
   }
   await Promise.all(
     labels.map((label) =>

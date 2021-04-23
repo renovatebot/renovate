@@ -204,6 +204,12 @@ You can also configure this using `packageRules` if you want to use it selective
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items).
 Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renovate can link an already existing work item when creating PRs.
 
+## azureAutoApprove
+
+Setting this to `true` will automatically approve the PRs in Azure DevOps.
+
+You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
+
 ## baseBranches
 
 By default, Renovate will detect and process only the repository's default branch, e.g. `master`.
