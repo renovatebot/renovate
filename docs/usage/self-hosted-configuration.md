@@ -200,7 +200,7 @@ It will also override any settings in `packageRules`.
 ## forkMode
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
-However, if this is set to `true` then Renovate will fork the repository into the personal space of the person owning the Personal Access Token.
+If this is set to `true` then Renovate will fork the repository into the personal space of the person owning the Personal Access Token.
 
 ## forkToken
 
