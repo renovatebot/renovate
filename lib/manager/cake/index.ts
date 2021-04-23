@@ -17,6 +17,10 @@ const lexerStates = {
     dependency: {
       match: /^#(?:addin|tool|module)\s+(?:nuget|dotnet):.*$/,
     },
+    dependencyQuoted: {
+      match: /^#(?:addin|tool|module)\s+"(?:nuget|dotnet):[^"]+"\s*$/,
+      value: (s: string) => s.trim().slice(1, -1),
+    },
     unknown: { match: /[^]/, lineBreaks: true },
   },
 };
@@ -26,6 +30,7 @@ function parseDependencyLine(line: string): PackageDependency | null {
     let url = line.replace(/^[^:]*:/, '');
     const isEmptyHost = url.startsWith('?');
     url = isEmptyHost ? `http://localhost/${url}` : url;
+
     const { origin: registryUrl, protocol, searchParams } = new URL(url);
 
     const depName = searchParams.get('package');
@@ -54,7 +59,7 @@ export function extractPackageFile(content: string): PackageFile {
   let token = lexer.next();
   while (token) {
     const { type, value } = token;
-    if (type === 'dependency') {
+    if (type === 'dependency' || type === 'dependencyQuoted') {
       const dep = parseDependencyLine(value);
       if (dep) {
         deps.push(dep);
