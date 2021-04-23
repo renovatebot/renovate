@@ -87,7 +87,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     });
   }
 
-  const datasources = getDatasourceList();
+  const datasources = new Set(getDatasourceList());
   const fields = ['token', 'username', 'password'];
 
   const hostRules: HostRule[] = [];
@@ -96,7 +96,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName.toLowerCase().replace('__', '-').split('_');
     const hostType = splitEnv.shift();
-    if (datasources.includes(hostType)) {
+    if (datasources.has(hostType)) {
       const suffix = splitEnv.pop();
       if (fields.includes(suffix)) {
         let hostName: string;
