@@ -88,6 +88,7 @@ const repoGroups = {
   hamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
+  HotChocolate: 'https://github.com/ChilliCream/hotchocolate',
   infrastructure: 'https://github.com/instructure/instructure-ui',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
