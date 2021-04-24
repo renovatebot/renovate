@@ -1,7 +1,7 @@
 import { getName } from '../../test/util';
 import configSerializer from './config-serializer';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('squashes templates', () => {
     const config = {
       nottoken: 'b',

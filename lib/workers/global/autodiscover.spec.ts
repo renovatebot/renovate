@@ -13,7 +13,7 @@ jest.unmock('../../platform');
 const hostRules = _hostRules;
 const ghApi: jest.Mocked<typeof _ghApi> = _ghApi as never;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let config: RenovateConfig;
   beforeEach(async () => {
     jest.resetAllMocks();

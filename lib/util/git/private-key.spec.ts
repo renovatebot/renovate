@@ -11,7 +11,7 @@ jest.mock('../exec');
 
 const exec = mocked(exec_);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('writePrivateKey()', () => {
     it('returns if no private key', async () => {
       await expect(writePrivateKey()).resolves.not.toThrow();

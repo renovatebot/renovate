@@ -4,9 +4,9 @@ import { getName, loadFixture } from '../../../test/util';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
-const content = loadFixture(__filename, 'WORKSPACE1');
-const contentContainerPull = loadFixture(__filename, 'container_pull');
-const fileWithBzlExtension = loadFixture(__filename, 'repositories.bzl');
+const content = loadFixture('WORKSPACE1');
+const contentContainerPull = loadFixture('container_pull');
+const fileWithBzlExtension = loadFixture('repositories.bzl');
 
 /*
 git_repository(
@@ -16,7 +16,7 @@ git_repository(
 )
 */
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('updateDependency', () => {
     beforeEach(() => {
       jest.resetAllMocks();

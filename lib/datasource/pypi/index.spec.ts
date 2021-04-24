@@ -4,22 +4,18 @@ import { getName, loadFixture } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 
-const res1: any = loadFixture(__filename, 'azure-cli-monitor.json');
-const res2: any = loadFixture(__filename, 'azure-cli-monitor-updated.json');
-const htmlResponse = loadFixture(__filename, 'versions-html.html');
-const badResponse = loadFixture(__filename, 'versions-html-badfile.html');
+const res1: any = loadFixture('azure-cli-monitor.json');
+const res2: any = loadFixture('azure-cli-monitor-updated.json');
+const htmlResponse = loadFixture('versions-html.html');
+const badResponse = loadFixture('versions-html-badfile.html');
 const dataRequiresPythonResponse = loadFixture(
-  __filename,
   'versions-html-data-requires-python.html'
 );
-const mixedHyphensResponse = loadFixture(
-  __filename,
-  'versions-html-mixed-hyphens.html'
-);
+const mixedHyphensResponse = loadFixture('versions-html-mixed-hyphens.html');
 
 const baseUrl = 'https://pypi.org/pypi';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     const OLD_ENV = process.env;
 

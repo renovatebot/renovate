@@ -3,9 +3,9 @@ import { setAdminConfig } from './admin';
 import { decryptConfig } from './decrypt';
 import type { RenovateConfig } from './types';
 
-const privateKey = loadFixture(__filename, 'private.pem', 'keys');
+const privateKey = loadFixture('private.pem', 'keys');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('decryptConfig()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

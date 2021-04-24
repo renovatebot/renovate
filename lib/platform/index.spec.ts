@@ -7,7 +7,7 @@ import * as platform from '.';
 
 jest.unmock('.');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetModules();
   });

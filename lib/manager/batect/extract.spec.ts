@@ -25,7 +25,7 @@ function createGitDependency(repo: string, version: string): PackageDependency {
   };
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns empty array for empty configuration file', async () => {
       expect(

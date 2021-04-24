@@ -5,11 +5,11 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { id as versioning } from '../../versioning/gradle';
 import { id as datasource, getReleases } from '.';
 
-const allResponse: any = loadJsonFixture(__filename, 'all.json');
+const allResponse: any = loadJsonFixture('all.json');
 
 let config: GetPkgReleasesConfig;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       config = {

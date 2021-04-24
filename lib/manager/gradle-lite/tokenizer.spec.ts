@@ -6,7 +6,7 @@ function tokenTypes(input): string[] {
   return extractRawTokens(input).map((token) => token.type);
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('extractTokens', () => {
     const samples = {
       ' ': [TokenType.Space],

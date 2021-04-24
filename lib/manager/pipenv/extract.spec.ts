@@ -3,13 +3,13 @@ import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-const pipfile1 = loadFixture(__filename, 'Pipfile1');
-const pipfile2 = loadFixture(__filename, 'Pipfile2');
-const pipfile3 = loadFixture(__filename, 'Pipfile3');
-const pipfile4 = loadFixture(__filename, 'Pipfile4');
-const pipfile5 = loadFixture(__filename, 'Pipfile5');
+const pipfile1 = loadFixture('Pipfile1');
+const pipfile2 = loadFixture('Pipfile2');
+const pipfile3 = loadFixture('Pipfile3');
+const pipfile4 = loadFixture('Pipfile4');
+const pipfile5 = loadFixture('Pipfile5');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('[packages]\r\n', 'Pipfile')).toBeNull();

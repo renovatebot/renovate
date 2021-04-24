@@ -4,10 +4,10 @@ import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 import { extractPackageFile } from './extract';
 
-const validWrapperContent = loadFixture(__filename, 'valid-wrapper');
-const malformedWrapperContent = loadFixture(__filename, 'malformed-wrapper');
+const validWrapperContent = loadFixture('valid-wrapper');
+const malformedWrapperContent = loadFixture('malformed-wrapper');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty wrapper file', () => {
       expect(extractPackageFile('')).toBeNull();

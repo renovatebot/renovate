@@ -4,11 +4,11 @@ import { extractPackageFile } from '../../manager/html';
 import type { BranchUpgradeConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
-const sampleHtml = loadFixture(__filename, 'sample.html', `../../manager/html`);
+const sampleHtml = loadFixture('sample.html', `../../manager/html`);
 
 jest.mock('../../util/fs');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;

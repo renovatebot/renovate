@@ -5,7 +5,7 @@ import { getName } from '../../test/util';
 import customConfig from './config/__fixtures__/file';
 import * as file from './file';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let tmp: DirectoryResult;
 
   beforeAll(async () => {

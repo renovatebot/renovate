@@ -3,11 +3,11 @@ import { logger } from '../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
 
-const dockerfileContent = loadFixture(__filename, `Dockerfile`);
-const ansibleYamlContent = loadFixture(__filename, `ansible.yml`);
-const exampleJsonContent = loadFixture(__filename, `example.json`);
+const dockerfileContent = loadFixture(`Dockerfile`);
+const ansibleYamlContent = loadFixture(`ansible.yml`);
+const exampleJsonContent = loadFixture(`example.json`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
       pinDigests: false,
