@@ -15,7 +15,7 @@ export { id } from './common';
 
 export const customRegistrySupport = false;
 
-const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
+const gitlabRegExp = /^(https:\/\/[^/]*gitlab\.[^/]*)\/(.*)$/;
 
 interface DataSource {
   datasource: string;
