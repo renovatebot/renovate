@@ -1,5 +1,4 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
@@ -11,47 +10,18 @@ import {
   parseKustomize,
 } from './extract';
 
-const kustomizeGitSSHBase = readFileSync(
-  'lib/manager/kustomize/__fixtures__/gitSshBase.yaml',
-  'utf8'
+const kustomizeGitSSHBase = loadFixture(__filename, 'gitSshBase.yaml');
+const kustomizeEmpty = loadFixture(__filename, 'kustomizeEmpty.yaml');
+const kustomizeGitSSHSubdir = loadFixture(__filename, 'gitSubdir.yaml');
+const kustomizeHTTP = loadFixture(__filename, 'kustomizeHttp.yaml');
+const kustomizeWithLocal = loadFixture(__filename, 'kustomizeWithLocal.yaml');
+const nonKustomize = loadFixture(__filename, 'service.yaml');
+const gitImages = loadFixture(__filename, 'gitImages.yaml');
+const kustomizeDepsInResources = loadFixture(
+  __filename,
+  'depsInResources.yaml'
 );
-
-const kustomizeEmpty = readFileSync(
-  'lib/manager/kustomize/__fixtures__/kustomizeEmpty.yaml',
-  'utf8'
-);
-
-const kustomizeGitSSHSubdir = readFileSync(
-  'lib/manager/kustomize/__fixtures__/gitSubdir.yaml',
-  'utf8'
-);
-
-const kustomizeHTTP = readFileSync(
-  'lib/manager/kustomize/__fixtures__/kustomizeHttp.yaml',
-  'utf8'
-);
-
-const kustomizeWithLocal = readFileSync(
-  'lib/manager/kustomize/__fixtures__/kustomizeWithLocal.yaml',
-  'utf8'
-);
-
-const nonKustomize = readFileSync(
-  'lib/manager/kustomize/__fixtures__/service.yaml',
-  'utf8'
-);
-
-const gitImages = readFileSync(
-  'lib/manager/kustomize/__fixtures__/gitImages.yaml',
-  'utf8'
-);
-
-const kustomizeDepsInResources = readFileSync(
-  'lib/manager/kustomize/__fixtures__/depsInResources.yaml',
-  'utf8'
-);
-
-const sha = readFileSync('lib/manager/kustomize/__fixtures__/sha.yaml', 'utf8');
+const sha = loadFixture(__filename, 'sha.yaml');
 
 describe(getName(__filename), () => {
   it('should successfully parse a valid kustomize file', () => {

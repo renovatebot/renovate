@@ -1,12 +1,7 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { updateDependency } from './update';
 
-const content = readFileSync(
-  resolve('lib/manager/travis/__fixtures__/travis.yml'),
-  'utf8'
-);
+const content = loadFixture(__filename, 'travis.yml');
 
 describe(getName(__filename), () => {
   describe('updateDependency', () => {

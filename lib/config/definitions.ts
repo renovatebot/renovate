@@ -341,6 +341,15 @@ const options: RenovateOptions[] = [
     admin: true,
   },
   {
+    name: 'forkToken',
+    description:
+      'Will be used on GitHub when `forkMode` is set to `true` to clone the repositories.',
+    stage: 'repository',
+    type: 'string',
+    default: '',
+    admin: true,
+  },
+  {
     name: 'requireConfig',
     description: 'Set to true if repositories must have a config to activate.',
     stage: 'repository',
@@ -1494,6 +1503,12 @@ const options: RenovateOptions[] = [
     name: 'reviewersFromCodeOwners',
     description:
       'Determine reviewers based on configured code owners and changes in PR.',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'filterUnavailableUsers',
+    description: 'Filter reviewers and assignees based on their availability.',
     type: 'boolean',
     default: false,
   },

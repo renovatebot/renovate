@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs';
 import {
   ExecSnapshots,
   envMock,
@@ -6,18 +5,16 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../test/exec-util';
-import { env, getName } from '../../../test/util';
+import { env, getName, loadFixture } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
 import * as extract from './extract';
 import { extractPackageFile } from '.';
 
-const packageFile = 'lib/manager/pip_setup/__fixtures__/setup.py';
-const content = readFileSync(packageFile, 'utf8');
-
-const packageFileJson = 'lib/manager/pip_setup/__fixtures__/setup.py.json';
-const jsonContent = readFileSync(packageFileJson, 'utf8');
+const packageFile = 'setup.py';
+const content = loadFixture(__filename, packageFile);
+const jsonContent = loadFixture(__filename, 'setup.py.json');
 
 const config = {
   localDir: '/tmp/github/some/repo',

@@ -20,7 +20,7 @@ The same goes for any other third party binary tool like `gradle` or `poetry` - 
 ### Docker
 
 Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/).
-It builds `latest` based on the `master` branch and all semver tags are published too.
+It builds `latest` based on the `main` branch and all semver tags are published too.
 For example, all the following are valid tags:
 
 ```sh

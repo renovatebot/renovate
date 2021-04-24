@@ -1,15 +1,10 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { defaultConfig, getName } from '../../../test/util';
+import { defaultConfig, getName, loadFixture } from '../../../test/util';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
 import type { BranchUpgradeConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
-const sampleHtml = readFileSync(
-  resolve(__dirname, `../../manager/html/__fixtures__/sample.html`),
-  'utf8'
-);
+const sampleHtml = loadFixture(__filename, 'sample.html', `../../manager/html`);
 
 jest.mock('../../util/fs');
 

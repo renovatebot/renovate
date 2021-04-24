@@ -1,12 +1,11 @@
 import nock from 'nock';
-import { getConfig, getName, mocked, partial } from '../../../../../test/util';
-import qJson from '../../../../config/npm/__fixtures__/01.json';
-import helmetJson from '../../../../config/npm/__fixtures__/02.json';
-import coffeelintJson from '../../../../config/npm/__fixtures__/coffeelint.json';
-import nextJson from '../../../../config/npm/__fixtures__/next.json';
-import typescriptJson from '../../../../config/npm/__fixtures__/typescript.json';
-import vueJson from '../../../../config/npm/__fixtures__/vue.json';
-import webpackJson from '../../../../config/npm/__fixtures__/webpack.json';
+import {
+  getConfig,
+  getName,
+  loadJsonFixture,
+  mocked,
+  partial,
+} from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import * as datasourceDocker from '../../../../datasource/docker';
 import { id as datasourceDockerId } from '../../../../datasource/docker';
@@ -29,7 +28,25 @@ jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-refs');
 jest.mock('../../../../datasource/github-releases');
 
-qJson.latestVersion = '1.4.1';
+const fixtureRoot = '../../../../config/npm';
+const qJson = {
+  ...loadJsonFixture(__filename, '01.json', fixtureRoot),
+  latestVersion: '1.4.1',
+};
+const helmetJson = loadJsonFixture(__filename, '02.json', fixtureRoot);
+const coffeelintJson = loadJsonFixture(
+  __filename,
+  'coffeelint.json',
+  fixtureRoot
+);
+const nextJson = loadJsonFixture(__filename, 'next.json', fixtureRoot);
+const typescriptJson = loadJsonFixture(
+  __filename,
+  'typescript.json',
+  fixtureRoot
+);
+const vueJson = loadJsonFixture(__filename, 'vue.json', fixtureRoot);
+const webpackJson = loadJsonFixture(__filename, 'webpack.json', fixtureRoot);
 
 const docker = mocked(datasourceDocker) as any;
 docker.defaultRegistryUrls = ['https://index.docker.io'];
