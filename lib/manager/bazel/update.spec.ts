@@ -1,25 +1,12 @@
-import { readFileSync } from 'fs';
 import { Readable } from 'stream';
-import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
-const content = readFileSync(
-  resolve('lib/manager/bazel/__fixtures__/WORKSPACE1'),
-  'utf8'
-);
-
-const contentContainerPull = readFileSync(
-  resolve('lib/manager/bazel/__fixtures__/container_pull'),
-  'utf8'
-);
-
-const fileWithBzlExtension = readFileSync(
-  'lib/manager/bazel/__fixtures__/repositories.bzl',
-  'utf8'
-);
+const content = loadFixture(__filename, 'WORKSPACE1');
+const contentContainerPull = loadFixture(__filename, 'container_pull');
+const fileWithBzlExtension = loadFixture(__filename, 'repositories.bzl');
 
 /*
 git_repository(

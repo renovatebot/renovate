@@ -1,31 +1,12 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import extractPackageFile, { getSliceEndNumber } from './extract';
 
-const yamlFile1 = readFileSync(
-  'lib/manager/ansible-galaxy/__fixtures__/requirements01.yml',
-  'utf8'
-);
-const yamlFile2 = readFileSync(
-  'lib/manager/ansible-galaxy/__fixtures__/requirements02.yml',
-  'utf8'
-);
-const helmRequirements = readFileSync(
-  'lib/manager/ansible-galaxy/__fixtures__/helmRequirements.yml',
-  'utf8'
-);
-const collections1 = readFileSync(
-  'lib/manager/ansible-galaxy/__fixtures__/collections1.yml',
-  'utf8'
-);
-const collections2 = readFileSync(
-  'lib/manager/ansible-galaxy/__fixtures__/collections2.yml',
-  'utf8'
-);
-const galaxy = readFileSync(
-  'lib/manager/ansible-galaxy/__fixtures__/galaxy.yml',
-  'utf8'
-);
+const yamlFile1 = loadFixture(__filename, 'requirements01.yml');
+const yamlFile2 = loadFixture(__filename, 'requirements02.yml');
+const helmRequirements = loadFixture(__filename, 'helmRequirements.yml');
+const collections1 = loadFixture(__filename, 'collections1.yml');
+const collections2 = loadFixture(__filename, 'collections2.yml');
+const galaxy = loadFixture(__filename, 'galaxy.yml');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

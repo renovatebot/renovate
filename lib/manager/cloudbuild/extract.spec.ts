@@ -1,11 +1,7 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const file1 = readFileSync(
-  'lib/manager/cloudbuild/__fixtures__/cloudbuild.yml',
-  'utf8'
-);
+const file1 = loadFixture(__filename, 'cloudbuild.yml');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

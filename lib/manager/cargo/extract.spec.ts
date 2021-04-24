@@ -1,39 +1,16 @@
-import { readFileSync } from 'fs';
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { setFsConfig, writeLocalFile } from '../../util/fs';
 import { extractPackageFile } from './extract';
 
-const cargo1toml = readFileSync(
-  'lib/manager/cargo/__fixtures__/Cargo.1.toml',
-  'utf8'
-);
-const cargo2toml = readFileSync(
-  'lib/manager/cargo/__fixtures__/Cargo.2.toml',
-  'utf8'
-);
-const cargo3toml = readFileSync(
-  'lib/manager/cargo/__fixtures__/Cargo.3.toml',
-  'utf8'
-);
-const cargo4toml = readFileSync(
-  'lib/manager/cargo/__fixtures__/Cargo.4.toml',
-  'utf8'
-);
-const cargo5toml = readFileSync(
-  'lib/manager/cargo/__fixtures__/Cargo.5.toml',
-  'utf8'
-);
-
-const cargo6configtoml = readFileSync(
-  'lib/manager/cargo/__fixtures__/cargo.6.config.toml',
-  'utf8'
-);
-const cargo6toml = readFileSync(
-  'lib/manager/cargo/__fixtures__/Cargo.6.toml',
-  'utf8'
-);
+const cargo1toml = loadFixture(__filename, 'Cargo.1.toml');
+const cargo2toml = loadFixture(__filename, 'Cargo.2.toml');
+const cargo3toml = loadFixture(__filename, 'Cargo.3.toml');
+const cargo4toml = loadFixture(__filename, 'Cargo.4.toml');
+const cargo5toml = loadFixture(__filename, 'Cargo.5.toml');
+const cargo6configtoml = loadFixture(__filename, 'cargo.6.config.toml');
+const cargo6toml = loadFixture(__filename, 'Cargo.6.toml');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

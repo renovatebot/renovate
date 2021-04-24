@@ -1,7 +1,6 @@
-import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
-import { getName, mocked } from '../../../../test/util';
+import { getName, loadFixture, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import {
   addReleaseNotes,
@@ -16,33 +15,19 @@ jest.mock('../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
-const angularJsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/angular-js.md',
-  'utf8'
+const angularJsChangelogMd = loadFixture(__filename, 'angular-js.md', '..');
+const jestChangelogMd = loadFixture(__filename, 'jest.md', '..');
+const jsYamlChangelogMd = loadFixture(__filename, 'js-yaml.md', '..');
+const yargsChangelogMd = loadFixture(__filename, 'yargs.md', '..');
+const adapterutilsChangelogMd = loadFixture(
+  __filename,
+  'adapter-utils.md',
+  '..'
 );
-const jestChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/jest.md',
-  'utf8'
-);
-
-const jsYamlChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/js-yaml.md',
-  'utf8'
-);
-
-const yargsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/yargs.md',
-  'utf8'
-);
-
-const adapterutilsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/adapter-utils.md',
-  'utf8'
-);
-
-const gitterWebappChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/gitter-webapp.md',
-  'utf8'
+const gitterWebappChangelogMd = loadFixture(
+  __filename,
+  'gitter-webapp.md',
+  '..'
 );
 
 const githubTreeResponse = {

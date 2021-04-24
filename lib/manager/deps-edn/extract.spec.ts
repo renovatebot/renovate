@@ -1,13 +1,7 @@
-/* eslint-disable no-template-curly-in-string */
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const depsEdn = readFileSync(
-  resolve(__dirname, `./__fixtures__/deps.edn`),
-  'utf8'
-);
+const depsEdn = loadFixture(__filename, 'deps.edn');
 
 describe(getName(__filename), () => {
   it('extractPackageFile', () => {

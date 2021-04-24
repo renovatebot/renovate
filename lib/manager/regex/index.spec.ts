@@ -1,22 +1,11 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { logger } from '../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
 
-const dockerfileContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/Dockerfile`),
-  'utf8'
-);
-const ansibleYamlContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/ansible.yml`),
-  'utf8'
-);
-const exampleJsonContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/example.json`),
-  'utf8'
-);
+const dockerfileContent = loadFixture(__filename, `Dockerfile`);
+const ansibleYamlContent = loadFixture(__filename, `ansible.yml`);
+const exampleJsonContent = loadFixture(__filename, `example.json`);
 
 describe(getName(__filename), () => {
   it('has default config', () => {

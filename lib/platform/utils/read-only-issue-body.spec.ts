@@ -1,15 +1,9 @@
-import fs from 'fs-extra';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { readOnlyIssueBody } from './read-only-issue-body';
 
+const issueBody = loadFixture(__filename, 'issue-body.txt');
+
 describe(getName(__filename), () => {
-  let issueBody: string;
-  beforeAll(async () => {
-    issueBody = await fs.readFile(
-      'lib/platform/utils/__fixtures__/issue-body.txt',
-      'utf8'
-    );
-  });
   describe('.readOnlyIssueBody', () => {
     it('removes all checkbox formatting', () => {
       expect(readOnlyIssueBody(issueBody)).toEqual(
