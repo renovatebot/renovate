@@ -479,6 +479,31 @@ describe(getName(__filename), () => {
         delete process.env.GOPRIVATE;
       });
 
+      it('skips GONOPROXY and GOPRIVATE packages', async () => {
+        process.env.GOPROXY = baseUrl;
+        process.env.GOPRIVATE = 'github.com/google/*';
+
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/google/btree/tags?per_page=100')
+          .reply(200, [{ name: 'v1.0.0' }, { name: 'v1.0.1' }])
+          .get('/repos/google/btree/releases?per_page=100')
+          .reply(200, []);
+
+        const res = await getPkgReleases({
+          datasource,
+          depName: 'github.com/google/btree',
+        });
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res).toEqual({
+          releases: [
+            { gitRef: 'v1.0.0', version: 'v1.0.0' },
+            { gitRef: 'v1.0.1', version: 'v1.0.1' },
+          ],
+          sourceUrl: 'https://github.com/google/btree',
+        });
+      });
+
       it('fetches release data from goproxy', async () => {
         process.env.GOPROXY = baseUrl;
 

@@ -5,7 +5,6 @@ import {
   encodeCase,
   listVersions,
   parseGoproxy,
-  parseGoproxyEnv,
   parseNoproxy,
   versionInfo,
 } from './goproxy';
@@ -92,43 +91,49 @@ describe(getName(__filename), () => {
       ]);
     });
     it('ignores everything starting from "direct" and "off" keywords', () => {
-      expect(parseGoproxy('off')).toBeNull();
-      expect(parseGoproxy('direct')).toBeNull();
+      expect(parseGoproxy('off')).toBeEmpty();
+      expect(parseGoproxy('direct')).toBeEmpty();
       expect(parseGoproxy('foo,off|direct,qux')).toMatchObject([
         { url: 'foo', fallback: ',' },
       ]);
     });
   });
 
-  it('parseNoproxy', () => {
-    expect(parseNoproxy('')).toBeNull();
-    expect(parseNoproxy('*')?.source).toEqual('[^\\/]*');
-    expect(parseNoproxy('?')?.source).toEqual('[^\\/]');
-    expect(parseNoproxy('foo')?.source).toEqual('foo');
-    expect(parseNoproxy('\\f\\o\\o')?.source).toEqual('foo');
-    expect(parseNoproxy('foo,bar')?.source).toEqual('foo|bar');
-    expect(parseNoproxy('[abc]')?.source).toEqual('[abc]');
-    expect(parseNoproxy('[a-c]')?.source).toEqual('[a-c]');
-    expect(parseNoproxy('[\\a-\\c]')?.source).toEqual('[a-c]');
-  });
+  describe('parseNoproxy', () => {
+    it('produces regex', () => {
+      expect(parseNoproxy('')).toBeNull();
+      expect(parseNoproxy('*')?.source).toEqual('^(?:[^\\/]*)$');
+      expect(parseNoproxy('?')?.source).toEqual('^(?:[^\\/])$');
+      expect(parseNoproxy('foo')?.source).toEqual('^(?:foo)$');
+      expect(parseNoproxy('\\f\\o\\o')?.source).toEqual('^(?:foo)$');
+      expect(parseNoproxy('foo,bar')?.source).toEqual('^(?:foo|bar)$');
+      expect(parseNoproxy('[abc]')?.source).toEqual('^(?:[abc])$');
+      expect(parseNoproxy('[a-c]')?.source).toEqual('^(?:[a-c])$');
+      expect(parseNoproxy('[\\a-\\c]')?.source).toEqual('^(?:[a-c])$');
+    });
 
-  it('getProxyList', () => {
-    expect(parseGoproxyEnv('')).toEqual([]);
-    expect(parseGoproxyEnv('foo')).toEqual([{ fallback: '|', url: 'foo' }]);
-    expect(parseGoproxyEnv('foo,bar')).toEqual([
-      { fallback: ',', url: 'foo' },
-      { fallback: '|', url: 'bar' },
-    ]);
-    expect(parseGoproxyEnv('foo|bar')).toEqual([
-      { fallback: '|', url: 'foo' },
-      { fallback: '|', url: 'bar' },
-    ]);
+    it('matches on real package prefixes', () => {
+      expect(parseNoproxy('ex.co/foo/bar').test('ex.co/foo/bar')).toBeTrue();
+      expect(parseNoproxy('*/foo/*').test('example.com/foo/bar')).toBeTrue();
+      expect(parseNoproxy('ex.co/foo/*').test('ex.co/foo/bar')).toBeTrue();
+      expect(parseNoproxy('ex.co/foo/*').test('ex.co/foo/baz')).toBeTrue();
+      expect(
+        parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test('ex.co/foo/bar')
+      ).toBeTrue();
+      expect(
+        parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test('ex.co/foo/baz')
+      ).toBeTrue();
+      expect(
+        parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test('ex.co/foo/qux')
+      ).toBeFalse();
+    });
 
-    expect(parseGoproxyEnv('foo,bar', 'bar')).toEqual([
-      { fallback: ',', url: 'foo' },
-      { fallback: '|', url: 'bar', disabled: true },
-    ]);
-
-    expect(parseGoproxyEnv('foo|bar|baz')).toBe(parseGoproxyEnv('foo|bar|baz'));
+    it('Matches from start to end', () => {
+      expect(parseNoproxy('x').test('x/aba')).toBeFalse();
+      expect(parseNoproxy('aba').test('x/aba')).toBeFalse();
+      expect(parseNoproxy('x/b').test('x/aba')).toBeFalse();
+      expect(parseNoproxy('x/ab').test('x/aba')).toBeFalse();
+      expect(parseNoproxy('x/ab[a-b]').test('x/aba')).toBeTrue();
+    });
   });
 });

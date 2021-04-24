@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import moo from 'moo';
 import pAll from 'p-all';
 import { logger } from '../../logger';
-import * as memCache from '../../util/cache/memory';
 import { regEx } from '../../util/regex';
 import { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { http } from './common';
@@ -21,9 +20,11 @@ import { GoproxyFallback, GoproxyItem, VersionInfo } from './types';
  *
  * @see https://golang.org/ref/mod#goproxy-protocol
  */
-export function parseGoproxy(input: unknown): GoproxyItem[] | null {
+export function parseGoproxy(
+  input: string = process.env.GOPROXY
+): GoproxyItem[] {
   if (!input || !is.string(input)) {
-    return null;
+    return [];
   }
 
   let result: GoproxyItem[] = input
@@ -47,7 +48,7 @@ export function parseGoproxy(input: unknown): GoproxyItem[] | null {
     }
   }
 
-  return result.length ? result : null;
+  return result;
 }
 
 // https://golang.org/pkg/path/#Match
@@ -89,44 +90,16 @@ const pathGlobLexer = {
   },
 };
 
-export function parseNoproxy(input: unknown): RegExp | null {
+export function parseNoproxy(
+  input: unknown = process.env.GONOPROXY || process.env.GOPRIVATE
+): RegExp | null {
   if (!input || !is.string(input)) {
     return null;
   }
   const lexer = moo.states(pathGlobLexer);
   lexer.reset(input);
   const noproxyPattern = [...lexer].map(({ value }) => value).join('');
-  return noproxyPattern ? regEx(noproxyPattern) : null;
-}
-
-/**
- * Parse `GOPROXY` and disable elements that match `GONOPROXY` pattern.
- */
-export function parseGoproxyEnv(
-  proxy: string = process.env.GOPROXY,
-  noproxy: string = process.env.GONOPROXY || process.env.GOPRIVATE
-): GoproxyItem[] {
-  const cacheKey = `${proxy}::${noproxy}`;
-  const cachedResult = memCache.get<GoproxyItem[]>(cacheKey);
-  if (cachedResult) {
-    return cachedResult;
-  }
-
-  let result: GoproxyItem[] = [];
-
-  const proxyList = parseGoproxy(proxy);
-  if (proxyList) {
-    const noproxyRegex = parseNoproxy(noproxy);
-    result = proxyList.map((x) => {
-      if (noproxyRegex?.test(x.url)) {
-        return { ...x, disabled: true };
-      }
-      return x;
-    });
-  }
-
-  memCache.set(cacheKey, result);
-  return result;
+  return noproxyPattern ? regEx(`^(?:${noproxyPattern})$`) : null;
 }
 
 /**
@@ -174,37 +147,41 @@ export async function getReleases(
 ): Promise<ReleaseResult | null> {
   const { lookupName } = config;
 
-  const proxyList = parseGoproxyEnv();
+  const noproxy = parseNoproxy();
+  if (noproxy?.test(lookupName)) {
+    logger.debug(`Skipping ${lookupName} via GONOPROXY match`);
+    return null;
+  }
 
-  for (const { url, fallback, disabled } of proxyList) {
-    if (!disabled) {
-      try {
-        const versions = await listVersions(url, lookupName);
-        const queue = versions.map((version) => async (): Promise<Release> => {
-          try {
-            return await versionInfo(url, lookupName, version);
-          } catch (err) {
-            logger.trace({ err }, `Can't obtain data from ${url}`);
-            return { version };
-          }
-        });
-        const releases = await pAll(queue, { concurrency: 5 });
-        if (releases.length) {
-          return { releases };
+  const proxyList = parseGoproxy();
+
+  for (const { url, fallback } of proxyList) {
+    try {
+      const versions = await listVersions(url, lookupName);
+      const queue = versions.map((version) => async (): Promise<Release> => {
+        try {
+          return await versionInfo(url, lookupName, version);
+        } catch (err) {
+          logger.trace({ err }, `Can't obtain data from ${url}`);
+          return { version };
         }
-      } catch (err) {
-        const statusCode = err?.response?.statusCode;
-        const canFallback =
-          fallback === GoproxyFallback.Always
-            ? true
-            : statusCode === 404 || statusCode === 410;
-        const msg = canFallback
-          ? 'Goproxy error: trying next URL provided with GOPROXY'
-          : 'Goproxy error: skipping other URLs provided with GOPROXY';
-        logger.debug({ err }, msg);
-        if (!canFallback) {
-          break;
-        }
+      });
+      const releases = await pAll(queue, { concurrency: 5 });
+      if (releases.length) {
+        return { releases };
+      }
+    } catch (err) {
+      const statusCode = err?.response?.statusCode;
+      const canFallback =
+        fallback === GoproxyFallback.Always
+          ? true
+          : statusCode === 404 || statusCode === 410;
+      const msg = canFallback
+        ? 'Goproxy error: trying next URL provided with GOPROXY'
+        : 'Goproxy error: skipping other URLs provided with GOPROXY';
+      logger.debug({ err }, msg);
+      if (!canFallback) {
+        break;
       }
     }
   }

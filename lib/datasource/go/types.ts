@@ -11,5 +11,4 @@ export enum GoproxyFallback {
 export interface GoproxyItem {
   url: string;
   fallback: GoproxyFallback;
-  disabled?: true;
 }
