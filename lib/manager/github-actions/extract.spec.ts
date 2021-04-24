@@ -1,16 +1,8 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const workflow1 = readFileSync(
-  'lib/manager/github-actions/__fixtures__/workflow.yml.1',
-  'utf8'
-);
-
-const workflow2 = readFileSync(
-  'lib/manager/github-actions/__fixtures__/workflow.yml.2',
-  'utf8'
-);
+const workflow1 = loadFixture(__filename, 'workflow.yml.1');
+const workflow2 = loadFixture(__filename, 'workflow.yml.2');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

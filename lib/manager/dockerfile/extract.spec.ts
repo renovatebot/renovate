@@ -1,16 +1,8 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile, getDep } from './extract';
 
-const d1 = readFileSync(
-  'lib/manager/dockerfile/__fixtures__/1.Dockerfile',
-  'utf8'
-);
-
-const d2 = readFileSync(
-  'lib/manager/dockerfile/__fixtures__/2.Dockerfile',
-  'utf8'
-);
+const d1 = loadFixture(__filename, '1.Dockerfile');
+const d2 = loadFixture(__filename, '2.Dockerfile');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

@@ -1,12 +1,7 @@
-import fs from 'fs-extra';
-import upath from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const sample = fs.readFileSync(
-  upath.resolve(__dirname, './__fixtures__/mix.exs'),
-  'utf-8'
-);
+const sample = loadFixture(__filename, 'mix.exs');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

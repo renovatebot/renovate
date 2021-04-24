@@ -1,15 +1,14 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const helmDefaultChartInitValues = readFileSync(
-  'lib/manager/helm-values/__fixtures__/default_chart_init_values.yaml',
-  'utf8'
+const helmDefaultChartInitValues = loadFixture(
+  __filename,
+  'default_chart_init_values.yaml'
 );
 
-const helmMultiAndNestedImageValues = readFileSync(
-  'lib/manager/helm-values/__fixtures__/multi_and_nested_image_values.yaml',
-  'utf8'
+const helmMultiAndNestedImageValues = loadFixture(
+  __filename,
+  'multi_and_nested_image_values.yaml'
 );
 
 describe(getName(__filename), () => {

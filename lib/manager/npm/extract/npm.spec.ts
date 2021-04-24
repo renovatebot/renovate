@@ -1,5 +1,4 @@
-import { readFileSync } from 'fs';
-import { fs, getName } from '../../../../test/util';
+import { fs, getName, loadFixture } from '../../../../test/util';
 import { getNpmLock } from './npm';
 
 jest.mock('../../../util/fs');
@@ -12,8 +11,10 @@ describe(getName(__filename), () => {
       expect(Object.keys(res.lockedVersions)).toHaveLength(0);
     });
     it('extracts', async () => {
-      const plocktest1Lock = readFileSync(
-        'lib/manager/npm/__fixtures__/plocktest1/package-lock.json'
+      const plocktest1Lock = loadFixture(
+        __filename,
+        'plocktest1/package-lock.json',
+        '..'
       );
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock as never);
       const res = await getNpmLock('package.json');
@@ -21,9 +22,7 @@ describe(getName(__filename), () => {
       expect(Object.keys(res.lockedVersions)).toHaveLength(7);
     });
     it('extracts npm 7 lockfile', async () => {
-      const npm7Lock = readFileSync(
-        'lib/manager/npm/__fixtures__/npm7/package-lock.json'
-      );
+      const npm7Lock = loadFixture(__filename, 'npm7/package-lock.json', '..');
       fs.readLocalFile.mockResolvedValueOnce(npm7Lock as never);
       const res = await getNpmLock('package.json');
       expect(res).toMatchSnapshot();

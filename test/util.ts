@@ -1,5 +1,7 @@
 import crypto from 'crypto';
+import { readFileSync } from 'fs';
 import { expect } from '@jest/globals';
+import upath from 'upath';
 import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig as _RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
@@ -42,6 +44,30 @@ export { getConfig };
 export function getName(file: string): string {
   const [, name] = /lib\/(.*?)\.spec\.ts$/.exec(file.replace(/\\/g, '/'));
   return name;
+}
+
+export function loadFixture(
+  currentFile: string,
+  fixtureFile: string,
+  fixtureRoot = '.'
+): string {
+  const callerDir = upath.dirname(currentFile);
+  const fixtureAbsFile = upath.join(
+    callerDir,
+    fixtureRoot,
+    '__fixtures__',
+    fixtureFile
+  );
+  return readFileSync(fixtureAbsFile, { encoding: 'utf8' });
+}
+
+export function loadJsonFixture<T = any>(
+  currentFile: string,
+  fixtureFile: string,
+  fixtureRoot = '.'
+): T {
+  const rawFixture = loadFixture(currentFile, fixtureFile, fixtureRoot);
+  return JSON.parse(rawFixture) as T;
 }
 
 /**

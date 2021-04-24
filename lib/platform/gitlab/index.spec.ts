@@ -1615,4 +1615,44 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+  describe('filterUnavailableUsers(users)', () => {
+    it('filters users that are busy', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users/maria/status')
+        .reply(200, {
+          availability: 'busy',
+        })
+        .get('/api/v4/users/john/status')
+        .reply(200, {
+          availability: 'not_set',
+        });
+      const filteredUsers = await gitlab.filterUnavailableUsers([
+        'maria',
+        'john',
+      ]);
+      expect(filteredUsers).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('keeps users with missing availability', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users/maria/status')
+        .reply(200, {});
+      const filteredUsers = await gitlab.filterUnavailableUsers(['maria']);
+      expect(filteredUsers).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('keeps users with failing requests', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users/maria/status')
+        .reply(404);
+      const filteredUsers = await gitlab.filterUnavailableUsers(['maria']);
+      expect(filteredUsers).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
 });

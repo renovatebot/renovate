@@ -1505,6 +1505,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'filterUnavailableUsers',
+    description: 'Filter reviewers and assignees based on their availability.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'reviewersSampleSize',
     description: 'Take a random sample of given size from reviewers.',
     type: 'integer',
