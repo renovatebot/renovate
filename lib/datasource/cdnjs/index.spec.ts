@@ -1,21 +1,11 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as datasource } from '.';
 
-let res1 = fs.readFileSync(
-  'lib/datasource/cdnjs/__fixtures__/d3-force.json',
-  'utf8'
-);
-res1 = JSON.parse(res1);
-
-let res2 = fs.readFileSync(
-  'lib/datasource/cdnjs/__fixtures__/bulma.json',
-  'utf8'
-);
-res2 = JSON.parse(res2);
+const res1 = loadFixture(__filename, 'd3-force.json');
+const res2 = loadFixture(__filename, 'bulma.json');
 
 const baseUrl = 'https://api.cdnjs.com/';
 

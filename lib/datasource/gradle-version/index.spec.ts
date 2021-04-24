@@ -1,14 +1,11 @@
-import fs from 'fs';
 import { GetPkgReleasesConfig, GetReleasesConfig, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, partial } from '../../../test/util';
+import { getName, loadJsonFixture, partial } from '../../../test/util';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { id as versioning } from '../../versioning/gradle';
 import { id as datasource, getReleases } from '.';
 
-const allResponse: any = fs.readFileSync(
-  'lib/datasource/gradle-version/__fixtures__/all.json'
-);
+const allResponse: any = loadJsonFixture(__filename, 'all.json');
 
 let config: GetPkgReleasesConfig;
 
@@ -32,7 +29,7 @@ describe(getName(__filename), () => {
       httpMock
         .scope('https://services.gradle.org/')
         .get('/versions/all')
-        .reply(200, JSON.parse(allResponse));
+        .reply(200, allResponse);
       const res = await getPkgReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -44,10 +41,7 @@ describe(getName(__filename), () => {
     });
 
     it('calls configured registryUrls', async () => {
-      httpMock
-        .scope('https://foo.bar')
-        .get('/')
-        .reply(200, JSON.parse(allResponse));
+      httpMock.scope('https://foo.bar').get('/').reply(200, allResponse);
 
       httpMock
         .scope('http://baz.qux')

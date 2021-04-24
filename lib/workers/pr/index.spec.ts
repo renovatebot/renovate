@@ -410,6 +410,16 @@ describe(getName(__filename), () => {
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
+    it('should filter assignees and reviewers based on their availability', async () => {
+      config.assignees = ['foo', 'bar'];
+      config.reviewers = ['foo', 'bar'];
+      config.filterUnavailableUsers = true;
+      platform.filterUnavailableUsers = jest.fn();
+      platform.filterUnavailableUsers.mockResolvedValue(['foo']);
+      await prWorker.ensurePr(config);
+      expect(platform.addAssignees.mock.calls).toMatchSnapshot();
+      expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
     it('should determine assignees from code owners', async () => {
       config.assigneesFromCodeOwners = true;
       codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@john', '@maria']);

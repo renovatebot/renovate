@@ -7,7 +7,7 @@ exports[`generateLockFile finds npm globally 1`] = `Array []`;
 exports[`generateLockFile generates lock files 1`] = `
 Array [
   Object {
-    "cmd": "npm install --ignore-scripts --no-audit",
+    "cmd": "npm install --no-audit --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -50,7 +50,7 @@ exports[`generateLockFile performs full install 1`] = `Array []`;
 exports[`generateLockFile performs lock file maintenance 1`] = `
 Array [
   Object {
-    "cmd": "npm install --package-lock-only --ignore-scripts --no-audit",
+    "cmd": "npm install --package-lock-only --no-audit --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -73,7 +73,7 @@ Array [
 exports[`generateLockFile performs lock file updates 1`] = `
 Array [
   Object {
-    "cmd": "npm install --package-lock-only --ignore-scripts --no-audit some-dep@1.0.1",
+    "cmd": "npm install --package-lock-only --no-audit --ignore-scripts some-dep@1.0.1",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",

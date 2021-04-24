@@ -1,11 +1,7 @@
-import fs from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const yamlFile = fs.readFileSync(
-  'lib/manager/gitlabci-include/__fixtures__/gitlab-ci.1.yaml',
-  'utf8'
-);
+const yamlFile = loadFixture(__filename, 'gitlab-ci.1.yaml');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

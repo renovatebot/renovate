@@ -1,29 +1,13 @@
-import fs from 'fs';
-import { fs as fsutil, getName } from '../../../test/util';
+import { fs as fsutil, getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-const pipfile1 = fs.readFileSync(
-  'lib/manager/pipenv/__fixtures__/Pipfile1',
-  'utf8'
-);
-const pipfile2 = fs.readFileSync(
-  'lib/manager/pipenv/__fixtures__/Pipfile2',
-  'utf8'
-);
-const pipfile3 = fs.readFileSync(
-  'lib/manager/pipenv/__fixtures__/Pipfile3',
-  'utf8'
-);
-const pipfile4 = fs.readFileSync(
-  'lib/manager/pipenv/__fixtures__/Pipfile4',
-  'utf8'
-);
-const pipfile5 = fs.readFileSync(
-  'lib/manager/pipenv/__fixtures__/Pipfile5',
-  'utf8'
-);
+const pipfile1 = loadFixture(__filename, 'Pipfile1');
+const pipfile2 = loadFixture(__filename, 'Pipfile2');
+const pipfile3 = loadFixture(__filename, 'Pipfile3');
+const pipfile4 = loadFixture(__filename, 'Pipfile4');
+const pipfile5 = loadFixture(__filename, 'Pipfile5');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

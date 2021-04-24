@@ -5,8 +5,8 @@
 Automated dependency updates.
 Multi-platform and multi-language.
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/master/license)
-[![codecov](https://codecov.io/gh/renovatebot/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/main/license)
+[![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
 [![Build status](https://github.com/renovatebot/renovate/workflows/build/badge.svg)](https://github.com/renovatebot/renovate/actions)
 
@@ -65,7 +65,7 @@ If you are not on github.com or gitlab.com, or you prefer to run your own instan
 - Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
 - Run the `renovate/renovate:slim` Docker Hub image if you only use package managers that don't need third party binaries (e.g. JS, Docker, Nuget, pip)
 
-[More details on the self-hosting development](https://github.com/renovatebot/renovate/blob/master/docs/usage/self-hosting.md).
+[More details on the self-hosting development](https://github.com/renovatebot/renovate/blob/main/docs/usage/self-hosting.md).
 
 ## Contributing
 

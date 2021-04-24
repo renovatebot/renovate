@@ -1,7 +1,6 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { id as datasource, parseRegistryUrl } from '.';
@@ -10,81 +9,48 @@ const hostRules: any = _hostRules;
 
 jest.mock('../../util/host-rules');
 
-const pkgInfoV3FromNuget = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/nunit/v3_nuget_org.xml',
-  'utf8'
-);
-const pkgListV3Registration = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/nunit/v3_registration.json',
-  'utf8'
+const pkgInfoV3FromNuget = loadFixture(__filename, 'nunit/v3_nuget_org.xml');
+const pkgListV3Registration = loadFixture(
+  __filename,
+  'nunit/v3_registration.json'
 );
 
-const pkgListV2 = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/nunit/v2.xml',
-  'utf8'
+const pkgListV2 = loadFixture(__filename, 'nunit/v2.xml');
+const pkgListV2NoGitHubProjectUrl = loadFixture(
+  __filename,
+  'nunit/v2_noGitHubProjectUrl.xml'
 );
-const pkgListV2NoGitHubProjectUrl = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/nunit/v2_noGitHubProjectUrl.xml',
-  'utf8'
-);
-const pkgListV2NoRelease = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/nunit/v2_no_release.xml',
-  'utf8'
-);
-const pkgListV2WithoutProjectUrl = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/nunit/v2_withoutProjectUrl.xml',
-  'utf8'
+const pkgListV2NoRelease = loadFixture(__filename, 'nunit/v2_no_release.xml');
+const pkgListV2WithoutProjectUrl = loadFixture(
+  __filename,
+  'nunit/v2_withoutProjectUrl.xml'
 );
 
-const pkgListV2Page1of2 = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/nunit/v2_paginated_1.xml',
-  'utf8'
-);
-const pkgListV2Page2of2 = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/nunit/v2_paginated_2.xml',
-  'utf8'
-);
+const pkgListV2Page1of2 = loadFixture(__filename, 'nunit/v2_paginated_1.xml');
+const pkgListV2Page2of2 = loadFixture(__filename, 'nunit/v2_paginated_2.xml');
 
-const nugetIndexV3 = fs.readFileSync(
-  'lib/datasource/nuget/__fixtures__/v3_index.json',
-  'utf8'
-);
+const nugetIndexV3 = loadFixture(__filename, 'v3_index.json');
 
 const nlogMocks = [
   {
     url: '/v3/registration5-gz-semver2/nlog/index.json',
-    result: fs.readFileSync(
-      'lib/datasource/nuget/__fixtures__/nlog/v3_registration.json',
-      'utf8'
-    ),
+    result: loadFixture(__filename, 'nlog/v3_registration.json'),
   },
   {
     url: '/v3/registration5-gz-semver2/nlog/page/1.0.0.505/4.4.0-beta5.json',
-    result: fs.readFileSync(
-      'lib/datasource/nuget/__fixtures__/nlog/v3_catalog_1.json',
-      'utf8'
-    ),
+    result: loadFixture(__filename, 'nlog/v3_catalog_1.json'),
   },
   {
     url: '/v3/registration5-gz-semver2/nlog/page/4.4.0-beta6/4.6.0-rc2.json',
-    result: fs.readFileSync(
-      'lib/datasource/nuget/__fixtures__/nlog/v3_catalog_2.json',
-      'utf8'
-    ),
+    result: loadFixture(__filename, 'nlog/v3_catalog_2.json'),
   },
   {
     url: '/v3/registration5-gz-semver2/nlog/page/4.6.0-rc3/5.0.0-beta11.json',
-    result: fs.readFileSync(
-      'lib/datasource/nuget/__fixtures__/nlog/v3_catalog_3.json',
-      'utf8'
-    ),
+    result: loadFixture(__filename, 'nlog/v3_catalog_3.json'),
   },
   {
     url: '/v3-flatcontainer/nlog/4.7.3/nlog.nuspec',
-    result: fs.readFileSync(
-      'lib/datasource/nuget/__fixtures__/nlog/nuspec.xml',
-      'utf8'
-    ),
+    result: loadFixture(__filename, 'nlog/nuspec.xml'),
   },
 ];
 

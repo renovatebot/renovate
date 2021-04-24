@@ -1,40 +1,14 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { extractPackageFile } from './extract';
 
-const requirements1 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements1.txt',
-  'utf8'
-);
-const requirements2 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements2.txt',
-  'utf8'
-);
-const requirements3 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements3.txt',
-  'utf8'
-);
-
-const requirements4 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements4.txt',
-  'utf8'
-);
-
-const requirements5 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements5.txt',
-  'utf8'
-);
-
-const requirements6 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements6.txt',
-  'utf8'
-);
-
-const requirements7 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements7.txt',
-  'utf8'
-);
+const requirements1 = loadFixture(__filename, 'requirements1.txt');
+const requirements2 = loadFixture(__filename, 'requirements2.txt');
+const requirements3 = loadFixture(__filename, 'requirements3.txt');
+const requirements4 = loadFixture(__filename, 'requirements4.txt');
+const requirements5 = loadFixture(__filename, 'requirements5.txt');
+const requirements6 = loadFixture(__filename, 'requirements6.txt');
+const requirements7 = loadFixture(__filename, 'requirements7.txt');
 
 describe(getName(__filename), () => {
   beforeEach(() => {
