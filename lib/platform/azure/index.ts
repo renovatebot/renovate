@@ -35,6 +35,7 @@ import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import type { AzurePr } from './types';
+import { AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -420,7 +421,7 @@ export async function createPr({
     pr = await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy.url,
-        vote: 10,
+        vote: AzurePrVote.Approved,
         isFlagged: false,
         isRequired: false,
       },

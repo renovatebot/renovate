@@ -11,6 +11,7 @@ import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
+import { AzurePrVote } from './types';
 
 describe(getName(__filename), () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -669,29 +670,32 @@ describe(getName(__filename), () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
-        displayNumber: `Pull Request #456`,
+        displayNumber: 'Pull Request #456',
         createdBy: {
           id: 123,
+          url: 'user-url',
         },
       };
       const prUpdateResult = {
         ...prResult,
         reviewers: [
           {
-            id: prResult.createdBy.id,
-            vote: 10,
+            reviewerUrl: prResult.createdBy.url,
+            vote: AzurePrVote.Approved,
+            isFlagged: false,
+            isRequired: false,
           },
         ],
       };
       const updateFn = jest
         .fn(() => prUpdateResult)
-        .mockName('updatePullRequestReviewer');
+        .mockName('createPullRequestReviewer');
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
             createPullRequest: jest.fn(() => prResult),
             createPullRequestLabel: jest.fn(() => ({})),
-            updatePullRequestReviewer: updateFn,
+            createPullRequestReviewer: updateFn,
           } as any)
       );
       const pr = await azure.createPr({

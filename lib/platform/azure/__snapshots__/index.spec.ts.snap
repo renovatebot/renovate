@@ -58,12 +58,15 @@ Object {
   "createdAt": undefined,
   "createdBy": Object {
     "id": 123,
+    "url": "user-url",
   },
   "displayNumber": "Pull Request #456",
   "number": 456,
   "pullRequestId": 456,
   "reviewers": Array [
     Object {
+      "isFlagged": false,
+      "isRequired": false,
       "reviewerUrl": "user-url",
       "vote": 10,
     },
