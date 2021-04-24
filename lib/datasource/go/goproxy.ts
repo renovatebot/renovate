@@ -52,7 +52,7 @@ export function parseGoproxy(
 }
 
 // https://golang.org/pkg/path/#Match
-const pathGlobLexer = {
+const lexer = moo.states({
   main: {
     separator: {
       match: /\s*?,\s*?/,
@@ -88,7 +88,7 @@ const pathGlobLexer = {
       pop: 1,
     },
   },
-};
+});
 
 export function parseNoproxy(
   input: unknown = process.env.GONOPROXY || process.env.GOPRIVATE
@@ -96,7 +96,6 @@ export function parseNoproxy(
   if (!input || !is.string(input)) {
     return null;
   }
-  const lexer = moo.states(pathGlobLexer);
   lexer.reset(input);
   const noproxyPattern = [...lexer].map(({ value }) => value).join('');
   return noproxyPattern ? regEx(`^(?:${noproxyPattern})$`) : null;
