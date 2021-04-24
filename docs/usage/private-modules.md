@@ -147,7 +147,67 @@ For those found, a command similar to the following is run: `dotnet nuget add so
 
 For every poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`.
 
-<!-- TODO:
- * Describe admin vs repo config of hostRules
- * App details: no public->private presets lookup, encrypted
--->
+## WhiteSource Renovate Hosted App Encryption
+
+The popular [Renovate App on GitHub](https://github.com/apps/renovate) is hosted by WhiteSource.
+If you are a user of this app, and have private modules, then the following is applicable.
+
+### Private presets with public repositories
+
+If you have a preset in a private repo but reference ("extend") it from a public repository then it won't work.
+This is because public repositories are provided with a token scoped to only that particular repository, and not for all repositories within the org.
+This is a security measure so that if a the token is accidentally leaked publicly, the damage is limited to the public repository it leaked to and not to every repository within the organization.
+
+The solution to this is that you should break your presets into public and private ones, and reference only the public ones from public repositories.
+
+### Encrypting secrets
+
+It is strongly recommended that you don't commit secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
+Therefore the preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
+
+If you need to provide credentials to the hosted Renovate App, please do this:
+
+- Encrypt each secret string using <https://app.renovatebot.com/encrypt>. Note: this encrypts using the app's public key fully in the browser and does not send the original secret to any server. You can download this file and perform the encryption fully offline if you like.
+- Wrap each secret field in an [encrypted](https://docs.renovatebot.com/configuration-options/#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "registry.npmjs.org",
+      "encrypted": {
+        "token": "3f832f2983yf89hsd98ahadsjfasdfjaslf............"
+      }
+    },
+    {
+      "baseUrl": "https://custom.registry.company.com/pypi/",
+      "username": "bot1",
+      "encrypted": {
+        "password": "p278djfdsi9832jnfdshufwji2r389fdskj........."
+      }
+    }
+  ]
+}
+```
+
+### Access to GitHub Actions Secrets
+
+The WhiteSource Renovate App does not run using GitHub Actions, but such secrets would be a bad fit for the app anyway for the following reasons:
+
+- The app would be granted access to _all_ the repository/org secrets, not just the ones you want
+- If Renovate wants access to such secrets, it would need to ask for them from every user, not just the ones who want to use this approach (GitHub does not support the concept of optional permissions for Apps, so people do not have the option to decline)
+
+## Admin/Bot config vs User/Repository config for Self-hosted users
+
+"AdminBot config" refers to the config which the Renovate Bot administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file. User/Repository config refers to the in-repository config file which defaults to `renovate.json` but has a large number of alternative filenames supported.
+
+If there is a need to supply custom rules for certain repository, it can still be done using the `config.js` file and the `repositories` array.
+
+If per-repository config must be done within the repository, it is still recommended against committing secrets directly (including e.g. `.npmrc` files with tokens) and instead encrypting them with a custom public key first.
+For instructions on this, see the above section on encrypting secrets for the WhiteSource Renovate App but instead:
+
+- Save a copy of the <https://app.renovatebot.com/encrypt> html file locally, or host it locally
+- Generate a public/private key pair for the app using the instructions in [privateKey](https://docs.renovatebot.com/self-hosted-configuration/#privatekey)
+- Replace the existing public key in the html with the public key you generated in the step prior
+- Use the resulting html encrypt page to encrypt secrets for your app before adding them to user/repository config
+- Configure the app to run with `privateKey` set to the private key you generated above
