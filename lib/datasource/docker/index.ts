@@ -198,7 +198,7 @@ async function getAuthHeaders(
     };
   } catch (err) /* istanbul ignore next */ {
     if (err.host === 'quay.io') {
-      // TODO: https://github.com/renovatebot/renovate/issues/9604
+      // TODO: debug why quay throws errors (#9604)
       return null;
     }
     if (err.statusCode === 401) {
@@ -251,7 +251,7 @@ function extractDigestFromResponse(manifestResponse: HttpResponse): string {
   return manifestResponse.headers['docker-content-digest'] as string;
 }
 
-// TODO: https://github.com/renovatebot/renovate/issues/9612
+// TODO: debug why quay throws errors (#9612)
 async function getManifestResponse(
   registry: string,
   dockerRepository: string,

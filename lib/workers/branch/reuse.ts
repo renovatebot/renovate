@@ -82,7 +82,7 @@ export async function shouldReuseExistingBranch(
       return { reuseExistingBranch: false };
     }
     // Don't do anything different, but warn
-    // TODO: https://github.com/renovatebot/renovate/issues/9720
+    // TODO: Add warning to PR (#9720)
     logger.debug(`Branch is not mergeable but can't be rebased`);
   }
   logger.debug(`Branch does not need rebasing`);

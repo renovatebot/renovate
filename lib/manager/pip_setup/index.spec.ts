@@ -79,7 +79,7 @@ describe(getName(__filename), () => {
           binarySource: BinarySource.Docker,
         })
       ).toMatchSnapshot();
-      expect(execSnapshots).toHaveLength(1); // TODO: https://github.com/renovatebot/renovate/issues/9617
+      expect(execSnapshots).toHaveLength(1); // TODO: figure out volume arguments in Windows (#9617)
     });
 
     it('returns no deps', async () => {
