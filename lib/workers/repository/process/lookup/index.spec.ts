@@ -947,7 +947,7 @@ describe(getName(__filename), () => {
       config.lockedVersion = '0.9.4';
       config.currentValue = '~=0.9';
       config.depName = 'q';
-      // TODO: we are using npm as source to test pep440
+      // TODO: we are using npm as source to test pep440 (#9721)
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);

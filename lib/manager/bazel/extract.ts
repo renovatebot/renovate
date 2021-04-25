@@ -242,7 +242,7 @@ export function extractPackageFile(
       if (commit) {
         dep.currentDigest = commit;
       }
-      // TODO: Check if we really need to use parse here or if it should always be a plain https url
+      // TODO: Check if we really need to use parse here or if it should always be a plain https url (#9605)
       const githubURL = parse(remote);
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);

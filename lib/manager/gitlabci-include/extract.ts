@@ -30,7 +30,7 @@ export function extractPackageFile(
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
-    // TODO: fix me
+    // TODO: fix me (#9610)
     const doc = yaml.safeLoad(content, { json: true }) as any;
     if (doc?.include && is.array(doc.include)) {
       for (const includeObj of doc.include) {

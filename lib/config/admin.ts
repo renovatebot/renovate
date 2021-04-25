@@ -2,7 +2,7 @@ import type { RenovateConfig, RepoAdminConfig } from './types';
 
 let adminConfig: RepoAdminConfig = {};
 
-// TODO: once admin config work is complete, add a test to make sure this list includes all options with admin=true
+// TODO: once admin config work is complete, add a test to make sure this list includes all options with admin=true (#9603)
 export const repoAdminOptions = [
   'allowCustomCrateRegistries',
   'allowPostUpgradeCommandTemplating',

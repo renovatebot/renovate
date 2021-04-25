@@ -16,8 +16,8 @@ import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { Image, ImageList, MediaType } from './types';
 
-// TODO: add got typings when available
-// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
+// TODO: add got typings when available (#9646)
+// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
 
 export const id = 'docker';
 export const customRegistrySupport = true;
@@ -198,7 +198,7 @@ async function getAuthHeaders(
     };
   } catch (err) /* istanbul ignore next */ {
     if (err.host === 'quay.io') {
-      // TODO: debug why quay throws errors
+      // TODO: https://github.com/renovatebot/renovate/issues/9604
       return null;
     }
     if (err.statusCode === 401) {
@@ -251,7 +251,7 @@ function extractDigestFromResponse(manifestResponse: HttpResponse): string {
   return manifestResponse.headers['docker-content-digest'] as string;
 }
 
-// TODO: make generic to return json object
+// TODO: https://github.com/renovatebot/renovate/issues/9612
 async function getManifestResponse(
   registry: string,
   dockerRepository: string,
