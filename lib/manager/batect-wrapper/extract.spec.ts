@@ -1,19 +1,11 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { id as githubReleaseDatasource } from '../../datasource/github-releases';
 import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 import { extractPackageFile } from './extract';
 
-const validWrapperContent = readFileSync(
-  'lib/manager/batect-wrapper/__fixtures__/valid-wrapper',
-  'utf8'
-);
-
-const malformedWrapperContent = readFileSync(
-  'lib/manager/batect-wrapper/__fixtures__/malformed-wrapper',
-  'utf8'
-);
+const validWrapperContent = loadFixture(__filename, 'valid-wrapper');
+const malformedWrapperContent = loadFixture(__filename, 'malformed-wrapper');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile()', () => {

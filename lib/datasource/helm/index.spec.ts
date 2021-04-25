@@ -1,14 +1,10 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { id as datasource } from '.';
 
 // Truncated index.yaml file
-const indexYaml = fs.readFileSync(
-  'lib/datasource/helm/__fixtures__/index.yaml',
-  'utf8'
-);
+const indexYaml = loadFixture(__filename, 'index.yaml');
 
 describe(getName(__filename), () => {
   describe('getReleases', () => {

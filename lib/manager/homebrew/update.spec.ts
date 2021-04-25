@@ -1,17 +1,10 @@
-import fs from 'fs';
 import { Readable } from 'stream';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { updateDependency } from './update';
 
-const aide = fs.readFileSync(
-  'lib/manager/homebrew/__fixtures__/aide.rb',
-  'utf8'
-);
-const ibazel = fs.readFileSync(
-  'lib/manager/homebrew/__fixtures__/ibazel.rb',
-  'utf8'
-);
+const aide = loadFixture(__filename, 'aide.rb');
+const ibazel = loadFixture(__filename, 'ibazel.rb');
 
 const baseUrl = 'https://github.com';
 

@@ -1,16 +1,8 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const brokenYaml = readFileSync(
-  'lib/manager/pub/__fixtures__/update.yaml',
-  'utf8'
-);
-
-const packageFile = readFileSync(
-  'lib/manager/pub/__fixtures__/extract.yaml',
-  'utf8'
-);
+const brokenYaml = loadFixture(__filename, 'update.yaml');
+const packageFile = loadFixture(__filename, 'extract.yaml');
 
 describe(getName(__filename), () => {
   describe('extractPackageFile', () => {
