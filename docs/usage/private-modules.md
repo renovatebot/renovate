@@ -64,7 +64,7 @@ It can be either a "platform" name (e.g. `github`, `azure`, etc) or a "datasourc
 `baseUrl` can be used if you want to only apply the credentials for a nested path within the host, e.g. `https://registry.company.com/nested/path/`.
 If the same credentials apply to all paths on a host, then use `hostName` instead, e.g. `registry.company.com`.
 Finally, to apply credentials to all hosts within the domain, use `domainName`, e.g. `company.com`.
-You need to pick _only one_ of these and not try to use multiple at the same time, or you will end up with configuration errors.
+You need to pick _only one_ of these and not configure more than one of these fields within the same host rule, otherwise it will error.
 
 In addition to the above options to match against a host, you need to add the credentials.
 Typically they are either `token`, or `username` + `password`.
@@ -130,7 +130,7 @@ Any `hostRules` with `hostType=packagist` are also included.
 ### gomod
 
 If a `github.com` token is found in `hostRules`, then it is written out to local git config prior to running `go` commands.
-???CHECK THIS LINE, IS THE COMMAND CORRECT???: The command run is `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`.
+The command run is `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`.
 
 ### npm
 
