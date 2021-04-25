@@ -1,9 +1,12 @@
-import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
-import { downloadHttpProtocol } from '../maven/util';
+import {
+  MavenDependency,
+  downloadHttpProtocol,
+  getDependencyInfo,
+} from '../maven/util';
 import { parseIndexDir } from '../sbt-plugin/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -16,10 +19,13 @@ export const registryStrategy = 'hunt';
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
 export async function getArtifactSubdirs(
-  searchRoot: string,
+  registryUrl: string,
+  groupId: string,
   artifact: string,
   scalaVersion: string
 ): Promise<string[]> {
+  const searchRoot = `${registryUrl}${groupId}`;
+
   const { body: indexContent } = await downloadHttpProtocol(
     ensureTrailingSlash(searchRoot),
     'sbt'
@@ -52,9 +58,11 @@ export async function getArtifactSubdirs(
 }
 
 export async function getPackageReleases(
-  searchRoot: string,
+  registryUrl: string,
+  groupId: string,
   artifactSubdirs: string[]
 ): Promise<string[]> {
+  const searchRoot = `${registryUrl}${groupId}`;
   if (artifactSubdirs) {
     const releases: string[] = [];
     const parseReleases = (content: string): string[] =>
@@ -87,7 +95,8 @@ export function getLatestVersion(versions: string[]): string | null {
 }
 
 export async function getUrls(
-  searchRoot: string,
+  repositoryUrl: string,
+  groupId: string,
   artifactDirs: string[],
   version: string
 ): Promise<Partial<ReleaseResult>> {
@@ -103,32 +112,27 @@ export async function getUrls(
 
   for (const artifactDir of artifactDirs) {
     const [artifact] = artifactDir.split('_');
-    const pomFileNames = [
-      `${artifactDir}-${version}.pom`,
-      `${artifact}-${version}.pom`,
-    ];
+    const namesToTry: string[] = [];
+    namesToTry.push(artifactDir);
+    namesToTry.push(artifact);
 
-    for (const pomFileName of pomFileNames) {
-      const pomUrl = `${searchRoot}/${artifactDir}/${version}/${pomFileName}`;
-      const { body: content } = await downloadHttpProtocol(pomUrl, 'sbt');
+    for (const mavenName of namesToTry) {
+      const mavenDependency: MavenDependency = {
+        dependencyUrl: `${repositoryUrl}${groupId}/${artifactDir}`,
+        display: `${artifactDir}:${artifact}:${version}`,
+        group: artifactDir,
+        name: mavenName,
+      };
 
-      if (content) {
-        const pomXml = new XmlDocument(content);
+      const dependencyInfo = await getDependencyInfo(
+        mavenDependency,
+        repositoryUrl,
+        version
+      );
 
-        const homepage = pomXml.valueWithPath('url');
-        if (homepage) {
-          result.homepage = homepage;
-        }
-
-        const sourceUrl = pomXml.valueWithPath('scm.url');
-        if (sourceUrl) {
-          result.sourceUrl = sourceUrl
-            .replace(/^scm:/, '')
-            .replace(/^git:/, '')
-            .replace(/^git@github.com:/, 'https://github.com/')
-            .replace(/\.git$/, '');
-        }
-
+      if (dependencyInfo.homepage || dependencyInfo.sourceUrl) {
+        result.homepage = dependencyInfo.homepage;
+        result.sourceUrl = dependencyInfo.sourceUrl;
         return result;
       }
     }
@@ -147,23 +151,33 @@ export async function getReleases({
   const [artifact, scalaVersion] = artifactIdSplit;
 
   const repoRoot = ensureTrailingSlash(registryUrl);
-  const searchRoots: string[] = [];
+  const groupIds: string[] = [];
   // Optimize lookup order
-  searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
-  searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
+  groupIds.push(`${groupIdSplit.join('/')}`);
+  groupIds.push(`${groupIdSplit.join('.')}`);
 
-  for (let idx = 0; idx < searchRoots.length; idx += 1) {
-    const searchRoot = searchRoots[idx];
+  for (let idx = 0; idx < groupIds.length; idx += 1) {
+    const groupIdLookup = groupIds[idx];
     const artifactSubdirs = await getArtifactSubdirs(
-      searchRoot,
+      repoRoot,
+      groupIdLookup,
       artifact,
       scalaVersion
     );
-    const versions = await getPackageReleases(searchRoot, artifactSubdirs);
+    const versions = await getPackageReleases(
+      repoRoot,
+      groupIdLookup,
+      artifactSubdirs
+    );
     const latestVersion = getLatestVersion(versions);
-    const urls = await getUrls(searchRoot, artifactSubdirs, latestVersion);
+    const urls = await getUrls(
+      repoRoot,
+      groupIdLookup,
+      artifactSubdirs,
+      latestVersion
+    );
 
-    const dependencyUrl = searchRoot;
+    const dependencyUrl = `${repoRoot}${groupIdLookup}`;
 
     if (versions) {
       return {
@@ -175,7 +189,7 @@ export async function getReleases({
   }
 
   logger.debug(
-    `No versions found for ${lookupName} in ${searchRoots.length} repositories`
+    `No versions found for ${lookupName} in ${groupIdSplit.length} repositories`
   );
   return null;
 }

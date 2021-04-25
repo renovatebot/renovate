@@ -21,10 +21,11 @@ const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
 async function resolvePluginReleases(
   rootUrl: string,
+  groupId: string,
   artifact: string,
   scalaVersion: string
 ): Promise<string[]> {
-  const searchRoot = `${rootUrl}/${artifact}`;
+  const searchRoot = `${rootUrl}${groupId}/${artifact}`;
   const parse = (content: string): string[] =>
     parseIndexDir(content, (x) => !/^\.+$/.test(x));
   const { body: indexContent } = await downloadHttpProtocol(
@@ -78,15 +79,16 @@ export async function getReleases({
   const [artifact, scalaVersion] = artifactIdSplit;
 
   const repoRoot = ensureTrailingSlash(registryUrl);
-  const searchRoots: string[] = [];
+  const groupIds: string[] = [];
   // Optimize lookup order
-  searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
-  searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
+  groupIds.push(`${groupIdSplit.join('/')}`);
+  groupIds.push(`${groupIdSplit.join('.')}`);
 
-  for (let idx = 0; idx < searchRoots.length; idx += 1) {
-    const searchRoot = searchRoots[idx];
+  for (let idx = 0; idx < groupIds.length; idx += 1) {
+    const groupIdLookup = groupIds[idx];
     let versions = await resolvePluginReleases(
-      searchRoot,
+      repoRoot,
+      groupIdLookup,
       artifact,
       scalaVersion
     );
@@ -94,16 +96,26 @@ export async function getReleases({
 
     if (!versions?.length) {
       const artifactSubdirs = await getArtifactSubdirs(
-        searchRoot,
+        repoRoot,
+        groupIdLookup,
         artifact,
         scalaVersion
       );
-      versions = await getPackageReleases(searchRoot, artifactSubdirs);
+      versions = await getPackageReleases(
+        repoRoot,
+        groupIdLookup,
+        artifactSubdirs
+      );
       const latestVersion = getLatestVersion(versions);
-      urls = await getUrls(searchRoot, artifactSubdirs, latestVersion);
+      urls = await getUrls(
+        repoRoot,
+        groupIdLookup,
+        artifactSubdirs,
+        latestVersion
+      );
     }
 
-    const dependencyUrl = `${searchRoot}/${artifact}`;
+    const dependencyUrl = `${repoRoot}${groupIdLookup}/${artifact}`;
 
     if (versions) {
       return {
@@ -115,7 +127,7 @@ export async function getReleases({
   }
 
   logger.debug(
-    `No versions found for ${lookupName} in ${searchRoots.length} repositories`
+    `No versions found for ${lookupName} in ${groupIds.length} repositories`
   );
   return null;
 }

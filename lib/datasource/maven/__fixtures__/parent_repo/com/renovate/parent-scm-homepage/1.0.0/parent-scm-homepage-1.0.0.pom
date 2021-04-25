@@ -1,0 +1,7 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<scm>
+		<!-- example taken from https://maven.apache.org/scm/git.html -->
+		<url>scm:git:git://www.github.com/parent-scm/parent</url>
+	</scm>
+	<url>https://parent-home.example.com</url>
+</project>

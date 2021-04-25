@@ -312,5 +312,141 @@ describe(getName(__filename), () => {
       });
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
+
+    it('should get source and homepage from parent', async () => {
+      expect(
+        await getPkgReleases({
+          ...config,
+          depName: 'com.renovate:child-no-information',
+          registryUrls: [
+            'file://lib/datasource/maven/__fixtures__/parent_repo/',
+          ],
+        })
+      ).toEqual({
+        group: 'com.renovate',
+        name: 'child-no-information',
+        display: 'com.renovate:child-no-information',
+        registryUrl: 'file://lib/datasource/maven/__fixtures__/parent_repo/',
+        releases: [{ version: '2.0.0' }],
+        sourceUrl: 'https://github.com/parent-scm/parent',
+        homepage: 'https://parent-home.example.com',
+      });
+    });
+
+    it('should get source from own pom and homepage from parent', async () => {
+      expect(
+        await getPkgReleases({
+          ...config,
+          depName: 'com.renovate:child-scm-information',
+          registryUrls: [
+            'file://lib/datasource/maven/__fixtures__/parent_repo/',
+          ],
+        })
+      ).toEqual({
+        group: 'com.renovate',
+        name: 'child-scm-information',
+        display: 'com.renovate:child-scm-information',
+        registryUrl: 'file://lib/datasource/maven/__fixtures__/parent_repo/',
+        releases: [{ version: '2.0.0' }],
+        sourceUrl: 'https://github.com/child-scm/child',
+        homepage: 'https://parent-home.example.com',
+      });
+    });
+
+    it('should get homepage from own pom and source from parent', async () => {
+      expect(
+        await getPkgReleases({
+          ...config,
+          depName: 'com.renovate:child-url-information',
+          registryUrls: [
+            'file://lib/datasource/maven/__fixtures__/parent_repo/',
+          ],
+        })
+      ).toEqual({
+        group: 'com.renovate',
+        name: 'child-url-information',
+        display: 'com.renovate:child-url-information',
+        registryUrl: 'file://lib/datasource/maven/__fixtures__/parent_repo/',
+        releases: [{ version: '2.0.0' }],
+        sourceUrl: 'https://github.com/parent-scm/parent',
+        homepage: 'https://child-home.example.com',
+      });
+    });
+
+    it('should get homepage and source from own pom', async () => {
+      expect(
+        await getPkgReleases({
+          ...config,
+          depName: 'com.renovate:child-all-information',
+          registryUrls: [
+            'file://lib/datasource/maven/__fixtures__/parent_repo/',
+          ],
+        })
+      ).toEqual({
+        group: 'com.renovate',
+        name: 'child-all-information',
+        display: 'com.renovate:child-all-information',
+        registryUrl: 'file://lib/datasource/maven/__fixtures__/parent_repo/',
+        releases: [{ version: '2.0.0' }],
+        sourceUrl: 'https://github.com/child-scm/child',
+        homepage: 'https://child-home.example.com',
+      });
+    });
+
+    it('should be able to detect git@github.com:child-scm as valid sourceUrl', async () => {
+      expect(
+        await getPkgReleases({
+          ...config,
+          depName: 'com.renovate:child-scm-gitatcolon-information',
+          registryUrls: [
+            'file://lib/datasource/maven/__fixtures__/parent_repo/',
+          ],
+        })
+      ).toEqual({
+        group: 'com.renovate',
+        name: 'child-scm-gitatcolon-information',
+        display: 'com.renovate:child-scm-gitatcolon-information',
+        registryUrl: 'file://lib/datasource/maven/__fixtures__/parent_repo/',
+        releases: [{ version: '2.0.0' }],
+        sourceUrl: 'https://github.com/child-scm/child',
+      });
+    });
+
+    it('should be able to detect git@github.com/child-scm as valid sourceUrl', async () => {
+      expect(
+        await getPkgReleases({
+          ...config,
+          depName: 'com.renovate:child-scm-gitatslash-information',
+          registryUrls: [
+            'file://lib/datasource/maven/__fixtures__/parent_repo/',
+          ],
+        })
+      ).toEqual({
+        group: 'com.renovate',
+        name: 'child-scm-gitatslash-information',
+        display: 'com.renovate:child-scm-gitatslash-information',
+        registryUrl: 'file://lib/datasource/maven/__fixtures__/parent_repo/',
+        releases: [{ version: '2.0.0' }],
+        sourceUrl: 'https://github.com/child-scm/child',
+      });
+    });
+    it('should be able to detect git://@github.com/child-scm as valid sourceUrl', async () => {
+      expect(
+        await getPkgReleases({
+          ...config,
+          depName: 'com.renovate:child-scm-gitprotocol-information',
+          registryUrls: [
+            'file://lib/datasource/maven/__fixtures__/parent_repo/',
+          ],
+        })
+      ).toEqual({
+        group: 'com.renovate',
+        name: 'child-scm-gitprotocol-information',
+        display: 'com.renovate:child-scm-gitprotocol-information',
+        registryUrl: 'file://lib/datasource/maven/__fixtures__/parent_repo/',
+        releases: [{ version: '2.0.0' }],
+        sourceUrl: 'https://github.com/child-scm/child',
+      });
+    });
   });
 });
