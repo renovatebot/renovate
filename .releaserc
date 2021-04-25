@@ -87,7 +87,7 @@
     {
       "name": "v24",
       "range": "24.x",
-      "channel": "v24"
+      "channel": "version24"
     },
     {
       "name": "main"
