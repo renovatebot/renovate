@@ -3,9 +3,9 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
 import { id as datasource } from '.';
 
-const rubyReleasesHtml = loadFixture(__filename, 'releases.html');
+const rubyReleasesHtml = loadFixture('releases.html');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

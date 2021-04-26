@@ -13,7 +13,7 @@ import {
   streamToString,
 } from './util';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getNewBranchName', () => {
     it('should add refs/heads', () => {
       const res = getNewBranchName('testBB');

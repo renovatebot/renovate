@@ -8,7 +8,7 @@ jest.mock('../../../util/git');
 
 const managerFiles = mocked(_managerFiles);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractAllDependencies()', () => {
     let config: RenovateConfig;
     const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];

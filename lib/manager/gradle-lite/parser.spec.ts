@@ -2,7 +2,7 @@ import { getName, loadFixture } from '../../../test/util';
 import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO } from './common';
 import { parseGradle, parseProps } from './parser';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('handles end of input', () => {
     expect(parseGradle('version = ').deps).toBeEmpty();
     expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
@@ -156,11 +156,7 @@ describe(getName(__filename), () => {
     ]);
   });
   it('parses fixture from "gradle" manager', () => {
-    const content = loadFixture(
-      __filename,
-      'build.gradle.example1',
-      '../gradle'
-    );
+    const content = loadFixture('build.gradle.example1', '../gradle');
     const { deps } = parseGradle(content, {}, 'build.gradle');
     deps.forEach((dep) => {
       expect(

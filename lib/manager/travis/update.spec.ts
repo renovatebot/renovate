@@ -1,9 +1,9 @@
 import { getName, loadFixture } from '../../../test/util';
 import { updateDependency } from './update';
 
-const content = loadFixture(__filename, 'travis.yml');
+const content = loadFixture('travis.yml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('updateDependency', () => {
     it('updates values', () => {
       const upgrade: any = {

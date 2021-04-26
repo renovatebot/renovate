@@ -4,15 +4,15 @@ import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as datasource } from '.';
 
-const res1 = loadFixture(__filename, 'd3-force.json');
-const res2 = loadFixture(__filename, 'bulma.json');
+const res1 = loadFixture('d3-force.json');
+const res2 = loadFixture('bulma.json');
 
 const baseUrl = 'https://api.cdnjs.com/';
 
 const pathFor = (s: string): string =>
   `/libraries/${s.split('/').shift()}?fields=homepage,repository,assets`;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

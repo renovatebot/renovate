@@ -10,7 +10,7 @@ import {
 } from '../../../constants/error-messages';
 import { initApis } from './apis';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('initApis', () => {
     let config: RenovateConfig;
     beforeEach(() => {

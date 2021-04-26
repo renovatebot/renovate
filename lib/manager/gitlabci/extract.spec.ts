@@ -2,7 +2,7 @@ import { getName, logger } from '../../../test/util';
 import type { PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractAllPackageFiles()', () => {
     it('returns null for empty', async () => {
       expect(

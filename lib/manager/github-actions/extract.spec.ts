@@ -1,10 +1,10 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const workflow1 = loadFixture(__filename, 'workflow.yml.1');
-const workflow2 = loadFixture(__filename, 'workflow.yml.2');
+const workflow1 = loadFixture('workflow.yml.1');
+const workflow2 = loadFixture('workflow.yml.2');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

@@ -1,14 +1,14 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const tf1 = loadFixture(__filename, '1.tf');
+const tf1 = loadFixture('1.tf');
 const tf2 = `module "relative" {
   source = "../../modules/fe"
 }
 `;
-const helm = loadFixture(__filename, 'helm.tf');
+const helm = loadFixture('helm.tf');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

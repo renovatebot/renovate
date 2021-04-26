@@ -8,7 +8,7 @@ const getPkgReleases: any = _getPkgReleases;
 
 jest.mock('../../datasource');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getPackageUpdates', () => {
     let config: any;
     const RealDate = Date;

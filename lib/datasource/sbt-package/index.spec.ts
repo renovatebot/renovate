@@ -6,10 +6,10 @@ import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-plugin/util';
 import * as sbtPlugin from '.';
 
-const mavenIndexHtml = loadFixture(__filename, `maven-index.html`);
-const sbtPluginIndex = loadFixture(__filename, `sbt-plugins-index.html`);
+const mavenIndexHtml = loadFixture(`maven-index.html`);
+const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('parses Maven index directory', () => {
     expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
   });

@@ -13,8 +13,8 @@ import * as extract from './extract';
 import { extractPackageFile } from '.';
 
 const packageFile = 'setup.py';
-const content = loadFixture(__filename, packageFile);
-const jsonContent = loadFixture(__filename, 'setup.py.json');
+const content = loadFixture(packageFile);
+const jsonContent = loadFixture('setup.py.json');
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -36,7 +36,7 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
     cmd: snapshot.cmd.replace(/^.*extract\.py"\s+/, '<extract.py> '),
   }));
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(async () => {
       jest.resetAllMocks();

@@ -21,7 +21,7 @@ jest.mock('../../manager/git-submodules');
 jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
     beforeEach(() => {

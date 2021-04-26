@@ -62,7 +62,7 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],
@@ -445,6 +445,31 @@ describe(getName(__filename), () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch({ ...config, automerge: true });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+    });
+    it('ensures PR when impossible to automerge', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prResult: PrResult.Created,
+        pr: {},
+      } as EnsurePrResult);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await branchWorker.processBranch({
+        ...config,
+        automerge: true,
+        rebaseWhen: 'conflicted',
+      });
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);

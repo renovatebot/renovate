@@ -6,7 +6,7 @@ import { codeOwnersForPr } from './code-owners';
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('codeOwnersForPr', () => {
     let pr: Pr;
     beforeEach(() => {

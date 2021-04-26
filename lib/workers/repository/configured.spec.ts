@@ -7,7 +7,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('checkIfConfigured()', () => {
     it('returns', () => {
       expect(() => checkIfConfigured(config)).not.toThrow();

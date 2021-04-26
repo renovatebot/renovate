@@ -2,9 +2,9 @@ import * as httpMock from '../../../../../test/http-mock';
 import { getName, loadJsonFixture } from '../../../../../test/util';
 import { findFirstParentVersion } from './parent-version';
 
-const expressJson = loadJsonFixture(__filename, 'express.json');
+const expressJson = loadJsonFixture('express.json');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getLockedDependencies()', () => {
     beforeEach(() => {
       httpMock.setup();

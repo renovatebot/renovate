@@ -1,9 +1,9 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const file1 = loadFixture(__filename, 'cloudbuild.yml');
+const file1 = loadFixture('cloudbuild.yml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
