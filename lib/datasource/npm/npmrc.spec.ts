@@ -7,7 +7,7 @@ jest.mock('../../util/sanitize');
 
 const sanitize = mocked(_sanitize);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     setNpmrc('');
     setAdminConfig();

@@ -7,7 +7,7 @@ import {
 import { applyAuthorization, removeAuthorization } from './auth';
 import { GotOptions } from './types';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('applyAuthorization', () => {
     it('does nothing', () => {
       const opts: GotOptions = {

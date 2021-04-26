@@ -18,7 +18,7 @@ jest.mock('../../../../workers/repository/onboarding/branch/rebase');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('checkOnboardingBranch', () => {
     let config: RenovateConfig;
     beforeEach(() => {

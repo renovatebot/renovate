@@ -10,7 +10,7 @@ const hostRules: any = _hostRules;
 const githubApiHost = 'https://api.github.com';
 const githubEnterpriseApiHost = 'https://git.enterprise.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.reset();
     httpMock.setup();

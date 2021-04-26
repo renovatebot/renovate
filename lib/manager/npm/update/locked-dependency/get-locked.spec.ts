@@ -3,9 +3,9 @@ import { getLockedDependencies } from './get-locked';
 
 jest.mock('../../../../util/fs');
 
-const packageLockJson = loadJsonFixture(__filename, 'package-lock.json');
+const packageLockJson = loadJsonFixture('package-lock.json');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getLockedDependencies()', () => {
     it('handles error', () => {
       expect(getLockedDependencies(null as any, 'some-dep', '1.0.0')).toEqual(

@@ -6,19 +6,15 @@ import {
   parseAzurePipelines,
 } from './extract';
 
-const azurePipelines = loadFixture(__filename, 'azure-pipelines.yaml');
+const azurePipelines = loadFixture('azure-pipelines.yaml');
 
-const azurePipelinesInvalid = loadFixture(
-  __filename,
-  'azure-pipelines-invalid.yaml'
-);
+const azurePipelinesInvalid = loadFixture('azure-pipelines-invalid.yaml');
 
 const azurePipelinesNoDependency = loadFixture(
-  __filename,
   'azure-pipelines-no-dependency.yaml'
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('should parse a valid azure-pipelines file', () => {
     const file = parseAzurePipelines(azurePipelines, 'some-file');
     expect(file).not.toBeNull();

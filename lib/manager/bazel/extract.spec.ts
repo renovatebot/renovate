@@ -1,12 +1,12 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const workspaceFile = loadFixture(__filename, 'WORKSPACE1');
-const workspace2File = loadFixture(__filename, 'WORKSPACE2');
-const workspace3File = loadFixture(__filename, 'WORKSPACE3');
-const fileWithBzlExtension = loadFixture(__filename, 'repositories.bzl');
+const workspaceFile = loadFixture('WORKSPACE1');
+const workspace2File = loadFixture('WORKSPACE2');
+const workspace3File = loadFixture('WORKSPACE3');
+const fileWithBzlExtension = loadFixture('repositories.bzl');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

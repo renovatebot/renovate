@@ -11,7 +11,7 @@ function getPath(s = ''): string {
   return `${prePath}/@myco%2Ftest`;
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetMemCache();

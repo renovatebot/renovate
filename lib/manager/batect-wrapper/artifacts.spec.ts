@@ -21,7 +21,7 @@ function artifactForPath(
   };
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
 

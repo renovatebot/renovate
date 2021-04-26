@@ -15,7 +15,7 @@ const config = {
 const githubApiHost = 'https://api.github.com';
 const cocoapodsHost = 'https://cdn.cocoapods.org';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();

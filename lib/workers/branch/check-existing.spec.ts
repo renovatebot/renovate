@@ -3,7 +3,7 @@ import { PrState } from '../../types';
 import type { BranchConfig } from '../types';
 import { prAlreadyExisted } from './check-existing';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('prAlreadyExisted', () => {
     let config: BranchConfig;
     beforeEach(() => {

@@ -27,7 +27,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
       const branches: BranchConfig[] = [

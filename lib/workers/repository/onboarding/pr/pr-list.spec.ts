@@ -2,7 +2,7 @@ import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getPrList } from './pr-list';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getPrList()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

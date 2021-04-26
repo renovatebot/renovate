@@ -7,7 +7,7 @@ import {
   setMaxLimit,
 } from './limits';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     resetAllLimits();
   });

@@ -1,9 +1,9 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const content = loadFixture(__filename, 'build.cake');
+const content = loadFixture('build.cake');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('extracts', () => {
     expect(extractPackageFile(content)).toMatchSnapshot();
   });

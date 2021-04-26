@@ -4,7 +4,7 @@ import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
 import * as git from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   jest.setTimeout(15000);
 
   const masterCommitDate = new Date();

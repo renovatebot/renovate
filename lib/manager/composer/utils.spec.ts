@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { extractContraints, getConstraint } from './utils';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getConstraint', () => {
     it('returns from config', () => {
       expect(getConstraint({ constraints: { composer: '1.1.0' } })).toEqual(

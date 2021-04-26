@@ -14,7 +14,7 @@ function mockFs(files: Record<string, string>): void {
   );
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeAll(() => {});
   afterAll(() => {
     jest.resetAllMocks();

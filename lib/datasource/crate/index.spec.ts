@@ -20,9 +20,9 @@ import {
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
-const res1 = loadFixture(__filename, 'libc');
-const res2 = loadFixture(__filename, 'amethyst');
-const res3 = loadFixture(__filename, 'mypkg');
+const res1 = loadFixture('libc');
+const res2 = loadFixture('amethyst');
+const res3 = loadFixture('mypkg');
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
@@ -65,7 +65,7 @@ function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
   return { mockClone };
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
       expect(getIndexSuffix('a')).toStrictEqual(['1', 'a']);

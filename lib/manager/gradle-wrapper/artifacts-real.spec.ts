@@ -30,7 +30,7 @@ function compareFile(file: string, path: string) {
   );
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   ifSystemSupportsGradle(6).describe('real tests', () => {
     jest.setTimeout(60 * 1000);
 

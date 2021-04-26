@@ -1,13 +1,13 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const tg1 = loadFixture(__filename, '2.hcl');
+const tg1 = loadFixture('2.hcl');
 const tg2 = `terragrunt {
   source = "../../modules/fe"
 }
 `;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

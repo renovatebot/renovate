@@ -5,7 +5,7 @@ import { Http } from '../util/http';
 import errSerializer from './err-serializer';
 import { sanitizeValue } from './utils';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('expands errors', () => {
     const err = partial<Error & Record<string, unknown>>({
       a: 1,
