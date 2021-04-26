@@ -1,45 +1,19 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
-import { getName } from '../../../../../test/util';
+import { getName, loadFixture } from '../../../../../test/util';
 import { clone } from '../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 import { updateLockedDependency } from '.';
 
-const packageFileContent = readFileSync(
-  resolve(__dirname, './__fixtures__/package.json'),
-  'utf8'
-);
-const lockFileContent = readFileSync(
-  resolve(__dirname, './__fixtures__/package-lock.json'),
-  'utf8'
-);
+const packageFileContent = loadFixture('package.json');
+const lockFileContent = loadFixture('package-lock.json');
+const acceptsJson = JSON.parse(loadFixture('accepts.json'));
+const expressJson = JSON.parse(loadFixture('express.json'));
+const mimeJson = JSON.parse(loadFixture('mime.json'));
+const serveStaticJson = JSON.parse(loadFixture('serve-static.json'));
+const sendJson = JSON.parse(loadFixture('send.json'));
+const typeIsJson = JSON.parse(loadFixture('type-is.json'));
 
-const acceptsJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/accepts.json'), 'utf8')
-);
-
-const expressJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/express.json'), 'utf8')
-);
-
-const mimeJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/mime.json'), 'utf8')
-);
-
-const serveStaticJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/serve-static.json'), 'utf8')
-);
-
-const sendJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/send.json'), 'utf8')
-);
-
-const typeIsJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/type-is.json'), 'utf8')
-);
-
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
     beforeEach(() => {

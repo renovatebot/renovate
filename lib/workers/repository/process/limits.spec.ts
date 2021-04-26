@@ -18,7 +18,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getPrHourlyRemaining()', () => {
     it('calculates hourly limit remaining', async () => {
       const time = DateTime.local();

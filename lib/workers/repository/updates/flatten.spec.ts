@@ -11,7 +11,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       config.lockFileMaintenance.enabled = true;

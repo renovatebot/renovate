@@ -14,7 +14,7 @@ jest.mock('delay');
 const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> = _registryAuthToken as never;
 let npmResponse: any;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     httpMock.setup();

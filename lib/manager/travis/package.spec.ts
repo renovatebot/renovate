@@ -8,7 +8,7 @@ const getPkgReleases: any = _getPkgReleases;
 
 jest.mock('../../datasource');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getPackageUpdates', () => {
     // TODO: should be `PackageUpdateConfig`
     let config: any;

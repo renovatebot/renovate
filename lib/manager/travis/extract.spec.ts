@@ -1,14 +1,9 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const invalidYAML = readFileSync(
-  resolve('lib/manager/travis/__fixtures__/invalid.yml'),
-  'utf8'
-);
+const invalidYAML = loadFixture('invalid.yml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

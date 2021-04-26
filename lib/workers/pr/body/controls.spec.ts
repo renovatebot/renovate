@@ -5,7 +5,7 @@ import { getControls } from './controls';
 
 jest.mock('../../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getControls', () => {
     let branchConfig: BranchConfig;
     beforeEach(() => {

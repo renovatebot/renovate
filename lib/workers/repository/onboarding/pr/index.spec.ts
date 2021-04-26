@@ -15,7 +15,7 @@ import { ensureOnboardingPr } from '.';
 
 jest.mock('../../../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;
     let packageFiles: Record<string, PackageFile[]>;

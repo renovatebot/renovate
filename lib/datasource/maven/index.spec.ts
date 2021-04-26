@@ -1,8 +1,6 @@
-import fs from 'fs';
 import nock from 'nock';
-import { resolve } from 'upath';
 import { Release, getPkgReleases } from '..';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import * as mavenVersioning from '../../versioning/maven';
@@ -10,20 +8,12 @@ import { id as datasource } from '.';
 
 const MYSQL_VERSIONS = ['6.0.5', '6.0.6', '8.0.7', '8.0.8', '8.0.9'];
 
-const MYSQL_MAVEN_METADATA = fs.readFileSync(
-  resolve(
-    __dirname,
-    './__fixtures__/repo1.maven.org/maven2/mysql/mysql-connector-java/maven-metadata.xml'
-  ),
-  'utf8'
+const MYSQL_MAVEN_METADATA = loadFixture(
+  'repo1.maven.org/maven2/mysql/mysql-connector-java/maven-metadata.xml'
 );
 
-const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
-  resolve(
-    __dirname,
-    './__fixtures__/repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
-  ),
-  'utf8'
+const MYSQL_MAVEN_MYSQL_POM = loadFixture(
+  'repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
 );
 
 const config = {
@@ -46,7 +36,7 @@ function generateReleases(versions: string[], ts = false): Release[] {
   });
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     hostRules.add({
       hostType: datasource,

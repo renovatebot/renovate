@@ -11,7 +11,7 @@ const Git: typeof _simpleGit = jest.requireActual('simple-git');
 
 const localDir = `${__dirname}/__fixtures__`;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   // flaky ci tests
   jest.setTimeout(10 * 1000);
 

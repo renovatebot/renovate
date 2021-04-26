@@ -1,34 +1,26 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 
 import { id as datasource } from '.';
 
-const communityKubernetesBase = fs.readFileSync(
-  'lib/datasource/galaxy-collection/__fixtures__/community_kubernetes_base.json',
-  'utf8'
+const communityKubernetesBase = loadFixture('community_kubernetes_base.json');
+const communityKubernetesVersions = loadFixture(
+  'community_kubernetes_versions.json'
 );
-const communityKubernetesVersions = fs.readFileSync(
-  'lib/datasource/galaxy-collection/__fixtures__/community_kubernetes_versions.json',
-  'utf8'
+const communityKubernetesDetails121 = loadFixture(
+  'community_kubernetes_version_details_1.2.1.json'
 );
-const communityKubernetesDetails121 = fs.readFileSync(
-  'lib/datasource/galaxy-collection/__fixtures__/community_kubernetes_version_details_1.2.1.json',
-  'utf8'
+const communityKubernetesDetails120 = loadFixture(
+  'community_kubernetes_version_details_1.2.0.json'
 );
-const communityKubernetesDetails120 = fs.readFileSync(
-  'lib/datasource/galaxy-collection/__fixtures__/community_kubernetes_version_details_1.2.0.json',
-  'utf8'
-);
-const communityKubernetesDetails0111 = fs.readFileSync(
-  'lib/datasource/galaxy-collection/__fixtures__/community_kubernetes_version_details_0.11.1.json',
-  'utf8'
+const communityKubernetesDetails0111 = loadFixture(
+  'community_kubernetes_version_details_0.11.1.json'
 );
 
 const baseUrl = 'https://galaxy.ansible.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

@@ -5,7 +5,7 @@ import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import * as memCache from '../../util/cache/memory';
 import { setFsConfig } from '../../util/fs';
@@ -20,12 +20,9 @@ import {
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
-const res1 = fs.readFileSync('lib/datasource/crate/__fixtures__/libc', 'utf8');
-const res2 = fs.readFileSync(
-  'lib/datasource/crate/__fixtures__/amethyst',
-  'utf8'
-);
-const res3 = fs.readFileSync('lib/datasource/crate/__fixtures__/mypkg', 'utf8');
+const res1 = loadFixture('libc');
+const res2 = loadFixture('amethyst');
+const res3 = loadFixture('mypkg');
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
@@ -68,7 +65,7 @@ function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
   return { mockClone };
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
       expect(getIndexSuffix('a')).toStrictEqual(['1', 'a']);

@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { skip } from './util';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('skip()', () => {
     it('handles out of bounds case', () => {
       const content = 'some content';

@@ -16,7 +16,7 @@ const config: FetchPresetConfig = {
 
 const fetch = jest.fn(() => Promise.resolve<Preset>({}));
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     fetch.mockReset();
   });

@@ -10,7 +10,7 @@ import {
   versionLikeSubstring,
 } from './utils';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('versionLikeSubstring', () => {
     [
       '1.2.3',

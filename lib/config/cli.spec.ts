@@ -4,7 +4,7 @@ import * as cli from './cli';
 import getArgv from './config/__fixtures__/argv';
 import type { RenovateOptions } from './types';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let argv: string[];
   beforeEach(() => {
     argv = getArgv();
