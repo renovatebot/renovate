@@ -56,7 +56,7 @@ const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
 const registryUrl = defaultRegistryUrls[0];
 const releaseBackendUrl = defaultRegistryUrls[1];
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

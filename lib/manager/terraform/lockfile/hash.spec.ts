@@ -12,7 +12,7 @@ const releaseBackendAzurerm = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

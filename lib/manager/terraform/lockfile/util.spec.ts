@@ -7,7 +7,7 @@ const validLockfile = readFileSync(
   'utf8'
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractLocks()', () => {
     it('returns null for empty', () => {
       const result = extractLocks('nothing here');
