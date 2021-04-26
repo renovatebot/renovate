@@ -8,7 +8,7 @@ import { Http, HttpResponse } from '../../util/http';
 
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
-import type { MavenDependency } from './types';
+import type { MavenDependency, MavenXml } from './types';
 
 const http: Record<string, Http> = {};
 
@@ -100,6 +100,14 @@ export async function downloadHttpProtocol(
   }
 }
 
+async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
+  const pkgPath = pkgUrl.toString().replace('file://', '');
+  if (!(await fs.exists(pkgPath))) {
+    return null;
+  }
+  return fs.readFile(pkgPath, 'utf8');
+}
+
 export async function isHttpResourceExists(
   pkgUrl: url.URL | string,
   hostType = id
@@ -128,25 +136,12 @@ function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
 }
 
-async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
-  const pkgPath = pkgUrl.toString().replace('file://', '');
-  if (!(await fs.exists(pkgPath))) {
-    return null;
-  }
-  return fs.readFile(pkgPath, 'utf8');
-}
-
 export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
   path: string
 ): url.URL | null {
   return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
-}
-
-interface MavenXml {
-  authorization?: boolean;
-  xml?: XmlDocument;
 }
 
 export async function downloadMavenXml(
