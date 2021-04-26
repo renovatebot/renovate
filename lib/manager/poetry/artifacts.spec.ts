@@ -209,7 +209,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          isLockFileMaintenance: true,
+          updateType: 'lockFileMaintenance',
         },
       })
     ).not.toBeNull();
