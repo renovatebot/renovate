@@ -1,10 +1,14 @@
 import url from 'url';
+import fs from 'fs-extra';
+import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
 
+import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
+import type { MavenDependency } from './types';
 
 const http: Record<string, Http> = {};
 
@@ -118,4 +122,102 @@ export async function isHttpResourceExists(
     logger.debug({ failedUrl }, `Can't check HTTP resource existence`);
     return null;
   }
+}
+
+function containsPlaceholder(str: string): boolean {
+  return /\${.*?}/g.test(str);
+}
+
+async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
+  const pkgPath = pkgUrl.toString().replace('file://', '');
+  if (!(await fs.exists(pkgPath))) {
+    return null;
+  }
+  return fs.readFile(pkgPath, 'utf8');
+}
+
+export function getMavenUrl(
+  dependency: MavenDependency,
+  repoUrl: string,
+  path: string
+): url.URL | null {
+  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+}
+
+interface MavenXml {
+  authorization?: boolean;
+  xml?: XmlDocument;
+}
+
+export async function downloadMavenXml(
+  pkgUrl: url.URL | null
+): Promise<MavenXml | null> {
+  /* istanbul ignore if */
+  if (!pkgUrl) {
+    return {};
+  }
+  let rawContent: string;
+  let authorization: boolean;
+  switch (pkgUrl.protocol) {
+    case 'file:':
+      rawContent = await downloadFileProtocol(pkgUrl);
+      break;
+    case 'http:':
+    case 'https:':
+      ({ authorization, body: rawContent } = await downloadHttpProtocol(
+        pkgUrl
+      ));
+      break;
+    case 's3:':
+      logger.debug('Skipping s3 dependency');
+      return {};
+    default:
+      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
+      return {};
+  }
+
+  if (!rawContent) {
+    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
+    return {};
+  }
+
+  return { authorization, xml: new XmlDocument(rawContent) };
+}
+
+export async function getDependencyInfo(
+  dependency: MavenDependency,
+  repoUrl: string,
+  version: string
+): Promise<Partial<ReleaseResult>> {
+  const result: Partial<ReleaseResult> = {};
+  const path = `${version}/${dependency.name}-${version}.pom`;
+
+  const pomUrl = getMavenUrl(dependency, repoUrl, path);
+  const { xml: pomContent } = await downloadMavenXml(pomUrl);
+  if (!pomContent) {
+    return result;
+  }
+
+  const homepage = pomContent.valueWithPath('url');
+  if (homepage && !containsPlaceholder(homepage)) {
+    result.homepage = homepage;
+  }
+
+  const sourceUrl = pomContent.valueWithPath('scm.url');
+  if (sourceUrl && !containsPlaceholder(sourceUrl)) {
+    result.sourceUrl = sourceUrl.replace(/^scm:/, '');
+  }
+
+  return result;
+}
+
+export function getDependencyParts(lookupName: string): MavenDependency {
+  const [group, name] = lookupName.split(':');
+  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
+  return {
+    display: lookupName,
+    group,
+    name,
+    dependencyUrl,
+  };
 }
