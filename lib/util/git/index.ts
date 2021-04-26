@@ -450,13 +450,19 @@ export function getBranchList(): string[] {
 export async function isBranchStale(branchName: string): Promise<boolean> {
   await syncBranch(branchName);
   try {
+    const { currentBranchSha, currentBranch } = config;
     const branches = await git.branch([
       '--remotes',
       '--verbose',
       '--contains',
       config.currentBranchSha,
     ]);
-    return !branches.all.map(localName).includes(branchName);
+    const isStale = !branches.all.map(localName).includes(branchName);
+    logger.debug(
+      { isStale, branches, currentBranch, currentBranchSha },
+      `IsBranchStale=${isStale}`
+    );
+    return isStale;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     throw err;

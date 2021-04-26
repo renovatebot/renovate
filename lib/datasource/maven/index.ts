@@ -8,8 +8,8 @@ import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
+import type { MavenDependency } from './types';
 import {
-  MavenDependency,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,

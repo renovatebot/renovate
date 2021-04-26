@@ -5,9 +5,10 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
-import type { ReleaseResult } from '../types';
 
+import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
+import type { MavenDependency, MavenXml } from './types';
 
 const http: Record<string, Http> = {};
 
@@ -135,16 +136,12 @@ function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
 }
 
-export interface MavenDependency {
-  display: string;
-  group?: string;
-  name?: string;
-  dependencyUrl: string;
-}
-
-interface MavenXml {
-  authorization?: boolean;
-  xml?: XmlDocument;
+export function getMavenUrl(
+  dependency: MavenDependency,
+  repoUrl: string,
+  path: string
+): url.URL | null {
+  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export async function downloadMavenXml(
@@ -180,14 +177,6 @@ export async function downloadMavenXml(
   }
 
   return { authorization, xml: new XmlDocument(rawContent) };
-}
-
-export function getMavenUrl(
-  dependency: MavenDependency,
-  repoUrl: string,
-  path: string
-): url.URL | null {
-  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export function getDependencyParts(lookupName: string): MavenDependency {
