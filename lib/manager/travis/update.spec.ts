@@ -6,7 +6,6 @@ const content = loadFixture('travis.yml');
 describe(getName(), () => {
   describe('updateDependency', () => {
     it('updates values', () => {
-      // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: ['8', '6', '4'],
         newValue: '6,8',
@@ -15,7 +14,6 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
     });
     it('falls back to 2 spaces', () => {
-      // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: [8, 6, 4],
         newValue: '6,8',
@@ -27,7 +25,6 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
     });
     it('uses double quotes', () => {
-      // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: ['6'],
         newValue: '6,8',
@@ -39,7 +36,6 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
     });
     it('returns null if error', () => {
-      // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: [8, 6, 4],
         newValue: 6,

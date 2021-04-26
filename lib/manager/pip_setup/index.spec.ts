@@ -29,7 +29,7 @@ const pythonVersionCallResults = [
   { stdout: 'Python 3.7.5\\n', stderr: '' },
 ];
 
-// TODO: figure out snapshot similarity for each CI platform
+// TODO: figure out snapshot similarity for each CI platform (#9617)
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map((snapshot) => ({
     ...snapshot,
@@ -79,7 +79,7 @@ describe(getName(), () => {
           binarySource: BinarySource.Docker,
         })
       ).toMatchSnapshot();
-      expect(execSnapshots).toHaveLength(1); // TODO: figure out volume arguments in Windows
+      expect(execSnapshots).toHaveLength(1); // TODO: figure out volume arguments in Windows (#9617)
     });
 
     it('returns no deps', async () => {

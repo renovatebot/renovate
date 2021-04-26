@@ -273,7 +273,7 @@ export function generateBranchConfig(
     });
   }
   // Now assign first upgrade's config as branch config
-  config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme
+  config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme (#9666)
   config.reuseLockFiles = config.upgrades.every(
     (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
   );

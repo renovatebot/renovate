@@ -483,7 +483,7 @@ export async function processBranch(
       logger.debug('Reached PR limit - skipping PR creation');
       return { branchExists, result: BranchResult.PrLimitReached };
     }
-    // TODO: ensurePr should check for automerge itself
+    // TODO: ensurePr should check for automerge itself (#9719)
     if (result === PrResult.AwaitingApproval) {
       return { branchExists, result: BranchResult.NeedsPrApproval };
     }
