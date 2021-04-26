@@ -11,6 +11,7 @@ export type AutomergeResult =
   | 'branch status error'
   | 'failed'
   | 'no automerge'
+  | 'stale'
   | 'not ready';
 
 export async function tryBranchAutomerge(
@@ -48,7 +49,7 @@ export async function tryBranchAutomerge(
         err.message.includes('Not possible to fast-forward')
       ) {
         logger.warn({ err }, 'Branch is not up to date - cannot automerge');
-        return 'not ready';
+        return 'stale';
       }
       if (err.message.includes('Protected branch')) {
         if (err.message.includes('status check')) {
