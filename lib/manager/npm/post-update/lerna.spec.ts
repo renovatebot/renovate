@@ -25,7 +25,7 @@ function lernaPkgFileWithoutLernaDep(lernaClient: string) {
     lernaClient,
   };
 }
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('generateLockFiles()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

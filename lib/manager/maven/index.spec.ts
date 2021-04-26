@@ -5,16 +5,16 @@ import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('../../util/fs');
 
-const pomContent = loadFixture(__filename, 'simple.pom.xml');
-const pomParent = loadFixture(__filename, 'parent.pom.xml');
-const pomChild = loadFixture(__filename, 'child.pom.xml');
-const origContent = loadFixture(__filename, 'grouping.pom.xml');
+const pomContent = loadFixture('simple.pom.xml');
+const pomParent = loadFixture('parent.pom.xml');
+const pomChild = loadFixture('child.pom.xml');
+const origContent = loadFixture('grouping.pom.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);

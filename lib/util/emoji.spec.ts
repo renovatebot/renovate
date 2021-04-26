@@ -1,7 +1,7 @@
 import { getName } from '../../test/util';
 import { setEmojiConfig, unemojify } from './emoji';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('strips emojis when the config has been set accordingly', () => {
     const emoji = '🚀💎';
     const otherText = 'regular text';

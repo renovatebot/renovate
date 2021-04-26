@@ -1,9 +1,9 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const yamlFile = loadFixture(__filename, 'gitlab-ci.1.yaml');
+const yamlFile = loadFixture('gitlab-ci.1.yaml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(

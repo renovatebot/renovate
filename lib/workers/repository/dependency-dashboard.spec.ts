@@ -46,7 +46,7 @@ async function dryRun(
   expect(platform.findPr).toHaveBeenCalledTimes(findPrCalls);
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('ensureMasterIssue()', () => {
     beforeEach(() => {
       setAdminConfig();
@@ -239,7 +239,7 @@ describe(getName(__filename), () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture(__filename, 'master-issue_with_8_PR.txt')
+        loadFixture('master-issue_with_8_PR.txt')
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
       expect(platform.findPr).toHaveBeenCalledTimes(0);
@@ -279,7 +279,7 @@ describe(getName(__filename), () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture(__filename, 'master-issue_with_2_PR_edited.txt')
+        loadFixture('master-issue_with_2_PR_edited.txt')
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(2);
       expect(platform.getBranchPr.mock.calls[0][0]).toBe('branchName1');
@@ -329,7 +329,7 @@ describe(getName(__filename), () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture(__filename, 'master-issue_with_3_PR_in_progress.txt')
+        loadFixture('master-issue_with_3_PR_in_progress.txt')
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(3);
       expect(platform.getBranchPr.mock.calls[0][0]).toBe('branchName1');
@@ -373,7 +373,7 @@ describe(getName(__filename), () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture(__filename, 'master-issue_with_2_PR_closed_ignored.txt')
+        loadFixture('master-issue_with_2_PR_closed_ignored.txt')
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
       expect(platform.findPr).toHaveBeenCalledTimes(2);
@@ -431,7 +431,7 @@ describe(getName(__filename), () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture(__filename, 'master-issue_with_3_PR_in_approval.txt')
+        loadFixture('master-issue_with_3_PR_in_approval.txt')
       );
       expect(platform.findPr).toHaveBeenCalledTimes(0);
 

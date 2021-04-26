@@ -6,7 +6,7 @@ import * as npm from '.';
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     setAdminConfig();

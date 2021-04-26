@@ -3,21 +3,21 @@ import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-const pyproject1toml = loadFixture(__filename, 'pyproject.1.toml');
-const pyproject2toml = loadFixture(__filename, 'pyproject.2.toml');
-const pyproject3toml = loadFixture(__filename, 'pyproject.3.toml');
-const pyproject4toml = loadFixture(__filename, 'pyproject.4.toml');
-const pyproject5toml = loadFixture(__filename, 'pyproject.5.toml');
-const pyproject6toml = loadFixture(__filename, 'pyproject.6.toml');
-const pyproject7toml = loadFixture(__filename, 'pyproject.7.toml');
-const pyproject8toml = loadFixture(__filename, 'pyproject.8.toml');
-const pyproject9toml = loadFixture(__filename, 'pyproject.9.toml');
+const pyproject1toml = loadFixture('pyproject.1.toml');
+const pyproject2toml = loadFixture('pyproject.2.toml');
+const pyproject3toml = loadFixture('pyproject.3.toml');
+const pyproject4toml = loadFixture('pyproject.4.toml');
+const pyproject5toml = loadFixture('pyproject.5.toml');
+const pyproject6toml = loadFixture('pyproject.6.toml');
+const pyproject7toml = loadFixture('pyproject.7.toml');
+const pyproject8toml = loadFixture('pyproject.8.toml');
+const pyproject9toml = loadFixture('pyproject.9.toml');
 
 // pyproject.10.toml use by artifacts
-const pyproject11toml = loadFixture(__filename, 'pyproject.11.toml');
-const pyproject11tomlLock = loadFixture(__filename, 'pyproject.11.toml.lock');
+const pyproject11toml = loadFixture('pyproject.11.toml');
+const pyproject11tomlLock = loadFixture('pyproject.11.toml.lock');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     let filename: string;
     const OLD_ENV = process.env;

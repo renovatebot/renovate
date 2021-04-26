@@ -4,7 +4,7 @@ import { getName } from '../../test/util';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { regEx } from './regex';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetModules();
   });

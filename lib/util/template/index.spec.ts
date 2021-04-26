@@ -2,7 +2,7 @@ import { getName } from '../../../test/util';
 import { getOptions } from '../../config/definitions';
 import * as template from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(

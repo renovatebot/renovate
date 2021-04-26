@@ -6,7 +6,7 @@ import { tryBranchAutomerge } from './automerge';
 
 jest.mock('../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('tryBranchAutomerge', () => {
     let config: RenovateConfig;
     beforeEach(() => {

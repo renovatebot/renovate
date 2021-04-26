@@ -11,7 +11,7 @@ jest.mock('../../../util/fs');
 const fileMatch = mocked(_fileMatch);
 const html = mocked(_html);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getManagerPackageFiles()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

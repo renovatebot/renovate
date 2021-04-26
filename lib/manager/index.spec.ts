@@ -3,7 +3,7 @@ import { loadModules } from '../util/modules';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();

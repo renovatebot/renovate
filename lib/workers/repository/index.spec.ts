@@ -12,7 +12,7 @@ jest.mock('./process');
 jest.mock('./result');
 jest.mock('./error');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('renovateRepository()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

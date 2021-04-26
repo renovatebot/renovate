@@ -12,7 +12,7 @@ hostRules.add({
 
 const gitlabApiHost = 'https://gitlab.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let gitlabApi: GitlabHttp;
 
   beforeEach(() => {

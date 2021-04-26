@@ -1,13 +1,13 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const aalib = loadFixture(__filename, 'aalib.rb');
-const aap = loadFixture(__filename, 'aap.rb');
-const acmetool = loadFixture(__filename, 'acmetool.rb');
-const aide = loadFixture(__filename, 'aide.rb');
-const ibazel = loadFixture(__filename, 'ibazel.rb');
+const aalib = loadFixture('aalib.rb');
+const aap = loadFixture('aap.rb');
+const acmetool = loadFixture('acmetool.rb');
+const aide = loadFixture('aide.rb');
+const ibazel = loadFixture('ibazel.rb');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
       const res = extractPackageFile(aalib);

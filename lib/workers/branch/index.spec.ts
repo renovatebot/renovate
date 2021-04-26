@@ -62,7 +62,7 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],

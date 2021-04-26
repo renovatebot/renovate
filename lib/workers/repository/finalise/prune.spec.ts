@@ -20,7 +20,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('pruneStaleBranches()', () => {
     beforeEach(() => {
       setAdminConfig();

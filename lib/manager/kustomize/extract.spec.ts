@@ -10,20 +10,17 @@ import {
   parseKustomize,
 } from './extract';
 
-const kustomizeGitSSHBase = loadFixture(__filename, 'gitSshBase.yaml');
-const kustomizeEmpty = loadFixture(__filename, 'kustomizeEmpty.yaml');
-const kustomizeGitSSHSubdir = loadFixture(__filename, 'gitSubdir.yaml');
-const kustomizeHTTP = loadFixture(__filename, 'kustomizeHttp.yaml');
-const kustomizeWithLocal = loadFixture(__filename, 'kustomizeWithLocal.yaml');
-const nonKustomize = loadFixture(__filename, 'service.yaml');
-const gitImages = loadFixture(__filename, 'gitImages.yaml');
-const kustomizeDepsInResources = loadFixture(
-  __filename,
-  'depsInResources.yaml'
-);
-const sha = loadFixture(__filename, 'sha.yaml');
+const kustomizeGitSSHBase = loadFixture('gitSshBase.yaml');
+const kustomizeEmpty = loadFixture('kustomizeEmpty.yaml');
+const kustomizeGitSSHSubdir = loadFixture('gitSubdir.yaml');
+const kustomizeHTTP = loadFixture('kustomizeHttp.yaml');
+const kustomizeWithLocal = loadFixture('kustomizeWithLocal.yaml');
+const nonKustomize = loadFixture('service.yaml');
+const gitImages = loadFixture('gitImages.yaml');
+const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
+const sha = loadFixture('sha.yaml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
     expect(file).not.toBeNull();

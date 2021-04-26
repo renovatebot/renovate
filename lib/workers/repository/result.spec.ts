@@ -7,7 +7,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('processResult()', () => {
     it('runs', () => {
       const result = processResult(config, 'done');

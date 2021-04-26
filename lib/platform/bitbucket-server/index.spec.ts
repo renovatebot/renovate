@@ -169,7 +169,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;

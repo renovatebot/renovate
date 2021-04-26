@@ -4,7 +4,7 @@ import { getName } from '../../../test/util';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     let config: ExtractConfig;
     beforeEach(() => {
