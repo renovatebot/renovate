@@ -502,6 +502,7 @@ describe(getName(), () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
+          separateMinorPatch: true,
           updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
         },
