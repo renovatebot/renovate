@@ -23,7 +23,7 @@ You can store your Renovate configuration file in one of the following locations
 Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
 
-Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
+Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
 
 If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
 We will do our best to answer your question(s).
