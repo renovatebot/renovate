@@ -3,8 +3,8 @@ import yaml from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { replaceReferenceTags } from '../gitlabci/utils';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 function extractDepFromIncludeFile(includeObj: {
   file: any;
