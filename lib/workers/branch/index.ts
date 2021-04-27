@@ -381,6 +381,16 @@ export async function processBranch(
         return { branchExists: false, result: BranchResult.Automerged };
       }
       if (
+        mergeStatus === 'stale' &&
+        ['conflicted', 'never'].includes(config.rebaseWhen)
+      ) {
+        logger.warn(
+          'Branch cannot automerge because it is stale and rebaseWhen setting disallows rebasing - raising a PR instead'
+        );
+        config.forcePr = true;
+        config.branchAutomergeFailureMessage = mergeStatus;
+      }
+      if (
         mergeStatus === 'automerge aborted - PR exists' ||
         mergeStatus === 'branch status error' ||
         mergeStatus === 'failed'
@@ -473,7 +483,7 @@ export async function processBranch(
       logger.debug('Reached PR limit - skipping PR creation');
       return { branchExists, result: BranchResult.PrLimitReached };
     }
-    // TODO: ensurePr should check for automerge itself
+    // TODO: ensurePr should check for automerge itself (#9719)
     if (result === PrResult.AwaitingApproval) {
       return { branchExists, result: BranchResult.NeedsPrApproval };
     }

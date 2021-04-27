@@ -3,20 +3,16 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
 import { id as datasource } from '.';
 
-const consulData: any = loadFixture(__filename, 'registry-consul.json');
-const serviceDiscoveryResult: any = loadFixture(
-  __filename,
-  'service-discovery.json'
-);
+const consulData: any = loadFixture('registry-consul.json');
+const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
 const serviceDiscoveryCustomResult: any = loadFixture(
-  __filename,
   'service-custom-discovery.json'
 );
 
 const baseUrl = 'https://registry.terraform.io';
 const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

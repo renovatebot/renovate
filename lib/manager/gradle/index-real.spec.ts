@@ -13,7 +13,7 @@ const baseConfig = {
   },
 };
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   ifSystemSupportsGradle(6).describe('executeGradle integration', () => {
     const SUCCESS_FILE_NAME = 'success.indicator';
     let workingDir: DirectoryResult;

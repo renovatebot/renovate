@@ -221,7 +221,10 @@ export function generateBranchConfig(
         upgrade.updateType === 'minor' && upgrade.separateMinorPatch
           ? ' (minor)'
           : '';
-      upgrade.prTitle += upgrade.updateType === 'patch' ? ' (patch)' : '';
+      upgrade.prTitle +=
+        upgrade.updateType === 'patch' && upgrade.separateMinorPatch
+          ? ' (patch)'
+          : '';
     }
     // Compile again to allow for nested templates
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
@@ -273,7 +276,7 @@ export function generateBranchConfig(
     });
   }
   // Now assign first upgrade's config as branch config
-  config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme
+  config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme (#9666)
   config.reuseLockFiles = config.upgrades.every(
     (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
   );

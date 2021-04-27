@@ -4,29 +4,24 @@ import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-const railsGemfile = loadFixture(__filename, 'Gemfile.rails');
-const railsGemfileLock = loadFixture(__filename, 'Gemfile.rails.lock');
+const railsGemfile = loadFixture('Gemfile.rails');
+const railsGemfileLock = loadFixture('Gemfile.rails.lock');
 
-const sourceGroupGemfile = loadFixture(__filename, 'Gemfile.sourceGroup');
-const webPackerGemfile = loadFixture(__filename, 'Gemfile.webpacker');
-const webPackerGemfileLock = loadFixture(__filename, 'Gemfile.webpacker.lock');
-const mastodonGemfile = loadFixture(__filename, 'Gemfile.mastodon');
-const mastodonGemfileLock = loadFixture(__filename, 'Gemfile.mastodon.lock');
-const rubyCIGemfileLock = loadFixture(__filename, 'Gemfile.rubyci.lock');
+const sourceGroupGemfile = loadFixture('Gemfile.sourceGroup');
+const webPackerGemfile = loadFixture('Gemfile.webpacker');
+const webPackerGemfileLock = loadFixture('Gemfile.webpacker.lock');
+const mastodonGemfile = loadFixture('Gemfile.mastodon');
+const mastodonGemfileLock = loadFixture('Gemfile.mastodon.lock');
+const rubyCIGemfileLock = loadFixture('Gemfile.rubyci.lock');
 
-const rubyCIGemfile = loadFixture(__filename, 'Gemfile.rubyci');
-const gitlabFossGemfileLock = loadFixture(
-  __filename,
-  'Gemfile.gitlab-foss.lock'
-);
-const gitlabFossGemfile = loadFixture(__filename, 'Gemfile.gitlab-foss');
-const sourceBlockGemfile = loadFixture(__filename, 'Gemfile.sourceBlock');
+const rubyCIGemfile = loadFixture('Gemfile.rubyci');
+const gitlabFossGemfileLock = loadFixture('Gemfile.gitlab-foss.lock');
+const gitlabFossGemfile = loadFixture('Gemfile.gitlab-foss');
+const sourceBlockGemfile = loadFixture('Gemfile.sourceBlock');
 const sourceBlockWithNewLinesGemfileLock = loadFixture(
-  __filename,
   'Gemfile.sourceBlockWithNewLines.lock'
 );
 const sourceBlockWithNewLinesGemfile = loadFixture(
-  __filename,
   'Gemfile.sourceBlockWithNewLines'
 );
 
@@ -36,7 +31,7 @@ function validateGems(raw, parsed) {
   expect(gemfileGemCount).toEqual(parsedGemCount);
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();

@@ -15,20 +15,12 @@ jest.mock('../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
-const angularJsChangelogMd = loadFixture(__filename, 'angular-js.md', '..');
-const jestChangelogMd = loadFixture(__filename, 'jest.md', '..');
-const jsYamlChangelogMd = loadFixture(__filename, 'js-yaml.md', '..');
-const yargsChangelogMd = loadFixture(__filename, 'yargs.md', '..');
-const adapterutilsChangelogMd = loadFixture(
-  __filename,
-  'adapter-utils.md',
-  '..'
-);
-const gitterWebappChangelogMd = loadFixture(
-  __filename,
-  'gitter-webapp.md',
-  '..'
-);
+const angularJsChangelogMd = loadFixture('angular-js.md', '..');
+const jestChangelogMd = loadFixture('jest.md', '..');
+const jsYamlChangelogMd = loadFixture('js-yaml.md', '..');
+const yargsChangelogMd = loadFixture('yargs.md', '..');
+const adapterutilsChangelogMd = loadFixture('adapter-utils.md', '..');
+const gitterWebappChangelogMd = loadFixture('gitter-webapp.md', '..');
 
 const githubTreeResponse = {
   tree: [
@@ -44,7 +36,7 @@ const gitlabTreeResponse = [
   { path: 'README.md', type: 'blob' },
 ];
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({});

@@ -46,7 +46,7 @@ const resGitHubEnterprise = `<!DOCTYPE html>
 </body>
 </html>`;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({});

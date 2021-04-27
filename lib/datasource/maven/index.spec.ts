@@ -9,12 +9,10 @@ import { id as datasource } from '.';
 const MYSQL_VERSIONS = ['6.0.5', '6.0.6', '8.0.7', '8.0.8', '8.0.9'];
 
 const MYSQL_MAVEN_METADATA = loadFixture(
-  __filename,
   'repo1.maven.org/maven2/mysql/mysql-connector-java/maven-metadata.xml'
 );
 
 const MYSQL_MAVEN_MYSQL_POM = loadFixture(
-  __filename,
   'repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
 );
 
@@ -38,7 +36,7 @@ function generateReleases(versions: string[], ts = false): Release[] {
   });
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     hostRules.add({
       hostType: datasource,

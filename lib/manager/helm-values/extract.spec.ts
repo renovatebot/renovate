@@ -2,16 +2,14 @@ import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const helmDefaultChartInitValues = loadFixture(
-  __filename,
   'default_chart_init_values.yaml'
 );
 
 const helmMultiAndNestedImageValues = loadFixture(
-  __filename,
   'multi_and_nested_image_values.yaml'
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

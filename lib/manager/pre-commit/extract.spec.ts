@@ -6,32 +6,20 @@ jest.mock('../../util/host-rules');
 const hostRules = mocked(_hostRules);
 const filename = '.pre-commit.yaml';
 
-const complexPrecommitConfig = loadFixture(
-  __filename,
-  'complex.pre-commit-config.yaml'
-);
-const examplePrecommitConfig = loadFixture(
-  __filename,
-  '.pre-commit-config.yaml'
-);
+const complexPrecommitConfig = loadFixture('complex.pre-commit-config.yaml');
+const examplePrecommitConfig = loadFixture('.pre-commit-config.yaml');
 const emptyReposPrecommitConfig = loadFixture(
-  __filename,
   'empty_repos.pre-commit-config.yaml'
 );
-const noReposPrecommitConfig = loadFixture(
-  __filename,
-  'no_repos.pre-commit-config.yaml'
-);
+const noReposPrecommitConfig = loadFixture('no_repos.pre-commit-config.yaml');
 const invalidRepoPrecommitConfig = loadFixture(
-  __filename,
   'invalid_repo.pre-commit-config.yaml'
 );
 const enterpriseGitPrecommitConfig = loadFixture(
-  __filename,
   'enterprise.pre-commit-config.yaml'
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

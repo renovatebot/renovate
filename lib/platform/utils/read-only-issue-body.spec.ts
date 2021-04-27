@@ -1,9 +1,9 @@
 import { getName, loadFixture } from '../../../test/util';
 import { readOnlyIssueBody } from './read-only-issue-body';
 
-const issueBody = loadFixture(__filename, 'issue-body.txt');
+const issueBody = loadFixture('issue-body.txt');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('.readOnlyIssueBody', () => {
     it('removes all checkbox formatting', () => {
       expect(readOnlyIssueBody(issueBody)).toEqual(

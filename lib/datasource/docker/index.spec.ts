@@ -41,7 +41,7 @@ function mockEcrAuthReject(msg: string) {
   );
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({

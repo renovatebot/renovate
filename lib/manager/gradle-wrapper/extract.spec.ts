@@ -1,16 +1,15 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const propertiesFile1 = loadFixture(__filename, 'gradle-wrapper-1.properties');
-const propertiesFile2 = loadFixture(__filename, 'gradle-wrapper-2.properties');
-const propertiesFile3 = loadFixture(__filename, 'gradle-wrapper-3.properties');
-const propertiesFile4 = loadFixture(__filename, 'gradle-wrapper-4.properties');
+const propertiesFile1 = loadFixture('gradle-wrapper-1.properties');
+const propertiesFile2 = loadFixture('gradle-wrapper-2.properties');
+const propertiesFile3 = loadFixture('gradle-wrapper-3.properties');
+const propertiesFile4 = loadFixture('gradle-wrapper-4.properties');
 const whitespacePropertiesFile = loadFixture(
-  __filename,
   'gradle-wrapper-whitespace.properties'
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

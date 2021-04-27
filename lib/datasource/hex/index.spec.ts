@@ -7,13 +7,13 @@ import { id as datasource } from '.';
 
 const hostRules: any = _hostRules;
 
-const res1 = loadJsonFixture(__filename, 'certifi.json');
+const res1 = loadJsonFixture('certifi.json');
 
 jest.mock('../../util/host-rules');
 
 const baseUrl = 'https://hex.pm/api/packages/';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({});

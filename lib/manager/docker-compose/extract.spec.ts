@@ -1,14 +1,11 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const yamlFile1 = loadFixture(__filename, 'docker-compose.1.yml');
-const yamlFile3 = loadFixture(__filename, 'docker-compose.3.yml');
-const yamlFile3NoVersion = loadFixture(
-  __filename,
-  'docker-compose.3-no-version.yml'
-);
+const yamlFile1 = loadFixture('docker-compose.1.yml');
+const yamlFile3 = loadFixture('docker-compose.3.yml');
+const yamlFile3NoVersion = loadFixture('docker-compose.3-no-version.yml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('')).toBeNull();

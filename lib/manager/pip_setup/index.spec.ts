@@ -13,8 +13,8 @@ import * as extract from './extract';
 import { extractPackageFile } from '.';
 
 const packageFile = 'setup.py';
-const content = loadFixture(__filename, packageFile);
-const jsonContent = loadFixture(__filename, 'setup.py.json');
+const content = loadFixture(packageFile);
+const jsonContent = loadFixture('setup.py.json');
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -29,14 +29,14 @@ const pythonVersionCallResults = [
   { stdout: 'Python 3.7.5\\n', stderr: '' },
 ];
 
-// TODO: figure out snapshot similarity for each CI platform
+// TODO: figure out snapshot similarity for each CI platform (#9617)
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map((snapshot) => ({
     ...snapshot,
     cmd: snapshot.cmd.replace(/^.*extract\.py"\s+/, '<extract.py> '),
   }));
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(async () => {
       jest.resetAllMocks();
@@ -79,7 +79,7 @@ describe(getName(__filename), () => {
           binarySource: BinarySource.Docker,
         })
       ).toMatchSnapshot();
-      expect(execSnapshots).toHaveLength(1); // TODO: figure out volume arguments in Windows
+      expect(execSnapshots).toHaveLength(1); // TODO: figure out volume arguments in Windows (#9617)
     });
 
     it('returns no deps', async () => {

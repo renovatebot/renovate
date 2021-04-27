@@ -2,7 +2,7 @@ import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
 
 import { getBaseBranchDesc } from './base-branch';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getBaseBranchDesc()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

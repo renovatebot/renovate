@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { gitTagsRefMatchRegex, githubRefMatchRegex } from './modules';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('githubRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const { project, tag } = githubRefMatchRegex.exec(

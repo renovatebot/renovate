@@ -3,20 +3,14 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
 import { id as datasource, defaultRegistryUrls } from '.';
 
-const consulData: any = loadFixture(__filename, 'azurerm-provider.json');
-const hashicorpReleases: any = loadFixture(
-  __filename,
-  'releaseBackendIndex.json'
-);
-const serviceDiscoveryResult: any = loadFixture(
-  __filename,
-  'service-discovery.json'
-);
+const consulData: any = loadFixture('azurerm-provider.json');
+const hashicorpReleases: any = loadFixture('releaseBackendIndex.json');
+const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
 
 const primaryUrl = defaultRegistryUrls[0];
 const secondaryUrl = defaultRegistryUrls[1];
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

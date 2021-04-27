@@ -19,14 +19,14 @@ const yarnHelper = mocked(_yarnHelper);
 
 delete process.env.NPM_CONFIG_CACHE;
 
-// TODO: figure out snapshot similarity for each CI platform
+// TODO: figure out snapshot similarity for each CI platform (#9617)
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map((snapshot) => ({
     ...snapshot,
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

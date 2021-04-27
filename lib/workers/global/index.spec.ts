@@ -19,7 +19,7 @@ const configParser: jest.Mocked<typeof _configParser> = _configParser as never;
 const platform: jest.Mocked<typeof _platform> = _platform as never;
 const limits = _limits;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     logger.getProblems.mockImplementationOnce(() => []);

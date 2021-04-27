@@ -8,7 +8,7 @@ import { rebaseOnboardingBranch } from './rebase';
 
 jest.mock('../../../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
