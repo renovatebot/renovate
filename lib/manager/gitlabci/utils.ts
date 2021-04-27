@@ -1,4 +1,4 @@
-const re = /!reference \[(.*?)]/g;
+const re = /!reference \[(.*?)\]/g;
 
 /**
  * Replaces GitLab reference tags before parsing, because our yaml parser cannot process them anyway.
