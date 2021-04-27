@@ -1,8 +1,6 @@
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 
-import { updateArtifacts } from './lockfile';
-
-export { updateArtifacts };
+export { updateArtifacts } from './lockfile';
 export { extractPackageFile } from './extract';
 
 export const supportsLockFileMaintenance = true;

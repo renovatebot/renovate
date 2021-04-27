@@ -5,7 +5,10 @@ import { Http } from '../../util/http';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { TerraformProvider, TerraformProviderReleaseBackend } from './types';
+import type {
+  TerraformProvider,
+  TerraformProviderReleaseBackend,
+} from './types';
 
 export const id = 'terraform-provider';
 export const customRegistrySupport = true;

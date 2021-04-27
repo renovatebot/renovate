@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 import * as fs from 'fs';
-import { createWriteStream } from 'fs';
 import extract from 'extract-zip';
 import pMap from 'p-map';
 import {
@@ -93,7 +92,7 @@ export async function calculateHashes(
         `Downloading archive and generating hash for ${build.name}-${build.version}...`
       );
       const stream = http.stream(build.url);
-      const writeStream = createWriteStream(downloadFileName);
+      const writeStream = fs.createWriteStream(downloadFileName);
       stream.pipe(writeStream);
 
       const streamPromise = new Promise((resolve, reject) => {

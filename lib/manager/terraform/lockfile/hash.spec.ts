@@ -17,12 +17,13 @@ describe(getName(__filename), () => {
     jest.resetAllMocks();
     jest.resetModules();
 
-    httpMock.reset();
     httpMock.setup();
   });
+
   afterEach(() => {
     httpMock.reset();
   });
+
   it('returns null if a non hashicorp release is found ', async () => {
     const result = await createHashes(
       'test/gitlab',
@@ -31,6 +32,7 @@ describe(getName(__filename), () => {
     );
     expect(result).toBeNull();
   });
+
   it('return null if requesting a version which is not available', async () => {
     httpMock
       .scope(releaseBackendUrl)
@@ -44,6 +46,7 @@ describe(getName(__filename), () => {
     );
     expect(result).toBeNull();
   });
+
   it('full walkthrough', async () => {
     const readStreamLinux = createReadStream(
       'lib/manager/terraform/lockfile/__fixtures__/test.zip'
