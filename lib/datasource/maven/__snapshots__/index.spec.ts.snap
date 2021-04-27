@@ -204,6 +204,119 @@ Array [
 ]
 `;
 
+exports[`datasource/maven/index handles optional slash at the end of registry url 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.0/package-1.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.1/package-1.0.1.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.2/package-1.0.2.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.0/package-1.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.1/package-1.0.1.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.2/package-1.0.2.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+]
+`;
+
 exports[`datasource/maven/index ignores unsupported protocols 1`] = `
 Array [
   Object {
@@ -272,6 +385,73 @@ Array [
     },
     "method": "GET",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+]
+`;
+
+exports[`datasource/maven/index removes authentication header after redirect 1`] = `
+Object {
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "https://frontend_for_private_s3_repository/maven2",
+  "releases": Array [
+    Object {
+      "version": "1.0.0",
+    },
+    Object {
+      "version": "1.0.1",
+    },
+    Object {
+      "version": "1.0.2",
+    },
+    Object {
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`datasource/maven/index removes authentication header after redirect 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ=",
+      "host": "frontend_for_private_s3_repository",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://frontend_for_private_s3_repository/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "private_s3_repository",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://private_s3_repository/maven2/org/example/package/maven-metadata.xml?X-Amz-Algorithm=AWS4-HMAC-SHA256",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ=",
+      "host": "frontend_for_private_s3_repository",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://frontend_for_private_s3_repository/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "private_s3_repository",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://private_s3_repository/maven2/org/example/package/2.0.0/package-2.0.0.pom?X-Amz-Algorithm=AWS4-HMAC-SHA256",
   },
 ]
 `;
@@ -452,74 +632,7 @@ Array [
 ]
 `;
 
-exports[`datasource/maven/index should remove authentication header when redirected with authentication in query string 1`] = `
-Object {
-  "display": "org.example:package",
-  "group": "org.example",
-  "homepage": "https://package.example.org/about",
-  "name": "package",
-  "registryUrl": "https://frontend_for_private_s3_repository/maven2",
-  "releases": Array [
-    Object {
-      "version": "1.0.0",
-    },
-    Object {
-      "version": "1.0.1",
-    },
-    Object {
-      "version": "1.0.2",
-    },
-    Object {
-      "version": "2.0.0",
-    },
-  ],
-}
-`;
-
-exports[`datasource/maven/index should remove authentication header when redirected with authentication in query string 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ=",
-      "host": "frontend_for_private_s3_repository",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://frontend_for_private_s3_repository/maven2/org/example/package/maven-metadata.xml",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "private_s3_repository",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://private_s3_repository/maven2/org/example/package/maven-metadata.xml?X-Amz-Algorithm=AWS4-HMAC-SHA256",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ=",
-      "host": "frontend_for_private_s3_repository",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://frontend_for_private_s3_repository/maven2/org/example/package/2.0.0/package-2.0.0.pom",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "private_s3_repository",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://private_s3_repository/maven2/org/example/package/2.0.0/package-2.0.0.pom?X-Amz-Algorithm=AWS4-HMAC-SHA256",
-  },
-]
-`;
-
-exports[`datasource/maven/index should return all versions of a specific library if a repository fails because a metadata file is not xml 1`] = `
+exports[`datasource/maven/index skips registry with invalid XML 1`] = `
 Object {
   "display": "org.example:package",
   "group": "org.example",
@@ -539,7 +652,7 @@ Object {
 }
 `;
 
-exports[`datasource/maven/index should return all versions of a specific library if a repository fails because a metadata file is not xml 2`] = `
+exports[`datasource/maven/index skips registry with invalid XML 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -607,7 +720,7 @@ Array [
 ]
 `;
 
-exports[`datasource/maven/index should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository 1`] = `
+exports[`datasource/maven/index skips registry with invalid metadata structure 1`] = `
 Object {
   "display": "org.example:package",
   "group": "org.example",
@@ -627,7 +740,7 @@ Object {
 }
 `;
 
-exports[`datasource/maven/index should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository 2`] = `
+exports[`datasource/maven/index skips registry with invalid metadata structure 2`] = `
 Array [
   Object {
     "headers": Object {

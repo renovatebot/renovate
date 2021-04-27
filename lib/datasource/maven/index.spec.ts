@@ -196,7 +196,7 @@ describe(getName(), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository', async () => {
+  it('skips registry with invalid metadata structure', async () => {
     mockGenericPackage();
     httpMock
       .scope('https://invalid_metadata_repo')
@@ -213,7 +213,7 @@ describe(getName(), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('should return all versions of a specific library if a repository fails because a metadata file is not xml', async () => {
+  it('skips registry with invalid XML', async () => {
     mockGenericPackage();
     httpMock
       .scope('https://invalid_metadata_repo')
@@ -230,13 +230,18 @@ describe(getName(), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('should return all versions of a specific library if a repository does not end with /', async () => {
+  it('handles optional slash at the end of registry url', async () => {
     mockGenericPackage();
-    const res = await get('org.example:package', baseUrl.replace(/\/+$/, ''));
-    expect(res).not.toBeNull();
+    const resA = await get('org.example:package', baseUrl.replace(/\/+$/, ''));
+    mockGenericPackage();
+    const resB = await get('org.example:package', baseUrl.replace(/\/*$/, '/'));
+    expect(resA).not.toBeNull();
+    expect(resB).not.toBeNull();
+    expect(resA.releases).toEqual(resB.releases);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('should return null for invalid registryUrls', async () => {
+  it('returns null for invalid registryUrls', async () => {
     const res = await get(
       'org.example:package',
       // eslint-disable-next-line no-template-curly-in-string
@@ -245,7 +250,7 @@ describe(getName(), () => {
     expect(res).toBeNull();
   });
 
-  it('should support scm.url values prefixed with "scm:"', async () => {
+  it('supports scm.url values prefixed with "scm:"', async () => {
     const pom = loadFixture('pom.scm-prefix.xml');
     mockGenericPackage({ pom });
 
@@ -254,7 +259,7 @@ describe(getName(), () => {
     expect(sourceUrl).toEqual('https://github.com/example/test');
   });
 
-  it('should remove authentication header when redirected with authentication in query string', async () => {
+  it('removes authentication header after redirect', async () => {
     process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK = 'true';
 
     const frontendHost = 'frontend_for_private_s3_repository';
