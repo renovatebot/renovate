@@ -183,13 +183,14 @@ describe(getName(), () => {
   });
 
   it('ignores unsupported protocols', async () => {
-    mockGenericPackage();
+    const base = baseUrl.replace('https', 'http');
+    mockGenericPackage({ base });
 
     const { releases } = await get(
       'org.example:package',
       'ftp://protocol_error_repo',
       's3://protocol_error_repo',
-      baseUrl
+      base
     );
 
     expect(releases).toMatchSnapshot();

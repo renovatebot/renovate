@@ -339,7 +339,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -348,7 +348,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.0/package-1.0.0.pom",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/1.0.0/package-1.0.0.pom",
   },
   Object {
     "headers": Object {
@@ -357,7 +357,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.1/package-1.0.1.pom",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/1.0.1/package-1.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -366,7 +366,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.2/package-1.0.2.pom",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/1.0.2/package-1.0.2.pom",
   },
   Object {
     "headers": Object {
@@ -375,7 +375,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
   },
   Object {
     "headers": Object {
@@ -384,7 +384,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
   },
 ]
 `;
