@@ -95,6 +95,7 @@ export async function calculateHashes(
       try {
         await pipeline(readStream, writeStream);
       } catch (err) {
+        /* istanbul ignore next */
         logger.error({ err }, 'write stream error');
       }
 
