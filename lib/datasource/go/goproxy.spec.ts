@@ -9,7 +9,7 @@ import {
   versionInfo,
 } from './goproxy';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     memCache.init();
   });
