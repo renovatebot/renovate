@@ -28,6 +28,22 @@ describe(getName(), () => {
       expect(deps).toHaveLength(5);
     });
 
+    it('extracts named services', async () => {
+      const res = await extractAllPackageFiles({}, [
+        'lib/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml',
+      ]);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+
+      const deps: PackageDependency[] = [];
+      res.forEach((e) => {
+        e.deps.forEach((d) => {
+          deps.push(d);
+        });
+      });
+      expect(deps).toHaveLength(3);
+    });
+
     it('extracts multiple image lines', async () => {
       const res = await extractAllPackageFiles({}, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.yaml',
