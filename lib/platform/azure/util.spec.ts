@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { getName } from '../../../test/util';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -12,7 +13,7 @@ import {
   streamToString,
 } from './util';
 
-describe('platform/azure/helpers', () => {
+describe(getName(), () => {
   describe('getNewBranchName', () => {
     it('should add refs/heads', () => {
       const res = getNewBranchName('testBB');

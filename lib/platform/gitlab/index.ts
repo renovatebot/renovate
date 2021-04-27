@@ -40,7 +40,7 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
-import { getUserID, gitlabApi } from './http';
+import { getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
 import type {
   GitLabMergeRequest,
@@ -1066,4 +1066,16 @@ export async function ensureCommentRemoval({
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
+}
+
+export async function filterUnavailableUsers(
+  users: string[]
+): Promise<string[]> {
+  const filteredUsers = [];
+  for (const user of users) {
+    if (!(await isUserBusy(user))) {
+      filteredUsers.push(user);
+    }
+  }
+  return filteredUsers;
 }

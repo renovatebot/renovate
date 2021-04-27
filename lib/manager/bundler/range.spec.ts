@@ -1,7 +1,8 @@
+import { getName } from '../../../test/util';
 import type { RangeConfig } from '../types';
 import { getRangeStrategy } from '.';
 
-describe('lib/manager/bundler/range', () => {
+describe(getName(), () => {
   describe('getRangeStrategy()', () => {
     it('returns replace when rangeStrategy is auto', () => {
       const config: RangeConfig = { rangeStrategy: 'auto' };

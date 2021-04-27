@@ -6,11 +6,7 @@ import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import {
-  deleteLocalFile,
-  getSiblingFileName,
-  readLocalFile,
-} from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -95,26 +91,30 @@ export async function extractPackageFile(
   delete lockFiles.shrinkwrapJson;
 
   let npmrc: string;
-  let ignoreNpmrcFile: boolean;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  // istanbul ignore if
-  if (config.ignoreNpmrcFile) {
-    await deleteLocalFile(npmrcFileName);
-  } else {
-    npmrc = await readLocalFile(npmrcFileName, 'utf8');
-    if (npmrc?.includes('package-lock')) {
-      logger.debug('Stripping package-lock setting from npmrc');
-      npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
-    }
-    if (is.string(npmrc)) {
-      if (npmrc.includes('=${') && getAdminConfig().trustLevel !== 'high') {
-        logger.debug('Discarding .npmrc file with variables');
-        ignoreNpmrcFile = true;
-        npmrc = undefined;
-        await deleteLocalFile(npmrcFileName);
-      }
+  const npmrcContent = await readLocalFile(npmrcFileName, 'utf8');
+  if (is.string(npmrcContent)) {
+    if (is.string(config.npmrc)) {
+      logger.debug(
+        { npmrcFileName },
+        'Repo .npmrc file is ignored due to presence of config.npmrc'
+      );
     } else {
-      npmrc = undefined;
+      npmrc = npmrcContent;
+      if (npmrc?.includes('package-lock')) {
+        logger.debug('Stripping package-lock setting from .npmrc');
+        npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
+      }
+      if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
+        logger.debug(
+          { npmrcFileName },
+          'Stripping .npmrc file of lines with variables'
+        );
+        npmrc = npmrc
+          .split('\n')
+          .filter((line) => !line.includes('=${'))
+          .join('\n');
+      }
     }
   }
   const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
@@ -126,7 +126,7 @@ export async function extractPackageFile(
   let lernaJsonFile: string;
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
-  let hasFileRefs = false;
+  let hasFancyRefs = false;
   let lernaJson: {
     packages: string[];
     npmClient: string;
@@ -224,6 +224,7 @@ export async function extractPackageFile(
 
     if (dep.currentValue.startsWith('npm:')) {
       dep.npmPackageAlias = true;
+      hasFancyRefs = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
         dep.lookupName = valSplit[0];
@@ -237,7 +238,7 @@ export async function extractPackageFile(
     }
     if (dep.currentValue.startsWith('file:')) {
       dep.skipReason = SkipReason.File;
-      hasFileRefs = true;
+      hasFancyRefs = true;
       return dep;
     }
     if (isValid(dep.currentValue)) {
@@ -345,11 +346,11 @@ export async function extractPackageFile(
   }
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
-    if (hasFileRefs) {
+    if (hasFancyRefs) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
-      //  - npm install --package-lock-only is buggy for transitive deps in file: references
-      //  - So we set skipInstalls to false if file: refs are found *and* the user hasn't explicitly set the value already
+      //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
+      //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
       logger.debug('Automatically setting skipInstalls to false');
       skipInstalls = false;
     } else {
@@ -363,7 +364,6 @@ export async function extractPackageFile(
     packageFileVersion,
     packageJsonType,
     npmrc,
-    ignoreNpmrcFile,
     yarnrc,
     ...lockFiles,
     managerData: {

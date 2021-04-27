@@ -7,7 +7,7 @@ import * as gitlab from '.';
 const gitlabApiHost = 'https://gitlab.com';
 const basePath = '/api/v4/projects/some%2Frepo/repository';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     httpMock.setup();

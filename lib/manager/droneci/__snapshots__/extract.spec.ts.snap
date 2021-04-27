@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/droneci/extract extractPackageFile() extracts multiple image lines 1`] = `
+exports[`manager/droneci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -13,7 +13,6 @@ Array [
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
     "datasource": "docker",

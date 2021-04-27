@@ -67,6 +67,30 @@ describe('semver.getNewValue()', () => {
         newVersion: '2.0.7',
       })
     ).toEqual('~> 2.0.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14.0',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.1',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('~> 0.15.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14.0',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.1',
+        newVersion: '0.15.1',
+      })
+    ).toEqual('~> 0.15.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14.6',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.6',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('~> 0.15.0');
   });
   it('handles comma dividers', () => {
     expect(
@@ -77,5 +101,23 @@ describe('semver.getNewValue()', () => {
         newVersion: '2.0.7',
       })
     ).toEqual('>= 1.0.0, <= 2.0.7');
+  });
+  it('updates short ranges', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '0.14',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.2',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('0.15');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.2',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('~> 0.15');
   });
 });

@@ -1,10 +1,9 @@
 import {
-  RenovateConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config';
-import { LANGUAGE_DOCKER } from '../../../constants/languages';
+import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
@@ -27,14 +26,6 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(/-+/, '-')
         .toLowerCase()
     : undefined;
-  if (
-    updateConfig.language === LANGUAGE_DOCKER &&
-    /(^|\/)node$/.exec(updateConfig.depName) &&
-    updateConfig.depName !== 'calico/node'
-  ) {
-    updateConfig.additionalBranchPrefix = '';
-    updateConfig.depNameSanitized = 'node';
-  }
   generateBranchName(updateConfig);
   return updateConfig;
 }

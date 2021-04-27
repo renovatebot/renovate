@@ -5,13 +5,14 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 
-describe('platform/azure', () => {
+describe(getName(), () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;

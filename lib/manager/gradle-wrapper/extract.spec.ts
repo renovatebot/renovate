@@ -1,30 +1,15 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const propertiesFile1 = readFileSync(
-  resolve(__dirname, './__fixtures__/gradle-wrapper-1.properties'),
-  'utf8'
-);
-const propertiesFile2 = readFileSync(
-  resolve(__dirname, './__fixtures__/gradle-wrapper-2.properties'),
-  'utf8'
-);
-const propertiesFile3 = readFileSync(
-  resolve(__dirname, './__fixtures__/gradle-wrapper-3.properties'),
-  'utf8'
-);
-const propertiesFile4 = readFileSync(
-  resolve(__dirname, './__fixtures__/gradle-wrapper-4.properties'),
-  'utf8'
-);
-const whitespacePropertiesFile = readFileSync(
-  resolve(__dirname, './__fixtures__/gradle-wrapper-whitespace.properties'),
-  'utf8'
+const propertiesFile1 = loadFixture('gradle-wrapper-1.properties');
+const propertiesFile2 = loadFixture('gradle-wrapper-2.properties');
+const propertiesFile3 = loadFixture('gradle-wrapper-3.properties');
+const propertiesFile4 = loadFixture('gradle-wrapper-4.properties');
+const whitespacePropertiesFile = loadFixture(
+  'gradle-wrapper-whitespace.properties'
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

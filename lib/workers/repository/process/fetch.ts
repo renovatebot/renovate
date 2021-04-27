@@ -1,10 +1,6 @@
 import pAll from 'p-all';
-import {
-  ManagerConfig,
-  RenovateConfig,
-  getManagerConfig,
-  mergeChildConfig,
-} from '../../../config';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
+import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
@@ -24,18 +20,17 @@ async function fetchDepUpdates(
   if (dep.skipReason) {
     return dep;
   }
-  const { manager, packageFile } = packageFileConfig;
-  const { depName, currentValue } = dep;
+  const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
-    logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
+    logger.debug({ dependency: depName }, 'Dependency is ignored');
     dep.skipReason = SkipReason.Ignored;
   } else if (depConfig.enabled === false) {
-    logger.debug({ dependency: dep.depName }, 'Dependency is disabled');
+    logger.debug({ dependency: depName }, 'Dependency is disabled');
     dep.skipReason = SkipReason.Disabled;
   } else {
     if (depConfig.datasource) {
@@ -44,24 +39,12 @@ async function fetchDepUpdates(
         ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
       };
     } else {
-      dep.updates = await getPackageUpdates(manager, depConfig);
+      dep = {
+        ...dep,
+        ...(await getPackageUpdates(packageFileConfig.manager, depConfig)),
+      };
     }
     dep.updates = dep.updates || [];
-    // istanbul ignore if
-    if (dep.updates.length) {
-      const results = String(dep.updates.map((upgrade) => upgrade.newValue));
-      logger.trace(
-        { dependency: depName },
-        `${dep.updates.length} result(s): ${results}`
-      );
-    }
-    logger.trace({
-      packageFile,
-      manager,
-      depName,
-      currentValue,
-      updates: dep.updates,
-    });
   }
   return dep;
 }

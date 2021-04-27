@@ -30,7 +30,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "408",
       "content-type": "application/json",
       "host": "api.github.com",
@@ -68,7 +68,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "428",
       "content-type": "application/json",
       "host": "api.github.com",
@@ -106,7 +106,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "427",
       "content-type": "application/json",
       "host": "api.github.com",
@@ -144,7 +144,7 @@ Array [
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "427",
       "content-type": "application/json",
       "host": "api.github.com",

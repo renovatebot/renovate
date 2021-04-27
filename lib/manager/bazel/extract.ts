@@ -53,7 +53,7 @@ function parseUrl(urlString: string): UrlParsedResult | null {
   return null;
 }
 
-const dummyLexer = {
+const lexer = moo.states({
   main: {
     lineComment: { match: /#.*?$/ },
     leftParen: { match: '(' },
@@ -103,11 +103,11 @@ const dummyLexer = {
     stringFinish: { match: "'", pop: 1 },
     char: { match: /[^]/, lineBreaks: true },
   },
-};
+});
 
 function parseContent(content: string): string[] {
-  const lexer = moo.states(dummyLexer);
   lexer.reset(content);
+
   let balance = 0;
 
   let def: null | string = null;
@@ -242,7 +242,7 @@ export function extractPackageFile(
       if (commit) {
         dep.currentDigest = commit;
       }
-      // TODO: Check if we really need to use parse here or if it should always be a plain https url
+      // TODO: Check if we really need to use parse here or if it should always be a plain https url (#9605)
       const githubURL = parse(remote);
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);

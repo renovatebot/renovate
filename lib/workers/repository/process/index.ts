@@ -1,4 +1,5 @@
-import { RenovateConfig, mergeChildConfig } from '../../../config';
+import { mergeChildConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
 import { platform } from '../../../platform';

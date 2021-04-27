@@ -1,6 +1,7 @@
 import {
   RenovateConfig,
   defaultConfig,
+  getName,
   git,
   partial,
   platform,
@@ -14,7 +15,7 @@ import { ensureOnboardingPr } from '.';
 
 jest.mock('../../../../util/git');
 
-describe('workers/repository/onboarding/pr', () => {
+describe(getName(), () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;
     let packageFiles: Record<string, PackageFile[]>;

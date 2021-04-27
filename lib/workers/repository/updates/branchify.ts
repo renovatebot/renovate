@@ -1,5 +1,5 @@
 import type { Merge } from 'type-fest';
-import { RenovateConfig, ValidationMessage } from '../../../config';
+import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { embedChangelogs } from '../changelog';

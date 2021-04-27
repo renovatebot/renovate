@@ -255,14 +255,6 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'dockerMapDotfiles',
-    description:
-      'Map relevant home directory dotfiles into containers when binarySource=docker.',
-    admin: true,
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'dockerChildPrefix',
     description:
       'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
@@ -294,13 +286,6 @@ const options: RenovateOptions[] = [
     admin: true,
   },
   // Log options
-  {
-    name: 'logLevel',
-    description: 'Logging level. Deprecated, use `LOG_LEVEL` environment.',
-    stage: 'global',
-    type: 'string',
-    allowedValues: ['fatal', 'error', 'warn', 'info', 'debug', 'trace'],
-  },
   {
     name: 'logFile',
     description: 'Log file path.',
@@ -353,6 +338,15 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: false,
+    admin: true,
+  },
+  {
+    name: 'forkToken',
+    description:
+      'Will be used on GitHub when `forkMode` is set to `true` to clone the repositories.',
+    stage: 'repository',
+    type: 'string',
+    default: '',
     admin: true,
   },
   {
@@ -480,17 +474,33 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'trustLevel',
+    name: 'exposeAllEnv',
     description:
-      'Set this to "high" if the bot should trust the repository owners/contents.',
+      'Configure this to true to allow passing of all env variables to package managers.',
     admin: true,
-    type: 'string',
-    default: 'low',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'allowScripts',
+    description:
+      'Configure this to true if repositories are allowed to run install scripts.',
+    admin: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'allowCustomCrateRegistries',
+    description:
+      'Configure this to true if custom crate registries are allowed.',
+    admin: true,
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'ignoreScripts',
     description:
-      'Configure this to true if trustLevel is high but you wish to skip running scripts when updating lock files.',
+      'Configure this to true if allowScripts=true but you wish to skip running scripts when updating lock files.',
     type: 'boolean',
     default: false,
   },
@@ -561,12 +571,6 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: null,
     admin: true,
-  },
-  {
-    name: 'ignoreNpmrcFile',
-    description: 'Whether to ignore any .npmrc file found in repository.',
-    type: 'boolean',
-    default: false,
   },
   {
     name: 'autodiscover',
@@ -1068,8 +1072,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'patch',
-    description:
-      'Configuration to apply when an update type is patch. Only applies if `separateMinorPatch` is set to true.',
+    description: 'Configuration to apply when an update type is patch.',
     stage: 'package',
     type: 'object',
     default: {},
@@ -1082,7 +1085,6 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      recreateClosed: true,
       rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
@@ -1105,6 +1107,19 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
       commitMessageTopic: '{{{depName}}} commit hash',
+    },
+    cli: false,
+    mergeable: true,
+  },
+  {
+    name: 'rollback',
+    description: 'Configuration to apply when rolling back a version.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      branchTopic: '{{{depNameSanitized}}}-rollback',
+      commitMessageAction: 'Roll back',
+      semanticCommitType: 'fix',
     },
     cli: false,
     mergeable: true,
@@ -1488,6 +1503,12 @@ const options: RenovateOptions[] = [
     name: 'reviewersFromCodeOwners',
     description:
       'Determine reviewers based on configured code owners and changes in PR.',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'filterUnavailableUsers',
+    description: 'Filter reviewers and assignees based on their availability.',
     type: 'boolean',
     default: false,
   },

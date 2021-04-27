@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/packagist getReleases adds packagist source implicitly 1`] = `
+exports[`datasource/packagist/index getReleases adds packagist source implicitly 1`] = `
 Object {
   "registryUrl": "https://packagist.org",
   "releases": Array [
@@ -84,12 +84,12 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getReleases adds packagist source implicitly 2`] = `
+exports[`datasource/packagist/index getReleases adds packagist source implicitly 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "packagist.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -99,12 +99,12 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases handles auth rejections 1`] = `
+exports[`datasource/packagist/index getReleases handles auth rejections 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -114,7 +114,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "packagist.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -124,12 +124,12 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases handles not found registries 1`] = `
+exports[`datasource/packagist/index getReleases handles not found registries 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -139,7 +139,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "packagist.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -149,12 +149,12 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases handles provider-includes miss 1`] = `
+exports[`datasource/packagist/index getReleases handles provider-includes miss 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -164,7 +164,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -174,7 +174,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "packagist.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -184,12 +184,12 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases handles providers miss 1`] = `
+exports[`datasource/packagist/index getReleases handles providers miss 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -199,7 +199,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "packagist.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -209,12 +209,12 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases handles timeouts 1`] = `
+exports[`datasource/packagist/index getReleases handles timeouts 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -224,7 +224,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "packagist.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -234,7 +234,7 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases processes real versioned data 1`] = `
+exports[`datasource/packagist/index getReleases processes real versioned data 1`] = `
 Object {
   "registryUrl": "https://packagist.org",
   "releases": Array [
@@ -318,12 +318,12 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getReleases processes real versioned data 2`] = `
+exports[`datasource/packagist/index getReleases processes real versioned data 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "packagist.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -333,7 +333,7 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases supports includes packages 1`] = `
+exports[`datasource/packagist/index getReleases supports includes packages 1`] = `
 Object {
   "homepage": "http://guzzlephp.org/",
   "registryUrl": "https://composer.renovatebot.com",
@@ -478,12 +478,12 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getReleases supports includes packages 2`] = `
+exports[`datasource/packagist/index getReleases supports includes packages 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -494,7 +494,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -505,7 +505,7 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases supports lazy repositories 1`] = `
+exports[`datasource/packagist/index getReleases supports lazy repositories 1`] = `
 Object {
   "registryUrl": "https://composer.renovatebot.com/composer/lazy",
   "releases": Array [
@@ -521,12 +521,12 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getReleases supports lazy repositories 2`] = `
+exports[`datasource/packagist/index getReleases supports lazy repositories 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -536,7 +536,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -546,7 +546,7 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases supports plain packages 1`] = `
+exports[`datasource/packagist/index getReleases supports plain packages 1`] = `
 Object {
   "registryUrl": "https://composer.renovatebot.com",
   "releases": Array [
@@ -566,12 +566,12 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getReleases supports plain packages 2`] = `
+exports[`datasource/packagist/index getReleases supports plain packages 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -581,7 +581,7 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases supports provider-includes 1`] = `
+exports[`datasource/packagist/index getReleases supports provider-includes 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "registryUrl": "https://composer.renovatebot.com",
@@ -611,12 +611,12 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getReleases supports provider-includes 2`] = `
+exports[`datasource/packagist/index getReleases supports provider-includes 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -626,7 +626,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -636,7 +636,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -646,7 +646,7 @@ Array [
 ]
 `;
 
-exports[`datasource/packagist getReleases supports providers 1`] = `
+exports[`datasource/packagist/index getReleases supports providers 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "registryUrl": "https://composer.renovatebot.com",
@@ -676,12 +676,12 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getReleases supports providers 2`] = `
+exports[`datasource/packagist/index getReleases supports providers 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -691,7 +691,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "composer.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

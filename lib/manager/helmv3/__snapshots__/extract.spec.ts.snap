@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/helm-requirements/extract extractPackageFile() parses simple Chart.yaml correctly 1`] = `
+exports[`manager/helmv3/extract extractPackageFile() parses simple Chart.yaml correctly 1`] = `
 Object {
   "datasource": "helm",
   "deps": Array [
@@ -23,7 +23,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/helm-requirements/extract extractPackageFile() resolves aliased registry urls 1`] = `
+exports[`manager/helmv3/extract extractPackageFile() resolves aliased registry urls 1`] = `
 Object {
   "datasource": "helm",
   "deps": Array [
@@ -46,7 +46,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/helm-requirements/extract extractPackageFile() skips invalid registry urls 1`] = `
+exports[`manager/helmv3/extract extractPackageFile() skips invalid registry urls 1`] = `
 Object {
   "datasource": "helm",
   "deps": Array [
@@ -76,7 +76,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/helm-requirements/extract extractPackageFile() skips local dependencies 1`] = `
+exports[`manager/helmv3/extract extractPackageFile() skips local dependencies 1`] = `
 Object {
   "datasource": "helm",
   "deps": Array [
