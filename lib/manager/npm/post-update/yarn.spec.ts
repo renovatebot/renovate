@@ -26,7 +26,7 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -54,7 +54,6 @@ describe(getName(__filename), () => {
         );
       });
       const config = {
-        dockerMapDotfiles: true,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -140,7 +139,6 @@ describe(getName(__filename), () => {
         );
       });
       const config = {
-        dockerMapDotfiles: true,
         constraints: {
           yarn: yarnCompatibility,
         },

@@ -1,21 +1,11 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const file1 = readFileSync(
-  'lib/manager/circleci/__fixtures__/config.yml',
-  'utf8'
-);
-const file2 = readFileSync(
-  'lib/manager/circleci/__fixtures__/config2.yml',
-  'utf8'
-);
-const file3 = readFileSync(
-  'lib/manager/circleci/__fixtures__/config3.yml',
-  'utf8'
-);
+const file1 = loadFixture('config.yml');
+const file2 = loadFixture('config2.yml');
+const file3 = loadFixture('config3.yml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

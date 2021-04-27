@@ -1,20 +1,11 @@
 /* eslint-disable no-template-curly-in-string */
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackage } from './extract';
 
-const minimumContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/minimum.pom.xml`),
-  'utf8'
-);
+const minimumContent = loadFixture(`minimum.pom.xml`);
+const simpleContent = loadFixture(`simple.pom.xml`);
 
-const simpleContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/simple.pom.xml`),
-  'utf8'
-);
-
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractDependencies', () => {
     it('returns null for invalid XML', () => {
       expect(extractPackage(undefined)).toBeNull();

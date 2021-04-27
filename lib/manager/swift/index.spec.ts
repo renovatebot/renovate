@@ -1,14 +1,9 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const pkgContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/SamplePackage.swift`),
-  'utf8'
-);
+const pkgContent = loadFixture(`SamplePackage.swift`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty content', () => {
       expect(extractPackageFile(null)).toBeNull();

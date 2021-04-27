@@ -99,7 +99,7 @@ function setupGitlabChangelogMock() {
   gitlabChangelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;
@@ -408,6 +408,16 @@ describe(getName(__filename), () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+      expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
+    it('should filter assignees and reviewers based on their availability', async () => {
+      config.assignees = ['foo', 'bar'];
+      config.reviewers = ['foo', 'bar'];
+      config.filterUnavailableUsers = true;
+      platform.filterUnavailableUsers = jest.fn();
+      platform.filterUnavailableUsers.mockResolvedValue(['foo']);
+      await prWorker.ensurePr(config);
+      expect(platform.addAssignees.mock.calls).toMatchSnapshot();
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
     it('should determine assignees from code owners', async () => {

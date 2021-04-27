@@ -372,9 +372,23 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
-        await deleteBranchSilently(config.branchName);
+        if (getAdminConfig().dryRun) {
+          logger.info('DRY-RUN: Would delete branch' + config.branchName);
+        } else {
+          await deleteBranchSilently(config.branchName);
+        }
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
+      }
+      if (
+        mergeStatus === 'stale' &&
+        ['conflicted', 'never'].includes(config.rebaseWhen)
+      ) {
+        logger.warn(
+          'Branch cannot automerge because it is stale and rebaseWhen setting disallows rebasing - raising a PR instead'
+        );
+        config.forcePr = true;
+        config.branchAutomergeFailureMessage = mergeStatus;
       }
       if (
         mergeStatus === 'automerge aborted - PR exists' ||

@@ -4,7 +4,7 @@ import { addMetaData } from './metadata';
 import * as datasourceNpm from './npm';
 import * as datasourcePypi from './pypi';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('Should do nothing if dep is not specified', () => {
     expect(addMetaData()).toBeUndefined();
   });

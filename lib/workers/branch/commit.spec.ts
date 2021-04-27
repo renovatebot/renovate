@@ -5,7 +5,7 @@ import { commitFilesToBranch } from './commit';
 
 jest.mock('../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('commitFilesToBranch', () => {
     let config: BranchConfig;
     beforeEach(() => {

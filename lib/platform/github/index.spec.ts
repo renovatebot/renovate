@@ -1,7 +1,6 @@
-import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
-import { getName, mocked } from '../../../test/util';
+import { getName, loadFixture, mocked } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -12,7 +11,7 @@ import type { Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -42,13 +41,9 @@ describe(getName(__filename), () => {
     httpMock.reset();
   });
 
-  const graphqlOpenPullRequests = fs.readFileSync(
-    'lib/platform/github/__fixtures__/graphql/pullrequest-1.json',
-    'utf8'
-  );
-  const graphqlClosedPullRequests = fs.readFileSync(
-    'lib/platform/github/__fixtures__/graphql/pullrequests-closed.json',
-    'utf8'
+  const graphqlOpenPullRequests = loadFixture('graphql/pullrequest-1.json');
+  const graphqlClosedPullRequests = loadFixture(
+    'graphql/pullrequests-closed.json'
   );
 
   describe('initPlatform()', () => {

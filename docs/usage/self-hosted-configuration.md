@@ -9,6 +9,8 @@ The configuration options listed in this document are applicable to self-hosted 
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
+## allowCustomCrateRegistries
+
 ## allowPostUpgradeCommandTemplating
 
 Set to true to allow templating of dependency level post-upgrade commands.
@@ -52,18 +54,18 @@ npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
+## allowScripts
+
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed.
 If this list is empty then no tasks will be executed.
-Also you need to have `"trustLevel": "high"`, otherwise these tasks will be ignored.
 
 e.g.
 
 ```json
 {
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"],
-  "trustLevel": "high"
+  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
 ```
 
@@ -156,17 +158,6 @@ You would use put this in your configuration file:
 
 If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
 
-## dockerMapDotfiles
-
-This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files.
-Currently applicable to `.npmrc` only.
-
-```json
-{
-  "dockerMapDotfiles": true
-}
-```
-
 ## dockerUser
 
 Override default user and group used by Docker-based binaries.
@@ -186,6 +177,14 @@ e.g.
 
 ## endpoint
 
+## exposeAllEnv
+
+By default, Renovate only passes a limited set of environment variables to package managers.
+Confidential data can be leaked if a malicious script enumerates all environment variables.
+Set `exposeAllEnv` to `true` only if you have reviewed (and trust) the repositories which Renovate bot runs against.
+
+Setting this to `true` will also allow for variable substitution in `.npmrc` files.
+
 ## force
 
 This object is used as a "force override" when you need to make sure certain configuration overrides whatever is configured in the repository.
@@ -201,6 +200,14 @@ It will also override any settings in `packageRules`.
 ## forkMode
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
+If this is set to `true` then Renovate will fork the repository into the personal space of the person owning the Personal Access Token.
+
+## forkToken
+
+You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
+This should be set to a Personal Access Token (GitHub only) when `forkMode` is set to `true`.
+Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
+Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitAuthor
 
@@ -232,18 +239,6 @@ If left as default (null), a random short ID will be selected.
 ## logFile
 
 ## logFileLevel
-
-## logLevel
-
-We recommend that you run the Renovate bot at the debug level if you can.
-Use the environment variable `LOG_LEVEL=debug` to run Renovate at the debug level.
-
-When you use `LOG_LEVEL=debug`, debug logging starts from the beginning of the app.
-If you had configured debug logging in a file config, then the debug logging starts _after_ the file config is parsed.
-
-Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
-
-Warning: Configuring `logLevel` config option or `--log-level` cli option is deprecated and will be removed in a major version.
 
 ## onboarding
 
@@ -386,14 +381,5 @@ If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
-
-## trustLevel
-
-Setting trustLevel to `"high"` can make sense in many self-hosted cases where the bot operator trusts the content in each repository.
-
-Setting trustLevel=high means:
-
-- Child processes are run with full access to `env`
-- `.npmrc` files can have environment variable substitution performed
 
 ## username

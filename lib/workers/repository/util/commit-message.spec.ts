@@ -4,7 +4,7 @@ import {
   formatCommitMessagePrefix,
 } from './commit-message';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('COMMIT_MESSAGE_PREFIX_END_CHARACTER', () => {
     it('is a colon character', () => {
       expect(COMMIT_MESSAGE_PREFIX_SEPARATOR).toBe(':');

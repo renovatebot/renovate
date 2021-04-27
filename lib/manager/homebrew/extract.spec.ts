@@ -1,26 +1,13 @@
-import fs from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const aalib = fs.readFileSync(
-  'lib/manager/homebrew/__fixtures__/aalib.rb',
-  'utf8'
-);
-const aap = fs.readFileSync('lib/manager/homebrew/__fixtures__/aap.rb', 'utf8');
-const acmetool = fs.readFileSync(
-  'lib/manager/homebrew/__fixtures__/acmetool.rb',
-  'utf8'
-);
-const aide = fs.readFileSync(
-  'lib/manager/homebrew/__fixtures__/aide.rb',
-  'utf8'
-);
-const ibazel = fs.readFileSync(
-  'lib/manager/homebrew/__fixtures__/ibazel.rb',
-  'utf8'
-);
+const aalib = loadFixture('aalib.rb');
+const aap = loadFixture('aap.rb');
+const acmetool = loadFixture('acmetool.rb');
+const aide = loadFixture('aide.rb');
+const ibazel = loadFixture('ibazel.rb');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
       const res = extractPackageFile(aalib);

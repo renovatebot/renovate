@@ -8,7 +8,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade', () => {
       const branch = [

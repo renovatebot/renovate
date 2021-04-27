@@ -6,7 +6,7 @@ jest.mock('fs-extra');
 
 const fs = mocked(_fs);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });

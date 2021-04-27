@@ -1,16 +1,10 @@
-/* eslint-disable no-template-curly-in-string */
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import * as datasourceClojure from '../../datasource/clojure';
 import { extractFromVectors, extractPackageFile, trimAtKey } from './extract';
 
-const leinProjectClj = readFileSync(
-  resolve(__dirname, `./__fixtures__/project.clj`),
-  'utf8'
-);
+const leinProjectClj = loadFixture(`project.clj`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('trimAtKey', () => {
     expect(trimAtKey('foo', 'bar')).toBeNull();
     expect(trimAtKey(':dependencies    ', 'dependencies')).toBeNull();

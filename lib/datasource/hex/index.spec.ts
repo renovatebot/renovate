@@ -1,24 +1,19 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadJsonFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 
 const hostRules: any = _hostRules;
 
-let res1 = fs.readFileSync(
-  'lib/datasource/hex/__fixtures__/certifi.json',
-  'utf8'
-);
-res1 = JSON.parse(res1);
+const res1 = loadJsonFixture('certifi.json');
 
 jest.mock('../../util/host-rules');
 
 const baseUrl = 'https://hex.pm/api/packages/';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({});

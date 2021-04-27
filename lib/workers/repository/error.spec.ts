@@ -38,7 +38,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('handleError()', () => {
     const errors = [
       REPOSITORY_UNINITIATED,

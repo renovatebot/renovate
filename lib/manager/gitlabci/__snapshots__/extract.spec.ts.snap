@@ -148,7 +148,6 @@ Array [
     "deps": Array [
       Object {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-        "commitMessageTopic": "Node.js",
         "currentDigest": undefined,
         "currentValue": "12",
         "datasource": "docker",

@@ -5,7 +5,7 @@ import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import * as memCache from '../../util/cache/memory';
 import { setFsConfig } from '../../util/fs';
@@ -20,12 +20,9 @@ import {
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
-const res1 = fs.readFileSync('lib/datasource/crate/__fixtures__/libc', 'utf8');
-const res2 = fs.readFileSync(
-  'lib/datasource/crate/__fixtures__/amethyst',
-  'utf8'
-);
-const res3 = fs.readFileSync('lib/datasource/crate/__fixtures__/mypkg', 'utf8');
+const res1 = loadFixture('libc');
+const res2 = loadFixture('amethyst');
+const res3 = loadFixture('mypkg');
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
@@ -68,7 +65,7 @@ function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
   return { mockClone };
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
       expect(getIndexSuffix('a')).toStrictEqual(['1', 'a']);
@@ -225,7 +222,7 @@ describe(getName(__filename), () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('refuses to clone if trustLevel is not high', async () => {
+    it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
@@ -240,7 +237,7 @@ describe(getName(__filename), () => {
     });
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
@@ -254,7 +251,7 @@ describe(getName(__filename), () => {
     });
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -268,7 +265,7 @@ describe(getName(__filename), () => {
     });
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
       await getPkgReleases({
         datasource,
@@ -284,7 +281,7 @@ describe(getName(__filename), () => {
     });
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       await Promise.all([
@@ -310,7 +307,7 @@ describe(getName(__filename), () => {
     });
     it('returns null when git clone fails', async () => {
       setupErrorGitMock();
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       const result = await getPkgReleases({

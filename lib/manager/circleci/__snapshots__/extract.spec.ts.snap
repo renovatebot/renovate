@@ -4,7 +4,6 @@ exports[`manager/circleci/extract extractPackageFile() extracts image without le
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "14.8.0",
     "datasource": "docker",
@@ -20,7 +19,6 @@ exports[`manager/circleci/extract extractPackageFile() extracts multiple image l
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -31,7 +29,6 @@ Array [
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "4",
     "datasource": "docker",
@@ -42,7 +39,6 @@ Array [
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "6",
     "datasource": "docker",
@@ -53,7 +49,6 @@ Array [
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8.9.0",
     "datasource": "docker",

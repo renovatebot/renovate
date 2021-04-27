@@ -10,7 +10,7 @@ import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let http: Http;
 
   beforeEach(() => {
