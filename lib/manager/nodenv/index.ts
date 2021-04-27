@@ -6,6 +6,6 @@ export { extractPackageFile } from './extract';
 export const language = LANGUAGE_NODE;
 
 export const defaultConfig = {
-  fileMatch: ['^.node-version$'],
+  fileMatch: ['(^|/).node-version$'],
   versioning: nodeVersioning.id,
 };
