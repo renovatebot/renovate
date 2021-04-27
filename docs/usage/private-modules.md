@@ -136,7 +136,7 @@ The command run is `git config --global url."https://${token}@github.com/".inste
 
 The best way to do this now is using `hostRules` and no longer via `.npmrc` files on disk or in config.
 `hostRules` credentials with `hostType=npm` are written to a `.npmrc` file in the same directory as the `package.json` being updated.
-See [private npm modules](/private-npm-modules) for more details.
+See [private npm modules](./private-npm-modules.md) for more details.
 
 ### nuget
 
