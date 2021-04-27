@@ -18,7 +18,7 @@ export async function extractPackageFile(
     dependencies: Array<{ name: string; version: string; repository: string }>;
   };
   try {
-    // TODO: fix me
+    // TODO: fix me (#9610)
     chart = yaml.safeLoad(content, { json: true }) as any;
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(

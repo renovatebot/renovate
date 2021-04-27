@@ -41,7 +41,7 @@ export function generateBranchName(update: RenovateConfig): void {
         update.groupSlug = `major-${update.groupSlug}`;
       }
     }
-    if (update.updateType === 'patch') {
+    if (update.updateType === 'patch' && update.separateMinorPatch) {
       update.groupSlug = `patch-${update.groupSlug}`;
     }
     update.branchTopic = update.group.branchTopic || update.branchTopic;

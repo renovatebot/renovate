@@ -14,7 +14,7 @@ describe(getName(), () => {
 
   it('validates', () => {
     function validate(module: Platform, name: string): boolean {
-      // TODO: test required api
+      // TODO: test required api (#9650)
       if (!module.initPlatform) {
         throw Error(`Missing api on ${name}`);
       }

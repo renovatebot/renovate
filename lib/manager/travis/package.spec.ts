@@ -10,7 +10,6 @@ jest.mock('../../datasource');
 
 describe(getName(), () => {
   describe('getPackageUpdates', () => {
-    // TODO: should be `PackageUpdateConfig`
     let config: any;
     const RealDate = Date;
 
