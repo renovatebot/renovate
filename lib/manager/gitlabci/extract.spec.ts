@@ -34,14 +34,7 @@ describe(getName(), () => {
       ]);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-
-      const deps: PackageDependency[] = [];
-      res.forEach((e) => {
-        e.deps.forEach((d) => {
-          deps.push(d);
-        });
-      });
-      expect(deps).toHaveLength(3);
+      expect(res[0].deps).toHaveLength(3);
     });
 
     it('extracts multiple image lines', async () => {
