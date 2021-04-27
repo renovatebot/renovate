@@ -20,7 +20,7 @@ If you have any ideas on this topic, please contact the author by starting a [ne
 
 To reduce noise, you can reduce the number of updates in total, and a good way to do that is via intelligent grouping of related packages.
 
-As an example, our default `":app"` and `":library"` [presets](/config-presets/) include the rule `"group:monorepos"`, which means that "sibling" packages from known monorepos will always be grouped into the same branch/PR by renovate.
+As an example, our default `":app"` and `":library"` [presets](./config-presets.md) include the rule `"group:monorepos"`, which means that "sibling" packages from known monorepos will always be grouped into the same branch/PR by renovate.
 For example, all `@angular/*` packages that are updated at the same time will be raised in a "Renovate angular monorepo packages" PR.
 And every package in the React monorepo will be grouped together in a React monorepo PR too.
 
