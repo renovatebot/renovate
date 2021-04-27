@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import * as fs from 'fs';
 import extract from 'extract-zip';
 import pMap from 'p-map';
 import {
@@ -12,19 +11,21 @@ import type {
 } from '../../../datasource/terraform-provider/types';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import * as fs from '../../../util/fs';
 import { Http } from '../../../util/http';
 
 const http = new Http(id);
+const hashCacheTTL = 10080; // in seconds == 1 week
 
-export function hashFiles(files: string[]): string {
+export async function hashFiles(files: string[]): Promise<string> {
   const rootHash = crypto.createHash('sha256');
 
-  files.forEach((file) => {
+  for (const file of files) {
     // build for every file a line looking like "aaaaaaaaaaaaaaa  file.txt\n"
     const hash = crypto.createHash('sha256');
 
     // a sha256sum displayed as lowercase hex string to root hash
-    const fileBuffer = fs.readFileSync(file);
+    const fileBuffer = await fs.readFile(file);
     hash.update(fileBuffer);
     hash.end();
     const data = hash.read();
@@ -35,7 +36,7 @@ export function hashFiles(files: string[]): string {
     const fileName = file.replace(/^.*[\\/]/, '');
     rootHash.update(fileName);
     rootHash.update('\n');
-  });
+  }
 
   rootHash.end();
   const rootData = rootHash.read();
@@ -48,7 +49,7 @@ export async function hashOfZipContent(
   extractPath: string
 ): Promise<string> {
   await extract(zipFilePath, { dir: extractPath });
-  const files = fs.readdirSync(extractPath);
+  const files = await fs.readLocalDirectory(extractPath);
   // the h1 hashing algorithms requires that the files are sorted by filename
   const sortedFiles = files.sort((a, b) => a.localeCompare(b));
   const filesWithPath = sortedFiles.map((file) => `${extractPath}/${file}`);
@@ -56,14 +57,9 @@ export async function hashOfZipContent(
   const result = hashFiles(filesWithPath);
 
   // delete extracted files
-  filesWithPath.forEach((value) =>
-    fs.unlink(value, (err) => {
-      /* istanbul ignore next */
-      if (err) {
-        logger.warn({ err }, 'Failed to delete extracted file');
-      }
-    })
-  );
+  for (const value of filesWithPath) {
+    await fs.deleteLocalFile(value);
+  }
   return result;
 }
 
@@ -91,19 +87,16 @@ export async function calculateHashes(
       logger.trace(
         `Downloading archive and generating hash for ${build.name}-${build.version}...`
       );
-      const stream = http.stream(build.url);
+      const readStream = http.stream(build.url);
       const writeStream = fs.createWriteStream(downloadFileName);
-      stream.pipe(writeStream);
+      readStream.pipe(writeStream);
 
-      const streamPromise = new Promise((resolve, reject) => {
-        writeStream.on('finish', resolve);
-        /* istanbul ignore next */
-        writeStream.on('error', (err) => {
-          logger.error({ err }, 'write stream error');
-        });
-        stream.on('error', reject);
-      });
-      await streamPromise;
+      const pipeline = fs.getStreamingPipeline();
+      try {
+        await pipeline(readStream, writeStream);
+      } catch (err) {
+        logger.error({ err }, 'write stream error');
+      }
 
       const hash = await hashOfZipContent(downloadFileName, extractPath);
       logger.trace(
@@ -112,18 +105,9 @@ export async function calculateHashes(
       );
 
       // delete zip file
-      fs.unlink(downloadFileName, (err) => {
-        /* istanbul ignore next */
-        if (err) {
-          logger.debug({ err }, `Failed to delete file ${downloadFileName}`);
-        }
-      });
-      fs.rmdir(extractPath, (err) => {
-        /* istanbul ignore next */
-        if (err) {
-          logger.debug({ err }, `Failed to delete directory ${extractPath}`);
-        }
-      });
+      await fs.deleteLocalFile(downloadFileName);
+      await fs.deleteLocalFile(extractPath);
+
       return hash;
     },
     { concurrency: 4 } // allow to look up 4 builds for this version in parallel
@@ -181,7 +165,7 @@ export default async function createHashes(
     'terraform-provider-release',
     cacheKey,
     sortedHashes,
-    10080
-  ); // cache for a week
+    hashCacheTTL
+  );
   return sortedHashes;
 }

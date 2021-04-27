@@ -1,16 +1,16 @@
 import { readFileSync } from 'fs';
-import _fs from 'fs-extra';
 import { join } from 'upath';
 import * as httpMock from '../../../../test/http-mock';
 import { getName } from '../../../../test/util';
 import { getPkgReleases } from '../../../datasource';
 import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
+import * as _fs from '../../../util/fs';
 import type { UpdateArtifactsConfig } from '../../types';
 import hash from './hash';
 import { updateArtifacts } from './index';
 
 // auto-mock fs
-jest.mock('fs-extra');
+jest.mock('../../../util/fs');
 jest.mock('./hash');
 jest.mock('../../../datasource');
 
@@ -68,7 +68,7 @@ describe(getName(__filename), () => {
     httpMock.reset();
   });
   it('returns null if no .terraform.lock.hcl found', async () => {
-    fs.readFile.mockResolvedValueOnce(null);
+    fs.readLocalFile.mockResolvedValueOnce(null);
     expect(
       await updateArtifacts({
         packageFileName: 'main.tf',
@@ -79,7 +79,7 @@ describe(getName(__filename), () => {
     ).toBeNull();
   });
   it('returns null if .terraform.lock.hcl is empty', async () => {
-    fs.readFile.mockResolvedValueOnce('empty' as any);
+    fs.readLocalFile.mockResolvedValueOnce('empty' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'main.tf',
@@ -90,7 +90,7 @@ describe(getName(__filename), () => {
     ).toBeNull();
   });
   it('update single dependency with exact constraint', async () => {
-    fs.readFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -122,7 +122,7 @@ describe(getName(__filename), () => {
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
   it('update single dependency with range constraint and minor update', async () => {
-    fs.readFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -154,7 +154,7 @@ describe(getName(__filename), () => {
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
   it('update single dependency with range constraint and major update', async () => {
-    fs.readFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -191,7 +191,7 @@ describe(getName(__filename), () => {
       .get('/.well-known/terraform.json')
       .reply(200, serviceDiscoveryResult);
 
-    fs.readFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
       .mockResolvedValueOnce(
@@ -276,7 +276,7 @@ describe(getName(__filename), () => {
       .get('/.well-known/terraform.json')
       .reply(200, serviceDiscoveryResult);
 
-    fs.readFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
       .mockResolvedValueOnce(

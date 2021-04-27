@@ -1,3 +1,5 @@
+import stream from 'stream';
+import util from 'util';
 import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
 import type { RenovateConfig } from '../../config/types';
@@ -132,4 +134,22 @@ export async function findLocalSiblingOrParent(
   }
 
   return null;
+}
+
+/**
+ * Get files by name from directory
+ */
+export function readLocalDirectory(path: string): Promise<string[]> {
+  return fs.readdir(path);
+}
+
+export function createWriteStream(path: string): fs.WriteStream {
+  return fs.createWriteStream(path);
+}
+
+export function getStreamingPipeline(): (
+  arg1: NodeJS.ReadableStream,
+  arg2: NodeJS.ReadWriteStream | NodeJS.WritableStream
+) => Promise<void> {
+  return util.promisify(stream.pipeline);
 }
