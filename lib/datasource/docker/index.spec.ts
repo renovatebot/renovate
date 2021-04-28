@@ -255,6 +255,34 @@ describe(getName(), () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('passes credentials to client', async () => {
+      httpMock
+        .scope(amazonUrl)
+        .get('/')
+        .reply(200, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      await getDigest(
+        {
+          datasource: 'docker',
+          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
+        'some-tag'
+      );
+
+      expect(AWS.ECR).toHaveBeenCalledWith({
+        credentials: {
+          accessKeyId: 'some-username',
+          secretAccessKey: 'some-password',
+        },
+        region: 'us-east-1',
+      });
+    });
     it('supports ECR authentication', async () => {
       httpMock
         .scope(amazonUrl)

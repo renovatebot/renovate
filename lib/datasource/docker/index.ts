@@ -113,10 +113,12 @@ async function getECRAuthToken(
   region: string,
   opts: HostRule
 ): Promise<string | null> {
-  const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
+  const config = { region, credentials: undefined };
   if (opts.username && opts.password) {
-    config.accessKeyId = opts.username;
-    config.secretAccessKey = opts.password;
+    config.credentials = {
+      accessKeyId: opts.username,
+      secretAccessKey: opts.password,
+    };
   }
   const ecr = new ECR(config);
   try {
