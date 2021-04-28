@@ -1,13 +1,13 @@
-import { createReadStream, readFileSync } from 'fs';
+import { createReadStream } from 'fs';
 import * as httpMock from '../../../../test/http-mock';
-import { getName } from '../../../../test/util';
+import { getName, loadFixture } from '../../../../test/util';
 import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
 import createHashes from './hash';
 
 jest.setTimeout(15000);
 
 const releaseBackendUrl = defaultRegistryUrls[1];
-const releaseBackendAzurerm = readFileSync(
+const releaseBackendAzurerm = loadFixture(
   'lib/manager/terraform/lockfile/__fixtures__/releaseBackendAzurerm_2_56_0.json',
   'utf8'
 );

@@ -1,8 +1,7 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../../test/util';
+import { getName, loadFixture } from '../../../../test/util';
 import { extractLocks } from './util';
 
-const validLockfile = readFileSync(
+const validLockfile = loadFixture(
   'lib/manager/terraform/lockfile/__fixtures__/validLockfile.hcl',
   'utf8'
 );
