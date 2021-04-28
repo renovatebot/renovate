@@ -34,8 +34,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
-import type { AzurePr } from './types';
-import { AzurePrVote } from './types';
+import { AzurePr, AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
