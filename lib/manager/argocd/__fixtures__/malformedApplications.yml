@@ -1,0 +1,7 @@
+---
+# malformed application as the source section is missing
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  target:
+    namespace: testing

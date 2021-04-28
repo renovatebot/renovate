@@ -1,0 +1,38 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+...
+spec:
+  source:
+    chart: kube-state-metrics
+    repoURL: https://kubernetes-charts.storage.googleapis.com
+    targetRevision: 2.4.1
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    chart: traefik
+    helm:
+      values: |
+        traefik:
+          service:
+            spec:
+              loadBalancerIP: 1.2.3.4
+    repoURL: gs://helm-charts-internal
+    targetRevision: 0.0.2
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    repoURL: https://git.example.com/foo/bar.git
+    targetRevision: v1.2.0
+---
+# malformed application as the source section is missing
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  target:
+    namespace: testing
