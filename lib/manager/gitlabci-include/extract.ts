@@ -3,6 +3,7 @@ import yaml from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { replaceReferenceTags } from '../gitlabci/utils';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 function extractDepFromIncludeFile(includeObj: {
@@ -31,7 +32,9 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   try {
     // TODO: fix me (#9610)
-    const doc = yaml.safeLoad(content, { json: true }) as any;
+    const doc = yaml.safeLoad(replaceReferenceTags(content), {
+      json: true,
+    }) as any;
     if (doc?.include && is.array(doc.include)) {
       for (const includeObj of doc.include) {
         if (includeObj.file && includeObj.project) {
