@@ -49,9 +49,7 @@ export function extractPackageFile(
 
   const definitions = loadYaml(content);
 
-  const deps = definitions.map((definition) => {
-    return createDependency(definition);
-  });
+  const deps = definitions.map((definition) => createDependency(definition));
 
   const filteredDeps = deps.filter((value) => value);
 
