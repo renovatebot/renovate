@@ -189,6 +189,7 @@ export async function getDependencyInfo(
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
   const { xml: pomContent } = await downloadMavenXml(pomUrl);
+  // istanbul ignore if
   if (!pomContent) {
     return result;
   }

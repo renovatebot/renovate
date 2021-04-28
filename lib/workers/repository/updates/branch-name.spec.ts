@@ -67,6 +67,7 @@ describe(getName(), () => {
         groupSlug: 'some group slug',
         updateType: 'patch',
         separateMajorMinor: true,
+        separateMinorPatch: true,
         newMajor: 2,
         group: {},
       };

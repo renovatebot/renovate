@@ -174,3 +174,40 @@ Array [
   },
 ]
 `;
+
+exports[`manager/gitlabci/extract extractAllPackageFiles() extracts named services 1`] = `
+Array [
+  Object {
+    "deps": Array [
+      Object {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "19.70.8-slim",
+        "datasource": "docker",
+        "depName": "renovate/renovate",
+        "depType": "image-name",
+        "replaceString": "renovate/renovate:19.70.8-slim",
+      },
+      Object {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "10.4.11",
+        "datasource": "docker",
+        "depName": "mariadb",
+        "depType": "service-image",
+        "replaceString": "mariadb:10.4.11",
+      },
+      Object {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.0.0",
+        "datasource": "docker",
+        "depName": "other/image",
+        "depType": "service-image",
+        "replaceString": "other/image:1.0.0",
+      },
+    ],
+    "packageFile": "lib/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml",
+  },
+]
+`;
