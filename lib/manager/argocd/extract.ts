@@ -1,21 +1,12 @@
-import { safeLoad } from 'js-yaml';
+import { safeLoadAll } from 'js-yaml';
 import * as gitTags from '../../datasource/git-tags';
 import * as helm from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { ApplicationDefinition } from './types';
 import { fileTestRegex } from './util';
 
-function loadYaml(content: string): ApplicationDefinition {
-  const config = safeLoad(content);
-
-  if (typeof config !== 'object') {
-    /* istanbul ignore next */
-    throw new Error(
-      `Configuration file does not contain a YAML object (it is ${typeof config}).`
-    );
-  }
-
-  return config as ApplicationDefinition;
+function loadYaml(content: string): ApplicationDefinition[] {
+  return safeLoadAll(content);
 }
 function createDependency(
   definition: ApplicationDefinition
@@ -56,16 +47,9 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitionStrings = content.split('---');
+  const definitions = loadYaml(content);
 
-  const deps = definitionStrings.map((definitionString) => {
-    // check if the block is an ArgoCD API object
-    if (fileTestRegex.test(definitionString) === false) {
-      return null;
-    }
-
-    const definition = loadYaml(definitionString);
-
+  const deps = definitions.map((definition) => {
     return createDependency(definition);
   });
 
