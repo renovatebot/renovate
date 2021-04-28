@@ -24,7 +24,7 @@ describe(getName(), () => {
       expect(result).toBeNull();
     });
 
-    it('full rest', () => {
+    it('full test', () => {
       const result = extractPackageFile(validApplication, 'applications.yml');
       expect(result).not.toBeNull();
       expect(result.deps).toBeArrayOfSize(3);

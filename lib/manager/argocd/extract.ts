@@ -1,29 +1,45 @@
+import { safeLoad } from 'js-yaml';
 import * as gitTags from '../../datasource/git-tags';
 import * as helm from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { fileTestRegex, keyValueExtractionRegex } from './util';
+import type { ApplicationDefinition } from './types';
+import { fileTestRegex } from './util';
 
+function loadYaml(content: string): ApplicationDefinition {
+  const config = safeLoad(content);
+
+  if (typeof config !== 'object') {
+    /* istanbul ignore next */
+    throw new Error(
+      `Configuration file does not contain a YAML object (it is ${typeof config}).`
+    );
+  }
+
+  return config as ApplicationDefinition;
+}
 function createDependency(
-  attributes: Record<string, string>
+  definition: ApplicationDefinition
 ): PackageDependency {
   let result: PackageDependency;
 
-  if (attributes.repoURL == null || attributes.targetRevision == null) {
+  const source = definition.spec.source;
+
+  if (source == null) {
     return null;
   }
 
   // a chart variable is defined this is helm declaration
-  if (attributes.chart) {
+  if (source.chart) {
     result = {
-      depName: attributes.chart,
-      registryUrls: [attributes.repoURL],
-      currentValue: attributes.targetRevision,
+      depName: source.chart,
+      registryUrls: [source.repoURL],
+      currentValue: source.targetRevision,
       datasource: helm.id,
     };
   } else {
     result = {
-      depName: attributes.repoURL,
-      currentValue: attributes.targetRevision,
+      depName: source.repoURL,
+      currentValue: source.targetRevision,
       datasource: gitTags.id,
     };
   }
@@ -44,21 +60,13 @@ export function extractPackageFile(
 
   const deps = definitionStrings.map((definitionString) => {
     // check if the block is an ArgoCD API object
-    if (fileTestRegex.test(content) === false) {
+    if (fileTestRegex.test(definitionString) === false) {
       return null;
     }
 
-    const lines = definitionString.split('\n');
+    const definition = loadYaml(definitionString);
 
-    const attributes: Record<string, string> = {};
-    lines.forEach((line) => {
-      const regexResult = keyValueExtractionRegex.exec(line);
-      if (regexResult) {
-        attributes[regexResult.groups.key] = regexResult.groups.value;
-      }
-    });
-
-    return createDependency(attributes);
+    return createDependency(definition);
   });
 
   const filteredDeps = deps.filter((value) => value);

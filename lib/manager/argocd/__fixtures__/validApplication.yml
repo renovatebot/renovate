@@ -1,12 +1,10 @@
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
-metadata:
-...
 spec:
   source:
     chart: kube-state-metrics
-    repoURL: https://kubernetes-charts.storage.googleapis.com
+    repoURL: https://prometheus-community.github.io/helm-charts
     targetRevision: 2.4.1
 ---
 apiVersion: argoproj.io/v1alpha1

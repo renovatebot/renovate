@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/argocd/extract extractPackageFile() full rest 1`] = `
+exports[`manager/argocd/extract extractPackageFile() full test 1`] = `
 Array [
   Object {
     "currentValue": "2.4.1",
     "datasource": "helm",
     "depName": "kube-state-metrics",
     "registryUrls": Array [
-      "https://kubernetes-charts.storage.googleapis.com",
+      "https://prometheus-community.github.io/helm-charts",
     ],
   },
   Object {
