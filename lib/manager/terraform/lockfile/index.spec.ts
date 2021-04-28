@@ -1,7 +1,6 @@
-import { readFileSync } from 'fs';
 import { join } from 'upath';
 import * as httpMock from '../../../../test/http-mock';
-import { getName } from '../../../../test/util';
+import { getName, loadFixture } from '../../../../test/util';
 import { getPkgReleases } from '../../../datasource';
 import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
 import * as _fs from '../../../util/fs';
@@ -23,28 +22,17 @@ const config = {
   constraints: {},
 };
 
-const validLockfile = readFileSync(
-  'lib/manager/terraform/lockfile/__fixtures__/validLockfile.hcl',
-  'utf8'
-);
+const validLockfile = loadFixture('validLockfile.hcl');
 
-const releaseBackendAWS = readFileSync(
-  'lib/manager/terraform/lockfile/__fixtures__/releaseBackendAWS_3_36_0.json',
-  'utf8'
-);
+const releaseBackendAWS = loadFixture('releaseBackendAWS_3_36_0.json');
 
-const releaseBackendRandom = readFileSync(
-  'lib/manager/terraform/lockfile/__fixtures__/releaseBackendRandom_3_1_0.json',
-  'utf8'
-);
+const releaseBackendRandom = loadFixture('releaseBackendRandom_3_1_0.json');
 
-const releaseBackendAzurerm = readFileSync(
-  'lib/manager/terraform/lockfile/__fixtures__/releaseBackendAzurerm_2_56_0.json',
-  'utf8'
-);
+const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
 
-const serviceDiscoveryResult = readFileSync(
-  'lib/datasource/terraform-module/__fixtures__/service-discovery.json'
+const serviceDiscoveryResult = loadFixture(
+  'service-discovery.json',
+  '../../../datasource/terraform-provider'
 );
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;

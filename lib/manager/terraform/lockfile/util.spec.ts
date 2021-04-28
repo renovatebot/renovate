@@ -1,10 +1,7 @@
 import { getName, loadFixture } from '../../../../test/util';
 import { extractLocks } from './util';
 
-const validLockfile = loadFixture(
-  'lib/manager/terraform/lockfile/__fixtures__/validLockfile.hcl',
-  'utf8'
-);
+const validLockfile = loadFixture('validLockfile.hcl');
 
 describe(getName(), () => {
   describe('extractLocks()', () => {

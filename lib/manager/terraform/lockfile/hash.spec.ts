@@ -7,10 +7,7 @@ import createHashes from './hash';
 jest.setTimeout(15000);
 
 const releaseBackendUrl = defaultRegistryUrls[1];
-const releaseBackendAzurerm = loadFixture(
-  'lib/manager/terraform/lockfile/__fixtures__/releaseBackendAzurerm_2_56_0.json',
-  'utf8'
-);
+const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
 
 describe(getName(), () => {
   beforeEach(() => {
