@@ -255,7 +255,7 @@ describe(getName(), () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('passes credentials to client', async () => {
+    it('passes credentials to ECR client', async () => {
       httpMock
         .scope(amazonUrl)
         .get('/')
@@ -267,6 +267,10 @@ describe(getName(), () => {
         .get('/node/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
+      mockEcrAuthResolve({
+        authorizationData: [{ authorizationToken: 'abcdef' }],
+      });
+
       await getDigest(
         {
           datasource: 'docker',
@@ -275,6 +279,8 @@ describe(getName(), () => {
         'some-tag'
       );
 
+      const trace = httpMock.getTrace();
+      expect(trace).toMatchSnapshot();
       expect(AWS.ECR).toHaveBeenCalledWith({
         credentials: {
           accessKeyId: 'some-username',
