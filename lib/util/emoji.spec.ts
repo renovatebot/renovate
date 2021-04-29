@@ -33,7 +33,7 @@ describe(getName(), () => {
   });
 
   describe('unsupported characters', () => {
-    const unsupported = '☝🏻';
+    const unsupported = '🪆';
 
     it('uses replacement character', () => {
       setEmojiConfig({ unicodeEmoji: false });

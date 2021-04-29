@@ -50,12 +50,34 @@ const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
   ({ source }) => source
 );
 const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g');
+const excludedModifiers = new Set([
+  '20E3',
+  '200D',
+  'FE0E',
+  'FE0F',
+  '1F3FB',
+  '1F3FC',
+  '1F3FD',
+  '1F3FE',
+  '1F3FF',
+  '1F9B0',
+  '1F9B1',
+  '1F9B2',
+  '1F9B3',
+]);
+
+export function stripHexCode(input: string): string {
+  return input
+    .split('-')
+    .filter((modifier) => !excludedModifiers.has(modifier))
+    .join('-');
+}
 
 export function unemojify(text: string, tofu = '�'): string {
   return unicodeEmoji
     ? text
     : text.replace(emojiRegex, (emoji) => {
-        const hex = fromUnicodeToHexcode(emoji);
+        const hex = stripHexCode(fromUnicodeToHexcode(emoji));
         const shortCode = shortCodesByHex.get(hex);
         return shortCode || tofu;
       });
