@@ -1,9 +1,8 @@
 import { join } from 'upath';
 import * as httpMock from '../../../../test/http-mock';
-import { getName, loadFixture } from '../../../../test/util';
+import { fs, getName, loadFixture } from '../../../../test/util';
 import { getPkgReleases } from '../../../datasource';
 import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
-import * as _fs from '../../../util/fs';
 import type { UpdateArtifactsConfig } from '../../types';
 import hash from './hash';
 import { updateArtifacts } from './index';
@@ -12,8 +11,6 @@ import { updateArtifacts } from './index';
 jest.mock('../../../util/fs');
 jest.mock('./hash');
 jest.mock('../../../datasource');
-
-jest.setTimeout(15000);
 
 const config = {
   // `join` fixes Windows CI
@@ -35,7 +32,6 @@ const serviceDiscoveryResult = loadFixture(
   '../../../datasource/terraform-provider'
 );
 
-const fs: jest.Mocked<typeof _fs> = _fs as any;
 const mockHash = hash as jest.MockedFunction<typeof hash>;
 const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
   typeof getPkgReleases
@@ -55,6 +51,7 @@ describe(getName(), () => {
   afterEach(() => {
     httpMock.reset();
   });
+
   it('returns null if no .terraform.lock.hcl found', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     expect(
@@ -66,6 +63,7 @@ describe(getName(), () => {
       })
     ).toBeNull();
   });
+
   it('returns null if .terraform.lock.hcl is empty', async () => {
     fs.readLocalFile.mockResolvedValueOnce('empty' as any);
     expect(
@@ -77,6 +75,7 @@ describe(getName(), () => {
       })
     ).toBeNull();
   });
+
   it('update single dependency with exact constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
@@ -109,6 +108,7 @@ describe(getName(), () => {
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
+
   it('update single dependency with range constraint and minor update', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
@@ -141,6 +141,7 @@ describe(getName(), () => {
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
+
   it('update single dependency with range constraint and major update', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
@@ -173,6 +174,7 @@ describe(getName(), () => {
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
+
   it('do full lock file maintenance', async () => {
     httpMock
       .scope(registryUrl)
@@ -258,6 +260,7 @@ describe(getName(), () => {
     expect(mockHash.mock.calls).toBeArrayOfSize(2);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
+
   it('do full lock file maintenance without needed changes', async () => {
     httpMock
       .scope(registryUrl)

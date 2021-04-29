@@ -106,8 +106,8 @@ export async function calculateHashes(
       );
 
       // delete zip file
-      await fs.deleteLocalFile(downloadFileName);
-      await fs.deleteLocalFile(extractPath);
+      await fs.unlink(downloadFileName);
+      await fs.remove(extractPath);
 
       return hash;
     },
@@ -148,7 +148,6 @@ export default async function createHashes(
       backendLookUpName,
       version
     );
-    /* istanbul ignore next */
   } catch (err) {
     logger.debug(
       { err, backendLookUpName, version },

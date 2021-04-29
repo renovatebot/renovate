@@ -44,6 +44,16 @@ describe(getName(), () => {
     expect(result).toBeNull();
   });
 
+  it('backend index throws error', async () => {
+    httpMock
+      .scope(releaseBackendUrl)
+      .get('/terraform-provider-azurerm/2.56.0/index.json')
+      .replyWithError('');
+
+    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
+    expect(result).toBeNull();
+  });
+
   it('full walkthrough', async () => {
     const readStreamLinux = createReadStream(
       'lib/manager/terraform/lockfile/__fixtures__/test.zip'

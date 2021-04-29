@@ -115,7 +115,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
 
 export function isPinnedVersion(value: string): boolean {
   const versioning = getVersioning('hashicorp');
-  return <boolean>versioning.isSingleVersion(value);
+  return !!versioning.isSingleVersion(value);
 }
 
 export function writeLockUpdates(
