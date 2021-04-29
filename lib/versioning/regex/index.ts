@@ -62,7 +62,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     }
 
     // TODO: should we validate the user has not added extra unsupported
-    // capture groups?
+    // capture groups? (#9717)
     this._config = regEx(new_config);
   }
 

@@ -1,8 +1,8 @@
 import { getName } from '../../test/util';
 import * as massage from './massage';
-import { RenovateConfig } from '.';
+import type { RenovateConfig } from './types';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('massageConfig', () => {
     it('returns empty', () => {
       const config: RenovateConfig = {};

@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
@@ -55,7 +55,7 @@ export async function shouldReuseExistingBranch(
       logger.debug(`Branch is stale and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (await isBranchModified(branchName)) {
-        // TODO: Warn here so that it appears in PR body
+        // TODO: Warn here so that it appears in PR body (#9720)
         logger.debug('Cannot rebase branch as it has been modified');
         return { reuseExistingBranch: true, isModified: true };
       }
@@ -82,7 +82,7 @@ export async function shouldReuseExistingBranch(
       return { reuseExistingBranch: false };
     }
     // Don't do anything different, but warn
-    // TODO: Add warning to PR
+    // TODO: Add warning to PR (#9720)
     logger.debug(`Branch is not mergeable but can't be rebased`);
   }
   logger.debug(`Branch does not need rebasing`);

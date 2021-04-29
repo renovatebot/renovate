@@ -20,7 +20,7 @@ import * as ght from './gitea-helper';
  */
 const GITEA_VERSION = '1.14.0+dev-754-g5d2b7ba63';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;

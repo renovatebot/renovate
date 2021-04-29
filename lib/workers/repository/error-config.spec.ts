@@ -19,7 +19,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('raiseConfigWarningIssue()', () => {
     beforeEach(() => {
       setAdminConfig();

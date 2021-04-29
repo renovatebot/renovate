@@ -7,7 +7,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('migrateAndValidate()', () => {
     it('handles empty', async () => {
       const res = await migrateAndValidate(config, {});

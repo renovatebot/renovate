@@ -10,7 +10,7 @@ jest.mock('../../../platform/azure/azure-got-wrapper');
 
 const azureApi = mocked(_azureApi);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeAll(() => {
     setPlatformApi('azure');
   });

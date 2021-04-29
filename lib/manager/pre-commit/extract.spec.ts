@@ -1,44 +1,25 @@
-import { readFileSync } from 'fs';
-import { getName, mocked } from '../../../test/util';
+import { getName, loadFixture, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/host-rules');
 const hostRules = mocked(_hostRules);
-
 const filename = '.pre-commit.yaml';
 
-const complexPrecommitConfig = readFileSync(
-  'lib/manager/pre-commit/__fixtures__/complex.pre-commit-config.yaml',
-  'utf8'
+const complexPrecommitConfig = loadFixture('complex.pre-commit-config.yaml');
+const examplePrecommitConfig = loadFixture('.pre-commit-config.yaml');
+const emptyReposPrecommitConfig = loadFixture(
+  'empty_repos.pre-commit-config.yaml'
+);
+const noReposPrecommitConfig = loadFixture('no_repos.pre-commit-config.yaml');
+const invalidRepoPrecommitConfig = loadFixture(
+  'invalid_repo.pre-commit-config.yaml'
+);
+const enterpriseGitPrecommitConfig = loadFixture(
+  'enterprise.pre-commit-config.yaml'
 );
 
-const examplePrecommitConfig = readFileSync(
-  'lib/manager/pre-commit/__fixtures__/.pre-commit-config.yaml',
-  'utf8'
-);
-
-const emptyReposPrecommitConfig = readFileSync(
-  'lib/manager/pre-commit/__fixtures__/empty_repos.pre-commit-config.yaml',
-  'utf8'
-);
-
-const noReposPrecommitConfig = readFileSync(
-  'lib/manager/pre-commit/__fixtures__/no_repos.pre-commit-config.yaml',
-  'utf8'
-);
-
-const invalidRepoPrecommitConfig = readFileSync(
-  'lib/manager/pre-commit/__fixtures__/invalid_repo.pre-commit-config.yaml',
-  'utf8'
-);
-
-const enterpriseGitPrecommitConfig = readFileSync(
-  'lib/manager/pre-commit/__fixtures__/enterprise.pre-commit-config.yaml',
-  'utf8'
-);
-
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

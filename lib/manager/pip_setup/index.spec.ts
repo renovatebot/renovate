@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs';
 import {
   ExecSnapshots,
   envMock,
@@ -6,18 +5,16 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../test/exec-util';
-import { env, getName } from '../../../test/util';
+import { env, getName, loadFixture } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
 import * as extract from './extract';
 import { extractPackageFile } from '.';
 
-const packageFile = 'lib/manager/pip_setup/__fixtures__/setup.py';
-const content = readFileSync(packageFile, 'utf8');
-
-const packageFileJson = 'lib/manager/pip_setup/__fixtures__/setup.py.json';
-const jsonContent = readFileSync(packageFileJson, 'utf8');
+const packageFile = 'setup.py';
+const content = loadFixture(packageFile);
+const jsonContent = loadFixture('setup.py.json');
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -32,14 +29,14 @@ const pythonVersionCallResults = [
   { stdout: 'Python 3.7.5\\n', stderr: '' },
 ];
 
-// TODO: figure out snapshot similarity for each CI platform
+// TODO: figure out snapshot similarity for each CI platform (#9617)
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map((snapshot) => ({
     ...snapshot,
     cmd: snapshot.cmd.replace(/^.*extract\.py"\s+/, '<extract.py> '),
   }));
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(async () => {
       jest.resetAllMocks();
@@ -82,7 +79,7 @@ describe(getName(__filename), () => {
           binarySource: BinarySource.Docker,
         })
       ).toMatchSnapshot();
-      expect(execSnapshots).toHaveLength(1); // TODO: figure out volume arguments in Windows
+      expect(execSnapshots).toHaveLength(1); // TODO: figure out volume arguments in Windows (#9617)
     });
 
     it('returns no deps', async () => {

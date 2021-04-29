@@ -1,21 +1,14 @@
-import fs from 'fs';
 import { Readable } from 'stream';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { updateDependency } from './update';
 
-const aide = fs.readFileSync(
-  'lib/manager/homebrew/__fixtures__/aide.rb',
-  'utf8'
-);
-const ibazel = fs.readFileSync(
-  'lib/manager/homebrew/__fixtures__/ibazel.rb',
-  'utf8'
-);
+const aide = loadFixture('aide.rb');
+const ibazel = loadFixture('ibazel.rb');
 
 const baseUrl = 'https://github.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

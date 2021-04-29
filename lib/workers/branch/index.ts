@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -372,9 +372,23 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
-        await deleteBranchSilently(config.branchName);
+        if (getAdminConfig().dryRun) {
+          logger.info('DRY-RUN: Would delete branch' + config.branchName);
+        } else {
+          await deleteBranchSilently(config.branchName);
+        }
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
+      }
+      if (
+        mergeStatus === 'stale' &&
+        ['conflicted', 'never'].includes(config.rebaseWhen)
+      ) {
+        logger.warn(
+          'Branch cannot automerge because it is stale and rebaseWhen setting disallows rebasing - raising a PR instead'
+        );
+        config.forcePr = true;
+        config.branchAutomergeFailureMessage = mergeStatus;
       }
       if (
         mergeStatus === 'automerge aborted - PR exists' ||
@@ -469,7 +483,7 @@ export async function processBranch(
       logger.debug('Reached PR limit - skipping PR creation');
       return { branchExists, result: BranchResult.PrLimitReached };
     }
-    // TODO: ensurePr should check for automerge itself
+    // TODO: ensurePr should check for automerge itself (#9719)
     if (result === PrResult.AwaitingApproval) {
       return { branchExists, result: BranchResult.NeedsPrApproval };
     }

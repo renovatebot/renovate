@@ -137,7 +137,6 @@ export async function lookupUpdates(
       .filter((release) => !release.isDeprecated)
       .map((release) => release.version);
     const currentVersion =
-      lockedVersion ||
       getCurrentVersion(
         config,
         versioning,
@@ -250,6 +249,7 @@ export async function lookupUpdates(
 
   // Record if the dep is fixed to a version
   if (lockedVersion) {
+    res.currentVersion = lockedVersion;
     res.fixedVersion = lockedVersion;
   } else if (currentValue && versioning.isSingleVersion(currentValue)) {
     res.fixedVersion = currentValue.replace(/^=+/, '');

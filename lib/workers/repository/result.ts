@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../config';
+import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,

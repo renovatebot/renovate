@@ -18,7 +18,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('branchifyUpgrades()', () => {
     it('returns empty', async () => {
       flattenUpdates.mockResolvedValueOnce([]);

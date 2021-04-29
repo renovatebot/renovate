@@ -6,8 +6,7 @@ import * as npm from '.';
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-describe(getName(__filename), () => {
-  delete process.env.NPM_TOKEN;
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     setAdminConfig();

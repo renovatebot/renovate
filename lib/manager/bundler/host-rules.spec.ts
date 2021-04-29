@@ -8,7 +8,7 @@ import {
   getDomain,
 } from './host-rules';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     clear();
   });

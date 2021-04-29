@@ -31,7 +31,7 @@ interface TestInput {
   adminConfig?: RepoAdminConfig;
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let processEnvOrig: NodeJS.ProcessEnv;
 
   const cacheDir = '/tmp/renovate/cache/';
@@ -194,7 +194,7 @@ describe(getName(__filename), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { trustLevel: 'high' },
+        adminConfig: { exposeAllEnv: true },
       },
     ],
 

@@ -7,8 +7,8 @@ import type { PackageDependency } from '../types';
 import { extractTerraformProvider } from './providers';
 import { ExtractionResult, TerraformDependencyTypes } from './util';
 
-const githubRefMatchRegex = /github.com([/:])(?<project>[^/]+\/[a-z0-9-.]+).*\?ref=(?<tag>.*)$/;
-const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
+export const githubRefMatchRegex = /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i;
+export const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
 const hostnameMatchRegex = /^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/;
 
 export function extractTerraformModule(
@@ -30,12 +30,12 @@ export function analyseTerraformModule(dep: PackageDependency): void {
   /* eslint-disable no-param-reassign */
   if (githubRefMatch) {
     dep.lookupName = githubRefMatch.groups.project.replace(/\.git$/, '');
-    dep.depType = 'github';
+    dep.depType = 'module';
     dep.depName = 'github.com/' + dep.lookupName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = datasourceGithubTags.id;
   } else if (gitTagsRefMatch) {
-    dep.depType = 'gitTags';
+    dep.depType = 'module';
     if (gitTagsRefMatch.groups.path.includes('//')) {
       logger.debug('Terraform module contains subdirectory');
       dep.depName = gitTagsRefMatch.groups.path.split('//')[0];
@@ -56,7 +56,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
       if (hostnameMatch) {
         dep.registryUrls = [`https://${hostnameMatch.groups.hostname}`];
       }
-      dep.depType = 'terraform';
+      dep.depType = 'module';
       dep.depName = moduleParts.join('/');
       dep.datasource = datasourceTerraformModule.id;
     }

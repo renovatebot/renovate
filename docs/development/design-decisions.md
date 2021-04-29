@@ -80,7 +80,7 @@ This allows users to close unwelcome upgrade PRs and not worry about them being 
 With the default behavior of one branch per dependency, it's often the case that a PR gets merge conflicts after an adjacent dependency update is merged.
 Although platforms often have a web interface for simple merge conflicts, this is still annoying to resolve manually.
 
-`renovate` will rebase any unmergeable branches and add the latest necessary commit on top of the most recent `master` commit.
+`renovate` will rebase any unmergeable branches and add the latest necessary commit on top of the most recent `main` commit.
 
 Note: `renovate` will only do this if the original branch hasn't been modified by anyone else.
 

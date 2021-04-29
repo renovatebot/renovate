@@ -1,32 +1,21 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 
-const res1: any = fs.readFileSync(
-  'lib/datasource/pypi/__fixtures__/azure-cli-monitor.json'
+const res1: any = loadFixture('azure-cli-monitor.json');
+const res2: any = loadFixture('azure-cli-monitor-updated.json');
+const htmlResponse = loadFixture('versions-html.html');
+const badResponse = loadFixture('versions-html-badfile.html');
+const dataRequiresPythonResponse = loadFixture(
+  'versions-html-data-requires-python.html'
 );
-const res2: any = fs.readFileSync(
-  'lib/datasource/pypi/__fixtures__/azure-cli-monitor-updated.json'
-);
-const htmlResponse = fs.readFileSync(
-  'lib/datasource/pypi/__fixtures__/versions-html.html'
-);
-const badResponse = fs.readFileSync(
-  'lib/datasource/pypi/__fixtures__/versions-html-badfile.html'
-);
-const dataRequiresPythonResponse = fs.readFileSync(
-  'lib/datasource/pypi/__fixtures__/versions-html-data-requires-python.html'
-);
-const mixedHyphensResponse = fs.readFileSync(
-  'lib/datasource/pypi/__fixtures__/versions-html-mixed-hyphens.html'
-);
+const mixedHyphensResponse = loadFixture('versions-html-mixed-hyphens.html');
 
 const baseUrl = 'https://pypi.org/pypi';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     const OLD_ENV = process.env;
 

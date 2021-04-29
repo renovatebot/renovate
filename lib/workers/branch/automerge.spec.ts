@@ -1,12 +1,12 @@
 import { defaultConfig, getName, git, platform } from '../../../test/util';
-import { RenovateConfig } from '../../config';
 import { setAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import { BranchStatus } from '../../types';
 import { tryBranchAutomerge } from './automerge';
 
 jest.mock('../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('tryBranchAutomerge', () => {
     let config: RenovateConfig;
     beforeEach(() => {

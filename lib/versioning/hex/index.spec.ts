@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { api as hexScheme } from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('hexScheme.matches()', () => {
     it('handles tilde greater than', () => {
       expect(hexScheme.matches('4.2.0', '~> 4.0')).toBe(true);
@@ -198,7 +198,7 @@ describe(getName(__filename), () => {
         currentVersion: '1.2.3',
         newVersion: '2.0.7',
       })
-    ).toEqual('>= 1.0.0 or <= 2.0.7');
+    ).toEqual('>= 1.0.0 or <= 2.0.0');
     expect(
       hexScheme.getNewValue({
         currentValue: '>= 1.0.0 or <= 2.0.0',

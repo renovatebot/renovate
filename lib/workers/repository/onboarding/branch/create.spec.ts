@@ -25,7 +25,7 @@ const buildExpectedCommitFilesArgument = (
   message,
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let config: RenovateConfig;
   beforeEach(() => {
     jest.clearAllMocks();
