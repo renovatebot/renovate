@@ -1,16 +1,5 @@
-import { fromCodepointToUnicode, fromHexcodeToCodepoint } from 'emojibase';
-import cldrShortcodes from 'emojibase-data/en/shortcodes/cldr.json';
-import githubShortcodes from 'emojibase-data/en/shortcodes/github.json';
 import { getName } from '../../test/util';
 import { emojify, setEmojiConfig, unemojify } from './emoji';
-
-function findUnsupportedEmoji() {
-  const supported = new Set(Object.keys(githubShortcodes));
-  const hexCode = Object.keys(cldrShortcodes).find(
-    (code) => !supported.has(code)
-  );
-  return fromCodepointToUnicode(fromHexcodeToCodepoint(hexCode));
-}
 
 describe(getName(), () => {
   it('strips emojis when the config has been set accordingly', () => {
@@ -44,7 +33,7 @@ describe(getName(), () => {
   });
 
   describe('unsupported characters', () => {
-    const unsupported = findUnsupportedEmoji();
+    const unsupported = '☝🏻';
 
     it('uses replacement character', () => {
       setEmojiConfig({ unicodeEmoji: false });
