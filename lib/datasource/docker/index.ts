@@ -1,5 +1,5 @@
 import URL from 'url';
-import { ECR } from '@aws-sdk/client-ecr';
+import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
@@ -113,10 +113,12 @@ async function getECRAuthToken(
   region: string,
   opts: HostRule
 ): Promise<string | null> {
-  const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
+  const config: ECRClientConfig = { region };
   if (opts.username && opts.password) {
-    config.accessKeyId = opts.username;
-    config.secretAccessKey = opts.password;
+    config.credentials = {
+      accessKeyId: opts.username,
+      secretAccessKey: opts.password,
+    };
   }
   const ecr = new ECR(config);
   try {

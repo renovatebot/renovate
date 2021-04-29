@@ -75,6 +75,6 @@ jobs:
       - name: Publish ${{ env.NPM_VERSION }}
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-          npm publish --tag ${NPM_TAG:-latest}
+          npm publish --tag ${{ env.NPM_TAG }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
