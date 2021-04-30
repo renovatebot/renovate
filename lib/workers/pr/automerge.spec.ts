@@ -9,7 +9,7 @@ jest.mock('../../util/git');
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;

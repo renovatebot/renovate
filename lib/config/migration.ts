@@ -46,7 +46,7 @@ interface MigratedRenovateConfig extends RenovateConfig {
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
-  // TODO: remove any type
+  // TODO: remove any type (#9611)
   parentKey?: string | any
 ): MigratedConfig {
   try {

@@ -1,10 +1,10 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const sample = loadFixture(__filename, `sample.html`);
-const nothing = loadFixture(__filename, `nothing.html`);
+const sample = loadFixture(`sample.html`);
+const nothing = loadFixture(`nothing.html`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('extractPackageFile', () => {
     expect(extractPackageFile(sample)).toMatchSnapshot();
   });

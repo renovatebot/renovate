@@ -1,14 +1,11 @@
 import { loadFixture } from '../../../test/util';
 import { extractLockFileEntries } from './locked-version';
 
-const railsGemfileLock = loadFixture(__filename, 'Gemfile.rails.lock');
-const webPackerGemfileLock = loadFixture(__filename, 'Gemfile.webpacker.lock');
-const mastodonGemfileLock = loadFixture(__filename, 'Gemfile.mastodon.lock');
-const rubyCIGemfileLock = loadFixture(__filename, 'Gemfile.rubyci.lock');
-const gitlabFossGemfileLock = loadFixture(
-  __filename,
-  'Gemfile.gitlab-foss.lock'
-);
+const railsGemfileLock = loadFixture('Gemfile.rails.lock');
+const webPackerGemfileLock = loadFixture('Gemfile.webpacker.lock');
+const mastodonGemfileLock = loadFixture('Gemfile.mastodon.lock');
+const rubyCIGemfileLock = loadFixture('Gemfile.rubyci.lock');
+const gitlabFossGemfileLock = loadFixture('Gemfile.gitlab-foss.lock');
 
 describe('/lib/manager/bundler/locked-version', () => {
   test('Parse Rails Gem Lock File', () => {

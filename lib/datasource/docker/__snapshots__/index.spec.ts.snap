@@ -110,6 +110,42 @@ Array [
 ]
 `;
 
+exports[`datasource/docker/index getDigest passes credentials to ECR client 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic abcdef",
+      "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic abcdef",
+      "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/node/manifests/some-tag",
+  },
+]
+`;
+
 exports[`datasource/docker/index getDigest returns digest 1`] = `
 Array [
   Object {

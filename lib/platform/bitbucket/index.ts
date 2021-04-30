@@ -78,7 +78,7 @@ export async function initPlatform({
       logger.debug({ err }, 'Unknown error fetching Bitbucket user identity');
     }
   }
-  // TODO: Add a connection check that endpoint/username/password combination are valid
+  // TODO: Add a connection check that endpoint/username/password combination are valid (#9594)
   const platformConfig: PlatformResult = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
   };
@@ -278,7 +278,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (utils.prStates.open.includes(pr.state)) {
     res.isConflicted = await isPrConflicted(prNo);
 
-    // TODO: Is that correct? Should we check getBranchStatus like gitlab?
+    // TODO: Is that correct? Should we check getBranchStatus like gitlab? (#9618)
     res.canMerge = !res.isConflicted;
   }
   res.hasReviewers = is.nonEmptyArray(pr.reviewers);

@@ -2,10 +2,10 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackage } from './extract';
 
-const minimumContent = loadFixture(__filename, `minimum.pom.xml`);
-const simpleContent = loadFixture(__filename, `simple.pom.xml`);
+const minimumContent = loadFixture(`minimum.pom.xml`);
+const simpleContent = loadFixture(`simple.pom.xml`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractDependencies', () => {
     it('returns null for invalid XML', () => {
       expect(extractPackage(undefined)).toBeNull();

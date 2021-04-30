@@ -3,7 +3,7 @@ import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

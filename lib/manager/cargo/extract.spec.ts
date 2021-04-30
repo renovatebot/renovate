@@ -4,15 +4,15 @@ import { getName, loadFixture } from '../../../test/util';
 import { setFsConfig, writeLocalFile } from '../../util/fs';
 import { extractPackageFile } from './extract';
 
-const cargo1toml = loadFixture(__filename, 'Cargo.1.toml');
-const cargo2toml = loadFixture(__filename, 'Cargo.2.toml');
-const cargo3toml = loadFixture(__filename, 'Cargo.3.toml');
-const cargo4toml = loadFixture(__filename, 'Cargo.4.toml');
-const cargo5toml = loadFixture(__filename, 'Cargo.5.toml');
-const cargo6configtoml = loadFixture(__filename, 'cargo.6.config.toml');
-const cargo6toml = loadFixture(__filename, 'Cargo.6.toml');
+const cargo1toml = loadFixture('Cargo.1.toml');
+const cargo2toml = loadFixture('Cargo.2.toml');
+const cargo3toml = loadFixture('Cargo.3.toml');
+const cargo4toml = loadFixture('Cargo.4.toml');
+const cargo5toml = loadFixture('Cargo.5.toml');
+const cargo6configtoml = loadFixture('cargo.6.config.toml');
+const cargo6toml = loadFixture('Cargo.6.toml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {

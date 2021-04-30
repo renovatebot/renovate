@@ -13,7 +13,7 @@ try {
 
 const defaultConfig = getConfig();
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];

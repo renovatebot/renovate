@@ -62,7 +62,7 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],
@@ -132,6 +132,7 @@ describe(getName(__filename), () => {
            The type definition for "releaseTimestamp" is a string. But when I change it to
            one the test starts failing. Once this test has been fixed, the never typing can be removed.
            And instead replaced with the pattern used on the other places that have a config.upgrades
+           (#9718)
         */
       ] as never;
 

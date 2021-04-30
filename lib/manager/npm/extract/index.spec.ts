@@ -8,21 +8,16 @@ const fs: any = _fs;
 // TODO: fix types
 const defaultConfig = getConfig();
 
-const input01Content = loadFixture(__filename, 'inputs/01.json', '..');
-const workspacesContent = loadFixture(
-  __filename,
-  'inputs/workspaces.json',
-  '..'
-);
+const input01Content = loadFixture('inputs/01.json', '..');
+const workspacesContent = loadFixture('inputs/workspaces.json', '..');
 const workspacesSimpleContent = loadFixture(
-  __filename,
   'inputs/workspaces-simple.json',
   '..'
 );
-const vendorisedContent = loadFixture(__filename, 'is-object.json', '..');
-const invalidNameContent = loadFixture(__filename, 'invalid-name.json', '..');
+const vendorisedContent = loadFixture('is-object.json', '..');
+const invalidNameContent = loadFixture('invalid-name.json', '..');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
       fs.readLocalFile = jest.fn(() => null);

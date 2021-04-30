@@ -1,14 +1,14 @@
 import { getName, loadFixture } from '../../../test/util';
 import extractPackageFile, { getSliceEndNumber } from './extract';
 
-const yamlFile1 = loadFixture(__filename, 'requirements01.yml');
-const yamlFile2 = loadFixture(__filename, 'requirements02.yml');
-const helmRequirements = loadFixture(__filename, 'helmRequirements.yml');
-const collections1 = loadFixture(__filename, 'collections1.yml');
-const collections2 = loadFixture(__filename, 'collections2.yml');
-const galaxy = loadFixture(__filename, 'galaxy.yml');
+const yamlFile1 = loadFixture('requirements01.yml');
+const yamlFile2 = loadFixture('requirements02.yml');
+const helmRequirements = loadFixture('helmRequirements.yml');
+const collections1 = loadFixture('collections1.yml');
+const collections2 = loadFixture('collections2.yml');
+const galaxy = loadFixture('galaxy.yml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', 'requirements.yml')).toBeNull();

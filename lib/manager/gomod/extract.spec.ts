@@ -1,11 +1,11 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const gomod1 = loadFixture(__filename, '1/go.mod');
-const gomod2 = loadFixture(__filename, '2/go.mod');
-const gomod3 = loadFixture(__filename, '3/go.mod');
+const gomod1 = loadFixture('1/go.mod');
+const gomod2 = loadFixture('2/go.mod');
+const gomod3 = loadFixture('3/go.mod');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

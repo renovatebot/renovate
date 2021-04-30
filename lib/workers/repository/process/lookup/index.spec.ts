@@ -30,23 +30,15 @@ jest.mock('../../../../datasource/github-releases');
 
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
-  ...loadJsonFixture(__filename, '01.json', fixtureRoot),
+  ...loadJsonFixture('01.json', fixtureRoot),
   latestVersion: '1.4.1',
 };
-const helmetJson = loadJsonFixture(__filename, '02.json', fixtureRoot);
-const coffeelintJson = loadJsonFixture(
-  __filename,
-  'coffeelint.json',
-  fixtureRoot
-);
-const nextJson = loadJsonFixture(__filename, 'next.json', fixtureRoot);
-const typescriptJson = loadJsonFixture(
-  __filename,
-  'typescript.json',
-  fixtureRoot
-);
-const vueJson = loadJsonFixture(__filename, 'vue.json', fixtureRoot);
-const webpackJson = loadJsonFixture(__filename, 'webpack.json', fixtureRoot);
+const helmetJson = loadJsonFixture('02.json', fixtureRoot);
+const coffeelintJson = loadJsonFixture('coffeelint.json', fixtureRoot);
+const nextJson = loadJsonFixture('next.json', fixtureRoot);
+const typescriptJson = loadJsonFixture('typescript.json', fixtureRoot);
+const vueJson = loadJsonFixture('vue.json', fixtureRoot);
+const webpackJson = loadJsonFixture('webpack.json', fixtureRoot);
 
 const docker = mocked(datasourceDocker) as any;
 docker.defaultRegistryUrls = ['https://index.docker.io'];
@@ -57,7 +49,7 @@ Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
 
 let config: LookupUpdateConfig;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     // TODO: fix types
     config = partial<LookupUpdateConfig>(getConfig());
@@ -947,7 +939,7 @@ describe(getName(__filename), () => {
       config.lockedVersion = '0.9.4';
       config.currentValue = '~=0.9';
       config.depName = 'q';
-      // TODO: we are using npm as source to test pep440
+      // TODO: we are using npm as source to test pep440 (#9721)
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);

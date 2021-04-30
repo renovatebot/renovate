@@ -3,14 +3,14 @@ import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-const requirements1 = loadFixture(__filename, 'composer1.json');
-const requirements2 = loadFixture(__filename, 'composer2.json');
-const requirements3 = loadFixture(__filename, 'composer3.json');
-const requirements4 = loadFixture(__filename, 'composer4.json');
-const requirements5 = loadFixture(__filename, 'composer5.json');
-const requirements5Lock = loadFixture(__filename, 'composer5.lock');
+const requirements1 = loadFixture('composer1.json');
+const requirements2 = loadFixture('composer2.json');
+const requirements3 = loadFixture('composer3.json');
+const requirements4 = loadFixture('composer4.json');
+const requirements5 = loadFixture('composer5.json');
+const requirements5Lock = loadFixture('composer5.lock');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     let packageFile;
     beforeEach(() => {

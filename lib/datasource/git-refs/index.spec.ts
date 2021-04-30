@@ -8,9 +8,9 @@ const simpleGit: any = _simpleGit;
 
 const depName = 'https://github.com/example/example.git';
 
-const lsRemote1 = loadFixture(__filename, 'ls-remote-1.txt');
+const lsRemote1 = loadFixture('ls-remote-1.txt');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({

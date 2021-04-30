@@ -1,22 +1,15 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const sbt = loadFixture(__filename, `sample.sbt`);
-const sbtScalaVersionVariable = loadFixture(
-  __filename,
-  `scala-version-variable.sbt`
-);
-const sbtMissingScalaVersion = loadFixture(
-  __filename,
-  `missing-scala-version.sbt`
-);
-const sbtDependencyFile = loadFixture(__filename, `dependency-file.scala`);
+const sbt = loadFixture(`sample.sbt`);
+const sbtScalaVersionVariable = loadFixture(`scala-version-variable.sbt`);
+const sbtMissingScalaVersion = loadFixture(`missing-scala-version.sbt`);
+const sbtDependencyFile = loadFixture(`dependency-file.scala`);
 const sbtPrivateVariableDependencyFile = loadFixture(
-  __filename,
   `private-variable-dependency-file.scala`
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile(null)).toBeNull();

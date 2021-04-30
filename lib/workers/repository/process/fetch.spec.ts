@@ -16,7 +16,7 @@ const lookupUpdates = mocked(lookup).lookupUpdates;
 
 jest.mock('./lookup');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('fetchUpdates()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

@@ -68,7 +68,7 @@ async function setupMocks() {
   return [require('.'), exec, util];
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile', () => {
     let manager: typeof _manager;
     let exec: jest.Mock<typeof _exec>;

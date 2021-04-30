@@ -3,10 +3,10 @@ import { findDepConstraints } from './dep-constraints';
 
 jest.mock('../../../../util/fs');
 
-const packageJson = loadJsonFixture(__filename, 'package.json');
-const packageLockJson = loadJsonFixture(__filename, 'package-lock.json');
+const packageJson = loadJsonFixture('package.json');
+const packageLockJson = loadJsonFixture('package-lock.json');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('findDepConstraints()', () => {
     it('finds indirect dependency', () => {
       expect(

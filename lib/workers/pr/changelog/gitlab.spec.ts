@@ -31,7 +31,7 @@ const upgrade: BranchUpgradeConfig = {
 
 const baseUrl = 'https://gitlab.com/';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       httpMock.setup();

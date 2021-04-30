@@ -1,7 +1,7 @@
 import { RenovateConfig, getName, platform } from '../../../../test/util';
 import { raiseDeprecationWarnings } from './deprecated';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('raiseDeprecationWarnings()', () => {
     it('returns if onboarding', async () => {
       const config = {};
