@@ -219,6 +219,10 @@ Otherwise, if another bot or human shares the same email and pushes to one of Re
 
 ## gitNoVerify
 
+Controls when Renovate passes the `--no-verify` flag to `git`. The flag can be passed to `git commit` and/or `git push`.
+Please refer to the documentation for [git commit](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---no-verify)
+and [git push](https://git-scm.com/docs/git-push#Documentation/git-push.txt---no-verify) to see exactly what this flag does.
+
 ## gitPrivateKey
 
 This should be an armored private key, e.g. the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
