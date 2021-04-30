@@ -2166,12 +2166,12 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 ## stabilityDays
 
-If this is set to a non-zero value, _and_ an update provides a release timestamp header, then Renovate will check if the "stability days" have passed.
+If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
 If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
-If enough days have passed then the "pending status is removed, and a "passing" status check is added.
+If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
 
-Some datasources do not provide a release timestamp, and other datasources are not supported at all by Renovate.
+Some datasources do not provide a release timestamp (in which case this feature is not compatible), and other datasources may provide a release timestamp but it's not supported by Renovate (in which case a feature request needs to be implemented).
 
 Maven users: you cannot use `stabilityDays` if a Maven source returns unreliable `last-modified` headers.
 
