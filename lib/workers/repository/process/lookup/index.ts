@@ -10,7 +10,6 @@ import {
 } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
-import type { LookupUpdate } from '../../../../manager/types';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
@@ -18,9 +17,9 @@ import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
+import { generateUpdate } from './generate';
 import { getRollbackUpdate } from './rollback';
 import type { LookupUpdateConfig, UpdateResult } from './types';
-import { getUpdateType } from './update-type';
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig
@@ -208,25 +207,13 @@ export async function lookupUpdates(
       );
       const release = sortedReleases.pop();
       const newVersion = release.version;
-      const update: LookupUpdate = {
-        newVersion,
-        newValue: null,
-      };
-      update.bucket = bucket;
-      try {
-        update.newValue = versioning.getNewValue({
-          currentValue,
-          rangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn(
-          { err, currentValue, rangeStrategy, currentVersion, newVersion },
-          'getNewValue error'
-        );
-        update.newValue = currentValue;
-      }
+      const update = generateUpdate(
+        config,
+        versioning,
+        currentVersion,
+        bucket,
+        release
+      );
       if (!update.newValue || update.newValue === currentValue) {
         if (!lockedVersion) {
           continue; // eslint-disable-line no-continue
@@ -241,39 +228,9 @@ export async function lookupUpdates(
         }
         res.isSingleVersion = true;
       }
-      update.newMajor = versioning.getMajor(newVersion);
-      update.newMinor = versioning.getMinor(newVersion);
-      update.updateType =
-        update.updateType ||
-        getUpdateType(config, versioning, currentVersion, newVersion);
       res.isSingleVersion =
         res.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
-      if (!versioning.isVersion(update.newValue)) {
-        update.isRange = true;
-      }
-      const releaseFields = [
-        'checksumUrl',
-        'downloadUrl',
-        'newDigest',
-        'releaseTimestamp',
-      ];
-      releaseFields.forEach((field) => {
-        if (release[field] !== undefined) {
-          update[field] = release[field];
-        }
-      });
-      if (
-        rangeStrategy === 'update-lockfile' &&
-        currentValue === update.newValue
-      ) {
-        update.isLockfileUpdate = true;
-      }
-      if (
-        rangeStrategy === 'bump' &&
-        versioning.matches(newVersion, currentValue)
-      ) {
-        update.isBump = true;
-      }
+
       res.updates.push(update);
     }
   } else if (currentValue) {
