@@ -1030,15 +1030,15 @@ If you are more interested in including only certain package managers (e.g. `npm
 
 ## internalChecksFilter
 
-This setting controls whether Renovate controls when and how filtering of internal checks are performed, particularly when multiple versions of the same update type are available.
-Currently this applies to the stabilityDays check only.
+This setting determines whether Renovate controls when and how filtering of internal checks are performed, particularly when multiple versions of the same update type are available.
+Currently this applies to the `stabilityDays` check only.
 
 - `none`: No filtering will be performed, and the highest release will be used regardless of whether it's pending or not
-- `strict`: All pending releases will be filtered if they are pending. PRs will be skipped unless a non-pending version is available.
-- `flexible`: Similar to strict, but in the case where all versions are pending then a PR will be created with the highest pending version.
+- `strict`: All pending releases will be filtered if they are pending. PRs will be skipped unless a non-pending version is available
+- `flexible`: Similar to strict, but in the case where all versions are pending then a PR will be created with the highest pending version
 
-The `flexible` mode can reduce in "flapping" of Pull Requests, where e.g. a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `stabilityDays`.
-It is recommended that you use `strict` combined with `dependencyDashboard` so that you have visibility into suppressed PRs.
+The `flexible` mode can result in "flapping" of Pull Requests, where e.g. a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `stabilityDays`.
+We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you have visibility into suppressed PRs.
 
 ## java
 
