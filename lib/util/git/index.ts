@@ -2,9 +2,11 @@ import URL from 'url';
 import fs from 'fs-extra';
 import Git, {
   DiffResult as DiffResult_,
+  Options,
   ResetMode,
   SimpleGit,
   StatusResult as StatusResult_,
+  TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
@@ -672,7 +674,7 @@ export async function commitFiles({
       }
     }
 
-    const commitOptions = {};
+    const commitOptions: Options = {};
     if (noVerify.includes('commit')) {
       commitOptions['--no-verify'] = null;
     }
@@ -697,7 +699,7 @@ export async function commitFiles({
       return null;
     }
 
-    const pushOptions = {
+    const pushOptions: TaskOptions = {
       '--force': null,
       '-u': null,
     };
