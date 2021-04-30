@@ -61,8 +61,5 @@ export function generateUpdate(
   ) {
     update.isBump = true;
   }
-  if (versioning.valueToVersion) {
-    update.newVersion = versioning.valueToVersion(update.newVersion);
-  }
   return update;
 }

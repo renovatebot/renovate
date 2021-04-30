@@ -152,9 +152,6 @@ export async function lookupUpdates(
         allVersions.map((v) => v.version)
       );
     res.currentVersion = currentVersion;
-    if (versioning.valueToVersion) {
-      res.currentVersion = versioning.valueToVersion(res.currentVersion);
-    }
     if (
       currentVersion &&
       rangeStrategy === 'pin' &&
@@ -272,6 +269,12 @@ export async function lookupUpdates(
           updateType: 'pin',
           newValue: currentValue,
         });
+      }
+    }
+    if (versioning.valueToVersion) {
+      res.currentVersion = versioning.valueToVersion(res.currentVersion);
+      for (const update of res.updates || []) {
+        update.newVersion = versioning.valueToVersion(update.newVersion);
       }
     }
     // update digest for all
