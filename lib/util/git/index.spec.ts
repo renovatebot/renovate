@@ -348,7 +348,8 @@ describe(getName(), () => {
     });
 
     it('passes --no-verify to commit', async () => {
-      const spy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
       const files = [
         {
@@ -364,17 +365,23 @@ describe(getName(), () => {
         noVerify: ['commit'],
       });
 
-      expect(spy).toHaveBeenCalledWith(
+      expect(commitSpy).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
       );
 
       jest.restoreAllMocks();
     });
 
     it('passes --no-verify to push', async () => {
-      const spy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
       const files = [
         {
@@ -390,7 +397,12 @@ describe(getName(), () => {
         noVerify: ['push'],
       });
 
-      expect(spy).toHaveBeenCalledWith(
+      expect(commitSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({ '--no-verify': null })
