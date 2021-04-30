@@ -115,12 +115,8 @@ export async function isHttpResourceExists(
   try {
     const httpClient = httpByHostType(hostType);
     const res = await httpClient.head(pkgUrl.toString());
-    const pkgUrlHost = url.parse(pkgUrl.toString()).host;
-    if (['repo.maven.apache.org', 'gitlab.com'].includes(pkgUrlHost)) {
-      const timestamp = res?.headers?.['last-modified'] as string;
-      return timestamp || true;
-    }
-    return true;
+    const timestamp = res?.headers?.['last-modified'] as string;
+    return timestamp || true;
   } catch (err) {
     if (isNotFoundError(err)) {
       return false;
