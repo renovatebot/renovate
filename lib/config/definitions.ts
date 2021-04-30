@@ -1964,6 +1964,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     cli: false,
     env: false,
+    admin: true,
   },
 ];
 

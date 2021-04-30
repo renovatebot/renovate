@@ -10,6 +10,8 @@ import type { BranchConfig } from '../types';
 export function commitFilesToBranch(
   config: BranchConfig
 ): Promise<string | null> {
+  const { dryRun, gitNoVerify } = getAdminConfig();
+
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
@@ -32,7 +34,7 @@ export function commitFilesToBranch(
   const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
-  if (getAdminConfig().dryRun) {
+  if (dryRun) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     return null;
   }
@@ -49,6 +51,6 @@ export function commitFilesToBranch(
     files: updatedFiles,
     message: config.commitMessage,
     force: !!config.forceCommit,
-    noVerify: config.noVerify,
+    noVerify: gitNoVerify,
   });
 }

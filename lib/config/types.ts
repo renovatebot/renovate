@@ -91,6 +91,7 @@ export interface RepoAdminConfig {
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
+  gitNoVerify?: ('commit' | 'push')[];
   privateKey?: string | Buffer;
   trustLevel?: 'low' | 'high';
 }
@@ -160,7 +161,6 @@ export interface RenovateConfig
   errors?: ValidationMessage[];
 
   gitAuthor?: string;
-  gitNoVerify?: ('commit' | 'push')[];
 
   hostRules?: HostRule[];
 

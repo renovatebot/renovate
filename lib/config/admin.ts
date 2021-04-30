@@ -11,6 +11,7 @@ export const repoAdminOptions = [
   'dockerImagePrefix',
   'dockerUser',
   'dryRun',
+  'gitNoVerify',
   'privateKey',
   'trustLevel',
 ];

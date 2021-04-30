@@ -36,6 +36,9 @@ export async function rebaseOnboardingBranch(
   config: RenovateConfig
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
+
+  const { dryRun, gitNoVerify } = getAdminConfig();
+
   if (await isBranchModified(config.onboardingBranch)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
@@ -55,7 +58,7 @@ export async function rebaseOnboardingBranch(
   const commitMessage = getCommitMessage(config);
 
   // istanbul ignore if
-  if (getAdminConfig().dryRun) {
+  if (dryRun) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }
@@ -68,6 +71,6 @@ export async function rebaseOnboardingBranch(
       },
     ],
     message: commitMessage,
-    noVerify: config.gitNoVerify,
+    noVerify: gitNoVerify,
   });
 }
