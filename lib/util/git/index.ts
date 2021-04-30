@@ -622,7 +622,7 @@ export async function commitFiles({
   files,
   message,
   force = false,
-  noVerify = [],
+  noVerify,
 }: CommitFilesConfig): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
@@ -675,7 +675,7 @@ export async function commitFiles({
     }
 
     const commitOptions: Options = {};
-    if (noVerify.includes('commit')) {
+    if (noVerify?.includes('commit')) {
       commitOptions['--no-verify'] = null;
     }
 
@@ -703,7 +703,7 @@ export async function commitFiles({
       '--force': null,
       '-u': null,
     };
-    if (noVerify.includes('push')) {
+    if (noVerify?.includes('push')) {
       pushOptions['--no-verify'] = null;
     }
 
