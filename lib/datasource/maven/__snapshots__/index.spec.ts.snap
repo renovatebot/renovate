@@ -204,6 +204,257 @@ Array [
 ]
 `;
 
+exports[`datasource/maven/index fetching parent info should be able to detect git://@github.com/child-scm as valid sourceUrl 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+]
+`;
+
+exports[`datasource/maven/index fetching parent info should be able to detect git@github.com/child-scm as valid sourceUrl 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+]
+`;
+
+exports[`datasource/maven/index fetching parent info should be able to detect git@github.com:child-scm as valid sourceUrl 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+]
+`;
+
+exports[`datasource/maven/index fetching parent info should get homepage and source from own pom 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+]
+`;
+
+exports[`datasource/maven/index fetching parent info should get homepage from own pom and source from parent 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/parent/1.0.0/parent-1.0.0.pom",
+  },
+]
+`;
+
+exports[`datasource/maven/index fetching parent info should get source and homepage from parent 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/parent/1.0.0/parent-1.0.0.pom",
+  },
+]
+`;
+
+exports[`datasource/maven/index fetching parent info should get source from own pom and homepage from parent 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/parent/1.0.0/parent-1.0.0.pom",
+  },
+]
+`;
+
 exports[`datasource/maven/index handles optional slash at the end of registry url 1`] = `
 Array [
   Object {
