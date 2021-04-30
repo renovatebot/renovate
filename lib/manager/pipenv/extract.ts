@@ -126,7 +126,7 @@ export async function extractPackageFile(
 
   let pipfile: PipFile;
   try {
-    // TODO: fix type
+    // TODO: fix type (#9610)
     pipfile = toml.parse(content) as any;
   } catch (err) {
     logger.debug({ err }, 'Error parsing Pipfile');

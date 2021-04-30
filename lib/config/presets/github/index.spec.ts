@@ -11,7 +11,7 @@ const hostRules = mocked(_hostRules);
 const githubApiHost = github.Endpoint;
 const basePath = '/repos/some/repo/contents';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });

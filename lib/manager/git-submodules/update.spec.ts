@@ -7,7 +7,7 @@ import updateDependency from './update';
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('updateDependency', () => {
     let upgrade: Upgrade;
     beforeAll(async () => {

@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { api as hexScheme } from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('hexScheme.matches()', () => {
     it('handles tilde greater than', () => {
       expect(hexScheme.matches('4.2.0', '~> 4.0')).toBe(true);

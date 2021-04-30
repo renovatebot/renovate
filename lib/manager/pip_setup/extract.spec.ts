@@ -10,7 +10,7 @@ import {
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

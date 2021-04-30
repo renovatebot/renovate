@@ -1,6 +1,5 @@
-import { getName, mocked } from '../../../test/util';
+import { getName, loadJsonFixture, mocked } from '../../../test/util';
 import type { RenovateConfig } from '../types';
-import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
 import * as _local from './local';
 import * as _npm from './npm';
 import {
@@ -16,6 +15,8 @@ jest.mock('./local');
 
 const npm = mocked(_npm);
 const local = mocked(_local);
+
+const presetIkatyang = loadJsonFixture('renovate-config-ikatyang.json');
 
 npm.getPreset = jest.fn(({ packageName, presetName }) => {
   if (packageName === 'renovate-config-ikatyang') {
@@ -38,7 +39,7 @@ npm.getPreset = jest.fn(({ packageName, presetName }) => {
   return null;
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('resolvePreset', () => {
     let config: RenovateConfig;
     beforeEach(() => {

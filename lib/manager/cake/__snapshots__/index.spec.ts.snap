@@ -9,6 +9,11 @@ Object {
       "depName": "Foo.Foo",
     },
     Object {
+      "currentValue": "6.6.6",
+      "datasource": "nuget",
+      "depName": "Bim.Bim",
+    },
+    Object {
       "currentValue": "2.2.2",
       "datasource": "nuget",
       "depName": "Bar.Bar",

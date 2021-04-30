@@ -1,28 +1,12 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const workspaceFile = readFileSync(
-  'lib/manager/bazel/__fixtures__/WORKSPACE1',
-  'utf8'
-);
+const workspaceFile = loadFixture('WORKSPACE1');
+const workspace2File = loadFixture('WORKSPACE2');
+const workspace3File = loadFixture('WORKSPACE3');
+const fileWithBzlExtension = loadFixture('repositories.bzl');
 
-const workspace2File = readFileSync(
-  'lib/manager/bazel/__fixtures__/WORKSPACE2',
-  'utf8'
-);
-
-const workspace3File = readFileSync(
-  'lib/manager/bazel/__fixtures__/WORKSPACE3',
-  'utf8'
-);
-
-const fileWithBzlExtension = readFileSync(
-  'lib/manager/bazel/__fixtures__/repositories.bzl',
-  'utf8'
-);
-
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

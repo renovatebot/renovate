@@ -9,7 +9,8 @@ Renovate supports the following Python package managers:
 
 - `pip` (e.g. `requirements.txt`, `requirements.pip`) files
 - `pipenv` (e.g. `Pipfile`)
-- `setup.py`
+- `setup.py` file
+- `setup.cfg` file
 
 ## Versioning support
 

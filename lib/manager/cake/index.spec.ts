@@ -1,13 +1,9 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const content = readFileSync(
-  'lib/manager/cake/__fixtures__/build.cake',
-  'utf8'
-);
+const content = loadFixture('build.cake');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('extracts', () => {
     expect(extractPackageFile(content)).toMatchSnapshot();
   });

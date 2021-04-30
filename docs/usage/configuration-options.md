@@ -23,7 +23,7 @@ You can store your Renovate configuration file in one of the following locations
 Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
 
-Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
+Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
 
 If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
 We will do our best to answer your question(s).
@@ -69,7 +69,7 @@ With the above config:
 ## additionalBranchPrefix
 
 This value defaults to an empty string, and is typically not necessary.
-Some managers populate this field for historical reasons, for example we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
+Some managers previously populated this field, but they no longer do so by default.
 You normally don't need to configure this, but one example where it can be useful is combining with `parentDir` in monorepos to split PRs based on where the package definition is located, e.g.
 
 ```json
@@ -631,6 +631,12 @@ Because `fileMatch` is mergeable, you don't need to duplicate the defaults and c
 If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
 The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
 
+## filterUnavailableUsers
+
+When this option is enabled PRs are not assigned to users that are unavailable.
+This option only works on platforms that support the concept of user availability.
+For now, you can only use this option on the GitLab platform.
+
 ## followTag
 
 Caution: advanced functionality. Only use it if you're sure you know what you're doing.
@@ -968,13 +974,6 @@ The above is the same as if you wrote this package rule:
   ]
 }
 ```
-
-## ignoreNpmrcFile
-
-By default, Renovate will look for and use any `.npmrc` file it finds in a repository.
-Additionally, it will be read in by `npm` or `yarn` at the time of lock file generation.
-Sometimes this causes problems, for example if the file contains placeholder values, so you can configure this to `true` and Renovate will ignore any `.npmrc` files it finds and temporarily remove the file before running `npm install` or `yarn install`.
-Renovate will try to configure this to `true` also if you have configured any `npmrc` string within your config file.
 
 ## ignorePaths
 
@@ -1517,7 +1516,6 @@ For example to apply a special label for Major updates:
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
-Only applies if `separateMinorPatch` is set to true.
 
 ## php
 
@@ -1542,8 +1540,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
-This is only available on Renovate instances that have a `trustLevel` of 'high'.
-Each command must match at least one of the patterns defined in `allowedPostUpgradeTasks` in order to be executed.
+Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (an admin-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
 
 e.g.
@@ -2169,11 +2166,16 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 ## stabilityDays
 
-If this is configured to a non-zero value, and an update has a release date/timestamp available, then Renovate will check if the configured "stability days" have elapsed.
-If the days since the release is less than the configured stability days then a "pending" status check will be added to the branch.
-If enough days have passed then a passing status check will be added.
+If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
-There are a couple of uses for this:
+If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
+If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
+
+Some datasources do not provide a release timestamp (in which case this feature is not compatible), and other datasources may provide a release timestamp but it's not supported by Renovate (in which case a feature request needs to be implemented).
+
+Maven users: you cannot use `stabilityDays` if a Maven source returns unreliable `last-modified` headers.
+
+There are a couple of uses for `stabilityDays`:
 
 <!-- markdownlint-disable MD001 -->
 

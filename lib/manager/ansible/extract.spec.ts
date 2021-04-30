@@ -1,17 +1,10 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import extractPackageFile from './extract';
 
-const yamlFile1 = readFileSync(
-  'lib/manager/ansible/__fixtures__/main1.yaml',
-  'utf8'
-);
-const yamlFile2 = readFileSync(
-  'lib/manager/ansible/__fixtures__/main2.yaml',
-  'utf8'
-);
+const yamlFile1 = loadFixture('main1.yaml');
+const yamlFile2 = loadFixture('main2.yaml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

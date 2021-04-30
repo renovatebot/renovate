@@ -26,7 +26,7 @@ const orbData = {
 
 const baseUrl = 'https://circleci.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

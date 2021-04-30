@@ -6,7 +6,7 @@ jest.mock('../../util/cache/memory');
 
 const memCache: any = memCache_ as any;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('printRequestStats()', () => {
     it('runs', () => {
       memCache.get = jest.fn(() => [

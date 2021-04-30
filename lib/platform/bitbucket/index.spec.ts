@@ -35,7 +35,7 @@ lxml==3.6.0
 mccabe==0.6.1
 `;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;

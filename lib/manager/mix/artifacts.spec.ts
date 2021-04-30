@@ -15,7 +15,7 @@ const config = {
   localDir: join('/tmp/github/some/repo'),
 };
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();

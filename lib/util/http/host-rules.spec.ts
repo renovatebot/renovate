@@ -12,7 +12,7 @@ const url = 'https://github.com';
 
 jest.mock('global-agent');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   const options = {
     hostType: PLATFORM_TYPE_GITHUB,
   };

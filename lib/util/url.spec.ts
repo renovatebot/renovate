@@ -6,7 +6,7 @@ import {
   validateUrl,
 } from './url';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   test.each([
     ['http://foo.io', '', 'http://foo.io'],
     ['http://foo.io/', '', 'http://foo.io'],

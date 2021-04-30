@@ -1,42 +1,16 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { extractPackageFile } from './extract';
 
-const requirements1 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements1.txt',
-  'utf8'
-);
-const requirements2 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements2.txt',
-  'utf8'
-);
-const requirements3 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements3.txt',
-  'utf8'
-);
+const requirements1 = loadFixture('requirements1.txt');
+const requirements2 = loadFixture('requirements2.txt');
+const requirements3 = loadFixture('requirements3.txt');
+const requirements4 = loadFixture('requirements4.txt');
+const requirements5 = loadFixture('requirements5.txt');
+const requirements6 = loadFixture('requirements6.txt');
+const requirements7 = loadFixture('requirements7.txt');
 
-const requirements4 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements4.txt',
-  'utf8'
-);
-
-const requirements5 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements5.txt',
-  'utf8'
-);
-
-const requirements6 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements6.txt',
-  'utf8'
-);
-
-const requirements7 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements7.txt',
-  'utf8'
-);
-
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
     setAdminConfig();
@@ -129,7 +103,7 @@ describe(getName(__filename), () => {
     });
     it('should replace env vars in high trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ exposeAllEnv: true });
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',

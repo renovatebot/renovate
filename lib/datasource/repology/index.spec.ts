@@ -1,7 +1,6 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import { RepologyPackage, id as datasource } from '.';
@@ -46,28 +45,13 @@ const mockResolverCall = (
   }
 };
 
-const fixtureNginx = fs.readFileSync(
-  `${__dirname}/__fixtures__/nginx.json`,
-  'utf8'
-);
-const fixtureGccDefaults = fs.readFileSync(
-  `${__dirname}/__fixtures__/gcc-defaults.json`,
-  'utf8'
-);
-const fixtureGcc = fs.readFileSync(
-  `${__dirname}/__fixtures__/gcc.json`,
-  'utf8'
-);
-const fixturePulseaudio = fs.readFileSync(
-  `${__dirname}/__fixtures__/pulseaudio.json`,
-  'utf8'
-);
-const fixtureJdk = fs.readFileSync(
-  `${__dirname}/__fixtures__/openjdk.json`,
-  'utf8'
-);
+const fixtureNginx = loadFixture(`nginx.json`);
+const fixtureGccDefaults = loadFixture(`gcc-defaults.json`);
+const fixtureGcc = loadFixture(`gcc.json`);
+const fixturePulseaudio = loadFixture(`pulseaudio.json`);
+const fixtureJdk = loadFixture(`openjdk.json`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

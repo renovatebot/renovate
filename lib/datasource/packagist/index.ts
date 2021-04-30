@@ -229,7 +229,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
-  // TODO: fix types
+  // TODO: fix types (#9610)
   const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
     dep = extractDepReleases(res);
@@ -278,7 +278,7 @@ async function packageLookup(
       return null;
     }
     const opts = getHostOpts(regUrl);
-    // TODO: fix types
+    // TODO: fix types (#9610)
     const versions = (await http.getJson<any>(pkgUrl, opts)).body.packages[
       name
     ];

@@ -2,7 +2,7 @@ import { getName } from '../../test/util';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getParentName()', () => {
     it('ignores encrypted in root', () => {
       expect(configValidation.getParentName('encrypted')).toEqual('');
@@ -584,6 +584,23 @@ describe(getName(__filename), () => {
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
       expect(errors).toHaveLength(0);
+    });
+    it('errors if invalid combinations in packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            registryUrls: ['https://registry.npmjs.org'],
+          },
+        ],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
     });
   });
 });

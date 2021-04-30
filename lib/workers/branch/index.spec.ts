@@ -62,7 +62,7 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],
@@ -132,6 +132,7 @@ describe(getName(__filename), () => {
            The type definition for "releaseTimestamp" is a string. But when I change it to
            one the test starts failing. Once this test has been fixed, the never typing can be removed.
            And instead replaced with the pattern used on the other places that have a config.upgrades
+           (#9718)
         */
       ] as never;
 
@@ -372,6 +373,7 @@ describe(getName(__filename), () => {
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
     });
     it('returns if branch exists and prCreation set to approval', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -443,6 +445,31 @@ describe(getName(__filename), () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch({ ...config, automerge: true });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+    });
+    it('ensures PR when impossible to automerge', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prResult: PrResult.Created,
+        pr: {},
+      } as EnsurePrResult);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await branchWorker.processBranch({
+        ...config,
+        automerge: true,
+        rebaseWhen: 'conflicted',
+      });
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
@@ -736,7 +763,7 @@ describe(getName(__filename), () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 
@@ -816,7 +843,7 @@ describe(getName(__filename), () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 
@@ -885,7 +912,7 @@ describe(getName(__filename), () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
       const result = await branchWorker.processBranch({
@@ -965,7 +992,7 @@ describe(getName(__filename), () => {
       const adminConfig = {
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        exposeAllEnv: true,
       };
       setAdminConfig(adminConfig);
 

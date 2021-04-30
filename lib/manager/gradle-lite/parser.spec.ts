@@ -1,14 +1,8 @@
-import { readFileSync } from 'fs';
-import path from 'path';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO } from './common';
 import { parseGradle, parseProps } from './parser';
 
-function getGradleFile(fileName: string): string {
-  return readFileSync(path.resolve(__dirname, fileName), 'utf8');
-}
-
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('handles end of input', () => {
     expect(parseGradle('version = ').deps).toBeEmpty();
     expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
@@ -162,9 +156,7 @@ describe(getName(__filename), () => {
     ]);
   });
   it('parses fixture from "gradle" manager', () => {
-    const content = getGradleFile(
-      `../gradle/__fixtures__/build.gradle.example1`
-    );
+    const content = loadFixture('build.gradle.example1', '../gradle');
     const { deps } = parseGradle(content, {}, 'build.gradle');
     deps.forEach((dep) => {
       expect(

@@ -5,7 +5,10 @@ import {
   analyzeTerraformProvider,
   extractTerraformProvider,
 } from './providers';
-import { extractTerraformRequiredProviders } from './required-providers';
+import {
+  analyzeTerraformRequiredProvider,
+  extractTerraformRequiredProviders,
+} from './required-providers';
 import {
   analyseTerraformVersion,
   extractTerraformRequiredVersion,
@@ -98,6 +101,8 @@ export function extractPackageFile(content: string): PackageFile | null {
   deps.forEach((dep) => {
     switch (dep.managerData.terraformDependencyType) {
       case TerraformDependencyTypes.required_providers:
+        analyzeTerraformRequiredProvider(dep);
+        break;
       case TerraformDependencyTypes.provider:
         analyzeTerraformProvider(dep);
         break;

@@ -21,7 +21,7 @@ const gitea = mocked(_gitea);
 const github = mocked(_github);
 const gitlab = mocked(_gitlab);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     const preset = { resolved: 'preset' };

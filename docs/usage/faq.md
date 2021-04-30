@@ -37,7 +37,7 @@ You can set more than one PR target branch in the `baseBranches` array.
 
 ### Support private npm modules
 
-See the dedicated [Private npm module support](/private-modules/) page.
+See the dedicated [Private npm module support](./private-modules.md) page.
 
 ### Control Renovate's schedule
 
@@ -208,10 +208,7 @@ To learn more read the section below.
 
 You can see in the example above that Renovate won't normally open a PR for the `snorgleborf` patch release.
 
-There are 2 ways to tell Renovate to open a separate PR for the patch release:
-
-- Set `separateMinorPatch` to `true`
-- Set `automerge` to the value: `"patch"`
+You can tell Renovate to open a separate PR for the patch release by setting `separateMinorPatch` to `true`.
 
 In both cases, Renovate will open 3 PRs:
 

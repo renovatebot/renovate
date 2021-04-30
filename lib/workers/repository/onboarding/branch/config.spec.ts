@@ -7,7 +7,7 @@ jest.mock('../../../../config/presets/local');
 
 const mockedPresets = presets as jest.Mocked<typeof presets>;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let config: RenovateConfig;
   let onboardingConfig: string;
   beforeEach(() => {
