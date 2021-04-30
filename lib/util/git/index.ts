@@ -8,7 +8,7 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
-import { GitNoVerifyOption, RenovateConfig } from '../../config/types';
+import type { GitNoVerifyOption, RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_DISABLED,
