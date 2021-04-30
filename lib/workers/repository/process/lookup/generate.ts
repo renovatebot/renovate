@@ -1,8 +1,8 @@
-import { Release } from '../../../../datasource';
+import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import type { LookupUpdate } from '../../../../manager/types';
-import { VersioningApi } from '../../../../versioning';
-import { LookupUpdateConfig } from './types';
+import type { VersioningApi } from '../../../../versioning';
+import type { LookupUpdateConfig } from './types';
 import { getUpdateType } from './update-type';
 
 export function generateUpdate(
