@@ -6,24 +6,26 @@ import * as sanitize from './sanitize';
 
 let hostRules: HostRule[] = [];
 
+const matchFields = ['matchHost', 'hostName', 'domainName', 'baseUrl'];
+
 export function add(params: HostRule): void {
-  if (params.domainName && params.hostName) {
-    throw new Error('hostRules cannot contain both a domainName and hostName');
-  }
-  if (params.domainName && params.baseUrl) {
-    throw new Error('hostRules cannot contain both a domainName and baseUrl');
-  }
-  if (params.hostName && params.baseUrl) {
-    throw new Error('hostRules cannot contain both a hostName and baseUrl');
+  const matchedFields = matchFields.filter((field) => params[field]);
+  if (matchedFields.length > 1) {
+    throw new Error(
+      `hostRules cannot contain more than one host-matching field. Found: [${matchedFields.join(
+        ', '
+      )}]`
+    );
   }
   hostRules.push(params);
   const confidentialFields = ['password', 'token'];
-  const ruleMatch = params.baseUrl || params.hostName || params.domainName;
-  if (ruleMatch) {
+  if (matchedFields.length) {
     confidentialFields.forEach((field) => {
       if (params[field]) {
         logger.debug(
-          `Adding ${field} authentication for ${ruleMatch} to hostRules`
+          `Adding ${field} authentication for ${String(
+            params[matchedFields[0]]
+          )} to hostRules`
         );
       }
     });
@@ -48,7 +50,13 @@ export interface HostRuleSearch {
 }
 
 function isEmptyRule(rule: HostRule): boolean {
-  return !rule.hostType && !rule.domainName && !rule.hostName && !rule.baseUrl;
+  return (
+    !rule.hostType &&
+    !rule.domainName &&
+    !rule.hostName &&
+    !rule.baseUrl &&
+    !rule.matchHost
+  );
 }
 
 function isHostTypeRule(rule: HostRule): boolean {
@@ -67,8 +75,15 @@ function isBaseUrlRule(rule: HostRule): boolean {
   return !rule.hostType && !!rule.baseUrl;
 }
 
+function isHostOnlyRule(rule: HostRule): boolean {
+  return !rule.hostType && !!rule.matchHost;
+}
+
 function isMultiRule(rule: HostRule): boolean {
-  return rule.hostType && !!(rule.domainName || rule.hostName || rule.baseUrl);
+  return (
+    rule.hostType &&
+    !!(rule.matchHost || rule.domainName || rule.hostName || rule.baseUrl)
+  );
 }
 
 function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
@@ -95,6 +110,22 @@ function matchesHostName(rule: HostRule, search: HostRuleSearch): boolean {
 
 function matchesBaseUrl(rule: HostRule, search: HostRuleSearch): boolean {
   return search.url && rule.baseUrl && search.url.startsWith(rule.baseUrl);
+}
+
+const baseUrlTest = /^https?:\/\//;
+
+function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
+  if (!rule.matchHost) {
+    return false;
+  }
+  if (baseUrlTest.test(rule.matchHost)) {
+    return search.url.startsWith(rule.matchHost);
+  }
+  const { hostname } = URL.parse(search.url);
+  if (!hostname) {
+    return false;
+  }
+  return hostname === rule.matchHost || hostname.endsWith(`.${rule.matchHost}`);
 }
 
 export function find(search: HostRuleSearch): HostRule {
@@ -133,6 +164,11 @@ export function find(search: HostRuleSearch): HostRule {
     .forEach((rule) => {
       res = merge(res, rule);
     });
+  hostRules
+    .filter((rule) => isHostOnlyRule(rule) && matchesHost(rule, search))
+    .forEach((rule) => {
+      res = merge(res, rule);
+    });
   // Finally, find combination matches
   hostRules
     .filter(
@@ -140,6 +176,7 @@ export function find(search: HostRuleSearch): HostRule {
         isMultiRule(rule) &&
         matchesHostType(rule, search) &&
         (matchesDomainName(rule, search) ||
+          matchesHost(rule, search) ||
           matchesHostName(rule, search) ||
           matchesBaseUrl(rule, search))
     )
@@ -150,6 +187,7 @@ export function find(search: HostRuleSearch): HostRule {
   delete res.domainName;
   delete res.hostName;
   delete res.baseUrl;
+  delete res.matchHost;
   return res;
 }
 
@@ -162,6 +200,12 @@ export function hosts({ hostType }: { hostType: string }): string[] {
       }
       if (rule.baseUrl) {
         return URL.parse(rule.baseUrl).hostname;
+      }
+      if (rule.matchHost) {
+        if (baseUrlTest.test(rule.matchHost)) {
+          return URL.parse(rule.matchHost).hostname;
+        }
+        return rule.matchHost;
       }
       return null;
     })

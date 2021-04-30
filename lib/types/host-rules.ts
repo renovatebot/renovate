@@ -1,7 +1,7 @@
 export interface HostRule {
   authType?: string;
   endpoint?: string;
-  host?: string;
+  matchHost?: string;
   hostType?: string;
   domainName?: string;
   hostName?: string;

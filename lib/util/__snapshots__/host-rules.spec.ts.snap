@@ -31,5 +31,7 @@ exports[`util/host-rules find() returns hosts 1`] = `
 Array [
   "nuget.local",
   "my.local.registry",
+  "another.local.registry",
+  "yet.another.local.registry",
 ]
 `;
