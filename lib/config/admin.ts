@@ -21,7 +21,7 @@ export const repoAdminOptions: (keyof RepoAdminConfig)[] = [
 export function setAdminConfig(config: RenovateConfig = {}): void {
   adminConfig = {};
   for (const option of repoAdminOptions) {
-    adminConfig[option] = config[option];
+    adminConfig[option as string] = config[option];
     delete config[option]; // eslint-disable-line no-param-reassign
   }
 }
