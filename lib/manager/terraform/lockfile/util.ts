@@ -8,6 +8,8 @@ import type {
   ProviderSlice,
 } from './types';
 
+export const repositoryRegex = /^hashicorp\/(?<lookupName>\S+)$/;
+
 const providerStartLineRegex = /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/;
 const versionLineRegex = /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/;
 const constraintLineRegex = /^(?<prefix>[\s]*constraints[\s]*=[\s]*")(?<constraint>[^"']+)(?<suffix>".*)$/;
@@ -200,5 +202,5 @@ export function writeLockUpdates(
       contents: newContent,
     },
   };
-  return new Promise<UpdateArtifactsResult[]>((resolve) => resolve([result]));
+  return Promise.resolve([result]);
 }

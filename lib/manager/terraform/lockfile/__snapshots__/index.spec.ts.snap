@@ -60,7 +60,7 @@ Array [
 ]
 `;
 
-exports[`manager/terraform/lockfile/index do full lock file maintenance without needed changes 1`] = `Array []`;
+exports[`manager/terraform/lockfile/index do full lock file maintenance without necessary changes 1`] = `Array []`;
 
 exports[`manager/terraform/lockfile/index update single dependency with exact constraint 1`] = `
 Object {

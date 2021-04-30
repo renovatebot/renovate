@@ -1,3 +1,4 @@
+import pMap from 'p-map';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import { get as getVersioning } from '../../../versioning';
@@ -19,8 +20,9 @@ async function updateAllLocks(
   locks: ProviderLock[],
   config: UpdateArtifactsConfig
 ): Promise<ProviderLockUpdate[]> {
-  const updates = await Promise.all(
-    locks.map(async (lock) => {
+  const updates = await pMap(
+    locks,
+    async (lock) => {
       const updateConfig: GetPkgReleasesConfig = {
         versioning: 'hashicorp',
         datasource: 'terraform-provider',
@@ -46,8 +48,10 @@ async function updateAllLocks(
         ...lock,
       };
       return update;
-    })
+    },
+    { concurrency: 4 } // allow to look up 4 lock in parallel
   );
+
   const result = updates.filter((value) => value);
   return new Promise((resolve) => resolve(result));
 }
@@ -99,6 +103,5 @@ export async function updateArtifacts({
     return null;
   }
 
-  const result = writeLockUpdates(updates, lockFileContent);
-  return result;
+  return writeLockUpdates(updates, lockFileContent);
 }

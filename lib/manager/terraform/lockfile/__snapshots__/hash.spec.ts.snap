@@ -1,8 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/terraform/lockfile/hash backend index throws error 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/index.json",
+  },
+]
+`;
+
 exports[`manager/terraform/lockfile/hash full walkthrough 1`] = `
 Array [
   "h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=",
   "h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=",
+]
+`;
+
+exports[`manager/terraform/lockfile/hash full walkthrough 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip",
+  },
+]
+`;
+
+exports[`manager/terraform/lockfile/hash return null if requesting a version which is not available 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/terraform-provider-azurerm/2.59.0/index.json",
+  },
 ]
 `;

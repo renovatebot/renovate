@@ -42,6 +42,7 @@ describe(getName(), () => {
       '/tmp/renovate/cache'
     );
     expect(result).toBeNull();
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('backend index throws error', async () => {
@@ -52,6 +53,7 @@ describe(getName(), () => {
 
     const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
     expect(result).toBeNull();
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('full walkthrough', async () => {
@@ -83,5 +85,6 @@ describe(getName(), () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(2);
     expect(result).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

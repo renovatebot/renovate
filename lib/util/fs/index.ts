@@ -139,8 +139,10 @@ export async function findLocalSiblingOrParent(
 /**
  * Get files by name from directory
  */
-export function readLocalDirectory(path: string): Promise<string[]> {
-  return fs.readdir(path);
+export async function readLocalDirectory(path: string): Promise<string[]> {
+  const localPath = join(localDir, path);
+  const fileList = await fs.readdir(localPath);
+  return fileList;
 }
 
 export function createWriteStream(path: string): fs.WriteStream {

@@ -1,9 +1,11 @@
 import { withDir } from 'tmp-promise';
 import { getName } from '../../../test/util';
 import {
+  ensureLocalDir,
   findLocalSiblingOrParent,
   getSubDirectory,
   localPathExists,
+  readLocalDirectory,
   readLocalFile,
   setFsConfig,
   writeLocalFile,
@@ -93,6 +95,59 @@ describe(getName(), () => {
     it('immediately returns null when either path is absolute', async () => {
       expect(await findLocalSiblingOrParent('/etc/hosts', 'other')).toBeNull();
       expect(await findLocalSiblingOrParent('other', '/etc/hosts')).toBeNull();
+    });
+  });
+
+  describe('readLocalDirectory', () => {
+    it('returns dir content', async () => {
+      await withDir(
+        async (localDir) => {
+          setFsConfig({
+            localDir: localDir.path,
+          });
+
+          await writeLocalFile('test/Cargo.toml', '');
+          await writeLocalFile('test/Cargo.lock', '');
+
+          const result = await readLocalDirectory('test');
+          expect(result).not.toBeNull();
+          expect(result).toBeArrayOfSize(2);
+          expect(result).toMatchSnapshot();
+
+          await writeLocalFile('Cargo.lock', '');
+          await writeLocalFile('/test/subdir/Cargo.lock', '');
+
+          const resultWithAdditionalFiles = await readLocalDirectory('test');
+          expect(resultWithAdditionalFiles).not.toBeNull();
+          expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
+          expect(resultWithAdditionalFiles).toMatchSnapshot();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+
+    it('return empty array for non existing directory', async () => {
+      await withDir(
+        async (localDir) => {
+          setFsConfig({
+            localDir: localDir.path,
+          });
+
+          await expect(readLocalDirectory('somedir')).rejects.toThrow();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+
+    it('return empty array for a existing but empty directory', async () => {
+      await ensureLocalDir('somedir');
+      const result = await readLocalDirectory('somedir');
+      expect(result).not.toBeNull();
+      expect(result).toBeArrayOfSize(0);
     });
   });
 });

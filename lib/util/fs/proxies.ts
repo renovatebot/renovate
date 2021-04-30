@@ -70,3 +70,21 @@ export function move(
 ): Promise<void> {
   return fs.move(src, dest, options ?? {});
 }
+
+// istanbul ignore next
+export function readdir(path: string): Promise<string[]> {
+  return fs.readdir(path);
+}
+
+// istanbul ignore next
+export function rm(
+  path: string,
+  options?: {
+    force?: boolean;
+    maxRetries?: number;
+    recursive?: boolean;
+    retryDelay?: number;
+  }
+): Promise<void> {
+  return fs.rm(path, options);
+}

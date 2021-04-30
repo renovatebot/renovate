@@ -13,6 +13,7 @@ import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import * as fs from '../../../util/fs';
 import { Http } from '../../../util/http';
+import { repositoryRegex } from './util';
 
 const http = new Http(id);
 const hashCacheTTL = 10080; // in seconds == 1 week
@@ -49,7 +50,7 @@ export async function hashOfZipContent(
   extractPath: string
 ): Promise<string> {
   await extract(zipFilePath, { dir: extractPath });
-  const files = await fs.readLocalDirectory(extractPath);
+  const files = await fs.readdir(extractPath);
   // the h1 hashing algorithms requires that the files are sorted by filename
   const sortedFiles = files.sort((a, b) => a.localeCompare(b));
   const filesWithPath = sortedFiles.map((file) => `${extractPath}/${file}`);
@@ -57,9 +58,8 @@ export async function hashOfZipContent(
   const result = hashFiles(filesWithPath);
 
   // delete extracted files
-  for (const value of filesWithPath) {
-    await fs.deleteLocalFile(value);
-  }
+  await fs.rm(extractPath, { recursive: true });
+
   return result;
 }
 
@@ -92,23 +92,24 @@ export async function calculateHashes(
       readStream.pipe(writeStream);
 
       const pipeline = fs.getStreamingPipeline();
+
+      let hash = null;
       try {
         await pipeline(readStream, writeStream);
+
+        hash = await hashOfZipContent(downloadFileName, extractPath);
+        logger.trace(
+          { hash },
+          `Generated hash for ${build.name}-${build.version}`
+        );
       } catch (err) {
         /* istanbul ignore next */
         logger.error({ err }, 'write stream error');
+      } finally {
+        // delete zip file
+        await fs.unlink(downloadFileName);
+        await fs.remove(extractPath);
       }
-
-      const hash = await hashOfZipContent(downloadFileName, extractPath);
-      logger.trace(
-        { hash },
-        `Generated hash for ${build.name}-${build.version}`
-      );
-
-      // delete zip file
-      await fs.unlink(downloadFileName);
-      await fs.remove(extractPath);
-
       return hash;
     },
     { concurrency: 4 } // allow to look up 4 builds for this version in parallel
@@ -123,9 +124,7 @@ export default async function createHashes(
   cacheDir: string
 ): Promise<string[]> {
   // check cache for hashes
-  const repositoryRegexResult = /^hashicorp\/(?<lookupName>\S+)$/.exec(
-    repository
-  );
+  const repositoryRegexResult = repositoryRegex.exec(repository);
   if (!repositoryRegexResult) {
     // non hashicorp builds are not supported at the moment
     return null;

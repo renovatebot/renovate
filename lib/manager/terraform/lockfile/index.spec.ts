@@ -1,8 +1,6 @@
 import { join } from 'upath';
-import * as httpMock from '../../../../test/http-mock';
 import { fs, getName, loadFixture } from '../../../../test/util';
 import { getPkgReleases } from '../../../datasource';
-import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
 import type { UpdateArtifactsConfig } from '../../types';
 import hash from './hash';
 import { updateArtifacts } from './index';
@@ -21,35 +19,15 @@ const config = {
 
 const validLockfile = loadFixture('validLockfile.hcl');
 
-const releaseBackendAWS = loadFixture('releaseBackendAWS_3_36_0.json');
-
-const releaseBackendRandom = loadFixture('releaseBackendRandom_3_1_0.json');
-
-const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
-
-const serviceDiscoveryResult = loadFixture(
-  'service-discovery.json',
-  '../../../datasource/terraform-provider'
-);
-
 const mockHash = hash as jest.MockedFunction<typeof hash>;
 const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
   typeof getPkgReleases
 >;
 
-const registryUrl = defaultRegistryUrls[0];
-const releaseBackendUrl = defaultRegistryUrls[1];
-
 describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-
-    httpMock.reset();
-    httpMock.setup();
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   it('returns null if no .terraform.lock.hcl found', async () => {
@@ -84,11 +62,6 @@ describe(getName(), () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    httpMock
-      .scope(releaseBackendUrl)
-      .get('/terraform-provider-aws/3.36.0/index.json')
-      .reply(200, JSON.parse(releaseBackendAWS));
-
     const localConfig: UpdateArtifactsConfig = {
       updateType: 'minor',
       newVersion: '3.36.0',
@@ -105,6 +78,7 @@ describe(getName(), () => {
     expect(result).toBeArrayOfSize(1);
     expect(result[0].file).not.toBeNull();
     expect(result[0].file).toMatchSnapshot();
+
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
@@ -116,11 +90,6 @@ describe(getName(), () => {
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
-
-    httpMock
-      .scope(releaseBackendUrl)
-      .get('/terraform-provider-azurerm/2.56.0/index.json')
-      .reply(200, JSON.parse(releaseBackendAzurerm));
 
     const localConfig: UpdateArtifactsConfig = {
       updateType: 'minor',
@@ -138,6 +107,7 @@ describe(getName(), () => {
     expect(result).toBeArrayOfSize(1);
     expect(result[0].file).not.toBeNull();
     expect(result[0].file).toMatchSnapshot();
+
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
@@ -149,11 +119,6 @@ describe(getName(), () => {
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
-
-    httpMock
-      .scope(releaseBackendUrl)
-      .get('/terraform-provider-random/3.1.0/index.json')
-      .reply(200, JSON.parse(releaseBackendRandom));
 
     const localConfig: UpdateArtifactsConfig = {
       updateType: 'major',
@@ -171,16 +136,12 @@ describe(getName(), () => {
     expect(result).toBeArrayOfSize(1);
     expect(result[0].file).not.toBeNull();
     expect(result[0].file).toMatchSnapshot();
+
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
   it('do full lock file maintenance', async () => {
-    httpMock
-      .scope(registryUrl)
-      .get('/.well-known/terraform.json')
-      .reply(200, serviceDiscoveryResult);
-
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
@@ -255,18 +216,15 @@ describe(getName(), () => {
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
+
     result.forEach((value) => expect(value.file).not.toBeNull());
     result.forEach((value) => expect(value.file).toMatchSnapshot());
+
     expect(mockHash.mock.calls).toBeArrayOfSize(2);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
-  it('do full lock file maintenance without needed changes', async () => {
-    httpMock
-      .scope(registryUrl)
-      .get('/.well-known/terraform.json')
-      .reply(200, serviceDiscoveryResult);
-
+  it('do full lock file maintenance without necessary changes', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
@@ -325,6 +283,7 @@ describe(getName(), () => {
       config: localConfig,
     });
     expect(result).toBeNull();
+
     expect(mockHash.mock.calls).toBeArrayOfSize(0);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
