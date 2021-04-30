@@ -9,6 +9,7 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
+export type GitNoVerifyOption = 'commit' | 'push';
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 
 export interface GroupConfig extends Record<string, unknown> {
@@ -93,7 +94,7 @@ export interface RepoAdminConfig {
   dockerUser?: string;
   dryRun?: boolean;
   exposeAllEnv?: boolean;
-  gitNoVerify?: ('commit' | 'push')[];
+  gitNoVerify?: GitNoVerifyOption[];
   privateKey?: string | Buffer;
 }
 

@@ -8,7 +8,7 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
-import { RenovateConfig } from '../../config/types';
+import { GitNoVerifyOption, RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_DISABLED,
@@ -612,7 +612,7 @@ export type CommitFilesConfig = {
   files: File[];
   message: string;
   force?: boolean;
-  noVerify?: ('commit' | 'push')[];
+  noVerify?: GitNoVerifyOption[];
 };
 
 export async function commitFiles({
