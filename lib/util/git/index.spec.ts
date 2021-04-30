@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
+import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
 import * as git from '.';
@@ -313,6 +314,89 @@ describe(getName(), () => {
         message: 'No change update',
       });
       expect(commit).toBeNull();
+    });
+
+    it('does not pass --no-verify', async () => {
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+      });
+
+      expect(commitSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+
+      jest.restoreAllMocks();
+    });
+
+    it('passes --no-verify to commit', async () => {
+      const spy = jest.spyOn(SimpleGit.prototype, 'commit');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+        noVerify: ['commit'],
+      });
+
+      expect(spy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ '--no-verify': null })
+      );
+
+      jest.restoreAllMocks();
+    });
+
+    it('passes --no-verify to push', async () => {
+      const spy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+        noVerify: ['push'],
+      });
+
+      expect(spy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ '--no-verify': null })
+      );
+
+      jest.restoreAllMocks();
     });
   });
 
