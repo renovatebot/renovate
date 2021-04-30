@@ -13,6 +13,7 @@ Array [
       ],
       "force": false,
       "message": "some commit message",
+      "noVerify": undefined,
     },
   ],
 ]
