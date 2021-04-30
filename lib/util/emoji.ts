@@ -5,11 +5,15 @@ import {
   fromHexcodeToCodepoint,
   fromUnicodeToHexcode,
 } from 'emojibase';
-import githubShortcodes from 'emojibase-data/en/shortcodes/github.json';
 import emojibaseEmojiRegex from 'emojibase-regex/emoji';
 import SHORTCODE_REGEX from 'emojibase-regex/shortcode';
 import type { RenovateConfig } from '../config/types';
+import dataFiles from '../data-files.generated';
 import { regEx } from './regex';
+
+const githubShortcodes: Record<string, string | string[]> = JSON.parse(
+  dataFiles.get('emojibase-github-shortcodes.json')
+);
 
 let unicodeEmoji = false;
 
