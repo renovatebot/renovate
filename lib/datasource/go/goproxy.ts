@@ -23,7 +23,7 @@ import { GoproxyFallback, GoproxyItem, VersionInfo } from './types';
 export function parseGoproxy(
   input: string = process.env.GOPROXY
 ): GoproxyItem[] {
-  if (!input || !is.string(input)) {
+  if (!is.string(input)) {
     return [];
   }
 
@@ -93,7 +93,7 @@ const lexer = moo.states({
 export function parseNoproxy(
   input: unknown = process.env.GONOPROXY || process.env.GOPRIVATE
 ): RegExp | null {
-  if (!input || !is.string(input)) {
+  if (!is.string(input)) {
     return null;
   }
   lexer.reset(input);

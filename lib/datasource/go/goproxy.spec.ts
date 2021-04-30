@@ -91,6 +91,9 @@ describe(getName(), () => {
       ]);
     });
     it('ignores everything starting from "direct" and "off" keywords', () => {
+      expect(parseGoproxy(undefined)).toBeEmpty();
+      expect(parseGoproxy(null)).toBeEmpty();
+      expect(parseGoproxy('')).toBeEmpty();
       expect(parseGoproxy('off')).toBeEmpty();
       expect(parseGoproxy('direct')).toBeEmpty();
       expect(parseGoproxy('foo,off|direct,qux')).toMatchObject([
@@ -101,6 +104,8 @@ describe(getName(), () => {
 
   describe('parseNoproxy', () => {
     it('produces regex', () => {
+      expect(parseNoproxy(undefined)).toBeNull();
+      expect(parseNoproxy(null)).toBeNull();
       expect(parseNoproxy('')).toBeNull();
       expect(parseNoproxy('*')?.source).toEqual('^(?:[^\\/]*)$');
       expect(parseNoproxy('?')?.source).toEqual('^(?:[^\\/])$');
