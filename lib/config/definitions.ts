@@ -1179,6 +1179,13 @@ const options: RenovateOptions[] = [
     default: 0,
   },
   {
+    name: 'internalChecksFilter',
+    description: 'When/how to filter based on internal checks.',
+    type: 'string',
+    allowedValues: ['strict', 'flexible', 'none'],
+    default: 'none',
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',

@@ -120,6 +120,20 @@ export async function processBranch(
       logger.debug('Reached commits limit - skipping branch');
       return { branchExists, result: BranchResult.CommitLimitReached };
     }
+    let pendingChecksBypassed = false;
+    if (!branchExists && branchConfig.pendingChecks) {
+      if (!dependencyDashboardCheck) {
+        return { branchExists: false, result: BranchResult.Pending };
+      }
+      pendingChecksBypassed = true;
+    }
+    if (
+      !branchExists &&
+      branchConfig.pendingChecks &&
+      !dependencyDashboardCheck
+    ) {
+      return { branchExists: false, result: BranchResult.Pending };
+    }
     if (branchExists) {
       logger.debug('Checking if PR has been edited');
       const branchIsModified = await isBranchModified(config.branchName);
@@ -218,7 +232,7 @@ export async function processBranch(
         if (upgrade.stabilityDays && upgrade.releaseTimestamp) {
           const daysElapsed = getElapsedDays(upgrade.releaseTimestamp);
           if (
-            !dependencyDashboardCheck &&
+            (pendingChecksBypassed || !dependencyDashboardCheck) &&
             daysElapsed < upgrade.stabilityDays
           ) {
             logger.debug(

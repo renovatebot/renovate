@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import {
   Release,
@@ -12,6 +14,7 @@ import { logger } from '../../../../logger';
 import { getRangeStrategy } from '../../../../manager';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
+import { getElapsedDays } from '../../../../util/date';
 import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
@@ -20,6 +23,7 @@ import { filterVersions } from './filter';
 import { generateUpdate } from './generate';
 import { getRollbackUpdate } from './rollback';
 import type { LookupUpdateConfig, UpdateResult } from './types';
+import { getUpdateType } from './update-type';
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig
@@ -32,6 +36,7 @@ export async function lookupUpdates(
     depName,
     digestOneAndOnly,
     followTag,
+    internalChecksFilter,
     lockedVersion,
     packageFile,
     pinDigests,
@@ -201,11 +206,72 @@ export async function lookupUpdates(
         buckets[bucket] = [release];
       }
     }
+    const depResultConfig = mergeChildConfig(config, res);
     for (const [bucket, releases] of Object.entries(buckets)) {
       const sortedReleases = releases.sort((r1, r2) =>
         versioning.sortVersions(r1.version, r2.version)
       );
-      const release = sortedReleases.pop();
+      let release: Release;
+      const pendingChecks: string[] = [];
+      let pendingReleases: Release[] = [];
+      if (internalChecksFilter === 'none') {
+        // Don't care if stabilityDays are unmet
+        release = sortedReleases.pop();
+      } else {
+        // iterate through releases from highest to lowest, looking for the first which will pass checks if present
+        for (const candidateRelease of sortedReleases.reverse()) {
+          // merge the release data into dependency config
+          let releaseConfig = mergeChildConfig(
+            depResultConfig,
+            candidateRelease
+          );
+          // calculate updateType and then apply it
+          releaseConfig.updateType = getUpdateType(
+            releaseConfig,
+            versioning,
+            currentVersion,
+            candidateRelease.version
+          );
+          releaseConfig = mergeChildConfig(
+            releaseConfig,
+            releaseConfig[releaseConfig.updateType]
+          );
+          // Apply packageRules in case any apply to updateType
+          releaseConfig = applyPackageRules(releaseConfig);
+          // Now check for a stabilityDays config
+          const { stabilityDays, releaseTimestamp } = releaseConfig;
+          if (is.integer(stabilityDays) && releaseTimestamp) {
+            if (getElapsedDays(releaseTimestamp) < stabilityDays) {
+              // Skip it if it doesn't pass checks
+              logger.debug(
+                `Release ${candidateRelease.version} is pending status checks`
+              );
+              pendingReleases.unshift(candidateRelease);
+              continue; // eslint-disable-line no-continue
+            }
+          }
+          // If we get to here, then the release is OK and we can stop iterating
+          release = candidateRelease;
+          break;
+        }
+        if (!release) {
+          if (pendingReleases.length) {
+            // If all releases were pending then just take the highest
+            logger.debug(
+              { depName, bucket },
+              'All releases are pending - using latest'
+            );
+            release = pendingReleases.pop();
+            // None are pending anymore because we took the latest, so empty the array
+            pendingReleases = [];
+            if (internalChecksFilter === 'strict') {
+              pendingChecks.push('stabilityDays');
+            }
+          } else {
+            return res;
+          }
+        }
+      }
       const newVersion = release.version;
       const update = generateUpdate(
         config,
@@ -214,6 +280,12 @@ export async function lookupUpdates(
         bucket,
         release
       );
+      if (pendingChecks.length) {
+        update.pendingChecks = pendingChecks;
+      }
+      if (pendingReleases.length) {
+        update.pendingVersions = pendingReleases.map((r) => r.version);
+      }
       if (!update.newValue || update.newValue === currentValue) {
         if (!lockedVersion) {
           continue; // eslint-disable-line no-continue
