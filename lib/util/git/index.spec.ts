@@ -82,6 +82,7 @@ describe(getName(), () => {
   afterEach(async () => {
     await tmpDir.cleanup();
     await origin.cleanup();
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -343,8 +344,6 @@ describe(getName(), () => {
         expect.anything(),
         expect.not.objectContaining({ '--no-verify': null })
       );
-
-      jest.restoreAllMocks();
     });
 
     it('passes --no-verify to commit', async () => {
@@ -375,8 +374,6 @@ describe(getName(), () => {
         expect.anything(),
         expect.not.objectContaining({ '--no-verify': null })
       );
-
-      jest.restoreAllMocks();
     });
 
     it('passes --no-verify to push', async () => {
@@ -407,8 +404,6 @@ describe(getName(), () => {
         expect.anything(),
         expect.objectContaining({ '--no-verify': null })
       );
-
-      jest.restoreAllMocks();
     });
   });
 
