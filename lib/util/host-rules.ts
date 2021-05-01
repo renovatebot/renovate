@@ -192,21 +192,7 @@ export function find(search: HostRuleSearch): HostRule {
 export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
     .filter((rule) => rule.hostType === hostType)
-    .map((rule) => {
-      if (rule.hostName) {
-        return rule.hostName;
-      }
-      if (rule.baseUrl) {
-        return URL.parse(rule.baseUrl).hostname;
-      }
-      if (rule.matchHost) {
-        if (baseUrlTest.test(rule.matchHost)) {
-          return URL.parse(rule.matchHost).hostname;
-        }
-        return rule.matchHost;
-      }
-      return null;
-    })
+    .map((rule) => rule.resolvedHost)
     .filter(Boolean);
 }
 
