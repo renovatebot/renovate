@@ -179,7 +179,7 @@ workflows:
             filters:
               branches:
                 only:
-                  - main (TODO/QUESTION: Does CircleCI support `main`???)
+                  - main
 ```
 
 ### GitLab CI/CD pipeline
