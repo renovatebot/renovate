@@ -69,11 +69,11 @@ describe(getName(), () => {
     });
     it('matches on empty rules', () => {
       add({
-        json: true,
+        enabled: true,
       });
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
-      ).toEqual({ json: true });
+      ).toEqual({ enabled: true });
     });
     it('matches on hostType', () => {
       add({
@@ -159,11 +159,10 @@ describe(getName(), () => {
         hostName: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
-        token: undefined,
       };
       add(hostRule);
       expect(findAll({ hostType: 'nuget' })).toHaveLength(1);
-      expect(findAll({ hostType: 'nuget' })[0]).toEqual(hostRule);
+      expect(findAll({ hostType: 'nuget' })[0]).toMatchObject(hostRule);
     });
   });
 });

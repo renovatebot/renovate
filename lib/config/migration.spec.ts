@@ -155,7 +155,7 @@ describe(getName(), () => {
           },
         ],
         raiseDeprecationWarnings: false,
-      };
+      } as any;
       const parentConfig = { ...defaultConfig, semanticCommits: 'disabled' };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
         config,
