@@ -50,7 +50,6 @@ describe(getName(), () => {
       hostRules: [
         {
           hostType: datasourceDocker.id,
-          domainName: 'docker.io',
           username: 'some-user',
           password: 'some-password',
         },
@@ -70,7 +69,6 @@ describe(getName(), () => {
       hostRules: [
         {
           hostType: datasourceDocker.id,
-          domainName: 'docker.io',
           username: 'some-user',
           password: 'some-password',
         },
