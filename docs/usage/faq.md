@@ -38,7 +38,7 @@ The default branch could be called `trunk` or `mainline` or `prod`, and Git woul
 Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
 You can configure the PR target branch via the `baseBranches` option.
 
-Add this line to the `renovate.json` file that's in the _default_ branch (`main` in this example).
+Add this line to the `renovate.json` file that's in the _base_ branch (`main` in this example).
 
 ```json
 {

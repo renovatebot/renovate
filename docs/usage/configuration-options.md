@@ -178,7 +178,7 @@ This setting is only applicable if you opt in to configure `automerge` to `true`
 
 Automerging defaults to using Pull Requests (`automergeType="pr"`).
 In that case Renovate first creates a branch and associated Pull Request, and then automerges the PR on a subsequent run once it detects the PR's status checks are "green".
-If by the next run the PR is already behind the `main` branch it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
+If by the next run the PR is already behind the base branch it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
 If Renovate is scheduled for hourly runs on the repository but commits are made every 15 minutes to the main branch, then an automerge like this will keep getting deferred with every rebase.
 
 Note: if you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
@@ -206,7 +206,7 @@ Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renova
 
 ## baseBranches
 
-By default, Renovate will detect and process only the repository's default branch, e.g. `main`.
+By default, Renovate will detect and process only the repository's base branch.
 For most projects, this is the expected approach.
 However, Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
 
@@ -2148,7 +2148,7 @@ It is recommended that you leave this setting to `true`, because of the polite w
 For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives.
 In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released.
 You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it.
-Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to the main branch once it's tested.
+Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to the base branch once it's tested.
 After that, Renovate will resume providing you updates to 3.x again!
 i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
@@ -2238,7 +2238,7 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseStale=true and the main branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseStale=true and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
