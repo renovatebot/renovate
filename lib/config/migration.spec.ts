@@ -626,4 +626,35 @@ describe(getName(__filename), () => {
       expect(migratedConfig).toMatchSnapshot();
     });
   });
+  it('it migrates nested packageRules', () => {
+    const config: RenovateConfig = {
+      packageRules: [
+        {
+          matchDepTypes: ['devDependencies'],
+          enabled: false,
+        },
+        {
+          automerge: true,
+          excludePackageNames: ['@types/react-table'],
+          packageRules: [
+            {
+              groupName: 'definitelyTyped',
+              matchPackagePrefixes: ['@types/'],
+            },
+            {
+              matchDepTypes: ['dependencies'],
+              automerge: false,
+            },
+          ],
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
+    expect(migratedConfig.packageRules).toHaveLength(3);
+  });
 });
