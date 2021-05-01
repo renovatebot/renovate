@@ -3,6 +3,7 @@ import merge from 'deepmerge';
 import { logger } from '../logger';
 import { HostRule } from '../types';
 import * as sanitize from './sanitize';
+import { clone } from './clone';
 
 let hostRules: HostRule[] = [];
 
@@ -17,15 +18,15 @@ export function add(params: HostRule): void {
       )}]`
     );
   }
-  hostRules.push(params);
   const confidentialFields = ['password', 'token'];
+  let resolvedHost: string;
   if (matchedFields.length) {
+    resolvedHost = params[matchedFields[0]];
+    resolvedHost = URL.parse(resolvedHost).hostname || resolvedHost;
     confidentialFields.forEach((field) => {
       if (params[field]) {
         logger.debug(
-          `Adding ${field} authentication for ${String(
-            params[matchedFields[0]]
-          )} to hostRules`
+          `Adding ${field} authentication for ${resolvedHost} to hostRules`
         );
       }
     });
@@ -42,6 +43,11 @@ export function add(params: HostRule): void {
     ).toString('base64');
     sanitize.add(secret);
   }
+  const hostRule = clone(params);
+  if (resolvedHost) {
+    hostRule.resolvedHost = resolvedHost;
+  }
+  hostRules.push(hostRule);
 }
 
 export interface HostRuleSearch {
@@ -187,6 +193,7 @@ export function find(search: HostRuleSearch): HostRule {
   delete res.domainName;
   delete res.hostName;
   delete res.baseUrl;
+  delete res.resolvedHost;
   delete res.matchHost;
   return res;
 }
