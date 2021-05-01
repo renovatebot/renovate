@@ -19,4 +19,5 @@ export interface HostRule {
   enabled?: boolean;
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
+  resolvedHost?: string;
 }
