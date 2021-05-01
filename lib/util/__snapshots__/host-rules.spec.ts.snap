@@ -3,18 +3,21 @@
 exports[`util/host-rules add() supports baseUrl-only 1`] = `
 Object {
   "password": "pass1",
+  "resolvedHost": "some.endpoint",
   "username": "user1",
 }
 `;
 
 exports[`util/host-rules find() matches on endpoint subresource 1`] = `
 Object {
+  "resolvedHost": "nuget.local",
   "token": "abc",
 }
 `;
 
 exports[`util/host-rules find() matches on hostName 1`] = `
 Object {
+  "resolvedHost": "nuget.local",
   "token": "abc",
 }
 `;

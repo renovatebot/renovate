@@ -40,25 +40,6 @@ interface AuthJson {
   'http-basic'?: Record<string, UserPass>;
 }
 
-function getHost({
-  hostName,
-  domainName,
-  endpoint,
-  baseUrl,
-}: HostRule): string | null {
-  let host = hostName || domainName;
-  if (!host) {
-    try {
-      host = endpoint || baseUrl;
-      host = url.parse(host).host;
-    } catch (err) {
-      logger.warn(`Composer: can't parse ${host}`);
-      host = null;
-    }
-  }
-  return host;
-}
-
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
@@ -85,11 +66,10 @@ function getAuthJson(): string | null {
   hostRules
     .findAll({ hostType: datasourcePackagist.id })
     ?.forEach((hostRule) => {
-      const { username, password } = hostRule;
-      const host = getHost(hostRule);
-      if (host && username && password) {
+      const { resolvedHost, username, password } = hostRule;
+      if (resolvedHost && username && password) {
         authJson['http-basic'] = authJson['http-basic'] || {};
-        authJson['http-basic'][host] = { username, password };
+        authJson['http-basic'][resolvedHost] = { username, password };
       }
     });
 
