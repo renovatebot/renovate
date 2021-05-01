@@ -94,7 +94,7 @@ describe('.updateArtifacts()', () => {
     });
     hostRules.add({
       hostType: datasourcePackagist.id,
-      endpoint: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
+      baseUrl: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
       username: 'some-other-username',
       password: 'some-other-password',
     });
