@@ -122,7 +122,7 @@ Or if you think your preset would be valuable for others, please contribute a PR
 ## GitHub-hosted Presets
 
 It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `renovate.json` file in the default branch, e.g. `main`.
+In such cases Renovate will simply look for a `renovate.json` file in the base branch, e.g. `main`.
 
 To host your preset config on GitHub:
 
