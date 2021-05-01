@@ -458,6 +458,34 @@ describe(getName(), () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('uses quay registry', async () => {
+      const tags = [{ name: '1.0.0' }];
+      httpMock
+        .scope('https://quay.io')
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/api/v1/repository/node/tag/?limit=10000&page=1')
+        .reply(
+          200,
+          { tags, has_additional: false },
+          {
+            link:
+              '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
+          }
+        )
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/node/manifests/1.0.0')
+        .reply(200, '', {});
+      const config = {
+        datasource: docker.id,
+        depName: 'node',
+        registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res.releases).toHaveLength(1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('uses custom registry in depName', async () => {
       const tags = ['1.0.0'];
       httpMock

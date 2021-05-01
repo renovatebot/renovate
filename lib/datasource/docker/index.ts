@@ -451,18 +451,46 @@ async function getTags(
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
     const limit = ecrRegex.test(registry) ? 1000 : 10000;
-    let url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
+
+    let url: string;
+    let page = 1;
+
+    // quay registry returns unordered tags using v2, let's use v1 for now
+    const isQuay = registry.endsWith('quay.io');
+    if (isQuay) {
+      url = `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}`;
+    } else {
+      url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
+    }
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
     do {
-      const res = await http.getJson<{ tags: string[] }>(url, { headers });
-      tags = tags.concat(res.body.tags);
-      const linkHeader = parseLinkHeader(res.headers.link as string);
-      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      let pageTags: string[];
+      if (isQuay) {
+        const res = await http.getJson<{
+          tags: { name: string }[];
+          has_additional: boolean;
+        }>(url, {
+          headers,
+        });
+        pageTags = res.body.tags.map((tag) => tag.name);
+        url = res.body.has_additional
+          ? `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`
+          : null;
+      } else {
+        const res = await http.getJson<{
+          tags: string[];
+        }>(url, {
+          headers,
+        });
+        pageTags = res.body.tags;
+        const linkHeader = parseLinkHeader(res.headers.link as string);
+        url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      }
+      tags = tags.concat(pageTags);
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 30;
