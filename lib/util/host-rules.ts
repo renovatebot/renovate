@@ -55,11 +55,11 @@ export interface HostRuleSearch {
 }
 
 function isEmptyRule(rule: HostRule): boolean {
-  return !rule.hostType && !rule.domainName && !rule.hostName && !rule.baseUrl;
+  return !rule.hostType && !rule.resolvedHost;
 }
 
 function isHostTypeRule(rule: HostRule): boolean {
-  return rule.hostType && !rule.domainName && !rule.hostName && !rule.baseUrl;
+  return rule.hostType && !rule.resolvedHost;
 }
 
 function isDomainNameRule(rule: HostRule): boolean {
@@ -75,7 +75,7 @@ function isBaseUrlRule(rule: HostRule): boolean {
 }
 
 function isMultiRule(rule: HostRule): boolean {
-  return rule.hostType && !!(rule.domainName || rule.hostName || rule.baseUrl);
+  return rule.hostType && !!rule.resolvedHost;
 }
 
 function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
