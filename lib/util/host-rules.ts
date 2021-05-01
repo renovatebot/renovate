@@ -16,14 +16,13 @@ export function add(params: HostRule): void {
   if (params.hostName && params.baseUrl) {
     throw new Error('hostRules cannot contain both a hostName and baseUrl');
   }
-  hostRules.push(params);
   const confidentialFields = ['password', 'token'];
-  const ruleMatch = params.baseUrl || params.hostName || params.domainName;
-  if (ruleMatch) {
+  const resolvedHost = params.baseUrl || params.hostName || params.domainName;
+  if (resolvedHost) {
     confidentialFields.forEach((field) => {
       if (params[field]) {
         logger.debug(
-          `Adding ${field} authentication for ${ruleMatch} to hostRules`
+          `Adding ${field} authentication for ${resolvedHost} to hostRules`
         );
       }
     });
@@ -40,6 +39,7 @@ export function add(params: HostRule): void {
     ).toString('base64');
     sanitize.add(secret);
   }
+  hostRules.push(params);
 }
 
 export interface HostRuleSearch {
