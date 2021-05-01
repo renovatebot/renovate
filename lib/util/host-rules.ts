@@ -164,15 +164,7 @@ export function find(search: HostRuleSearch): HostRule {
 export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
     .filter((rule) => rule.hostType === hostType)
-    .map((rule) => {
-      if (rule.hostName) {
-        return rule.hostName;
-      }
-      if (rule.baseUrl) {
-        return URL.parse(rule.baseUrl).hostname;
-      }
-      return null;
-    })
+    .map((rule) => rule.resolvedHost)
     .filter(Boolean);
 }
 
