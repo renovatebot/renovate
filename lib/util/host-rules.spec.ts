@@ -72,11 +72,11 @@ describe(getName(), () => {
     });
     it('matches on empty rules', () => {
       add({
-        json: true,
+        enabled: true,
       });
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
-      ).toEqual({ json: true });
+      ).toEqual({ enabled: true });
     });
     it('matches on hostType', () => {
       add({
