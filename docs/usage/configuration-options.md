@@ -1540,7 +1540,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
-Each command must match at least one of the patterns defined in `allowedPostUpgradeTasks` in order to be executed.
+Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (an admin-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
 
 e.g.
@@ -2166,11 +2166,16 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 ## stabilityDays
 
-If this is configured to a non-zero value, and an update has a release date/timestamp available, then Renovate will check if the configured "stability days" have elapsed.
-If the days since the release is less than the configured stability days then a "pending" status check will be added to the branch.
-If enough days have passed then a passing status check will be added.
+If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
-There are a couple of uses for this:
+If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
+If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
+
+Some datasources do not provide a release timestamp (in which case this feature is not compatible), and other datasources may provide a release timestamp but it's not supported by Renovate (in which case a feature request needs to be implemented).
+
+Maven users: you cannot use `stabilityDays` if a Maven source returns unreliable `last-modified` headers.
+
+There are a couple of uses for `stabilityDays`:
 
 <!-- markdownlint-disable MD001 -->
 
