@@ -156,6 +156,7 @@ export function find(search: HostRuleSearch): HostRule {
   delete res.domainName;
   delete res.hostName;
   delete res.baseUrl;
+  delete res.resolvedHost;
   return res;
 }
 
