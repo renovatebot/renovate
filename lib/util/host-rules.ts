@@ -7,15 +7,16 @@ import * as sanitize from './sanitize';
 
 let hostRules: HostRule[] = [];
 
+const matchFields = ['hostName', 'domainName', 'baseUrl'];
+
 export function add(params: HostRule): void {
-  if (params.domainName && params.hostName) {
-    throw new Error('hostRules cannot contain both a domainName and hostName');
-  }
-  if (params.domainName && params.baseUrl) {
-    throw new Error('hostRules cannot contain both a domainName and baseUrl');
-  }
-  if (params.hostName && params.baseUrl) {
-    throw new Error('hostRules cannot contain both a hostName and baseUrl');
+  const matchedFields = matchFields.filter((field) => params[field]);
+  if (matchedFields.length > 1) {
+    throw new Error(
+      `hostRules cannot contain more than one host-matching field. Found: [${matchedFields.join(
+        ', '
+      )}]`
+    );
   }
   const confidentialFields = ['password', 'token'];
   let resolvedHost = params.baseUrl || params.hostName || params.domainName;
