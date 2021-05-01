@@ -2,8 +2,8 @@ import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
 import { HostRule } from '../types';
-import * as sanitize from './sanitize';
 import { clone } from './clone';
+import * as sanitize from './sanitize';
 
 let hostRules: HostRule[] = [];
 
@@ -19,9 +19,9 @@ export function add(params: HostRule): void {
     );
   }
   const confidentialFields = ['password', 'token'];
-  let resolvedHost: string;
-  if (matchedFields.length) {
-    resolvedHost = params[matchedFields[0]];
+  let resolvedHost =
+    params.baseUrl || params.hostName || params.domainName || params.matchHost;
+  if (resolvedHost) {
     resolvedHost = URL.parse(resolvedHost).hostname || resolvedHost;
     confidentialFields.forEach((field) => {
       if (params[field]) {
