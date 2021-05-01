@@ -20,16 +20,16 @@ Renovate will:
 
 ## What is this `main` branch I see in the documentation?
 
-When you create a new repository with Git, Git creates a default branch for you.
+When you create a new repository with Git, Git creates a base branch for you.
 The default branch name that Git uses is `master` (this will be changed to `main` later).
 
-The Git-hosting ecosystem has settled on using `main` as the replacement for `master`.
-When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your default branch.
+The Git-hosting ecosystem has settled on using `main` to replace `master`.
+When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
 
 It therefore makes sense for Renovate to replace `master` with `main` where possible as well.
 
 A branch name has no special meaning within the Git program, it's just a name.
-The default branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
+The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
 ## What if I need to .. ?
 
