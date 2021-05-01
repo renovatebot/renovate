@@ -1,4 +1,3 @@
-import url from 'url';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -13,7 +12,6 @@ import {
 } from '../../constants/platforms';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,

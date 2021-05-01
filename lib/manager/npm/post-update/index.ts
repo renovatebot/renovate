@@ -444,7 +444,9 @@ export async function getAdditionalFiles(
   });
   for (const hostRule of npmHostRules) {
     if (hostRule.resolvedHost) {
-      const uri = `//${hostRule.resolvedHost}/`;
+      const uri = hostRule.baseUrl
+        ? hostRule.baseUrl.replace(/^https?:/, '')
+        : `//${hostRule.resolvedHost}/`;
       if (hostRule.token) {
         additionalNpmrcContent.push(`${uri}:_authToken=${hostRule.token}`);
       } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
