@@ -2,6 +2,7 @@ import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
 import { HostRule } from '../types';
+import { clone } from './clone';
 import * as sanitize from './sanitize';
 
 let hostRules: HostRule[] = [];
@@ -16,14 +17,14 @@ export function add(params: HostRule): void {
   if (params.hostName && params.baseUrl) {
     throw new Error('hostRules cannot contain both a hostName and baseUrl');
   }
-  hostRules.push(params);
   const confidentialFields = ['password', 'token'];
-  const ruleMatch = params.baseUrl || params.hostName || params.domainName;
-  if (ruleMatch) {
+  let resolvedHost = params.baseUrl || params.hostName || params.domainName;
+  if (resolvedHost) {
+    resolvedHost = URL.parse(resolvedHost).hostname || resolvedHost;
     confidentialFields.forEach((field) => {
       if (params[field]) {
         logger.debug(
-          `Adding ${field} authentication for ${ruleMatch} to hostRules`
+          `Adding ${field} authentication for ${resolvedHost} to hostRules`
         );
       }
     });
@@ -40,6 +41,11 @@ export function add(params: HostRule): void {
     ).toString('base64');
     sanitize.add(secret);
   }
+  const hostRule = clone(params);
+  if (resolvedHost) {
+    hostRule.resolvedHost = resolvedHost;
+  }
+  hostRules.push(hostRule);
 }
 
 export interface HostRuleSearch {
@@ -150,6 +156,7 @@ export function find(search: HostRuleSearch): HostRule {
   delete res.domainName;
   delete res.hostName;
   delete res.baseUrl;
+  delete res.resolvedHost;
   return res;
 }
 

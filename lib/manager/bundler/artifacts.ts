@@ -19,7 +19,6 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
-  getDomain,
 } from './host-rules';
 import { getGemHome } from './utils';
 
@@ -56,7 +55,7 @@ async function getRubyConstraint(
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   const varName =
     hostConfigVariablePrefix +
-    getDomain(hostRule)
+    hostRule.resolvedHost
       .split('.')
       .map((term) => term.toUpperCase())
       .join('__');
