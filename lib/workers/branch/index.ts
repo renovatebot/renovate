@@ -231,10 +231,7 @@ export async function processBranch(
       for (const upgrade of config.upgrades) {
         if (upgrade.stabilityDays && upgrade.releaseTimestamp) {
           const daysElapsed = getElapsedDays(upgrade.releaseTimestamp);
-          if (
-            (pendingChecksBypassed || !dependencyDashboardCheck) &&
-            daysElapsed < upgrade.stabilityDays
-          ) {
+          if (daysElapsed < upgrade.stabilityDays) {
             logger.debug(
               {
                 depName: upgrade.depName,

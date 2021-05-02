@@ -43,7 +43,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
       if (line.startsWith('go ') && validRange(line.replace('go ', ''))) {
-        constraints.go = line.replace('go ', '');
+        constraints.go = line.replace('go ', '^');
       }
       const replaceMatch = /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/.exec(
         line
