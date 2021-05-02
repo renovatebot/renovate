@@ -42,6 +42,14 @@ function filterUnavailableUsers(
     : Promise.resolve(users);
 }
 
+function prepareAssigneesReviewers(
+  config: RenovateConfig,
+  usernames: string[]
+): Promise<string[]> {
+  const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
+  return filterUnavailableUsers(config, normalizedUsernames);
+}
+
 export async function addAssigneesReviewers(
   config: RenovateConfig,
   pr: Pr
@@ -50,10 +58,9 @@ export async function addAssigneesReviewers(
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(assignees, pr);
   }
-  assignees = await filterUnavailableUsers(config, assignees);
   if (assignees.length > 0) {
     try {
-      assignees = assignees.map(noLeadingAtSymbol);
+      assignees = await prepareAssigneesReviewers(config, assignees);
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
@@ -80,10 +87,9 @@ export async function addAssigneesReviewers(
   if (config.additionalReviewers.length > 0) {
     reviewers = reviewers.concat(config.additionalReviewers);
   }
-  reviewers = await filterUnavailableUsers(config, reviewers);
   if (reviewers.length > 0) {
     try {
-      reviewers = [...new Set(reviewers.map(noLeadingAtSymbol))];
+      reviewers = await prepareAssigneesReviewers(config, reviewers);
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
