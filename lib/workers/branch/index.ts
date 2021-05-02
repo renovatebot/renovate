@@ -120,11 +120,6 @@ export async function processBranch(
       logger.debug('Reached commits limit - skipping branch');
       return { branchExists, result: BranchResult.CommitLimitReached };
     }
-    if (!branchExists && branchConfig.pendingChecks) {
-      if (!dependencyDashboardCheck) {
-        return { branchExists: false, result: BranchResult.Pending };
-      }
-    }
     if (
       !branchExists &&
       branchConfig.pendingChecks &&
