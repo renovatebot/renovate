@@ -608,7 +608,7 @@ Configure this to `false` if you want to disable release notes fetching
 
 ## fileMatch
 
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
+`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override the default values to customize for your project's needs.
 
 Sometimes file matches are really simple - for example with Go Modules Renovate looks for any `go.mod` file, and you probably don't need to change that default.
 
