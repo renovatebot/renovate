@@ -30,7 +30,7 @@ In order to achieve these goals, preset configs allow for a very modular approac
 
 ## Preset Hosting
 
-In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the base branch and it will be picked up by Renovate the next time it runs.
+In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
 An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
 | name                    | example use                | preset    | resolves as                          | filename                          |
@@ -122,7 +122,7 @@ Or if you think your preset would be valuable for others, please contribute a PR
 ## GitHub-hosted Presets
 
 It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `renovate.json` file in the base branch, e.g. `main`.
+In such cases Renovate will simply look for a `renovate.json` file in the default branch, e.g. `main`.
 
 To host your preset config on GitHub:
 
@@ -134,7 +134,7 @@ To host your preset config on GitHub:
   "extends": ["github>rarkins/renovate-config"]
 ```
 
-From then on Renovate will use the Renovate config from the preset repo's base branch.
+From then on Renovate will use the Renovate config from the preset repo's default branch.
 You do not need to add it as a devDependency or add any other files to the preset repo.
 
 ## GitLab-hosted Presets

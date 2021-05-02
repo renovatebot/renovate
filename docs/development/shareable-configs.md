@@ -46,7 +46,7 @@ If you use a non-scoped config, you must use a preset name!
 
 ### Git based
 
-In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the base branch and it will be picked up by Renovate the next time it runs.
+In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
 An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
 | name                    | example use          | preset    | resolves as                          | filename                          |

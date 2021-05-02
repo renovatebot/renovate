@@ -20,7 +20,7 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 
-Renovate always uses the config from the repository's base branch, even if that configuration specifies multiple `baseBranches`.
+Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
 
 Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
@@ -206,11 +206,11 @@ Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renova
 
 ## baseBranches
 
-By default, Renovate will detect and process only the repository's base branch.
+By default, Renovate will detect and process only the repository's default branch.
 For most projects, this is the expected approach.
 However, Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
 
-- You wish Renovate to process only a non-base branch, e.g. `dev`: `"baseBranches": ["dev"]`
+- You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
