@@ -114,76 +114,23 @@ export function isScheduledNow(config: RenovateConfig): boolean {
   logger.trace(`currentSeconds=${currentSeconds}`);
   // Support a single string but massage to array for processing
   logger.debug(`Checking ${configSchedule.length} schedule(s)`);
+
+  // later is timezone agnostic (as in, it purely relies on the underlying UTC date/time that is stored in the Date),
+  // which means we have to pass it a Date that has an underlying UTC date/time in the same timezone as the schedule
+  const jsNow = now.setZone('utc', { keepLocalTime: true }).toJSDate();
+
   // We run if any schedule matches
   const isWithinSchedule = configSchedule.some((scheduleText) => {
     const massagedText = scheduleMappings[scheduleText] || scheduleText;
     const parsedSchedule = later.parse.text(fixShortHours(massagedText));
     logger.debug({ parsedSchedule }, `Checking schedule "${scheduleText}"`);
-    // Later library returns array of schedules
-    return parsedSchedule.schedules.some((schedule) => {
-      // Check if months are defined
-      if (schedule.M) {
-        const currentMonth = now.month;
-        if (!schedule.M.includes(currentMonth)) {
-          logger.debug(
-            `Does not match schedule because ${currentMonth} is not in ${String(
-              schedule.M
-            )}`
-          );
-          return false;
-        }
-      }
-      // Check if days are defined
-      if (schedule.d) {
-        // We need to map because 'luxon' uses monday as first day
-        // and later uses sundays as first day of week
-        // http://bunkat.github.io/later/time-periods.html#day-of-week
-        const dowMap = [6, 7, 1, 2, 3, 4, 5, 6];
-        const scheduledDays = schedule.d.map((day) => dowMap[day]);
-        logger.trace({ scheduledDays }, `scheduledDays`);
-        if (!scheduledDays.includes(currentDay)) {
-          logger.debug(
-            `Does not match schedule because ${currentDay} is not in ${String(
-              scheduledDays
-            )}`
-          );
-          return false;
-        }
-      }
-      if (schedule.D) {
-        logger.debug({ schedule_D: schedule.D }, `schedule.D`);
-        const currentDayOfMonth = now.day;
-        if (!schedule.D.includes(currentDayOfMonth)) {
-          return false;
-        }
-      }
-      // Check for start time
-      if (schedule.t_a) {
-        const startSeconds = schedule.t_a[0];
-        if (currentSeconds < startSeconds) {
-          logger.debug(
-            `Does not match schedule because ${currentSeconds} is earlier than ${startSeconds}`
-          );
-          return false;
-        }
-      }
-      // Check for end time
-      if (schedule.t_b) {
-        const endSeconds = schedule.t_b[0];
-        if (currentSeconds > endSeconds) {
-          logger.debug(
-            `Does not match schedule because ${currentSeconds} is later than ${endSeconds}`
-          );
-          return false;
-        }
-      }
-      // Check for week of year
-      if (schedule.wy && !schedule.wy.includes(now.weekNumber)) {
-        return false;
-      }
+
+    if (later.schedule(parsedSchedule).isValid(jsNow)) {
       logger.debug(`Matches schedule ${scheduleText}`);
       return true;
-    });
+    }
+
+    return false;
   });
   if (!isWithinSchedule) {
     logger.debug('Package not scheduled');

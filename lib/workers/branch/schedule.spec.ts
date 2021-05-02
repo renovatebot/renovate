@@ -257,5 +257,19 @@ describe(getName(), () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
+    it('supports weekday instances', () => {
+      config.schedule = ['on Monday on the first day instance'];
+
+      const cases: [string, boolean][] = [
+        ['2017-02-01T06:00:00.000', false], // Locally Thursday, 2 February 2017 6am
+        ['2017-02-06T06:00:00.000', true], // Locally Monday, 6 February 2017 6am
+        ['2017-02-13T06:00:00.000', false], // Locally Monday, 13 February 2017 6am
+      ];
+
+      cases.forEach(([datetime, expected]) => {
+        mockDate.set(datetime);
+        expect(schedule.isScheduledNow(config)).toBe(expected);
+      });
+    });
   });
 });
