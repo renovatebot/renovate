@@ -21,7 +21,7 @@ branchify.branchifyUpgrades.mockResolvedValueOnce({
   branchList: ['branchName'],
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extract()', () => {
     it('runs with no baseBranches', async () => {
       const config = {

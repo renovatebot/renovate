@@ -12,7 +12,7 @@ import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
 import type { GotOptions, OutgoingHttpHeaders, RequestStats } from './types';
 
-// TODO: refactor code to remove this
+// TODO: refactor code to remove this (#9651)
 import './legacy';
 
 export interface HttpOptions {

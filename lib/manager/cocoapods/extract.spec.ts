@@ -1,20 +1,10 @@
-import fs from 'fs-extra';
-import upath from 'upath';
-
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const simplePodfile = fs.readFileSync(
-  upath.resolve(__dirname, './__fixtures__/Podfile.simple'),
-  'utf-8'
-);
+const simplePodfile = loadFixture('Podfile.simple');
+const complexPodfile = loadFixture('Podfile.complex');
 
-const complexPodfile = fs.readFileSync(
-  upath.resolve(__dirname, './__fixtures__/Podfile.complex'),
-  'utf-8'
-);
-
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('extracts all dependencies', async () => {
       const simpleResult = (await extractPackageFile(simplePodfile, 'Podfile'))

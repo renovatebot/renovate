@@ -6,7 +6,7 @@ import { BitbucketServerHttp, setBaseUrl } from './bitbucket-server';
 
 const baseUrl = 'https://git.example.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let api: BitbucketServerHttp;
   beforeEach(() => {
     api = new BitbucketServerHttp();

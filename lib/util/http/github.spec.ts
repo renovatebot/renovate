@@ -13,7 +13,7 @@ import { GithubHttp, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
     githubApi = new GithubHttp();

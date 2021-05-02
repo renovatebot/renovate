@@ -1,7 +1,6 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadJsonFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
@@ -11,19 +10,13 @@ jest.mock('../../util/host-rules');
 
 const hostRules = _hostRules;
 
-const includesJson: any = fs.readFileSync(
-  'lib/datasource/packagist/__fixtures__/includes.json'
-);
-const beytJson: any = fs.readFileSync(
-  'lib/datasource/packagist/__fixtures__/1beyt.json'
-);
-const mailchimpJson: any = fs.readFileSync(
-  'lib/datasource/packagist/__fixtures__/mailchimp-api.json'
-);
+const includesJson: any = loadJsonFixture('includes.json');
+const beytJson: any = loadJsonFixture('1beyt.json');
+const mailchimpJson: any = loadJsonFixture('mailchimp-api.json');
 
 const baseUrl = 'https://packagist.org';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     let config: any;
     beforeEach(() => {
@@ -143,7 +136,7 @@ describe(getName(__filename), () => {
         .get('/packages.json')
         .reply(200, packagesJson)
         .get('/include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json')
-        .reply(200, JSON.parse(includesJson));
+        .reply(200, includesJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -227,7 +220,7 @@ describe(getName(__filename), () => {
         .get(
           '/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json'
         )
-        .reply(200, JSON.parse(beytJson));
+        .reply(200, beytJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -269,10 +262,7 @@ describe(getName(__filename), () => {
           '/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json'
         )
         .reply(200, fileJson);
-      httpMock
-        .scope(baseUrl)
-        .get('/p/some/other.json')
-        .reply(200, JSON.parse(beytJson));
+      httpMock.scope(baseUrl).get('/p/some/other.json').reply(200, beytJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -304,7 +294,7 @@ describe(getName(__filename), () => {
         .get(
           '/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json'
         )
-        .reply(200, JSON.parse(beytJson));
+        .reply(200, beytJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -334,10 +324,7 @@ describe(getName(__filename), () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(200, packagesJson);
-      httpMock
-        .scope(baseUrl)
-        .get('/p/some/other.json')
-        .reply(200, JSON.parse(beytJson));
+      httpMock.scope(baseUrl).get('/p/some/other.json').reply(200, beytJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -351,7 +338,7 @@ describe(getName(__filename), () => {
       httpMock
         .scope(baseUrl)
         .get('/p/drewm/mailchimp-api.json')
-        .reply(200, JSON.parse(mailchimpJson));
+        .reply(200, mailchimpJson);
       config.registryUrls = ['https://packagist.org'];
       expect(
         await getPkgReleases({
@@ -367,7 +354,7 @@ describe(getName(__filename), () => {
       httpMock
         .scope(baseUrl)
         .get('/p/drewm/mailchimp-api.json')
-        .reply(200, JSON.parse(mailchimpJson));
+        .reply(200, mailchimpJson);
       config.registryUrls = [];
       expect(
         await getPkgReleases({

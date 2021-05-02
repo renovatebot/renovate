@@ -3,7 +3,7 @@ import * as fileMatch from './file-match';
 
 jest.mock('../../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   const fileList = ['package.json', 'frontend/package.json'];
   describe('getIncludedFiles()', () => {
     it('returns fileList if no includePaths', () => {

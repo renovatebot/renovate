@@ -1,14 +1,13 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const tg1 = readFileSync('lib/manager/terragrunt/__fixtures__/2.hcl', 'utf8');
+const tg1 = loadFixture('2.hcl');
 const tg2 = `terragrunt {
   source = "../../modules/fe"
 }
 `;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

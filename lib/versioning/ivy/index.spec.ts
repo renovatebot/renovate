@@ -9,7 +9,7 @@ import ivy from '.';
 
 const { getNewValue, isValid, isVersion, matches } = ivy;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('parses dynamic revisions', () => {
     expect(parseDynamicRevision(null)).toBeNull();
     expect(parseDynamicRevision('')).toBeNull();
@@ -61,7 +61,7 @@ describe(getName(__filename), () => {
   });
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('isValid', () => {
     expect(isValid('')).toBe(false);
     expect(isValid('1.0.0')).toBe(true);

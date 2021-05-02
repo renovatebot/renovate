@@ -1,13 +1,9 @@
-import { readFileSync } from 'fs';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const file1 = readFileSync(
-  'lib/manager/cloudbuild/__fixtures__/cloudbuild.yml',
-  'utf8'
-);
+const file1 = loadFixture('cloudbuild.yml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

@@ -18,7 +18,7 @@ const config = mocked(_config);
 const onboarding = mocked(_onboarding);
 const secrets = mocked(_secrets);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('initRepo', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue({} as never);

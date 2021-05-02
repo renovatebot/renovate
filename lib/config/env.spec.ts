@@ -6,7 +6,7 @@ import {
 import * as env from './env';
 import type { RenovateOptions } from './types';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
       expect(env.getConfig({})).toEqual({ hostRules: [] });

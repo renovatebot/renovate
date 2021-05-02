@@ -30,7 +30,7 @@ When Renovate processes your project's repository it will look for the files lis
 
 ## Configuring Support Policy
 
-Renovate supports a [`supportPolicy`](/configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of April 2021):
+Renovate supports a [`supportPolicy`](./configuration-options.md#supportpolicy) option that can be passed the following values and associated versions (current as of April 2021):
 
 **Default:** `lts`
 
@@ -54,7 +54,7 @@ For example, to instruct Renovate to upgrade your project to the latest [Long-te
 We recommend that you define this support policy inside the `node` configuration object.
 This way, it is applied to all Node.js-related files.
 
-For additional language support see the [`supportPolicy` documentation](/configuration-options/#supportpolicy).
+For additional language support see the [`supportPolicy` documentation](./configuration-options.md#supportpolicy).
 
 ## Configuring which version of npm Renovate uses
 

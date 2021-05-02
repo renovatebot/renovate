@@ -99,7 +99,7 @@ function setupGitlabChangelogMock() {
   gitlabChangelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;

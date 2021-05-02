@@ -31,7 +31,7 @@ beforeEach(() => {
 jest.mock('../../../config/migration');
 jest.mock('../../../config/migrate-validate');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('detectRepoFileConfig()', () => {
     it('returns config if not found', () => {
       git.getFileList.mockResolvedValue(['package.json']);

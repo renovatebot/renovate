@@ -1,35 +1,16 @@
-import { readFileSync } from 'fs';
-import { fs, getName } from '../../../test/util';
+import { fs, getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-const requirements1 = readFileSync(
-  'lib/manager/composer/__fixtures__/composer1.json',
-  'utf8'
-);
-const requirements2 = readFileSync(
-  'lib/manager/composer/__fixtures__/composer2.json',
-  'utf8'
-);
-const requirements3 = readFileSync(
-  'lib/manager/composer/__fixtures__/composer3.json',
-  'utf8'
-);
-const requirements4 = readFileSync(
-  'lib/manager/composer/__fixtures__/composer4.json',
-  'utf8'
-);
-const requirements5 = readFileSync(
-  'lib/manager/composer/__fixtures__/composer5.json',
-  'utf8'
-);
-const requirements5Lock = readFileSync(
-  'lib/manager/composer/__fixtures__/composer5.lock',
-  'utf8'
-);
+const requirements1 = loadFixture('composer1.json');
+const requirements2 = loadFixture('composer2.json');
+const requirements3 = loadFixture('composer3.json');
+const requirements4 = loadFixture('composer4.json');
+const requirements5 = loadFixture('composer5.json');
+const requirements5Lock = loadFixture('composer5.lock');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     let packageFile;
     beforeEach(() => {

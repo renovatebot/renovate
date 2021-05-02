@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { TerragruntDependencyTypes, getTerragruntDependencyType } from './util';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getTerragruntDependencyType()', () => {
     it('returns TerragruntDependencyTypes.terragrunt', () => {
       expect(getTerragruntDependencyType('terraform')).toBe(

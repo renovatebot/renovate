@@ -38,7 +38,7 @@ function readString(...paths: string[]): Promise<string> {
   return readFile(resolve(fixtures, ...paths), 'utf8');
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     httpMock.setup();
