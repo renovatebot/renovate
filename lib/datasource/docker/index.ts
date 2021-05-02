@@ -1,5 +1,5 @@
 import URL from 'url';
-import { ECR } from '@aws-sdk/client-ecr';
+import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
@@ -16,8 +16,8 @@ import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { Image, ImageList, MediaType } from './types';
 
-// TODO: add got typings when available
-// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
+// TODO: add got typings when available (#9646)
+// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
 
 export const id = 'docker';
 export const customRegistrySupport = true;
@@ -113,10 +113,12 @@ async function getECRAuthToken(
   region: string,
   opts: HostRule
 ): Promise<string | null> {
-  const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
+  const config: ECRClientConfig = { region };
   if (opts.username && opts.password) {
-    config.accessKeyId = opts.username;
-    config.secretAccessKey = opts.password;
+    config.credentials = {
+      accessKeyId: opts.username,
+      secretAccessKey: opts.password,
+    };
   }
   const ecr = new ECR(config);
   try {
@@ -198,7 +200,7 @@ async function getAuthHeaders(
     };
   } catch (err) /* istanbul ignore next */ {
     if (err.host === 'quay.io') {
-      // TODO: debug why quay throws errors
+      // TODO: debug why quay throws errors (#9604)
       return null;
     }
     if (err.statusCode === 401) {
@@ -251,7 +253,7 @@ function extractDigestFromResponse(manifestResponse: HttpResponse): string {
   return manifestResponse.headers['docker-content-digest'] as string;
 }
 
-// TODO: make generic to return json object
+// TODO: debug why quay throws errors (#9612)
 async function getManifestResponse(
   registry: string,
   dockerRepository: string,

@@ -14,7 +14,7 @@ npm.getPreset = jest.fn((_) => null);
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('fails for undefined internal preset', async () => {
     const preset = 'foo:bar';
     const presetConfig = { extends: [preset] };

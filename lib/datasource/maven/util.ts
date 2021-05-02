@@ -116,7 +116,7 @@ export async function isHttpResourceExists(
     const httpClient = httpByHostType(hostType);
     const res = await httpClient.head(pkgUrl.toString());
     const pkgUrlHost = url.parse(pkgUrl.toString()).host;
-    if (pkgUrlHost === 'repo.maven.apache.org') {
+    if (['repo.maven.apache.org', 'gitlab.com'].includes(pkgUrlHost)) {
       const timestamp = res?.headers?.['last-modified'] as string;
       return timestamp || true;
     }
@@ -200,6 +200,7 @@ export async function getDependencyInfo(
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
   const { xml: pomContent } = await downloadMavenXml(pomUrl);
+  // istanbul ignore if
   if (!pomContent) {
     return result;
   }

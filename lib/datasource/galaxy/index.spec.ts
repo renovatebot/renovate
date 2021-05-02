@@ -4,12 +4,12 @@ import { getName, loadFixture } from '../../../test/util';
 
 import { id as datasource } from '.';
 
-const res1 = loadFixture(__filename, 'timezone');
-const empty = loadFixture(__filename, 'empty');
+const res1 = loadFixture('timezone');
+const empty = loadFixture('empty');
 
 const baseUrl = 'https://galaxy.ansible.com/';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

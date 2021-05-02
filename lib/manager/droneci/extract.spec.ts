@@ -2,9 +2,9 @@ import { getName, loadFixture } from '../../../test/util';
 
 import { extractPackageFile } from './extract';
 
-const droneYAML = loadFixture(__filename, '.drone.yml');
+const droneYAML = loadFixture('.drone.yml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

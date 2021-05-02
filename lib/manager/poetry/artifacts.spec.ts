@@ -11,7 +11,7 @@ import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
 import { updateArtifacts } from './artifacts';
 
-const pyproject10toml = loadFixture(__filename, 'pyproject.10.toml');
+const pyproject10toml = loadFixture('pyproject.10.toml');
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -209,7 +209,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          isLockFileMaintenance: true,
+          updateType: 'lockFileMaintenance',
         },
       })
     ).not.toBeNull();

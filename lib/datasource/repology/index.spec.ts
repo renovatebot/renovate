@@ -45,13 +45,13 @@ const mockResolverCall = (
   }
 };
 
-const fixtureNginx = loadFixture(__filename, `nginx.json`);
-const fixtureGccDefaults = loadFixture(__filename, `gcc-defaults.json`);
-const fixtureGcc = loadFixture(__filename, `gcc.json`);
-const fixturePulseaudio = loadFixture(__filename, `pulseaudio.json`);
-const fixtureJdk = loadFixture(__filename, `openjdk.json`);
+const fixtureNginx = loadFixture(`nginx.json`);
+const fixtureGccDefaults = loadFixture(`gcc-defaults.json`);
+const fixtureGcc = loadFixture(`gcc.json`);
+const fixturePulseaudio = loadFixture(`pulseaudio.json`);
+const fixtureJdk = loadFixture(`openjdk.json`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

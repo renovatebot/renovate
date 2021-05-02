@@ -8,7 +8,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade', () => {
       const branch = [
@@ -502,6 +502,7 @@ describe(getName(__filename), () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
+          separateMinorPatch: true,
           updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
         },

@@ -19,7 +19,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('processRepo()', () => {
     it('processes single branches', async () => {
       const res = await extractDependencies(config);

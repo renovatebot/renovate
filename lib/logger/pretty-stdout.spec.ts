@@ -10,7 +10,7 @@ jest.mock('chalk', () =>
   )
 );
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getMeta(rec)', () => {
     it('returns empty string if null rec', () => {
       expect(prettyStdout.getMeta(null as any)).toEqual('');

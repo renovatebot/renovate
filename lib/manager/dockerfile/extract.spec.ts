@@ -1,10 +1,10 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile, getDep } from './extract';
 
-const d1 = loadFixture(__filename, '1.Dockerfile');
-const d2 = loadFixture(__filename, '2.Dockerfile');
+const d1 = loadFixture('1.Dockerfile');
+const d2 = loadFixture('2.Dockerfile');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('handles no FROM', () => {
       const res = extractPackageFile('no from!');

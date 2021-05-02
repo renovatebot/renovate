@@ -27,7 +27,7 @@ hostRules.find = jest.fn((_) => ({
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('writeUpdatedPackageFiles', () => {
     let config: PostUpdateConfig;
     beforeEach(() => {

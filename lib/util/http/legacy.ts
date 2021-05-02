@@ -2,7 +2,7 @@
 import { parseUrl } from '../url';
 import { HttpError } from './types';
 
-// TODO: remove when code is refactored
+// TODO: remove when code is refactored (#9651)
 
 Object.defineProperty(HttpError.prototype, 'statusCode', {
   get: function statusCode(this: HttpError) {

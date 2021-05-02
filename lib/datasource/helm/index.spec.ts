@@ -4,9 +4,9 @@ import { getName, loadFixture } from '../../../test/util';
 import { id as datasource } from '.';
 
 // Truncated index.yaml file
-const indexYaml = loadFixture(__filename, 'index.yaml');
+const indexYaml = loadFixture('index.yaml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();

@@ -11,7 +11,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('detectSemanticCommits()', () => {
     it('detects false if unknown', async () => {
       config.semanticCommits = null;

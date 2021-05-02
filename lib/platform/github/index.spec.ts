@@ -11,7 +11,7 @@ import type { Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -41,12 +41,8 @@ describe(getName(__filename), () => {
     httpMock.reset();
   });
 
-  const graphqlOpenPullRequests = loadFixture(
-    __filename,
-    'graphql/pullrequest-1.json'
-  );
+  const graphqlOpenPullRequests = loadFixture('graphql/pullrequest-1.json');
   const graphqlClosedPullRequests = loadFixture(
-    __filename,
     'graphql/pullrequests-closed.json'
   );
 

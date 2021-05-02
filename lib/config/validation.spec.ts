@@ -2,7 +2,7 @@ import { getName } from '../../test/util';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getParentName()', () => {
     it('ignores encrypted in root', () => {
       expect(configValidation.getParentName('encrypted')).toEqual('');

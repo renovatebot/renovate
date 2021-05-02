@@ -2,10 +2,10 @@ import { getName, loadFixture } from '../../../test/util';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
-const gomod1 = loadFixture(__filename, '1/go.mod');
-const gomod2 = loadFixture(__filename, '2/go.mod');
+const gomod1 = loadFixture('1/go.mod');
+const gomod2 = loadFixture('2/go.mod');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {

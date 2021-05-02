@@ -45,7 +45,6 @@ export async function getPackageUpdates(
   }
   newValue.sort((a, b) => a - b);
 
-  // TODO: `config.currentValue` is a string!
   (config.currentValue as any).sort((a, b) => a - b);
   if (dequal(config.currentValue, newValue)) {
     return { updates: [] };

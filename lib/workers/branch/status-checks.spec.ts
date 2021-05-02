@@ -2,7 +2,7 @@ import { defaultConfig, getName, platform } from '../../../test/util';
 import { BranchStatus } from '../../types';
 import { StabilityConfig, setStability } from './status-checks';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('setStability', () => {
     let config: StabilityConfig;
     beforeEach(() => {

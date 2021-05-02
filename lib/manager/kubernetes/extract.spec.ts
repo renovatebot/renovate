@@ -1,12 +1,12 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const kubernetesImagesFile = loadFixture(__filename, 'kubernetes.yaml');
-const kubernetesConfigMapFile = loadFixture(__filename, 'configmap.yaml');
-const kubernetesArraySyntaxFile = loadFixture(__filename, 'array-syntax.yaml');
-const otherYamlFile = loadFixture(__filename, 'gitlab-ci.yaml');
+const kubernetesImagesFile = loadFixture('kubernetes.yaml');
+const kubernetesConfigMapFile = loadFixture('configmap.yaml');
+const kubernetesArraySyntaxFile = loadFixture('array-syntax.yaml');
+const otherYamlFile = loadFixture('gitlab-ci.yaml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile(kubernetesConfigMapFile)).toBeNull();

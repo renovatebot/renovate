@@ -6,7 +6,7 @@ import { shouldReuseExistingBranch } from './reuse';
 
 jest.mock('../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('shouldReuseExistingBranch(config)', () => {
     const pr: Pr = {
       sourceBranch: 'master',
