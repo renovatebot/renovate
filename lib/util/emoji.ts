@@ -15,13 +15,14 @@ const githubShortcodes: Record<string, string | string[]> = JSON.parse(
   dataFiles.get('emojibase-github-shortcodes.json')
 );
 
-let unicodeEmoji = false;
+let unicodeEmoji = true;
 
+let mappingsInitialized = false;
 const shortCodesByHex = new Map<string, string>();
 const hexCodesByShort = new Map<string, string>();
 
-function initMappings(): void {
-  if (shortCodesByHex.size === 0 && shortCodesByHex.size === 0) {
+function lazyInitMappings(): void {
+  if (!mappingsInitialized) {
     for (const [hex, val] of Object.entries(githubShortcodes)) {
       const shortcodes: string[] = is.array<string>(val) ? val : [val];
       shortCodesByHex.set(hex, `:${shortcodes[0]}:`);
@@ -29,17 +30,18 @@ function initMappings(): void {
         hexCodesByShort.set(`:${shortcode}:`, hex);
       });
     }
+    mappingsInitialized = true;
   }
 }
 
 export function setEmojiConfig(_config: RenovateConfig): void {
-  initMappings();
   unicodeEmoji = _config.unicodeEmoji;
 }
 
 const shortcodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
 
 export function emojify(text: string): string {
+  lazyInitMappings();
   return unicodeEmoji
     ? text.replace(shortcodeRegex, (shortcode) => {
         const hexCode = hexCodesByShort.get(shortcode);
@@ -78,6 +80,7 @@ export function stripHexCode(input: string): string {
 }
 
 export function unemojify(text: string, tofu = '�'): string {
+  lazyInitMappings();
   return unicodeEmoji
     ? text
     : text.replace(emojiRegex, (emoji) => {

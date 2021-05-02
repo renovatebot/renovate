@@ -1,6 +1,5 @@
 import { mock } from 'jest-mock-extended';
 import { getName, git } from '../../../../test/util';
-import { setEmojiConfig } from '../../../util/emoji';
 import { BranchConfig } from '../../types';
 import { getControls } from './controls';
 
@@ -9,7 +8,6 @@ jest.mock('../../../util/git');
 describe(getName(), () => {
   describe('getControls', () => {
     let branchConfig: BranchConfig;
-    beforeAll(() => setEmojiConfig({ unicodeEmoji: true }));
     beforeEach(() => {
       jest.resetAllMocks();
       branchConfig = mock<BranchConfig>();
