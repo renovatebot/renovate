@@ -229,11 +229,11 @@ describe('bundler.updateArtifacts()', () => {
         {
           hostType: 'bundler',
           hostName: 'gems.private.com',
+          resolvedHost: 'gems.private.com',
           username: 'some-user',
           password: 'some-password',
         },
       ]);
-      bundlerHostRules.getDomain.mockReturnValue('gems.private.com');
       bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
         'some-user:some-password'
       );
