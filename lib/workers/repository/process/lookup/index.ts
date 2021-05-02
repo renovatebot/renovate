@@ -282,6 +282,8 @@ export async function lookupUpdates(
       );
       if (pendingChecks.length) {
         update.pendingChecks = pendingChecks;
+      }
+      if (pendingReleases.length) {
         update.pendingVersions = pendingReleases.map((r) => r.version);
       }
       if (!update.newValue || update.newValue === currentValue) {
