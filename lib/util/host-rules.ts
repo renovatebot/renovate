@@ -7,15 +7,16 @@ import * as sanitize from './sanitize';
 
 let hostRules: HostRule[] = [];
 
+const matchFields = ['hostName', 'domainName', 'baseUrl'];
+
 export function add(params: HostRule): void {
-  if (params.domainName && params.hostName) {
-    throw new Error('hostRules cannot contain both a domainName and hostName');
-  }
-  if (params.domainName && params.baseUrl) {
-    throw new Error('hostRules cannot contain both a domainName and baseUrl');
-  }
-  if (params.hostName && params.baseUrl) {
-    throw new Error('hostRules cannot contain both a hostName and baseUrl');
+  const matchedFields = matchFields.filter((field) => params[field]);
+  if (matchedFields.length > 1) {
+    throw new Error(
+      `hostRules cannot contain more than one host-matching field. Found: [${matchedFields.join(
+        ', '
+      )}]`
+    );
   }
   const confidentialFields = ['password', 'token'];
   let resolvedHost = params.baseUrl || params.hostName || params.domainName;
@@ -54,11 +55,11 @@ export interface HostRuleSearch {
 }
 
 function isEmptyRule(rule: HostRule): boolean {
-  return !rule.hostType && !rule.domainName && !rule.hostName && !rule.baseUrl;
+  return !rule.hostType && !rule.resolvedHost;
 }
 
 function isHostTypeRule(rule: HostRule): boolean {
-  return rule.hostType && !rule.domainName && !rule.hostName && !rule.baseUrl;
+  return rule.hostType && !rule.resolvedHost;
 }
 
 function isDomainNameRule(rule: HostRule): boolean {
@@ -74,7 +75,7 @@ function isBaseUrlRule(rule: HostRule): boolean {
 }
 
 function isMultiRule(rule: HostRule): boolean {
-  return rule.hostType && !!(rule.domainName || rule.hostName || rule.baseUrl);
+  return rule.hostType && !!rule.resolvedHost;
 }
 
 function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
@@ -163,15 +164,7 @@ export function find(search: HostRuleSearch): HostRule {
 export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
     .filter((rule) => rule.hostType === hostType)
-    .map((rule) => {
-      if (rule.hostName) {
-        return rule.hostName;
-      }
-      if (rule.baseUrl) {
-        return URL.parse(rule.baseUrl).hostname;
-      }
-      return null;
-    })
+    .map((rule) => rule.resolvedHost)
     .filter(Boolean);
 }
 
