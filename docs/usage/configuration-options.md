@@ -20,7 +20,7 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 
-Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
+Renovate always uses the config from the repository's base branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
 
 Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
@@ -210,7 +210,7 @@ By default, Renovate will detect and process only the repository's base branch.
 For most projects, this is the expected approach.
 However, Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
 
-- You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
+- You wish Renovate to process only a non-base branch, e.g. `dev`: `"baseBranches": ["dev"]`
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
@@ -2025,7 +2025,7 @@ Currently Renovate's default behavior is to only automerge if every status check
 
 Setting this option to `null` means that Renovate will ignore _all_ status checks.
 You can set this if you don't have any status checks but still want Renovate to automerge PRs.
-Beware: configuring Renovate to automerge without any tests can lead to broken builds on your default branch, please think again before enabling this!
+Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
 
 In future, this might be configurable to allow certain status checks to be ignored/required.
 See [issue 1853 at the Renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.

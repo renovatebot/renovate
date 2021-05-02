@@ -35,7 +35,7 @@ The base branch could be called `trunk` or `mainline` or `prod`, and Git would w
 
 ### Use an alternative branch as my Pull Request target
 
-Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
+Say your repository's base branch is `main` but you want Renovate to use the `next` branch as its PR target.
 You can configure the PR target branch via the `baseBranches` option.
 
 Add this line to the `renovate.json` file that's in the _base_ branch (`main` in this example).
@@ -183,7 +183,7 @@ As above, but apply a `groupName`:
 ]
 ```
 
-### Change the default branch name, commit message, PR title or PR description
+### Change the base branch name, commit message, PR title or PR description
 
 You can use the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration options to change the defaults for those settings.
 

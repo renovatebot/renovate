@@ -43,7 +43,7 @@ By default, `renovate` will maintain separate branches for each dependency.
 So if 20 dependencies need updating, there will be at least 20 branches/PRs.
 Although this may seem undesirable, it's even less desirable if all 20 were in the same Pull Request and it's very difficult to work out which upgrade caused the test failure.
 
-However, you can override the default branch and PR name templates to get a single branch for all dependencies.
+However, you can override the base branch and PR name templates to get a single branch for all dependencies.
 The `groupName` configuration option can be used at a repository level (e.g. give it the value `All`) and then all dependency updates will be in the same branch/PR.
 
 ## Separate Minor and Major PRs
