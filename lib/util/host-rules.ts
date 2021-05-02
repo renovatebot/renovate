@@ -4,6 +4,7 @@ import { logger } from '../logger';
 import { HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
+import { validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
@@ -109,13 +110,11 @@ function matchesBaseUrl(rule: HostRule, search: HostRuleSearch): boolean {
   return search.url && rule.baseUrl && search.url.startsWith(rule.baseUrl);
 }
 
-const baseUrlTest = /^https?:\/\//;
-
 function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
   if (!rule.matchHost) {
     return false;
   }
-  if (baseUrlTest.test(rule.matchHost)) {
+  if (validateUrl(rule.matchHost)) {
     return search.url.startsWith(rule.matchHost);
   }
   const { hostname } = URL.parse(search.url);
