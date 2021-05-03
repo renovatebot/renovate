@@ -4,7 +4,7 @@ exports[`workers/repository/onboarding/pr/errors-warnings getDepWarnings() retur
 "
 ---
 
-### ⚠️ Dependency Lookup Warnings ⚠️
+### ⚠ Dependency Lookup Warnings ⚠
 
 Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.
 
