@@ -1,6 +1,6 @@
+import path from 'path';
 import fs from 'fs-extra';
 import shell from 'shelljs';
-import path from 'path';
 
 shell.echo('generating imports');
 const newFiles = new Set();
