@@ -6,7 +6,7 @@
     "@jest/reporters": "26.6.2",
     "@jest/test-result": "26.6.2",
     "commander": "6.2.1",
-    "eslint": "7.24.0",
+    "eslint": "7.25.0",
     "fs-extra": "9.1.0",
     "got": "11.8.2",
     "lodash": "4.17.21",
