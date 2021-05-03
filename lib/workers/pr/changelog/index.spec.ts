@@ -31,7 +31,7 @@ const upgrade: BranchConfig = partial<BranchConfig>({
   ],
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       httpMock.setup();

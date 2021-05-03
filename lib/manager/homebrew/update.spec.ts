@@ -3,12 +3,12 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
 import { updateDependency } from './update';
 
-const aide = loadFixture(__filename, 'aide.rb');
-const ibazel = loadFixture(__filename, 'ibazel.rb');
+const aide = loadFixture('aide.rb');
+const ibazel = loadFixture('ibazel.rb');
 
 const baseUrl = 'https://github.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

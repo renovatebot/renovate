@@ -31,7 +31,7 @@ interface TestInput {
   adminConfig?: RepoAdminConfig;
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let processEnvOrig: NodeJS.ProcessEnv;
 
   const cacheDir = '/tmp/renovate/cache/';

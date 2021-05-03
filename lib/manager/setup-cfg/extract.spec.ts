@@ -1,9 +1,9 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const content = loadFixture(__filename, 'setup-cfg-1.txt');
+const content = loadFixture('setup-cfg-1.txt');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

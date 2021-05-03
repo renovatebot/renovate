@@ -2,7 +2,7 @@ import { getName, logger } from '../../../test/util';
 import type { PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractAllPackageFiles()', () => {
     it('returns null for empty', async () => {
       expect(
@@ -26,6 +26,15 @@ describe(getName(__filename), () => {
         });
       });
       expect(deps).toHaveLength(5);
+    });
+
+    it('extracts named services', async () => {
+      const res = await extractAllPackageFiles({}, [
+        'lib/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml',
+      ]);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].deps).toHaveLength(3);
     });
 
     it('extracts multiple image lines', async () => {

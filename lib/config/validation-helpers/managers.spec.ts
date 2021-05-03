@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { check } from './managers';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('should have no errors', () => {
     const res = check({
       resolvedRule: { matchManagers: ['npm'] },

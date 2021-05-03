@@ -1,15 +1,15 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const invalidYamlFile = loadFixture(__filename, 'invalid.yaml');
+const invalidYamlFile = loadFixture('invalid.yaml');
 
-const pluginsTextFile = loadFixture(__filename, 'plugins.txt');
-const pluginsYamlFile = loadFixture(__filename, 'plugins.yaml');
+const pluginsTextFile = loadFixture('plugins.txt');
+const pluginsYamlFile = loadFixture('plugins.yaml');
 
-const pluginsEmptyTextFile = loadFixture(__filename, 'empty.txt');
-const pluginsEmptyYamlFile = loadFixture(__filename, 'empty.yaml');
+const pluginsEmptyTextFile = loadFixture('empty.txt');
+const pluginsEmptyYamlFile = loadFixture('empty.yaml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns empty list for an empty text file', () => {
       const res = extractPackageFile(pluginsEmptyTextFile, 'path/file.txt');

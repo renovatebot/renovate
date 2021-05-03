@@ -13,7 +13,7 @@ import * as _hostRules from '../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;

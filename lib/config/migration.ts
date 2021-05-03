@@ -46,7 +46,7 @@ interface MigratedRenovateConfig extends RenovateConfig {
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
-  // TODO: remove any type
+  // TODO: remove any type (#9611)
   parentKey?: string | any
 ): MigratedConfig {
   try {
@@ -554,7 +554,9 @@ export function migrateConfig(
     }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {
-      for (const packageRule of migratedConfig.packageRules) {
+      const existingRules = migratedConfig.packageRules;
+      migratedConfig.packageRules = [];
+      for (const packageRule of existingRules) {
         if (is.array(packageRule.packageRules)) {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
@@ -563,22 +565,10 @@ export function migrateConfig(
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
           }
-          // delete the nested packageRules
-          delete packageRule.packageRules;
-          // mark the original rule for deletion if it's now pointless
-          if (
-            !Object.keys(packageRule).some(
-              (key) => !key.startsWith('match') && !key.startsWith('exclude')
-            )
-          ) {
-            packageRule._delete = true;
-          }
+        } else {
+          migratedConfig.packageRules.push(packageRule);
         }
       }
-      // filter out any rules which were marked for deletion in the previous step
-      migratedConfig.packageRules = migratedConfig.packageRules.filter(
-        (rule) => !rule._delete
-      );
     }
     const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {

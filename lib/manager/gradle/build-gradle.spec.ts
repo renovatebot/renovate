@@ -5,7 +5,7 @@ import {
   updateGradleVersion,
 } from './build-gradle';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     init();
   });

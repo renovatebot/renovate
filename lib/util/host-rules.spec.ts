@@ -3,7 +3,7 @@ import { PLATFORM_TYPE_AZURE } from '../constants/platforms';
 import * as datasourceNuget from '../datasource/nuget';
 import { add, clear, find, findAll, hosts } from './host-rules';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     clear();
   });
@@ -15,7 +15,7 @@ describe(getName(__filename), () => {
           domainName: 'github.com',
           hostName: 'api.github.com',
         })
-      ).toThrow('hostRules cannot contain both a domainName and hostName');
+      ).toThrow();
     });
     it('throws if both domainName and baseUrl', () => {
       expect(() =>
@@ -24,7 +24,7 @@ describe(getName(__filename), () => {
           domainName: 'github.com',
           baseUrl: 'https://api.github.com',
         })
-      ).toThrow('hostRules cannot contain both a domainName and baseUrl');
+      ).toThrow();
     });
     it('throws if both hostName and baseUrl', () => {
       expect(() =>
@@ -33,7 +33,7 @@ describe(getName(__filename), () => {
           hostName: 'api.github.com',
           baseUrl: 'https://api.github.com',
         })
-      ).toThrow('hostRules cannot contain both a hostName and baseUrl');
+      ).toThrow();
     });
     it('supports baseUrl-only', () => {
       add({
@@ -45,6 +45,9 @@ describe(getName(__filename), () => {
     });
   });
   describe('find()', () => {
+    beforeEach(() => {
+      clear();
+    });
     it('warns and returns empty for bad search', () => {
       expect(find({ abc: 'def' } as any)).toEqual({});
     });
@@ -69,11 +72,11 @@ describe(getName(__filename), () => {
     });
     it('matches on empty rules', () => {
       add({
-        json: true,
+        enabled: true,
       });
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
-      ).toEqual({ json: true });
+      ).toEqual({ enabled: true });
     });
     it('matches on hostType', () => {
       add({
@@ -159,11 +162,10 @@ describe(getName(__filename), () => {
         hostName: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
-        token: undefined,
       };
       add(hostRule);
       expect(findAll({ hostType: 'nuget' })).toHaveLength(1);
-      expect(findAll({ hostType: 'nuget' })[0]).toEqual(hostRule);
+      expect(findAll({ hostType: 'nuget' })[0]).toMatchObject(hostRule);
     });
   });
 });

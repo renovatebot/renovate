@@ -5,16 +5,10 @@ import * as versioning from '../../versioning/docker';
 import { resetCache } from './get';
 import * as jenkins from '.';
 
-const jenkinsPluginsVersions = loadJsonFixture(
-  __filename,
-  'plugin-versions.json'
-);
-const jenkinsPluginsInfo = loadJsonFixture(
-  __filename,
-  'update-center.actual.json'
-);
+const jenkinsPluginsVersions = loadJsonFixture('plugin-versions.json');
+const jenkinsPluginsInfo = loadJsonFixture('update-center.actual.json');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 

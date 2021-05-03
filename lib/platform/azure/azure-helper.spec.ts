@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { getName } from '../../../test/util';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let azureHelper: typeof import('./azure-helper');
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
 

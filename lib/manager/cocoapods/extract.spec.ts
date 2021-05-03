@@ -1,10 +1,10 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const simplePodfile = loadFixture(__filename, 'Podfile.simple');
-const complexPodfile = loadFixture(__filename, 'Podfile.complex');
+const simplePodfile = loadFixture('Podfile.simple');
+const complexPodfile = loadFixture('Podfile.complex');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('extracts all dependencies', async () => {
       const simpleResult = (await extractPackageFile(simplePodfile, 'Podfile'))

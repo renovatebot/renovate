@@ -4,30 +4,23 @@ import { getName, loadFixture } from '../../../test/util';
 
 import { id as datasource } from '.';
 
-const communityKubernetesBase = loadFixture(
-  __filename,
-  'community_kubernetes_base.json'
-);
+const communityKubernetesBase = loadFixture('community_kubernetes_base.json');
 const communityKubernetesVersions = loadFixture(
-  __filename,
   'community_kubernetes_versions.json'
 );
 const communityKubernetesDetails121 = loadFixture(
-  __filename,
   'community_kubernetes_version_details_1.2.1.json'
 );
 const communityKubernetesDetails120 = loadFixture(
-  __filename,
   'community_kubernetes_version_details_1.2.0.json'
 );
 const communityKubernetesDetails0111 = loadFixture(
-  __filename,
   'community_kubernetes_version_details_0.11.1.json'
 );
 
 const baseUrl = 'https://galaxy.ansible.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

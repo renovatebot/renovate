@@ -1,10 +1,10 @@
 import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const brokenYaml = loadFixture(__filename, 'update.yaml');
-const packageFile = loadFixture(__filename, 'extract.yaml');
+const brokenYaml = loadFixture('update.yaml');
+const packageFile = loadFixture('extract.yaml');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile', () => {
     it('should return null if package does not contain any deps', () => {
       const res = extractPackageFile('foo: bar', 'pubspec.yaml');

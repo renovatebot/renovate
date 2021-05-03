@@ -1,316 +1,329 @@
-import nock from 'nock';
-import { Release, getPkgReleases } from '..';
-import { getName, loadFixture } from '../../../test/util';
+import _fs from 'fs-extra';
+import { ReleaseResult, getPkgReleases } from '..';
+import * as httpMock from '../../../test/http-mock';
+import { getName, loadFixture, mocked } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
-import * as mavenVersioning from '../../versioning/maven';
+import { id as versioning } from '../../versioning/maven';
 import { id as datasource } from '.';
 
-const MYSQL_VERSIONS = ['6.0.5', '6.0.6', '8.0.7', '8.0.8', '8.0.9'];
+jest.mock('fs-extra');
+const fs = mocked(_fs);
 
-const MYSQL_MAVEN_METADATA = loadFixture(
-  __filename,
-  'repo1.maven.org/maven2/mysql/mysql-connector-java/maven-metadata.xml'
-);
+const baseUrl = 'https://repo.maven.apache.org/maven2';
+const baseUrlCustom = 'https://custom.registry.renovatebot.com';
 
-const MYSQL_MAVEN_MYSQL_POM = loadFixture(
-  __filename,
-  'repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
-);
-
-const config = {
-  versioning: mavenVersioning.id,
-  datasource,
-};
-
-function timestamp(version: string): string {
-  const millis = (version.replace(/[^1-9]/g, '') + '000').slice(0, 3);
-  return `2020-01-01T00:00:00.${millis}Z`;
+interface MockOpts {
+  dep?: string;
+  base?: string;
+  meta?: string | null;
+  pom?: string | null;
+  latest?: string;
+  jars?: Record<string, number> | null;
 }
 
-function generateReleases(versions: string[], ts = false): Release[] {
-  return versions.map((version) => {
-    if (ts) {
-      const releaseTimestamp = timestamp(version);
-      return { version, releaseTimestamp };
-    }
-    return { version };
-  });
-}
+function mockGenericPackage(opts: MockOpts = {}) {
+  const {
+    dep = 'org.example:package',
+    base = baseUrl,
+    latest = '2.0.0',
+  } = opts;
+  const meta =
+    opts.meta === undefined ? loadFixture('metadata.xml') : opts.meta;
+  const pom = opts.pom === undefined ? loadFixture('pom.xml') : opts.pom;
+  const jars =
+    opts.jars === undefined
+      ? {
+          '1.0.0': 200,
+          '1.0.1': 404,
+          '1.0.2': 500,
+          '2.0.0': 200,
+        }
+      : opts.jars;
 
-describe(getName(__filename), () => {
-  beforeEach(() => {
-    hostRules.add({
-      hostType: datasource,
-      hostName: 'frontend_for_private_s3_repository',
-      username: 'username',
-      password: 'password',
-      timeout: 20000,
+  const scope = httpMock.scope(base);
+
+  const [group, artifact] = dep.split(':');
+  const packagePath = `${group.replace(/\./g, '/')}/${artifact}`;
+
+  if (meta) {
+    scope.get(`/${packagePath}/maven-metadata.xml`).reply(200, meta);
+  }
+
+  if (pom) {
+    scope
+      .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
+      .reply(200, pom);
+  }
+
+  if (jars) {
+    Object.entries(jars).forEach(([version, status]) => {
+      const [major, minor, patch] = version
+        .split('.')
+        .map((x) => parseInt(x, 10))
+        .map((x) => (x < 10 ? `0${x}` : `${x}`));
+      const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
+      scope
+        .head(`/${packagePath}/${version}/${artifact}-${version}.pom`)
+        .reply(status, '', { 'Last-Modified': timestamp });
     });
+  }
+}
+
+function get(
+  depName = 'org.example:package',
+  ...registryUrls: string[]
+): Promise<ReleaseResult | null> {
+  const conf = { versioning, datasource, depName };
+  return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
+}
+
+describe(getName(), () => {
+  beforeEach(() => {
     hostRules.add({
       hostType: datasource,
       hostName: 'custom.registry.renovatebot.com',
       token: 'abc123',
     });
     jest.resetAllMocks();
-    nock.cleanAll();
-    nock.disableNetConnect();
-    nock('https://repo.maven.apache.org')
-      .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
-      .reply(200, MYSQL_MAVEN_METADATA);
-    nock('https://repo.maven.apache.org')
-      .get(
-        '/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
-      )
-      .reply(200, MYSQL_MAVEN_MYSQL_POM);
-    nock('https://custom.registry.renovatebot.com')
-      .get('/mysql/mysql-connector-java/maven-metadata.xml')
-      .reply(200, MYSQL_MAVEN_METADATA);
-    nock('https://custom.registry.renovatebot.com')
-      .get('/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom')
-      .reply(200, MYSQL_MAVEN_MYSQL_POM);
-    nock('http://failed_repo')
-      .get('/mysql/mysql-connector-java/maven-metadata.xml')
-      .reply(404, null);
-    nock('http://unauthorized_repo')
-      .get('/mysql/mysql-connector-java/maven-metadata.xml')
-      .reply(403, null);
-    nock('http://empty_repo')
-      .get('/mysql/mysql-connector-java/maven-metadata.xml')
-      .reply(200, 'non-sense');
-    nock('http://frontend_for_private_s3_repository')
-      .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
-      .basicAuth({ user: 'username', pass: 'password' })
-      .reply(302, '', {
-        Location:
-          'http://private_s3_repository/maven2/mysql/mysql-connector-java/maven-metadata.xml?X-Amz-Algorithm=AWS4-HMAC-SHA256',
-      })
-      .get(
-        '/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
-      )
-      .basicAuth({ user: 'username', pass: 'password' })
-      .reply(302, '', {
-        Location:
-          'http://private_s3_repository/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom?X-Amz-Algorithm=AWS4-HMAC-SHA256',
-      });
-    nock('http://private_s3_repository', { badheaders: ['authorization'] })
-      .get(
-        '/maven2/mysql/mysql-connector-java/maven-metadata.xml?X-Amz-Algorithm=AWS4-HMAC-SHA256'
-      )
-      .reply(200, MYSQL_MAVEN_METADATA)
-      .get(
-        '/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom?X-Amz-Algorithm=AWS4-HMAC-SHA256'
-      )
-      .reply(200, MYSQL_MAVEN_MYSQL_POM);
-    Object.entries({
-      '6.0.5': 200,
-      '6.0.6': 200,
-      '8.0.7': 200,
-      '8.0.8': 200,
-      '8.0.9': 200,
-      '8.0.11': 404,
-      '8.0.12': 500,
-    }).forEach(([v, status]) => {
-      const path = `/maven2/mysql/mysql-connector-java/${v}/mysql-connector-java-${v}.pom`;
-      nock('https://repo.maven.apache.org')
-        .head(path)
-        .reply(status, '', { 'Last-Modified': timestamp(v) });
-      nock('http://frontend_for_private_s3_repository')
-        .head(path)
-        .reply(status, '', { 'Last-Modified': timestamp(v) });
-    });
+    httpMock.setup();
   });
 
   afterEach(() => {
-    nock.enableNetConnect();
+    hostRules.clear();
+    httpMock.reset();
     delete process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK;
   });
 
-  describe('getReleases', () => {
-    it('should return empty if library is not found', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'unknown:unknown',
-        registryUrls: [
-          's3://somewhere.s3.aws.amazon.com',
-          'file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/',
-        ],
-      });
-      expect(releases).toBeNull();
+  it('returns null when metadata is not found', async () => {
+    httpMock
+      .scope(baseUrl)
+      .get('/org/example/package/maven-metadata.xml')
+      .reply(404);
+
+    const res = await get();
+
+    expect(res).toBeNull();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('returns releases', async () => {
+    mockGenericPackage();
+
+    const res = await get();
+
+    expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('returns releases from custom repository', async () => {
+    mockGenericPackage({ base: baseUrlCustom });
+
+    const res = await get('org.example:package', baseUrlCustom);
+
+    expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('collects releases from all registry urls', async () => {
+    mockGenericPackage();
+    mockGenericPackage({
+      base: baseUrlCustom,
+      meta: loadFixture('metadata-extra.xml'),
+      latest: '3.0.0',
+      jars: { '3.0.0': 200 },
     });
 
-    it('should simply return all versions of a specific library', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'org.hamcrest:hamcrest-core',
-        registryUrls: [
-          'file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/',
-          'file://lib/datasource/maven/__fixtures__/custom_maven_repo/maven2/',
-          's3://somewhere.s3.aws.amazon.com',
-        ],
-      });
-      expect(releases.releases).toMatchSnapshot();
+    const { releases } = await get(
+      'org.example:package',
+      baseUrl,
+      baseUrlCustom
+    );
+
+    expect(releases).toMatchObject([
+      { version: '1.0.0' },
+      { version: '2.0.0' },
+      { version: '3.0.0' },
+    ]);
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('falls back to next registry url', async () => {
+    mockGenericPackage();
+    httpMock
+      .scope('https://failed_repo')
+      .get('/org/example/package/maven-metadata.xml')
+      .reply(404, null);
+    httpMock
+      .scope('https://unauthorized_repo')
+      .get('/org/example/package/maven-metadata.xml')
+      .reply(403, null);
+    httpMock
+      .scope('https://empty_repo')
+      .get('/org/example/package/maven-metadata.xml')
+      .reply(200, 'non-sense');
+    httpMock
+      .scope('https://unknown_error')
+      .get('/org/example/package/maven-metadata.xml')
+      .replyWithError('unknown');
+
+    const res = await get(
+      'org.example:package',
+      'https://failed_repo/',
+      'https://unauthorized_repo/',
+      'https://empty_repo',
+      'https://unknown_error',
+      baseUrl
+    );
+
+    expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('throws EXTERNAL_HOST_ERROR for 50x', async () => {
+    httpMock
+      .scope(baseUrl)
+      .get('/org/example/package/maven-metadata.xml')
+      .reply(503);
+
+    await expect(get()).rejects.toThrow(EXTERNAL_HOST_ERROR);
+
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('ignores unsupported protocols', async () => {
+    const base = baseUrl.replace('https', 'http');
+    mockGenericPackage({ base });
+
+    const { releases } = await get(
+      'org.example:package',
+      'ftp://protocol_error_repo',
+      's3://protocol_error_repo',
+      base
+    );
+
+    expect(releases).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('skips registry with invalid metadata structure', async () => {
+    mockGenericPackage();
+    httpMock
+      .scope('https://invalid_metadata_repo')
+      .get('/org/example/package/maven-metadata.xml')
+      .reply(200, loadFixture('metadata-invalid.xml'));
+
+    const res = await get(
+      'org.example:package',
+      'https://invalid_metadata_repo',
+      baseUrl
+    );
+
+    expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('skips registry with invalid XML', async () => {
+    mockGenericPackage();
+    httpMock
+      .scope('https://invalid_metadata_repo')
+      .get('/org/example/package/maven-metadata.xml')
+      .reply(200, '###');
+
+    const res = await get(
+      'org.example:package',
+      'https://invalid_metadata_repo',
+      baseUrl
+    );
+
+    expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('handles optional slash at the end of registry url', async () => {
+    mockGenericPackage();
+    const resA = await get('org.example:package', baseUrl.replace(/\/+$/, ''));
+    mockGenericPackage();
+    const resB = await get('org.example:package', baseUrl.replace(/\/*$/, '/'));
+    expect(resA).not.toBeNull();
+    expect(resB).not.toBeNull();
+    expect(resA.releases).toEqual(resB.releases);
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('returns null for invalid registryUrls', async () => {
+    const res = await get(
+      'org.example:package',
+      // eslint-disable-next-line no-template-curly-in-string
+      '${project.baseUri}../../repository/'
+    );
+    expect(res).toBeNull();
+  });
+
+  it('supports scm.url values prefixed with "scm:"', async () => {
+    const pom = loadFixture('pom.scm-prefix.xml');
+    mockGenericPackage({ pom });
+
+    const { sourceUrl } = await get();
+
+    expect(sourceUrl).toEqual('https://github.com/example/test');
+  });
+
+  it('removes authentication header after redirect', async () => {
+    process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK = 'true';
+
+    const frontendHost = 'frontend_for_private_s3_repository';
+    const frontendUrl = `https://${frontendHost}/maven2`;
+    const backendUrl = 'https://private_s3_repository/maven2';
+    const metadataPath = '/org/example/package/maven-metadata.xml';
+    const pomfilePath = '/org/example/package/2.0.0/package-2.0.0.pom';
+    const queryStr = '?X-Amz-Algorithm=AWS4-HMAC-SHA256';
+
+    hostRules.add({
+      hostType: datasource,
+      hostName: frontendHost,
+      username: 'username',
+      password: 'password',
+      timeout: 20000,
     });
 
-    it('should return versions in all repositories for a specific library', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: [
-          'file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/',
-          'file://lib/datasource/maven/__fixtures__/custom_maven_repo/maven2/',
-        ],
+    httpMock
+      .scope(frontendUrl)
+      .get(metadataPath)
+      .basicAuth({ user: 'username', pass: 'password' })
+      .reply(302, '', {
+        Location: `${backendUrl}${metadataPath}${queryStr}`,
+      })
+      .get(pomfilePath)
+      .basicAuth({ user: 'username', pass: 'password' })
+      .reply(302, '', {
+        Location: `${backendUrl}${pomfilePath}${queryStr}`,
       });
-      expect(releases).toMatchSnapshot();
-    });
+    httpMock
+      .scope(backendUrl, { badheaders: ['authorization'] })
+      .get(`${metadataPath}${queryStr}`)
+      .reply(200, loadFixture('metadata.xml'))
+      .get(`${pomfilePath}${queryStr}`)
+      .reply(200, loadFixture('pom.xml'));
 
-    it('should return all versions of a specific library for http repositories', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: ['https://repo.maven.apache.org/maven2/'],
-      });
-      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
-    });
+    const res = await get('org.example:package', frontendUrl);
 
-    it('should return all versions from a custom repository', async () => {
-      process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK = 'true';
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: ['https://custom.registry.renovatebot.com'],
-      });
-      expect(releases).toMatchSnapshot();
-    });
+    expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
 
-    it('should return all versions of a specific library if a repository fails', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: [
-          'https://repo.maven.apache.org/maven2/',
-          'http://failed_repo/',
-          'http://unauthorized_repo/',
-          'http://dns_error_repo',
-          'http://empty_repo',
-        ],
-      });
-      expect(releases.releases).toMatchSnapshot();
-    });
+  it('supports file protocol', async () => {
+    fs.exists.mockResolvedValueOnce(false);
 
-    it('should throw external-host-error if default maven repo fails', async () => {
-      nock('https://repo.maven.apache.org')
-        .get('/maven2/org/artifact/maven-metadata.xml')
-        .times(4)
-        .reply(503);
+    fs.exists.mockResolvedValueOnce(true);
+    fs.readFile.mockResolvedValueOnce(Buffer.from(loadFixture('metadata.xml')));
 
-      expect.assertions(1);
-      await expect(
-        getPkgReleases({
-          ...config,
-          depName: 'org:artifact',
-          registryUrls: ['https://repo.maven.apache.org/maven2/'],
-        })
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    });
+    fs.exists.mockResolvedValueOnce(true);
+    fs.readFile.mockResolvedValueOnce(Buffer.from(loadFixture('pom.xml')));
 
-    it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: [
-          'https://repo.maven.apache.org/maven2/',
-          'http://failed_repo/',
-          'ftp://protocol_error_repo',
-        ],
-      });
-      expect(releases.releases).toMatchSnapshot();
-    });
+    const res = await get('org.example:package', 'file:///foo', 'file:///bar');
 
-    it('should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository', async () => {
-      const invalidMavenMetadata = `
-        <?xml version="1.0" encoding="UTF-8"?><metadata>
-          <groupId>mysql</groupId>
-          <artifactId>mysql-connector-java</artifactId>
-          <version>8.0.12</version>
-          <versioning>
-            <lastUpdated>20130301200000</lastUpdated>
-          </versioning>
-        </metadata>
-      `;
-      nock('http://invalid_metadata_repo')
-        .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
-        .reply(200, invalidMavenMetadata);
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: [
-          'https://repo.maven.apache.org/maven2/',
-          'http://invalid_metadata_repo/maven2/',
-        ],
-      });
-      expect(releases).toMatchSnapshot();
-    });
-
-    it('should return all versions of a specific library if a repository fails because a metadata file is not xml', async () => {
-      const invalidMavenMetadata = `
-        Invalid XML
-      `;
-      nock('http://invalid_metadata_repo')
-        .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
-        .reply(200, invalidMavenMetadata);
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: [
-          'https://repo.maven.apache.org/maven2/',
-          'http://invalid_metadata_repo/maven2/',
-        ],
-      });
-      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS, true));
-    });
-
-    it('should return all versions of a specific library if a repository does not end with /', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: ['https://repo.maven.apache.org/maven2'],
-      });
-      expect(releases).not.toBeNull();
-    });
-
-    it('should return null if no repositories defined', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-      });
-      expect(releases).not.toBeNull();
-    });
-    it('should return null for invalid registryUrls', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        // eslint-disable-next-line no-template-curly-in-string
-        registryUrls: ['${project.baseUri}../../repository/'],
-      });
-      expect(releases).toBeNull();
-    });
-    it('should support scm.url values prefixed with "scm:"', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'io.realm:realm-gradle-plugin',
-        registryUrls: ['file://lib/datasource/maven/__fixtures__/jcenter/'],
-      });
-      expect(releases.sourceUrl).toEqual('https://github.com/realm/realm-java');
-    });
-
-    it('should remove authentication header when redirected with authentication in query string', async () => {
-      const releases = await getPkgReleases({
-        ...config,
-        depName: 'mysql:mysql-connector-java',
-        registryUrls: ['http://frontend_for_private_s3_repository/maven2'],
-      });
-      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
-    });
+    expect(res).toMatchSnapshot();
+    expect(fs.readFile.mock.calls).toMatchSnapshot();
   });
 });

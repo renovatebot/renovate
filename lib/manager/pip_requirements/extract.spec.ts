@@ -2,15 +2,15 @@ import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { extractPackageFile } from './extract';
 
-const requirements1 = loadFixture(__filename, 'requirements1.txt');
-const requirements2 = loadFixture(__filename, 'requirements2.txt');
-const requirements3 = loadFixture(__filename, 'requirements3.txt');
-const requirements4 = loadFixture(__filename, 'requirements4.txt');
-const requirements5 = loadFixture(__filename, 'requirements5.txt');
-const requirements6 = loadFixture(__filename, 'requirements6.txt');
-const requirements7 = loadFixture(__filename, 'requirements7.txt');
+const requirements1 = loadFixture('requirements1.txt');
+const requirements2 = loadFixture('requirements2.txt');
+const requirements3 = loadFixture('requirements3.txt');
+const requirements4 = loadFixture('requirements4.txt');
+const requirements5 = loadFixture('requirements5.txt');
+const requirements6 = loadFixture('requirements6.txt');
+const requirements7 = loadFixture('requirements7.txt');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
     setAdminConfig();

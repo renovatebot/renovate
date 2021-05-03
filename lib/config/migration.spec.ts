@@ -14,7 +14,7 @@ interface RenovateConfig extends _RenovateConfig {
   node?: RenovateSharedConfig & { supportPolicy?: unknown };
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
       const config: RenovateConfig = {
@@ -155,7 +155,7 @@ describe(getName(__filename), () => {
           },
         ],
         raiseDeprecationWarnings: false,
-      };
+      } as any;
       const parentConfig = { ...defaultConfig, semanticCommits: 'disabled' };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
         config,
@@ -627,5 +627,36 @@ describe(getName(__filename), () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
     });
+  });
+  it('it migrates nested packageRules', () => {
+    const config: RenovateConfig = {
+      packageRules: [
+        {
+          matchDepTypes: ['devDependencies'],
+          enabled: false,
+        },
+        {
+          automerge: true,
+          excludePackageNames: ['@types/react-table'],
+          packageRules: [
+            {
+              groupName: 'definitelyTyped',
+              matchPackagePrefixes: ['@types/'],
+            },
+            {
+              matchDepTypes: ['dependencies'],
+              automerge: false,
+            },
+          ],
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
+    expect(migratedConfig.packageRules).toHaveLength(3);
   });
 });

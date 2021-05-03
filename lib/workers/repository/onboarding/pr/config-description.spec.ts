@@ -2,7 +2,7 @@ import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
 import type { PackageFile } from '../../../../manager/types';
 import { getConfigDesc } from './config-description';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getConfigDesc()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
