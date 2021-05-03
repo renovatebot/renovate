@@ -73,7 +73,9 @@ The timezone must be a valid [IANA time zone](https://en.wikipedia.org/wiki/List
 
 With the timezone set, you can define days of week or hours of the day in which Renovate will make changes.
 Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text.
+Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 The _@breejs/later_ library also handles the concepts of "days", time_before", and "time_after".
+Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 Examples of the kind of schedules you can create:
 

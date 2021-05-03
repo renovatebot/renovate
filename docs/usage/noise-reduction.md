@@ -99,7 +99,8 @@ Or perhaps at least weekly:
 ```
 
 If you're wondering what is supported and not, under the hood, the schedule is parsed using [@breejs/later](https://github.com/breejs/later) using the `later.parse.text(scheduleString)` API.
-TODO INSERT PROPER LINK HERE explains the supported syntax DROPPED LINK TO RUNKIT PLAYGROUND.
+Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
+Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 ## Automerging
 
