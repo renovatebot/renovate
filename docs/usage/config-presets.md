@@ -140,7 +140,7 @@ You do not need to add it as a devDependency or add any other files to the prese
 ## GitLab-hosted Presets
 
 It is also possible to host your preset config using just a regular GitLab repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `renovate.json` file in the base branch.
+In such cases Renovate will simply look for a `renovate.json` file in the default branch.
 
 To host your preset config on GitLab:
 
@@ -151,7 +151,7 @@ To host your preset config on GitLab:
 ## Gitea-hosted Presets
 
 It is also possible to host your preset config using just a regular Gitea repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `renovate.json` file in the base branch.
+In such cases Renovate will simply look for a `renovate.json` file in the default branch.
 
 To host your preset config on Gitea:
 
