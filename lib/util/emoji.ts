@@ -11,11 +11,11 @@ import type { RenovateConfig } from '../config/types';
 import dataFiles from '../data-files.generated';
 import { regEx } from './regex';
 
+let unicodeEmoji = true;
+
 const githubShortcodes: Record<string, string | string[]> = JSON.parse(
   dataFiles.get('emojibase-github-shortcodes.json')
 );
-
-let unicodeEmoji = true;
 
 let mappingsInitialized = false;
 const shortCodesByHex = new Map<string, string>();
