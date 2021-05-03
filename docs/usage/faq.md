@@ -18,14 +18,27 @@ Renovate will:
 - Update `yarn.lock` and/or `package-lock.json` files if found
 - Create Pull Requests immediately after branch creation
 
+## What is this `main` branch I see in the documentation?
+
+When you create a new repository with Git, Git creates a base branch for you.
+The default branch name that Git uses is `master` (this will be changed to `main` later).
+
+The Git-hosting ecosystem has settled on using `main` to replace `master`.
+When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
+
+It therefore makes sense for Renovate to replace `master` with `main` where possible as well.
+
+A branch name has no special meaning within the Git program, it's just a name.
+The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
+
 ## What if I need to .. ?
 
 ### Use an alternative branch as my Pull Request target
 
-Say your repository's default branch is `master` but you want Renovate to use the `next` branch as its PR target.
+Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
 You can configure the PR target branch via the `baseBranches` option.
 
-Add this line to the `renovate.json` file that's in the _default_ branch (`master` in this example).
+Add this line to the `renovate.json` file that's in the _default_ branch (`main` in this example).
 
 ```json
 {
@@ -170,7 +183,7 @@ As above, but apply a `groupName`:
 ]
 ```
 
-### Change the default branch name, commit message, PR title or PR description
+### Change the default values for branch name, commit message, PR title or PR description
 
 You can use the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration options to change the defaults for those settings.
 
