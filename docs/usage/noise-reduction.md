@@ -98,8 +98,8 @@ Or perhaps at least weekly:
   ]
 ```
 
-If you're wondering what is supported and not, under the hood, the schedule is parsed using [later.js](https://bunkat.github.io/later/) using the `later.parse.text(scheduleString)` API.
-[This page](https://bunkat.github.io/later/parsers.html#text) explains the supported syntax or you can experiment on the [RunKit playground](https://npm.runkit.com/later).
+If you're wondering what is supported and not, under the hood, the schedule is parsed using [@breejs/later](https://github.com/breejs/later) using the `later.parse.text(scheduleString)` API.
+TODO INSERT PROPER LINK HERE explains the supported syntax DROPPED LINK TO RUNKIT PLAYGROUND.
 
 ## Automerging
 

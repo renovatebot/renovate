@@ -72,8 +72,8 @@ You can set a specific time zone in your local config file as well:
 The timezone must be a valid [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
 With the timezone set, you can define days of week or hours of the day in which Renovate will make changes.
-Renovate uses the [later](https://bunkat.github.io/later/parsers.html#text) library to parse the text.
-The _later_ library also handles the concepts of "days", time_before", and "time_after".
+Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text.
+The _@breejs/later_ library also handles the concepts of "days", time_before", and "time_after".
 
 Examples of the kind of schedules you can create:
 
