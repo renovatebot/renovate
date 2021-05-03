@@ -11,7 +11,7 @@ interface NodeJsSchedule {
 export type NodeJsData = Record<string, NodeJsSchedule>;
 
 export const nodeSchedule: NodeJsData = JSON.parse(
-  dataFiles.get('data/node-js-schedule.json')
+  dataFiles.get('node-js-schedule.json')
 );
 
 export interface NodeJsPolicies {
