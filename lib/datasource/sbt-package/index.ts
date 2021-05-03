@@ -3,8 +3,7 @@ import { logger } from '../../logger';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
-import type { MavenDependency } from '../maven/types';
-import { downloadHttpProtocol, getDependencyInfo } from '../maven/util';
+import { downloadHttpProtocol } from '../maven/util';
 import { parseIndexDir } from '../sbt-plugin/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
