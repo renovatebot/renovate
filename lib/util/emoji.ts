@@ -13,16 +13,15 @@ import { regEx } from './regex';
 
 let unicodeEmoji = true;
 
-const table: Record<string, string | string[]> = JSON.parse(
-  dataFiles.get('emojibase-github-shortcodes.json')
-);
-
 let mappingsInitialized = false;
 const shortCodesByHex = new Map<string, string>();
 const hexCodesByShort = new Map<string, string>();
 
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
+    const table: Record<string, string | string[]> = JSON.parse(
+      dataFiles.get('emojibase-github-shortcodes.json')
+    );
     for (const [hex, val] of Object.entries(table)) {
       const shortCodes: string[] = is.array<string>(val) ? val : [val];
       shortCodesByHex.set(hex, `:${shortCodes[0]}:`);
