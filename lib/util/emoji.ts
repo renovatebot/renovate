@@ -13,7 +13,7 @@ import { regEx } from './regex';
 
 let unicodeEmoji = true;
 
-const githubShortcodes: Record<string, string | string[]> = JSON.parse(
+const table: Record<string, string | string[]> = JSON.parse(
   dataFiles.get('emojibase-github-shortcodes.json')
 );
 
@@ -23,11 +23,11 @@ const hexCodesByShort = new Map<string, string>();
 
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
-    for (const [hex, val] of Object.entries(githubShortcodes)) {
-      const shortcodes: string[] = is.array<string>(val) ? val : [val];
-      shortCodesByHex.set(hex, `:${shortcodes[0]}:`);
-      shortcodes.forEach((shortcode) => {
-        hexCodesByShort.set(`:${shortcode}:`, hex);
+    for (const [hex, val] of Object.entries(table)) {
+      const shortCodes: string[] = is.array<string>(val) ? val : [val];
+      shortCodesByHex.set(hex, `:${shortCodes[0]}:`);
+      shortCodes.forEach((shortCode) => {
+        hexCodesByShort.set(`:${shortCode}:`, hex);
       });
     }
     mappingsInitialized = true;
@@ -38,16 +38,16 @@ export function setEmojiConfig(_config: RenovateConfig): void {
   unicodeEmoji = _config.unicodeEmoji;
 }
 
-const shortcodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
+const shortCodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
 
 export function emojify(text: string): string {
   lazyInitMappings();
   return unicodeEmoji
-    ? text.replace(shortcodeRegex, (shortcode) => {
-        const hexCode = hexCodesByShort.get(shortcode);
+    ? text.replace(shortCodeRegex, (shortCode) => {
+        const hexCode = hexCodesByShort.get(shortCode);
         return hexCode
           ? fromCodepointToUnicode(fromHexcodeToCodepoint(hexCode))
-          : shortcode;
+          : shortCode;
       })
     : text;
 }
@@ -84,8 +84,8 @@ export function unemojify(text: string, tofu = '�'): string {
   return unicodeEmoji
     ? text
     : text.replace(emojiRegex, (emoji) => {
-        const hex = stripHexCode(fromUnicodeToHexcode(emoji));
-        const shortCode = shortCodesByHex.get(hex);
+        const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
+        const shortCode = shortCodesByHex.get(hexCode);
         return shortCode || tofu;
       });
 }
