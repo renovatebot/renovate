@@ -10,6 +10,7 @@ import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
+import { stripEmojis } from '../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import * as template from '../../util/template';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
@@ -336,15 +337,15 @@ export async function ensurePr(
       }
       existingPrBody = existingPrBody.trim();
       if (
-        existingPr.title === prTitle &&
-        noWhitespaceOrHeadings(existingPrBody) ===
-          noWhitespaceOrHeadings(prBody)
+        stripEmojis(existingPr.title) === stripEmojis(prTitle) &&
+        noWhitespaceOrHeadings(stripEmojis(existingPrBody)) ===
+          noWhitespaceOrHeadings(stripEmojis(prBody))
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
         return { prResult: PrResult.NotUpdated, pr: existingPr };
       }
       // PR must need updating
-      if (existingPr.title !== prTitle) {
+      if (stripEmojis(existingPr.title) !== stripEmojis(prTitle)) {
         logger.debug(
           {
             branchName,
