@@ -20,7 +20,7 @@ const hexCodesByShort = new Map<string, string>();
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
     const table: Record<string, string | string[]> = JSON.parse(
-      dataFiles.get('emojibase-github-shortcodes.json')
+      dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')
     );
     for (const [hex, val] of Object.entries(table)) {
       const shortCodes: string[] = is.array<string>(val) ? val : [val];
