@@ -101,7 +101,25 @@ declare module '@breejs/later' {
     [timeperiodAndModifierName: string]: number[] | undefined;
   }
 
-  const later: { parse: { text: (s: string) => ScheduleData } };
+  interface Schedule {
+    /**
+     * True if the specified value is valid for the specified date, false otherwise.
+     *
+     * @param date - The given date.
+     * @param value - The value to test for the date.
+     */
+    isValid(date: Date, value: any): boolean;
+  }
+
+  const later: {
+    parse: { text: (s: string) => ScheduleData };
+
+    /**
+     * Schedule
+     * Generates instances from schedule data.
+     */
+    schedule(input: any): Schedule;
+  };
 
   export = later;
 }
