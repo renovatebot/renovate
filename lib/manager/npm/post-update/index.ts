@@ -443,26 +443,14 @@ export async function getAdditionalFiles(
     hostType: 'npm',
   });
   for (const hostRule of npmHostRules) {
-    if (hostRule.token) {
-      if (hostRule.baseUrl) {
-        additionalNpmrcContent.push(
-          `${hostRule.baseUrl}:_authToken=${hostRule.token}`
-            .replace('https://', '//')
-            .replace('http://', '//')
-        );
-      } else if (hostRule.hostName) {
-        additionalNpmrcContent.push(
-          `//${hostRule.hostName}/:_authToken=${hostRule.token}`
-        );
-      }
-    } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
-      const password = Buffer.from(hostRule.password).toString('base64');
-      if (hostRule.baseUrl) {
-        const uri = hostRule.baseUrl.replace(/^https?:/, '');
-        additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
-        additionalNpmrcContent.push(`${uri}:_password=${password}`);
-      } else if (hostRule.hostName) {
-        const uri = `//${hostRule.hostName}/`;
+    if (hostRule.resolvedHost) {
+      const uri = hostRule.baseUrl
+        ? hostRule.baseUrl.replace(/^https?:/, '')
+        : `//${hostRule.resolvedHost}/`;
+      if (hostRule.token) {
+        additionalNpmrcContent.push(`${uri}:_authToken=${hostRule.token}`);
+      } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
+        const password = Buffer.from(hostRule.password).toString('base64');
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
         additionalNpmrcContent.push(`${uri}:_password=${password}`);
       }

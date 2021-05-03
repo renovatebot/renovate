@@ -3,7 +3,7 @@
 exports[`manager/gomod/extract extractPackageFile() extracts constraints 1`] = `
 Object {
   "constraints": Object {
-    "go": "1.13",
+    "go": "^1.13",
   },
   "deps": Array [
     Object {
