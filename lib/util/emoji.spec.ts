@@ -81,5 +81,11 @@ describe(getName(), () => {
       const y = fromCodepointToUnicode(fromHexcodeToCodepoint('26A0'));
       expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
     });
+
+    it('ignores when emojis disabled via config', () => {
+      setEmojiConfig({ unicodeEmoji: false });
+      const x = fromCodepointToUnicode(fromHexcodeToCodepoint('26A0-FE0F'));
+      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${x} bar`);
+    });
   });
 });

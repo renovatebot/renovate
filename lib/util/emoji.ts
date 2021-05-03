@@ -97,5 +97,5 @@ function stripEmoji(emoji: string): string {
 }
 
 export function stripEmojis(input: string): string {
-  return input.replace(emojiRegex, stripEmoji);
+  return unicodeEmoji ? input.replace(emojiRegex, stripEmoji) : input;
 }
