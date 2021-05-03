@@ -1,10 +1,12 @@
 import URL from 'url';
 import addrs from 'email-addresses';
+import { getAdminConfig } from '../config/admin';
 import type { GlobalConfig } from '../config/types';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { setPrivateKey } from '../util/git';
+import { setNoVerify } from '../util/git/config';
 import * as hostRules from '../util/host-rules';
 import platforms from './api';
 import type { Platform } from './types';
@@ -85,6 +87,7 @@ export async function initPlatform(
   config: GlobalConfig
 ): Promise<GlobalConfig> {
   setPrivateKey(config.gitPrivateKey);
+  setNoVerify(getAdminConfig().gitNoVerify);
   setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);

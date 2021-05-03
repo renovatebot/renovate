@@ -37,7 +37,7 @@ export async function rebaseOnboardingBranch(
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
 
-  const { dryRun, gitNoVerify } = getAdminConfig();
+  const { dryRun } = getAdminConfig();
 
   if (await isBranchModified(config.onboardingBranch)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
@@ -71,6 +71,5 @@ export async function rebaseOnboardingBranch(
       },
     ],
     message: commitMessage,
-    noVerify: gitNoVerify,
   });
 }

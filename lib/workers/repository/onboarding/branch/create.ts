@@ -13,7 +13,7 @@ export async function createOnboardingBranch(
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
 
-  const { dryRun, gitNoVerify } = getAdminConfig();
+  const { dryRun } = getAdminConfig();
 
   const contents = await getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
@@ -60,6 +60,5 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
-    noVerify: gitNoVerify,
   });
 }

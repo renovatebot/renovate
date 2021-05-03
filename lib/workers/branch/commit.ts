@@ -10,7 +10,7 @@ import type { BranchConfig } from '../types';
 export function commitFilesToBranch(
   config: BranchConfig
 ): Promise<string | null> {
-  const { dryRun, gitNoVerify } = getAdminConfig();
+  const { dryRun } = getAdminConfig();
 
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if
@@ -51,6 +51,5 @@ export function commitFilesToBranch(
     files: updatedFiles,
     message: config.commitMessage,
     force: !!config.forceCommit,
-    noVerify: gitNoVerify,
   });
 }

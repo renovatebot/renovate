@@ -1,6 +1,7 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
 import type { HostRule } from '../types';
+import type { GitNoVerifyOption } from '../util/git/config';
 
 export type RenovateConfigStage =
   | 'global'
@@ -9,7 +10,6 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
-export type GitNoVerifyOption = 'commit' | 'push';
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 
 export interface GroupConfig extends Record<string, unknown> {

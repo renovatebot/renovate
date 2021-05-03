@@ -22,6 +22,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
 export * from './private-key';
@@ -614,7 +615,6 @@ export type CommitFilesConfig = {
   files: File[];
   message: string;
   force?: boolean;
-  noVerify?: GitNoVerifyOption[];
 };
 
 export async function commitFiles({
@@ -622,7 +622,6 @@ export async function commitFiles({
   files,
   message,
   force = false,
-  noVerify,
 }: CommitFilesConfig): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
@@ -675,7 +674,7 @@ export async function commitFiles({
     }
 
     const commitOptions: Options = {};
-    if (noVerify?.includes('commit')) {
+    if (getNoVerify().includes('commit')) {
       commitOptions['--no-verify'] = null;
     }
 
@@ -703,7 +702,7 @@ export async function commitFiles({
       '--force': null,
       '-u': null,
     };
-    if (noVerify?.includes('push')) {
+    if (getNoVerify().includes('push')) {
       pushOptions['--no-verify'] = null;
     }
 
