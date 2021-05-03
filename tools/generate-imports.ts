@@ -1,3 +1,4 @@
+import path from 'path';
 import fs from 'fs-extra';
 import shell from 'shelljs';
 
@@ -22,12 +23,35 @@ async function updateFile(file: string, code: string): Promise<void> {
   newFiles.add(file);
 }
 
+const dataPaths = ['data'];
+
+function expandPaths(paths: string[]): string[] {
+  return paths
+    .map((pathName) => {
+      const stat = fs.statSync(pathName);
+
+      if (stat.isFile()) {
+        return [pathName];
+      }
+
+      if (stat.isDirectory()) {
+        const dirPaths = fs
+          .readdirSync(pathName, { withFileTypes: true })
+          .filter(
+            (dirent) =>
+              !(dirent.isFile() && ['.DS_Store'].includes(dirent.name))
+          )
+          .map((dirent) => path.join(pathName, dirent.name));
+        return expandPaths(dirPaths);
+      }
+
+      return [];
+    })
+    .reduce((x, y) => x.concat(y));
+}
+
 async function generateData(): Promise<void> {
-  const files = fs
-    .readdirSync('data', { withFileTypes: true })
-    .filter((dirent) => dirent.isFile())
-    .map((dirent) => dirent.name)
-    .sort();
+  const files = expandPaths(dataPaths).sort();
 
   const importDataFileType = files.map((x) => `  | '${x}'`).join('\n');
 
@@ -35,8 +59,8 @@ async function generateData(): Promise<void> {
 
   const contentMapAssignments: string[] = [];
   for (const file of files) {
-    shell.echo(`> data/${file}`);
-    const rawFileContent = await fs.readFile(`data/${file}`, 'utf8');
+    shell.echo(`> ${file}`);
+    const rawFileContent = await fs.readFile(file, 'utf8');
     contentMapAssignments.push(
       `data.set('${file}', ${JSON.stringify(rawFileContent)});`
     );
