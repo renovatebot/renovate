@@ -1,4 +1,5 @@
 import later from '@breejs/later';
+import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
@@ -80,7 +81,7 @@ export function isScheduledNow(config: RenovateConfig): boolean {
     logger.debug('No schedule defined');
     return true;
   }
-  if (!Array.isArray(configSchedule)) {
+  if (!is.array(configSchedule)) {
     logger.warn(
       `config schedule is not an array: ${JSON.stringify(configSchedule)}`
     );
