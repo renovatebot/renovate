@@ -89,3 +89,14 @@ export function unemojify(text: string, tofu = '�'): string {
         return shortCode || tofu;
       });
 }
+
+function stripEmoji(emoji: string): string {
+  const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
+  const codePoint = fromHexcodeToCodepoint(hexCode);
+  const result = fromCodepointToUnicode(codePoint);
+  return result;
+}
+
+export function stripEmojis(input: string): string {
+  return input.replace(emojiRegex, stripEmoji);
+}

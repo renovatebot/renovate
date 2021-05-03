@@ -1,5 +1,6 @@
+import { fromCodepointToUnicode, fromHexcodeToCodepoint } from 'emojibase';
 import { getName } from '../../test/util';
-import { emojify, setEmojiConfig, unemojify } from './emoji';
+import { emojify, setEmojiConfig, stripEmojis, unemojify } from './emoji';
 
 describe(getName(), () => {
   beforeEach(() => {
@@ -71,6 +72,14 @@ describe(getName(), () => {
       setEmojiConfig({ unicodeEmoji: true });
       const emojified = emojify(codified);
       expect(emojified).toEqual(char);
+    });
+  });
+
+  describe('stripEmojis', () => {
+    it('handles our problem case', () => {
+      const x = fromCodepointToUnicode(fromHexcodeToCodepoint('26A0-FE0F'));
+      const y = fromCodepointToUnicode(fromHexcodeToCodepoint('26A0'));
+      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
     });
   });
 });
