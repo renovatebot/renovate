@@ -275,9 +275,6 @@
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "tag": "latest"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged"
