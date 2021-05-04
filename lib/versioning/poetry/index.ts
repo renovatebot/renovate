@@ -1,6 +1,7 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { api as npm } from '../npm';
+import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'poetry';
@@ -67,17 +68,16 @@ function npm2poetry(input: string): string {
   return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
 }
 
-const equals = (a: string, b: string): boolean =>
-  npm.equals(padZeroes(a), padZeroes(b));
+const equals = (a: string, b: string): boolean => pep440.equals(a, b);
 
-const getMajor = (version: string): number => npm.getMajor(padZeroes(version));
+const getMajor = (version: string): number => pep440.getMajor(version);
 
-const getMinor = (version: string): number => npm.getMinor(padZeroes(version));
+const getMinor = (version: string): number => pep440.getMinor(version);
 
-const getPatch = (version: string): number => npm.getPatch(padZeroes(version));
+const getPatch = (version: string): number => pep440.getPatch(version);
 
 const isGreaterThan = (a: string, b: string): boolean =>
-  npm.isGreaterThan(padZeroes(a), padZeroes(b));
+  pep440.isGreaterThan(a, b);
 
 const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(padZeroes(version), poetry2npm(range));
@@ -90,8 +90,9 @@ const isStable = (version: string): boolean =>
 
 const isVersion = (input: string): string | boolean =>
   npm.isVersion(padZeroes(input));
+
 const matches = (version: string, range: string): boolean =>
-  npm.matches(version, poetry2npm(range));
+  npm.matches(padZeroes(version), poetry2npm(range));
 
 const getSatisfyingVersion = (versions: string[], range: string): string =>
   npm.getSatisfyingVersion(versions, poetry2npm(range));
