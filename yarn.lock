@@ -3696,6 +3696,11 @@ emoji-regex@^8.0.0:
   resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-8.0.0.tgz#e818fd69ce5ccfcb404594f842963bf53164cc37"
   integrity sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==
 
+emojibase-data@6.1.2:
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/emojibase-data/-/emojibase-data-6.1.2.tgz#c30331602419239579c0d7a032fa1232d8dc298f"
+  integrity sha512-1fYgpAYkAJq7bmGO3XboP0dQHrtRiyWrAluCmv5NHSK1nruz0x8kXhpLiz48rAJGDQOWYUpLGaPASTNXVZX87Q==
+
 emojibase-regex@5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/emojibase-regex/-/emojibase-regex-5.1.2.tgz#96cc95e26b186866de1c42a16782d3242cc29c11"
