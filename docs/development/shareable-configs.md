@@ -18,6 +18,7 @@ In human-understandable form, the rules are:
 - If a non-scoped package is specified then it is assumed to have the prefix `renovate-config-`. e.g. `rarkins:webapp` is expanded to `renovate-config-rarkins:webapp`
 - If a package name is specified and has no preset name, then `default` is assumed, e.g. `@rarkins` expands in full to `@rarkins/renovate-config:default` and `rarkins` expands in full to `renovate-config-rarkins:default`
 - There is a special "default" namespace where no package name is necessary. e.g. `:webapp` (not the leading `:`) expands to `renovate-config-default:webapp`
+- Renovate finds the relevant configuration file in your `username/renovate-config` repo automatically and will suggest you use it in the `extends` field in onboarding pull requests.
 
 ## Supported config syntax
 
