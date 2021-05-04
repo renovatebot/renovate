@@ -179,7 +179,7 @@ workflows:
             filters:
               branches:
                 only:
-                  - master
+                  - main
 ```
 
 ### GitLab CI/CD pipeline
