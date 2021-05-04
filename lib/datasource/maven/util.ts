@@ -189,7 +189,8 @@ export function getDependencyParts(lookupName: string): MavenDependency {
 export async function getDependencyInfo(
   dependency: MavenDependency,
   repoUrl: string,
-  version: string
+  version: string,
+  recursionLimit = 5
 ): Promise<Partial<ReleaseResult>> {
   const result: Partial<ReleaseResult> = {};
   const path = `${version}/${dependency.name}-${version}.pom`;
@@ -223,7 +224,7 @@ export async function getDependencyInfo(
   }
 
   const parent = pomContent.childNamed('parent');
-  if (parent && (!result.sourceUrl || !result.homepage)) {
+  if (recursionLimit > 0 && parent && (!result.sourceUrl || !result.homepage)) {
     // if we found a parent and are missing some information
     // trying to get the scm/homepage information from it
     const parentGroupId = parent.valueWithPath('groupId').replace(/\s/g, '');
@@ -235,7 +236,8 @@ export async function getDependencyInfo(
     const parentInformation = await getDependencyInfo(
       parentDependency,
       repoUrl,
-      parentVersion
+      parentVersion,
+      recursionLimit - 1
     );
     if (!result.sourceUrl && parentInformation.sourceUrl) {
       result.sourceUrl = parentInformation.sourceUrl;
