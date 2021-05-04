@@ -52,6 +52,32 @@ Object {
 }
 `;
 
+exports[`platform/azure/index createPr() should create and return an approved PR object 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "createdBy": Object {
+    "id": 123,
+    "url": "user-url",
+  },
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+  "reviewers": Array [
+    Object {
+      "isFlagged": false,
+      "isRequired": false,
+      "reviewerUrl": "user-url",
+      "vote": 10,
+    },
+  ],
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+}
+`;
+
 exports[`platform/azure/index deleteLabel() Should delete a label 1`] = `
 Array [
   Array [],
