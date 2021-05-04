@@ -1,6 +1,6 @@
-import path from 'path';
 import fs from 'fs-extra';
 import shell from 'shelljs';
+import upath from 'upath';
 
 shell.echo('generating imports');
 const newFiles = new Set();
@@ -41,7 +41,7 @@ function expandPaths(paths: string[]): string[] {
             (dirent) =>
               !(dirent.isFile() && ['.DS_Store'].includes(dirent.name))
           )
-          .map((dirent) => path.join(pathName, dirent.name));
+          .map((dirent) => upath.join(pathName, dirent.name));
         return expandPaths(dirPaths);
       }
 
