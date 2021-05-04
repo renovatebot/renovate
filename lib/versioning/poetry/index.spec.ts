@@ -139,6 +139,9 @@ describe(getName(__filename), () => {
     it('handles wildcards', () => {
       expect(versionig.matches('4.2.0', '*')).toBe(true);
     });
+    it('handles short', () => {
+      expect(versionig.matches('1.4', '1.4')).toBe(true);
+    });
   });
   describe('isLessThanRange()', () => {
     it('handles comma', () => {
