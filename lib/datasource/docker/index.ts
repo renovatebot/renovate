@@ -432,6 +432,69 @@ export async function getDigest(
   return digest;
 }
 
+async function getTagsQuayRegistry(
+  repository: string
+): Promise<string[] | null> {
+  const registry = 'https://quay.io';
+  let tags: string[] = [];
+  try {
+    const cacheNamespace = 'datasource-docker-tags';
+    const cacheKey = `${registry}:${repository}`;
+    const cachedResult = await packageCache.get<string[]>(
+      cacheNamespace,
+      cacheKey
+    );
+    // istanbul ignore if
+    if (cachedResult !== undefined) {
+      return cachedResult;
+    }
+    const limit = 10000;
+
+    let page = 1;
+    let url = `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}`;
+    const headers = await getAuthHeaders(registry, repository);
+    if (!headers) {
+      logger.debug('Failed to get authHeaders for getTags lookup');
+      return null;
+    }
+    do {
+      const res = await http.getJson<{
+        tags: { name: string }[];
+        has_additional: boolean;
+      }>(url, {
+        headers,
+      });
+      const pageTags = res.body.tags.map((tag) => tag.name);
+      url = res.body.has_additional
+        ? `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`
+        : null;
+      tags = tags.concat(pageTags);
+      page += 1;
+    } while (url && page < 20);
+    const cacheMinutes = 30;
+    await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
+    return tags;
+  } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    if (err.statusCode === 404 && !repository.includes('/')) {
+      logger.debug(
+        `Retrying Tags for ${registry}/${repository} using library/ prefix`
+      );
+      return getTagsQuayRegistry('library/' + repository);
+    }
+    if (err.statusCode >= 500 && err.statusCode < 600) {
+      logger.warn(
+        { registry, dockerRepository: repository, err },
+        'docker registry failure: internal error'
+      );
+      throw new ExternalHostError(err);
+    }
+    throw err;
+  }
+}
+
 async function getTags(
   registry: string,
   repository: string
@@ -451,46 +514,18 @@ async function getTags(
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
     const limit = ecrRegex.test(registry) ? 1000 : 10000;
-
-    let url: string;
-    let page = 1;
-
-    // quay registry returns unordered tags using v2, let's use v1 for now
-    const isQuay = registry.endsWith('quay.io');
-    if (isQuay) {
-      url = `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}`;
-    } else {
-      url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
-    }
+    let url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
+    let page = 1;
     do {
-      let pageTags: string[];
-      if (isQuay) {
-        const res = await http.getJson<{
-          tags: { name: string }[];
-          has_additional: boolean;
-        }>(url, {
-          headers,
-        });
-        pageTags = res.body.tags.map((tag) => tag.name);
-        url = res.body.has_additional
-          ? `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`
-          : null;
-      } else {
-        const res = await http.getJson<{
-          tags: string[];
-        }>(url, {
-          headers,
-        });
-        pageTags = res.body.tags;
-        const linkHeader = parseLinkHeader(res.headers.link as string);
-        url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
-      }
-      tags = tags.concat(pageTags);
+      const res = await http.getJson<{ tags: string[] }>(url, { headers });
+      tags = tags.concat(res.body.tags);
+      const linkHeader = parseLinkHeader(res.headers.link as string);
+      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 30;
@@ -659,7 +694,13 @@ export async function getReleases({
     lookupName,
     registryUrl
   );
-  const tags = await getTags(registry, repository);
+  const isQuay = registry.endsWith('quay.io');
+  let tags: string[] | null;
+  if (isQuay) {
+    tags = await getTagsQuayRegistry(repository);
+  } else {
+    tags = await getTags(registry, repository);
+  }
   if (!tags) {
     return null;
   }
