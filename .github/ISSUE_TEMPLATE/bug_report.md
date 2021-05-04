@@ -13,6 +13,25 @@ labels: 'type:bug, status:requirements, priority-5-triage'
 
 <!-- Tell us if you're using the hosted App, or if you are self-hosted Renovate yourself. Platform too (GitHub, GitLab, etc) plus which version of Renovate if you're self-hosted. -->
 
+**Renovate type:**
+
+- [ ] Hosted app
+- [ ] Self hosted
+
+**Renovate platform**
+
+- [ ] Azure DevOps
+- [ ] Azure DevOps Server (self-hosted)
+- [ ] Bitbucket Cloud
+- [ ] Bitbucket Server
+- [ ] GitHub (github.com, GitHub Enterprise)
+- [ ] GitLab (gitlab.com, self-hosted)
+- [ ] Gitea (gitea.com, self-hosted)
+
+**Renovate version (if self hosting)**
+
+I'm self hosting Renovate with version: ...
+
 **Describe the bug**
 
 <!-- A clear and concise description of what the bug is. -->
