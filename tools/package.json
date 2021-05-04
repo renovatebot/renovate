@@ -11,7 +11,8 @@
     "got": "11.8.2",
     "lodash": "4.17.21",
     "shelljs": "0.8.4",
-    "strip-ansi": "6.0.0"
+    "strip-ansi": "6.0.0",
+    "upath": "2.0.1"
   },
   "devDependencies": {
     "@types/graceful-fs": "4.1.5"
