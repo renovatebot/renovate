@@ -23,7 +23,10 @@ async function updateFile(file: string, code: string): Promise<void> {
   newFiles.add(file);
 }
 
-const dataPaths = ['data'];
+const dataPaths = [
+  'data',
+  'node_modules/emojibase-data/en/shortcodes/github.json',
+];
 
 function expandPaths(paths: string[]): string[] {
   return paths
