@@ -255,6 +255,7 @@ describe('bundler.updateArtifacts()', () => {
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
+
     it('injects bundler host configuration as command with bundler < 2', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -299,6 +300,7 @@ describe('bundler.updateArtifacts()', () => {
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
+
     it('injects bundler host configuration as command with bundler >= 2', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -343,6 +345,7 @@ describe('bundler.updateArtifacts()', () => {
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
+
     it('injects bundler host configuration as command with bundler == latest', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -385,6 +388,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
   });
+
   it('returns error when failing in lockFileMaintenance true', async () => {
     const execError = new Error();
     (execError as any).stdout = ' foo was resolved to';
