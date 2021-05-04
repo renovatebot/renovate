@@ -1,3 +1,4 @@
+import { lt } from '@renovatebot/ruby-semver';
 import { quote } from 'shlex';
 import {
   BUNDLER_INVALID_CREDENTIALS,
@@ -14,6 +15,7 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
+import { add } from '../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
@@ -53,13 +55,15 @@ async function getRubyConstraint(
 }
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
-  const varName =
-    hostConfigVariablePrefix +
+  if (hostRule.resolvedHost.includes('-')) {
+    return {};
+  }
+  const varName = hostConfigVariablePrefix.concat(
     hostRule.resolvedHost
       .split('.')
       .map((term) => term.toUpperCase())
-      .join('__');
-
+      .join('__')
+  );
   return {
     [varName]: `${getAuthenticationHeaderValue(hostRule)}`,
   };
@@ -121,15 +125,53 @@ export async function updateArtifacts(
       `gem install bundler${bundlerVersion}`,
     ];
 
-    const bundlerHostRulesVariables = findAllAuthenticatable({
+    const bundlerHostRules = findAllAuthenticatable({
       hostType: 'bundler',
-    }).reduce(
+    });
+
+    const bundlerHostRulesVariables = bundlerHostRules.reduce(
       (variables, hostRule) => ({
         ...variables,
         ...buildBundleHostVariable(hostRule),
       }),
       {} as Record<string, string>
     );
+
+    // Detect hosts with a hyphen '-' in the url.
+    // Those cannot be added with environment variables but need to be added
+    // with the bundler config
+    const bundlerHostRulesAuthCommands: string[] = bundlerHostRules.reduce(
+      (authCommands: string[], hostRule) => {
+        if (hostRule.resolvedHost.includes('-')) {
+          const creds = getAuthenticationHeaderValue(hostRule);
+          authCommands.push(`${hostRule.resolvedHost} ${creds}`);
+          // sanitize the authentication
+          add(creds);
+        }
+        return authCommands;
+      },
+      []
+    );
+
+    // Bundler < 2 has a different config option syntax than >= 2
+    if (
+      bundlerHostRulesAuthCommands &&
+      bundler &&
+      isValid(bundler) &&
+      lt(bundler, '2')
+    ) {
+      preCommands.push(
+        ...bundlerHostRulesAuthCommands.map(
+          (authCommand) => `bundler config --local ${authCommand}`
+        )
+      );
+    } else if (bundlerHostRulesAuthCommands) {
+      preCommands.push(
+        ...bundlerHostRulesAuthCommands.map(
+          (authCommand) => `bundler config set --local ${authCommand}`
+        )
+      );
+    }
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -145,6 +187,7 @@ export async function updateArtifacts(
       },
     };
     await exec(cmd, execOptions);
+
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
