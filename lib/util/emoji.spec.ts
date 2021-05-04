@@ -76,16 +76,18 @@ describe(getName(), () => {
   });
 
   describe('stripEmojis', () => {
-    it('handles our problem case', () => {
-      const x = fromCodepointToUnicode(fromHexcodeToCodepoint('26A0-FE0F'));
-      const y = fromCodepointToUnicode(fromHexcodeToCodepoint('26A0'));
-      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
-    });
+    const makeEmoji = (hexCode: string): string =>
+      fromCodepointToUnicode(fromHexcodeToCodepoint(hexCode));
 
-    it('ignores when emojis disabled via config', () => {
+    it('is independent of config option', () => {
+      const x: string = makeEmoji('26A0-FE0F');
+      const y: string = makeEmoji('26A0');
+
+      setEmojiConfig({ unicodeEmoji: true });
+      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
+
       setEmojiConfig({ unicodeEmoji: false });
-      const x = fromCodepointToUnicode(fromHexcodeToCodepoint('26A0-FE0F'));
-      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${x} bar`);
+      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
     });
   });
 });
