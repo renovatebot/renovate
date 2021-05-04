@@ -193,6 +193,12 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
+## azureAutoApprove
+
+Setting this to `true` will automatically approve the PRs in Azure DevOps.
+
+You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
+
 ## azureAutoComplete
 
 Setting this to `true` will configure PRs in Azure DevOps to auto-complete after all (if any) branch policies have been met.
@@ -2116,7 +2122,9 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 }
 ```
 
-Technical details: We mostly rely on the text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
+Technical details: We mostly rely on the text parsing of the library [@breejs/later](https://github.com/breejs/later) but only its concepts of "days", "time_before", and "time_after".
+Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
+Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 ## semanticCommitScope
 
