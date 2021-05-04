@@ -18,7 +18,17 @@ In human-understandable form, the rules are:
 - If a non-scoped package is specified then it is assumed to have the prefix `renovate-config-`. e.g. `rarkins:webapp` is expanded to `renovate-config-rarkins:webapp`
 - If a package name is specified and has no preset name, then `default` is assumed, e.g. `@rarkins` expands in full to `@rarkins/renovate-config:default` and `rarkins` expands in full to `renovate-config-rarkins:default`
 - There is a special "default" namespace where no package name is necessary. e.g. `:webapp` (not the leading `:`) expands to `renovate-config-default:webapp`
-- Renovate finds the relevant configuration file in your `username/renovate-config` repo automatically and will suggest you use it in the `extends` field in onboarding pull requests.
+
+## Onboarding PR behavior
+
+Renovate tries to find any global Renovate bot configuration in certain default locations.
+The steps are:
+
+1. Renovate searches for a repository called `renovate-config` in the user namespace or in the organization namespace.
+1. Renovate searches in the `renovate-config` repository for any configuration file (`renovate.json`, `default.json`).
+1. It will also try the `{org/user}/.{platform}` repository and searches for the `renovate-config.json` file.
+1. If Renovate finds any configuration file, it will link to this configuration in the `extends` array in the onboarding PR.
+1. As a fallback, offer the default Renovate bot configuration file.
 
 ## Supported config syntax
 
