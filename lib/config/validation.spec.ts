@@ -602,5 +602,21 @@ describe(getName(), () => {
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
     });
+    it('warns on nested group packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            automerge: true,
+            extends: ['group:fortawesome'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+    });
   });
 });
