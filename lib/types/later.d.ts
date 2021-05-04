@@ -106,19 +106,19 @@ declare module '@breejs/later' {
      * True if the specified value is valid for the specified date, false otherwise.
      *
      * @param date - The given date.
-     * @param value - The value to test for the date.
      */
-    isValid(date: Date, value: any): boolean;
+    isValid(date: Date): boolean;
   }
 
   const later: {
     parse: { text: (s: string) => ScheduleData };
 
     /**
-     * Schedule
-     * Generates instances from schedule data.
+     * Compiles schedule instances from schedule data.
+     *
+     * @param data - The given schedule data.
      */
-    schedule(input: any): Schedule;
+     schedule(data: ScheduleData): Schedule;
   };
 
   export = later;
