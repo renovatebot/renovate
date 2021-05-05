@@ -448,7 +448,8 @@ export async function getAdditionalFiles(
         ? hostRule.baseUrl.replace(/^https?:/, '')
         : `//${hostRule.resolvedHost}/`;
       if (hostRule.token) {
-        additionalNpmrcContent.push(`${uri}:_authToken=${hostRule.token}`);
+        const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
+        additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);
       } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
         const password = Buffer.from(hostRule.password).toString('base64');
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
