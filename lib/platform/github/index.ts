@@ -1569,9 +1569,13 @@ export async function mergePr(
   const url = `repos/${
     config.parentRepo || config.repository
   }/pulls/${prNo}/merge`;
-  const options = {
+  const options: any = {
     body: {} as { merge_method?: string },
   };
+  // istanbul ignore if
+  if (config.forkToken) {
+    options.token = config.forkToken;
+  }
   let automerged = false;
   if (config.mergeMethod) {
     // This path is taken if we have auto-detected the allowed merge types from the repo
