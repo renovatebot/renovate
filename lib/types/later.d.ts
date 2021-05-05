@@ -111,7 +111,18 @@ declare module '@breejs/later' {
   }
 
   const later: {
-    parse: { text: (s: string) => ScheduleData };
+    /**
+     * Parse
+     * For generating schedule data.
+     */
+    parse: {
+      /**
+       * Create schedule data by paring a human readable string.
+       *
+       * @param [input] - A string value to parse.
+       */
+      text: (s: string) => ScheduleData;
+    };
 
     /**
      * Compiles schedule instances from schedule data.
