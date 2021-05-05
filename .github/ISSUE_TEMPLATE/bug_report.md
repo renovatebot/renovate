@@ -20,7 +20,7 @@ labels: 'type:bug, status:requirements, priority-5-triage'
 
 **Renovate platform**
 
-- [ ] Azure DevOps
+- [ ] Azure DevOps (dev.azure.com)
 - [ ] Azure DevOps Server (self-hosted)
 - [ ] Bitbucket Cloud (bitbucket.org)
 - [ ] Bitbucket Server (self-hosted)
