@@ -411,14 +411,15 @@ describe(getName(), () => {
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
     it('should filter assignees and reviewers based on their availability', async () => {
-      config.assignees = ['foo', 'bar'];
-      config.reviewers = ['foo', 'bar'];
+      config.assignees = ['@foo', 'bar'];
+      config.reviewers = ['foo', '@bar', 'foo@bar.com'];
       config.filterUnavailableUsers = true;
       platform.filterUnavailableUsers = jest.fn();
       platform.filterUnavailableUsers.mockResolvedValue(['foo']);
       await prWorker.ensurePr(config);
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+      expect(platform.filterUnavailableUsers.mock.calls).toMatchSnapshot();
     });
     it('should determine assignees from code owners', async () => {
       config.assigneesFromCodeOwners = true;
