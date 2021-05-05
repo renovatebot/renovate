@@ -256,7 +256,10 @@ export async function validateConfig(
               const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
                 if (is.string(subval)) {
-                  if (subval.startsWith('group:')) {
+                  if (
+                    parentName === 'packageRules' &&
+                    subval.startsWith('group:')
+                  ) {
                     warnings.push({
                       topic: 'Configuration Warning',
                       message: `${currentPath}: you should not extend "group:" presets`,
