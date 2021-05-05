@@ -4,6 +4,10 @@ import type { RenovateConfig } from '../../config/types';
 import * as schedule from './schedule';
 
 describe(getName(__filename), () => {
+  afterEach(() => {
+    delete process.env.TZ;
+  });
+
   describe('hasValidTimezone(schedule)', () => {
     it('returns false for invalid timezone', () => {
       expect(schedule.hasValidTimezone('Asia')[0]).toBe(false);
@@ -156,13 +160,57 @@ describe(getName(__filename), () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
-    it('supports timezone', () => {
-      config.schedule = ['after 4:00pm'];
-      config.timezone = 'Asia/Singapore';
-      mockDate.set('2017-06-30T10:50:00.000Z'); // Globally 2017-06-30 10:50am
-      const res = schedule.isScheduledNow(config);
-      expect(res).toBe(true);
+
+    describe('supports timezone', () => {
+      const cases: [string, string, string, boolean][] = [
+        ['after 4:00pm', 'Asia/Singapore', '2017-06-30T10:50:00.000Z', true], // Globally 2017-06-30 10:50am
+        [
+          'after 4:00pm',
+          'Asia/Singapore',
+          '2017-06-30T15:59:00.000+0800',
+          false,
+        ],
+        [
+          'after 4:00pm',
+          'Asia/Singapore',
+          '2017-06-30T16:01:00.000+0800',
+          true,
+        ],
+        [
+          'before 3:00am on Monday',
+          'Asia/Tokyo',
+          '2017-06-25T17:59:00.000Z',
+          true,
+        ],
+        [
+          'before 3:00am on Monday',
+          'Asia/Tokyo',
+          '2017-06-25T15:59:00.000-0200',
+          true,
+        ],
+        [
+          'before 3:00am on Monday',
+          'Asia/Tokyo',
+          '2017-06-25T19:59:00.000+0200',
+          true,
+        ],
+        [
+          'before 3:00am on Monday',
+          'Asia/Tokyo',
+          '2017-06-25T20:01:00.000+0200',
+          false,
+        ],
+      ];
+
+      test.each(cases)('%p, %p, %p', (sched, tz, datetime, expected) => {
+        process.env.TZ = 'UTC';
+        config.schedule = [sched];
+        config.timezone = tz;
+        mockDate.set(datetime);
+        expect(schedule.isScheduledNow(config)).toBe(expected);
+      });
     });
+
     it('supports multiple schedules', () => {
       config.schedule = ['after 4:00pm', 'before 11:00am'];
       const res = schedule.isScheduledNow(config);
