@@ -1592,7 +1592,7 @@ export async function mergePr(
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${options.body.merge_method} merge PR`);
+        logger.warn({ err }, `Failed to ${config.mergeMethod} merge PR`);
         return false;
       }
     }
@@ -1604,29 +1604,20 @@ export async function mergePr(
       logger.debug({ options, url }, `mergePr`);
       await githubApi.putJson(url, options);
     } catch (err1) {
-      logger.debug(
-        { err: err1 },
-        `Failed to ${options.body.merge_method} merge PR`
-      );
+      logger.debug({ err: err1 }, `Failed to rebase merge PR`);
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
         await githubApi.putJson(url, options);
       } catch (err2) {
-        logger.debug(
-          { err: err2 },
-          `Failed to ${options.body.merge_method} merge PR`
-        );
+        logger.debug({ err: err2 }, `Failed to merge squash PR`);
         try {
           options.body.merge_method = 'merge';
           logger.debug({ options, url }, `mergePr`);
           await githubApi.putJson(url, options);
         } catch (err3) {
-          logger.debug(
-            { err: err3 },
-            `Failed to ${options.body.merge_method} merge PR`
-          );
-          logger.debug({ pr: prNo }, 'All merge attempts failed');
+          logger.debug({ err: err3 }, `Failed to merge commit PR`);
+          logger.info({ pr: prNo }, 'All merge attempts failed');
           return false;
         }
       }
