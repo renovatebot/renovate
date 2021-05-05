@@ -65,6 +65,14 @@ module.exports = {
       username: 'VssSessionToken',
       password: process.env.AZURE_NPM_TOKEN,
     },
+    {
+      // https://www.jfrog.com/confluence/display/JFROG/npm+Registry
+      // Will be passed as `//artifactory.my-company.com/artifactory/api/npm/npm:_auth=<TOKEN>` to `.npmrc`
+      hostType: 'npm',
+      baseUrl: 'https://artifactory.my-company.com/artifactory/api/npm/npm',
+      token: process.env.ARTIFACTORY_NPM_TOKEN,
+      authType: 'Basic',
+    },
   ],
 };
 ```
