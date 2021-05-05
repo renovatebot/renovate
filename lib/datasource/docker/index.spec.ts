@@ -458,7 +458,7 @@ describe(getName(), () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('uses quay registry', async () => {
+    it('uses quay api', async () => {
       const tags = [{ name: '1.0.0' }];
       httpMock
         .scope('https://quay.io')
