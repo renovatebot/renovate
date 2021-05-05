@@ -90,7 +90,7 @@ export function isScheduledNow(config: RenovateConfig): boolean {
   const [validSchedule, errorMessage] = hasValidSchedule(configSchedule);
   if (!validSchedule) {
     logger.warn(errorMessage);
-    return false;
+    return true;
   }
   let now = DateTime.local();
   logger.trace(`now=${now.toISO()}`);
