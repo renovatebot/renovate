@@ -24,9 +24,9 @@ labels: 'type:bug, status:requirements, priority-5-triage'
 - [ ] Azure DevOps Server (self-hosted)
 - [ ] Bitbucket Cloud (bitbucket.org)
 - [ ] Bitbucket Server (self-hosted)
+- [ ] Gitea (gitea.com, self-hosted)
 - [ ] GitHub (github.com, GitHub Enterprise)
 - [ ] GitLab (gitlab.com, self-hosted)
-- [ ] Gitea (gitea.com, self-hosted)
 
 **Renovate version (if self hosting)**
 
