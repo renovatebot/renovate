@@ -447,15 +447,16 @@ export async function getAdditionalFiles(
   });
   for (const hostRule of npmHostRules) {
     if (hostRule.token) {
+      const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
       if (hostRule.baseUrl) {
         additionalNpmrcContent.push(
-          `${hostRule.baseUrl}:_authToken=${hostRule.token}`
+          `${hostRule.baseUrl}:${key}=${hostRule.token}`
             .replace('https://', '//')
             .replace('http://', '//')
         );
       } else if (hostRule.hostName) {
         additionalNpmrcContent.push(
-          `//${hostRule.hostName}/:_authToken=${hostRule.token}`
+          `//${hostRule.hostName}/:${key}=${hostRule.token}`
         );
       }
     } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
