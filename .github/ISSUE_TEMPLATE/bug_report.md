@@ -11,7 +11,7 @@ labels: 'type:bug, status:requirements, priority-5-triage'
 
 **What Renovate type, platform and version are you using?**
 
-<!-- Tell us if you're using the hosted App, or if you are self-hosted Renovate yourself. Platform too (GitHub, GitLab, etc) plus which version of Renovate if you're self-hosted. -->
+<!-- Tell us if you're using the hosted App, or if you are self-hosting Renovate yourself. Platform too (GitHub, GitLab, etc) plus which version of Renovate if you're self-hosted. -->
 
 **Renovate type**
 
