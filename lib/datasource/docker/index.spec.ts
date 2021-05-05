@@ -465,14 +465,7 @@ describe(getName(), () => {
         .get('/v2/')
         .reply(200, '', {})
         .get('/api/v1/repository/node/tag/?limit=10000&page=1')
-        .reply(
-          200,
-          { tags, has_additional: false },
-          {
-            link:
-              '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
-          }
-        )
+        .reply(200, { tags, has_additional: false })
         .get('/v2/')
         .reply(200, '', {})
         .get('/v2/node/manifests/1.0.0')
