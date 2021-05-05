@@ -9,7 +9,7 @@ let gitPrivateKey: string;
 let keyId: string;
 
 export function setPrivateKey(key: string): void {
-  gitPrivateKey = key.trim();
+  gitPrivateKey = key?.trim();
 }
 
 async function importKey(): Promise<void> {
