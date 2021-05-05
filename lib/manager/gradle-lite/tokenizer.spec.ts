@@ -54,23 +54,22 @@ describe(getName(), () => {
       ],
       "'x'": [
         TokenType.SingleQuotedStart,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.SingleQuotedFinish,
       ],
       "'\n'": [
         TokenType.SingleQuotedStart,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.SingleQuotedFinish,
       ],
       "'$x'": [
         TokenType.SingleQuotedStart,
-        TokenType.Char,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.SingleQuotedFinish,
       ],
       "''''''": ['tripleQuotedStart', 'tripleQuotedFinish'],
-      "'''x'''": ['tripleQuotedStart', TokenType.Char, 'tripleQuotedFinish'],
-      "'''\n'''": ['tripleQuotedStart', TokenType.Char, 'tripleQuotedFinish'],
+      "'''x'''": ['tripleQuotedStart', TokenType.Chars, 'tripleQuotedFinish'],
+      "'''\n'''": ['tripleQuotedStart', TokenType.Chars, 'tripleQuotedFinish'],
       "'''\\''''": [
         'tripleQuotedStart',
         TokenType.EscapedChar,
@@ -106,12 +105,12 @@ describe(getName(), () => {
       ],
       '"x"': [
         TokenType.DoubleQuotedStart,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.DoubleQuotedFinish,
       ],
       '"\n"': [
         TokenType.DoubleQuotedStart,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.DoubleQuotedFinish,
       ],
       // eslint-disable-next-line no-template-curly-in-string

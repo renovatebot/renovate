@@ -56,7 +56,7 @@ export enum TokenType {
   TripleDoubleQuotedStart = 'tripleDoubleQuotedStart',
   TripleQuotedFinish = 'tripleQuotedFinish',
 
-  Char = 'char',
+  Chars = 'chars',
   EscapedChar = 'escapedChar',
   String = 'string',
 

@@ -89,19 +89,19 @@ const lexer = moo.states({
   },
   longDoubleQuoted: {
     stringFinish: { match: '"""', pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   doubleQuoted: {
     stringFinish: { match: '"', pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   longSingleQuoted: {
     stringFinish: { match: "'''", pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   singleQuoted: {
     stringFinish: { match: "'", pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
 });
 
