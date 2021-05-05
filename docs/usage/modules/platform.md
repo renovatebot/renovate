@@ -8,6 +8,6 @@ The currently supported platforms are:
 - Azure DevOps Server (self-hosted)
 - Bitbucket Cloud (bitbucket.org)
 - Bitbucket Server (self-hosted)
+- Gitea (gitea.com, self-hosted)
 - GitHub (github.com, GitHub Enterprise)
 - GitLab (gitlab.com, self-hosted)
-- Gitea (gitea.com, self-hosted)
