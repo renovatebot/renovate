@@ -92,6 +92,8 @@ function extractDependency(
     regEx('^https?:\\/\\/(?<hostname>[^\\/]+)\\/(?<depName>\\S*)'),
     // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
+    // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
+    /^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/,
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);

@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../util/host-rules';
@@ -231,7 +232,7 @@ export function addMetaData(
   // Clean up any empty urls
   const urls = ['homepage', 'sourceUrl', 'changelogUrl', 'dependencyUrl'];
   for (const url of urls) {
-    if (validateUrl(dep[url]?.trim())) {
+    if (is.string(dep[url]) && validateUrl(dep[url].trim())) {
       dep[url] = dep[url].trim();
     } else {
       delete dep[url];

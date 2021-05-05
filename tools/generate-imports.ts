@@ -62,11 +62,13 @@ async function generateData(): Promise<void> {
 
   const contentMapAssignments: string[] = [];
   for (const file of files) {
-    shell.echo(`> ${file}`);
+    const key = file.replace(/\\/g, '/');
+
     const rawFileContent = await fs.readFile(file, 'utf8');
-    contentMapAssignments.push(
-      `data.set('${file}', ${JSON.stringify(rawFileContent)});`
-    );
+    const value = JSON.stringify(rawFileContent);
+
+    shell.echo(`> ${key}`);
+    contentMapAssignments.push(`data.set('${key}', ${value});`);
   }
 
   await updateFile(
