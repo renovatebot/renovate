@@ -60,7 +60,6 @@ export enum TokenType {
   EscapedChar = 'escapedChar',
   String = 'string',
 
-  UnknownLexeme = 'unknownChar',
   UnknownFragment = 'unknownFragment',
 }
 

@@ -35,7 +35,7 @@ describe(getName(), () => {
         TokenType.RightBrace,
         TokenType.RightBrace,
       ],
-      '@': [TokenType.UnknownLexeme],
+      '@': [TokenType.UnknownFragment],
       "'\\''": [
         TokenType.SingleQuotedStart,
         TokenType.EscapedChar,
@@ -130,9 +130,7 @@ describe(getName(), () => {
       '"${x()}"': [
         TokenType.DoubleQuotedStart,
         TokenType.IgnoredInterpolationStart,
-        TokenType.UnknownLexeme,
-        TokenType.UnknownLexeme,
-        TokenType.UnknownLexeme,
+        TokenType.UnknownFragment,
         TokenType.RightBrace,
         TokenType.DoubleQuotedFinish,
       ],
@@ -140,7 +138,7 @@ describe(getName(), () => {
       '"${x{}}"': [
         TokenType.DoubleQuotedStart,
         TokenType.IgnoredInterpolationStart,
-        TokenType.UnknownLexeme,
+        TokenType.UnknownFragment,
         TokenType.LeftBrace,
         TokenType.RightBrace,
         TokenType.RightBrace,

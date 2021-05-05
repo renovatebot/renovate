@@ -55,7 +55,7 @@ const lexer = moo.states({
       match: '"',
       push: TokenType.DoubleQuotedStart,
     },
-    [TokenType.UnknownLexeme]: { match: /./ },
+    [TokenType.UnknownFragment]: moo.fallback,
   },
 
   // Tokenize triple-quoted string literal characters
@@ -102,26 +102,9 @@ const lexer = moo.states({
       push: TokenType.IgnoredInterpolationStart,
     },
     [TokenType.RightBrace]: { match: '}', pop: 1 },
-    [TokenType.UnknownLexeme]: { match: /[^]/, lineBreaks: true },
+    [TokenType.UnknownFragment]: moo.fallback,
   },
 });
-
-/*
-  Turn UnknownLexeme chars to UnknownFragment strings
- */
-function processUnknownLexeme(acc: Token[], token: Token): Token[] {
-  if (token.type === TokenType.UnknownLexeme) {
-    const prevToken: Token = acc[acc.length - 1];
-    if (prevToken?.type === TokenType.UnknownFragment) {
-      prevToken.value += token.value;
-    } else {
-      acc.push({ ...token, type: TokenType.UnknownFragment });
-    }
-  } else {
-    acc.push(token);
-  }
-  return acc;
-}
 
 //
 // Turn separated chars of string literal to single String token
@@ -221,7 +204,6 @@ export function extractRawTokens(input: string): Token[] {
 
 export function processTokens(tokens: Token[]): Token[] {
   return tokens
-    .reduce(processUnknownLexeme, [])
     .reduce(processChar, [])
     .reduce(processInterpolation, [])
     .filter(filterTokens);

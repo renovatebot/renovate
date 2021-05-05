@@ -85,7 +85,7 @@ const lexer = moo.states({
         ].join('|')
       ),
     },
-    unknown: { match: /[^]/, lineBreaks: true },
+    unknown: moo.fallback,
   },
   longDoubleQuoted: {
     stringFinish: { match: '"""', pop: 1 },
