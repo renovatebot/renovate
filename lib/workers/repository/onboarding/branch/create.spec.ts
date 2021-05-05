@@ -5,7 +5,7 @@ import { createOnboardingBranch } from './create';
 
 jest.mock('../../../../util/git');
 jest.mock('./config', () => ({
-  getOnboardingConfig: () =>
+  getOnboardingConfigContents: () =>
     JSON.stringify({
       foo: 'bar',
     }),
