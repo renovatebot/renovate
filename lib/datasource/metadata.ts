@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import * as hostRules from '../util/host-rules';
 import { validateUrl } from '../util/url';
 import type { ReleaseResult } from './types';
+import is from '@sindresorhus/is';
 
 // Use this object to define changelog URLs for packages
 // Only necessary when the changelog data cannot be found in the package's source repository
@@ -231,7 +232,7 @@ export function addMetaData(
   // Clean up any empty urls
   const urls = ['homepage', 'sourceUrl', 'changelogUrl', 'dependencyUrl'];
   for (const url of urls) {
-    if (validateUrl(dep[url]?.trim())) {
+    if (is.string(dep[url]) && validateUrl(dep[url].trim())) {
       dep[url] = dep[url].trim();
     } else {
       delete dep[url];
