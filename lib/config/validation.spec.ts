@@ -604,6 +604,7 @@ describe(getName(), () => {
     });
     it('warns on nested group packageRules', async () => {
       const config = {
+        extends: ['group:fortawesome'],
         packageRules: [
           {
             automerge: true,
