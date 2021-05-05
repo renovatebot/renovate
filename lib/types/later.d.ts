@@ -118,7 +118,7 @@ declare module '@breejs/later' {
      *
      * @param data - The given schedule data.
      */
-     schedule(data: ScheduleData): Schedule;
+    schedule(data: ScheduleData): Schedule;
   };
 
   export = later;
