@@ -21,7 +21,7 @@ const lexer = moo.states({
       match: /^#(?:addin|tool|module)\s+"(?:nuget|dotnet):[^"]+"\s*$/,
       value: (s: string) => s.trim().slice(1, -1),
     },
-    unknown: { match: /[^]/, lineBreaks: true },
+    unknown: moo.fallback,
   },
 });
 
