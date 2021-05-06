@@ -671,7 +671,7 @@ describe(getName(), () => {
           token: 'abc123',
         },
         {
-          hotsName: 'some.domain.com',
+          hostName: 'some.domain.com',
           token: 'abc123',
         },
       ],

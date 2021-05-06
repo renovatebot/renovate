@@ -12,7 +12,8 @@ Object {
       "token": "abc123",
     },
     Object {
-      "hotsName": "some.domain.com",
+      "hostName": "some.domain.com",
+      "matchHost": "some.domain.com",
       "token": "abc123",
     },
   ],

@@ -115,7 +115,7 @@ export function migrateConfig(
       } else if (parentKey === 'hostRules' && key === 'baseUrl') {
         migratedConfig.matchHost ||= val;
         delete migratedConfig.baseUrl;
-      } else if (parentKey === 'hostRules' && key === 'baseUrl') {
+      } else if (parentKey === 'hostRules' && key === 'hostName') {
         migratedConfig.matchHost ||= val;
         delete migratedConfig.baseUrl;
       } else if (parentKey === 'hostRules' && key === 'domainName') {
