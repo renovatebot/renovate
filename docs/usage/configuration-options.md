@@ -934,6 +934,12 @@ Example:
 }
 ```
 
+### matchHost
+
+This can be a base URL (e.g. `https://api.github.com`) or a hostname like `github.com` or `api.github.com`.
+If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
+Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
+
 ### timeout
 
 Use this figure to adjust the timeout for queries.
