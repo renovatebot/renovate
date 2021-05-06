@@ -12,7 +12,7 @@ import {
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
-} from './config';
+} from './merge';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');

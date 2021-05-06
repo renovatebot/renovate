@@ -55,26 +55,26 @@ const lexer = moo.states({
       match: '"',
       push: TokenType.DoubleQuotedStart,
     },
-    [TokenType.UnknownLexeme]: { match: /./ },
+    [TokenType.UnknownFragment]: moo.fallback,
   },
 
   // Tokenize triple-quoted string literal characters
   [TokenType.TripleSingleQuotedStart]: {
     ...escapedChars,
     [TokenType.TripleQuotedFinish]: { match: "'''", pop: 1 },
-    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
+    [TokenType.Chars]: moo.fallback,
   },
   [TokenType.TripleDoubleQuotedStart]: {
     ...escapedChars,
     [TokenType.TripleQuotedFinish]: { match: '"""', pop: 1 },
-    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
+    [TokenType.Chars]: moo.fallback,
   },
 
   // Tokenize single-quoted string literal characters
   [TokenType.SingleQuotedStart]: {
     ...escapedChars,
     [TokenType.SingleQuotedFinish]: { match: "'", pop: 1 },
-    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
+    [TokenType.Chars]: moo.fallback,
   },
 
   // Tokenize double-quoted string literal chars and interpolations
@@ -91,7 +91,7 @@ const lexer = moo.states({
       match: /\${/,
       push: TokenType.IgnoredInterpolationStart,
     },
-    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
+    [TokenType.Chars]: moo.fallback,
   },
 
   // Ignore interpolation of complex expressions˙,
@@ -102,34 +102,17 @@ const lexer = moo.states({
       push: TokenType.IgnoredInterpolationStart,
     },
     [TokenType.RightBrace]: { match: '}', pop: 1 },
-    [TokenType.UnknownLexeme]: { match: /[^]/, lineBreaks: true },
+    [TokenType.UnknownFragment]: moo.fallback,
   },
 });
 
-/*
-  Turn UnknownLexeme chars to UnknownFragment strings
- */
-function processUnknownLexeme(acc: Token[], token: Token): Token[] {
-  if (token.type === TokenType.UnknownLexeme) {
-    const prevToken: Token = acc[acc.length - 1];
-    if (prevToken?.type === TokenType.UnknownFragment) {
-      prevToken.value += token.value;
-    } else {
-      acc.push({ ...token, type: TokenType.UnknownFragment });
-    }
-  } else {
-    acc.push(token);
-  }
-  return acc;
-}
-
 //
-// Turn separated chars of string literal to single String token
+// Turn substrings of chars and escaped chars into single String token
 //
-function processChar(acc: Token[], token: Token): Token[] {
+function processChars(acc: Token[], token: Token): Token[] {
   const tokenType = token.type;
   const prevToken: Token = acc[acc.length - 1];
-  if ([TokenType.Char, TokenType.EscapedChar].includes(tokenType)) {
+  if ([TokenType.Chars, TokenType.EscapedChar].includes(tokenType)) {
     if (prevToken?.type === TokenType.String) {
       prevToken.value += token.value;
     } else {
@@ -221,8 +204,7 @@ export function extractRawTokens(input: string): Token[] {
 
 export function processTokens(tokens: Token[]): Token[] {
   return tokens
-    .reduce(processUnknownLexeme, [])
-    .reduce(processChar, [])
+    .reduce(processChars, [])
     .reduce(processInterpolation, [])
     .filter(filterTokens);
 }

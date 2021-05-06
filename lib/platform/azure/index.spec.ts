@@ -11,6 +11,7 @@ import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
+import { AzurePrVote } from './types';
 
 describe(getName(), () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -661,6 +662,49 @@ describe(getName(), () => {
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
         platformOptions: { azureAutoComplete: true },
+      });
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
+    });
+    it('should create and return an approved PR object', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        displayNumber: 'Pull Request #456',
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+      };
+      const prUpdateResult = {
+        ...prResult,
+        reviewers: [
+          {
+            reviewerUrl: prResult.createdBy.url,
+            vote: AzurePrVote.Approved,
+            isFlagged: false,
+            isRequired: false,
+          },
+        ],
+      };
+      const updateFn = jest
+        .fn(() => prUpdateResult)
+        .mockName('createPullRequestReviewer');
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            createPullRequest: jest.fn(() => prResult),
+            createPullRequestLabel: jest.fn(() => ({})),
+            createPullRequestReviewer: updateFn,
+          } as any)
+      );
+      const pr = await azure.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'dev',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        platformOptions: { azureAutoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();

@@ -339,6 +339,63 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processPredefinedRegistryUrl,
   },
   {
+    // maven("https://repository.mycompany.com/m2/repository")
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { url = uri("https://maven.springframework.org/release") }
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'uri',
+      },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: TokenType.RightParen },
+      { matchType: TokenType.RightBrace },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { url "https://maven.springframework.org/release" }
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: TokenType.RightBrace },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },

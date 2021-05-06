@@ -24,7 +24,7 @@ schedules:
   - cron: '0 3 * * *'
     displayName: 'Every day at 3am'
     branches:
-      include: [master]
+      include: [main]
 
 trigger: none
 
