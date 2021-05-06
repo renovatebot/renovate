@@ -1736,6 +1736,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchHost',
+    description: 'A host name or base URL to match against',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'timeout',
     description: 'Timeout (in milliseconds) for queries to external endpoints.',
     type: 'integer',
