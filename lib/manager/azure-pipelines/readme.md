@@ -5,7 +5,7 @@ resources:
   repositories:
     - type: github
       name: renovate/renovate
-      ref: refs/heads/master
+      ref: refs/heads/main
     - type: github
       name: user/repo
       ref: refs/tags/v0.5.1

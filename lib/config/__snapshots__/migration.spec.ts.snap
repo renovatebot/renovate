@@ -1,5 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/migration it migrates nested packageRules 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "enabled": false,
+      "matchDepTypes": Array [
+        "devDependencies",
+      ],
+    },
+    Object {
+      "automerge": true,
+      "excludePackageNames": Array [
+        "@types/react-table",
+      ],
+      "groupName": "definitelyTyped",
+      "matchPackagePrefixes": Array [
+        "@types/",
+      ],
+    },
+    Object {
+      "automerge": false,
+      "excludePackageNames": Array [
+        "@types/react-table",
+      ],
+      "matchDepTypes": Array [
+        "dependencies",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
 Object {
   "schedule": "after 5:00pm on wednesday and thursday",
@@ -174,6 +206,15 @@ Object {
       "versioning": "maven",
     },
     Object {
+      "automerge": true,
+      "matchDepTypes": Array [
+        "bar",
+      ],
+      "matchPackageNames": Array [
+        "foo",
+      ],
+    },
+    Object {
       "matchDepTypes": Array [
         "peerDependencies",
       ],
@@ -203,15 +244,6 @@ Object {
       },
       "respectLatest": false,
       "schedule": "before 5am on Monday",
-    },
-    Object {
-      "automerge": true,
-      "matchDepTypes": Array [
-        "bar",
-      ],
-      "matchPackageNames": Array [
-        "foo",
-      ],
     },
   ],
   "patch": Object {

@@ -18,6 +18,7 @@ import {
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { validateUrl } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
@@ -443,26 +444,14 @@ export async function getAdditionalFiles(
     hostType: 'npm',
   });
   for (const hostRule of npmHostRules) {
-    if (hostRule.token) {
-      if (hostRule.baseUrl) {
-        additionalNpmrcContent.push(
-          `${hostRule.baseUrl}:_authToken=${hostRule.token}`
-            .replace('https://', '//')
-            .replace('http://', '//')
-        );
-      } else if (hostRule.hostName) {
-        additionalNpmrcContent.push(
-          `//${hostRule.hostName}/:_authToken=${hostRule.token}`
-        );
-      }
-    } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
-      const password = Buffer.from(hostRule.password).toString('base64');
-      if (hostRule.baseUrl) {
-        const uri = hostRule.baseUrl.replace(/^https?:/, '');
-        additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
-        additionalNpmrcContent.push(`${uri}:_password=${password}`);
-      } else if (hostRule.hostName) {
-        const uri = `//${hostRule.hostName}/`;
+    if (hostRule.resolvedHost) {
+      let uri = hostRule.baseUrl || hostRule.matchHost || hostRule.resolvedHost;
+      uri = validateUrl(uri) ? uri.replace(/^https?:/, '') : `//${uri}/`;
+      if (hostRule.token) {
+        const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
+        additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);
+      } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
+        const password = Buffer.from(hostRule.password).toString('base64');
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
         additionalNpmrcContent.push(`${uri}:_password=${password}`);
       }

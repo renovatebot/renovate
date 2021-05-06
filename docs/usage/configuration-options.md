@@ -178,7 +178,7 @@ This setting is only applicable if you opt in to configure `automerge` to `true`
 
 Automerging defaults to using Pull Requests (`automergeType="pr"`).
 In that case Renovate first creates a branch and associated Pull Request, and then automerges the PR on a subsequent run once it detects the PR's status checks are "green".
-If by the next run the PR is already behind master branch then it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
+If by the next run the PR is already behind the base branch it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
 If Renovate is scheduled for hourly runs on the repository but commits are made every 15 minutes to the main branch, then an automerge like this will keep getting deferred with every rebase.
 
 Note: if you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
@@ -193,6 +193,12 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
+## azureAutoApprove
+
+Setting this to `true` will automatically approve the PRs in Azure DevOps.
+
+You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
+
 ## azureAutoComplete
 
 Setting this to `true` will configure PRs in Azure DevOps to auto-complete after all (if any) branch policies have been met.
@@ -206,12 +212,12 @@ Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renova
 
 ## baseBranches
 
-By default, Renovate will detect and process only the repository's default branch, e.g. `master`.
+By default, Renovate will detect and process only the repository's default branch.
 For most projects, this is the expected approach.
 However, Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
-- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `master` and `next`: `"baseBranches": ["master", "next"]`
+- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
@@ -608,7 +614,7 @@ Configure this to `false` if you want to disable release notes fetching
 
 ## fileMatch
 
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
+`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override the default values to customize for your project's needs.
 
 Sometimes file matches are really simple - for example with Go Modules Renovate looks for any `go.mod` file, and you probably don't need to change that default.
 
@@ -931,6 +937,12 @@ Example:
   ]
 }
 ```
+
+### matchHost
+
+This can be a base URL (e.g. `https://api.github.com`) or a hostname like `github.com` or `api.github.com`.
+If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
+Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 
 ### timeout
 
@@ -1321,7 +1333,7 @@ Use this field to restrict rules to a particular branch. e.g.
 {
   "packageRules": [
     {
-      "matchBaseBranches": ["master"],
+      "matchBaseBranches": ["main"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
@@ -1362,10 +1374,10 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 ### matchCurrentVersion
 
-`matchCurrentVersion` can be an exact semver version or a semver range.
+`matchCurrentVersion` can be an exact SemVer version or a SemVer range.
 
-This field also supports Regular Expressions which have to begin and end with `/`.
-For example, the following will enforce that only `1.*` versions:
+This field also supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
 
 ```json
 {
@@ -1378,8 +1390,8 @@ For example, the following will enforce that only `1.*` versions:
 }
 ```
 
-This field also supports a special negated regex syntax for ignoring certain versions.
-Use the syntax `!/ /` like the following:
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
 
 ```json
 {
@@ -1544,7 +1556,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
-Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (ad admin-only configuration option) in order to be executed.
+Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (an admin-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
 
 e.g.
@@ -2029,7 +2041,7 @@ Currently Renovate's default behavior is to only automerge if every status check
 
 Setting this option to `null` means that Renovate will ignore _all_ status checks.
 You can set this if you don't have any status checks but still want Renovate to automerge PRs.
-Beware: configuring Renovate to automerge without any tests can lead to broken builds on your default branch, please think again before enabling this!
+Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
 
 In future, this might be configurable to allow certain status checks to be ignored/required.
 See [issue 1853 at the Renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
@@ -2120,7 +2132,9 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 }
 ```
 
-Technical details: We mostly rely on the text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
+Technical details: We mostly rely on the text parsing of the library [@breejs/later](https://github.com/breejs/later) but only its concepts of "days", "time_before", and "time_after".
+Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
+Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 ## semanticCommitScope
 
@@ -2152,7 +2166,7 @@ It is recommended that you leave this setting to `true`, because of the polite w
 For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives.
 In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released.
 You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it.
-Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested.
+Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to the base branch once it's tested.
 After that, Renovate will resume providing you updates to 3.x again!
 i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
@@ -2170,11 +2184,16 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 ## stabilityDays
 
-If this is configured to a non-zero value, and an update has a release date/timestamp available, then Renovate will check if the configured "stability days" have elapsed.
-If the days since the release is less than the configured stability days then a "pending" status check will be added to the branch.
-If enough days have passed then a passing status check will be added.
+If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
-There are a couple of uses for this:
+If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
+If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
+
+Some datasources do not provide a release timestamp (in which case this feature is not compatible), and other datasources may provide a release timestamp but it's not supported by Renovate (in which case a feature request needs to be implemented).
+
+Maven users: you cannot use `stabilityDays` if a Maven source returns unreliable `last-modified` headers.
+
+There are a couple of uses for `stabilityDays`:
 
 <!-- markdownlint-disable MD001 -->
 
@@ -2237,7 +2256,7 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseStale=true and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
