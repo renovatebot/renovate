@@ -72,6 +72,7 @@ export interface GlobalOnlyConfig {
   autodiscoverFilter?: string;
   baseDir?: string;
   forceCli?: boolean;
+  gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
@@ -94,7 +95,6 @@ export interface RepoAdminConfig {
   dockerUser?: string;
   dryRun?: boolean;
   exposeAllEnv?: boolean;
-  gitNoVerify?: GitNoVerifyOption[];
   privateKey?: string | Buffer;
 }
 
