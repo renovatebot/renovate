@@ -169,9 +169,10 @@ export async function mergeRenovateConfig(
     throw error;
   }
   if (migratedConfig.warnings) {
-    returnConfig.warnings = returnConfig.warnings.concat(
-      migratedConfig.warnings
-    );
+    returnConfig.warnings = [
+      ...(returnConfig.warnings || []),
+      ...migratedConfig.warnings,
+    ];
   }
   delete migratedConfig.errors;
   delete migratedConfig.warnings;

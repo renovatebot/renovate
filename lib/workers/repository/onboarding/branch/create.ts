@@ -4,7 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';
 import { formatCommitMessagePrefix } from '../../util/commit-message';
-import { getOnboardingConfig } from './config';
+import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -12,7 +12,7 @@ export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
-  const contents = await getOnboardingConfig(config);
+  const contents = await getOnboardingConfigContents(config);
   logger.debug('Creating onboarding branch');
 
   const configFile = configFileNames.includes(config.onboardingConfigFileName)
