@@ -445,7 +445,7 @@ export async function getAdditionalFiles(
   });
   for (const hostRule of npmHostRules) {
     if (hostRule.resolvedHost) {
-      let uri = hostRule.baseUrl || hostRule.matchHost || hostRule.resolvedHost;
+      let uri = hostRule.matchHost;
       uri = validateUrl(uri) ? uri.replace(/^https?:/, '') : `//${uri}/`;
       if (hostRule.token) {
         const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';

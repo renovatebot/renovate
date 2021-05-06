@@ -365,7 +365,7 @@ It could then be used in a repository config or preset like so:
 {
   "hostRules": [
     {
-      "domainName": "google.com",
+      "matchHost": "google.com",
       "token": "{{ secrets.GOOGLE_TOKEN }}"
     }
   ]

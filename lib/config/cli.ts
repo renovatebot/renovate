@@ -25,8 +25,8 @@ export function getConfig(input: string[]): GlobalConfig {
         .replace('--expose-env', '--trust-level=high')
         .replace('--renovate-fork', '--include-forks')
         .replace('"platform":"', '"hostType":"')
-        .replace('"endpoint":"', '"baseUrl":"')
-        .replace('"host":"', '"hostName":"')
+        .replace('"endpoint":"', '"matchHost":"')
+        .replace('"host":"', '"matchHost":"')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();

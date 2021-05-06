@@ -271,7 +271,7 @@ describe(getName(), () => {
   it('should use host rules by hostName if provided', async () => {
     hostRules.add({
       hostType: 'npm',
-      hostName: 'npm.mycustomregistry.com',
+      matchHost: 'npm.mycustomregistry.com',
       token: 'abcde',
     });
     httpMock
@@ -289,7 +289,7 @@ describe(getName(), () => {
   it('should use host rules by baseUrl if provided', async () => {
     hostRules.add({
       hostType: 'npm',
-      baseUrl:
+      matchHost:
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/',
       token: 'abcde',
     });

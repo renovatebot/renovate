@@ -659,4 +659,28 @@ describe(getName(), () => {
     expect(migratedConfig).toMatchSnapshot();
     expect(migratedConfig.packageRules).toHaveLength(3);
   });
+  it('it migrates hostRules fields', () => {
+    const config: RenovateConfig = {
+      hostRules: [
+        {
+          baseUrl: 'https://some.domain.com',
+          token: 'abc123',
+        },
+        {
+          domainName: 'domain.com',
+          token: 'abc123',
+        },
+        {
+          hotsName: 'some.domain.com',
+          token: 'abc123',
+        },
+      ],
+    } as any;
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
+  });
 });

@@ -56,15 +56,14 @@ If such a package is private, then Renovate must be configured with the relevant
 Renovate does not use any package managers for this step and performs all HTTP(S) lookups itself, including insertion of authentication headers.
 
 Configuring Renovate with credentials requires `hostRules`.
-Each host rule consists of a `hostType` value and/or a way to match against hosts using `baseUrl`, `hostName` or `domainName`.
+Each host rule consists of a `hostType` value and/or a way to match against hosts using `matchHost`.
 
 `hostType` is not particularly important at this step unless you have different credentials for the same host, however it is sometimes useful in later steps so is good to include if you can.
 It can be either a "platform" name (e.g. `github`, `azure`, etc) or a "datasource" name (e.g. `npm`, `maven`, `github-tags`, etc).
 
-`baseUrl` can be used if you want to only apply the credentials for a nested path within the host, e.g. `https://registry.company.com/nested/path/`.
-If the same credentials apply to all paths on a host, then use `hostName` instead, e.g. `registry.company.com`.
-Finally, to apply credentials to all hosts within the domain, use `domainName`, e.g. `company.com`.
-You need to pick _only one_ of these and not configure more than one of these fields within the same host rule, otherwise it will error.
+If you want to apply credentials only for a nested path within a host then write `matchHost` as a base URL like `https://registry.company.com/nested/path/`.
+If the same credentials apply to all paths on a host and not on any subdomains of it then configure `matchHost` with a protocol like `https://registry.company.com`.
+Finally, to apply credentials to all hosts within the domain, use a `matchHost` value with no `https://` prefix, e.g. `company.com` or `registry.company.com`, both of which would apply to a host like `beta.registry.company.com`.
 
 In addition to the above options to match against a host, you need to add the credentials.
 Typically they are either `token`, or `username` + `password`.
@@ -76,11 +75,11 @@ Here is an example of some host rules:
 {
   "hostRules": [
     {
-      "hostName": "registry.npmjs.org",
+      "matchHost": "registry.npmjs.org",
       "token": "abc123"
     },
     {
-      "baseUrl": "https://registry.company.com/pypi-simple/",
+      "matchHost": "https://registry.company.com/pypi-simple/",
       "username": "engineering",
       "password": "abc123"
     }
@@ -174,13 +173,13 @@ If you need to provide credentials to the hosted Renovate App, please do this:
 {
   "hostRules": [
     {
-      "hostName": "registry.npmjs.org",
+      "matchHost": "registry.npmjs.org",
       "encrypted": {
         "token": "3f832f2983yf89hsd98ahadsjfasdfjaslf............"
       }
     },
     {
-      "baseUrl": "https://custom.registry.company.com/pypi/",
+      "matchHost": "https://custom.registry.company.com/pypi/",
       "username": "bot1",
       "encrypted": {
         "password": "p278djfdsi9832jnfdshufwji2r389fdskj........."

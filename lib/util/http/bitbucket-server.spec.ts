@@ -18,7 +18,7 @@ describe(getName(), () => {
     hostRules.clear();
     hostRules.add({
       hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
-      baseUrl,
+      matchHost: baseUrl,
       token: 'token',
     });
 

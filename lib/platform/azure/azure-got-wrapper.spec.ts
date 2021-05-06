@@ -22,7 +22,7 @@ describe(getName(), () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_AZURE,
         token: '1234567890123456789012345678901234567890123456789012',
-        baseUrl: 'https://dev.azure.com/renovate1',
+        matchHost: 'https://dev.azure.com/renovate1',
       });
       azure.setEndpoint('https://dev.azure.com/renovate1');
 
@@ -38,7 +38,7 @@ describe(getName(), () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_AZURE,
         token: 'token',
-        baseUrl: 'https://dev.azure.com/renovate2',
+        matchHost: 'https://dev.azure.com/renovate2',
       });
       azure.setEndpoint('https://dev.azure.com/renovate2');
 
@@ -56,7 +56,7 @@ describe(getName(), () => {
         hostType: PLATFORM_TYPE_AZURE,
         username: 'user',
         password: 'pass',
-        baseUrl: 'https://dev.azure.com/renovate3',
+        matchHost: 'https://dev.azure.com/renovate3',
       });
       azure.setEndpoint('https://dev.azure.com/renovate3');
 

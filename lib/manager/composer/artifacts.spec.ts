@@ -78,23 +78,23 @@ describe('.updateArtifacts()', () => {
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
       hostType: PLATFORM_TYPE_GITHUB,
-      hostName: 'api.github.com',
+      matchHost: 'api.github.com',
       token: 'github-token',
     });
     hostRules.add({
       hostType: PLATFORM_TYPE_GITLAB,
-      hostName: 'gitlab.com',
+      matchHost: 'gitlab.com',
       token: 'gitlab-token',
     });
     hostRules.add({
       hostType: datasourcePackagist.id,
-      hostName: 'packagist.renovatebot.com',
+      matchHost: 'packagist.renovatebot.com',
       username: 'some-username',
       password: 'some-password',
     });
     hostRules.add({
       hostType: datasourcePackagist.id,
-      baseUrl: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
+      matchHost: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
       username: 'some-other-username',
       password: 'some-other-password',
     });

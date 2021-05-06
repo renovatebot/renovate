@@ -8,7 +8,7 @@ If you need Bundler to authenticate with a private registry - and it's not the s
 {
   "hostRules": [
     {
-      "hostName": "private-registry.company.com",
+      "matchHost": "private-registry.company.com",
       "hostType": "bundler",
       "token": "abc123"
     }

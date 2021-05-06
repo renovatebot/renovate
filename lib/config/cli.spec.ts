@@ -79,12 +79,12 @@ describe(getName(), () => {
     });
     it('parses json lists correctly', () => {
       argv.push(
-        `--host-rules=[{"domainName":"docker.io","hostType":"${datasourceDocker.id}","username":"user","password":"password"}]`
+        `--host-rules=[{"matchHost":"docker.io","hostType":"${datasourceDocker.id}","username":"user","password":"password"}]`
       );
       expect(cli.getConfig(argv)).toEqual({
         hostRules: [
           {
-            domainName: 'docker.io',
+            matchHost: 'docker.io',
             hostType: datasourceDocker.id,
             username: 'user',
             password: 'password',

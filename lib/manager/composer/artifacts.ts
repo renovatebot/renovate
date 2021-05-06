@@ -56,7 +56,7 @@ function getAuthJson(): string | null {
     .findAll({ hostType: PLATFORM_TYPE_GITLAB })
     ?.forEach((gitlabHostRule) => {
       if (gitlabHostRule?.token) {
-        const host = gitlabHostRule.hostName || 'gitlab.com';
+        const host = gitlabHostRule.resolvedHost || 'gitlab.com';
         authJson['gitlab-token'] = authJson['gitlab-token'] || {};
         authJson['gitlab-token'][host] = gitlabHostRule.token;
         // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token

@@ -29,7 +29,7 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
-const baseUrl = 'https://gitlab.com/';
+const matchHost = 'https://gitlab.com/';
 
 describe(getName(), () => {
   describe('getChangeLogJSON', () => {
@@ -38,7 +38,7 @@ describe(getName(), () => {
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITLAB,
-        baseUrl,
+        matchHost,
         token: 'abc',
       });
     });
@@ -46,7 +46,7 @@ describe(getName(), () => {
       httpMock.reset();
     });
     it('returns null if @types', async () => {
-      httpMock.scope(baseUrl);
+      httpMock.scope(matchHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -56,7 +56,7 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toBeEmpty();
     });
     it('returns null if currentVersion equals newVersion', async () => {
-      httpMock.scope(baseUrl);
+      httpMock.scope(matchHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -83,7 +83,7 @@ describe(getName(), () => {
     });
     it('uses GitLab tags', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(matchHost)
         .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .reply(200, [
           { name: 'v5.2.0' },
@@ -108,7 +108,7 @@ describe(getName(), () => {
     });
     it('handles empty GitLab tags response', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(matchHost)
         .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .reply(200, [])
         .persist()
@@ -126,7 +126,7 @@ describe(getName(), () => {
     });
     it('uses GitLab tags with error', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(matchHost)
         .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .replyWithError('Unknown GitLab Repo')
         .persist()
@@ -177,7 +177,7 @@ describe(getName(), () => {
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_GITLAB,
-        baseUrl: 'https://gitlab-enterprise.example.com/',
+        matchHost: 'https://gitlab-enterprise.example.com/',
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
@@ -193,7 +193,7 @@ describe(getName(), () => {
       httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
       hostRules.add({
         hostType: PLATFORM_TYPE_GITLAB,
-        baseUrl: 'https://git.test.com/',
+        matchHost: 'https://git.test.com/',
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';

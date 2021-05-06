@@ -1,5 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/migration it migrates hostRules fields 1`] = `
+Object {
+  "hostRules": Array [
+    Object {
+      "matchHost": "https://some.domain.com",
+      "token": "abc123",
+    },
+    Object {
+      "matchHost": "domain.com",
+      "token": "abc123",
+    },
+    Object {
+      "hotsName": "some.domain.com",
+      "token": "abc123",
+    },
+  ],
+}
+`;
+
 exports[`config/migration it migrates nested packageRules 1`] = `
 Object {
   "packageRules": Array [

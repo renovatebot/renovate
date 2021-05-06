@@ -82,7 +82,7 @@ describe(getName(), () => {
     });
 
     it('sets private if authorization privided', async () => {
-      hostRules.add({ hostName: 'customprivate.pypi.net', token: 'abc123' });
+      hostRules.add({ matchHost: 'customprivate.pypi.net', token: 'abc123' });
       httpMock
         .scope('https://customprivate.pypi.net/foo')
         .get('/azure-cli-monitor/json')
@@ -257,7 +257,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('sets private simple if authorization provided', async () => {
-      hostRules.add({ hostName: 'some.private.registry.org', token: 'abc123' });
+      hostRules.add({
+        matchHost: 'some.private.registry.org',
+        token: 'abc123',
+      });
       httpMock
         .scope('https://some.private.registry.org/+simple/')
         .get('/dj-database-url/')
