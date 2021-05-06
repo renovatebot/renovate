@@ -694,7 +694,7 @@ export async function getReleases({
     lookupName,
     registryUrl
   );
-  const isQuay = registry == 'https://quay.io';
+  const isQuay = registry === 'https://quay.io';
   let tags: string[] | null;
   if (isQuay) {
     tags = await getTagsQuayRegistry(repository);
