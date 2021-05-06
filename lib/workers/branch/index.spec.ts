@@ -324,6 +324,17 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
+    it('returns if pending checks', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      config.pendingChecks = ['stabilityDays'];
+      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+    });
     it('returns if branch automerged', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
