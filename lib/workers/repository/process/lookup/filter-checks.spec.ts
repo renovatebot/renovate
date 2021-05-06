@@ -1,10 +1,10 @@
 import { getConfig, getName, mocked } from '../../../../../test/util';
-import { Release } from '../../../../datasource';
+import type { Release } from '../../../../datasource';
 import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';
 import * as allVersioning from '../../../../versioning';
 import { filterInternalChecks } from './filter-checks';
-import { LookupUpdateConfig, UpdateResult } from './types';
+import type { LookupUpdateConfig, UpdateResult } from './types';
 
 jest.mock('../../../../util/date');
 
@@ -59,6 +59,7 @@ describe(getName(), () => {
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release.version).toEqual('1.0.4');
     });
+
     it('returns non-pending latest release if internalChecksFilter=flexible and none pass checks', () => {
       config.internalChecksFilter = 'flexible';
       config.stabilityDays = 10;
@@ -73,6 +74,7 @@ describe(getName(), () => {
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release.version).toEqual('1.0.4');
     });
+
     it('returns pending latest release if internalChecksFilter=strict and none pass checks', () => {
       config.internalChecksFilter = 'strict';
       config.stabilityDays = 10;
@@ -87,6 +89,7 @@ describe(getName(), () => {
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release.version).toEqual('1.0.4');
     });
+
     it('returns non-latest release if internalChecksFilter=strict and some pass checks', () => {
       config.internalChecksFilter = 'strict';
       config.stabilityDays = 6;
@@ -101,6 +104,7 @@ describe(getName(), () => {
       expect(res.pendingReleases).toHaveLength(2);
       expect(res.release.version).toEqual('1.0.2');
     });
+
     it('returns non-latest release if internalChecksFilter=flexible and some pass checks', () => {
       config.internalChecksFilter = 'strict';
       config.stabilityDays = 6;
@@ -115,6 +119,7 @@ describe(getName(), () => {
       expect(res.pendingReleases).toHaveLength(2);
       expect(res.release.version).toEqual('1.0.2');
     });
+
     it('picks up stabilityDays settings from hostRules', () => {
       config.internalChecksFilter = 'strict';
       config.stabilityDays = 6;
@@ -130,6 +135,7 @@ describe(getName(), () => {
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release.version).toEqual('1.0.4');
     });
+
     it('picks up stabilityDays settings from updateType', () => {
       config.internalChecksFilter = 'strict';
       config.patch = { stabilityDays: 4 };

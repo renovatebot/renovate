@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
-import { Release } from '../../../../datasource';
+import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import { getElapsedDays } from '../../../../util/date';
 import { applyPackageRules } from '../../../../util/package-rules';
-import { VersioningApi } from '../../../../versioning';
-import { LookupUpdateConfig, UpdateResult } from './types';
+import type { VersioningApi } from '../../../../versioning';
+import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
 export interface InternalChecksResult {
