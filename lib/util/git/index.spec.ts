@@ -3,6 +3,7 @@ import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
+import { setNoVerify } from './config';
 import * as git from '.';
 
 describe(getName(), () => {
@@ -76,6 +77,7 @@ describe(getName(), () => {
       gitAuthorEmail: 'Jest@example.com',
     });
     await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    setNoVerify([]);
     await git.syncGit();
   });
 
@@ -356,12 +358,12 @@ describe(getName(), () => {
           contents: 'some new-contents',
         },
       ];
+      setNoVerify(['commit']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
         files,
         message: 'Pass no-verify',
-        noVerify: ['commit'],
       });
 
       expect(commitSpy).toHaveBeenCalledWith(
@@ -386,12 +388,12 @@ describe(getName(), () => {
           contents: 'some new-contents',
         },
       ];
+      setNoVerify(['push']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
         files,
         message: 'Pass no-verify',
-        noVerify: ['push'],
       });
 
       expect(commitSpy).toHaveBeenCalledWith(
