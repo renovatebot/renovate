@@ -96,6 +96,13 @@ describe(getName(), () => {
         find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
           .token
       ).toEqual('def');
+      expect(
+        find({ hostType: datasourceNuget.id, url: 'https://github.com' }).token
+      ).toEqual('def');
+      expect(
+        find({ hostType: datasourceNuget.id, url: 'https://apigithub.com' })
+          .token
+      ).toBeUndefined();
     });
     it('matches on hostName', () => {
       add({
