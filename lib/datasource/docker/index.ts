@@ -10,7 +10,6 @@ import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { ecrRegex, getAuthHeaders } from './common';
-import { getTagsQuayRegistry } from './quay';
 import { Image, ImageList, MediaType } from './types';
 
 // TODO: add got typings when available (#9646)
@@ -493,13 +492,7 @@ export async function getReleases({
     lookupName,
     registryUrl
   );
-  const isQuay = registry === 'https://quay.io';
-  let tags: string[] | null;
-  if (isQuay) {
-    tags = await getTagsQuayRegistry(repository);
-  } else {
-    tags = await getTags(registry, repository);
-  }
+  const tags = await getTags(registry, repository);
   if (!tags) {
     return null;
   }
