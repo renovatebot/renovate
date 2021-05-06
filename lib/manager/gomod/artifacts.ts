@@ -76,11 +76,12 @@ function useModcacherw(goVersion: string): boolean {
 
   const [majorPart, minorPart] = goVersion.replace(/^[^\d]*/g, '').split('.');
   const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
-  if (Number.isNaN(major) || Number.isNaN(minor)) {
-    return false;
-  }
 
-  return major > 1 || (major === 1 && minor >= 14);
+  return (
+    !Number.isNaN(major) &&
+    !Number.isNaN(minor) &&
+    (major > 1 || (major === 1 && minor >= 14))
+  );
 }
 
 export async function updateArtifacts({
