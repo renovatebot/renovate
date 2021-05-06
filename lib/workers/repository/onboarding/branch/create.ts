@@ -12,9 +12,6 @@ export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
-
-  const { dryRun } = getAdminConfig();
-
   const contents = await getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
 
@@ -47,7 +44,7 @@ export async function createOnboardingBranch(
   const commitMessage = `${commitMessagePrefix} ${onboardingCommitMessage}`.trim();
 
   // istanbul ignore if
-  if (dryRun) {
+  if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }

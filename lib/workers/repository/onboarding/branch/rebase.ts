@@ -36,9 +36,6 @@ export async function rebaseOnboardingBranch(
   config: RenovateConfig
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
-
-  const { dryRun } = getAdminConfig();
-
   if (await isBranchModified(config.onboardingBranch)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
@@ -58,7 +55,7 @@ export async function rebaseOnboardingBranch(
   const commitMessage = getCommitMessage(config);
 
   // istanbul ignore if
-  if (dryRun) {
+  if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }
