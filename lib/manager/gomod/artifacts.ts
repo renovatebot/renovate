@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
@@ -68,6 +69,20 @@ function getUpdateImportPathCmds(
   return updateImportCommands;
 }
 
+function useModcacherw(goVersion: string): boolean {
+  if (!is.string(goVersion)) {
+    return false;
+  }
+
+  const [majorPart, minorPart] = goVersion.replace(/^[^\d]*/g, '').split('.');
+  const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
+  if (Number.isNaN(major) || Number.isNaN(minor)) {
+    return false;
+  }
+
+  return major > 1 || (major === 1 && minor >= 14);
+}
+
 export async function updateArtifacts({
   packageFileName: goModFileName,
   updatedDeps,
@@ -109,6 +124,7 @@ export async function updateArtifacts({
         GOPRIVATE: process.env.GOPRIVATE,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
+        GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: config.binarySource === BinarySource.Docker ? '0' : null,
       },
       docker: {
