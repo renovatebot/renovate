@@ -1,19 +1,16 @@
 import URL from 'url';
-import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
-import wwwAuthenticate from 'www-authenticate';
-import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
-import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { ecrRegex, getAuthHeaders } from './common';
+import { getTagsQuayRegistry } from './quay';
 import { Image, ImageList, MediaType } from './types';
 
 // TODO: add got typings when available (#9646)
@@ -53,8 +50,6 @@ export const defaultConfig = {
 };
 
 const http = new Http(id);
-
-const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
 export interface RegistryRepository {
   registry: string;
@@ -109,139 +104,6 @@ export function getRegistryRepository(
   };
 }
 
-async function getECRAuthToken(
-  region: string,
-  opts: HostRule
-): Promise<string | null> {
-  const config: ECRClientConfig = { region };
-  if (opts.username && opts.password) {
-    config.credentials = {
-      accessKeyId: opts.username,
-      secretAccessKey: opts.password,
-    };
-  }
-  const ecr = new ECR(config);
-  try {
-    const data = await ecr.getAuthorizationToken({});
-    const authorizationToken = data?.authorizationData?.[0]?.authorizationToken;
-    if (authorizationToken) {
-      return authorizationToken;
-    }
-    logger.warn(
-      'Could not extract authorizationToken from ECR getAuthorizationToken response'
-    );
-  } catch (err) {
-    logger.trace({ err }, 'err');
-    logger.debug('ECR getAuthorizationToken error');
-  }
-  return null;
-}
-
-async function getAuthHeaders(
-  registry: string,
-  dockerRepository: string
-): Promise<OutgoingHttpHeaders | null> {
-  try {
-    const apiCheckUrl = `${registry}/v2/`;
-    const apiCheckResponse = await http.get(apiCheckUrl, {
-      throwHttpErrors: false,
-    });
-    if (apiCheckResponse.headers['www-authenticate'] === undefined) {
-      return {};
-    }
-    const authenticateHeader = new wwwAuthenticate.parsers.WWW_Authenticate(
-      apiCheckResponse.headers['www-authenticate']
-    );
-
-    const opts: HostRule & {
-      headers?: Record<string, string>;
-    } = hostRules.find({ hostType: id, url: apiCheckUrl });
-    if (ecrRegex.test(registry)) {
-      const [, region] = ecrRegex.exec(registry);
-      const auth = await getECRAuthToken(region, opts);
-      if (auth) {
-        opts.headers = { authorization: `Basic ${auth}` };
-      }
-    } else if (opts.username && opts.password) {
-      const auth = Buffer.from(`${opts.username}:${opts.password}`).toString(
-        'base64'
-      );
-      opts.headers = { authorization: `Basic ${auth}` };
-    }
-    delete opts.username;
-    delete opts.password;
-
-    if (authenticateHeader.scheme.toUpperCase() === 'BASIC') {
-      logger.debug(`Using Basic auth for docker registry ${dockerRepository}`);
-      await http.get(apiCheckUrl, opts);
-      return opts.headers;
-    }
-
-    // prettier-ignore
-    const authUrl = `${String(authenticateHeader.parms.realm)}?service=${String(authenticateHeader.parms.service)}&scope=repository:${dockerRepository}:pull`;
-    logger.trace(
-      `Obtaining docker registry token for ${dockerRepository} using url ${authUrl}`
-    );
-    const authResponse = (
-      await http.getJson<{ token?: string; access_token?: string }>(
-        authUrl,
-        opts
-      )
-    ).body;
-
-    const token = authResponse.token || authResponse.access_token;
-    // istanbul ignore if
-    if (!token) {
-      logger.warn('Failed to obtain docker registry token');
-      return null;
-    }
-    return {
-      authorization: `Bearer ${token}`,
-    };
-  } catch (err) /* istanbul ignore next */ {
-    if (err.host === 'quay.io') {
-      // TODO: debug why quay throws errors (#9604)
-      return null;
-    }
-    if (err.statusCode === 401) {
-      logger.debug(
-        { registry, dockerRepository },
-        'Unauthorized docker lookup'
-      );
-      logger.debug({ err });
-      return null;
-    }
-    if (err.statusCode === 403) {
-      logger.debug(
-        { registry, dockerRepository },
-        'Not allowed to access docker registry'
-      );
-      logger.debug({ err });
-      return null;
-    }
-    // prettier-ignore
-    if (err.name === 'RequestError' && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new ExternalHostError(err);
-    }
-    // prettier-ignore
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new ExternalHostError(err);
-    }
-    if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new ExternalHostError(err);
-    }
-    if (err.message === HOST_DISABLED) {
-      logger.trace({ registry, dockerRepository, err }, 'Host disabled');
-      return null;
-    }
-    logger.warn(
-      { registry, dockerRepository, err },
-      'Error obtaining docker token'
-    );
-    return null;
-  }
-}
-
 function digestFromManifestStr(str: hasha.HashaInput): string {
   return 'sha256:' + hasha(str, { algorithm: 'sha256' });
 }
@@ -261,7 +123,7 @@ async function getManifestResponse(
 ): Promise<HttpResponse> {
   logger.debug(`getManifestResponse(${registry}, ${dockerRepository}, ${tag})`);
   try {
-    const headers = await getAuthHeaders(registry, dockerRepository);
+    const headers = await getAuthHeaders(id, http, registry, dockerRepository);
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return null;
@@ -432,69 +294,6 @@ export async function getDigest(
   return digest;
 }
 
-async function getTagsQuayRegistry(
-  repository: string
-): Promise<string[] | null> {
-  const registry = 'https://quay.io';
-  let tags: string[] = [];
-  try {
-    const cacheNamespace = 'datasource-docker-tags';
-    const cacheKey = `${registry}:${repository}`;
-    const cachedResult = await packageCache.get<string[]>(
-      cacheNamespace,
-      cacheKey
-    );
-    // istanbul ignore if
-    if (cachedResult !== undefined) {
-      return cachedResult;
-    }
-    const limit = 10000;
-
-    let page = 1;
-    let url = `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}`;
-    const headers = await getAuthHeaders(registry, repository);
-    if (!headers) {
-      logger.debug('Failed to get authHeaders for getTags lookup');
-      return null;
-    }
-    do {
-      const res = await http.getJson<{
-        tags: { name: string }[];
-        has_additional: boolean;
-      }>(url, {
-        headers,
-      });
-      const pageTags = res.body.tags.map((tag) => tag.name);
-      url = res.body.has_additional
-        ? `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`
-        : null;
-      tags = tags.concat(pageTags);
-      page += 1;
-    } while (url && page < 20);
-    const cacheMinutes = 30;
-    await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
-    return tags;
-  } catch (err) /* istanbul ignore next */ {
-    if (err instanceof ExternalHostError) {
-      throw err;
-    }
-    if (err.statusCode === 404 && !repository.includes('/')) {
-      logger.debug(
-        `Retrying Tags for ${registry}/${repository} using library/ prefix`
-      );
-      return getTagsQuayRegistry('library/' + repository);
-    }
-    if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.warn(
-        { registry, dockerRepository: repository, err },
-        'docker registry failure: internal error'
-      );
-      throw new ExternalHostError(err);
-    }
-    throw err;
-  }
-}
-
 async function getTags(
   registry: string,
   repository: string
@@ -515,7 +314,7 @@ async function getTags(
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
     const limit = ecrRegex.test(registry) ? 1000 : 10000;
     let url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
-    const headers = await getAuthHeaders(registry, repository);
+    const headers = await getAuthHeaders(id, http, registry, repository);
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
@@ -598,7 +397,7 @@ async function getLabels(
       return {};
     }
 
-    const headers = await getAuthHeaders(registry, dockerRepository);
+    const headers = await getAuthHeaders(id, http, registry, dockerRepository);
     // istanbul ignore if: Should never be happen
     if (!headers) {
       logger.debug('No docker auth found - returning');
@@ -694,7 +493,7 @@ export async function getReleases({
     lookupName,
     registryUrl
   );
-  const isQuay = registry == 'https://quay.io';
+  const isQuay = registry === 'https://quay.io';
   let tags: string[] | null;
   if (isQuay) {
     tags = await getTagsQuayRegistry(repository);
