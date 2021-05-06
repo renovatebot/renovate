@@ -118,6 +118,13 @@ Object {
       "depType": "repository",
       "lookupName": "pre-commit/pre-commit-hooks",
     },
+    Object {
+      "currentValue": "v2.1.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+    },
   ],
 }
 `;
