@@ -99,8 +99,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     if (datasources.has(hostType)) {
       const suffix = splitEnv.pop();
       if (fields.includes(suffix)) {
-        let hostName: string;
-        let domainName: string;
+        let matchHost: string;
         const rule: HostRule = {};
         rule[suffix] = env[envName];
         if (splitEnv.length === 0) {
@@ -108,16 +107,11 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
         } else if (splitEnv.length === 1) {
           logger.warn(`Cannot parse ${envName} env`);
           continue; // eslint-disable-line no-continue
-        } else if (splitEnv.length === 2) {
-          domainName = splitEnv.join('.');
         } else {
-          hostName = splitEnv.join('.');
+          matchHost = splitEnv.join('.');
         }
         const existingRule = hostRules.find(
-          (hr) =>
-            hr.hostType === hostType &&
-            hr.hostName === hostName &&
-            hr.domainName === domainName
+          (hr) => hr.hostType === hostType && hr.matchHost === matchHost
         );
         if (existingRule) {
           // Add current field to existing rule
@@ -127,10 +121,8 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
           const newRule: HostRule = {
             hostType,
           };
-          if (hostName) {
-            newRule.hostName = hostName;
-          } else if (domainName) {
-            newRule.domainName = domainName;
+          if (matchHost) {
+            newRule.matchHost = matchHost;
           }
           newRule[suffix] = env[envName];
           hostRules.push(newRule);
