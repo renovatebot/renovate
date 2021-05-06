@@ -91,11 +91,9 @@ export async function calculateHashes(
       const writeStream = fs.createWriteStream(downloadFileName);
       readStream.pipe(writeStream);
 
-      const pipeline = fs.getStreamingPipeline();
-
       let hash = null;
       try {
-        await pipeline(readStream, writeStream);
+        await fs.pipeline(readStream, writeStream);
 
         hash = await hashOfZipContent(downloadFileName, extractPath);
         logger.trace(
@@ -108,7 +106,6 @@ export async function calculateHashes(
       } finally {
         // delete zip file
         await fs.unlink(downloadFileName);
-        await fs.remove(extractPath);
       }
       return hash;
     },

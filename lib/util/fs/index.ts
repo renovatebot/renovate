@@ -7,6 +7,8 @@ import { logger } from '../../logger';
 
 export * from './proxies';
 
+export const pipeline = util.promisify(stream.pipeline);
+
 let localDir = '';
 let cacheDir = '';
 
@@ -147,11 +149,4 @@ export async function readLocalDirectory(path: string): Promise<string[]> {
 
 export function createWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
-}
-
-export function getStreamingPipeline(): (
-  arg1: NodeJS.ReadableStream,
-  arg2: NodeJS.ReadWriteStream | NodeJS.WritableStream
-) => Promise<void> {
-  return util.promisify(stream.pipeline);
 }

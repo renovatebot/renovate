@@ -52,8 +52,7 @@ async function updateAllLocks(
     { concurrency: 4 } // allow to look up 4 lock in parallel
   );
 
-  const result = updates.filter((value) => value);
-  return new Promise((resolve) => resolve(result));
+  return updates.filter(Boolean);
 }
 
 export async function updateArtifacts({
