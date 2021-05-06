@@ -71,7 +71,7 @@ function getUpdateImportPathCmds(
 
 function useModcacherw(goVersion: string): boolean {
   if (!is.string(goVersion)) {
-    return false;
+    return true;
   }
 
   const [majorPart, minorPart] = goVersion.replace(/^[^\d]*/g, '').split('.');

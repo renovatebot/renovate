@@ -740,6 +740,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -764,6 +765,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -788,6 +790,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -812,6 +815,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -836,6 +840,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -888,6 +893,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -912,6 +918,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -936,6 +943,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -960,6 +968,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -984,6 +993,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
