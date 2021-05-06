@@ -934,6 +934,12 @@ Example:
 }
 ```
 
+### matchHost
+
+This can be a base URL (e.g. `https://api.github.com`) or a hostname like `github.com` or `api.github.com`.
+If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
+Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
+
 ### timeout
 
 Use this figure to adjust the timeout for queries.
@@ -1364,10 +1370,10 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 ### matchCurrentVersion
 
-`matchCurrentVersion` can be an exact semver version or a semver range.
+`matchCurrentVersion` can be an exact SemVer version or a SemVer range.
 
-This field also supports Regular Expressions which have to begin and end with `/`.
-For example, the following will enforce that only `1.*` versions:
+This field also supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
 
 ```json
 {
@@ -1380,8 +1386,8 @@ For example, the following will enforce that only `1.*` versions:
 }
 ```
 
-This field also supports a special negated regex syntax for ignoring certain versions.
-Use the syntax `!/ /` like the following:
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
 
 ```json
 {
