@@ -14,54 +14,64 @@ const baseUrl = 'https://repo.maven.apache.org/maven2';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';
 
 interface MockOpts {
+  dep?: string;
   base?: string;
-  meta?: string;
-  pom?: string;
-  heads?: Record<string, number>;
+  meta?: string | null;
+  pom?: string | null;
+  latest?: string;
+  jars?: Record<string, number> | null;
 }
 
 function mockGenericPackage(opts: MockOpts = {}) {
   const {
+    dep = 'org.example:package',
     base = baseUrl,
-    meta = loadFixture('metadata.xml'),
-    pom = loadFixture('pom.xml'),
-    heads = {
-      '1.0.0': 200,
-      '1.0.1': 404,
-      '1.0.2': 500,
-      '2.0.0': 200,
-    },
+    latest = '2.0.0',
   } = opts;
+  const meta =
+    opts.meta === undefined ? loadFixture('metadata.xml') : opts.meta;
+  const pom = opts.pom === undefined ? loadFixture('pom.xml') : opts.pom;
+  const jars =
+    opts.jars === undefined
+      ? {
+          '1.0.0': 200,
+          '1.0.1': 404,
+          '1.0.2': 500,
+          '2.0.0': 200,
+        }
+      : opts.jars;
 
   const scope = httpMock.scope(base);
 
-  scope.get('/org/example/package/maven-metadata.xml').reply(200, meta);
+  const [group, artifact] = dep.split(':');
+  const packagePath = `${group.replace(/\./g, '/')}/${artifact}`;
 
-  if (heads) {
-    const pairs = Object.entries(heads);
-    const latest = pairs
-      .filter(([, s]) => s >= 200 && s < 300)
-      .map(([v]) => v)
-      .sort()
-      .pop();
+  if (meta) {
+    scope.get(`/${packagePath}/maven-metadata.xml`).reply(200, meta);
+  }
+
+  if (pom) {
     scope
-      .get(`/org/example/package/${latest}/package-${latest}.pom`)
+      .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
       .reply(200, pom);
-    pairs.forEach(([version, status]) => {
+  }
+
+  if (jars) {
+    Object.entries(jars).forEach(([version, status]) => {
       const [major, minor, patch] = version
         .split('.')
         .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
       scope
-        .head(`/org/example/package/${version}/package-${version}.pom`)
+        .head(`/${packagePath}/${version}/${artifact}-${version}.pom`)
         .reply(status, '', { 'Last-Modified': timestamp });
     });
   }
 }
 
 function get(
-  depName: string,
+  depName = 'org.example:package',
   ...registryUrls: string[]
 ): Promise<ReleaseResult | null> {
   const conf = { versioning, datasource, depName };
@@ -91,7 +101,7 @@ describe(getName(), () => {
       .get('/org/example/package/maven-metadata.xml')
       .reply(404);
 
-    const res = await get('org.example:package');
+    const res = await get();
 
     expect(res).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
@@ -100,7 +110,7 @@ describe(getName(), () => {
   it('returns releases', async () => {
     mockGenericPackage();
 
-    const res = await get('org.example:package');
+    const res = await get();
 
     expect(res).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
@@ -120,7 +130,8 @@ describe(getName(), () => {
     mockGenericPackage({
       base: baseUrlCustom,
       meta: loadFixture('metadata-extra.xml'),
-      heads: { '3.0.0': 200 },
+      latest: '3.0.0',
+      jars: { '3.0.0': 200 },
     });
 
     const { releases } = await get(
@@ -175,9 +186,7 @@ describe(getName(), () => {
       .get('/org/example/package/maven-metadata.xml')
       .reply(503);
 
-    await expect(get('org.example:package')).rejects.toThrow(
-      EXTERNAL_HOST_ERROR
-    );
+    await expect(get()).rejects.toThrow(EXTERNAL_HOST_ERROR);
 
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -255,7 +264,7 @@ describe(getName(), () => {
     const pom = loadFixture('pom.scm-prefix.xml');
     mockGenericPackage({ pom });
 
-    const { sourceUrl } = await get('org.example:package');
+    const { sourceUrl } = await get();
 
     expect(sourceUrl).toEqual('https://github.com/example/test');
   });
@@ -290,7 +299,6 @@ describe(getName(), () => {
       .reply(302, '', {
         Location: `${backendUrl}${pomfilePath}${queryStr}`,
       });
-
     httpMock
       .scope(backendUrl, { badheaders: ['authorization'] })
       .get(`${metadataPath}${queryStr}`)

@@ -58,11 +58,11 @@ Note: we'll cover lock files later, don't worry.
 
 Let's say that a "faulty" version `1.2.0` of `foobar` is released and it breaks one of your tests.
 
-If you were using default caret SemVer ranges, then your `master` branch is now "broken" because its `package.json` says that any version 1.x above 1.1.0 is acceptable, and npm will choose the latest (`1.2.0`).
+If you were using default caret SemVer ranges, then your `main` branch is now "broken" because its `package.json` says that any version 1.x above 1.1.0 is acceptable, and npm will choose the latest (`1.2.0`).
 You would need to manually check and work out which dependency caused the failure (`foobar` may not have been the only dependency to have "automatically" upgraded since the last time your tests passed) and then you would need to pin the dependency yourself to stop `npm` installing `1.2.0`.
 
 Consider the same situation if instead you were _pinning_ dependency versions.
-Your `master` would not be broken because it's pinned to `foobar@1.1.0` - instead you'd just have a Pull Request for upgrading to `foobar@1.2.0` which would fail.
+Your `main` branch would not be broken because it's pinned to `foobar@1.1.0` - instead you'd just have a Pull Request for upgrading to `foobar@1.2.0` which would fail.
 You'd know not to merge it and can wait for `foobar@1.2.1` or later when it's fixed.
 Therefore you know exactly what you're running and you know exactly what failed - you have great "visibility".
 
@@ -77,7 +77,7 @@ So first of all, you can choose to read the release notes and/or visually inspec
 
 If you did not catch the fault before merging, you are still better off with a pinned version.
 If you discover something wrong in production, you can easily "roll back" commits in your development environment until you find which rollback fixes the problem.
-Then you can simply revert that commit (reversing `foobar@1.1.0` -> `foobar@1.2.0`) and push that to `master`.
+Then you can simply revert that commit (reversing `foobar@1.1.0` -> `foobar@1.2.0`) and push that to `main`.
 When the next release of `foobar` comes out (e.g. `1.2.1`) you will be prompted with a new PR and hopefully inspect it carefully this time before merge!
 
 As you can see in the above, pinning dependencies makes your build more consistent and predictable as a developer.
@@ -111,10 +111,10 @@ In that case, you could set `automergeType` to `branch`, which means Renovate wi
 
 - Create a new branch for testing
 - Wait until after tests have completed
-- Push the commit directly to `master` if tests pass, or
+- Push the commit directly to `main` if tests pass, or
 - Raise a PR only if tests failed
 
-With this approach, updates will be essentially "silent" - causing no notifications - but you will be able to see each commit on `master` of course.
+With this approach, updates will be essentially "silent" - causing no notifications - but you will be able to see each commit on `main` of course.
 
 ### Scheduling
 
