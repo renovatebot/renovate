@@ -35,6 +35,7 @@ interface UserPass {
 interface AuthJson {
   'github-oauth'?: Record<string, string>;
   'gitlab-token'?: Record<string, string>;
+  'gitlab-domains'?: string[];
   'http-basic'?: Record<string, UserPass>;
 }
 
@@ -51,15 +52,20 @@ function getAuthJson(): string | null {
     };
   }
 
-  const gitlabCredentials = hostRules.find({
-    hostType: PLATFORM_TYPE_GITLAB,
-    url: 'https://gitlab.com/api/v4/',
-  });
-  if (gitlabCredentials?.token) {
-    authJson['gitlab-token'] = {
-      'gitlab.com': gitlabCredentials.token,
-    };
-  }
+  hostRules
+    .findAll({ hostType: PLATFORM_TYPE_GITLAB })
+    ?.forEach((gitlabHostRule) => {
+      if (gitlabHostRule?.token) {
+        const host = gitlabHostRule.hostName || 'gitlab.com';
+        authJson['gitlab-token'] = authJson['gitlab-token'] || {};
+        authJson['gitlab-token'][host] = gitlabHostRule.token;
+        // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
+        authJson['gitlab-domains'] = [
+          host,
+          ...(authJson['gitlab-domains'] || []),
+        ];
+      }
+    });
 
   hostRules
     .findAll({ hostType: datasourcePackagist.id })

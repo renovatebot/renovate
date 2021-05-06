@@ -716,6 +716,13 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  {
+    name: 'azureAutoApprove',
+    description:
+      'If set to true, Azure DevOps PRs will be automatically approved.',
+    type: 'boolean',
+    default: false,
+  },
   // depType
   {
     name: 'ignoreDeps',
@@ -1715,6 +1722,15 @@ const options: RenovateOptions[] = [
   {
     name: 'baseUrl',
     description: 'baseUrl for a host rule. e.g. "https://api.github.com/".',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchHost',
+    description: 'A host name or base URL to match against',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',

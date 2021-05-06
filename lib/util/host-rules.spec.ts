@@ -96,6 +96,13 @@ describe(getName(), () => {
         find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
           .token
       ).toEqual('def');
+      expect(
+        find({ hostType: datasourceNuget.id, url: 'https://github.com' }).token
+      ).toEqual('def');
+      expect(
+        find({ hostType: datasourceNuget.id, url: 'https://apigithub.com' })
+          .token
+      ).toBeUndefined();
     });
     it('matches on hostName', () => {
       add({
@@ -105,6 +112,29 @@ describe(getName(), () => {
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
+    });
+    it('matches on matchHost with protocol', () => {
+      add({
+        matchHost: 'https://domain.com',
+        token: 'def',
+      });
+      expect(find({ url: 'https://api.domain.com' }).token).toBeUndefined();
+      expect(find({ url: 'https://domain.com' }).token).toEqual('def');
+      expect(
+        find({
+          hostType: datasourceNuget.id,
+          url: 'https://domain.com/renovatebot',
+        }).token
+      ).toEqual('def');
+    });
+    it('matches on matchHost without protocol', () => {
+      add({
+        matchHost: 'domain.com',
+        token: 'def',
+      });
+      expect(find({ url: 'https://api.domain.com' }).token).toEqual('def');
+      expect(find({ url: 'https://domain.com' }).token).toEqual('def');
+      expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
     it('matches on hostType and endpoint', () => {
       add({
@@ -145,11 +175,21 @@ describe(getName(), () => {
         hostName: 'my.local.registry',
         token: 'def',
       });
+      add({
+        hostType: datasourceNuget.id,
+        matchHost: 'another.local.registry',
+        token: 'xyz',
+      });
+      add({
+        hostType: datasourceNuget.id,
+        matchHost: 'https://yet.another.local.registry',
+        token: '123',
+      });
       const res = hosts({
         hostType: datasourceNuget.id,
       });
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(4);
     });
   });
   describe('findAll()', () => {
@@ -165,7 +205,7 @@ describe(getName(), () => {
       };
       add(hostRule);
       expect(findAll({ hostType: 'nuget' })).toHaveLength(1);
-      expect(findAll({ hostType: 'nuget' })[0]).toMatchObject(hostRule);
+      expect(findAll({ hostType: 'nuget' })[0]).toMatchSnapshot();
     });
   });
 });
