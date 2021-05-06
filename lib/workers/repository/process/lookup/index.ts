@@ -214,6 +214,7 @@ export async function lookupUpdates(
         bucket,
         sortedReleases
       );
+      // istanbul ignore next
       if (!release) {
         return res;
       }
