@@ -94,7 +94,7 @@ function matchesDomainName(rule: HostRule, search: HostRuleSearch): boolean {
     search.url &&
     rule.domainName &&
     hostname &&
-    hostname.endsWith(rule.domainName)
+    (hostname === rule.domainName || hostname.endsWith(`.${rule.domainName}`))
   );
 }
 
