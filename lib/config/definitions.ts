@@ -1970,7 +1970,7 @@ const options: RenovateOptions[] = [
     allowString: true,
     allowedValues: ['commit', 'push'],
     default: ['commit', 'push'],
-    stage: 'repository',
+    stage: 'global',
     admin: true,
   },
 ];
