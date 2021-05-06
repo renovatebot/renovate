@@ -40,15 +40,16 @@ export function setEmojiConfig(_config: RenovateConfig): void {
 const shortCodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
 
 export function emojify(text: string): string {
+  if (!unicodeEmoji) {
+    return text;
+  }
   lazyInitMappings();
-  return unicodeEmoji
-    ? text.replace(shortCodeRegex, (shortCode) => {
-        const hexCode = hexCodesByShort.get(shortCode);
-        return hexCode
-          ? fromCodepointToUnicode(fromHexcodeToCodepoint(hexCode))
-          : shortCode;
-      })
-    : text;
+  return text.replace(shortCodeRegex, (shortCode) => {
+    const hexCode = hexCodesByShort.get(shortCode);
+    return hexCode
+      ? fromCodepointToUnicode(fromHexcodeToCodepoint(hexCode))
+      : shortCode;
+  });
 }
 
 const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
@@ -78,15 +79,16 @@ export function stripHexCode(input: string): string {
     .join('-');
 }
 
-export function unemojify(text: string, tofu = '�'): string {
+export function unemojify(text: string): string {
+  if (unicodeEmoji) {
+    return text;
+  }
   lazyInitMappings();
-  return unicodeEmoji
-    ? text
-    : text.replace(emojiRegex, (emoji) => {
-        const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
-        const shortCode = shortCodesByHex.get(hexCode);
-        return shortCode || tofu;
-      });
+  return text.replace(emojiRegex, (emoji) => {
+    const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
+    const shortCode = shortCodesByHex.get(hexCode);
+    return shortCode || '�';
+  });
 }
 
 function stripEmoji(emoji: string): string {

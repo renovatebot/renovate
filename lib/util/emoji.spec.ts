@@ -54,12 +54,6 @@ describe(getName(), () => {
         setEmojiConfig({ unicodeEmoji: false });
         expect(unemojify(unsupported)).toEqual('�');
       });
-
-      it('uses custom replacement strings', () => {
-        setEmojiConfig({ unicodeEmoji: false });
-        expect(unemojify(unsupported, '?')).toEqual('?');
-        expect(unemojify(`foo${unsupported}bar`, '')).toEqual('foobar');
-      });
     });
   });
 

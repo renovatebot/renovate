@@ -342,9 +342,11 @@ export async function ensurePr(
         logger.debug('Stripping Reviewable content');
         existingPrBody = existingPrBody.slice(0, reviewableIndex);
       }
+      const existingPrTitle = stripEmojis(existingPr.title);
+      const newPrTitle = stripEmojis(prTitle);
       existingPrBody = existingPrBody.trim();
       if (
-        stripEmojis(existingPr.title) === stripEmojis(prTitle) &&
+        existingPrTitle === newPrTitle &&
         noWhitespaceOrHeadings(stripEmojis(existingPrBody)) ===
           noWhitespaceOrHeadings(stripEmojis(prBody))
       ) {
@@ -352,7 +354,7 @@ export async function ensurePr(
         return { prResult: PrResult.NotUpdated, pr: existingPr };
       }
       // PR must need updating
-      if (stripEmojis(existingPr.title) !== stripEmojis(prTitle)) {
+      if (existingPrTitle !== newPrTitle) {
         logger.debug(
           {
             branchName,
