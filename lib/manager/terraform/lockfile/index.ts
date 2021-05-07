@@ -28,8 +28,7 @@ async function updateAllLocks(
         datasource: 'terraform-provider',
         depName: lock.lookupName,
       };
-      const releasesResult = await getPkgReleases(updateConfig);
-      const releases = releasesResult.releases;
+      const { releases } = await getPkgReleases(updateConfig);
       const versioning = getVersioning(updateConfig.versioning);
       const versionsList = releases.map((release) => release.version);
       const newVersion = versioning.getSatisfyingVersion(
@@ -58,12 +57,11 @@ async function updateAllLocks(
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
-  newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`terraform.updateArtifacts(${packageFileName})`);
 
-  const lockFileContent = await readLockFile();
+  const lockFileContent = await readLockFile(packageFileName);
   if (!lockFileContent) {
     logger.debug('No .terraform.lock.hcl found');
     return null;
@@ -102,5 +100,6 @@ export async function updateArtifacts({
     return null;
   }
 
-  return writeLockUpdates(updates, lockFileContent);
+  const res = writeLockUpdates(updates, lockFileContent);
+  return res ? [res] : null;
 }

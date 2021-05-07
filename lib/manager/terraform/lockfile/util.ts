@@ -1,3 +1,4 @@
+import * as fs from '../../../util/fs';
 import { readLocalFile } from '../../../util/fs';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
@@ -17,8 +18,9 @@ const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/;
 
 const lockFile = '.terraform.lock.hcl';
 
-export function readLockFile(): Promise<string> {
-  return readLocalFile(lockFile, 'utf8');
+export function readLockFile(packageFilePath: string): Promise<string> {
+  const lockFilePath = fs.getSiblingFileName(packageFilePath, lockFile);
+  return readLocalFile(lockFilePath, 'utf8');
 }
 
 export function extractLocks(lockFileContent: string): ProviderLock[] {
@@ -123,7 +125,7 @@ export function isPinnedVersion(value: string): boolean {
 export function writeLockUpdates(
   updates: ProviderLockUpdate[],
   oldLockFileContent: string
-): Promise<UpdateArtifactsResult[]> {
+): UpdateArtifactsResult {
   const lines = oldLockFileContent.split('\n');
 
   const sections: string[][] = [];
@@ -196,11 +198,10 @@ export function writeLockUpdates(
   );
   const newContent = newLines.join('\n');
 
-  const result: UpdateArtifactsResult = {
+  return {
     file: {
       name: lockFile,
       contents: newContent,
     },
   };
-  return Promise.resolve([result]);
 }
