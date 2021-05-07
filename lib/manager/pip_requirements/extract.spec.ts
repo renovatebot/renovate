@@ -9,7 +9,6 @@ const requirements4 = loadFixture('requirements4.txt');
 const requirements5 = loadFixture('requirements5.txt');
 const requirements6 = loadFixture('requirements6.txt');
 const requirements7 = loadFixture('requirements7.txt');
-const requirements8 = loadFixture('requirements8.txt');
 
 describe(getName(), () => {
   beforeEach(() => {
@@ -91,12 +90,15 @@ describe(getName(), () => {
     });
 
     it('handles extra spaces around pinned dependency equal signs', () => {
-      const res = extractPackageFile(requirements8, 'unused_file_name', {});
+      const res = extractPackageFile(requirements4, 'unused_file_name', {});
       expect(res).toMatchSnapshot();
 
       expect(res.deps[0].currentValue).toStartWith('==');
+      expect(res.deps[0].currentVersion).toStartWith('2.0.12');
       expect(res.deps[1].currentValue).toStartWith('==');
+      expect(res.deps[1].currentVersion).toStartWith('4.1.1');
       expect(res.deps[2].currentValue).toStartWith('==');
+      expect(res.deps[2].currentVersion).toStartWith('3.2.1');
 
       expect(res.deps).toHaveLength(3);
     });

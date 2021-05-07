@@ -115,7 +115,8 @@ Object {
       "depName": "celery",
     },
     Object {
-      "currentValue": " == 3.2.1",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
@@ -161,7 +162,8 @@ Object {
       "depName": "celery",
     },
     Object {
-      "currentValue": " == 3.2.1",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
@@ -207,7 +209,8 @@ Object {
       "depName": "celery",
     },
     Object {
-      "currentValue": " == 3.2.1",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
@@ -241,23 +244,26 @@ exports[`manager/pip_requirements/extract extractPackageFile() handles extra spa
 Object {
   "deps": Array [
     Object {
-      "currentValue": "== 1",
-      "currentVersion": "1",
+      "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
     },
     Object {
-      "currentValue": "== 0.6.27",
-      "currentVersion": "0.6.27",
+      "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
       "datasource": "pypi",
-      "depName": "distribute",
+      "depName": "celery",
     },
     Object {
-      "currentValue": "== 0.2",
-      "currentVersion": "0.2",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
-      "depName": "dj-database-url",
+      "depName": "foo",
     },
+  ],
+  "registryUrls": Array [
+    "https://artifactory.company.com/artifactory/api/pypi/python/simple",
   ],
 }
 `;
@@ -278,7 +284,8 @@ Object {
       "depName": "celery",
     },
     Object {
-      "currentValue": " == 3.2.1",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
