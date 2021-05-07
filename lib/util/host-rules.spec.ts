@@ -205,7 +205,7 @@ describe(getName(), () => {
       };
       add(hostRule);
       expect(findAll({ hostType: 'nuget' })).toHaveLength(1);
-      expect(findAll({ hostType: 'nuget' })[0]).toMatchObject(hostRule);
+      expect(findAll({ hostType: 'nuget' })[0]).toMatchSnapshot();
     });
   });
 });
