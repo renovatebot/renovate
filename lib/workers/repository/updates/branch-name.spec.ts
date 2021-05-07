@@ -86,6 +86,44 @@ describe(getName(), () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toEqual('dep');
     });
+    it('separates patches when separateMinorPatch=true', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchPrefix: 'renovate/',
+        additionalBranchPrefix: '',
+        depNameSanitized: 'lodash',
+        newMajor: 4,
+        separateMinorPatch: true,
+        isPatch: true,
+        newMinor: 17,
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        depName: 'dep',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('renovate/lodash-4.17.x');
+    });
+    it('does not separate patches when separateMinorPatch=false', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchPrefix: 'renovate/',
+        additionalBranchPrefix: '',
+        depNameSanitized: 'lodash',
+        newMajor: 4,
+        separateMinorPatch: false,
+        isPatch: true,
+        newMinor: 17,
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        depName: 'dep',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('renovate/lodash-4.x');
+    });
 
     it('realistic defaults', () => {
       const upgrade: RenovateConfig = {
