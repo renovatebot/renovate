@@ -3,8 +3,7 @@ import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
-import { setNoVerify } from './config';
-import * as git from '.';
+import * as git, { setNoVerify } from '.';
 
 describe(getName(), () => {
   jest.setTimeout(15000);
