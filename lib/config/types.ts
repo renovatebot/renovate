@@ -1,7 +1,7 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
 import type { HostRule } from '../types';
-import type { GitNoVerifyOption } from '../util/git/config';
+import type { GitNoVerifyOption } from '../util/git';
 
 export type RenovateConfigStage =
   | 'global'
