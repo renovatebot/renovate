@@ -25,7 +25,7 @@ import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
-export { setNoVerify } from './config';
+export { GitNoVerifyOption, setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
 declare module 'fs-extra' {
