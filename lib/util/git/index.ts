@@ -25,7 +25,8 @@ import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
-export * from './private-key';
+export { setNoVerify } from './config';
+export { setPrivateKey } from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
