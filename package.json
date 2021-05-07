@@ -37,10 +37,10 @@
     "prettier-fix": "prettier --write \"**/*.{ts,js,mjs,json,md}\"",
     "release": "node tools/release.mjs",
     "start": "node -r ts-node/register/transpile-only -- lib/renovate.ts",
+    "test": "run-s lint test-schema type-check jest",
     "test-dirty": "git diff --exit-code",
     "test-e2e": "npm pack && cd test/e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
     "test-schema": "node -r ts-node/register/transpile-only -- test/json-schema.ts",
-    "test": "run-s lint test-schema type-check jest",
     "tsc": "tsc",
     "type-check": "run-s generate:* \"tsc --noEmit {@}\"",
     "verify": "node tools/verify.mjs"
