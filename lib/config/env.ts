@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getDatasourceList } from '../datasource';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { getOptions } from './definitions';
 import type { GlobalConfig, RenovateOptions } from './types';
 
