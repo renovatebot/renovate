@@ -63,15 +63,16 @@ export function extractPackageFile(
       if (!matches) {
         return null;
       }
-      const [, depName, , currentValue] = matches;
+      const [, depName, , currVal] = matches;
+      const currentValue = currVal.trim();
       dep = {
         ...dep,
         depName,
         currentValue,
         datasource: datasourcePypi.id,
       };
-      if (currentValue?.startsWith('==')) {
-        dep.currentVersion = currentValue.replace(/^==/, '');
+      if (currentValue?.trimStart().startsWith('==')) {
+        dep.currentVersion = currentValue.trimStart().replace(/^==\s*/, '');
       }
       return dep;
     })
