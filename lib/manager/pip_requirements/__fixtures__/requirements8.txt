@@ -1,0 +1,3 @@
+Django == 1
+distribute == 0.6.27
+dj-database-url == 0.2

@@ -237,6 +237,31 @@ Object {
 }
 `;
 
+exports[`manager/pip_requirements/extract extractPackageFile() handles extra spaces around pinned dependency equal signs 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "== 1",
+      "currentVersion": "1",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    Object {
+      "currentValue": "== 0.6.27",
+      "currentVersion": "0.6.27",
+      "datasource": "pypi",
+      "depName": "distribute",
+    },
+    Object {
+      "currentValue": "== 0.2",
+      "currentVersion": "0.2",
+      "datasource": "pypi",
+      "depName": "dj-database-url",
+    },
+  ],
+}
+`;
+
 exports[`manager/pip_requirements/extract extractPackageFile() handles extras and complex index url 1`] = `
 Object {
   "deps": Array [
