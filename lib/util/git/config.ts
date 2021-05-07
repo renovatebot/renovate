@@ -1,6 +1,6 @@
 export type GitNoVerifyOption = 'commit' | 'push';
 
-let noVerify: GitNoVerifyOption[] = [];
+let noVerify: GitNoVerifyOption[] = ['commit', 'push'];
 
 export function setNoVerify(value: GitNoVerifyOption[]): void {
   noVerify = value;
