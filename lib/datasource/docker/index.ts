@@ -10,7 +10,7 @@ import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { ecrRegex, getAuthHeaders } from './common';
-import { Image, ImageList, MediaType } from './types';
+import { Image, ImageList, MediaType, RegistryRepository } from './types';
 
 // TODO: add got typings when available (#9646)
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
@@ -49,11 +49,6 @@ export const defaultConfig = {
 };
 
 const http = new Http(id);
-
-export interface RegistryRepository {
-  registry: string;
-  repository: string;
-}
 
 export function getRegistryRepository(
   lookupName: string,
@@ -122,7 +117,7 @@ async function getManifestResponse(
 ): Promise<HttpResponse> {
   logger.debug(`getManifestResponse(${registry}, ${dockerRepository}, ${tag})`);
   try {
-    const headers = await getAuthHeaders(id, http, registry, dockerRepository);
+    const headers = await getAuthHeaders(registry, dockerRepository);
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return null;
@@ -313,7 +308,7 @@ async function getTags(
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
     const limit = ecrRegex.test(registry) ? 1000 : 10000;
     let url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
-    const headers = await getAuthHeaders(id, http, registry, repository);
+    const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
@@ -396,7 +391,7 @@ async function getLabels(
       return {};
     }
 
-    const headers = await getAuthHeaders(id, http, registry, dockerRepository);
+    const headers = await getAuthHeaders(registry, dockerRepository);
     // istanbul ignore if: Should never be happen
     if (!headers) {
       logger.debug('No docker auth found - returning');
