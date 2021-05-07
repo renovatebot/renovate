@@ -5,17 +5,17 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
-import { Http, HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { ecrRegex, getAuthHeaders } from './common';
+import { ecrRegex, getAuthHeaders, http, id } from './common';
 import { Image, ImageList, MediaType, RegistryRepository } from './types';
 
 // TODO: add got typings when available (#9646)
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
 
-export const id = 'docker';
+export { id };
 export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://index.docker.io'];
 export const defaultVersioning = dockerVersioning.id;
@@ -47,8 +47,6 @@ export const defaultConfig = {
     commitMessageTopic: '{{{groupName}}} Docker tags',
   },
 };
-
-const http = new Http(id);
 
 export function getRegistryRepository(
   lookupName: string,

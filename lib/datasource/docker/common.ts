@@ -9,7 +9,7 @@ import { Http } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 
 export const id = 'docker';
-const http = new Http(id);
+export const http = new Http(id);
 
 export const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
