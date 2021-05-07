@@ -80,18 +80,18 @@ const isGreaterThan = (a: string, b: string): boolean =>
   pep440.isGreaterThan(a, b);
 
 const isLessThanRange = (version: string, range: string): boolean =>
+  npm.isVersion(padZeroes(version)) &&
   npm.isLessThanRange(padZeroes(version), poetry2npm(range));
 
 export const isValid = (input: string): string | boolean =>
   npm.isValid(poetry2npm(input));
 
-const isStable = (version: string): boolean =>
-  version && npm.isStable(padZeroes(version));
+const isStable = (version: string): boolean => pep440.isStable(version);
 
-const isVersion = (input: string): string | boolean =>
-  npm.isVersion(padZeroes(input));
+const isVersion = (input: string): string | boolean => pep440.isVersion(input);
 
 const matches = (version: string, range: string): boolean =>
+  npm.isVersion(padZeroes(version)) &&
   npm.matches(padZeroes(version), poetry2npm(range));
 
 const getSatisfyingVersion = (versions: string[], range: string): string =>
