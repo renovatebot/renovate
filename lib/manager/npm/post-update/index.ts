@@ -18,6 +18,7 @@ import {
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { validateUrl } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
@@ -444,9 +445,8 @@ export async function getAdditionalFiles(
   });
   for (const hostRule of npmHostRules) {
     if (hostRule.resolvedHost) {
-      const uri = hostRule.baseUrl
-        ? hostRule.baseUrl.replace(/^https?:/, '')
-        : `//${hostRule.resolvedHost}/`;
+      let uri = hostRule.baseUrl || hostRule.matchHost || hostRule.resolvedHost;
+      uri = validateUrl(uri) ? uri.replace(/^https?:/, '') : `//${uri}/`;
       if (hostRule.token) {
         const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
         additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);

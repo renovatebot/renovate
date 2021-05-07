@@ -34,6 +34,8 @@ export const exposedConfigOptions = [
   'prTitle',
   'semanticCommitScope',
   'semanticCommitType',
+  'separateMajorMinor',
+  'separateMinorPatch',
 ];
 
 export const allowedFields = {

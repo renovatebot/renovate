@@ -1309,7 +1309,7 @@ const options: RenovateOptions[] = [
     description: 'Branch topic.',
     type: 'string',
     default:
-      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
     cli: false,
   },
   {
@@ -1722,6 +1722,15 @@ const options: RenovateOptions[] = [
   {
     name: 'baseUrl',
     description: 'baseUrl for a host rule. e.g. "https://api.github.com/".',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchHost',
+    description: 'A host name or base URL to match against',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
