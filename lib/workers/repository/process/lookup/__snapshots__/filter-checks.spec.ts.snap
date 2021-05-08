@@ -1,0 +1,103 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up stabilityDays settings from hostRules 1`] = `
+Object {
+  "pendingChecks": Array [],
+  "pendingReleases": Array [],
+  "release": Object {
+    "releaseTimestamp": "2021-01-07T00:00:00.000Z",
+    "version": "1.0.4",
+  },
+}
+`;
+
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up stabilityDays settings from updateType 1`] = `
+Object {
+  "pendingChecks": Array [],
+  "pendingReleases": Array [
+    Object {
+      "releaseTimestamp": "2021-01-07T00:00:00.000Z",
+      "version": "1.0.4",
+    },
+  ],
+  "release": Object {
+    "releaseTimestamp": "2021-01-05T00:00:00.000Z",
+    "version": "1.0.3",
+  },
+}
+`;
+
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns latest release if internalChecksFilter=none 1`] = `
+Object {
+  "pendingChecks": Array [],
+  "pendingReleases": Array [],
+  "release": Object {
+    "releaseTimestamp": "2021-01-07T00:00:00.000Z",
+    "version": "1.0.4",
+  },
+}
+`;
+
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-latest release if internalChecksFilter=flexible and some pass checks 1`] = `
+Object {
+  "pendingChecks": Array [],
+  "pendingReleases": Array [
+    Object {
+      "releaseTimestamp": "2021-01-05T00:00:00.000Z",
+      "version": "1.0.3",
+    },
+    Object {
+      "releaseTimestamp": "2021-01-07T00:00:00.000Z",
+      "version": "1.0.4",
+    },
+  ],
+  "release": Object {
+    "releaseTimestamp": "2021-01-03T00:00:00.000Z",
+    "version": "1.0.2",
+  },
+}
+`;
+
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-latest release if internalChecksFilter=strict and some pass checks 1`] = `
+Object {
+  "pendingChecks": Array [],
+  "pendingReleases": Array [
+    Object {
+      "releaseTimestamp": "2021-01-05T00:00:00.000Z",
+      "version": "1.0.3",
+    },
+    Object {
+      "releaseTimestamp": "2021-01-07T00:00:00.000Z",
+      "version": "1.0.4",
+    },
+  ],
+  "release": Object {
+    "releaseTimestamp": "2021-01-03T00:00:00.000Z",
+    "version": "1.0.2",
+  },
+}
+`;
+
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-pending latest release if internalChecksFilter=flexible and none pass checks 1`] = `
+Object {
+  "pendingChecks": Array [],
+  "pendingReleases": Array [],
+  "release": Object {
+    "releaseTimestamp": "2021-01-07T00:00:00.000Z",
+    "version": "1.0.4",
+  },
+}
+`;
+
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns pending latest release if internalChecksFilter=strict and none pass checks 1`] = `
+Object {
+  "pendingChecks": Array [
+    "stabilityDays",
+  ],
+  "pendingReleases": Array [],
+  "release": Object {
+    "releaseTimestamp": "2021-01-07T00:00:00.000Z",
+    "version": "1.0.4",
+  },
+}
+`;

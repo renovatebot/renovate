@@ -146,6 +146,8 @@ export interface LookupUpdate {
   newMinor?: number;
   newValue: string;
   semanticCommitType?: string;
+  pendingChecks?: string[];
+  pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
 }
