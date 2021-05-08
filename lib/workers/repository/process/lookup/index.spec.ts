@@ -656,6 +656,7 @@ describe(getName(), () => {
       });
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+
     it('should return pendingChecks', async () => {
       config.currentValue = '1.4.4';
       config.depName = 'some/action';
@@ -686,6 +687,7 @@ describe(getName(), () => {
       expect(res.updates[0].newVersion).toEqual('1.4.6');
       expect(res.updates[0].pendingChecks).toHaveLength(1);
     });
+
     it('should return pendingVersions', async () => {
       config.currentValue = '1.4.4';
       config.depName = 'some/action';
@@ -716,6 +718,7 @@ describe(getName(), () => {
       expect(res.updates[0].newVersion).toEqual('1.4.5');
       expect(res.updates[0].pendingVersions).toHaveLength(1);
     });
+
     it('should allow unstable versions if the ignoreUnstable=false', async () => {
       config.currentValue = '2.5.16';
       config.ignoreUnstable = false;
