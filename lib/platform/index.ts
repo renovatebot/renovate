@@ -85,7 +85,7 @@ export async function initPlatform(
   config: GlobalConfig
 ): Promise<GlobalConfig> {
   setPrivateKey(config.gitPrivateKey);
-  setNoVerify(config.gitNoVerify);
+  setNoVerify(config.gitNoVerify ?? []);
   setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
