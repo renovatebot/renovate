@@ -1,4 +1,4 @@
-import { gte, lte, satisfies } from '@renovate/pep440';
+import { gte, lt, lte, satisfies } from '@renovate/pep440';
 import { parse as parseRange } from '@renovate/pep440/lib/specifier';
 import { parse as parseVersion } from '@renovate/pep440/lib/version';
 import { logger } from '../../logger';
@@ -153,4 +153,34 @@ export function getNewValue({
   }
 
   return result;
+}
+
+export function isLessThanRange(input: string, range: string): boolean {
+  let invertResult = true;
+
+  const results = range
+    .split(',')
+    .map((x) =>
+      x
+        .replace(/\s*/g, '')
+        .split(/(~=|==|!=|<=|>=|<|>|===)/)
+        .slice(1)
+    )
+    .map(([op, version]) => {
+      if (['!=', '<=', '<'].includes(op)) {
+        return true;
+      }
+      invertResult = false;
+      if (['~=', '==', '>=', '==='].includes(op)) {
+        return lt(input, version);
+      }
+      if (op === '>') {
+        return lte(input, version);
+      }
+      return false;
+    });
+
+  const result = results.every((res) => res === true);
+
+  return invertResult ? !result : result;
 }

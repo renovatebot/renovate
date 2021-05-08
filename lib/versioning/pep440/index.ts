@@ -1,7 +1,7 @@
 import * as pep440 from '@renovate/pep440';
 import { filter } from '@renovate/pep440/lib/specifier';
 import type { VersioningApi } from '../types';
-import { getNewValue } from './range';
+import { getNewValue, isLessThanRange } from './range';
 
 export const id = 'pep440';
 export const displayName = 'PEP440';
@@ -69,6 +69,7 @@ export const api: VersioningApi = {
   minSatisfyingVersion,
   getNewValue,
   sortVersions,
+  isLessThanRange,
 };
 
 export default api;
