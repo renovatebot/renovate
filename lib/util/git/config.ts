@@ -12,6 +12,7 @@ let noVerify: GitNoVerifyOption[] = [
 
 export function setNoVerify(value: GitNoVerifyOption[]): void {
   if (!is.array(value, is.string)) {
+    // istanbul ignore next
     throw new Error('config error: gitNoVerify should be an array of strings');
   }
   noVerify = value;
