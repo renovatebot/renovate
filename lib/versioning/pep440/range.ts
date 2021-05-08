@@ -177,6 +177,7 @@ export function isLessThanRange(input: string, range: string): boolean {
       if (op === '>') {
         return lte(input, version);
       }
+      // istanbul ignore next
       return false;
     });
 
