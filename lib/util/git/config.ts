@@ -1,8 +1,19 @@
-export type GitNoVerifyOption = 'commit' | 'push';
+import is from '@sindresorhus/is';
 
-let noVerify: GitNoVerifyOption[] = ['commit', 'push'];
+export const enum GitNoVerifyOption {
+  Commit = 'commit',
+  Push = 'push',
+}
+
+let noVerify: GitNoVerifyOption[] = [
+  GitNoVerifyOption.Push,
+  GitNoVerifyOption.Commit,
+];
 
 export function setNoVerify(value: GitNoVerifyOption[]): void {
+  if (!is.array(value, is.string)) {
+    throw new Error('config error: gitNoVerify should be an array of strings');
+  }
   noVerify = value;
 }
 

@@ -3,8 +3,8 @@ import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
-import { setNoVerify } from '.';
 import * as git from '.';
+import { GitNoVerifyOption, setNoVerify } from '.';
 
 describe(getName(), () => {
   jest.setTimeout(15000);
@@ -358,7 +358,7 @@ describe(getName(), () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify(['commit']);
+      setNoVerify([GitNoVerifyOption.Commit]);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -388,7 +388,7 @@ describe(getName(), () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify(['push']);
+      setNoVerify([GitNoVerifyOption.Push]);
 
       await git.commitFiles({
         branchName: 'renovate/something',

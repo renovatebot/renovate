@@ -22,7 +22,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { getNoVerify } from './config';
+import { GitNoVerifyOption, getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
 export { GitNoVerifyOption, setNoVerify } from './config';
@@ -675,7 +675,7 @@ export async function commitFiles({
     }
 
     const commitOptions: Options = {};
-    if (getNoVerify().includes('commit')) {
+    if (getNoVerify().includes(GitNoVerifyOption.Commit)) {
       commitOptions['--no-verify'] = null;
     }
 
@@ -703,7 +703,7 @@ export async function commitFiles({
       '--force': null,
       '-u': null,
     };
-    if (getNoVerify().includes('push')) {
+    if (getNoVerify().includes(GitNoVerifyOption.Push)) {
       pushOptions['--no-verify'] = null;
     }
 
