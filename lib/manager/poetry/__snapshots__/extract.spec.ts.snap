@@ -19,7 +19,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.1.0",
@@ -29,7 +29,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0a1",
@@ -39,7 +39,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0b2",
@@ -49,7 +49,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0rc1",
@@ -59,7 +59,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0.dev4",
@@ -69,7 +69,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0c1",
@@ -79,7 +79,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "2012.2",
@@ -89,7 +89,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0.dev456",
@@ -99,7 +99,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0a1",
@@ -109,7 +109,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0a2.dev456",
@@ -119,7 +119,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0a12.dev456",
@@ -129,7 +129,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0a12",
@@ -139,7 +139,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0b1.dev456",
@@ -149,7 +149,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0b2",
@@ -159,7 +159,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0b2.post345.dev456",
@@ -169,7 +169,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0b2.post345",
@@ -179,7 +179,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0rc1.dev456",
@@ -189,7 +189,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0rc1",
@@ -199,7 +199,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0",
@@ -209,7 +209,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0+abc.5",
@@ -219,7 +219,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0+abc.7",
@@ -229,7 +229,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0+5",
@@ -239,7 +239,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0.post456.dev34",
@@ -249,7 +249,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.0.post456",
@@ -259,7 +259,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "1.1.dev1",
@@ -269,7 +269,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "~=3.1",
@@ -279,7 +279,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "~=3.1.2",
@@ -289,7 +289,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "~=3.1a1",
@@ -299,7 +299,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "==3.1",
@@ -309,7 +309,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "==3.1.*",
@@ -319,7 +319,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "~=3.1.0, !=3.1.3",
@@ -329,7 +329,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "<=2.0",
@@ -339,7 +339,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
     Object {
       "currentValue": "<2.0",
@@ -349,7 +349,7 @@ Object {
       "managerData": Object {
         "nestedVersion": false,
       },
-      "versioning": "pep440",
+      "versioning": "poetry",
     },
   ],
   "registryUrls": null,
@@ -445,7 +445,7 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versioning": "pep440",
+    "versioning": "poetry",
   },
   Object {
     "currentValue": "0.0.0",
@@ -455,7 +455,7 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versioning": "pep440",
+    "versioning": "poetry",
   },
   Object {
     "currentValue": "^0.6.0",
