@@ -67,44 +67,67 @@ function npm2poetry(input: string): string {
   return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
 }
 
-const equals = (a: string, b: string): boolean =>
-  npm.equals(padZeroes(a), padZeroes(b));
+function equals(a: string, b: string): boolean {
+  return npm.equals(padZeroes(a), padZeroes(b));
+}
 
-const getMajor = (version: string): number => npm.getMajor(padZeroes(version));
+function getMajor(version: string): number {
+  return npm.getMajor(padZeroes(version));
+}
 
-const getMinor = (version: string): number => npm.getMinor(padZeroes(version));
+function getMinor(version: string): number {
+  return npm.getMinor(padZeroes(version));
+}
 
-const getPatch = (version: string): number => npm.getPatch(padZeroes(version));
+function getPatch(version: string): number {
+  return npm.getPatch(padZeroes(version));
+}
 
-const isGreaterThan = (a: string, b: string): boolean =>
-  npm.isGreaterThan(padZeroes(a), padZeroes(b));
+function isGreaterThan(a: string, b: string): boolean {
+  return npm.isGreaterThan(padZeroes(a), padZeroes(b));
+}
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isVersion(padZeroes(version)) &&
-  npm.isLessThanRange(padZeroes(version), poetry2npm(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return (
+    npm.isVersion(padZeroes(version)) &&
+    npm.isLessThanRange(padZeroes(version), poetry2npm(range))
+  );
+}
 
-export const isValid = (input: string): string | boolean =>
-  npm.isValid(poetry2npm(input));
+export function isValid(input: string): string | boolean {
+  return npm.isValid(poetry2npm(input));
+}
 
-const isStable = (version: string): boolean => npm.isStable(padZeroes(version));
+function isStable(version: string): boolean {
+  return npm.isStable(padZeroes(version));
+}
 
-const isVersion = (input: string): string | boolean =>
-  npm.isVersion(padZeroes(input));
+function isVersion(input: string): string | boolean {
+  return npm.isVersion(padZeroes(input));
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.isVersion(padZeroes(version)) &&
-  npm.matches(padZeroes(version), poetry2npm(range));
+function matches(version: string, range: string): boolean {
+  return (
+    npm.isVersion(padZeroes(version)) &&
+    npm.matches(padZeroes(version), poetry2npm(range))
+  );
+}
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.getSatisfyingVersion(versions, poetry2npm(range));
+function getSatisfyingVersion(versions: string[], range: string): string {
+  return npm.getSatisfyingVersion(versions, poetry2npm(range));
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.minSatisfyingVersion(versions, poetry2npm(range));
+function minSatisfyingVersion(versions: string[], range: string): string {
+  return npm.minSatisfyingVersion(versions, poetry2npm(range));
+}
 
-const isSingleVersion = (constraint: string): string | boolean =>
-  (constraint.trim().startsWith('=') &&
-    isVersion(constraint.trim().substring(1).trim())) ||
-  isVersion(constraint.trim());
+function isSingleVersion(constraint: string): string | boolean {
+  return (
+    (constraint.trim().startsWith('=') &&
+      isVersion(constraint.trim().substring(1).trim())) ||
+    isVersion(constraint.trim())
+  );
+}
 
 function handleShort(
   operator: string,
