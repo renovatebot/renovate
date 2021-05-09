@@ -26,7 +26,6 @@ export interface ExtractConfig extends ManagerConfig {
   npmrc?: string;
   yarnrc?: string;
   skipInstalls?: boolean;
-  versioning?: string;
   updateInternalDeps?: boolean;
 }
 
