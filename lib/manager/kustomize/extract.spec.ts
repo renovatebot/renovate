@@ -57,6 +57,17 @@ describe(getName(), () => {
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
+    it('should extract the depName if the URL includes a port number', () => {
+      const pkg = extractBase(
+        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3'
+      );
+      expect(pkg).toEqual({
+        currentValue: 'v1.2.3',
+        datasource: datasourceGitTags.id,
+        depName: 'bitbucket.com:7999/user/test-repo',
+        lookupName: 'ssh://git@bitbucket.com:7999/user/test-repo',
+      });
+    });
     it('should extract the version of a non http base with subdir', () => {
       const pkg = extractBase(
         'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3'
