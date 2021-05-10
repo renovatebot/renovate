@@ -656,6 +656,69 @@ describe(getName(), () => {
       });
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+
+    it('should return pendingChecks', async () => {
+      config.currentValue = '1.4.4';
+      config.depName = 'some/action';
+      config.datasource = datasourceGithubReleases.id;
+      config.stabilityDays = 14;
+      config.internalChecksFilter = 'strict';
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      githubReleases.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.4.4',
+          },
+          {
+            version: '1.4.5',
+            releaseTimestamp: lastWeek.toISOString(),
+          },
+          {
+            version: '1.4.6',
+            releaseTimestamp: yesterday.toISOString(),
+          },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newVersion).toEqual('1.4.6');
+      expect(res.updates[0].pendingChecks).toHaveLength(1);
+    });
+
+    it('should return pendingVersions', async () => {
+      config.currentValue = '1.4.4';
+      config.depName = 'some/action';
+      config.datasource = datasourceGithubReleases.id;
+      config.stabilityDays = 3;
+      config.internalChecksFilter = 'strict';
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      githubReleases.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.4.4',
+          },
+          {
+            version: '1.4.5',
+            releaseTimestamp: lastWeek.toISOString(),
+          },
+          {
+            version: '1.4.6',
+            releaseTimestamp: yesterday.toISOString(),
+          },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newVersion).toEqual('1.4.5');
+      expect(res.updates[0].pendingVersions).toHaveLength(1);
+    });
+
     it('should allow unstable versions if the ignoreUnstable=false', async () => {
       config.currentValue = '2.5.16';
       config.ignoreUnstable = false;

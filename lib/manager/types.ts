@@ -26,7 +26,6 @@ export interface ExtractConfig extends ManagerConfig {
   npmrc?: string;
   yarnrc?: string;
   skipInstalls?: boolean;
-  versioning?: string;
   updateInternalDeps?: boolean;
 }
 
@@ -146,6 +145,8 @@ export interface LookupUpdate {
   newMinor?: number;
   newValue: string;
   semanticCommitType?: string;
+  pendingChecks?: string[];
+  pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
 }
