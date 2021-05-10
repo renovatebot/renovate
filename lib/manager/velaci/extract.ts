@@ -1,11 +1,19 @@
+import yaml from 'js-yaml';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
-  const deps: PackageDependency[] = [];
+export function extractPackageFile(file: string): PackageFile | null {
+  let doc;
   try {
-    const lines = content.split('\n');
+    doc = yaml.safeLoad(file, { json: true });
+  } catch (err) {
+    logger.warn({ err, file }, 'Failed to parse Vela file.');
+    return null;
+  }
+  let deps: PackageDependency[] = [];
+  try {
+    const lines = doc.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
       const match = /^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
