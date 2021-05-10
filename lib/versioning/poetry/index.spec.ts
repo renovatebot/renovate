@@ -87,13 +87,13 @@ describe(getName(), () => {
 
   describe('isValid(input)', () => {
     it('should return null for irregular versions', () => {
-      expect(versionig.isValid('17.04.0')).toBeFalsy();
+      expect(versionig.isValid('17.04.0')).toBeTruthy();
     });
     it('should support simple semver', () => {
       expect(versionig.isValid('1.2.3')).toBeTruthy();
     });
     it('should support semver with dash', () => {
-      expect(versionig.isValid('1.2.3-foo')).toBeTruthy();
+      expect(versionig.isValid('1.2.3-foo')).toBeFalsy();
     });
     it('should reject semver without dash', () => {
       expect(versionig.isValid('1.2.3foo')).toBeFalsy();
@@ -120,8 +120,10 @@ describe(getName(), () => {
       expect(versionig.isSingleVersion('1.2.3-alpha.1')).toBeTruthy();
     });
     it('returns true if equals', () => {
-      expect(versionig.isSingleVersion('=1.2.3')).toBeTruthy();
-      expect(versionig.isSingleVersion('= 1.2.3')).toBeTruthy();
+      expect(versionig.isSingleVersion('=1.2.3')).toBeFalsy();
+      expect(versionig.isSingleVersion('= 1.2.3')).toBeFalsy();
+      expect(versionig.isSingleVersion('==1.2.3')).toBeTruthy();
+      expect(versionig.isSingleVersion('== 1.2.3')).toBeTruthy();
     });
     it('returns false when not version', () => {
       expect(versionig.isSingleVersion('1.*')).toBeFalsy();
@@ -129,10 +131,10 @@ describe(getName(), () => {
   });
   describe('matches()', () => {
     it('handles comma', () => {
-      expect(versionig.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
+      expect(versionig.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(false);
       expect(versionig.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
       expect(versionig.matches('4.2.2', '4.2.0, < 4.2.4')).toBe(false);
-      expect(versionig.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(true);
+      expect(versionig.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(false);
       expect(versionig.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
       expect(versionig.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
     });
@@ -140,7 +142,7 @@ describe(getName(), () => {
       expect(versionig.matches('4.2.0', '*')).toBe(true);
     });
     it('handles short', () => {
-      expect(versionig.matches('1.4', '1.4')).toBe(true);
+      expect(versionig.matches('1.4', '1.4')).toBe(false);
     });
   });
   describe('isLessThanRange()', () => {
@@ -160,7 +162,7 @@ describe(getName(), () => {
           ['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0'],
           '4.*, > 4.2'
         )
-      ).toBe('4.3.0');
+      ).toBeNull();
       expect(
         versionig.minSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -178,7 +180,7 @@ describe(getName(), () => {
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
           '^4.0.0, > 4.1.0, <= 4.3.5'
         )
-      ).toBe('4.2.0');
+      ).toBeNull();
       expect(
         versionig.minSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -194,13 +196,13 @@ describe(getName(), () => {
           ['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
           '4.*.0, < 4.2.5'
         )
-      ).toBe('4.2.1');
+      ).toBeNull();
       expect(
         versionig.getSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3'],
           '5.0, > 5.0.0'
         )
-      ).toBe('5.0.3');
+      ).toBeNull();
     });
   });
 
@@ -361,7 +363,7 @@ describe(getName(), () => {
           currentVersion: '5.0.0',
           newVersion: '5.1.7',
         })
-      ).toEqual('5');
+      ).toBeNull();
       expect(
         versionig.getNewValue({
           currentValue: '5',
@@ -369,7 +371,7 @@ describe(getName(), () => {
           currentVersion: '5.0.0',
           newVersion: '6.1.7',
         })
-      ).toEqual('6');
+      ).toBeNull();
     });
     it('bumps naked minor', () => {
       expect(
@@ -379,7 +381,7 @@ describe(getName(), () => {
           currentVersion: '5.0.0',
           newVersion: '5.0.7',
         })
-      ).toEqual('5.0');
+      ).toBeNull();
       expect(
         versionig.getNewValue({
           currentValue: '5.0',
@@ -387,7 +389,7 @@ describe(getName(), () => {
           currentVersion: '5.0.0',
           newVersion: '5.1.7',
         })
-      ).toEqual('5.1');
+      ).toBeNull();
       expect(
         versionig.getNewValue({
           currentValue: '5.0',
@@ -395,7 +397,7 @@ describe(getName(), () => {
           currentVersion: '5.0.0',
           newVersion: '6.1.7',
         })
-      ).toEqual('6.1');
+      ).toBeNull();
     });
     it('replaces minor', () => {
       expect(
@@ -405,7 +407,7 @@ describe(getName(), () => {
           currentVersion: '5.0.0',
           newVersion: '6.1.7',
         })
-      ).toEqual('6.1');
+      ).toBeNull();
     });
     it('replaces equals', () => {
       expect(
@@ -485,7 +487,7 @@ describe(getName(), () => {
           currentVersion: '1.2.3',
           newVersion: '1.5.0',
         })
-      ).toEqual('<1.5.1');
+      ).toEqual('<1.6.0');
       expect(
         versionig.getNewValue({
           currentValue: '< 1.3.4',
@@ -493,7 +495,7 @@ describe(getName(), () => {
           currentVersion: '1.2.3',
           newVersion: '1.5.0',
         })
-      ).toEqual('< 1.5.1');
+      ).toEqual('<1.6.0');
       expect(
         versionig.getNewValue({
           currentValue: '<   1.3.4',
@@ -501,7 +503,7 @@ describe(getName(), () => {
           currentVersion: '1.2.3',
           newVersion: '1.5.0',
         })
-      ).toEqual('< 1.5.1');
+      ).toEqual('<1.6.0');
     });
     it('handles less than equals version requirements', () => {
       expect(
@@ -519,7 +521,7 @@ describe(getName(), () => {
           currentVersion: '1.2.3',
           newVersion: '1.5.0',
         })
-      ).toEqual('<= 1.5.0');
+      ).toEqual('<=1.5.0');
       expect(
         versionig.getNewValue({
           currentValue: '<=   1.3.4',
@@ -527,7 +529,7 @@ describe(getName(), () => {
           currentVersion: '1.2.3',
           newVersion: '1.5.0',
         })
-      ).toEqual('<= 1.5.0');
+      ).toEqual('<=1.5.0');
     });
     it('handles replacing short caret versions', () => {
       expect(
