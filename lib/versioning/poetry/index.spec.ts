@@ -8,6 +8,7 @@ describe(getName(), () => {
       ['1.0', '1'],
       ['1.0.0', '1'],
       ['1.9.0', '1.9'],
+      ['1.9', '1.9.0'],
     ])('%s == %s', (a, b) => {
       expect(versionig.equals(a, b)).toBe(true);
     });
@@ -92,7 +93,7 @@ describe(getName(), () => {
     it('should support simple semver', () => {
       expect(versionig.isValid('1.2.3')).toBeTruthy();
     });
-    it('should support semver with dash', () => {
+    it('should reject semver with dash', () => {
       expect(versionig.isValid('1.2.3-foo')).toBeFalsy();
     });
     it('should reject semver without dash', () => {
@@ -140,9 +141,6 @@ describe(getName(), () => {
     });
     it('handles wildcards', () => {
       expect(versionig.matches('4.2.0', '*')).toBe(true);
-    });
-    it('handles short', () => {
-      expect(versionig.matches('1.4', '1.4')).toBe(false);
     });
   });
   describe('isLessThanRange()', () => {
