@@ -4,6 +4,10 @@
 
 <!-- Tell us what requirements you need solving, and be sure to mention too if this is part of any "bigger" problem you're trying to solve. -->
 
+**How popular is the manager you want Renovate to support?**
+
+<!-- It's useful for the Renovate maintainers to know how popular a manager is, as that helps us prioritize properly. -->
+
 **Did you already have any implementation ideas?**
 
 <!-- In case you've already dug into existing options or source code and have ideas, mention them here. Try to keep implementation ideas separate from *requirements* above -->
