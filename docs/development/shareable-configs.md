@@ -21,14 +21,10 @@ In human-understandable form, the rules are:
 
 ## Onboarding PR behavior
 
-Renovate tries to find any global Renovate bot configuration in certain default locations.
-The steps are:
+When Renovate creates a onboarding PR, it tries to find any global Renovate configuration in the namespace of the onboarding repository.
 
-1. Renovate searches for a repository called `renovate-config` in the user namespace or in the organization namespace.
-1. Renovate searches in the `renovate-config` repository for any configuration file (`renovate.json`, `default.json`).
-1. It will also try the `{org/user}/.{platform}` repository and searches for the `renovate-config.json` file.
-1. If Renovate finds any configuration file, it will link to this configuration in the `extends` array in the onboarding PR.
-1. As a fallback, offer the default Renovate bot configuration file.
+If the bot finds a global Renovate bot configuration, it will put a link to this repository in the `extends` array of the onboarding pull request.
+If the bot does not find a global configuration, it will create the default Renovate configuration.
 
 ## Supported config syntax
 
