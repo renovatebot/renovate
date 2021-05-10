@@ -1,6 +1,8 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
+import * as memCache from '../../util/cache/memory';
 import { api as npm } from '../npm';
+import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'poetry';
@@ -22,7 +24,7 @@ function getVersionParts(input: string): [string, string] {
   return [versionParts[0], '-' + versionParts[1]];
 }
 
-function padZeroes(input: string): string {
+function toNpmVersion(input: string): string {
   if (/[~^*]/.test(input)) {
     // ignore ranges
     return input;
@@ -41,11 +43,16 @@ function padZeroes(input: string): string {
 // add a '^', because poetry treats versions without operators as
 // exact versions.
 function poetry2npm(input: string): string {
-  return input
-    .split(',')
-    .map((str) => str.trim())
-    .filter(notEmpty)
-    .join(' ');
+  const cacheKey = `poetry2npm:${input}`;
+  let result = memCache.get<string | null>(cacheKey);
+  if (result === undefined) {
+    result = input
+      .split(',')
+      .map((str) => str.trim())
+      .filter(notEmpty)
+      .join(' ');
+  }
+  return result;
 }
 
 // NOTE: This function is copied from cargo versioning code.
@@ -67,66 +74,66 @@ function npm2poetry(input: string): string {
   return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
 }
 
-function equals(a: string, b: string): boolean {
-  return npm.equals(padZeroes(a), padZeroes(b));
-}
-
-function getMajor(version: string): number {
-  return npm.getMajor(padZeroes(version));
-}
-
-function getMinor(version: string): number {
-  return npm.getMinor(padZeroes(version));
-}
-
-function getPatch(version: string): number {
-  return npm.getPatch(padZeroes(version));
-}
-
-function isGreaterThan(a: string, b: string): boolean {
-  return npm.isGreaterThan(padZeroes(a), padZeroes(b));
-}
-
-function isLessThanRange(version: string, range: string): boolean {
-  return (
-    npm.isVersion(padZeroes(version)) &&
-    npm.isLessThanRange(padZeroes(version), poetry2npm(range))
-  );
+function toNpmRange(input: string): string | null {
+  const cacheKey = `getNpmRange:${input}`;
+  let result = memCache.get<string | null>(cacheKey);
+  if (result === undefined) {
+    result =
+      !pep440.isValid(input) && npm.isValid(input) && !npm.isVersion(input)
+        ? poetry2npm(input)
+        : null;
+    result = result && npm.isValid(result) ? result : null;
+    memCache.set(cacheKey, result);
+  }
+  return result;
 }
 
 export function isValid(input: string): string | boolean {
-  return npm.isValid(poetry2npm(input));
+  if (pep440.isValid(input)) {
+    return true;
+  }
+  if (toNpmRange(input)) {
+    return true;
+  }
+  return false;
 }
 
-function isStable(version: string): boolean {
-  return npm.isStable(padZeroes(version));
-}
+function isLessThanRange(version: string, range: string): boolean {
+  const npmRange = toNpmRange(range);
+  if (!npmRange) {
+    return pep440.isLessThanRange(version, range);
+  }
 
-function isVersion(input: string): string | boolean {
-  return npm.isVersion(padZeroes(input));
+  const npmVersion = toNpmVersion(version);
+  return npm.isVersion(npmVersion) && npm.isLessThanRange(npmVersion, npmRange);
 }
 
 function matches(version: string, range: string): boolean {
-  return (
-    npm.isVersion(padZeroes(version)) &&
-    npm.matches(padZeroes(version), poetry2npm(range))
-  );
+  const npmRange = toNpmRange(range);
+  if (!npmRange) {
+    return pep440.matches(version, range);
+  }
+
+  const npmVersion = toNpmVersion(version);
+  return npm.isVersion(npmVersion) && npm.matches(npmVersion, npmRange);
 }
 
 function getSatisfyingVersion(versions: string[], range: string): string {
-  return npm.getSatisfyingVersion(versions, poetry2npm(range));
+  const npmRange = toNpmRange(range);
+  if (!npmRange) {
+    return pep440.getSatisfyingVersion(versions, range);
+  }
+
+  return npm.getSatisfyingVersion(versions, npmRange);
 }
 
 function minSatisfyingVersion(versions: string[], range: string): string {
-  return npm.minSatisfyingVersion(versions, poetry2npm(range));
-}
+  const npmRange = toNpmRange(range);
+  if (!npmRange) {
+    return pep440.minSatisfyingVersion(versions, range);
+  }
 
-function isSingleVersion(constraint: string): string | boolean {
-  return (
-    (constraint.trim().startsWith('=') &&
-      isVersion(constraint.trim().substring(1).trim())) ||
-    isVersion(constraint.trim())
-  );
+  return npm.minSatisfyingVersion(versions, npmRange);
 }
 
 function handleShort(
@@ -134,8 +141,9 @@ function handleShort(
   currentValue: string,
   newVersion: string
 ): string {
-  const toVersionMajor = getMajor(newVersion);
-  const toVersionMinor = getMinor(newVersion);
+  const npmNewVersion = toNpmVersion(newVersion);
+  const toVersionMajor = npm.getMajor(npmNewVersion);
+  const toVersionMinor = npm.getMinor(npmNewVersion);
   const split = currentValue.split('.');
   if (split.length === 1) {
     // [^,~]4
@@ -148,16 +156,16 @@ function handleShort(
   return null;
 }
 
-function getNewValue({
-  currentValue,
-  rangeStrategy,
-  currentVersion,
-  newVersion,
-}: NewValueConfig): string {
+function getNewValue(config: NewValueConfig): string {
+  const { currentValue, rangeStrategy, currentVersion, newVersion } = config;
+  const npmRange = toNpmRange(currentValue);
+  if (!npmRange) {
+    return pep440.getNewValue(config);
+  }
   if (rangeStrategy === 'replace') {
-    const npmCurrentValue = poetry2npm(currentValue);
+    const npmCurrentValue = npmRange;
     try {
-      const massagedNewVersion = padZeroes(newVersion);
+      const massagedNewVersion = toNpmVersion(newVersion);
       if (
         npm.isVersion(massagedNewVersion) &&
         npm.matches(massagedNewVersion, npmCurrentValue)
@@ -188,7 +196,7 @@ function getNewValue({
     }
   }
   const newSemver = npm.getNewValue({
-    currentValue: poetry2npm(currentValue),
+    currentValue: npmRange,
     rangeStrategy,
     currentVersion,
     newVersion,
@@ -197,26 +205,13 @@ function getNewValue({
   return newPoetry;
 }
 
-function sortVersions(a: string, b: string): number {
-  return npm.sortVersions(padZeroes(a), padZeroes(b));
-}
-
 export const api: VersioningApi = {
-  equals,
-  getMajor,
-  getMinor,
-  getPatch,
+  ...pep440,
+  isValid,
+  matches,
   getNewValue,
   getSatisfyingVersion,
-  isCompatible: isVersion,
-  isGreaterThan,
   isLessThanRange,
-  isSingleVersion,
-  isStable,
-  isValid,
-  isVersion,
-  matches,
   minSatisfyingVersion,
-  sortVersions,
 };
 export default api;
