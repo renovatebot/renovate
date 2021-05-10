@@ -1,8 +1,4 @@
----
-name: Adding a new package manager
-about: Propose a new package manager
-labels: 'type:feature, status:requirements, priority-5-triage, new package manager'
----
+<!-- Please copy/paste this template and fill it in on request from the Renovate maintainers. -->
 
 **What package manager do you want Renovate to support?**
 
