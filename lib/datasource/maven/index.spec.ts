@@ -354,6 +354,45 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('should deal with circular hierarchy', async () => {
+      const parentPom = loadFixture('child-parent-cycle/parent.pom.xml');
+      const parentPomMock = {
+        dep: 'org.example:parent',
+        meta: null,
+        pom: parentPom,
+        latest: '2.0.0',
+        jars: null,
+      };
+
+      const childMeta = loadFixture('child-parent-cycle/child.meta.xml');
+      const childPom = loadFixture('child-parent-cycle/child.pom.xml');
+      const childPomMock = {
+        dep: 'org.example:child',
+        meta: null,
+        pom: childPom,
+        latest: '2.0.0',
+        jars: null,
+      };
+
+      mockGenericPackage({
+        ...childPomMock,
+        meta: childMeta,
+        jars: { '2.0.0': 200 },
+      });
+      mockGenericPackage(parentPomMock);
+      mockGenericPackage(childPomMock);
+      mockGenericPackage(parentPomMock);
+      mockGenericPackage(childPomMock);
+      mockGenericPackage(parentPomMock);
+
+      const res = await get('org.example:child');
+
+      expect(res).toMatchObject({
+        homepage: 'https://parent-home.example.com',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('should get source from own pom and homepage from parent', async () => {
       mockGenericPackage({
         meta: loadFixture('child-scm/meta.xml'),

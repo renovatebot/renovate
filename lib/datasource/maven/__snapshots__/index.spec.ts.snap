@@ -300,6 +300,83 @@ Array [
 ]
 `;
 
+exports[`datasource/maven/index fetching parent info should deal with circular hierarchy 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/child/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/child/2.0.0/child-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/child/2.0.0/child-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/parent/2.0.0/parent-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/child/2.0.0/child-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/parent/2.0.0/parent-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/child/2.0.0/child-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/parent/2.0.0/parent-2.0.0.pom",
+  },
+]
+`;
+
 exports[`datasource/maven/index fetching parent info should get homepage and source from own pom 1`] = `
 Array [
   Object {

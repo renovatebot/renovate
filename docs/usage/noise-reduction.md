@@ -98,8 +98,9 @@ Or perhaps at least weekly:
   ]
 ```
 
-If you're wondering what is supported and not, under the hood, the schedule is parsed using [later.js](https://bunkat.github.io/later/) using the `later.parse.text(scheduleString)` API.
-[This page](https://bunkat.github.io/later/parsers.html#text) explains the supported syntax or you can experiment on the [RunKit playground](https://npm.runkit.com/later).
+If you're wondering what is supported and not, under the hood, the schedule is parsed using [@breejs/later](https://github.com/breejs/later) using the `later.parse.text(scheduleString)` API.
+Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
+Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 ## Automerging
 
