@@ -131,10 +131,10 @@ describe(getName(), () => {
   });
   describe('matches()', () => {
     it('handles comma', () => {
-      expect(versionig.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(false);
+      expect(versionig.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
       expect(versionig.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
       expect(versionig.matches('4.2.2', '4.2.0, < 4.2.4')).toBe(false);
-      expect(versionig.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(false);
+      expect(versionig.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(true);
       expect(versionig.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
       expect(versionig.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
     });
@@ -162,7 +162,7 @@ describe(getName(), () => {
           ['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0'],
           '4.*, > 4.2'
         )
-      ).toBeNull();
+      ).toEqual('4.3.0');
       expect(
         versionig.minSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -180,7 +180,7 @@ describe(getName(), () => {
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
           '^4.0.0, > 4.1.0, <= 4.3.5'
         )
-      ).toBeNull();
+      ).toEqual('4.2.0');
       expect(
         versionig.minSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -196,13 +196,13 @@ describe(getName(), () => {
           ['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
           '4.*.0, < 4.2.5'
         )
-      ).toBeNull();
+      ).toEqual('4.2.1');
       expect(
         versionig.getSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3'],
           '5.0, > 5.0.0'
         )
-      ).toBeNull();
+      ).toEqual('5.0.3');
     });
   });
 

@@ -78,11 +78,11 @@ function toNpmRange(input: string): string | null {
   const cacheKey = `getNpmRange:${input}`;
   let result = memCache.get<string | null>(cacheKey);
   if (result === undefined) {
-    result =
-      !pep440.isValid(input) && npm.isValid(input) && !npm.isVersion(input)
-        ? poetry2npm(input)
-        : null;
-    result = result && npm.isValid(result) ? result : null;
+    const isPep440 = pep440.isValid(input);
+    const npmResult = poetry2npm(input);
+    const isNpm = npm.isValid(npmResult);
+    const isNpmRange = isNpm && !npm.isVersion(npmResult);
+    result = !isPep440 && isNpmRange ? npmResult : null;
     memCache.set(cacheKey, result);
   }
   return result;
@@ -160,7 +160,10 @@ function getNewValue(config: NewValueConfig): string {
   const { currentValue, rangeStrategy, currentVersion, newVersion } = config;
   const npmRange = toNpmRange(currentValue);
   if (!npmRange) {
-    return pep440.getNewValue(config);
+    return pep440.getNewValue({
+      ...config,
+      currentValue: currentValue.trim(),
+    });
   }
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = npmRange;
