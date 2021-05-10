@@ -19,14 +19,16 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
-export interface ExtractConfig extends ManagerConfig {
+export interface ExtractConfig {
+  binarySource?: string;
+  localDir?: string;
+  registryUrls?: string[];
   endpoint?: string;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
   yarnrc?: string;
   skipInstalls?: boolean;
-  versioning?: string;
   updateInternalDeps?: boolean;
 }
 
@@ -146,6 +148,8 @@ export interface LookupUpdate {
   newMinor?: number;
   newValue: string;
   semanticCommitType?: string;
+  pendingChecks?: string[];
+  pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
 }

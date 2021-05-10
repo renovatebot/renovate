@@ -934,6 +934,12 @@ Example:
 }
 ```
 
+### matchHost
+
+This can be a base URL (e.g. `https://api.github.com`) or a hostname like `github.com` or `api.github.com`.
+If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
+Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
+
 ### timeout
 
 Use this figure to adjust the timeout for queries.
@@ -1033,6 +1039,18 @@ If you wish for Renovate to process only select paths in the repository, use `in
 
 Alternatively, if you need to just _exclude_ certain paths in the repository then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
+
+## internalChecksFilter
+
+This setting determines whether Renovate controls when and how filtering of internal checks are performed, particularly when multiple versions of the same update type are available.
+Currently this applies to the `stabilityDays` check only.
+
+- `none`: No filtering will be performed, and the highest release will be used regardless of whether it's pending or not
+- `strict`: All pending releases will be filtered. PRs will be skipped unless a non-pending version is available
+- `flexible`: Similar to strict, but in the case where all versions are pending then a PR will be created with the highest pending version
+
+The `flexible` mode can result in "flapping" of Pull Requests, where e.g. a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `stabilityDays`.
+We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you have visibility into suppressed PRs.
 
 ## java
 
@@ -1364,10 +1382,10 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 ### matchCurrentVersion
 
-`matchCurrentVersion` can be an exact semver version or a semver range.
+`matchCurrentVersion` can be an exact SemVer version or a SemVer range.
 
-This field also supports Regular Expressions which have to begin and end with `/`.
-For example, the following will enforce that only `1.*` versions:
+This field also supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
 
 ```json
 {
@@ -1380,8 +1398,8 @@ For example, the following will enforce that only `1.*` versions:
 }
 ```
 
-This field also supports a special negated regex syntax for ignoring certain versions.
-Use the syntax `!/ /` like the following:
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
 
 ```json
 {

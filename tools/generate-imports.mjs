@@ -15,7 +15,12 @@ if (!fs.existsSync('data')) {
   shell.exit(0);
 }
 
-async function updateFile(file: string, code: string): Promise<void> {
+/**
+ *
+ * @param {string} file
+ * @param {string} code
+ */
+async function updateFile(file, code) {
   const oldCode = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
   if (code !== oldCode) {
     await fs.writeFile(file, code);
@@ -25,7 +30,12 @@ async function updateFile(file: string, code: string): Promise<void> {
 
 const dataPaths = ['data'];
 
-function expandPaths(paths: string[]): string[] {
+/**
+ *
+ * @param {string[]} paths
+ * @returns {string[]}
+ */
+function expandPaths(paths) {
   return paths
     .map((pathName) => {
       const stat = fs.statSync(pathName);
@@ -50,20 +60,23 @@ function expandPaths(paths: string[]): string[] {
     .reduce((x, y) => x.concat(y));
 }
 
-async function generateData(): Promise<void> {
+async function generateData() {
   const files = expandPaths(dataPaths).sort();
 
   const importDataFileType = files.map((x) => `  | '${x}'`).join('\n');
 
   const contentMapDecl = 'const data = new Map<DataFile, string>();';
 
-  const contentMapAssignments: string[] = [];
+  /** @type {string[]} */
+  const contentMapAssignments = [];
   for (const file of files) {
-    shell.echo(`> ${file}`);
+    const key = file.replace(/\\/g, '/');
+
     const rawFileContent = await fs.readFile(file, 'utf8');
-    contentMapAssignments.push(
-      `data.set('${file}', ${JSON.stringify(rawFileContent)});`
-    );
+    const value = JSON.stringify(rawFileContent);
+
+    shell.echo(`> ${key}`);
+    contentMapAssignments.push(`data.set('${key}', ${value});`);
   }
 
   await updateFile(

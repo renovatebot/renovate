@@ -4,6 +4,7 @@ export interface HostRule {
   domainName?: string;
   hostName?: string;
   baseUrl?: string;
+  matchHost?: string;
   token?: string;
   username?: string;
   password?: string;
