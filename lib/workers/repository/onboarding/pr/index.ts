@@ -127,7 +127,7 @@ If you need any further assistance then you can also [request help here](${confi
     return;
   }
   logger.debug('Creating onboarding PR');
-  const labels: string[] = [];
+  const labels: string[] = config.addLabels ? config.addLabels : [];
   try {
     if (getAdminConfig().dryRun) {
       logger.info('DRY-RUN: Would create onboarding PR');
