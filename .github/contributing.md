@@ -16,9 +16,10 @@ If you've found a **bug** or have a **feature request** then please create an is
 ## Code
 
 If you would like to fix a bug or implement a feature, please fork the repository and create a Pull Request.
-More information on getting set up locally can be found in [docs/development/local-development.md](https://github.com/renovatebot/renovate/blob/main/docs/development/local-development.md).
+To learn how to setup your local workstation correctly read [docs/development/local-development.md](../docs/development/local-development.md).
+Also skim the [docs/development](../docs/development/) folder, it contains a lot of helpful information on things like adding a new package manager, how Renovate branches work, design decisions and more.
 
-Before you start any Pull Request, it's recommended that you create an issue to discuss first if you have any doubts about requirement or implementation.
+Before you start any Pull Request, it's recommended that you create an issue to discuss first if you have any doubts about requirements or implementation.
 That way you can be sure that the maintainer(s) agree on what to change and how, and you can hopefully get a quick merge afterwards.
 Also, let the maintainers know that you plan to work on a particular issue so that no one else starts any duplicate work.
 
