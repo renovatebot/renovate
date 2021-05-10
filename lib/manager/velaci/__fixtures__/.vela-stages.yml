@@ -1,0 +1,40 @@
+version: "1"
+
+services:
+  - name: mysql
+    image: mysql:5.7.24
+
+  - name: redis
+    image: redis:alpine
+
+steps:
+  - name: go
+    image: golang:1.13
+    environment:
+      CGO_ENABLED: '0'
+      GOOS: linux
+    commands:
+      - go get ./...
+      - go test ./...
+
+  - name: node
+    image: amd64/node:10.0.0@sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201
+    commands:
+      - npm install
+      - npm test
+
+secrets:
+  # Implicit secret definition.
+  - name: vault_token
+
+  - origin:
+      name: private vault
+      image: target/secret-vault:v0.1.0
+      secrets: [ vault_token ]
+      parameters:
+        addr: vault.example.com
+        auth_method: token
+        username: octocat
+        items:
+          - source: secret/docker
+            path: docker
