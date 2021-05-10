@@ -156,32 +156,36 @@ export function getNewValue({
 }
 
 export function isLessThanRange(input: string, range: string): boolean {
-  let invertResult = true;
+  try {
+    let invertResult = true;
 
-  const results = range
-    .split(',')
-    .map((x) =>
-      x
-        .replace(/\s*/g, '')
-        .split(/(~=|==|!=|<=|>=|<|>|===)/)
-        .slice(1)
-    )
-    .map(([op, version]) => {
-      if (['!=', '<=', '<'].includes(op)) {
-        return true;
-      }
-      invertResult = false;
-      if (['~=', '==', '>=', '==='].includes(op)) {
-        return lt(input, version);
-      }
-      if (op === '>') {
-        return lte(input, version);
-      }
-      // istanbul ignore next
-      return false;
-    });
+    const results = range
+      .split(',')
+      .map((x) =>
+        x
+          .replace(/\s*/g, '')
+          .split(/(~=|==|!=|<=|>=|<|>|===)/)
+          .slice(1)
+      )
+      .map(([op, version]) => {
+        if (['!=', '<=', '<'].includes(op)) {
+          return true;
+        }
+        invertResult = false;
+        if (['~=', '==', '>=', '==='].includes(op)) {
+          return lt(input, version);
+        }
+        if (op === '>') {
+          return lte(input, version);
+        }
+        // istanbul ignore next
+        return false;
+      });
 
-  const result = results.every((res) => res === true);
+    const result = results.every((res) => res === true);
 
-  return invertResult ? !result : result;
+    return invertResult ? !result : result;
+  } catch (err) /* istanbul ignore next */ {
+    return false;
+  }
 }
