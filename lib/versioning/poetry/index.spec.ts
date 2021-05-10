@@ -87,7 +87,7 @@ describe(getName(), () => {
   });
 
   describe('isValid(input)', () => {
-    it('should return null for irregular versions', () => {
+    it('should support irregular versions', () => {
       expect(versionig.isValid('17.04.0')).toBeTruthy();
     });
     it('should support simple semver', () => {
