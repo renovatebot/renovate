@@ -120,7 +120,7 @@ describe(getName(), () => {
       expect(versionig.isSingleVersion('1.2.3')).toBeTruthy();
       expect(versionig.isSingleVersion('1.2.3-alpha.1')).toBeTruthy();
     });
-    it('returns true if equals', () => {
+    it('supports only PEP440 exact versions', () => {
       expect(versionig.isSingleVersion('=1.2.3')).toBeFalsy();
       expect(versionig.isSingleVersion('= 1.2.3')).toBeFalsy();
       expect(versionig.isSingleVersion('==1.2.3')).toBeTruthy();
@@ -160,7 +160,7 @@ describe(getName(), () => {
           ['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0'],
           '4.*, > 4.2'
         )
-      ).toEqual('4.3.0');
+      ).toBe('4.3.0');
       expect(
         versionig.minSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -178,7 +178,7 @@ describe(getName(), () => {
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
           '^4.0.0, > 4.1.0, <= 4.3.5'
         )
-      ).toEqual('4.2.0');
+      ).toBe('4.2.0');
       expect(
         versionig.minSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -194,13 +194,13 @@ describe(getName(), () => {
           ['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
           '4.*.0, < 4.2.5'
         )
-      ).toEqual('4.2.1');
+      ).toBe('4.2.1');
       expect(
         versionig.getSatisfyingVersion(
           ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3'],
           '5.0, > 5.0.0'
         )
-      ).toEqual('5.0.3');
+      ).toBe('5.0.3');
     });
   });
 
