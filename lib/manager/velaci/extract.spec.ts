@@ -3,9 +3,7 @@ import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const invalidYAML = loadFixture('invalid.yml');
-
 const stepsPipeline = loadFixture('.vela-steps.yml');
-
 const stagesPipeline = loadFixture('.vela-stages.yaml');
 
 describe(getName(), () => {
