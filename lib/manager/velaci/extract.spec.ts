@@ -1,5 +1,4 @@
 import { getName, loadFixture } from '../../../test/util';
-
 import { extractPackageFile } from './extract';
 
 const invalidYAML = loadFixture('invalid.yml');
