@@ -153,6 +153,10 @@ export async function lookupUpdates(
         latestVersion,
         allVersions.map((v) => v.version)
       );
+    // istanbul ignore if
+    if (!currentVersion && lockedVersion) {
+      return res;
+    }
     res.currentVersion = currentVersion;
     if (
       currentVersion &&
