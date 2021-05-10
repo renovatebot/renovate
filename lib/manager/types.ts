@@ -19,7 +19,10 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
-export interface ExtractConfig extends ManagerConfig {
+export interface ExtractConfig {
+  binarySource?: string;
+  localDir?: string;
+  registryUrls?: string[];
   endpoint?: string;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
