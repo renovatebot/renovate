@@ -16,4 +16,4 @@ labels: 'type:feature, status:requirements, priority-5-triage, new package manag
 
 **Did you read our documentation on adding a package manager?**
 
-- [ ] I've read the [adding a package manager](docs/development/adding-a-package-manager.md) documentation.
+- [ ] I've read the [adding a package manager](../../docs/development/adding-a-package-manager.md) documentation.
