@@ -1,5 +1,3 @@
-import { Stats } from 'fs';
-import { stat } from 'fs-extra';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { LANGUAGE_JAVA } from '../../constants/languages';
@@ -7,7 +5,7 @@ import * as datasourceMaven from '../../datasource/maven';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile } from '../../util/fs';
+import { Stats, readLocalFile, stat } from '../../util/fs';
 import * as gradleVersioning from '../../versioning/gradle';
 import type {
   ExtractConfig,

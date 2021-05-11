@@ -16,7 +16,7 @@ import * as docker from '../../util/exec/docker';
 import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('child_process');
-jest.mock('fs-extra');
+jest.mock('../../util/fs');
 jest.mock('../../util/exec/env');
 
 const gradleOutput = {

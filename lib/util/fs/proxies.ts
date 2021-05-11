@@ -1,6 +1,8 @@
 import * as fs from 'fs-extra';
 import { MoveOptions, WriteFileOptions } from 'fs-extra';
 
+export type Stats = fs.Stats;
+
 // istanbul ignore next
 export function stat(path: string | Buffer): Promise<fs.Stats> {
   return fs.stat(path);
