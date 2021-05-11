@@ -3,7 +3,7 @@ import upath from 'upath';
 import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
-import { resolveBaseUrl } from '../../util/url';
+import { ensureTrailingSlash, resolveUrl } from '../../util/url';
 import type { ManagerConfig, PackageFile } from '../types';
 
 type GitModule = {
@@ -31,7 +31,7 @@ async function getUrl(
   const remoteUrl = (
     await git.raw(['config', '--get', 'remote.origin.url'])
   ).trim();
-  return resolveBaseUrl(`${remoteUrl}/`, path);
+  return resolveUrl(ensureTrailingSlash(remoteUrl), path);
 }
 
 const headRefRe = /ref: refs\/heads\/(?<branch>\w+)\s/;

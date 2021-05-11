@@ -23,7 +23,7 @@ function parseUrl(urlString: string): UrlParsedResult | null {
     return null;
   }
   const url = _parse(urlString);
-  if (url.host !== 'github.com') {
+  if (url?.host !== 'github.com') {
     return null;
   }
   const path = url.pathname.split('/').slice(1);

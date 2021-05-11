@@ -21,8 +21,7 @@ function httpByHostType(hostType: string): Http {
 const getHost = (x: string): string => parseUrl(x)?.host;
 
 function isMavenCentral(pkgUrl: URL): boolean {
-  const host = pkgUrl.host;
-  return getHost(MAVEN_REPO) === host;
+  return getHost(MAVEN_REPO) === pkgUrl.host;
 }
 
 function isTemporalError(err: { code: string; statusCode: number }): boolean {

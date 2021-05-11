@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
-import { resolveBaseUrl } from '../../util/url';
+import { resolveUrl } from '../../util/url';
 
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
@@ -108,7 +108,7 @@ export function resolvePackage(packageName: string): PackageResolution {
   } catch (err) {
     registryUrl = 'https://registry.npmjs.org/';
   }
-  const packageUrl = resolveBaseUrl(
+  const packageUrl = resolveUrl(
     registryUrl,
     encodeURIComponent(packageName).replace(/^%40/, '@')
   );

@@ -116,7 +116,6 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
         logger.trace({ goModule }, 'go-import header prefix not match');
         return null;
       }
-
       logger.debug({ goModule, goImportURL }, 'Go lookup import url');
 
       // get server base url from import url

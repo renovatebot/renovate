@@ -5,7 +5,7 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
-import { resolveBaseUrl } from '../../util/url';
+import { ensureTrailingSlash, resolveUrl } from '../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -52,7 +52,7 @@ interface RegistryMeta {
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-  const url = resolveBaseUrl(regUrl.replace(/\/?$/, '/'), 'packages.json');
+  const url = resolveUrl(ensureTrailingSlash(regUrl), 'packages.json');
   const opts = getHostOpts(url);
   const res = (await http.getJson<PackageMeta>(url, opts)).body;
   const meta: RegistryMeta = {
@@ -227,8 +227,8 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   }
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
-  const pkgUrl = resolveBaseUrl(regUrl, `/p/${name}.json`);
-  // TODO: fix types
+  const pkgUrl = resolveUrl(regUrl, `/p/${name}.json`);
+  // TODO: fix types (#9610)
   const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
     dep = extractDepReleases(res);
@@ -263,19 +263,16 @@ async function packageLookup(
     if (includesPackages?.[name]) {
       return includesPackages[name];
     }
-    let pkgUrl;
+    let pkgUrl: string;
     if (providerPackages?.[name]) {
-      pkgUrl = resolveBaseUrl(
+      pkgUrl = resolveUrl(
         regUrl,
         providersUrl
           .replace('%package%', name)
           .replace('%hash%', providerPackages[name])
       );
     } else if (providersLazyUrl) {
-      pkgUrl = resolveBaseUrl(
-        regUrl,
-        providersLazyUrl.replace('%package%', name)
-      );
+      pkgUrl = resolveUrl(regUrl, providersLazyUrl.replace('%package%', name));
     } else {
       return null;
     }

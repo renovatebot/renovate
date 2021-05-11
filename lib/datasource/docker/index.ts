@@ -12,7 +12,7 @@ import { Http, HttpResponse } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 import {
   ensureTrailingSlash,
-  resolveBaseUrl,
+  resolveUrl,
   trimTrailingSlash,
 } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
@@ -465,7 +465,7 @@ async function getTags(
       const res = await http.getJson<{ tags: string[] }>(url, { headers });
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link as string);
-      url = linkHeader?.next ? resolveBaseUrl(url, linkHeader.next.url) : null;
+      url = linkHeader?.next ? resolveUrl(url, linkHeader.next.url) : null;
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 30;
