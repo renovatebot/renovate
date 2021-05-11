@@ -7,6 +7,7 @@ import { envMock, mockExecAll } from '../../../test/exec-util';
 import {
   addReplacingSerializer,
   getName,
+  loadFixture,
   replacingSerializer,
 } from '../../../test/util';
 import * as _util from '../../util';
@@ -18,13 +19,9 @@ import type { ExtractConfig } from '../types';
 import { GRADLE_DEPENDENCY_REPORT_FILENAME } from './gradle-updates-report';
 import * as _manager from '.';
 
-const fixtures = 'lib/manager/gradle/__fixtures__';
-const standardUpdatesReport = () =>
-  fsExtra.readFile(`${fixtures}/updatesReport.json`, 'utf8');
-const emptyUpdatesReport = () =>
-  fsExtra.readFile(`${fixtures}/updatesReportEmpty.json`, 'utf8');
-const multiProjectUpdatesReport = () =>
-  fsExtra.readFile(`${fixtures}/MultiProjectUpdatesReport.json`, 'utf8');
+const standardUpdatesReport = loadFixture(`updatesReport.json`);
+const emptyUpdatesReport = loadFixture(`updatesReportEmpty.json`);
+const multiProjectUpdatesReport = loadFixture(`MultiProjectUpdatesReport.json`);
 
 const baseConfig = {
   gradle: {
@@ -100,7 +97,10 @@ describe(getName(), () => {
       dir: string = config.localDir
     ) {
       if (addGradleWrapper) {
-        await fsExtra.copy(`${fixtures}/gradle-wrappers/6`, dir);
+        await fsExtra.copy(
+          `lib/manager/gradle/__fixtures__/gradle-wrappers/6`,
+          dir
+        );
       }
       if (updatesReport) {
         await fsExtra.writeFile(
@@ -112,7 +112,7 @@ describe(getName(), () => {
 
     it('should return gradle dependencies', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(true, standardUpdatesReport());
+      await initializeWorkingDir(true, standardUpdatesReport);
 
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
@@ -124,7 +124,7 @@ describe(getName(), () => {
 
     it('should return gradle.kts dependencies', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(true, standardUpdatesReport());
+      await initializeWorkingDir(true, standardUpdatesReport);
 
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle.kts',
@@ -136,7 +136,7 @@ describe(getName(), () => {
 
     it('should return empty if there are no dependencies', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(true, emptyUpdatesReport());
+      await initializeWorkingDir(true, emptyUpdatesReport);
 
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
@@ -176,7 +176,7 @@ describe(getName(), () => {
 
     it('should use repositories only for current project', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(true, multiProjectUpdatesReport());
+      await initializeWorkingDir(true, multiProjectUpdatesReport);
 
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
@@ -187,7 +187,7 @@ describe(getName(), () => {
 
     it('should execute gradlew when available', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(true, standardUpdatesReport());
+      await initializeWorkingDir(true, standardUpdatesReport);
 
       await manager.extractAllPackageFiles(config, ['build.gradle']);
       expect(execSnapshots).toMatchSnapshot();
@@ -195,7 +195,7 @@ describe(getName(), () => {
 
     it('should execute gradlew.bat when available on Windows', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(true, standardUpdatesReport());
+      await initializeWorkingDir(true, standardUpdatesReport);
 
       jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
 
@@ -205,7 +205,7 @@ describe(getName(), () => {
 
     it('should execute gradle if gradlew is not available', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(false, standardUpdatesReport());
+      await initializeWorkingDir(false, standardUpdatesReport);
 
       await manager.extractAllPackageFiles(config, ['build.gradle']);
       expect(execSnapshots).toMatchSnapshot();
@@ -226,11 +226,11 @@ describe(getName(), () => {
 
     it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(true, standardUpdatesReport());
+      await initializeWorkingDir(true, standardUpdatesReport);
       await fsExtra.mkdirs(`${config.localDir}/foo`);
       await initializeWorkingDir(
         true,
-        standardUpdatesReport(),
+        standardUpdatesReport,
         `${config.localDir}/foo`
       );
 
@@ -243,7 +243,7 @@ describe(getName(), () => {
 
     it('should configure the renovate report plugin', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-      await initializeWorkingDir(true, standardUpdatesReport());
+      await initializeWorkingDir(true, standardUpdatesReport);
 
       jest.spyOn(os, 'platform').mockReturnValueOnce('linux');
       await manager.extractAllPackageFiles(config, ['build.gradle']);
@@ -261,7 +261,7 @@ describe(getName(), () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await util.setUtilConfig(configWithDocker);
-      await initializeWorkingDir(false, standardUpdatesReport());
+      await initializeWorkingDir(false, standardUpdatesReport);
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
@@ -273,7 +273,7 @@ describe(getName(), () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await util.setUtilConfig(configWithDocker);
-      await initializeWorkingDir(true, standardUpdatesReport());
+      await initializeWorkingDir(true, standardUpdatesReport);
 
       const execSnapshots = mockExecAll(exec, gradleOutput);
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
@@ -286,7 +286,7 @@ describe(getName(), () => {
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await util.setUtilConfig(configWithDocker);
       jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
-      await initializeWorkingDir(true, standardUpdatesReport());
+      await initializeWorkingDir(true, standardUpdatesReport);
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
@@ -304,13 +304,10 @@ describe(getName(), () => {
     });
     afterAll(resetMocks);
 
-    it('should update an existing module dependency', async () => {
+    it('should update an existing module dependency', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      const buildGradleContent = await fsExtra.readFile(
-        `${fixtures}/build.gradle.example1`,
-        'utf8'
-      );
+      const buildGradleContent = loadFixture(`build.gradle.example1`);
       // prettier-ignore
       const upgrade = {
         depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8',
@@ -394,13 +391,10 @@ describe(getName(), () => {
       expect(execSnapshots).toMatchSnapshot();
     });
 
-    it('should update dependencies in same file', async () => {
+    it('should update dependencies in same file', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      const buildGradleContent = await fsExtra.readFile(
-        `${fixtures}/build.gradle.example1`,
-        'utf8'
-      );
+      const buildGradleContent = loadFixture(`build.gradle.example1`);
 
       const upgrade = {
         depGroup: 'org.apache.openjpa',
