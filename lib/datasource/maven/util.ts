@@ -57,11 +57,16 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 }
 
 export async function downloadHttpProtocol(
-  pkgUrl: URL,
+  pkgUrl: URL | null,
   hostType = id
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
+    /* istanbul ignore if */
+    if (!pkgUrl) {
+      logger.debug('Dependency lookup faild. Missing pkgUrl');
+      return {};
+    }
     const httpClient = httpByHostType(hostType);
     raw = await httpClient.get(pkgUrl.href);
     return raw;
