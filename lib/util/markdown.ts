@@ -20,11 +20,19 @@ export function sanitizeMarkdown(markdown: string): string {
   return res;
 }
 
+/**
+ *
+ * @param content content to process
+ * @param options github options
+ * @returns linkified content
+ */
 export async function linkify(
   content: string,
   options: github.Options
 ): Promise<string> {
+  // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
   const output = await remark()
+    .use({ settings: { bullet: '-' } })
     .use(github, { mentionStrong: false, ...options })
     .process(content);
   return output.toString();
