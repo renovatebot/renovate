@@ -1,3 +1,4 @@
+import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import {
   Release,
@@ -17,6 +18,7 @@ import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
+import { filterInternalChecks } from './filter-checks';
 import { generateUpdate } from './generate';
 import { getRollbackUpdate } from './rollback';
 import type { LookupUpdateConfig, UpdateResult } from './types';
@@ -151,6 +153,10 @@ export async function lookupUpdates(
         latestVersion,
         allVersions.map((v) => v.version)
       );
+    // istanbul ignore if
+    if (!currentVersion && lockedVersion) {
+      return res;
+    }
     res.currentVersion = currentVersion;
     if (
       currentVersion &&
@@ -201,11 +207,21 @@ export async function lookupUpdates(
         buckets[bucket] = [release];
       }
     }
+    const depResultConfig = mergeChildConfig(config, res);
     for (const [bucket, releases] of Object.entries(buckets)) {
       const sortedReleases = releases.sort((r1, r2) =>
         versioning.sortVersions(r1.version, r2.version)
       );
-      const release = sortedReleases.pop();
+      const { release, pendingChecks, pendingReleases } = filterInternalChecks(
+        depResultConfig,
+        versioning,
+        bucket,
+        sortedReleases
+      );
+      // istanbul ignore next
+      if (!release) {
+        return res;
+      }
       const newVersion = release.version;
       const update = generateUpdate(
         config,
@@ -214,6 +230,12 @@ export async function lookupUpdates(
         bucket,
         release
       );
+      if (pendingChecks.length) {
+        update.pendingChecks = pendingChecks;
+      }
+      if (pendingReleases.length) {
+        update.pendingVersions = pendingReleases.map((r) => r.version);
+      }
       if (!update.newValue || update.newValue === currentValue) {
         if (!lockedVersion) {
           continue; // eslint-disable-line no-continue

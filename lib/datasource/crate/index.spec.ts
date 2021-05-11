@@ -9,13 +9,8 @@ import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import * as memCache from '../../util/cache/memory';
 import { setFsConfig } from '../../util/fs';
-import {
-  RegistryFlavor,
-  RegistryInfo,
-  id as datasource,
-  fetchCrateRecordsPayload,
-  getIndexSuffix,
-} from '.';
+import { RegistryFlavor, RegistryInfo } from './types';
+import { id as datasource, fetchCrateRecordsPayload, getIndexSuffix } from '.';
 
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;

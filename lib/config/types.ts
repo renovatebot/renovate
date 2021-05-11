@@ -357,3 +357,26 @@ export interface ManagerConfig extends RenovateConfig {
   language: string;
   manager: string;
 }
+
+export interface RenovateCliConfig extends Record<string, any> {
+  repositories?: string[];
+}
+
+export interface MigratedConfig {
+  isMigrated: boolean;
+  migratedConfig: RenovateConfig;
+}
+
+export interface MigratedRenovateConfig extends RenovateConfig {
+  endpoints?: HostRule[];
+  pathRules: PackageRule[];
+  packages: PackageRule[];
+
+  node?: RenovateConfig;
+  travis?: RenovateConfig;
+}
+
+export interface ValidationResult {
+  errors: ValidationMessage[];
+  warnings: ValidationMessage[];
+}

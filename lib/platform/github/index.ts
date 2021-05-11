@@ -634,6 +634,10 @@ async function getOpenPrs(): Promise<PrList> {
           pr.canMergeReason = `hasNegativeReview`;
         } else if (canMergeStates.includes(pr.mergeStateStatus)) {
           pr.canMerge = true;
+        } else if (config.forkToken && pr.mergeStateStatus === 'BLOCKED') {
+          // The main token can't merge but maybe the forking token can
+          // istanbul ignore next
+          pr.canMerge = true;
         } else {
           pr.canMerge = false;
           pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
