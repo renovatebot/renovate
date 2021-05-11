@@ -11,12 +11,7 @@ import { ExecOptions, exec } from '../../../util/exec';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
-
-export interface GenerateLockFileResult {
-  error?: boolean;
-  lockFile?: string;
-  stderr?: string;
-}
+import type { GenerateLockFileResult } from './types';
 
 export async function generateLockFile(
   cwd: string,
