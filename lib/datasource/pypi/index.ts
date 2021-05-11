@@ -6,7 +6,7 @@ import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { PypiJSON, Releases, PypiJSONRelease } from './types';
+import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
 export const id = 'pypi';
 export const customRegistrySupport = true;

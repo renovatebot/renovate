@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
+import { TerraformDependencyTypes } from './common';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
 import {
   analyzeTerraformProvider,
@@ -17,12 +18,11 @@ import {
   analyseTerraformResource,
   extractTerraformResource,
 } from './resources';
+import type { TerraformManagerData } from './types';
 import {
   checkFileContainsDependency,
   getTerraformDependencyType,
 } from './util';
-import { TerraformDependencyTypes } from './common';
-import type { TerraformManagerData } from './types';
 
 const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
 const contentCheckList = [

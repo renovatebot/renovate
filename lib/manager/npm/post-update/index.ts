@@ -20,16 +20,16 @@ import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { validateUrl } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
-import type {
-  AdditionalPackageFiles,
-  DetermineLockFileDirsResult,
-  UpdatedArtifacts,
-  WriteExistingFilesResult,
-  ArtifactError,
-} from './types';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
+import type {
+  AdditionalPackageFiles,
+  ArtifactError,
+  DetermineLockFileDirsResult,
+  UpdatedArtifacts,
+  WriteExistingFilesResult,
+} from './types';
 import * as yarn from './yarn';
 
 // Strips empty values, deduplicates, and returns the directories from filenames

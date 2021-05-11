@@ -1,6 +1,6 @@
 import { getName } from '../../../test/util';
-import { getTerraformDependencyType } from './util';
 import { TerraformDependencyTypes } from './common';
+import { getTerraformDependencyType } from './util';
 
 describe(getName(), () => {
   describe('getTerraformDependencyType()', () => {

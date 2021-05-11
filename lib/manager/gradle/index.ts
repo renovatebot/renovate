@@ -20,11 +20,11 @@ import {
   init,
   updateGradleVersion,
 } from './build-gradle';
-import type { GradleDependency } from './types';
 import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
+import type { GradleDependency } from './types';
 import { extraEnv, gradleWrapperFileName, prepareGradleCommand } from './utils';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =

@@ -3,8 +3,8 @@ import { logger } from '../../logger';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import { matchesHelmValuesDockerHeuristic } from './util';
 import type { HelmDockerImageDependency } from './types';
+import { matchesHelmValuesDockerHeuristic } from './util';
 
 function getHelmDep({
   registry,

@@ -1,7 +1,7 @@
 import type { PackageDependency } from '../types';
-import { keyValueExtractionRegex } from './util';
-import type { ExtractionResult } from './types';
 import { TerragruntDependencyTypes } from './common';
+import type { ExtractionResult } from './types';
+import { keyValueExtractionRegex } from './util';
 
 export const sourceExtractionRegex = /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
 

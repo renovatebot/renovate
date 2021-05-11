@@ -3,7 +3,7 @@ import * as datasourceGitTags from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import type { Repository, Container, AzurePipelines } from './types';
+import type { AzurePipelines, Container, Repository } from './types';
 
 export function extractRepository(
   repository: Repository
