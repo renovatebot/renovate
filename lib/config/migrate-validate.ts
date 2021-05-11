@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { massageConfig } from './massage';
-import { migrateConfig } from './migration';
+import * as configMassage from './massage';
+import * as configMigration from './migration';
 import type { RenovateConfig, ValidationMessage } from './types';
-import { validateConfig } from './validation';
+import * as configValidation from './validation';
 
 export async function migrateAndValidate(
   config: RenovateConfig,
@@ -11,7 +11,7 @@ export async function migrateAndValidate(
 ): Promise<RenovateConfig> {
   logger.debug('migrateAndValidate()');
   try {
-    const { isMigrated, migratedConfig } = migrateConfig(input);
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(input);
     if (isMigrated) {
       logger.debug(
         { oldConfig: input, newConfig: migratedConfig },
@@ -20,7 +20,7 @@ export async function migrateAndValidate(
     } else {
       logger.debug('No config migration necessary');
     }
-    const massagedConfig = massageConfig(migratedConfig);
+    const massagedConfig = configMassage.massageConfig(migratedConfig);
     logger.debug({ config: massagedConfig }, 'massaged config');
     const {
       warnings,
@@ -28,7 +28,7 @@ export async function migrateAndValidate(
     }: {
       warnings: ValidationMessage[];
       errors: ValidationMessage[];
-    } = await validateConfig(massagedConfig);
+    } = await configValidation.validateConfig(massagedConfig);
     /* c8 ignore next 3 */
     if (is.nonEmptyArray(warnings)) {
       logger.warn({ warnings }, 'Found renovate config warnings');

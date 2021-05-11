@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* c8 ignore start */
 import { dequal } from 'dequal';
 import { readFileSync } from 'fs-extra';
 import JSON5 from 'json5';
