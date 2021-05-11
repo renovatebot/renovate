@@ -74,7 +74,7 @@ function useModcacherw(goVersion: string): boolean {
     return true;
   }
 
-  const [majorPart, minorPart] = goVersion.replace(/^[^\d]*/g, '').split('.');
+  const [,majorPart, minorPart] = goVersion.match(/(\d+)\.(\d+)/) ?? [];
   const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
 
   return (
