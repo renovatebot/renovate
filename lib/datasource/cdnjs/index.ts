@@ -1,6 +1,7 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { CdnjsResponse } from './types';
 
 export const id = 'cdnjs';
 export const customRegistrySupport = false;
@@ -8,21 +9,6 @@ export const defaultRegistryUrls = ['https://api.cdnjs.com/'];
 export const caching = true;
 
 const http = new Http(id);
-
-interface CdnjsAsset {
-  version: string;
-  files: string[];
-  sri?: Record<string, string>;
-}
-
-interface CdnjsResponse {
-  homepage?: string;
-  repository?: {
-    type: 'git' | unknown;
-    url?: string;
-  };
-  assets?: CdnjsAsset[];
-}
 
 export async function getReleases({
   lookupName,

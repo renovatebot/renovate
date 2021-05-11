@@ -63,7 +63,8 @@ export function extractPackageFile(
       if (!matches) {
         return null;
       }
-      const [, depName, , currentValue] = matches;
+      const [, depName, , currVal] = matches;
+      const currentValue = currVal.trim();
       dep = {
         ...dep,
         depName,
@@ -71,7 +72,7 @@ export function extractPackageFile(
         datasource: datasourcePypi.id,
       };
       if (currentValue?.startsWith('==')) {
-        dep.currentVersion = currentValue.replace(/^==/, '');
+        dep.currentVersion = currentValue.replace(/^==\s*/, '');
       }
       return dep;
     })
