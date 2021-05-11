@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
+import { TerraformDependencyTypes } from './common';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
 import {
   analyzeTerraformProvider,
@@ -17,9 +18,8 @@ import {
   analyseTerraformResource,
   extractTerraformResource,
 } from './resources';
+import type { TerraformManagerData } from './types';
 import {
-  TerraformDependencyTypes,
-  TerraformManagerData,
   checkFileContainsDependency,
   getTerraformDependencyType,
 } from './util';

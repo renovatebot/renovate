@@ -1,10 +1,8 @@
 import type { PackageDependency } from '../types';
+import { TerraformDependencyTypes } from './common';
 import { analyzeTerraformProvider } from './providers';
-import {
-  ExtractionResult,
-  TerraformDependencyTypes,
-  keyValueExtractionRegex,
-} from './util';
+import type { ExtractionResult } from './types';
+import { keyValueExtractionRegex } from './util';
 
 export const providerBlockExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+{/;
 

@@ -5,18 +5,7 @@ import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
-
-interface Image {
-  name: string;
-  newTag: string;
-  newName?: string;
-}
-
-interface Kustomize {
-  kind: string;
-  bases: string[];
-  images: Image[];
-}
+import type { Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format

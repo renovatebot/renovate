@@ -5,11 +5,7 @@ import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
 import type { ManagerConfig, PackageFile } from '../types';
-
-type GitModule = {
-  name: string;
-  path: string;
-};
+import { GitModule } from './types';
 
 async function getUrl(
   git: SimpleGit,
