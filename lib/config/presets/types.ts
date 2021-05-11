@@ -13,10 +13,3 @@ export type PresetConfig = {
 export interface PresetApi {
   getPreset(config: PresetConfig): Promise<Preset> | Preset;
 }
-
-export interface ParsedPreset {
-  presetSource: string;
-  packageName: string;
-  presetName: string;
-  params?: string[];
-}
