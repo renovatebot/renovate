@@ -2,7 +2,6 @@ import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import type { ReleaseResult } from '../types';
-
 import { id, removeBuildMeta } from './common';
 
 const http = new Http(id);
@@ -10,7 +9,6 @@ const http = new Http(id);
 function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`)?.val;
 }
-
 export async function getReleases(
   feedUrl: string,
   pkgName: string
