@@ -7,12 +7,14 @@ export interface TerraformProvider {
   version: string;
   published_at: string;
 }
+
 export interface TerraformProviderReleaseBackend {
   [key: string]: {
     name: string;
     versions: VersionsReleaseBackend;
   };
 }
+
 interface VersionsReleaseBackend {
   [key: string]: Record<string, any>;
 }

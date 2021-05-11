@@ -6,7 +6,7 @@ import * as packageCache from '../../util/cache/package';
 import { Http, HttpOptions } from '../../util/http';
 import { id } from './common';
 import { resolvePackage } from './npmrc';
-import { NpmDependency, NpmRelease, NpmResponse } from './types';
+import type { NpmDependency, NpmRelease, NpmResponse } from './types';
 
 const http = new Http(id);
 

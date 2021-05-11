@@ -3,6 +3,7 @@ interface CdnjsAsset {
   files: string[];
   sri?: Record<string, string>;
 }
+
 export interface CdnjsResponse {
   homepage?: string;
   repository?: {
