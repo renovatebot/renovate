@@ -87,6 +87,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       // get server base url from import url
       const parsedUrl = parseUrl(goSourceUrl);
 
+      /* istanbul ignore if: should not happen */
       if (!parseUrl) {
         logger.debug({ goModule, goSourceUrl }, 'Invalid go source url');
         return null;
@@ -115,11 +116,13 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
         logger.trace({ goModule }, 'go-import header prefix not match');
         return null;
       }
+
       logger.debug({ goModule, goImportURL }, 'Go lookup import url');
 
       // get server base url from import url
       const parsedUrl = parseUrl(goImportURL);
 
+      /* istanbul ignore if: should not happen */
       if (!parseUrl) {
         logger.debug({ goModule, goImportURL }, 'Invalid go import url');
         return null;

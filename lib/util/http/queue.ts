@@ -4,16 +4,8 @@ import { getRequestLimit } from './host-rules';
 
 const hostQueues = new Map<string | null, PQueue | null>();
 
-function getUrlHost(url: string): string | null {
-  try {
-    return parseUrl(url)?.host ?? null;
-  } catch (e) {
-    return null;
-  }
-}
-
 export function getQueue(url: string): PQueue | null {
-  const host = getUrlHost(url);
+  const host = parseUrl(url)?.host ?? null;
   if (!host) {
     return null;
   }
