@@ -3,8 +3,8 @@ import { id as datasource, defaultRegistryUrls } from '../../datasource/maven';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { ManagerData, PackageVariables, VariableRegistry } from './common';
 import { parseGradle, parseProps } from './parser';
+import type { ManagerData, PackageVariables, VariableRegistry } from './types';
 import {
   getVars,
   isGradleFile,

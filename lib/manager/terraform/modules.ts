@@ -4,8 +4,9 @@ import * as datasourceTerraformModule from '../../datasource/terraform-module';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
+import { TerraformDependencyTypes } from './common';
 import { extractTerraformProvider } from './providers';
-import { ExtractionResult, TerraformDependencyTypes } from './util';
+import type { ExtractionResult } from './types';
 
 export const githubRefMatchRegex = /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i;
 export const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;

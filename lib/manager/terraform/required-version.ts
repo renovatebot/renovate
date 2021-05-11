@@ -1,11 +1,9 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import type { PackageDependency } from '../types';
-import {
-  ExtractionResult,
-  TerraformDependencyTypes,
-  keyValueExtractionRegex,
-} from './util';
+import { TerraformDependencyTypes } from './common';
+import type { ExtractionResult } from './types';
+import { keyValueExtractionRegex } from './util';
 
 export function extractTerraformRequiredVersion(
   startingLine: number,
