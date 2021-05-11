@@ -4,6 +4,11 @@ import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  RegistryRepository,
+  ServiceDiscoveryResult,
+  TerraformRelease,
+} from './types';
 
 export const id = 'terraform-module';
 export const customRegistrySupport = true;
@@ -12,11 +17,6 @@ export const defaultVersioning = hashicorpVersioning.id;
 export const registryStrategy = 'first';
 
 const http = new Http(id);
-
-interface RegistryRepository {
-  registry: string;
-  repository: string;
-}
 
 function getRegistryRepository(
   lookupName: string,
@@ -38,21 +38,6 @@ function getRegistryRepository(
     registry,
     repository,
   };
-}
-
-interface TerraformRelease {
-  namespace: string;
-  name: string;
-  provider: string;
-  source?: string;
-  versions: string[];
-  version: string;
-  published_at: string;
-}
-
-export interface ServiceDiscoveryResult {
-  'modules.v1'?: string;
-  'providers.v1'?: string;
 }
 
 export async function getTerraformServiceDiscoveryResult(

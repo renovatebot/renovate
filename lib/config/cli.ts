@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { version } from '../../package.json';
 import { getOptions } from './definitions';
-import type { GlobalConfig, RenovateOptions } from './types';
+import type { GlobalConfig, RenovateCliConfig, RenovateOptions } from './types';
 
 export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
@@ -9,10 +9,6 @@ export function getCliName(option: Partial<RenovateOptions>): string {
   }
   const nameWithHyphens = option.name.replace(/([A-Z])/g, '-$1');
   return `--${nameWithHyphens.toLowerCase()}`;
-}
-
-export interface RenovateCliConfig extends Record<string, any> {
-  repositories?: string[];
 }
 
 export function getConfig(input: string[]): GlobalConfig {

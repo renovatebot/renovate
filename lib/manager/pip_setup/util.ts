@@ -2,6 +2,7 @@ import { dirname } from 'path';
 import { join } from 'upath';
 import dataFiles from '../../data-files.generated';
 import { ensureCacheDir, outputFile, readLocalFile } from '../../util/fs';
+import type { PythonSetup } from './types';
 
 // need to match filename in `data/extract.py`
 const REPORT = 'renovate-pip_setup-report.json';
@@ -19,11 +20,6 @@ export async function getExtractFile(): Promise<string> {
   await outputFile(extractPy, dataFiles.get('data/extract.py'));
 
   return extractPy;
-}
-
-export interface PythonSetup {
-  extras_require: Record<string, string[]>;
-  install_requires: string[];
 }
 
 export async function parseReport(packageFile: string): Promise<PythonSetup> {
