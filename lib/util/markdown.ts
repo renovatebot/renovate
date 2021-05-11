@@ -1,3 +1,6 @@
+import remark from 'remark';
+import github from 'remark-github';
+
 // Generic replacements/link-breakers
 export function sanitizeMarkdown(markdown: string): string {
   let res = markdown;
@@ -15,4 +18,14 @@ export function sanitizeMarkdown(markdown: string): string {
   res = res.replace(backTickRe, '`$1`');
   res = res.replace(/`#&#8203;(\d+)`/g, '`#$1`');
   return res;
+}
+
+export async function linkify(
+  content: string,
+  options: github.Options
+): Promise<string> {
+  const output = await remark()
+    .use(github, { mentionStrong: false, ...options })
+    .process(content);
+  return output.toString();
 }

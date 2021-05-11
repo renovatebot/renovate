@@ -159,7 +159,6 @@
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "2.0.0",
     "json5": "2.2.0",
-    "linkify-markdown": "1.0.0",
     "luxon": "1.26.0",
     "markdown-it": "12.0.6",
     "markdown-table": "2.0.0",
@@ -174,6 +173,8 @@
     "parse-link-header": "1.0.1",
     "redis": "3.1.2",
     "registry-auth-token": "4.2.1",
+    "remark": "13.0.0",
+    "remark-github": "10.0.1",
     "semver": "7.3.5",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
@@ -262,7 +263,8 @@
     "ts-jest": "26.5.5",
     "ts-node": "9.1.1",
     "type-fest": "1.0.2",
-    "typescript": "4.2.4"
+    "typescript": "4.2.4",
+    "unified": "9.2.1"
   },
   "resolutions": {
     "underscore": "^1.12.1",
