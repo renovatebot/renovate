@@ -35,7 +35,7 @@ export function extractPackageFile(
   let config: DockerComposeConfig;
   try {
     // TODO: fix me (#9610)
-    config = safeLoad(content, { json: true }) as unknown;
+    config = safeLoad(content, { json: true }) as DockerComposeConfig;
     if (!config) {
       logger.debug(
         { fileName },
