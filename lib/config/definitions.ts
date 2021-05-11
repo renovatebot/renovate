@@ -716,6 +716,13 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  {
+    name: 'azureAutoApprove',
+    description:
+      'If set to true, Azure DevOps PRs will be automatically approved.',
+    type: 'boolean',
+    default: false,
+  },
   // depType
   {
     name: 'ignoreDeps',
@@ -1179,6 +1186,13 @@ const options: RenovateOptions[] = [
     default: 0,
   },
   {
+    name: 'internalChecksFilter',
+    description: 'When/how to filter based on internal checks.',
+    type: 'string',
+    allowedValues: ['strict', 'flexible', 'none'],
+    default: 'none',
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
@@ -1302,7 +1316,7 @@ const options: RenovateOptions[] = [
     description: 'Branch topic.',
     type: 'string',
     default:
-      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
     cli: false,
   },
   {
@@ -1715,6 +1729,15 @@ const options: RenovateOptions[] = [
   {
     name: 'baseUrl',
     description: 'baseUrl for a host rule. e.g. "https://api.github.com/".',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchHost',
+    description: 'A host name or base URL to match against',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',

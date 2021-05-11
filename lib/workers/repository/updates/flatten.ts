@@ -7,6 +7,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
+import { parseUrl } from '../../../util/url';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
 
@@ -26,6 +27,15 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(/-+/, '-')
         .toLowerCase()
     : undefined;
+  if (updateConfig.sourceUrl) {
+    const parsedSourceUrl = parseUrl(updateConfig.sourceUrl);
+    if (parsedSourceUrl?.pathname) {
+      updateConfig.sourceRepoSlug = parsedSourceUrl.pathname
+        .replace(/^\//, '') // remove leading slash
+        .replace(/\//g, '-') // change slashes to hyphens
+        .replace(/-+/g, '-'); // remove multiple hyphens
+    }
+  }
   generateBranchName(updateConfig);
   return updateConfig;
 }

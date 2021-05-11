@@ -48,8 +48,14 @@ function matchesRule(
   let positiveMatch = false;
   // Massage a positive patterns patch if an exclude one is present
   if (
-    (excludePackageNames.length || excludePackagePatterns.length) &&
-    !(matchPackageNames.length || matchPackagePatterns.length)
+    (excludePackageNames.length ||
+      excludePackagePatterns.length ||
+      excludePackagePrefixes.length) &&
+    !(
+      matchPackageNames.length ||
+      matchPackagePatterns.length ||
+      matchPackagePrefixes.length
+    )
   ) {
     matchPackagePatterns = ['.*'];
   }
