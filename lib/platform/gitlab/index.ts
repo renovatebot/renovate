@@ -236,7 +236,7 @@ export async function initRepo({
       });
     } else {
       logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
-      const repoUrl = parseUrl(`${res.body.http_url_to_repo}`);
+      const repoUrl = parseUrl(res.body.http_url_to_repo);
       repoUrl.username = 'oauth2';
       repoUrl.password = opts.token;
       url = repoUrl.toString();

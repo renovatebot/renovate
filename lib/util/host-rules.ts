@@ -88,7 +88,7 @@ function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
 }
 
 function matchesDomainName(rule: HostRule, search: HostRuleSearch): boolean {
-  const hostname = search.url && parseUrl(search.url).hostname;
+  const hostname = search.url && parseUrl(search.url)?.hostname;
   return (
     search.url &&
     rule.domainName &&
@@ -101,7 +101,7 @@ function matchesHostName(rule: HostRule, search: HostRuleSearch): boolean {
   return (
     search.url &&
     rule.hostName &&
-    parseUrl(search.url).hostname === rule.hostName
+    parseUrl(search.url)?.hostname === rule.hostName
   );
 }
 

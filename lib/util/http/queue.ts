@@ -6,7 +6,7 @@ const hostQueues = new Map<string | null, PQueue | null>();
 
 function getUrlHost(url: string): string | null {
   try {
-    return parseUrl(url).host;
+    return parseUrl(url)?.host ?? null;
   } catch (e) {
     return null;
   }

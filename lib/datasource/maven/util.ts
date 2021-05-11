@@ -19,7 +19,7 @@ function httpByHostType(hostType: string): Http {
   return http[hostType];
 }
 
-const getHost = (x: string): string => parseUrl(x).host;
+const getHost = (x: string): string => parseUrl(x)?.host;
 
 function isMavenCentral(pkgUrl: URL | string): boolean {
   const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;

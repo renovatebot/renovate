@@ -162,7 +162,7 @@ function sectionize(text: string, level: number): string[] {
 
 function isUrl(url: string): boolean {
   try {
-    return !!parseUrl(url).hostname;
+    return !!parseUrl(url)?.hostname;
   } catch (err) {
     // istanbul ignore next
     logger.debug({ err }, `Error parsing ${url} in URL.parse`);

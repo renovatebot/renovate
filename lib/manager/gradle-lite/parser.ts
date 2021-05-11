@@ -197,7 +197,7 @@ function processCustomRegistryUrl({
   const registryUrl = tokenMap.registryUrl?.value;
   try {
     if (registryUrl) {
-      const { host, protocol } = parseUrl(registryUrl);
+      const { host, protocol } = parseUrl(registryUrl) ?? {};
       if (host && protocol) {
         return { urls: [registryUrl] };
       }

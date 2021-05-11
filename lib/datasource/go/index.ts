@@ -87,6 +87,11 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       // get server base url from import url
       const parsedUrl = parseUrl(goSourceUrl);
 
+      if (!parseUrl) {
+        logger.debug({ goModule, goSourceUrl }, 'Invalid go source url');
+        return null;
+      }
+
       // split the go module from the URL: host/go/module -> go/module
       const split = goModule.split('/');
       const lookupName = split[1] + '/' + split[2];
@@ -114,6 +119,11 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
 
       // get server base url from import url
       const parsedUrl = parseUrl(goImportURL);
+
+      if (!parseUrl) {
+        logger.debug({ goModule, goImportURL }, 'Invalid go import url');
+        return null;
+      }
 
       // split the go module from the URL: host/go/module -> go/module
       const lookupName = trimTrailingSlash(parsedUrl.pathname)
