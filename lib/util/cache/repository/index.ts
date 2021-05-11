@@ -6,7 +6,7 @@ import type {
 } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
-import type { RepoInitConfig } from '../../../workers/repository/init/common';
+import type { RepoInitConfig } from '../../../workers/repository/init/types';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
 export const CACHE_REVISION = 8;

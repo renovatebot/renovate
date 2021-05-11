@@ -2,22 +2,22 @@ import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
-import { MigratedConfig } from './migration';
 import type {
+  MigratedConfig,
+  RenovateConfig,
   RenovateSharedConfig,
-  RenovateConfig as _RenovateConfig,
 } from './types';
 
 const defaultConfig = getConfig();
 
-interface RenovateConfig extends _RenovateConfig {
+interface TestRenovateConfig extends RenovateConfig {
   node?: RenovateSharedConfig & { supportPolicy?: unknown };
 }
 
 describe(getName(), () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
         platform: PLATFORM_TYPE_GITHUB,
@@ -275,7 +275,7 @@ describe(getName(), () => {
       expect(migratedConfig).toMatchSnapshot();
     });
     it('overrides existing automerge setting', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         automerge: 'minor' as never,
         packages: [
           {
@@ -294,7 +294,7 @@ describe(getName(), () => {
       expect(migratedConfig.packageRules[0].minor.automerge).toBe(false);
     });
     it('does not migrate config', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         enabled: true,
         separateMinorPatch: true,
       };
@@ -305,7 +305,7 @@ describe(getName(), () => {
       expect(migratedConfig).toMatchObject(config);
     });
     it('migrates subconfig', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         lockFileMaintenance: {
           depTypes: [
             'dependencies',
@@ -346,7 +346,7 @@ describe(getName(), () => {
       expect(migratedConfig.packageRules).toHaveLength(1);
     });
     it('migrates node to travis', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         node: {
           enabled: true,
           supportPolicy: ['lts'],
@@ -366,11 +366,11 @@ describe(getName(), () => {
         true
       );
       expect(
-        (migratedConfig.node as RenovateConfig).supportPolicy
+        (migratedConfig.node as TestRenovateConfig).supportPolicy
       ).toBeDefined();
     });
     it('migrates packageFiles', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         packageFiles: [
           'package.json',
           { packageFile: 'backend/package.json', pinVersions: false },
@@ -395,7 +395,7 @@ describe(getName(), () => {
       expect(migratedConfig.packageRules[1].rangeStrategy).toBe('pin');
     });
     it('migrates more packageFiles', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         packageFiles: [
           {
             packageFile: 'package.json',
@@ -424,7 +424,7 @@ describe(getName(), () => {
     });
 
     it('removes invalid configs', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         pathRules: {},
         packageFiles: [{ packageFile: 'test' }],
         gomodTidy: false,
@@ -448,7 +448,7 @@ describe(getName(), () => {
       expect(isMigrated).toBe(true);
     });
     it('it migrates semanticCommits', () => {
-      let config: RenovateConfig;
+      let config: TestRenovateConfig;
       let res: MigratedConfig;
 
       config = { semanticCommits: true as never };
@@ -478,7 +478,7 @@ describe(getName(), () => {
     });
 
     it('it migrates preset strings to array', () => {
-      let config: RenovateConfig;
+      let config: TestRenovateConfig;
       let res: MigratedConfig;
 
       config = { extends: ':js-app' } as never;
@@ -500,7 +500,7 @@ describe(getName(), () => {
     });
 
     it('it migrates unpublishSafe', () => {
-      let config: RenovateConfig;
+      let config: TestRenovateConfig;
       let res: MigratedConfig;
 
       config = { unpublishSafe: true };
@@ -582,7 +582,7 @@ describe(getName(), () => {
       });
     });
     it('migrates combinations of packageRules', () => {
-      let config: RenovateConfig;
+      let config: TestRenovateConfig;
       let res: MigratedConfig;
 
       config = {
@@ -602,7 +602,7 @@ describe(getName(), () => {
       expect(res.migratedConfig.packageRules).toHaveLength(2);
     });
     it('it migrates packageRules', () => {
-      const config: RenovateConfig = {
+      const config: TestRenovateConfig = {
         packageRules: [
           {
             paths: ['package.json'],
@@ -629,7 +629,7 @@ describe(getName(), () => {
     });
   });
   it('it migrates nested packageRules', () => {
-    const config: RenovateConfig = {
+    const config: TestRenovateConfig = {
       packageRules: [
         {
           matchDepTypes: ['devDependencies'],
