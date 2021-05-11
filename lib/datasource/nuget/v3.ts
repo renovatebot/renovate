@@ -1,15 +1,20 @@
 import is from '@sindresorhus/is';
-import { RequestError } from 'got';
 import pAll from 'p-all';
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
+import { HttpError } from '../../util/http/types';
 import { ensureTrailingSlash } from '../../util/url';
 import type { Release, ReleaseResult } from '../types';
-
 import { id, removeBuildMeta } from './common';
+import type {
+  CatalogEntry,
+  CatalogPage,
+  PackageRegistration,
+  ServicesIndexRaw,
+} from './types';
 
 const http = new Http(id);
 
@@ -19,13 +24,6 @@ const cacheNamespace = 'datasource-nuget';
 
 export function getDefaultFeed(): string {
   return defaultNugetFeed;
-}
-
-interface ServicesIndexRaw {
-  resources: {
-    '@id': string;
-    '@type': string;
-  }[];
 }
 
 export async function getResourceUrl(
@@ -94,24 +92,6 @@ export async function getResourceUrl(
     );
     return null;
   }
-}
-
-interface CatalogEntry {
-  version: string;
-  published?: string;
-  projectUrl?: string;
-  listed?: boolean;
-}
-
-interface CatalogPage {
-  '@id': string;
-  items: {
-    catalogEntry: CatalogEntry;
-  }[];
-}
-
-interface PackageRegistration {
-  items: CatalogPage[];
 }
 
 async function getCatalogEntry(
@@ -195,7 +175,7 @@ export async function getReleases(
     }
   } catch (err) /* istanbul ignore next */ {
     // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
-    if (err instanceof RequestError && err.response?.statusCode === 404) {
+    if (err instanceof HttpError && err.response?.statusCode === 404) {
       logger.debug(
         { registryUrl, pkgName, pkgVersion: latestStable },
         `package manifest (.nuspec) not found`

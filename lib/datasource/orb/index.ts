@@ -2,20 +2,13 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { OrbRelease } from './types';
 
 export const id = 'orb';
 export const defaultRegistryUrls = ['https://circleci.com/'];
 export const customRegistrySupport = false;
 
 const http = new Http(id);
-
-interface OrbRelease {
-  homeUrl?: string;
-  versions: {
-    version: string;
-    createdAt?: string;
-  }[];
-}
 
 /**
  * orb.getReleases
