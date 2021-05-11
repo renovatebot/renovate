@@ -9,7 +9,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
-import { OutgoingHttpHeaders } from '../../util/http/types';
+import type { OutgoingHttpHeaders } from '../../util/http/types';
 import {
   ensureTrailingSlash,
   resolveBaseUrl,
