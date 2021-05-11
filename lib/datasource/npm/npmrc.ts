@@ -8,11 +8,10 @@ import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
 import { resolveUrl } from '../../util/url';
+import type { Npmrc, PackageResolution } from './types';
 
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
-
-export type Npmrc = Record<string, any>;
 
 export function getNpmrc(): Npmrc | null {
   return npmrc;
@@ -92,12 +91,6 @@ export function setNpmrc(input?: string): void {
     npmrc = {};
     npmrcRaw = '';
   }
-}
-
-export interface PackageResolution {
-  headers: OutgoingHttpHeaders;
-  packageUrl: string;
-  registryUrl: string;
 }
 
 export function resolvePackage(packageName: string): PackageResolution {

@@ -2,11 +2,15 @@ import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
-import type { HostRule } from '../types';
 import { clone } from '../util/clone';
 import { getOptions } from './definitions';
 import { removedPresets } from './presets/common';
-import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
+import type {
+  MigratedConfig,
+  MigratedRenovateConfig,
+  RenovateConfig,
+  RenovateOptions,
+} from './types';
 import { mergeChildConfig } from './utils';
 
 const options = getOptions();
@@ -28,20 +32,6 @@ const removedOptions = [
   'statusCheckVerify',
   'lazyGrouping',
 ];
-
-export interface MigratedConfig {
-  isMigrated: boolean;
-  migratedConfig: RenovateConfig;
-}
-
-interface MigratedRenovateConfig extends RenovateConfig {
-  endpoints?: HostRule[];
-  pathRules: PackageRule[];
-  packages: PackageRule[];
-
-  node?: RenovateConfig;
-  travis?: RenovateConfig;
-}
 
 // Returns a migrated config
 export function migrateConfig(

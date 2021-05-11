@@ -17,7 +17,7 @@ import {
 } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { Image, ImageList, MediaType } from './types';
+import { Image, ImageList, MediaType, RegistryRepository } from './types';
 
 // TODO: add got typings when available (#9646)
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
@@ -58,11 +58,6 @@ export const defaultConfig = {
 const http = new Http(id);
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
-
-export interface RegistryRepository {
-  registry: string;
-  repository: string;
-}
 
 export function getRegistryRepository(
   lookupName: string,

@@ -8,6 +8,13 @@ import { Http, HttpOptions } from '../../util/http';
 import { ensureTrailingSlash, resolveUrl } from '../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  AllPackages,
+  PackageMeta,
+  PackagistFile,
+  RegistryFile,
+  RegistryMeta,
+} from './types';
 
 export const id = 'packagist';
 export const customRegistrySupport = true;
@@ -28,27 +35,6 @@ function getHostOpts(url: string): HttpOptions {
     opts = { ...opts, username, password };
   }
   return opts;
-}
-
-interface PackageMeta {
-  includes?: Record<string, { sha256: string }>;
-  packages: Record<string, RegistryFile>;
-  'provider-includes': Record<string, { sha256: string }>;
-  providers: Record<string, { sha256: string }>;
-  'providers-url'?: string;
-}
-
-interface RegistryFile {
-  key: string;
-  sha256: string;
-}
-interface RegistryMeta {
-  files?: RegistryFile[];
-  providerPackages: Record<string, string>;
-  providersUrl?: string;
-  providersLazyUrl?: string;
-  includesFiles?: RegistryFile[];
-  packages?: Record<string, RegistryFile>;
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
@@ -91,11 +77,6 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
     }
   }
   return meta;
-}
-
-interface PackagistFile {
-  providers: Record<string, RegistryFile>;
-  packages?: Record<string, RegistryFile>;
 }
 
 async function getPackagistFile(
@@ -149,15 +130,6 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
     };
   });
   return dep;
-}
-
-interface AllPackages {
-  packages: Record<string, RegistryFile>;
-  providersUrl: string;
-  providersLazyUrl: string;
-  providerPackages: Record<string, string>;
-
-  includesPackages: Record<string, ReleaseResult>;
 }
 
 async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
