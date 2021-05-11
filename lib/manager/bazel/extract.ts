@@ -10,12 +10,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
-
-interface UrlParsedResult {
-  datasource: string;
-  repo: string;
-  currentValue: string;
-}
+import type { UrlParsedResult } from './types';
 
 function parseUrl(urlString: string): UrlParsedResult | null {
   // istanbul ignore if

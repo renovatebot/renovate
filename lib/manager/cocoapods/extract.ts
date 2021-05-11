@@ -4,6 +4,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import type { PackageDependency, PackageFile } from '../types';
+import type { ParsedLine } from './types';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
@@ -13,18 +14,6 @@ const regexMappings = [
   /,\s*:path\s*=>\s*(['"])(?<path>[^'"]+)\1/,
   /^\s*source\s*(['"])(?<source>[^'"]+)\1/,
 ];
-
-export interface ParsedLine {
-  depName?: string;
-  groupName?: string;
-  spec?: string;
-  subspec?: string;
-  currentValue?: string;
-  git?: string;
-  tag?: string;
-  path?: string;
-  source?: string;
-}
 
 export function parseLine(line: string): ParsedLine {
   let result: ParsedLine = {};

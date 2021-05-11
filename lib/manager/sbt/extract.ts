@@ -5,6 +5,7 @@ import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import type { PackageDependency, PackageFile } from '../types';
+import type { ParseContext, ParseOptions } from './types';
 
 const stripComment = (str: string): string => str.replace(/(^|\s+)\/\/.*$/, '');
 
@@ -102,12 +103,6 @@ const getVarInfo = (str: string, ctx: ParseContext): { val: string } => {
   return { val };
 };
 
-interface ParseContext {
-  scalaVersion: string;
-  variables: any;
-  depType?: string;
-}
-
 function parseDepExpr(
   expr: string,
   ctx: ParseContext
@@ -196,12 +191,6 @@ function parseDepExpr(
   }
 
   return result;
-}
-
-interface ParseOptions {
-  isMultiDeps?: boolean;
-  scalaVersion?: string;
-  variables?: Record<string, any>;
 }
 
 function parseSbtLine(

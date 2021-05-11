@@ -1,5 +1,5 @@
 import { regEx } from '../../util/regex';
-import { BuildDependency } from './gradle-updates-report';
+import { BuildDependency, GradleDependency, UpdateFunction } from './types';
 
 /**
  * Functions adapted/ported from https://github.com/patrikerdes/gradle-use-latest-versions-plugin
@@ -7,20 +7,6 @@ import { BuildDependency } from './gradle-updates-report';
  */
 
 let variables: Record<string, string> = {};
-
-export interface GradleDependency {
-  group: string;
-  name: string;
-  version?: string;
-}
-
-interface UpdateFunction {
-  (
-    dependency: GradleDependency,
-    buildGradleContent: string,
-    newValue: string
-  ): string;
-}
 
 const groovyQuotes = `(?:["'](?:""|'')?)`;
 const groovyVersionVariable = `(?:${groovyQuotes}\\$)?{?([^\\s"'{}$)]+)}?${groovyQuotes}?`;

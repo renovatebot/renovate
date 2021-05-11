@@ -115,7 +115,8 @@ Object {
       "depName": "celery",
     },
     Object {
-      "currentValue": " == 3.2.1",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
@@ -161,7 +162,8 @@ Object {
       "depName": "celery",
     },
     Object {
-      "currentValue": " == 3.2.1",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
@@ -207,7 +209,8 @@ Object {
       "depName": "celery",
     },
     Object {
-      "currentValue": " == 3.2.1",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
@@ -237,6 +240,34 @@ Object {
 }
 `;
 
+exports[`manager/pip_requirements/extract extractPackageFile() handles extra spaces around pinned dependency equal signs 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    Object {
+      "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
+      "datasource": "pypi",
+      "depName": "celery",
+    },
+    Object {
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
+      "datasource": "pypi",
+      "depName": "foo",
+    },
+  ],
+  "registryUrls": Array [
+    "https://artifactory.company.com/artifactory/api/pypi/python/simple",
+  ],
+}
+`;
+
 exports[`manager/pip_requirements/extract extractPackageFile() handles extras and complex index url 1`] = `
 Object {
   "deps": Array [
@@ -253,7 +284,8 @@ Object {
       "depName": "celery",
     },
     Object {
-      "currentValue": " == 3.2.1",
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },

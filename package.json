@@ -180,7 +180,7 @@
     "shlex": "2.0.2",
     "shortid": "2.2.16",
     "simple-git": "2.38.0",
-    "slugify": "1.5.0",
+    "slugify": "1.5.1",
     "traverse": "0.6.6",
     "upath": "2.0.1",
     "url-join": "4.0.1",

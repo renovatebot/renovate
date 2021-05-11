@@ -40,3 +40,8 @@ export interface Image extends MediaObject {
 
   readonly config: MediaObject;
 }
+
+export interface RegistryRepository {
+  registry: string;
+  repository: string;
+}
