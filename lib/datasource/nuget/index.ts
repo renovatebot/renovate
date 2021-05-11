@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { formatUrl, parseUrlLegacy } from '../../util/url';
+import { parseUrl } from '../../util/url';
 import * as nugetVersioning from '../../versioning/nuget';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as v2 from './v2';
@@ -15,23 +15,27 @@ export const registryStrategy = 'merge';
 export function parseRegistryUrl(
   registryUrl: string
 ): { feedUrl: string; protocolVersion: number } {
-  try {
-    // TODO: check why test is failing with whatwg url api
-    const parsedUrl = parseUrlLegacy(registryUrl);
-    let protocolVersion = 2;
-    const protocolVersionRegExp = /#protocolVersion=(2|3)/;
-    const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
-    if (protocolVersionMatch) {
-      parsedUrl.hash = '';
-      protocolVersion = Number.parseInt(protocolVersionMatch[1], 10);
-    } else if (parsedUrl.pathname.endsWith('.json')) {
-      protocolVersion = 3;
-    }
-    return { feedUrl: formatUrl(parsedUrl), protocolVersion };
-  } catch (err) {
-    logger.debug({ err }, `nuget registry failure: can't parse ${registryUrl}`);
+  const parsedUrl = parseUrl(registryUrl);
+  if (!parsedUrl) {
+    logger.debug(
+      { urL: registryUrl },
+      `nuget registry failure: can't parse ${registryUrl}`
+    );
     return { feedUrl: registryUrl, protocolVersion: null };
   }
+  let protocolVersion = 2;
+  const protocolVersionRegExp = /#protocolVersion=(2|3)/;
+  const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
+  if (protocolVersionMatch) {
+    parsedUrl.hash = '';
+    protocolVersion = Number.parseInt(protocolVersionMatch[1], 10);
+  } else if (parsedUrl.pathname.endsWith('.json')) {
+    protocolVersion = 3;
+  }
+  return {
+    feedUrl: parsedUrl.href,
+    protocolVersion,
+  };
 }
 
 export async function getReleases({
