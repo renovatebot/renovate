@@ -65,28 +65,20 @@ describe(getName(), () => {
   } = {}) {
     fs.stat.mockImplementationOnce((dirname) => {
       if (wrapperFilename) {
-        expect(dirname).toEqual(join(baseDir, wrapperFilename));
         return Promise.resolve({
           isFile: () => true,
         } as Stats);
       }
       return Promise.reject();
     });
-    fs.writeFile.mockImplementationOnce((filename, _content) => {
-      expect(filename).toEqual(join(baseDir, pluginFilename));
-    });
-    fs.exists.mockImplementationOnce((filename) => {
-      expect(filename).toEqual(join(baseDir, reportFilename));
-      return Promise.resolve(!!report);
-    });
-    fs.readFile.mockImplementationOnce((filename) => {
-      expect(filename).toEqual(join(baseDir, reportFilename));
-      return report ? Promise.resolve(report as never) : Promise.reject();
-    });
-    fs.readFile.mockImplementationOnce((filename) => {
-      expect(filename).toEqual(join(baseDir, packageFilename));
-      return Promise.resolve(buildGradle as never);
-    });
+    fs.writeFile.mockImplementationOnce((_filename, _content) => {});
+    fs.exists.mockImplementationOnce((_filename) => Promise.resolve(!!report));
+    fs.readFile.mockImplementationOnce((filename) =>
+      report ? Promise.resolve(report as never) : Promise.reject()
+    );
+    fs.readFile.mockImplementationOnce((filename) =>
+      Promise.resolve(buildGradle as never)
+    );
     return mockExecAll(exec, output);
   }
 
