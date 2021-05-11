@@ -318,6 +318,12 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
     });
     it('extracts npm package alias', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === 'package-lock.json') {
+          return '{}';
+        }
+        return null;
+      });
       const pJson = {
         dependencies: {
           a: 'npm:foo@1',

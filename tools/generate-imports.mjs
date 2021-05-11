@@ -15,7 +15,12 @@ if (!fs.existsSync('data')) {
   shell.exit(0);
 }
 
-async function updateFile(file: string, code: string): Promise<void> {
+/**
+ *
+ * @param {string} file
+ * @param {string} code
+ */
+async function updateFile(file, code) {
   const oldCode = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
   if (code !== oldCode) {
     await fs.writeFile(file, code);
@@ -28,7 +33,12 @@ const dataPaths = [
   'node_modules/emojibase-data/en/shortcodes/github.json',
 ];
 
-function expandPaths(paths: string[]): string[] {
+/**
+ *
+ * @param {string[]} paths
+ * @returns {string[]}
+ */
+function expandPaths(paths) {
   return paths
     .map((pathName) => {
       const stat = fs.statSync(pathName);
@@ -53,14 +63,15 @@ function expandPaths(paths: string[]): string[] {
     .reduce((x, y) => x.concat(y));
 }
 
-async function generateData(): Promise<void> {
+async function generateData() {
   const files = expandPaths(dataPaths).sort();
 
   const importDataFileType = files.map((x) => `  | '${x}'`).join('\n');
 
   const contentMapDecl = 'const data = new Map<DataFile, string>();';
 
-  const contentMapAssignments: string[] = [];
+  /** @type {string[]} */
+  const contentMapAssignments = [];
   for (const file of files) {
     const key = file.replace(/\\/g, '/');
 
