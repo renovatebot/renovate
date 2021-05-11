@@ -1,23 +1,30 @@
+import { exec as _exec } from 'child_process';
 import type { Stats } from 'fs';
 import os from 'os';
+import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import {
   addReplacingSerializer,
-  env,
-  fs,
   getName,
   loadFixture,
+  mocked,
 } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
+import * as _env from '../../util/exec/env';
 import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('child_process');
+const exec: jest.Mock<typeof _exec> = _exec as never;
+
 jest.mock('fs-extra');
+const fs = mocked(_fs);
+
 jest.mock('../../util/exec/env');
+const env = mocked(_env);
 
 const gradleOutput = {
   stdout: 'gradle output',
@@ -67,7 +74,6 @@ describe(getName(), () => {
     });
     fs.writeFile.mockImplementationOnce((filename, _content) => {
       expect(filename).toEqual(join(baseDir, pluginFilename));
-      return Promise.resolve();
     });
     fs.exists.mockImplementationOnce((filename) => {
       expect(filename).toEqual(join(baseDir, reportFilename));
