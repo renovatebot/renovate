@@ -169,7 +169,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -2107,7 +2107,20 @@ Followed by some information.
           expect(res).toEqual(data);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
-        it('returns null for long content', async () => {
+        it('throws on malformed JSON', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: '!@#' }],
+            });
+          await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+        it('throws on long content', async () => {
           const scope = await initRepo();
           scope
             .get(
@@ -2117,19 +2130,17 @@ Followed by some information.
               isLastPage: false,
               lines: [{ text: '{' }],
             });
-          const res = await bitbucket.getJsonFile('file.json');
-          expect(res).toBeNull();
+          await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
-        it('returns null on errors', async () => {
+        it('throws on errors', async () => {
           const scope = await initRepo();
           scope
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
             )
             .replyWithError('some error');
-          const res = await bitbucket.getJsonFile('file.json');
-          expect(res).toBeNull();
+          await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

@@ -88,10 +88,10 @@ type TestRequest = {
 };
 
 function onMissing(req: TestRequest, opts?: TestRequest): void {
-  if (!opts) {
-    missingLog.push(`  ${req.method} ${req.href}`);
-  } else {
+  if (opts) {
     missingLog.push(`  ${opts.method} ${opts.href}`);
+  } else {
+    missingLog.push(`  ${req.method} ${req.href}`);
   }
 }
 

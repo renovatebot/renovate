@@ -12,7 +12,7 @@ This includes libraries and plugins.
 
 Renovate detects versions that are specified in a string `'group:artifact:version'` and those specified in a map `(group:groupName, name:ArtifactName, version:Version)`.
 
-### File Support
+### Gradle File Support
 
 Renovate can update `build.gradle`/`build.gradle.kts` files in the root of the repository.
 It also updates any `*.gradle`/`*.gradle.kts` files in a subdirectory as multi-project configurations.
@@ -32,7 +32,7 @@ Once the Gradle plugin has detected the dependencies, lookups and updating will 
 
 Renovate can update dependency versions found in Maven `pom.xml` files.
 
-### File Support
+### Maven File Support
 
 Renovate will search repositories for all `pom.xml` files and processes them independently.
 

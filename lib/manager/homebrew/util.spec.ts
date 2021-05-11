@@ -1,6 +1,7 @@
+import { getName } from '../../../test/util';
 import { skip } from './util';
 
-describe('lib/manager/homebrew/util', () => {
+describe(getName(), () => {
   describe('skip()', () => {
     it('handles out of bounds case', () => {
       const content = 'some content';

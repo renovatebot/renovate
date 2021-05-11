@@ -1,4 +1,4 @@
-import { fs } from '../../../test/util';
+import { fs, getName } from '../../../test/util';
 import { extractAllPackageFiles } from '.';
 
 jest.mock('../../util/fs');
@@ -14,7 +14,7 @@ function mockFs(files: Record<string, string>): void {
   );
 }
 
-describe('manager/gradle-lite/extract', () => {
+describe(getName(), () => {
   beforeAll(() => {});
   afterAll(() => {
     jest.resetAllMocks();
@@ -97,6 +97,45 @@ describe('manager/gradle-lite/extract', () => {
         deps: [{ depName: 'bar:bar', currentValue: '2.0.1' }],
       },
       { packageFile: 'aaa/bbb/build.gradle', deps: [] },
+    ]);
+  });
+
+  it('deduplicates registry urls', async () => {
+    const fsMock = {
+      'build.gradle': [
+        'url "https://repo.maven.apache.org/maven2"',
+        'url "https://repo.maven.apache.org/maven2"',
+        'url "https://example.com"',
+        'url "https://example.com"',
+        'id "foo.bar" version "1.2.3"',
+        '"foo:bar:1.2.3"',
+      ].join(';\n'),
+    };
+
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'build.gradle',
+        deps: [
+          {
+            depType: 'plugin',
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+              'https://example.com',
+            ],
+          },
+          {
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://example.com',
+            ],
+          },
+        ],
+      },
     ]);
   });
 });

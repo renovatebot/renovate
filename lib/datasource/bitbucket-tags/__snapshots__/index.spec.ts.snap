@@ -7,7 +7,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -17,7 +17,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -34,7 +34,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -44,7 +44,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -56,6 +56,7 @@ Array [
 
 exports[`datasource/bitbucket-tags/index getReleases returns tags from bitbucket cloud 1`] = `
 Object {
+  "registryUrl": "https://bitbucket.org",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
@@ -80,7 +81,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -97,7 +98,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

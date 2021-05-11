@@ -1,7 +1,7 @@
 import { getName } from '../../test/util';
 import { HTMLElement, parse } from './html';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('parses HTML', () => {
     const body = parse('<div>Hello, world!</div>');
     expect(body.childNodes).toHaveLength(1);

@@ -1,22 +1,18 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName, loadFixture } from '../../../test/util';
 import { id as datasource } from '.';
 
-const consulData: any = fs.readFileSync(
-  'lib/datasource/terraform-module/__fixtures__/registry-consul.json'
-);
-const serviceDiscoveryResult: any = fs.readFileSync(
-  'lib/datasource/terraform-module/__fixtures__/service-discovery.json'
-);
-const serviceDiscoveryCustomResult: any = fs.readFileSync(
-  'lib/datasource/terraform-module/__fixtures__/service-custom-discovery.json'
+const consulData: any = loadFixture('registry-consul.json');
+const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
+const serviceDiscoveryCustomResult: any = loadFixture(
+  'service-custom-discovery.json'
 );
 
 const baseUrl = 'https://registry.terraform.io';
 const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
-describe('datasource/terraform-module', () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

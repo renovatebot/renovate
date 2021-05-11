@@ -47,11 +47,9 @@ export async function findFirstParentVersion(
       .sort((v1, v2) => semver.sortVersions(v1, v2));
     // iterate through parentVersions in sorted order
     for (const parentVersion of parentVersions) {
-      const { dependencies, devDependencies } = parentDep.releases.find(
+      const constraint = parentDep.releases.find(
         (release) => release.version === parentVersion
-      );
-      const constraint =
-        dependencies[targetDepName] || devDependencies[targetDepName];
+      ).dependencies?.[targetDepName];
       if (!constraint) {
         logger.debug(
           `${targetDepName} has been removed from ${parentName}@${parentVersion}`

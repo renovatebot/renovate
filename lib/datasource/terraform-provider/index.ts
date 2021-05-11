@@ -7,6 +7,7 @@ import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'terraform-provider';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [
   'https://registry.terraform.io',
   'https://releases.hashicorp.com',
@@ -69,7 +70,7 @@ async function queryRegistry(
   return dep;
 }
 
-// TODO: add long term cache
+// TODO: add long term cache (#9590)
 async function queryReleaseBackend(
   lookupName: string,
   registryURL: string,

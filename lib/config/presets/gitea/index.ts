@@ -5,7 +5,11 @@ import {
 } from '../../../platform/gitea/gitea-helper';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Preset, PresetConfig } from '../types';
-import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID_JSON,
+  fetchPreset,
+} from '../util';
 
 export const Endpoint = 'https://gitea.com/api/v1/';
 
@@ -34,18 +38,20 @@ export async function fetchJSONFile(
     const parsed = JSON.parse(content);
     return parsed;
   } catch (err) {
-    throw new Error('invalid preset JSON');
+    throw new Error(PRESET_INVALID_JSON);
   }
 }
 
 export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
+  presetPath: string,
   endpoint = Endpoint
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
     filePreset,
+    presetPath,
     endpoint,
     fetch: fetchJSONFile,
   });
@@ -54,6 +60,7 @@ export function getPresetFromEndpoint(
 export function getPreset({
   packageName: pkgName,
   presetName = 'default',
+  presetPath,
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(pkgName, presetName, Endpoint);
+  return getPresetFromEndpoint(pkgName, presetName, presetPath, Endpoint);
 }

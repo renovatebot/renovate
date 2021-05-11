@@ -78,7 +78,7 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
     notes: getPrNotes(config) + getPrExtraNotes(config),
     changelogs: getChangelogs(config),
     configDescription: await getPrConfigDescription(config),
-    controls: getControls(),
+    controls: await getControls(config),
     footer: getPrFooter(config),
   };
   const prBodyTemplate = config.prBodyTemplate;

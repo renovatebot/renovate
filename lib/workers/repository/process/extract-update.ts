@@ -109,12 +109,12 @@ export async function lookup(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<ExtractResult> {
   await fetchUpdates(config, packageFiles);
-  logger.debug({ config: packageFiles }, 'packageFiles with updates');
   await raiseDeprecationWarnings(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
     packageFiles
   );
+  logger.debug({ config: packageFiles }, 'packageFiles with updates');
   sortBranches(branches);
   return { branches, branchList, packageFiles };
 }

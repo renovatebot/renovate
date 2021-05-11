@@ -3,7 +3,10 @@ import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
-import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import {
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
+} from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -18,25 +21,36 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
-export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
+export async function checkYarnrc(
+  cwd: string
+): Promise<{ offlineMirror: boolean; yarnPath: string | null }> {
+  let offlineMirror = false;
+  let yarnPath: string = null;
   try {
     const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
         .find((line) => line.startsWith('yarn-offline-mirror '));
-      if (mirrorLine) {
-        return true;
+      offlineMirror = !!mirrorLine;
+      const pathLine = yarnrc
+        .split('\n')
+        .find((line) => line.startsWith('yarn-path '));
+      if (pathLine) {
+        yarnPath = pathLine.replace(/^yarn-path\s+"?(.+?)"?$/, '$1');
       }
     }
   } catch (err) /* c8 ignore next */ {
     // not found
   }
-  return false;
+  return { offlineMirror, yarnPath };
 }
 
-export const optimizeCommand =
-  "sed -i 's/ steps,/ steps.slice(0,1),/' /home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js";
+export function getOptimizeCommand(
+  fileName = '/home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js'
+): string {
+  return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
+}
 
 export async function generateLockFile(
   cwd: string,
@@ -68,14 +82,16 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    if (
-      isYarn1 &&
-      config.skipInstalls !== false &&
-      (await hasYarnOfflineMirror(cwd)) === false
-    ) {
-      logger.debug('Updating yarn.lock only - skipping node_modules');
-      // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-      preCommands.push(optimizeCommand);
+    if (isYarn1 && config.skipInstalls !== false) {
+      const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
+      if (!offlineMirror) {
+        logger.debug('Updating yarn.lock only - skipping node_modules');
+        // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+        preCommands.push(getOptimizeCommand());
+        if (yarnPath) {
+          preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
+        }
+      }
     }
     const commands = [];
     let cmdOptions = '';
@@ -83,9 +99,10 @@ export async function generateLockFile(
       cmdOptions +=
         '--ignore-engines --ignore-platform --network-timeout 100000';
     } else {
+      extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
     }
-    if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {
+    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
       } else {
@@ -97,23 +114,16 @@ export async function generateLockFile(
       cwd,
       extraEnv,
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
       },
     };
-    // istanbul ignore if
-    if (getAdminConfig().trustLevel === 'high') {
+    /* istanbul ignore next 4 */
+    if (getAdminConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
-      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
-    }
-    if (config.dockerMapDotfiles) {
-      const homeDir =
-        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-      const homeNpmrc = join(homeDir, '.npmrc');
-      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
 
     // This command updates the lock file based on package.json
@@ -181,7 +191,11 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readFile(lockFileName, 'utf8');
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) {
+    /* c8 ignore start */
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug(
       {
         err,
@@ -202,6 +216,7 @@ export async function generateLockFile(
       }
     }
     return { error: true, stderr: err.stderr };
+    /* c8 ignore stop */
   }
   return { lockFile };
 }

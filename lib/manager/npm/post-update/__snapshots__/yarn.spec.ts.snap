@@ -24,6 +24,20 @@ Array [
 ]
 `;
 
+exports[`manager/npm/post-update/yarn checkYarnrc() returns no offline mirror and unquoted yarn path 1`] = `
+Object {
+  "offlineMirror": false,
+  "yarnPath": "./.yarn/cli.js",
+}
+`;
+
+exports[`manager/npm/post-update/yarn checkYarnrc() returns offline mirror and yarn path 1`] = `
+Object {
+  "offlineMirror": true,
+  "yarnPath": "./.yarn/cli.js",
+}
+`;
+
 exports[`manager/npm/post-update/yarn generates lock files using yarn v1.22.0 1`] = `
 Array [
   Object {
@@ -140,6 +154,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
       },
@@ -166,6 +181,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
       },
@@ -187,6 +203,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
       },
@@ -313,6 +330,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
       },
@@ -339,6 +357,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
       },
@@ -360,6 +379,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
       },
@@ -472,6 +492,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
       },
@@ -493,6 +514,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
       },

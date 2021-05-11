@@ -1,16 +1,17 @@
-import url from 'url';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { getAdminConfig } from '../../config/admin';
-import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
+import {
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
+} from '../../constants/error-messages';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
@@ -34,26 +35,8 @@ interface UserPass {
 interface AuthJson {
   'github-oauth'?: Record<string, string>;
   'gitlab-token'?: Record<string, string>;
+  'gitlab-domains'?: string[];
   'http-basic'?: Record<string, UserPass>;
-}
-
-function getHost({
-  hostName,
-  domainName,
-  endpoint,
-  baseUrl,
-}: HostRule): string | null {
-  let host = hostName || domainName;
-  if (!host) {
-    try {
-      host = endpoint || baseUrl;
-      host = url.parse(host).host;
-    } catch (err) {
-      logger.warn(`Composer: can't parse ${host}`);
-      host = null;
-    }
-  }
-  return host;
 }
 
 function getAuthJson(): string | null {
@@ -69,24 +52,28 @@ function getAuthJson(): string | null {
     };
   }
 
-  const gitlabCredentials = hostRules.find({
-    hostType: PLATFORM_TYPE_GITLAB,
-    url: 'https://gitlab.com/api/v4/',
-  });
-  if (gitlabCredentials?.token) {
-    authJson['gitlab-token'] = {
-      'gitlab.com': gitlabCredentials.token,
-    };
-  }
+  hostRules
+    .findAll({ hostType: PLATFORM_TYPE_GITLAB })
+    ?.forEach((gitlabHostRule) => {
+      if (gitlabHostRule?.token) {
+        const host = gitlabHostRule.hostName || 'gitlab.com';
+        authJson['gitlab-token'] = authJson['gitlab-token'] || {};
+        authJson['gitlab-token'][host] = gitlabHostRule.token;
+        // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
+        authJson['gitlab-domains'] = [
+          host,
+          ...(authJson['gitlab-domains'] || []),
+        ];
+      }
+    });
 
   hostRules
     .findAll({ hostType: datasourcePackagist.id })
     ?.forEach((hostRule) => {
-      const { username, password } = hostRule;
-      const host = getHost(hostRule);
-      if (host && username && password) {
+      const { resolvedHost, username, password } = hostRule;
+      if (resolvedHost && username && password) {
         authJson['http-basic'] = authJson['http-basic'] || {};
-        authJson['http-basic'][host] = { username, password };
+        authJson['http-basic'][resolvedHost] = { username, password };
       }
     });
 
@@ -130,7 +117,7 @@ export async function updateArtifacts({
         COMPOSER_AUTH: getAuthJson(),
       },
       docker: {
-        image: 'renovate/composer',
+        image: 'composer',
         tagConstraint: getConstraint(config),
         tagScheme: composerVersioningId,
       },
@@ -148,7 +135,7 @@ export async function updateArtifacts({
       args += ' --ignore-platform-reqs';
     }
     args += ' --no-ansi --no-interaction';
-    if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {
+    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');
@@ -193,6 +180,10 @@ export async function updateArtifacts({
 
     return res;
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     if (
       err.message?.includes(
         'Your requirements could not be resolved to an installable set of packages.'

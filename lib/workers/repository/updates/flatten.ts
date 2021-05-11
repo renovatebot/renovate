@@ -1,13 +1,13 @@
 import {
-  RenovateConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config';
-import { LANGUAGE_DOCKER } from '../../../constants/languages';
+import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
+import { parseUrl } from '../../../util/url';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
 
@@ -18,7 +18,6 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   const updateConfig = { ...input };
   delete updateConfig.packageRules;
   // TODO: Remove next line once #8075 is complete
-  updateConfig.depNameShort ||= updateConfig.depName;
   updateConfig.depNameSanitized = updateConfig.depName
     ? updateConfig.depName
         .replace('@types/', '')
@@ -28,13 +27,14 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(/-+/, '-')
         .toLowerCase()
     : undefined;
-  if (
-    updateConfig.language === LANGUAGE_DOCKER &&
-    /(^|\/)node$/.exec(updateConfig.depName) &&
-    updateConfig.depName !== 'calico/node'
-  ) {
-    updateConfig.additionalBranchPrefix = '';
-    updateConfig.depNameSanitized = 'node';
+  if (updateConfig.sourceUrl) {
+    const parsedSourceUrl = parseUrl(updateConfig.sourceUrl);
+    if (parsedSourceUrl?.pathname) {
+      updateConfig.sourceRepoSlug = parsedSourceUrl.pathname
+        .replace(/^\//, '') // remove leading slash
+        .replace(/\//g, '-') // change slashes to hyphens
+        .replace(/-+/g, '-'); // remove multiple hyphens
+    }
   }
   generateBranchName(updateConfig);
   return updateConfig;
@@ -104,6 +104,7 @@ export async function flattenUpdates(
             updateConfig = applyPackageRules(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
+            update.branchName = updateConfig.branchName;
             updates.push(updateConfig);
           }
         }
@@ -147,12 +148,14 @@ export async function flattenUpdates(
                 updateConfig,
                 config.vulnerabilityAlerts
               );
+              delete updateConfig.vulnerabilityAlerts;
               updateConfig.isVulnerabilityAlert = true;
               updateConfig.isRemediation = true;
               updateConfig.lockFile = lockFile;
               updateConfig.currentValue = updateConfig.currentVersion;
               updateConfig.newValue = updateConfig.newVersion;
               updateConfig = applyUpdateConfig(updateConfig);
+              updateConfig.enabled = true;
               updates.push(updateConfig);
             }
           }

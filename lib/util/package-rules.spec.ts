@@ -1,4 +1,4 @@
-import { UpdateType } from '../config';
+import type { PackageRuleInputConfig, UpdateType } from '../config/types';
 import {
   LANGUAGE_DOCKER,
   LANGUAGE_JAVASCRIPT,
@@ -8,9 +8,9 @@ import {
 
 import * as datasourceDocker from '../datasource/docker';
 import * as datasourceOrb from '../datasource/orb';
-import { Config, applyPackageRules } from './package-rules';
+import { applyPackageRules } from './package-rules';
 
-type TestConfig = Config & { x?: number; y?: number };
+type TestConfig = PackageRuleInputConfig & { x?: number; y?: number };
 
 describe('applyPackageRules()', () => {
   const config1: TestConfig = {
@@ -19,6 +19,8 @@ describe('applyPackageRules()', () => {
     packageRules: [
       {
         matchPackageNames: ['a', 'b'],
+        matchPackagePrefixes: ['xyz/'],
+        excludePackagePrefixes: ['xyz/foo'],
         x: 2,
       },
       {
@@ -30,7 +32,7 @@ describe('applyPackageRules()', () => {
     ],
   };
   it('applies', () => {
-    const config: Config = {
+    const config: PackageRuleInputConfig = {
       depName: 'a',
       isBump: true,
       currentValue: '1.0.0',
@@ -84,6 +86,21 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
     expect(res.y).toBe(2);
+  });
+  it('applies matchPackagePrefixes', () => {
+    const dep = {
+      depName: 'xyz/abc',
+    };
+    const res = applyPackageRules({ ...config1, ...dep });
+    expect(res.x).toBe(2);
+    expect(res.y).toBe(2);
+  });
+  it('applies excludePackagePrefixes', () => {
+    const dep = {
+      depName: 'xyz/foo-a',
+    };
+    const res = applyPackageRules({ ...config1, ...dep });
+    expect(res.x).toBeUndefined();
   });
   it('applies the second second rule', () => {
     const dep = {

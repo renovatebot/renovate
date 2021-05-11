@@ -19,14 +19,16 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
-export interface ExtractConfig extends ManagerConfig {
+export interface ExtractConfig {
+  binarySource?: string;
+  localDir?: string;
+  registryUrls?: string[];
   endpoint?: string;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
-  ignoreNpmrcFile?: boolean;
+  npmrc?: string;
   yarnrc?: string;
   skipInstalls?: boolean;
-  versioning?: string;
   updateInternalDeps?: boolean;
 }
 
@@ -50,6 +52,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   updateType?: UpdateType;
   newValue?: string;
   newVersion?: string;
+  newMajor?: number;
 }
 
 export interface PackageUpdateConfig {
@@ -58,8 +61,12 @@ export interface PackageUpdateConfig {
   supportPolicy?: string[];
 }
 
+export interface PackageUpdateResult {
+  sourceUrl?: string;
+  updates: LookupUpdate[];
+}
+
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
-  composerJsonType?: 'composer-plugin' | 'library' | 'metapackage' | 'project';
   currentValue?: string;
   depName?: string;
   depType?: string;
@@ -74,7 +81,6 @@ export interface NpmLockFiles {
   shrinkwrapJson?: string;
   pnpmShrinkwrap?: string;
   npmLock?: string;
-  lernaDir?: string;
   lockFiles?: string[];
 }
 
@@ -86,7 +92,6 @@ export interface PackageFile<T = Record<string, any>>
   datasource?: string;
   registryUrls?: string[];
   deps: PackageDependency[];
-  ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
   mavenProps?: Record<string, any>;
@@ -107,7 +112,6 @@ export interface Package<T> extends ManagerData<T> {
   currentValue?: string;
   currentDigest?: string;
   depName?: string;
-  depNameShort?: string;
   depType?: string;
   fileReplacePosition?: number;
   groupName?: string;
@@ -132,28 +136,22 @@ export interface Package<T> extends ManagerData<T> {
 
 export interface LookupUpdate {
   bucket?: string;
-  blockedByPin?: boolean;
   branchName?: string;
   commitMessageAction?: string;
-  displayFrom?: string;
-  displayTo?: string;
   isBump?: boolean;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
-  isSingleVersion?: boolean;
-  currentVersion?: string;
   newDigest?: string;
-  newDigestShort?: string;
   newMajor?: number;
   newMinor?: number;
   newValue: string;
   semanticCommitType?: string;
-  skippedOverVersions?: string[];
+  pendingChecks?: string[];
+  pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
-  sourceUrl?: string;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -163,8 +161,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
-  displayFrom?: string;
-  displayTo?: string;
   fixedVersion?: string;
   currentVersion?: string;
   lockedVersion?: string;
@@ -262,7 +258,7 @@ export interface ManagerApi {
     config?: ExtractConfig
   ): Result<PackageFile | null>;
 
-  getPackageUpdates?(config: PackageUpdateConfig): Result<LookupUpdate[]>;
+  getPackageUpdates?(config: PackageUpdateConfig): Result<PackageUpdateResult>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
@@ -285,6 +281,7 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
+  ignoreScripts?: boolean;
 
   platform?: string;
   upgrades?: Upgrade[];

@@ -13,7 +13,7 @@ import { GithubHttp, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
     githubApi = new GithubHttp();
@@ -186,6 +186,14 @@ describe(getName(__filename), () => {
         ).rejects.toThrow(
           'Review cannot be requested from pull request author.'
         );
+      });
+      it('should throw original error when pull requests aleady existed', async () => {
+        await expect(
+          fail(422, {
+            message: 'Validation error',
+            errors: [{ message: 'A pull request already exists' }],
+          })
+        ).rejects.toThrow('Validation error');
       });
       it('should throw original error of unknown type', async () => {
         await expect(

@@ -117,9 +117,7 @@ export async function getReleaseNotes(
         ? `${baseUrl}${repository}/tags/${release.tag}`
         : `${baseUrl}${repository}/releases/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
-      if (!releaseNotes.body.length) {
-        releaseNotes = null;
-      } else {
+      if (releaseNotes.body.length) {
         try {
           if (baseUrl !== 'https://gitlab.com/') {
             releaseNotes.body = linkify(releaseNotes.body, {
@@ -129,6 +127,8 @@ export async function getReleaseNotes(
         } catch (err) /* c8 ignore next */ {
           logger.warn({ err, baseUrl, repository }, 'Error linkifying');
         }
+      } else {
+        releaseNotes = null;
       }
     }
   });
@@ -317,10 +317,9 @@ export async function addReleaseNotes(
     return input;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
-  const repository =
-    input.project.github != null
-      ? input.project.github.replace(/\.git$/, '')
-      : input.project.gitlab;
+  const repository = input.project.github
+    ? input.project.github.replace(/\.git$/, '')
+    : input.project.gitlab;
   const cacheNamespace = input.project.github
     ? 'changelog-github-notes'
     : 'changelog-gitlab-notes';

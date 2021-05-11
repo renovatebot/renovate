@@ -1,6 +1,5 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import GitUrlParse from 'git-url-parse';
 import Git, {
   DiffResult as DiffResult_,
   ResetMode,
@@ -9,9 +8,9 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
+import { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
-  REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -52,6 +51,7 @@ interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
+  ignoredAuthors: string[];
 }
 
 /* c8 ignore next */
@@ -72,6 +72,8 @@ function checkForPlatformFailure(err: Error): void {
     'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
     'Could not resolve host',
     ' is not a member of team',
+    'early EOF',
+    'fatal: bad config', // .gitmodules problem
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -165,6 +167,7 @@ async function fetchBranchCommits(): Promise<void> {
 
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
+  config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
   git = Git(config.localDir);
@@ -200,7 +203,7 @@ async function cleanLocalBranches(): Promise<void> {
  * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
  * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
  */
-export async function setBranchPrefix(branchPrefix: string): Promise<void> {
+async function setBranchPrefix(branchPrefix: string): Promise<void> {
   config.branchPrefix = branchPrefix;
   // If the repo is already cloned then set branchPrefix now, otherwise it will be called again during syncGit()
   if (gitInitialized) {
@@ -213,6 +216,14 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
       throw err;
     }
   }
+}
+
+export async function setUserRepoConfig({
+  branchPrefix,
+  gitIgnoredAuthors,
+}: RenovateConfig): Promise<void> {
+  await setBranchPrefix(branchPrefix);
+  config.ignoredAuthors = gitIgnoredAuthors ?? [];
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -305,14 +316,15 @@ export async function syncGit(): Promise<void> {
     }
   }
   try {
-    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
-    logger.debug({ latestCommitDate }, 'latest commit');
-  } catch (err) /* c8 ignore next */ {
+    const latestCommit = (await git.log({ n: 1 })).latest;
+    logger.debug({ latestCommit }, 'latest repository commit');
+  } catch (err) {
+    /* c8 ignore next 5 */
     checkForPlatformFailure(err);
     if (err.message.includes('does not have any commits yet')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    logger.warn({ err }, 'Cannot retrieve latest commit date');
+    logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   try {
     const { gitAuthorName, gitAuthorEmail } = config;
@@ -418,7 +430,7 @@ export async function getFileList(): Promise<string[]> {
   const branch = config.currentBranch;
   const submodules = await getSubmodules();
   const files: string = await git.raw(['ls-tree', '-r', branch]);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!files) {
     return [];
   }
@@ -439,14 +451,21 @@ export function getBranchList(): string[] {
 export async function isBranchStale(branchName: string): Promise<boolean> {
   await syncBranch(branchName);
   try {
+    const { currentBranchSha, currentBranch } = config;
     const branches = await git.branch([
       '--remotes',
       '--verbose',
       '--contains',
       config.currentBranchSha,
     ]);
-    return !branches.all.map(localName).includes(branchName);
-  } catch (err) /* c8 ignore next */ {
+    const isStale = !branches.all.map(localName).includes(branchName);
+    logger.debug(
+      { isStale, branches, currentBranch, currentBranchSha },
+      `IsBranchStale=${isStale}`
+    );
+    return isStale;
+  } catch (err) {
+    /* c8 ignore next 2 */
     checkForPlatformFailure(err);
     throw err;
   }
@@ -477,8 +496,8 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   ).trim();
   const { gitAuthorEmail } = config;
   if (
-    lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
-    lastAuthor === gitAuthorEmail
+    lastAuthor === gitAuthorEmail ||
+    config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
     // author matches - branch has not been modified
     config.branchIsModified[branchName] = false;
@@ -617,7 +636,7 @@ export async function commitFiles({
     const fileNames: string[] = [];
     const deleted: string[] = [];
     for (const file of files) {
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (file.name === '|delete|') {
         deleted.push(file.contents as string);
       } else if (await isDirectory(join(config.localDir, file.name))) {
@@ -626,7 +645,7 @@ export async function commitFiles({
       } else {
         fileNames.push(file.name);
         let contents: Buffer;
-        // istanbul ignore else
+
         if (typeof file.contents === 'string') {
           contents = Buffer.from(file.contents);
         } else {
@@ -635,7 +654,7 @@ export async function commitFiles({
         await fs.outputFile(join(config.localDir, file.name), contents);
       }
     }
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
       fileNames.unshift('-f');
     }
@@ -646,7 +665,8 @@ export async function commitFiles({
       for (const f of deleted) {
         try {
           await git.rm([f]);
-        } catch (err) /* c8 ignore next */ {
+        } catch (err) {
+          /* c8 ignore next 2 */
           checkForPlatformFailure(err);
           logger.debug({ err }, 'Cannot delete ' + f);
         }
@@ -655,6 +675,15 @@ export async function commitFiles({
     const commitRes = await git.commit(message, [], {
       '--no-verify': null,
     });
+    if (
+      commitRes.summary &&
+      commitRes.summary.changes === 0 &&
+      commitRes.summary.insertions === 0 &&
+      commitRes.summary.deletions === 0
+    ) {
+      logger.warn({ commitRes }, 'Detected empty commit - aborting git push');
+      return null;
+    }
     logger.debug({ result: commitRes }, `git commit`);
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
@@ -682,6 +711,13 @@ export async function commitFiles({
     return commit;
   } catch (err) /* c8 ignore next */ {
     checkForPlatformFailure(err);
+    if (err.message.includes(`'refs/heads/renovate' exists`)) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.location = 'None';
+      error.validationError = 'An existing branch is blocking Renovate';
+      error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
+      throw error;
+    }
     if (
       err.message.includes(
         'refusing to allow a GitHub App to create or update workflow'
@@ -692,12 +728,20 @@ export async function commitFiles({
       );
       return null;
     }
+    if (err.message.includes('protected branch hook declined')) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.location = branchName;
+      error.validationError = 'Renovate branch is protected';
+      error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
+      throw error;
+    }
     if (err.message.includes('remote: error: cannot lock ref')) {
       logger.error({ err }, 'Error committing files.');
       return null;
     }
-    logger.debug({ err }, 'Error committing files');
-    throw new Error(REPOSITORY_CHANGED);
+    logger.debug({ err }, 'Unknown error committing files');
+    // We don't know why this happened, so this will cause bubble up to a branch error
+    throw err;
   }
 }
 
@@ -724,10 +768,4 @@ export function getUrl({
     host,
     pathname: repository + '.git',
   });
-}
-
-export function getHttpUrl(url: string, token?: string): string {
-  const parsedUrl = GitUrlParse(url);
-  parsedUrl.token = token;
-  return parsedUrl.toString('https');
 }

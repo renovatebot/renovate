@@ -34,6 +34,8 @@ export const exposedConfigOptions = [
   'prTitle',
   'semanticCommitScope',
   'semanticCommitType',
+  'separateMajorMinor',
+  'separateMinorPatch',
 ];
 
 export const allowedFields = {
@@ -48,7 +50,6 @@ export const allowedFields = {
     'The dependency name already linked to its home page using markdown',
   depNameSanitized:
     'The depName field sanitized for use in branches after removing spaces and special characters',
-  depNameShort: 'Shortened depName',
   depType: 'The dependency type (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
   displayTo: 'The to value, formatted for display',
@@ -87,6 +88,7 @@ export const allowedFields = {
   releaseNotes: 'A ChangeLogNotes object for the release',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
+  sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
   sourceUrl: 'The source URL for the package',
   updateType: 'One of digest, pin, rollback, patch, minor, major',
   upgrades: 'An array of upgrade objects in the branch',

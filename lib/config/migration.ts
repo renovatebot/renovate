@@ -1,11 +1,13 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { clone } from '../util/clone';
 import { getOptions } from './definitions';
+import { removedPresets } from './presets/common';
 import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
+import { mergeChildConfig } from './utils';
 
 const options = getOptions();
 
@@ -44,7 +46,7 @@ interface MigratedRenovateConfig extends RenovateConfig {
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
-  // TODO: remove any type
+  // TODO: remove any type (#9611)
   parentKey?: string | any
 ): MigratedConfig {
   try {
@@ -166,6 +168,8 @@ export function migrateConfig(
         }
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(/{{baseDir}}/g, '{{packageFileDir}}');
+      } else if (is.string(val) && val.includes('{{depNameShort}}')) {
+        migratedConfig[key] = val.replace(/{{depNameShort}}/g, '{{depName}}');
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
       } else if (key === 'rebaseStalePrs') {
@@ -187,11 +191,19 @@ export function migrateConfig(
           migratedConfig.rebaseWhen = 'never';
         }
       } else if (key === 'exposeEnv') {
+        migratedConfig.exposeAllEnv = val;
         delete migratedConfig.exposeEnv;
-        if (val === true) {
-          migratedConfig.trustLevel = 'high';
-        } else if (val === false) {
-          migratedConfig.trustLevel = 'low';
+      } else if (key === 'trustLevel') {
+        delete migratedConfig.trustLevel;
+        if (val === 'high') {
+          migratedConfig.allowCustomCrateRegistries ??= true;
+          migratedConfig.allowScripts ??= true;
+          migratedConfig.exposeAllEnv ??= true;
+        }
+      } else if (key === 'ignoreNpmrcFile') {
+        delete migratedConfig.ignoreNpmrcFile;
+        if (!is.string(migratedConfig.npmrc)) {
+          migratedConfig.npmrc = '';
         }
       } else if (
         key === 'branchName' &&
@@ -242,22 +254,15 @@ export function migrateConfig(
         }
         const presets = migratedConfig.extends;
         for (let i = 0; i < presets.length; i += 1) {
-          let preset = presets[i];
+          const preset = presets[i];
           if (is.string(preset)) {
-            if (preset === 'config:application' || preset === ':js-app') {
-              preset = 'config:js-app';
-            } else if (preset === ':library' || preset === 'config:library') {
-              preset = 'config:js-lib';
-            } else if (preset.startsWith(':masterIssue')) {
-              preset = preset.replace('masterIssue', 'dependencyDashboard');
-            } else if (
-              [':unpublishSafe', 'default:unpublishSafe'].includes(preset)
-            ) {
-              preset = 'npm:unpublishSafe';
+            const newPreset = removedPresets[preset];
+            if (newPreset !== undefined) {
+              presets[i] = newPreset;
             }
-            presets[i] = preset;
           }
         }
+        migratedConfig.extends = migratedConfig.extends.filter(Boolean);
       } else if (key === 'unpublishSafe') {
         if (val === true) {
           migratedConfig.extends = migratedConfig.extends || [];
@@ -463,11 +468,11 @@ export function migrateConfig(
         delete migratedConfig.node.enabled;
         migratedConfig.travis = migratedConfig.travis || {};
         migratedConfig.travis.enabled = true;
-        if (!Object.keys(migratedConfig.node).length) {
-          delete migratedConfig.node;
-        } else {
+        if (Object.keys(migratedConfig.node).length) {
           const subMigrate = migrateConfig(migratedConfig.node, key);
           migratedConfig.node = subMigrate.migratedConfig;
+        } else {
+          delete migratedConfig.node;
         }
       } else if (is.array(val)) {
         const newArray = [];
@@ -545,7 +550,25 @@ export function migrateConfig(
         }
       }
     }
-    const isMigrated = !equal(config, migratedConfig);
+    // Migrate nested packageRules
+    if (is.nonEmptyArray(migratedConfig.packageRules)) {
+      const existingRules = migratedConfig.packageRules;
+      migratedConfig.packageRules = [];
+      for (const packageRule of existingRules) {
+        if (is.array(packageRule.packageRules)) {
+          logger.debug('Flattening nested packageRules');
+          // merge each subrule and add to the parent list
+          for (const subrule of packageRule.packageRules) {
+            const combinedRule = mergeChildConfig(packageRule, subrule);
+            delete combinedRule.packageRules;
+            migratedConfig.packageRules.push(combinedRule);
+          }
+        } else {
+          migratedConfig.packageRules.push(packageRule);
+        }
+      }
+    }
+    const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
       // recursive call in case any migrated configs need further migrating
       return {

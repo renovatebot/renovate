@@ -1,3 +1,4 @@
+import { getName } from '../../test/util';
 import {
   PLATFORM_TYPE_BITBUCKET,
   PLATFORM_TYPE_GITLAB,
@@ -5,7 +6,7 @@ import {
 import * as env from './env';
 import type { RenovateOptions } from './types';
 
-describe('config/env', () => {
+describe(getName(), () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
       expect(env.getConfig({})).toEqual({ hostRules: [] });
@@ -115,6 +116,15 @@ describe('config/env', () => {
         RENOVATE_PASSWORD: 'app-password',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('merges full config from env', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG: '{"enabled":false,"token":"foo"}',
+        RENOVATE_TOKEN: 'a',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.enabled).toBe(false);
+      expect(config.token).toBe('a');
     });
   });
   describe('.getEnvName(definition)', () => {

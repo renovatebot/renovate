@@ -1,16 +1,19 @@
+import { Readable } from 'stream';
 import is from '@sindresorhus/is';
 import {
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
+import { AzurePrVote } from './types';
 
-describe('platform/azure', () => {
+describe(getName(), () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
@@ -127,13 +130,13 @@ describe('platform/azure', () => {
         ({
           getRepositories: jest.fn(() => [
             {
-              name: 'some-repo',
+              name: 'repo',
               id: '1',
               privateRepo: true,
               isFork: false,
               defaultBranch: 'defBr',
               project: {
-                name: 'some-repo',
+                name: 'some',
               },
             },
             {
@@ -145,10 +148,6 @@ describe('platform/azure', () => {
           ]),
         } as any)
     );
-    azureHelper.getProjectAndRepo.mockImplementationOnce(() => ({
-      project: 'some-repo',
-      repo: 'some-repo',
-    }));
 
     if (is.string(args)) {
       return azure.initRepo({
@@ -165,7 +164,7 @@ describe('platform/azure', () => {
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
       const config = await initRepo({
-        repository: 'some-repo',
+        repository: 'some/repo',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
@@ -478,12 +477,12 @@ describe('platform/azure', () => {
   });
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
-      await initRepo('some-repo');
+      await initRepo('some/repo');
       const res = await azure.getBranchStatus('somebranch', null);
       expect(res).toEqual(BranchStatus.green);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some-repo');
+      await initRepo('some/repo');
       const res = await azure.getBranchStatus('somebranch', ['foo']);
       expect(res).toEqual(BranchStatus.red);
     });
@@ -663,6 +662,49 @@ describe('platform/azure', () => {
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
         platformOptions: { azureAutoComplete: true },
+      });
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
+    });
+    it('should create and return an approved PR object', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        displayNumber: 'Pull Request #456',
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+      };
+      const prUpdateResult = {
+        ...prResult,
+        reviewers: [
+          {
+            reviewerUrl: prResult.createdBy.url,
+            vote: AzurePrVote.Approved,
+            isFlagged: false,
+            isRequired: false,
+          },
+        ],
+      };
+      const updateFn = jest
+        .fn(() => prUpdateResult)
+        .mockName('createPullRequestReviewer');
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            createPullRequest: jest.fn(() => prResult),
+            createPullRequestLabel: jest.fn(() => ({})),
+            createPullRequestReviewer: updateFn,
+          } as any)
+      );
+      const pr = await azure.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'dev',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        platformOptions: { azureAutoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
@@ -1184,20 +1226,55 @@ describe('platform/azure', () => {
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
-      azureHelper.getFile.mockResolvedValueOnce(JSON.stringify(data));
-      await initRepo({
-        repository: 'some-repo',
-      });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() =>
+              Promise.resolve(Readable.from(JSON.stringify(data)))
+            ),
+          } as any)
+      );
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
-    it('returns null on errors', async () => {
-      azureHelper.getFile.mockRejectedValueOnce('some error');
-      await initRepo({
-        repository: 'some-repo',
-      });
-      const res = await azure.getJsonFile('file.json');
-      expect(res).toBeNull();
+    it('throws on malformed JSON', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() =>
+              Promise.resolve(Readable.from('!@#'))
+            ),
+          } as any)
+      );
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
+    });
+    it('throws on errors', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() => {
+              throw new Error('some error');
+            }),
+          } as any)
+      );
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
+    });
+    it('supports fetch from another repo', async () => {
+      const data = { foo: 'bar' };
+      const gitApiMock = {
+        getItemContent: jest.fn(() =>
+          Promise.resolve(Readable.from(JSON.stringify(data)))
+        ),
+        getRepositories: jest.fn(() =>
+          Promise.resolve([
+            { id: '123456', name: 'bar', project: { name: 'foo' } },
+          ])
+        ),
+      };
+      azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
+      const res = await azure.getJsonFile('file.json', 'foo/bar');
+      expect(res).toEqual(data);
+      expect(gitApiMock.getItemContent.mock.calls).toMatchSnapshot();
     });
   });
 });

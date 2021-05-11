@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
+exports[`manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
 Object {
   "constraints": Object {
     "composer": "^1.10.0",
@@ -214,7 +214,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with no lock file 1`] = `
+exports[`manager/composer/extract extractPackageFile() extracts dependencies with no lock file 1`] = `
 Object {
   "constraints": Object {
     "composer": "^1.10.0",
@@ -425,7 +425,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractPackageFile() extracts object registryUrls 1`] = `
+exports[`manager/composer/extract extractPackageFile() extracts object registryUrls 1`] = `
 Object {
   "constraints": Object {
     "composer": "1.*",
@@ -530,7 +530,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractPackageFile() extracts object repositories and registryUrls with lock file 1`] = `
+exports[`manager/composer/extract extractPackageFile() extracts object repositories and registryUrls with lock file 1`] = `
 Object {
   "constraints": Object {
     "composer": "1.*",
@@ -570,7 +570,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
+exports[`manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
 Object {
   "constraints": Object {
     "composer": "^1.10.0",
@@ -615,7 +615,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractPackageFile() extracts repositories and registryUrls 1`] = `
+exports[`manager/composer/extract extractPackageFile() extracts repositories and registryUrls 1`] = `
 Object {
   "constraints": Object {
     "composer": "1.*",

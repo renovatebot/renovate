@@ -9,14 +9,16 @@ const basicEnvVars = [
   'LC_ALL',
   'LANG',
   'DOCKER_HOST',
+  'DOCKER_TLS_VERIFY',
+  'DOCKER_CERT_PATH',
 ];
 
 export function getChildProcessEnv(
   customEnvVars: string[] = []
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
-  if (getAdminConfig().trustLevel === 'high') {
-    return Object.assign(env, process.env);
+  if (getAdminConfig().exposeAllEnv) {
+    return { ...env, ...process.env };
   }
   const envVars = [...basicEnvVars, ...customEnvVars];
   envVars.forEach((envVar) => {

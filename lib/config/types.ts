@@ -61,6 +61,7 @@ export interface RenovateSharedConfig {
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
+  gitIgnoredAuthors?: string[];
 }
 
 // Config options used only within the global worker
@@ -73,7 +74,6 @@ export interface GlobalOnlyConfig {
   gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
-  logLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
   redisUrl?: string;
@@ -83,14 +83,17 @@ export interface GlobalOnlyConfig {
 // Config options used within the repository worker, but not user configurable
 // The below should contain config options where admin=true
 export interface RepoAdminConfig {
+  allowCustomCrateRegistries?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
+  allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
   customEnvVariables?: Record<string, string>;
+  dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
+  exposeAllEnv?: boolean;
   privateKey?: string | Buffer;
-  trustLevel?: 'low' | 'high';
 }
 
 export interface LegacyAdminConfig {
@@ -112,10 +115,12 @@ export interface LegacyAdminConfig {
   platform?: string;
   requireConfig?: boolean;
 }
+export type ExecutionMode = 'branch' | 'update';
 
 export type PostUpgradeTasks = {
   commands?: string[];
   fileFilters?: string[];
+  executionMode: ExecutionMode;
 };
 
 type UpdateConfig<
@@ -126,6 +131,7 @@ export type RenovateRepository =
   | string
   | {
       repository: string;
+      secrets?: Record<string, string>;
     };
 
 export interface CustomManager {
@@ -151,7 +157,7 @@ export interface RenovateConfig
   defaultBranch?: string;
   branchList?: string[];
   description?: string | string[];
-
+  force?: RenovateConfig;
   errors?: ValidationMessage[];
 
   gitAuthor?: string;
@@ -188,6 +194,7 @@ export interface RenovateConfig
   regexManagers?: CustomManager[];
 
   fetchReleaseNotes?: boolean;
+  secrets?: Record<string, string>;
 }
 
 export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
@@ -200,6 +207,7 @@ export interface AssigneesAndReviewersConfig {
   reviewers?: string[];
   reviewersSampleSize?: number;
   additionalReviewers?: string[];
+  filterUnavailableUsers?: boolean;
 }
 
 export type UpdateType =
@@ -229,15 +237,17 @@ export interface PackageRule
   matchDepTypes?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
+  matchPackagePrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
+  excludePackagePrefixes?: string[];
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchUpdateTypes?: UpdateType[];
 }
 
 export interface ValidationMessage {
-  depName: string;
+  topic: string;
   message: string;
 }
 
@@ -323,3 +333,27 @@ export type RenovateOptions =
   | RenovateBooleanOption
   | RenovateArrayOption
   | RenovateObjectOption;
+
+export interface PackageRuleInputConfig extends Record<string, unknown> {
+  versioning?: string;
+  packageFile?: string;
+  depType?: string;
+  depTypes?: string[];
+  depName?: string;
+  currentValue?: string;
+  currentVersion?: string;
+  lockedVersion?: string;
+  updateType?: UpdateType;
+  isBump?: boolean;
+  sourceUrl?: string;
+  language?: string;
+  baseBranch?: string;
+  manager?: string;
+  datasource?: string;
+  packageRules?: (PackageRule & PackageRuleInputConfig)[];
+}
+
+export interface ManagerConfig extends RenovateConfig {
+  language: string;
+  manager: string;
+}

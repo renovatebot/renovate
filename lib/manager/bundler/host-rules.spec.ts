@@ -1,49 +1,15 @@
+import { getName } from '../../../test/util';
 import { HostRule } from '../../types';
 import { add, clear } from '../../util/host-rules';
 
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
-  getDomain,
 } from './host-rules';
 
-describe('lib/manager/bundler/host-rules', () => {
+describe(getName(), () => {
   beforeEach(() => {
     clear();
-  });
-  describe('getDomain()', () => {
-    it('returns the hostName if hostName is present', () => {
-      expect(
-        getDomain({
-          hostName: 'api.github.com',
-        })
-      ).toEqual('api.github.com');
-    });
-    it('returns the domainName if domainName is present and hostName is not present', () => {
-      expect(
-        getDomain({
-          domainName: 'github.com',
-        })
-      ).toEqual('github.com');
-    });
-    it('returns the hostName if hostName and domainName are present', () => {
-      expect(
-        getDomain({
-          hostName: 'api.github.com',
-          domainName: 'github.com',
-        })
-      ).toEqual('api.github.com');
-    });
-    it('returns the baseUrl host if hostName and domainName are not present', () => {
-      expect(
-        getDomain({
-          baseUrl: 'https://github.com',
-        })
-      ).toEqual('github.com');
-    });
-    it('returns undefined if hostName, domainName and baseUrl are not present', () => {
-      expect(getDomain({})).toBeNull();
-    });
   });
   describe('getAuthenticationHeaderValue()', () => {
     it('returns the authentication header with the password', () => {
@@ -104,36 +70,36 @@ describe('lib/manager/bundler/host-rules', () => {
       delete hostRule.token;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([
-        hostRule,
-      ]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toMatchObject([hostRule]);
     });
     it('returns the hostRule if using domainName and password', () => {
       delete hostRule.hostName;
       delete hostRule.token;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([
-        hostRule,
-      ]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toMatchObject([hostRule]);
     });
     it('returns the hostRule if using hostName and token', () => {
       delete hostRule.domainName;
       delete hostRule.password;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([
-        hostRule,
-      ]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toMatchObject([hostRule]);
     });
     it('returns the hostRule if using domainName and token', () => {
       delete hostRule.hostName;
       delete hostRule.password;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([
-        hostRule,
-      ]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toMatchObject([hostRule]);
     });
     it('returns the hostRule if using baseUrl and password', () => {
       hostRule.baseUrl = 'https://nuget.com';
@@ -141,9 +107,9 @@ describe('lib/manager/bundler/host-rules', () => {
       delete hostRule.hostName;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([
-        hostRule,
-      ]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toMatchObject([hostRule]);
     });
     it('returns the hostRule if using baseUrl and token', () => {
       hostRule.baseUrl = 'https://nuget.com';
@@ -151,9 +117,9 @@ describe('lib/manager/bundler/host-rules', () => {
       delete hostRule.domainName;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([
-        hostRule,
-      ]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toMatchObject([hostRule]);
     });
   });
 });

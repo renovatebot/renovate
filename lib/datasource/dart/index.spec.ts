@@ -1,18 +1,13 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName, loadJsonFixture } from '../../../test/util';
 import { id as datasource } from '.';
 
-const body: any = JSON.parse(
-  fs.readFileSync(
-    'lib/datasource/dart/__fixtures__/shared_preferences.json',
-    'utf8'
-  )
-);
+const body = loadJsonFixture('shared_preferences.json');
 
 const baseUrl = 'https://pub.dartlang.org/api/packages/';
 
-describe('datasource/dart', () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
   });

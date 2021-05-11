@@ -1,8 +1,23 @@
 import { getName } from '../../test/util';
+import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
-import { RenovateConfig } from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
+  describe('getParentName()', () => {
+    it('ignores encrypted in root', () => {
+      expect(configValidation.getParentName('encrypted')).toEqual('');
+    });
+    it('handles array types', () => {
+      expect(configValidation.getParentName('hostRules[1]')).toEqual(
+        'hostRules'
+      );
+    });
+    it('handles encrypted within array types', () => {
+      expect(configValidation.getParentName('hostRules[0].encrypted')).toEqual(
+        'hostRules'
+      );
+    });
+  });
   describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
       const config = {
@@ -51,18 +66,22 @@ describe(getName(__filename), () => {
           {
             matchPackageNames: ['foo'],
             matchCurrentVersion: '/^2/',
+            enabled: true,
           },
           {
             matchPackageNames: ['bar'],
             matchCurrentVersion: '/***$}{]][/',
+            enabled: true,
           },
           {
             matchPackageNames: ['baz'],
             matchCurrentVersion: '!/^2/',
+            enabled: true,
           },
           {
             matchPackageNames: ['quack'],
             matchCurrentVersion: '!/***$}{]][/',
+            enabled: true,
           },
         ],
       };
@@ -79,6 +98,7 @@ describe(getName(__filename), () => {
           {
             matchPackagePatterns: ['*'],
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            enabled: true,
           },
         ],
         lockFileMaintenance: {
@@ -98,6 +118,7 @@ describe(getName(__filename), () => {
         packageRules: [
           {
             matchManagers: ['foo'],
+            enabled: true,
           },
         ],
       };
@@ -113,6 +134,7 @@ describe(getName(__filename), () => {
         packageRules: [
           {
             matchManagers: 'string not an array',
+            enabled: true,
           },
         ],
       };
@@ -123,10 +145,46 @@ describe(getName(__filename), () => {
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
+
+    it.each([
+      ['empty configuration', {}],
+      ['configuration with enabledManagers empty', { enabledManagers: [] }],
+      ['single enabled manager', { enabledManagers: ['npm'] }],
+      [
+        'multiple enabled managers',
+        { enabledManagers: ['npm', 'gradle', 'maven'] },
+      ],
+    ])('validates enabled managers for %s', async (_case, config) => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it.each([
+      ['single not supported manager', { enabledManagers: ['foo'] }],
+      ['multiple not supported managers', { enabledManagers: ['foo', 'bar'] }],
+      [
+        'combined supported and not supported managers',
+        { enabledManagers: ['foo', 'npm', 'gradle', 'maven'] },
+      ],
+    ])(
+      'errors if included not supported enabled managers for %s',
+      async (_case, config) => {
+        const { warnings, errors } = await configValidation.validateConfig(
+          config
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(1);
+        expect(errors).toMatchSnapshot();
+      }
+    );
     it('errors for all types', async () => {
       const config: RenovateConfig = {
         allowedVersions: 'foo',
         enabled: 1 as any,
+        enabledManagers: ['npm'],
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
         labels: 5 as any,
@@ -153,7 +211,7 @@ describe(getName(__filename), () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(12);
     });
@@ -164,6 +222,7 @@ describe(getName(__filename), () => {
           packageRules: [
             {
               matchPackageNames: ['meteor'],
+              enabled: true,
             },
           ],
         },
@@ -176,7 +235,7 @@ describe(getName(__filename), () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toHaveLength(2);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(2);
     });
@@ -292,6 +351,7 @@ describe(getName(__filename), () => {
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
+            registryUrlTemplate: 'foobar',
           },
         ],
       };
@@ -439,7 +499,7 @@ describe(getName(__filename), () => {
         fileMatch: ['foo'],
         npm: {
           fileMatch: ['package\\.json'],
-          gradle: {
+          minor: {
             fileMatch: ['bar'],
           },
         },
@@ -461,6 +521,44 @@ describe(getName(__filename), () => {
       expect(warnings).toMatchSnapshot();
     });
 
+    it('errors if language or manager objects are nested', async () => {
+      const config = {
+        python: {
+          enabled: false,
+        },
+        java: {
+          gradle: {
+            enabled: false,
+          },
+        },
+        major: {
+          minor: {
+            docker: {
+              automerge: true,
+            },
+          },
+        },
+      } as never;
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(errors).toHaveLength(2);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+    });
+
+    it('warns if hostType has the wrong parent', async () => {
+      const config = {
+        hostType: 'npm',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings).toMatchSnapshot();
+    });
+
     it('validates preset values', async () => {
       const config = {
         extends: ['foo', 'bar', 42] as never,
@@ -471,6 +569,55 @@ describe(getName(__filename), () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
+    });
+
+    it('warns if only selectors in packageRules', async () => {
+      const config = {
+        packageRules: [
+          { matchDepTypes: ['foo'], excludePackageNames: ['bar'] },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(1);
+      expect(warnings).toMatchSnapshot();
+      expect(errors).toHaveLength(0);
+    });
+    it('errors if invalid combinations in packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            registryUrls: ['https://registry.npmjs.org'],
+          },
+        ],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
+    });
+    it('warns on nested group packageRules', async () => {
+      const config = {
+        extends: ['group:fortawesome'],
+        packageRules: [
+          {
+            automerge: true,
+            extends: ['group:fortawesome'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
     });
   });
 });

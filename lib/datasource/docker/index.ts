@@ -1,6 +1,5 @@
-import { OutgoingHttpHeaders } from 'http';
 import URL from 'url';
-import { ECR } from '@aws-sdk/client-ecr';
+import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
@@ -11,22 +10,23 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
+import type { OutgoingHttpHeaders } from '../../util/http/types';
+import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { Image, ImageList, MediaType } from './types';
 
-// TODO: add got typings when available
-// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
+// TODO: add got typings when available (#9646)
+// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
 
 export const id = 'docker';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://index.docker.io'];
 export const defaultVersioning = dockerVersioning.id;
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
-  additionalBranchPrefix: 'docker-',
   commitMessageTopic: '{{{depName}}} Docker tag',
-  major: { enabled: false },
   commitMessageExtra:
     'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
   digest: {
@@ -66,9 +66,14 @@ export function getRegistryRepository(
   registryUrl: string
 ): RegistryRepository {
   if (registryUrl !== defaultRegistryUrls[0]) {
-    const registry = registryUrl.replace('https://', '');
-    const registryEndingWithSlash = registry.replace(/\/?$/, '/');
+    const registryEndingWithSlash = ensureTrailingSlash(
+      registryUrl.replace(/^https?:\/\//, '')
+    );
     if (lookupName.startsWith(registryEndingWithSlash)) {
+      let registry = trimTrailingSlash(registryUrl);
+      if (!/^https?:\/\//.test(registry)) {
+        registry = `https://${registry}`;
+      }
       return {
         registry,
         repository: lookupName.replace(registryEndingWithSlash, ''),
@@ -108,10 +113,12 @@ async function getECRAuthToken(
   region: string,
   opts: HostRule
 ): Promise<string | null> {
-  const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
+  const config: ECRClientConfig = { region };
   if (opts.username && opts.password) {
-    config.accessKeyId = opts.username;
-    config.secretAccessKey = opts.password;
+    config.credentials = {
+      accessKeyId: opts.username,
+      secretAccessKey: opts.password,
+    };
   }
   const ecr = new ECR(config);
   try {
@@ -194,7 +201,7 @@ async function getAuthHeaders(
   } catch (err) {
     /* c8 ignore start */
     if (err.host === 'quay.io') {
-      // TODO: debug why quay throws errors
+      // TODO: debug why quay throws errors (#9604)
       return null;
     }
     if (err.statusCode === 401) {
@@ -248,7 +255,7 @@ function extractDigestFromResponse(manifestResponse: HttpResponse): string {
   return manifestResponse.headers['docker-content-digest'] as string;
 }
 
-// TODO: make generic to return json object
+// TODO: debug why quay throws errors (#9612)
 async function getManifestResponse(
   registry: string,
   dockerRepository: string,
@@ -348,7 +355,10 @@ async function getConfigDigest(
     return null;
   }
 
-  if (manifest.mediaType === MediaType.manifestListV2) {
+  if (
+    manifest.mediaType === MediaType.manifestListV2 &&
+    manifest.manifests.length
+  ) {
     logger.trace(
       { registry, dockerRepository, tag },
       'Found manifest list, using first image'
@@ -361,7 +371,7 @@ async function getConfigDigest(
   }
 
   if (manifest.mediaType === MediaType.manifestV2) {
-    return manifest.config.digest;
+    return manifest.config?.digest || null;
   }
 
   logger.debug({ manifest }, 'Invalid manifest - returning');

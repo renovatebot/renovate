@@ -1,13 +1,8 @@
-import { readFileSync } from 'fs';
-import path from 'path';
+import { getName, loadFixture } from '../../../test/util';
 import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO } from './common';
 import { parseGradle, parseProps } from './parser';
 
-function getGradleFile(fileName: string): string {
-  return readFileSync(path.resolve(__dirname, fileName), 'utf8');
-}
-
-describe('manager/gradle-lite/parser', () => {
+describe(getName(), () => {
   it('handles end of input', () => {
     expect(parseGradle('version = ').deps).toBeEmpty();
     expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
@@ -72,6 +67,25 @@ describe('manager/gradle-lite/parser', () => {
       'https://example.com',
       JCENTER_REPO,
       GOOGLE_REPO,
+    ]);
+
+    ({ urls } = parseGradle(
+      'maven("https://repository.mycompany.com/m2/repository")'
+    ));
+    expect(urls).toStrictEqual([
+      'https://repository.mycompany.com/m2/repository',
+    ]);
+
+    ({ urls } = parseGradle(
+      'maven { url = uri("https://maven.springframework.org/release") }'
+    ));
+    expect(urls).toStrictEqual(['https://maven.springframework.org/release']);
+
+    ({ urls } = parseGradle(
+      "maven { url 'https://repository.mycompany.com/m2/repository' }"
+    ));
+    expect(urls).toStrictEqual([
+      'https://repository.mycompany.com/m2/repository',
     ]);
   });
   it('parses long form deps', () => {
@@ -161,9 +175,7 @@ describe('manager/gradle-lite/parser', () => {
     ]);
   });
   it('parses fixture from "gradle" manager', () => {
-    const content = getGradleFile(
-      `../gradle/__fixtures__/build.gradle.example1`
-    );
+    const content = loadFixture('build.gradle.example1', '../gradle');
     const { deps } = parseGradle(content, {}, 'build.gradle');
     deps.forEach((dep) => {
       expect(

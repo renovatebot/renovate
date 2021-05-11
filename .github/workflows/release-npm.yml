@@ -1,13 +1,29 @@
 name: release-npm
+
 on:
   repository_dispatch:
     types: [renovate-release]
+
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Git sha to checkout'
+        required: true
+      version:
+        description: 'Version to release'
+        required: true
+      tag:
+        description: 'Npm dist-tag'
+        default: 'latest'
 
 env:
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
+  GIT_SHA: ${{ github.event.client_payload.sha }}
+  NPM_VERSION: ${{ github.event.client_payload.version }}
+  NPM_TAG: ${{ github.event.client_payload.tag }}
 
 jobs:
   release-npm:
@@ -27,13 +43,21 @@ jobs:
           yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true
 
+      - name: Prepare env
+        run: |
+          if [[ "${{github.event_name}}" == "workflow_dispatch" ]]; then
+            echo "GIT_SHA=${{ github.event.inputs.sha }}" >> $GITHUB_ENV
+            echo "NPM_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+            echo "NPM_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          fi
+
       - uses: actions/checkout@v2.3.4
         with:
-          ref: ${{ github.event.client_payload.sha }}
+          ref: ${{ env.GIT_SHA }}
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -41,16 +65,16 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build ${{ github.event.client_payload.version }}
+      - name: Build ${{ env.NPM_VERSION }}
         run: yarn build
 
-      - name: Prepare ${{ github.event.client_payload.version }}
+      - name: Prepare  ${{ env.NPM_VERSION }}
         run: |
-          npm --no-git-tag-version version ${{ github.event.client_payload.version }}
+          npm --no-git-tag-version version ${{ env.NPM_VERSION }}
 
-      - name: Publish ${{ github.event.client_payload.version }}
+      - name: Publish ${{ env.NPM_VERSION }}
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-          npm publish
+          npm publish --tag ${{ env.NPM_TAG }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

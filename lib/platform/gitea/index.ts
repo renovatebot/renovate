@@ -1,5 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
+import { lt } from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -51,6 +52,7 @@ interface GiteaRepoConfig {
 const defaults = {
   hostType: PLATFORM_TYPE_GITEA,
   endpoint: 'https://gitea.com/api/v1/',
+  version: '0.0.0',
 };
 
 let config: GiteaRepoConfig = {} as any;
@@ -191,6 +193,7 @@ const platform: Platform = {
       gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
+      defaults.version = await helper.getVersion({ token });
     } catch (err) {
       logger.debug(
         { err },
@@ -205,17 +208,20 @@ const platform: Platform = {
     };
   },
 
-  async getJsonFile(fileName: string): Promise<any | null> {
-    try {
-      const contents = await helper.getRepoContents(
-        config.repository,
-        fileName,
-        config.defaultBranch
-      );
-      return JSON.parse(contents.contentString);
-    } catch (err) /* c8 ignore next */ {
-      return null;
-    }
+  async getRawFile(
+    fileName: string,
+    repo: string = config.repository
+  ): Promise<string | null> {
+    const contents = await helper.getRepoContents(repo, fileName);
+    return contents.contentString;
+  },
+
+  async getJsonFile(
+    fileName: string,
+    repo: string = config.repository
+  ): Promise<any | null> {
+    const raw = await platform.getRawFile(fileName, repo);
+    return JSON.parse(raw);
   },
 
   async initRepo({
@@ -311,7 +317,10 @@ const platform: Platform = {
   async getRepos(): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
     try {
-      const repos = await helper.searchRepos({ uid: botUserID });
+      const repos = await helper.searchRepos({
+        uid: botUserID,
+        archived: false,
+      });
       return repos.map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
@@ -728,14 +737,14 @@ const platform: Platform = {
           { repository: config.repository, issue, comment: c.id },
           'Comment added'
         );
-      } else if (comment.body !== body) {
+      } else if (comment.body === body) {
+        logger.debug(`Comment #${comment.id} is already up-to-date`);
+      } else {
         const c = await helper.updateComment(config.repository, issue, body);
         logger.debug(
           { repository: config.repository, issue, comment: c.id },
           'Comment updated'
         );
-      } else {
-        logger.debug(`Comment #${comment.id} is already up-to-date`);
       }
 
       return true;
@@ -792,6 +801,13 @@ const platform: Platform = {
 
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
+    if (lt(defaults.version, '1.14.0')) {
+      logger.debug(
+        { version: defaults.version },
+        'Adding reviewer not yet supported.'
+      );
+      return;
+    }
     try {
       await helper.requestPrReviewers(config.repository, number, { reviewers });
     } catch (err) {
@@ -823,6 +839,7 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
+  getRawFile,
   getJsonFile,
   getIssueList,
   getPr,

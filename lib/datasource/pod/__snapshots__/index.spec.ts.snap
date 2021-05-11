@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/cocoapods getReleases processes real data from CDN 1`] = `
+exports[`datasource/pod/index getReleases processes real data from CDN 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "cdn.cocoapods.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -14,12 +14,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases processes real data from Github 1`] = `
+exports[`datasource/pod/index getReleases processes real data from Github 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -29,7 +29,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -39,11 +39,11 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases returns null for 401 1`] = `
+exports[`datasource/pod/index getReleases returns null for 401 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "cdn.cocoapods.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -53,12 +53,12 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases returns null for 404 1`] = `
+exports[`datasource/pod/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -68,7 +68,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -78,11 +78,11 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases returns null for unknown error 1`] = `
+exports[`datasource/pod/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "cdn.cocoapods.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -92,11 +92,11 @@ Array [
 ]
 `;
 
-exports[`datasource/cocoapods getReleases throws for 429 1`] = `
+exports[`datasource/pod/index getReleases throws for 429 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "cdn.cocoapods.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

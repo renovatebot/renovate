@@ -2,6 +2,7 @@ import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { readFile, remove } from '../../../util/fs';
@@ -42,27 +43,20 @@ export async function generateLockFile(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
       },
     };
-    // istanbul ignore if
-    if (getAdminConfig().trustLevel === 'high') {
+    /* c8 ignore next 4 */
+    if (getAdminConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
-      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
-    }
-    if (config.dockerMapDotfiles) {
-      const homeDir =
-        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-      const homeNpmrc = join(homeDir, '.npmrc');
-      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
     cmd = 'pnpm';
     let args = 'install --recursive --lockfile-only';
-    if (getAdminConfig().trustLevel !== 'high' || config.ignoreScripts) {
+    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
     }
@@ -74,7 +68,8 @@ export async function generateLockFile(
       );
       try {
         await remove(lockFileName);
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) {
+        /* c8 ignore next */
         logger.debug(
           { err, lockFileName },
           'Error removing yarn.lock for lock file maintenance'
@@ -84,7 +79,11 @@ export async function generateLockFile(
 
     await exec(`${cmd} ${args}`, execOptions);
     lockFile = await readFile(lockFileName, 'utf8');
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) {
+    /* c8 ignore start */
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug(
       {
         cmd,
@@ -96,6 +95,7 @@ export async function generateLockFile(
       'lock file error'
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
+    /* c8 ignore stop */
   }
   return { lockFile };
 }

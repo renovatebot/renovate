@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
+import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
 import type { PackageFile } from '../../../../manager/types';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 
-describe('workers/repository/onboarding/pr/errors-warnings', () => {
+describe(getName(), () => {
   describe('getWarnings()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -12,7 +12,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
     it('returns warning text', () => {
       config.warnings = [
         {
-          depName: 'foo',
+          topic: 'foo',
           message: 'Failed to look up dependency',
         },
       ];
@@ -31,7 +31,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', depName: undefined }],
+                warnings: [{ message: 'Warning 1', topic: undefined }],
               },
               {},
             ],
@@ -40,7 +40,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'backend/package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', depName: undefined }],
+                warnings: [{ message: 'Warning 1', topic: undefined }],
               },
             ],
           },
@@ -50,7 +50,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'Dockerfile',
             deps: [
               {
-                warnings: [{ message: 'Warning 2', depName: undefined }],
+                warnings: [{ message: 'Warning 2', topic: undefined }],
               },
             ],
           },
@@ -69,7 +69,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
     it('returns error text', () => {
       config.errors = [
         {
-          depName: 'renovate.json',
+          topic: 'renovate.json',
           message: 'Failed to parse',
         },
       ];

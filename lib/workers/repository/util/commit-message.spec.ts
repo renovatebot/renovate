@@ -1,9 +1,10 @@
+import { getName } from '../../../../test/util';
 import {
   COMMIT_MESSAGE_PREFIX_SEPARATOR,
   formatCommitMessagePrefix,
 } from './commit-message';
 
-describe('workers/repository/util/commit-message', () => {
+describe(getName(), () => {
   describe('COMMIT_MESSAGE_PREFIX_END_CHARACTER', () => {
     it('is a colon character', () => {
       expect(COMMIT_MESSAGE_PREFIX_SEPARATOR).toBe(':');

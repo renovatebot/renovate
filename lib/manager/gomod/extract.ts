@@ -21,10 +21,10 @@ function getDep(
     depType: type,
     currentValue,
   };
-  if (!isVersion(currentValue)) {
-    dep.skipReason = SkipReason.UnsupportedVersion;
-  } else {
+  if (isVersion(currentValue)) {
     dep.datasource = datasourceGo.id;
+  } else {
+    dep.skipReason = SkipReason.UnsupportedVersion;
   }
   const digestMatch = /v0\.0.0-\d{14}-([a-f0-9]{12})/.exec(currentValue);
   if (digestMatch) {
@@ -43,7 +43,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
       if (line.startsWith('go ') && validRange(line.replace('go ', ''))) {
-        constraints.go = line.replace('go ', '');
+        constraints.go = line.replace('go ', '^');
       }
       const replaceMatch = /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/.exec(
         line

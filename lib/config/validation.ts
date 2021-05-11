@@ -1,20 +1,22 @@
 import is from '@sindresorhus/is';
-import { getManagerList } from '../manager';
+import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import { getOptions } from './definitions';
+import { migrateConfig } from './migration';
 import { resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
   RenovateOptions,
   ValidationMessage,
 } from './types';
-import { check } from './validation-helpers/managers';
+import * as managerValidator from './validation-helpers/managers';
 
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
+let optionParents: Record<string, RenovateOptions['parent']>;
 
 export interface ValidationResult {
   errors: ValidationMessage[];
@@ -30,6 +32,18 @@ function isManagerPath(parentPath: string): boolean {
   );
 }
 
+export function getParentName(parentPath: string): string {
+  return parentPath
+    ? parentPath
+        .replace(/\.?encrypted$/, '')
+        .replace(/\[\d+\]$/, '')
+        .split('.')
+        .pop()
+    : '.';
+}
+
+const topLevelObjects = getLanguageList().concat(getManagerList());
+
 export async function validateConfig(
   config: RenovateConfig,
   isPreset?: boolean,
@@ -41,6 +55,14 @@ export async function validateConfig(
       optionTypes[option.name] = option.type;
     });
   }
+  if (!optionParents) {
+    optionParents = {};
+    options.forEach((option) => {
+      if (option.parent) {
+        optionParents[option.name] = option.parent;
+      }
+    });
+  }
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -49,6 +71,8 @@ export async function validateConfig(
       branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
       commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
       prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
+      yarnrc:
+        'Use of `yarnrc` in config is deprecated. Please commit it to your repository instead.',
     };
     return deprecatedOptions[option];
   }
@@ -84,26 +108,51 @@ export async function validateConfig(
     return true;
   }
 
+  function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
+    return enabledManagers.filter(
+      (manager) => !getManagerList().includes(manager)
+    );
+  }
+
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     /* c8 ignore start */
     if (key === '__proto__') {
       errors.push({
-        depName: 'Config security error',
+        topic: 'Config security error',
         message: '__proto__',
       });
       continue; // eslint-disable-line
     }
     /* c8 ignore stop */
+    if (parentPath && topLevelObjects.includes(key)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
+      });
+    }
+    if (key === 'enabledManagers' && val) {
+      const unsupportedManagers = getUnsupportedEnabledManagers(
+        val as string[]
+      );
+      if (is.nonEmptyArray(unsupportedManagers)) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
+            ', '
+          )}"`,
+        });
+      }
+    }
     if (key === 'fileMatch') {
       if (parentPath === undefined) {
         errors.push({
-          depName: 'Config error',
+          topic: 'Config error',
           message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
         });
       } else if (!isManagerPath(parentPath)) {
         warnings.push({
-          depName: 'Config warning',
+          topic: 'Config warning',
           message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,
         });
       }
@@ -114,7 +163,7 @@ export async function validateConfig(
     ) {
       if (getDeprecationMessage(key)) {
         warnings.push({
-          depName: 'Deprecation Warning',
+          topic: 'Deprecation Warning',
           message: getDeprecationMessage(key),
         });
       }
@@ -132,21 +181,33 @@ export async function validateConfig(
           template.compile(res, config, false);
         } catch (err) {
           errors.push({
-            depName: 'Configuration Error',
+            topic: 'Configuration Error',
             message: `Invalid template in config path: ${currentPath}`,
           });
         }
       }
+      const parentName = getParentName(parentPath);
+      if (
+        !isPreset &&
+        optionParents[key] &&
+        optionParents[key] !== parentName
+      ) {
+        const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
+        warnings.push({
+          topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
+          message,
+        });
+      }
       if (!optionTypes[key]) {
         errors.push({
-          depName: 'Configuration Error',
+          topic: 'Configuration Error',
           message: `Invalid configuration option: ${currentPath}`,
         });
       } else if (key === 'schedule') {
         const [validSchedule, errorMessage] = hasValidSchedule(val as string[]);
         if (!validSchedule) {
           errors.push({
-            depName: 'Configuration Error',
+            topic: 'Configuration Error',
             message: `Invalid ${currentPath}: \`${errorMessage}\``,
           });
         }
@@ -156,7 +217,7 @@ export async function validateConfig(
       ) {
         if (!configRegexPredicate(val)) {
           errors.push({
-            depName: 'Configuration Error',
+            topic: 'Configuration Error',
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
@@ -164,7 +225,7 @@ export async function validateConfig(
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
           errors.push({
-            depName: 'Configuration Error',
+            topic: 'Configuration Error',
             message: `${currentPath}: ${errorMessage}`,
           });
         }
@@ -173,19 +234,14 @@ export async function validateConfig(
         if (type === 'boolean') {
           if (val !== true && val !== false) {
             errors.push({
-              depName: 'Configuration Error',
+              topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
                 val
               )} (${typeof val})`,
             });
           }
         } else if (type === 'array' && val) {
-          if (!is.array(val)) {
-            errors.push({
-              depName: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
-            });
-          } else {
+          if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await module.exports.validateConfig(
@@ -201,6 +257,15 @@ export async function validateConfig(
               const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
                 if (is.string(subval)) {
+                  if (
+                    parentName === 'packageRules' &&
+                    subval.startsWith('group:')
+                  ) {
+                    warnings.push({
+                      topic: 'Configuration Warning',
+                      message: `${currentPath}: you should not extend "group:" presets`,
+                    });
+                  }
                   if (tzRe.test(subval)) {
                     const [, timezone] = tzRe.exec(subval);
                     const [validTimezone, errorMessage] = hasValidTimezone(
@@ -208,14 +273,14 @@ export async function validateConfig(
                     );
                     if (!validTimezone) {
                       errors.push({
-                        depName: 'Configuration Error',
+                        topic: 'Configuration Error',
                         message: `${currentPath}: ${errorMessage}`,
                       });
                     }
                   }
                 } else {
                   errors.push({
-                    depName: 'Configuration Warning',
+                    topic: 'Configuration Warning',
                     message: `${currentPath}: preset value is not a string`,
                   });
                 }
@@ -223,7 +288,7 @@ export async function validateConfig(
             }
 
             const selectors = [
-              'matchPackageRules',
+              'matchFiles',
               'matchPaths',
               'matchLanguages',
               'matchBaseBranches',
@@ -232,38 +297,81 @@ export async function validateConfig(
               'matchDepTypes',
               'matchPackageNames',
               'matchPackagePatterns',
+              'matchPackagePrefixes',
               'excludePackageNames',
               'excludePackagePatterns',
+              'excludePackagePrefixes',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
               'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
-              for (const packageRule of val) {
-                let hasSelector = false;
+              for (const [subIndex, packageRule] of val.entries()) {
                 if (is.object(packageRule)) {
-                  const resolvedRule = await resolveConfigPresets(
-                    packageRule as RenovateConfig,
-                    config
+                  const resolvedRule = migrateConfig({
+                    packageRules: [
+                      await resolveConfigPresets(
+                        packageRule as RenovateConfig,
+                        config
+                      ),
+                    ],
+                  }).migratedConfig.packageRules[0];
+                  errors.push(
+                    ...managerValidator.check({ resolvedRule, currentPath })
                   );
-                  errors.push(...check({ resolvedRule, currentPath }));
-                  for (const pKey of Object.keys(resolvedRule)) {
-                    if (selectors.includes(pKey)) {
-                      hasSelector = true;
-                    }
-                  }
-                  if (!hasSelector) {
-                    const message = `${currentPath}: Each packageRule must contain at least one selector (${selectors.join(
-                      ', '
-                    )}). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.`;
+                  const selectorLength = Object.keys(
+                    resolvedRule
+                  ).filter((ruleKey) => selectors.includes(ruleKey)).length;
+                  if (!selectorLength) {
+                    const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
+                      packageRule
+                    )}`;
                     errors.push({
-                      depName: 'Configuration Error',
+                      topic: 'Configuration Error',
                       message,
                     });
                   }
+                  if (selectorLength === Object.keys(resolvedRule).length) {
+                    const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
+                      packageRule
+                    )}`;
+                    warnings.push({
+                      topic: 'Configuration Error',
+                      message,
+                    });
+                  }
+                  // It's too late to apply any of these options once you already have updates determined
+                  const preLookupOptions = [
+                    'allowedVersions',
+                    'extractVersion',
+                    'followTag',
+                    'ignoreDeps',
+                    'ignoreUnstable',
+                    'rangeStrategy',
+                    'registryUrls',
+                    'respectLatest',
+                    'rollbackPrs',
+                    'separateMajorMinor',
+                    'separateMinorPatch',
+                    'separateMultipleMajor',
+                    'versioning',
+                  ];
+                  if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {
+                    for (const option of preLookupOptions) {
+                      if (resolvedRule[option] !== undefined) {
+                        const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
+                          packageRule
+                        )}`;
+                        errors.push({
+                          topic: 'Configuration Error',
+                          message,
+                        });
+                      }
+                    }
+                  }
                 } else {
                   errors.push({
-                    depName: 'Configuration Error',
+                    topic: 'Configuration Error',
                     message: `${currentPath} must contain JSON objects`,
                   });
                 }
@@ -279,6 +387,7 @@ export async function validateConfig(
                 'lookupNameTemplate',
                 'datasourceTemplate',
                 'versioningTemplate',
+                'registryUrlTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
@@ -291,17 +400,12 @@ export async function validateConfig(
                     (k) => !allowedKeys.includes(k)
                   );
                   errors.push({
-                    depName: 'Configuration Error',
+                    topic: 'Configuration Error',
                     message: `Regex Manager contains disallowed fields: ${disallowedKeys.join(
                       ', '
                     )}`,
                   });
-                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
-                  errors.push({
-                    depName: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
-                  });
-                } else {
+                } else if (is.nonEmptyArray(regexManager.fileMatch)) {
                   let validRegex = false;
                   for (const matchString of regexManager.matchStrings) {
                     try {
@@ -309,7 +413,7 @@ export async function validateConfig(
                       validRegex = true;
                     } catch (e) {
                       errors.push({
-                        depName: 'Configuration Error',
+                        topic: 'Configuration Error',
                         message: `Invalid regExp for ${currentPath}: \`${String(
                           matchString
                         )}\``,
@@ -330,12 +434,17 @@ export async function validateConfig(
                         )
                       ) {
                         errors.push({
-                          depName: 'Configuration Error',
+                          topic: 'Configuration Error',
                           message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
                         });
                       }
                     }
                   }
+                } else {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Each Regex Manager must contain a fileMatch array`,
+                  });
                 }
               }
             }
@@ -349,7 +458,7 @@ export async function validateConfig(
                     regEx(pattern);
                   } catch (e) {
                     errors.push({
-                      depName: 'Configuration Error',
+                      topic: 'Configuration Error',
                       message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
                     });
                   }
@@ -362,7 +471,7 @@ export async function validateConfig(
                   regEx(fileMatch);
                 } catch (e) {
                   errors.push({
-                    depName: 'Configuration Error',
+                    topic: 'Configuration Error',
                     message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
                   });
                 }
@@ -374,15 +483,20 @@ export async function validateConfig(
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({
-                depName: 'Configuration Error',
+                topic: 'Configuration Error',
                 message: `${currentPath}: ${key} should be inside a \`packageRule\` only`,
               });
             }
+          } else {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
+            });
           }
         } else if (type === 'string') {
           if (!is.string(val)) {
             errors.push({
-              depName: 'Configuration Error',
+              topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
           }
@@ -396,7 +510,7 @@ export async function validateConfig(
             if (key === 'aliases') {
               if (!validateAliasObject(key, val)) {
                 errors.push({
-                  depName: 'Configuration Error',
+                  topic: 'Configuration Error',
                   message: `Invalid alias object configuration`,
                 });
               }
@@ -416,7 +530,7 @@ export async function validateConfig(
             }
           } else {
             errors.push({
-              depName: 'Configuration Error',
+              topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be a json object`,
             });
           }
@@ -425,10 +539,11 @@ export async function validateConfig(
     }
   }
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
-    if (a.depName === b.depName) {
+    if (a.topic === b.topic) {
       return a.message > b.message ? 1 : -1;
     }
-    return a.depName > b.depName ? 1 : -1;
+    /* c8 ignore next */
+    return a.topic > b.topic ? 1 : -1;
   }
   errors.sort(sortAll);
   warnings.sort(sortAll);

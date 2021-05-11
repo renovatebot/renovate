@@ -1,5 +1,6 @@
 import { stat } from 'fs-extra';
 import { resolve } from 'upath';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
@@ -85,13 +86,17 @@ export async function updateArtifacts({
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
-        image: 'renovate/gradle',
+        image: 'gradle',
       },
       extraEnv,
     };
     try {
       await exec(cmd, execOptions);
     } catch (err) {
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
       logger.warn(
         { err },
         'Error executing gradle wrapper update command. It can be not a critical one though.'

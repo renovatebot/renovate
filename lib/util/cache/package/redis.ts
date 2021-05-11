@@ -11,7 +11,7 @@ function getKey(namespace: string, key: string): string {
 
 export function end(): void {
   try {
-    client?.nodeRedis?.end(true); // TODO: Why is this not supported by client directly?
+    client?.nodeRedis?.end(true); // TODO: Why is this not supported by client directly? (#9714)
   } catch (err) {
     logger.warn({ err }, 'Redis cache end failed');
   }

@@ -1,5 +1,5 @@
-import { defaultConfig, git, mocked } from '../../../test/util';
-import * as datasourceGitSubmodules from '../../datasource/git-submodules';
+import { defaultConfig, getName, git, mocked } from '../../../test/util';
+import * as datasourceGitRefs from '../../datasource/git-refs';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
 import * as _helmv3 from '../../manager/helmv3';
@@ -21,7 +21,7 @@ jest.mock('../../manager/git-submodules');
 jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
-describe('workers/branch/get-updated', () => {
+describe(getName(), () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
     beforeEach(() => {
@@ -172,7 +172,7 @@ describe('workers/branch/get-updated', () => {
     it('handles git submodules', async () => {
       config.upgrades.push({
         manager: 'git-submodules',
-        datasource: datasourceGitSubmodules.id,
+        datasource: datasourceGitRefs.id,
       } as never);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);

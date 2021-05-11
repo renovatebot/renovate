@@ -76,6 +76,14 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
       upgrades,
     };
   } catch (err) {
+    // istanbul ignore if
+    if (err.response?.statusCode === 404) {
+      logger.warn(
+        { err, branchName },
+        '404 error when generating branch cache'
+      );
+      return null;
+    }
     logger.error({ err, branchName }, 'Error generating branch cache');
     return null;
   }

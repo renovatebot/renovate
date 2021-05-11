@@ -304,16 +304,6 @@ export const presets: Record<string, Preset> = {
       'If automerging, push the new commit directly to base branch (no PR)',
     automergeType: 'branch',
   },
-  automergeBranchMergeCommit: {
-    description:
-      'If automerging, perform a merge-commit on branch (no PR) - deprecated, use :automergeBranch instead',
-    automergeType: 'branch-merge-commit',
-  },
-  automergeBranchPush: {
-    description:
-      'If automerging, push the new commit directly to base branch (no PR) - deprecated, use :automergeBranch instead',
-    automergeType: 'branch-push',
-  },
   automergePr: {
     description: 'Raise a PR first before any automerging',
     automergeType: 'pr',
@@ -391,7 +381,7 @@ export const presets: Record<string, Preset> = {
     description: 'Update @types/* packages automatically if tests pass',
     packageRules: [
       {
-        matchPackagePatterns: ['^@types/'],
+        matchPackagePrefixes: ['@types/'],
         automerge: true,
       },
     ],
@@ -572,21 +562,24 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  base: {
-    description: 'deprecated alias for config:base',
-    extends: ['config:base'],
-  },
-  app: {
-    description: 'deprecated alias for config:js-app',
-    extends: ['config:js-app'],
-  },
-  library: {
-    description: 'deprecated alias for config:js-lib',
-    extends: ['config:js-lib'],
-  },
   disablePrControls: {
     description: 'Remove the checkbox controls from PRs',
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
+  },
+  enableGradleLite: {
+    description: 'Enable the gradle-lite manager',
+    'gradle-lite': {
+      enabled: true,
+    },
+  },
+  switchToGradleLite: {
+    description: 'Enable the gradle-lite manager and disable gradle',
+    gradle: {
+      enabled: false,
+    },
+    'gradle-lite': {
+      enabled: true,
+    },
   },
 };

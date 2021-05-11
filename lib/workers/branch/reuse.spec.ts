@@ -1,12 +1,12 @@
 import { getName, git, platform } from '../../../test/util';
-import { RenovateConfig } from '../../config';
+import type { RenovateConfig } from '../../config/types';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';
 import { shouldReuseExistingBranch } from './reuse';
 
 jest.mock('../../util/git');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('shouldReuseExistingBranch(config)', () => {
     const pr: Pr = {
       sourceBranch: 'master',
@@ -159,15 +159,13 @@ describe(getName(__filename), () => {
       expect(git.isBranchModified).not.toHaveBeenCalled();
     });
 
-    it('returns false if automerge, rebaseWhen=conflicted and stale', async () => {
+    it('returns true if automerge, rebaseWhen=conflicted and stale', async () => {
       config.rebaseWhen = 'conflicted';
       config.automerge = true;
       git.branchExists.mockReturnValueOnce(true);
       git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
-      expect(git.isBranchStale).toHaveBeenCalled();
-      expect(git.isBranchModified).toHaveBeenCalled();
+      expect(res.reuseExistingBranch).toBe(true);
     });
   });
 });

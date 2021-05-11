@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/gomod/extract extractPackageFile() extracts constraints 1`] = `
+exports[`manager/gomod/extract extractPackageFile() extracts constraints 1`] = `
 Object {
   "constraints": Object {
-    "go": "1.13",
+    "go": "^1.13",
   },
   "deps": Array [
     Object {
@@ -602,7 +602,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/gomod/extract extractPackageFile() extracts multi-line requires 1`] = `
+exports[`manager/gomod/extract extractPackageFile() extracts multi-line requires 1`] = `
 Array [
   Object {
     "currentValue": "v1.15.21",
@@ -1239,7 +1239,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/gomod/extract extractPackageFile() extracts single-line requires 1`] = `
+exports[`manager/gomod/extract extractPackageFile() extracts single-line requires 1`] = `
 Array [
   Object {
     "currentValue": "v0.7.0",

@@ -1,9 +1,8 @@
 import { exec as _exec } from 'child_process';
-import { readFileSync } from 'fs';
 import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
-import { mocked } from '../../../test/util';
+import { loadFixture, mocked } from '../../../test/util';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
@@ -12,10 +11,7 @@ import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
 import { updateArtifacts } from './artifacts';
 
-const pyproject10toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.10.toml',
-  'utf8'
-);
+const pyproject10toml = loadFixture('pyproject.10.toml');
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -150,7 +146,10 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          constraints: { python: '~2.7 || ^3.4' },
+          constraints: {
+            python: '~2.7 || ^3.4',
+            poetry: 'poetry>=1.1.2 setuptools poetry-dynamic-versioning>1',
+          },
         },
       })
     ).not.toBeNull();
@@ -210,7 +209,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          isLockFileMaintenance: true,
+          updateType: 'lockFileMaintenance',
         },
       })
     ).not.toBeNull();

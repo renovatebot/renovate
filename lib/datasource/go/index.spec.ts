@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { logger, mocked } from '../../../test/util';
+import { getName, logger, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource, getDigest } from '.';
 
@@ -46,7 +46,7 @@ const resGitHubEnterprise = `<!DOCTYPE html>
 </body>
 </html>`;
 
-describe('datasource/go', () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({});
@@ -132,6 +132,7 @@ describe('datasource/go', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock
@@ -391,7 +392,7 @@ describe('datasource/go', () => {
         httpMock.reset();
       }
     });
-    it('falls back to old behaviour', async () => {
+    it('returns none if no tags match submodules', async () => {
       const packages = [
         { datasource, depName: 'github.com/x/text/a' },
         { datasource, depName: 'github.com/x/text/b' },
@@ -408,15 +409,60 @@ describe('datasource/go', () => {
           .reply(200, []);
 
         const result = await getPkgReleases(pkg);
-        expect(result.releases).toHaveLength(2);
-        expect(result.releases.map(({ version }) => version)).toStrictEqual(
-          tags.map(({ name }) => name)
-        );
+        expect(result.releases).toHaveLength(0);
 
         const httpCalls = httpMock.getTrace();
         expect(httpCalls).toMatchSnapshot();
         httpMock.reset();
       }
+    });
+    it('works for nested modules on github v2+ major upgrades', async () => {
+      const pkg = { datasource, depName: 'github.com/x/text/b/v2' };
+      const tags = [
+        { name: 'a/v1.0.0' },
+        { name: 'v5.0.0' },
+        { name: 'b/v2.0.0' },
+        { name: 'b/v3.0.0' },
+      ];
+
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/x/text/tags?per_page=100')
+        .reply(200, tags)
+        .get('/repos/x/text/releases?per_page=100')
+        .reply(200, []);
+
+      const result = await getPkgReleases(pkg);
+      expect(result.releases).toEqual([
+        { gitRef: 'b/v2.0.0', version: 'v2.0.0' },
+        { gitRef: 'b/v3.0.0', version: 'v3.0.0' },
+      ]);
+
+      const httpCalls = httpMock.getTrace();
+      expect(httpCalls).toMatchSnapshot();
+    });
+    it('handles fyne.io', async () => {
+      httpMock
+        .scope('https://fyne.io/')
+        .get('/fyne?go-get=1')
+        .reply(
+          200,
+          '<meta name="go-import" content="fyne.io/fyne git https://github.com/fyne-io/fyne">'
+        );
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/fyne-io/fyne/tags?per_page=100')
+        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }])
+        .get('/repos/fyne-io/fyne/releases?per_page=100')
+        .reply(200, []);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'fyne.io/fyne',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

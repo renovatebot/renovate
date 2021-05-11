@@ -11,7 +11,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -22,12 +22,28 @@ Array [
 ]
 `;
 
+exports[`config/presets/github/index getPreset() should query custom paths 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/contents/path/custom.json",
+  },
+]
+`;
+
 exports[`config/presets/github/index getPreset() should query preset within the file 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -43,7 +59,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -59,7 +75,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -75,7 +91,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -91,7 +107,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -107,7 +123,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -123,7 +139,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -139,7 +155,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -150,7 +166,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -166,7 +182,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.example.org",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -182,7 +198,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",

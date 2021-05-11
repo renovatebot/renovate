@@ -132,6 +132,7 @@ export interface CombinedCommitStatus {
 
 export type RepoSearchParams = {
   uid?: number;
+  archived?: boolean;
 };
 
 export type IssueCreateParams = IssueUpdateParams;
@@ -198,6 +199,12 @@ export async function getCurrentUser(
   const url = 'user';
   const res = await giteaHttp.getJson<User>(url, options);
   return res.body;
+}
+
+export async function getVersion(options?: GiteaHttpOptions): Promise<string> {
+  const url = 'version';
+  const res = await giteaHttp.getJson<{ version: string }>(url, options);
+  return res.body.version;
 }
 
 export async function searchRepos(

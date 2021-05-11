@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { clone } from '../../util/clone';
+import { getElapsedMinutes } from '../../util/date';
 import { Http } from '../../util/http';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { id } from './common';
@@ -43,10 +44,7 @@ interface JenkinsPluginsVersionsResponse {
 }
 
 function hasCacheExpired(cache: JenkinsCache<JenkinsCacheTypes>): boolean {
-  const minutesElapsed = Math.floor(
-    (new Date().getTime() - cache.lastSync.getTime()) / (60 * 1000)
-  );
-  return minutesElapsed >= cache.cacheTimeMin;
+  return getElapsedMinutes(cache.lastSync) >= cache.cacheTimeMin;
 }
 
 async function updateJenkinsCache(

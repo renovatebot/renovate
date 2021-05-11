@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/nuget getReleases can't get packages list (v3) 1`] = `
+exports[`datasource/nuget/index getReleases can't get packages list (v3) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -15,7 +15,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -25,12 +25,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases empty packages list (v3) 1`] = `
+exports[`datasource/nuget/index getReleases empty packages list (v3) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -40,7 +40,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -50,12 +50,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases extracts feed version from registry URL hash 1`] = `
+exports[`datasource/nuget/index getReleases extracts feed version from registry URL hash 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "my-registry",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -65,8 +65,9 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases handles paginated results (v2) 1`] = `
+exports[`datasource/nuget/index getReleases handles paginated results (v2) 1`] = `
 Object {
+  "registryUrl": "https://www.nuget.org/api/v2/",
   "releases": Array [
     Object {
       "version": "1.0.0",
@@ -78,11 +79,11 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getReleases handles paginated results (v2) 2`] = `
+exports[`datasource/nuget/index getReleases handles paginated results (v2) 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -91,7 +92,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "example.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -101,8 +102,9 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases processes real data (v2) 1`] = `
+exports[`datasource/nuget/index getReleases processes real data (v2) 1`] = `
 Object {
+  "registryUrl": "https://www.nuget.org/api/v2/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:55.387Z",
@@ -289,11 +291,11 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getReleases processes real data (v2) 2`] = `
+exports[`datasource/nuget/index getReleases processes real data (v2) 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -303,9 +305,10 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases processes real data (v3) feed is a nuget.org 1`] = `
+exports[`datasource/nuget/index getReleases processes real data (v3) feed is a nuget.org 1`] = `
 Object {
   "homepage": "https://nunit.org/",
+  "registryUrl": "https://api.nuget.org/v3/index.json",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:55.387Z",
@@ -493,12 +496,12 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getReleases processes real data (v3) feed is a nuget.org 2`] = `
+exports[`datasource/nuget/index getReleases processes real data (v3) feed is a nuget.org 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -508,7 +511,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -518,7 +521,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -527,7 +530,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -537,9 +540,10 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases processes real data (v3) feed is not a nuget.org 1`] = `
+exports[`datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 Object {
   "homepage": "https://nunit.org/",
+  "registryUrl": "https://myprivatefeed/index.json",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:55.387Z",
@@ -726,12 +730,12 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getReleases processes real data (v3) feed is not a nuget.org 2`] = `
+exports[`datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "myprivatefeed",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -741,7 +745,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -751,7 +755,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "myprivatefeed",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -760,7 +764,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -770,9 +774,10 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases processes real data (v3) for several catalog pages 1`] = `
+exports[`datasource/nuget/index getReleases processes real data (v3) for several catalog pages 1`] = `
 Object {
   "homepage": "https://nlog-project.org/",
+  "registryUrl": "https://api.nuget.org/v3/index.json",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:35.043Z",
@@ -1491,12 +1496,12 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getReleases processes real data (v3) for several catalog pages 2`] = `
+exports[`datasource/nuget/index getReleases processes real data (v3) for several catalog pages 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1506,7 +1511,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1516,7 +1521,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1526,7 +1531,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1536,7 +1541,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1546,7 +1551,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1555,7 +1560,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1565,11 +1570,11 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases processes real data no relase (v2) 1`] = `
+exports[`datasource/nuget/index getReleases processes real data no relase (v2) 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1579,8 +1584,9 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases processes real data with no github project url (v2) 1`] = `
+exports[`datasource/nuget/index getReleases processes real data with no github project url (v2) 1`] = `
 Object {
+  "registryUrl": "https://www.nuget.org/api/v2/",
   "releases": Array [
     Object {
       "version": "3.11.0",
@@ -1590,11 +1596,11 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getReleases processes real data with no github project url (v2) 2`] = `
+exports[`datasource/nuget/index getReleases processes real data with no github project url (v2) 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1604,8 +1610,9 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases processes real data without project url (v2) 1`] = `
+exports[`datasource/nuget/index getReleases processes real data without project url (v2) 1`] = `
 Object {
+  "registryUrl": "https://www.nuget.org/api/v2/",
   "releases": Array [
     Object {
       "version": "2.5.7.10213",
@@ -1740,11 +1747,11 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getReleases processes real data without project url (v2) 2`] = `
+exports[`datasource/nuget/index getReleases processes real data without project url (v2) 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1754,188 +1761,233 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns deduplicated results 1`] = `
+exports[`datasource/nuget/index getReleases returns deduplicated results 1`] = `
 Object {
   "homepage": "https://nunit.org/",
   "releases": Array [
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2011-01-07T07:57:55.387Z",
       "version": "2.5.7.10213",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2011-02-09T07:26:34.347Z",
       "version": "2.5.9.10348",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2011-04-25T20:20:34.397Z",
       "version": "2.5.10.11092",
     },
     Object {
       "isDeprecated": true,
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.6.0.12051",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2012-02-24T04:03:05.290Z",
       "version": "2.6.0.12054",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2012-08-05T03:08:28.403Z",
       "version": "2.6.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2012-10-23T15:37:48.000Z",
       "version": "2.6.2",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2013-10-11T01:52:53.417Z",
       "version": "2.6.3",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2014-12-17T17:30:47.607Z",
       "version": "2.6.4",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2018-04-20T04:23:59.217Z",
       "version": "2.6.5",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2018-06-07T15:24:16.807Z",
       "version": "2.6.6",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2018-07-07T15:41:32.657Z",
       "version": "2.6.7",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2018-08-10T20:45:24.080Z",
       "version": "2.7.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2019-08-21T07:08:49.360Z",
       "version": "2.7.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2014-09-23T03:11:33.430Z",
       "version": "3.0.0-alpha",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2014-11-03T06:24:59.217Z",
       "version": "3.0.0-alpha-2",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2014-11-29T22:38:18.493Z",
       "version": "3.0.0-alpha-3",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2014-12-31T04:47:39.507Z",
       "version": "3.0.0-alpha-4",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-01-31T22:13:01.997Z",
       "version": "3.0.0-alpha-5",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-03-26T11:33:22.173Z",
       "version": "3.0.0-beta-1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-05-13T00:51:22.430Z",
       "version": "3.0.0-beta-2",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-07-15T23:44:47.403Z",
       "version": "3.0.0-beta-3",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-08-25T23:24:11.473Z",
       "version": "3.0.0-beta-4",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-10-17T03:39:18.100Z",
       "version": "3.0.0-beta-5",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-11-01T21:56:49.637Z",
       "version": "3.0.0-rc",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-11-08T16:27:15.110Z",
       "version": "3.0.0-rc-2",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-11-14T05:30:57.323Z",
       "version": "3.0.0-rc-3",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-11-16T00:02:51.807Z",
       "version": "3.0.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2015-12-02T03:52:57.997Z",
       "version": "3.0.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2016-03-05T21:12:58.990Z",
       "version": "3.2.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2016-04-19T15:31:13.390Z",
       "version": "3.2.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2016-06-25T17:44:56.253Z",
       "version": "3.4.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2016-06-30T21:20:49.497Z",
       "version": "3.4.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2016-10-04T01:19:19.447Z",
       "version": "3.5.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2017-01-10T02:17:19.187Z",
       "version": "3.6.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2017-02-26T14:56:04.407Z",
       "version": "3.6.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2017-05-30T00:07:36.707Z",
       "version": "3.7.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2017-06-06T01:59:11.787Z",
       "version": "3.7.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2017-08-28T00:08:29.500Z",
       "version": "3.8.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2017-08-29T01:11:58.860Z",
       "version": "3.8.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2017-11-10T23:35:19.670Z",
       "version": "3.9.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2018-03-13T00:29:56.400Z",
       "version": "3.10.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2018-03-13T03:13:09.930Z",
       "version": "3.10.1",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2018-10-07T01:17:31.310Z",
       "version": "3.11.0",
     },
     Object {
+      "registryUrl": "https://api.nuget.org/v3/index.json",
       "releaseTimestamp": "2019-05-15T00:24:28.390Z",
       "version": "3.12.0",
     },
@@ -1944,12 +1996,12 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getReleases returns deduplicated results 2`] = `
+exports[`datasource/nuget/index getReleases returns deduplicated results 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1959,7 +2011,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1969,7 +2021,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1978,7 +2030,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1988,7 +2040,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "myprivatefeed",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -1998,7 +2050,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2008,7 +2060,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "myprivatefeed",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2017,7 +2069,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2027,11 +2079,11 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for empty result (v2) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for empty result (v2) 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2041,12 +2093,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for empty result (v3) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for empty result (v3) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2056,12 +2108,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for empty result (v3v2) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for empty result (v3v2) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2070,7 +2122,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2080,11 +2132,11 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for non 200 (v2) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for non 200 (v2) 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2094,12 +2146,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for non 200 (v3) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for non 200 (v3) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2109,12 +2161,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for non 200 (v3v2) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for non 200 (v3v2) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2123,7 +2175,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2133,11 +2185,11 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for unknown error (v2) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for unknown error (v2) 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2147,12 +2199,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for unknown error (v3v2) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for unknown error (v3v2) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2161,7 +2213,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2171,12 +2223,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for unknown error in getQueryUrlForV3Feed  (v3) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for unknown error in getQueryUrlForV3Feed  (v3) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2186,7 +2238,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -2196,12 +2248,12 @@ Array [
 ]
 `;
 
-exports[`datasource/nuget getReleases returns null for unknown error in getReleasesFromV3Feed (v3) 1`] = `
+exports[`datasource/nuget/index getReleases returns null for unknown error in getReleasesFromV3Feed (v3) 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

@@ -2,7 +2,10 @@ import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
-import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import {
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
+} from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
@@ -29,11 +32,9 @@ export async function generateLockFile(
   try {
     let installNpm = 'npm i -g npm';
     const npmCompatibility = config.constraints?.npm as string;
-    // istanbul ignore else
     if (npmCompatibility) {
-      // istanbul ignore else
       if (validRange(npmCompatibility)) {
-        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)}`;
+        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)} || true`;
       } else {
         logger.debug(
           { npmCompatibility },
@@ -48,11 +49,16 @@ export async function generateLockFile(
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
       logger.debug('Performing node_modules install');
-      cmdOptions += '--ignore-scripts --no-audit';
+      cmdOptions += '--no-audit';
     } else {
       logger.debug('Updating lock file only');
-      cmdOptions += '--package-lock-only --ignore-scripts --no-audit';
+      cmdOptions += '--package-lock-only --no-audit';
     }
+
+    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+      cmdOptions += ' --ignore-scripts';
+    }
+
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
@@ -61,23 +67,16 @@ export async function generateLockFile(
         npm_config_store: env.npm_config_store,
       },
       docker: {
-        image: 'renovate/node',
+        image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
       },
     };
-    // istanbul ignore if
-    if (getAdminConfig().trustLevel === 'high') {
+    /* c8 ignore next 4 */
+    if (getAdminConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
-      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
-    }
-    if (config.dockerMapDotfiles) {
-      const homeDir =
-        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-      const homeNpmrc = join(homeDir, '.npmrc');
-      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
 
     if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
@@ -97,6 +96,11 @@ export async function generateLockFile(
       commands.push(updateCmd);
     }
 
+    if (upgrades.some((upgrade) => upgrade.isRemediation)) {
+      // We need to run twice to get the correct lock file
+      commands.push(`npm install ${cmdOptions}`.trim());
+    }
+
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('npmDedupe')) {
       logger.debug('Performing npm dedupe');
@@ -110,7 +114,8 @@ export async function generateLockFile(
       );
       try {
         await remove(lockFileName);
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) {
+        /* c8 ignore next */
         logger.debug(
           { err, lockFileName },
           'Error removing yarn.lock for lock file maintenance'
@@ -134,7 +139,11 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readFile(join(cwd, filename), 'utf8');
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) {
+    /* c8 ignore start */
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug(
       {
         err,
@@ -146,6 +155,7 @@ export async function generateLockFile(
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
     return { error: true, stderr: err.stderr };
+    /* c8 ignore stop */
   }
   return { lockFile };
 }

@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { platform } from '../../../platform';
 import * as repositoryCache from '../../../util/cache/repository';
 import { pruneStaleBranches } from './prune';

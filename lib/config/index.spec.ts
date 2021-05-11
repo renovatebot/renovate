@@ -13,7 +13,7 @@ try {
 
 const defaultConfig = getConfig();
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];
@@ -45,7 +45,6 @@ describe(getName(__filename), () => {
         ['token', 'abc'],
         ['prFooter', 'custom'],
         ['logContext', 'abc123'],
-        ['customPrFooter', true],
       ]);
     });
 

@@ -19,14 +19,14 @@ const yarnHelper = mocked(_yarnHelper);
 
 delete process.env.NPM_CONFIG_CACHE;
 
-// TODO: figure out snapshot similarity for each CI platform
+// TODO: figure out snapshot similarity for each CI platform (#9617)
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map((snapshot) => ({
     ...snapshot,
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -45,14 +45,15 @@ describe(getName(__filename), () => {
       });
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
-          return new Promise<string>((resolve) => resolve(null));
+          return new Promise<string>((resolve) =>
+            resolve('yarn-path ./.yarn/cli.js\n')
+          );
         }
         return new Promise<string>((resolve) =>
           resolve('package-lock-contents')
         );
       });
       const config = {
-        dockerMapDotfiles: true,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -138,7 +139,6 @@ describe(getName(__filename), () => {
         );
       });
       const config = {
-        dockerMapDotfiles: true,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -166,5 +166,31 @@ describe(getName(__filename), () => {
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+  describe('checkYarnrc()', () => {
+    it('returns offline mirror and yarn path', async () => {
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) =>
+            resolve(
+              'yarn-offline-mirror "./packages-cache"\nyarn-path "./.yarn/cli.js"\n'
+            )
+          );
+        }
+        return new Promise<string>((resolve) => resolve(''));
+      });
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+    });
+    it('returns no offline mirror and unquoted yarn path', async () => {
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) =>
+            resolve('yarn-path ./.yarn/cli.js\n')
+          );
+        }
+        return new Promise<string>((resolve) => resolve(''));
+      });
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+    });
   });
 });

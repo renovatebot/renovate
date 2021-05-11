@@ -11,7 +11,7 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git
-- Node.js `^12.13.0 || >=14.15.4`
+- Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
 - Python `^3.8`
@@ -22,7 +22,7 @@ We support Node.js versions according to the [Node.js release schedule](https://
 You need Java to execute Gradle tests.
 If you don’t have Java installed, the Gradle tests will be skipped.
 
-_Linux_
+#### Linux
 
 You can use the following commands on Ubuntu.
 
@@ -36,7 +36,7 @@ sudo apt-get install -y git python-minimal build-essential nodejs yarn default-j
 
 You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 
-_Windows_
+#### Windows
 
 Follow these steps to set up your development environment on Windows 10.
 If you already installed a component, skip the corresponding step.
@@ -58,7 +58,7 @@ If you already installed a component, skip the corresponding step.
   PS C:\Windows\system32> java -version
   ```
 
-_VS Code Remote Development_
+#### VS Code Remote Development
 
 If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
 
@@ -75,7 +75,6 @@ The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package ma
 
 To ensure everything is working properly on your end, you must:
 
-1. Make sure you don't have a local `.npmrc` file that overrides npm's default registry
 1. Install all dependencies with `yarn install`
 1. Make a build with `yarn build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`
@@ -124,11 +123,6 @@ You can run `yarn test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
 `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
-### Prerequisites
-
-You need to have Python with `mock` installed for all tests to pass.
-Python 3 includes `mock` so that approach is recommended.
-
 ### Jest
 
 You can run just the Jest unit tests by running `yarn jest`.
@@ -155,9 +149,9 @@ You usually don't need to fix any Prettier errors by hand.
 
 ## Keeping your Renovate fork up to date
 
-First of all, never commit to the `master` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
+First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
 
-Make sure your fork is up to date with the Renovate `master` branch, check this each time before you create a new branch.
+Make sure your fork is up to date with the Renovate `main` branch, check this each time before you create a new branch.
 To do this, see these GitHub guides:
 
 [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
@@ -185,7 +179,7 @@ It's usually easier to have the logs in a file that you can open with a text edi
 You can use a command like this to put the log messages in a file:
 
 ```
-$ rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
+rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
 ```
 
 The example command will delete any existing `debug.log` and then save Renovate's output to a new `debug.log` file.
@@ -224,6 +218,8 @@ module.exports = {
   repositories: ['r4harry/testrepo1'],
 };
 ```
+
+<!-- markdownlint-disable MD029 -->
 
 3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`
 4. Wait for your breakpoint to be triggered

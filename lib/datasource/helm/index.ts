@@ -12,11 +12,11 @@ export const id = 'helm';
 
 const http = new Http(id);
 
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://charts.helm.sh/stable'];
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
-  additionalBranchPrefix: 'helm-',
   commitMessageTopic: 'Helm release {{depName}}',
   group: {
     commitMessageTopic: '{{{groupName}}} Helm releases',

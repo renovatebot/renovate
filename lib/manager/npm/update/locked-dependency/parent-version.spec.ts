@@ -1,14 +1,10 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
-import { getName } from '../../../../../test/util';
+import { getName, loadJsonFixture } from '../../../../../test/util';
 import { findFirstParentVersion } from './parent-version';
 
-const expressJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/express.json'), 'utf8')
-);
+const expressJson = loadJsonFixture('express.json');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getLockedDependencies()', () => {
     beforeEach(() => {
       httpMock.setup();
@@ -40,32 +36,6 @@ describe(getName(__filename), () => {
         await findFirstParentVersion('express', '4.0.0', 'send', '0.11.1')
       ).toEqual('4.11.1');
     });
-    it('finds indirect devDependency', async () => {
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/cookie-parser')
-        .reply(200, {
-          name: 'cookie-parser',
-          repository: {},
-          versions: {
-            '1.0.1': {},
-            '1.0.2': {},
-          },
-          'dist-tags': { latest: '1.0.2' },
-        });
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
-      expect(
-        await findFirstParentVersion(
-          'express',
-          '4.0.0',
-          'cookie-parser',
-          '1.0.2'
-        )
-      ).toEqual('4.3.0');
-    });
     it('finds removed dependencies', async () => {
       httpMock
         .scope('https://registry.npmjs.org')
@@ -90,6 +60,28 @@ describe(getName(__filename), () => {
           '10.0.0'
         )
       ).toEqual('4.9.1');
+    });
+    it('finds when a greater version is needed', async () => {
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/qs')
+        .reply(200, {
+          name: 'qs',
+          repository: {},
+          versions: {
+            '0.6.6': {},
+            '6.0.4': {},
+            '6.2.0': {},
+          },
+          'dist-tags': { latest: '6.2.0' },
+        });
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/express')
+        .reply(200, expressJson);
+      expect(
+        await findFirstParentVersion('express', '4.0.0', 'qs', '6.0.4')
+      ).toEqual('4.14.0');
     });
     it('finds when a range matches greater versions', async () => {
       httpMock

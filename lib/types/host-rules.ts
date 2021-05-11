@@ -1,16 +1,14 @@
 export interface HostRule {
-  endpoint?: string;
-  host?: string;
+  authType?: string;
   hostType?: string;
   domainName?: string;
   hostName?: string;
-  json?: true;
   baseUrl?: string;
+  matchHost?: string;
   token?: string;
   username?: string;
   password?: string;
   insecureRegistry?: boolean;
-  platform?: string;
   timeout?: number;
   encrypted?: HostRule;
   abortOnError?: boolean;
@@ -18,4 +16,5 @@ export interface HostRule {
   enabled?: boolean;
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
+  resolvedHost?: string;
 }

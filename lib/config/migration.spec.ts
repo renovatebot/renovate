@@ -1,8 +1,12 @@
+import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
 import { MigratedConfig } from './migration';
-import { RenovateSharedConfig, RenovateConfig as _RenovateConfig } from '.';
+import type {
+  RenovateSharedConfig,
+  RenovateConfig as _RenovateConfig,
+} from './types';
 
 const defaultConfig = getConfig();
 
@@ -10,7 +14,7 @@ interface RenovateConfig extends _RenovateConfig {
   node?: RenovateSharedConfig & { supportPolicy?: unknown };
 }
 
-describe('config/migration', () => {
+describe(getName(), () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
       const config: RenovateConfig = {
@@ -29,11 +33,18 @@ describe('config/migration', () => {
         compatibility: {
           python: '3.7',
         },
-        extends: [':js-app', 'config:library', ':masterIssue'],
+        extends: [
+          ':automergeBranchMergeCommit',
+          'default:js-app',
+          'config:library',
+          ':masterIssue',
+          'helpers:oddIsUnstable',
+        ],
         maintainYarnLock: true,
         onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
+        ignoreNpmrcFile: true,
         separateMajorReleases: true,
         separatePatchReleases: true,
         suppressNotifications: ['lockFileErrors', 'prEditNotification'],
@@ -46,6 +57,7 @@ describe('config/migration', () => {
         masterIssueTitle: 'foo',
         gomodTidy: true,
         upgradeInRange: true,
+        trustLevel: 'high',
         automergeType: 'branch-push',
         branchName:
           '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
@@ -73,7 +85,7 @@ describe('config/migration', () => {
         meteor: true,
         autodiscover: 'true' as never,
         schedule: 'on the last day of the month' as never,
-        commitMessage: '{{semanticPrefix}}some commit message',
+        commitMessage: '{{semanticPrefix}}some commit message {{depNameShort}}',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
         pathRules: [
@@ -103,6 +115,15 @@ describe('config/migration', () => {
           {
             packageNames: ['guava'],
             versionScheme: 'maven',
+          },
+          {
+            packageNames: ['foo'],
+            packageRules: [
+              {
+                depTypeList: ['bar'],
+                automerge: true,
+              },
+            ],
           },
         ],
         exposeEnv: true,
@@ -134,7 +155,7 @@ describe('config/migration', () => {
           },
         ],
         raiseDeprecationWarnings: false,
-      };
+      } as any;
       const parentConfig = { ...defaultConfig, semanticCommits: 'disabled' };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
         config,
@@ -144,7 +165,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.automerge).toEqual(false);
-      expect(migratedConfig.packageRules).toHaveLength(8);
+      expect(migratedConfig.packageRules).toHaveLength(9);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
     it('migrates before and after schedules', () => {
@@ -606,5 +627,36 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
     });
+  });
+  it('it migrates nested packageRules', () => {
+    const config: RenovateConfig = {
+      packageRules: [
+        {
+          matchDepTypes: ['devDependencies'],
+          enabled: false,
+        },
+        {
+          automerge: true,
+          excludePackageNames: ['@types/react-table'],
+          packageRules: [
+            {
+              groupName: 'definitelyTyped',
+              matchPackagePrefixes: ['@types/'],
+            },
+            {
+              matchDepTypes: ['dependencies'],
+              automerge: false,
+            },
+          ],
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
+    expect(migratedConfig.packageRules).toHaveLength(3);
   });
 });

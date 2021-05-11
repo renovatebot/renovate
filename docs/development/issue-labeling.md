@@ -63,13 +63,17 @@ Add the `breaking` label for Issues or PRs which contain changes that are not ba
     priority-2-important
     priority-3-normal
     priority-4-low
+    priority-5-triage
 
 </details>
 
 Use these to assign a priority level to an issue.
+Incoming issues are labeled `priority-5-triage` by default, this label should be replaced with a proper priority (low/normal/important/critical).
 Make a best-effort attempt to select a proper priority.
 Nothing bad will happen if you select a "wrong" priority.
 At a high level: critical = needs immediate fix, important = to be prioritized ahead of others, normal = default priority, low = trivial issue, or impacts a very small % of the user base.
+
+Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-important+-label%3Apriority-3-normal+-label%3Apriority-4-low++-label%3Apriority-5-triage) to find any issues which are missing a priority label.
 
 ### Platform
 
@@ -134,6 +138,7 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
 
     good first issue
     help wanted
+    logs:problem
     reproduction:needed
     reproduction:provided
     reproduction:confirmed
@@ -145,6 +150,12 @@ Add a label `good first issue` to issues that are small, easy to fix, and do-abl
 This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
 
 Add the label `help wanted` to indicate that we need the original poster or someone else to do some work or it is unlikely to get done.
+
+Add a label `logs:problem` to indicate that there's a problem with the logs, and the contributor needs to do one of these things:
+
+1. Provide logs (if there are none yet)
+1. Provide more logs (in case current logs are insufficient)
+1. Format their logs properly
 
 Add a label `reproduction:needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduction:provided` once there is a public reproduction.

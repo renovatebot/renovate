@@ -2,7 +2,7 @@
 
 Datasources are used in Renovate primarily to fetch released versions of packages.
 
-### getReleases
+## getReleases
 
 The minimum exported interface for a datasource is a function called `getReleases` that takes a lookup config as input.
 
@@ -20,9 +20,9 @@ The config contains:
 - `changelogUrl`: a URL pointing to the package's Changelog (could be a markdown file, for example). If not present then Renovate will search the `sourceUrl` for a changelog file.
 - `tags`: an object mapping tag -> version, e.g. `tags: { latest: '3.0.0' }`. This is only used by the `followTags` function.
 
-### getDigest
+## getDigest
 
-Datasources that support the concept of digests (e.g. docker digests and git commit hashes) also can export a `getDigest` function.
+Datasources that support the concept of digests (e.g. Docker digests and Git commit hashes) also can export a `getDigest` function.
 
 The `getDigest` function has two inputs:
 

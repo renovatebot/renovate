@@ -172,13 +172,14 @@ export interface PrResponse {
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
-    body: pr.summary ? pr.summary.raw : /* c8 ignore next */ undefined,
-    sourceBranch: pr.source.branch.name,
-    targetBranch: pr.destination.branch.name,
+    displayNumber: `Pull Request #${pr.id}`,
+    body: pr.summary?.raw,
+    sourceBranch: pr.source?.branch?.name,
+    targetBranch: pr.destination?.branch?.name,
     title: pr.title,
-    state: prStates.closed.includes(pr.state)
+    state: prStates.closed?.includes(pr.state)
       ? /* c8 ignore next */ PrState.Closed
-      : pr.state.toLowerCase(),
+      : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
 }

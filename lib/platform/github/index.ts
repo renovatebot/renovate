@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import { DateTime } from 'luxon';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -140,21 +141,23 @@ async function getBranchProtection(
   return res.body;
 }
 
-export async function getJsonFile(fileName: string): Promise<any | null> {
-  try {
-    return JSON.parse(
-      Buffer.from(
-        (
-          await githubApi.getJson<{ content: string }>(
-            `repos/${config.repository}/contents/${fileName}`
-          )
-        ).body.content,
-        'base64'
-      ).toString()
-    );
-  } catch (err) {
-    return null;
-  }
+export async function getRawFile(
+  fileName: string,
+  repo: string = config.repository
+): Promise<string | null> {
+  const url = `repos/${repo}/contents/${fileName}`;
+  const res = await githubApi.getJson<{ content: string }>(url);
+  const buf = res.body.content;
+  const str = Buffer.from(buf, 'base64').toString();
+  return str;
+}
+
+export async function getJsonFile(
+  fileName: string,
+  repo: string = config.repository
+): Promise<any | null> {
+  const raw = await getRawFile(fileName, repo);
+  return JSON.parse(raw);
 }
 
 let existingRepos;
@@ -278,6 +281,7 @@ export async function initRepo({
   config.prList = null;
   config.openPrList = null;
   config.closedPrList = null;
+  config.branchPrs = [];
 
   config.forkMode = !!forkMode;
   if (forkMode) {
@@ -622,17 +626,21 @@ async function getOpenPrs(): Promise<PrList> {
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS'];
+        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS', 'UNSTABLE'];
         const hasNegativeReview = pr.reviews?.nodes?.length > 0;
         // istanbul ignore if
         if (hasNegativeReview) {
           pr.canMerge = false;
           pr.canMergeReason = `hasNegativeReview`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
+        } else if (canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.canMerge = true;
+        } else if (config.forkToken && pr.mergeStateStatus === 'BLOCKED') {
+          // The main token can't merge but maybe the forking token can
+          // istanbul ignore next
+          pr.canMerge = true;
+        } else {
           pr.canMerge = false;
           pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
-        } else {
-          pr.canMerge = true;
         }
         // https://developer.github.com/v4/enum/mergestatestatus
         if (pr.mergeStateStatus === 'DIRTY') {
@@ -759,7 +767,7 @@ export async function getPrList(): Promise<Pr[]> {
                 ? /* c8 ignore next */ PrState.Merged
                 : pr.state,
             createdAt: pr.created_at,
-            closed_at: pr.closed_at,
+            closedAt: pr.closed_at,
             sourceRepo: pr.head?.repo?.full_name,
           } as never)
       );
@@ -788,14 +796,71 @@ export async function findPr({
   return pr;
 }
 
+const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
+
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
+  // istanbul ignore if
+  if (config.branchPrs[branchName]) {
+    return config.branchPrs[branchName];
+  }
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({
+  const openPr = await findPr({
     branchName,
     state: PrState.Open,
   });
-  return existingPr ? getPr(existingPr.number) : null;
+  if (openPr) {
+    config.branchPrs[branchName] = await getPr(openPr.number);
+    return config.branchPrs[branchName];
+  }
+  const autoclosedPr = await findPr({
+    branchName,
+    state: PrState.Closed,
+  });
+  if (
+    autoclosedPr?.title?.endsWith(' - autoclosed') &&
+    autoclosedPr?.closedAt
+  ) {
+    const closedMillisAgo = DateTime.fromISO(autoclosedPr.closedAt)
+      .diffNow()
+      .negate()
+      .toMillis();
+    if (closedMillisAgo > REOPEN_THRESHOLD_MILLIS) {
+      return null;
+    }
+    logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
+    const { sha, number } = autoclosedPr;
+    try {
+      await githubApi.postJson(`repos/${config.repository}/git/refs`, {
+        body: { ref: `refs/heads/${branchName}`, sha },
+      });
+      logger.debug({ branchName, sha }, 'Recreated autoclosed branch');
+    } catch (err) {
+      logger.debug('Could not recreate autoclosed branch - skipping reopen');
+      return null;
+    }
+    try {
+      const title = autoclosedPr.title.replace(/ - autoclosed$/, '');
+      await githubApi.patchJson(`repos/${config.repository}/pulls/${number}`, {
+        body: {
+          state: 'open',
+          title,
+        },
+      });
+      logger.info(
+        { branchName, title, number },
+        'Successfully reopened autoclosed PR'
+      );
+    } catch (err) {
+      logger.debug('Could not reopen autoclosed PR');
+      return null;
+    }
+    delete config.openPrList; // So that it gets refreshed
+    delete config.closedPrList?.[number]; // So that it's no longer found in the closed list
+    config.branchPrs[branchName] = await getPr(number);
+    return config.branchPrs[branchName];
+  }
+  return null;
 }
 
 async function getStatus(
@@ -1508,9 +1573,13 @@ export async function mergePr(
   const url = `repos/${
     config.parentRepo || config.repository
   }/pulls/${prNo}/merge`;
-  const options = {
+  const options: any = {
     body: {} as { merge_method?: string },
   };
+  // istanbul ignore if
+  if (config.forkToken) {
+    options.token = config.forkToken;
+  }
   let automerged = false;
   if (config.mergeMethod) {
     // This path is taken if we have auto-detected the allowed merge types from the repo
@@ -1527,7 +1596,7 @@ export async function mergePr(
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${options.body.merge_method} merge PR`);
+        logger.warn({ err }, `Failed to ${config.mergeMethod} merge PR`);
         return false;
       }
     }
@@ -1539,29 +1608,20 @@ export async function mergePr(
       logger.debug({ options, url }, `mergePr`);
       await githubApi.putJson(url, options);
     } catch (err1) {
-      logger.debug(
-        { err: err1 },
-        `Failed to ${options.body.merge_method} merge PR`
-      );
+      logger.debug({ err: err1 }, `Failed to rebase merge PR`);
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
         await githubApi.putJson(url, options);
       } catch (err2) {
-        logger.debug(
-          { err: err2 },
-          `Failed to ${options.body.merge_method} merge PR`
-        );
+        logger.debug({ err: err2 }, `Failed to merge squash PR`);
         try {
           options.body.merge_method = 'merge';
           logger.debug({ options, url }, `mergePr`);
           await githubApi.putJson(url, options);
         } catch (err3) {
-          logger.debug(
-            { err: err3 },
-            `Failed to ${options.body.merge_method} merge PR`
-          );
-          logger.debug({ pr: prNo }, 'All merge attempts failed');
+          logger.debug({ err: err3 }, `Failed to merge commit PR`);
+          logger.info({ pr: prNo }, 'All merge attempts failed');
           return false;
         }
       }
@@ -1613,14 +1673,28 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       }
     }
   }`;
-  let alerts: VulnerabilityAlert[] = [];
+  let vulnerabilityAlerts: {
+    node: VulnerabilityAlert;
+  }[];
   try {
-    const vulnerabilityAlerts = await githubApi.queryRepoField<{
+    vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
     }>(query, 'vulnerabilityAlerts', {
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
     });
+  } catch (err) {
+    logger.debug({ err }, 'Error retrieving vulnerability alerts');
+    logger.warn(
+      {
+        url:
+          'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+      },
+      'Cannot access vulnerability alerts. Please ensure permissions have been granted.'
+    );
+  }
+  let alerts: VulnerabilityAlert[] = [];
+  try {
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
       const shortAlerts: AggregatedVulnerabilities = {};
@@ -1643,10 +1717,10 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
       }
     } else {
-      logger.debug('Cannot read vulnerability alerts');
+      logger.debug('No vulnerability alerts found');
     }
-  } catch (err) {
-    logger.debug({ err }, 'Error retrieving vulnerability alerts');
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Error processing vulnerabity alerts');
   }
   return alerts;
 }

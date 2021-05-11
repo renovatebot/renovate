@@ -2,6 +2,7 @@ import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import {
   BinarySource,
@@ -33,7 +34,7 @@ export async function setExecConfig(
     execConfig[key] = value || null;
   }
   if (execConfig.binarySource === 'docker') {
-    await removeDanglingContainers();
+    await removeDanglingContainers(getAdminConfig().dockerChildPrefix);
   }
 }
 
@@ -94,7 +95,8 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { env, docker, cwdFile } = opts;
-  const extraEnv = { ...opts.extraEnv, ...getAdminConfig().customEnvVariables };
+  const { dockerChildPrefix, customEnvVariables } = getAdminConfig();
+  const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
   // istanbul ignore if
   if (cwdFile) {
@@ -141,7 +143,7 @@ export async function exec(
   for (const rawExecCommand of commands) {
     const startTime = Date.now();
     if (useDocker) {
-      await removeDockerContainer(docker.image);
+      await removeDockerContainer(docker.image, dockerChildPrefix);
     }
     logger.debug({ command: rawExecCommand }, 'Executing command');
     logger.trace({ commandOptions: rawExecOptions }, 'Command options');
@@ -150,12 +152,21 @@ export async function exec(
     } catch (err) {
       logger.trace({ err }, 'rawExec err');
       if (useDocker) {
-        await removeDockerContainer(docker.image).catch((removeErr: Error) => {
-          const message: string = err.message;
-          throw new Error(
-            `Error: "${removeErr.message}" - Original Error: "${message}"`
-          );
-        });
+        await removeDockerContainer(docker.image, dockerChildPrefix).catch(
+          (removeErr: Error) => {
+            const message: string = err.message;
+            throw new Error(
+              `Error: "${removeErr.message}" - Original Error: "${message}"`
+            );
+          }
+        );
+      }
+      if (err.signal === `SIGTERM`) {
+        logger.debug(
+          { err },
+          'exec interrupted by SIGTERM - run needs to be aborted'
+        );
+        throw new Error(TEMPORARY_ERROR);
       }
       throw err;
     }

@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { api as versionig } from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('equals', () => {
     it.each([
       ['1', '1'],
@@ -138,6 +138,9 @@ describe(getName(__filename), () => {
     });
     it('handles wildcards', () => {
       expect(versionig.matches('4.2.0', '*')).toBe(true);
+    });
+    it('handles short', () => {
+      expect(versionig.matches('1.4', '1.4')).toBe(true);
     });
   });
   describe('isLessThanRange()', () => {
@@ -300,6 +303,16 @@ describe(getName(__filename), () => {
         })
       ).toEqual('^2.0.0');
     });
+    it('handles precision change caret', () => {
+      expect(
+        versionig.getNewValue({
+          currentValue: '^5.0.3',
+          rangeStrategy: 'replace',
+          currentVersion: '5.3.1',
+          newVersion: '5.5',
+        })
+      ).toEqual('^5.0.3');
+    });
     it('replaces naked version', () => {
       expect(
         versionig.getNewValue({
@@ -420,9 +433,9 @@ describe(getName(__filename), () => {
           currentValue: '^1.0.0',
           rangeStrategy: 'replace',
           currentVersion: '1.0.0',
-          newVersion: '1.0.7',
+          newVersion: '1.2.3',
         })
-      ).toEqual('^1.0.7');
+      ).toEqual('^1.0.0');
     });
     it('bumps short tilde', () => {
       expect(

@@ -7,3 +7,7 @@ include:
     ref: master
 - {"project":"mikebryant/include-source-example3", "file": "/template.yaml",}
 - {}
+
+script:
+- !reference [.setup, script]
+- !reference [arbitrary job name with space and no starting dot, nested1, nested2, nested3]

@@ -90,20 +90,21 @@ export async function initPlatform(
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };
   let gitAuthor: string;
+
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;
-  } else if (!platformInfo?.gitAuthor) {
+  } else if (platformInfo?.gitAuthor) {
+    logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
+    gitAuthor = platformInfo.gitAuthor;
+  } else {
     logger.debug(
       'Using default gitAuthor: Renovate Bot <renovate@whitesourcesoftware.com>'
     );
     gitAuthor = 'Renovate Bot <renovate@whitesourcesoftware.com>';
-  } /* c8 ignore next */ else {
-    logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
-    gitAuthor = platformInfo.gitAuthor;
   }
   const gitAuthorParsed = parseGitAuthor(gitAuthor);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!gitAuthorParsed) {
     throw new Error('Init: gitAuthor is not parsed as valid RFC5322 format');
   }

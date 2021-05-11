@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/helm-requirements/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
+exports[`manager/helm-requirements/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
 Object {
   "datasource": "helm",
   "deps": Array [
@@ -22,7 +22,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/helm-requirements/extract extractPackageFile() resolves aliased registry urls 1`] = `
+exports[`manager/helm-requirements/extract extractPackageFile() resolves aliased registry urls 1`] = `
 Object {
   "datasource": "helm",
   "deps": Array [
@@ -33,11 +33,18 @@ Object {
         "https://my-registry.gcr.io/",
       ],
     },
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": Array [
+        "https://registry.example.com/",
+      ],
+    },
   ],
 }
 `;
 
-exports[`lib/manager/helm-requirements/extract extractPackageFile() skips invalid registry urls 1`] = `
+exports[`manager/helm-requirements/extract extractPackageFile() skips invalid registry urls 1`] = `
 Object {
   "datasource": "helm",
   "deps": Array [
@@ -66,7 +73,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/helm-requirements/extract extractPackageFile() skips local dependencies 1`] = `
+exports[`manager/helm-requirements/extract extractPackageFile() skips local dependencies 1`] = `
 Object {
   "datasource": "helm",
   "deps": Array [

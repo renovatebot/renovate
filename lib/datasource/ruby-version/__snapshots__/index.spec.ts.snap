@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/gradle getReleases parses real data 1`] = `
+exports[`datasource/ruby-version/index getReleases parses real data 1`] = `
 Object {
   "homepage": "https://www.ruby-lang.org",
+  "registryUrl": "https://www.ruby-lang.org/",
   "releases": Array [
     Object {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2002/03/01/167-is-released/",
@@ -674,11 +675,11 @@ Object {
 }
 `;
 
-exports[`datasource/gradle getReleases parses real data 2`] = `
+exports[`datasource/ruby-version/index getReleases parses real data 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.ruby-lang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -688,11 +689,11 @@ Array [
 ]
 `;
 
-exports[`datasource/gradle getReleases throws for 404 1`] = `
+exports[`datasource/ruby-version/index getReleases throws for 404 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.ruby-lang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -702,11 +703,11 @@ Array [
 ]
 `;
 
-exports[`datasource/gradle getReleases throws for empty result 1`] = `
+exports[`datasource/ruby-version/index getReleases throws for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "www.ruby-lang.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
