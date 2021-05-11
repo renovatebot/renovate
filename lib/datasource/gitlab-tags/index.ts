@@ -51,7 +51,7 @@ export async function getReleases({
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: parseUrl(repo, depHost).toString(),
+    sourceUrl: parseUrl(repo, depHost)?.href,
     releases: null,
   };
   dependency.releases = gitlabTags.map(({ name, commit }) => ({

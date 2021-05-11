@@ -297,7 +297,7 @@ const platform: Platform = {
     // Initialize Git storage
     await git.initRepo({
       ...config,
-      url: gitEndpoint.toString(),
+      url: gitEndpoint.href,
       gitAuthorName: global.gitAuthor?.name,
       gitAuthorEmail: global.gitAuthor?.email,
     });
