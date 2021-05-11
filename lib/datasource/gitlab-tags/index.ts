@@ -45,7 +45,7 @@ export async function getReleases({
   );
 
   const gitlabTags = (
-    await gitlabApi.getJson<GitlabTag[]>(url.toString(), {
+    await gitlabApi.getJson<GitlabTag[]>(url.href, {
       paginate: true,
     })
   ).body;

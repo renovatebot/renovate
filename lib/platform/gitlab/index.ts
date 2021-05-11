@@ -239,7 +239,7 @@ export async function initRepo({
       const repoUrl = parseUrl(res.body.http_url_to_repo);
       repoUrl.username = 'oauth2';
       repoUrl.password = opts.token;
-      url = repoUrl.toString();
+      url = repoUrl.href;
     }
     await git.initRepo({
       ...config,
