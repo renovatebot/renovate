@@ -16,11 +16,11 @@ import type {
   Upgrade,
 } from '../types';
 import {
-  GradleDependency,
   collectVersionVariables,
   init,
   updateGradleVersion,
 } from './build-gradle';
+import type { GradleDependency } from './types';
 import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,

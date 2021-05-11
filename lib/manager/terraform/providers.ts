@@ -3,11 +3,9 @@ import * as datasourceTerraformProvider from '../../datasource/terraform-provide
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
-import {
-  ExtractionResult,
-  TerraformDependencyTypes,
-  keyValueExtractionRegex,
-} from './util';
+import { keyValueExtractionRegex } from './util';
+import { TerraformDependencyTypes } from './common';
+import type { ExtractionResult } from './types';
 
 export const sourceExtractionRegex = /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
 

@@ -2,11 +2,11 @@ import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
 import {
-  TerraformManagerData,
-  TerragruntDependencyTypes,
   checkFileContainsDependency,
   getTerragruntDependencyType,
 } from './util';
+import type { TerraformManagerData } from './types';
+import { TerragruntDependencyTypes } from './common';
 
 const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+{\s*$/;
 const contentCheckList = ['terraform {'];

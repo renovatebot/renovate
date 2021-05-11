@@ -5,7 +5,8 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
 import { extractTerragruntProvider } from './providers';
-import { ExtractionResult, TerragruntDependencyTypes } from './util';
+import { TerragruntDependencyTypes } from './common';
+import type { ExtractionResult } from './types';
 
 export const githubRefMatchRegex = /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i;
 export const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;

@@ -18,11 +18,11 @@ import {
   extractTerraformResource,
 } from './resources';
 import {
-  TerraformDependencyTypes,
-  TerraformManagerData,
   checkFileContainsDependency,
   getTerraformDependencyType,
 } from './util';
+import { TerraformDependencyTypes } from './common';
+import type { TerraformManagerData } from './types';
 
 const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
 const contentCheckList = [

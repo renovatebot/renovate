@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { ensureTrailingSlash } from '../../util/url';
-import type { Preset } from './types';
+import type { FetchPresetConfig, Preset } from './types';
 
 export const PRESET_DEP_NOT_FOUND = 'dep not found';
 export const PRESET_INVALID = 'invalid preset';
@@ -9,20 +9,6 @@ export const PRESET_NOT_FOUND = 'preset not found';
 export const PRESET_PROHIBITED_SUBPRESET = 'prohibited sub-preset';
 export const PRESET_RENOVATE_CONFIG_NOT_FOUND =
   'preset renovate-config not found';
-
-export type PresetFetcher = (
-  repo: string,
-  fileName: string,
-  endpoint: string
-) => Promise<Preset>;
-
-export type FetchPresetConfig = {
-  pkgName: string;
-  filePreset: string;
-  presetPath?: string;
-  endpoint: string;
-  fetch: PresetFetcher;
-};
 
 export async function fetchPreset({
   pkgName,

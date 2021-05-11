@@ -5,6 +5,7 @@ import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { readFile } from '../../util/fs';
+import type { Registry } from './types';
 
 async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
   try {
@@ -13,11 +14,6 @@ async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
     logger.debug({ err }, `failed to parse '${file}' as XML document`);
     return undefined;
   }
-}
-
-export interface Registry {
-  readonly url: string;
-  readonly name?: string;
 }
 
 /* istanbul ignore next */

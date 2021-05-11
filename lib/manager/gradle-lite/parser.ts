@@ -3,12 +3,11 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
-import {
-  GOOGLE_REPO,
-  JCENTER_REPO,
-  MAVEN_REPO,
+import type {
   ManagerData,
+  MatchConfig,
   PackageVariables,
+  ParseGradleResult,
   StringInterpolation,
   SyntaxHandlerInput,
   SyntaxHandlerOutput,
@@ -16,15 +15,15 @@ import {
   SyntaxMatcher,
   Token,
   TokenMap,
-  TokenType,
   VariableData,
-} from './common';
+} from './types';
 import { tokenize } from './tokenizer';
 import {
   interpolateString,
   isDependencyString,
   parseDependencyString,
 } from './utils';
+import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO, TokenType } from './common';
 
 function matchTokens(
   tokens: Token[],
@@ -487,12 +486,6 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
 ];
 
-interface MatchConfig {
-  tokens: Token[];
-  variables: PackageVariables;
-  packageFile: string;
-}
-
 function tryMatch({
   tokens,
   variables,
@@ -513,12 +506,6 @@ function tryMatch({
   }
   tokens.shift();
   return null;
-}
-
-interface ParseGradleResult {
-  deps: PackageDependency<ManagerData>[];
-  urls: string[];
-  vars: PackageVariables;
 }
 
 export function parseGradle(

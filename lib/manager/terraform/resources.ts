@@ -3,14 +3,12 @@ import { SkipReason } from '../../types';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 import {
-  ExtractionResult,
-  ResourceManagerData,
-  TerraformDependencyTypes,
-  TerraformResourceTypes,
   checkIfStringIsPath,
   keyValueExtractionRegex,
   resourceTypeExtractionRegex,
 } from './util';
+import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import type { ExtractionResult, ResourceManagerData } from './types';
 
 function applyDockerDependency(
   dep: PackageDependency<ResourceManagerData>,

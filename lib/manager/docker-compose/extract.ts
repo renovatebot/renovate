@@ -3,19 +3,7 @@ import { safeLoad } from 'js-yaml';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageFile } from '../types';
-
-interface DockerComposeConfig {
-  version?: string;
-  services?: Record<string, DockerComposeService>;
-}
-
-interface DockerComposeService {
-  image?: string;
-  build?: {
-    context?: string;
-    dockerfile?: string;
-  };
-}
+import type { DockerComposeConfig } from './types';
 
 class LineMapper {
   private imageLines: { line: string; lineNumber: number; used: boolean }[];

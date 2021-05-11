@@ -3,7 +3,7 @@ import { id as datasource, defaultRegistryUrls } from '../../datasource/maven';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { ManagerData, PackageVariables, VariableRegistry } from './common';
+import type { ManagerData, PackageVariables, VariableRegistry } from './types';
 import { parseGradle, parseProps } from './parser';
 import {
   getVars,
