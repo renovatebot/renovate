@@ -1,12 +1,13 @@
 import _simpleGit from 'simple-git';
 import { dir } from 'tmp-promise';
+import { getName } from '../../../test/util';
 import type { Upgrade } from '../types';
 import updateDependency from './update';
 
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
-describe('manager/git-submodules/update', () => {
+describe(getName(), () => {
   describe('updateDependency', () => {
     let upgrade: Upgrade;
     beforeAll(async () => {

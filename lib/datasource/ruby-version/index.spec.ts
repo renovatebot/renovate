@@ -1,14 +1,11 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName, loadFixture } from '../../../test/util';
 import { id as datasource } from '.';
 
-const rubyReleasesHtml = fs.readFileSync(
-  'lib/datasource/ruby-version/__fixtures__/releases.html',
-  'utf8'
-);
+const rubyReleasesHtml = loadFixture('releases.html');
 
-describe('datasource/gradle', () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       httpMock.setup();

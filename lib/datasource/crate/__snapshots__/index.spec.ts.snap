@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/crate getReleases clones cloudsmith private registry 1`] = `
+exports[`datasource/crate/index getReleases clones cloudsmith private registry 1`] = `
 Object {
   "dependencyUrl": "https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg",
   "registryUrl": "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git",
@@ -15,7 +15,7 @@ Object {
 }
 `;
 
-exports[`datasource/crate getReleases clones other private registry 1`] = `
+exports[`datasource/crate/index getReleases clones other private registry 1`] = `
 Object {
   "dependencyUrl": "https://github.com/mcorbin/testregistry/mypkg",
   "registryUrl": "https://github.com/mcorbin/testregistry",
@@ -30,7 +30,7 @@ Object {
 }
 `;
 
-exports[`datasource/crate getReleases processes real data: amethyst 1`] = `
+exports[`datasource/crate/index getReleases processes real data: amethyst 1`] = `
 Object {
   "dependencyUrl": "https://crates.io/crates/amethyst",
   "registryUrl": "https://crates.io",
@@ -97,11 +97,11 @@ Object {
 }
 `;
 
-exports[`datasource/crate getReleases processes real data: amethyst 2`] = `
+exports[`datasource/crate/index getReleases processes real data: amethyst 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "raw.githubusercontent.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -111,7 +111,7 @@ Array [
 ]
 `;
 
-exports[`datasource/crate getReleases processes real data: libc 1`] = `
+exports[`datasource/crate/index getReleases processes real data: libc 1`] = `
 Object {
   "dependencyUrl": "https://crates.io/crates/libc",
   "registryUrl": "https://crates.io",
@@ -317,11 +317,11 @@ Object {
 }
 `;
 
-exports[`datasource/crate getReleases processes real data: libc 2`] = `
+exports[`datasource/crate/index getReleases processes real data: libc 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "raw.githubusercontent.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -331,13 +331,13 @@ Array [
 ]
 `;
 
-exports[`datasource/crate getReleases refuses to clone if trustLevel is not high 1`] = `null`;
+exports[`datasource/crate/index getReleases refuses to clone if allowCustomCrateRegistries is not true 1`] = `null`;
 
-exports[`datasource/crate getReleases returns null for 404 1`] = `
+exports[`datasource/crate/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "raw.githubusercontent.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -347,11 +347,11 @@ Array [
 ]
 `;
 
-exports[`datasource/crate getReleases returns null for empty list 1`] = `
+exports[`datasource/crate/index getReleases returns null for empty list 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "raw.githubusercontent.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -361,11 +361,11 @@ Array [
 ]
 `;
 
-exports[`datasource/crate getReleases returns null for empty result 1`] = `
+exports[`datasource/crate/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "raw.githubusercontent.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -375,11 +375,11 @@ Array [
 ]
 `;
 
-exports[`datasource/crate getReleases returns null for missing fields 1`] = `
+exports[`datasource/crate/index getReleases returns null for missing fields 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "raw.githubusercontent.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -389,11 +389,11 @@ Array [
 ]
 `;
 
-exports[`datasource/crate getReleases returns null for unknown error 1`] = `
+exports[`datasource/crate/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "raw.githubusercontent.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -403,13 +403,13 @@ Array [
 ]
 `;
 
-exports[`datasource/crate getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
+exports[`datasource/crate/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
 
-exports[`datasource/crate getReleases throws for 5xx 2`] = `
+exports[`datasource/crate/index getReleases throws for 5xx 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "raw.githubusercontent.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

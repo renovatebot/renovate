@@ -29,10 +29,24 @@ const staticGroups = {
       },
     ],
   },
+  nodeJs: {
+    description:
+      "Group anything that looks like Node.js together so that it's updated together",
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: ['node'],
+        matchPackagePatterns: ['/node$'],
+        excludePackageNames: ['calico/node'],
+        commitMessageTopic: 'Node.js',
+      },
+    ],
+  },
   recommended: {
     description:
       'Use curated list of recommended non-monorepo package groupings',
     extends: [
+      'group:nodeJs',
       'group:allApollographql',
       'group:fortawesome',
       'group:fusionjs',
@@ -496,9 +510,8 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:jsUnitTest',
-        minor: {
-          groupName: 'JS unit test packages',
-        },
+        matchUpdateTypes: ['minor', 'patch'],
+        groupName: 'JS unit test packages',
       },
     ],
   },
@@ -516,9 +529,8 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:unitTest',
-        minor: {
-          groupName: 'unit test packages',
-        },
+        matchUpdateTypes: ['minor', 'patch'],
+        groupName: 'unit test packages',
       },
     ],
   },
@@ -536,9 +548,8 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:jsTest',
-        minor: {
-          groupName: 'JS test packages',
-        },
+        matchUpdateTypes: ['minor', 'patch'],
+        groupName: 'JS test packages',
       },
     ],
   },
@@ -556,9 +567,8 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:test',
-        minor: {
-          groupName: 'test packages',
-        },
+        matchUpdateTypes: ['minor', 'patch'],
+        groupName: 'test packages',
       },
     ],
   },

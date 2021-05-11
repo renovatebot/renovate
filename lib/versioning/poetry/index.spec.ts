@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import { api as versionig } from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('equals', () => {
     it.each([
       ['1', '1'],
@@ -138,6 +138,9 @@ describe(getName(__filename), () => {
     });
     it('handles wildcards', () => {
       expect(versionig.matches('4.2.0', '*')).toBe(true);
+    });
+    it('handles short', () => {
+      expect(versionig.matches('1.4', '1.4')).toBe(true);
     });
   });
   describe('isLessThanRange()', () => {

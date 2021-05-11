@@ -130,7 +130,7 @@ function extractClassName(content: string): string | null {
   return parseClassHeader(i, content);
 }
 
-// TODO: Maybe check if quotes/double-quotes are balanced
+// TODO: Maybe check if quotes/double-quotes are balanced (#9591)
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('extractPackageFile()');
   /*

@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -10,11 +10,7 @@ import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
-import {
-  deleteBranch,
-  getBranchLastCommitTime,
-  isBranchModified,
-} from '../../util/git';
+import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import * as template from '../../util/template';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
 import { BranchConfig, PrResult } from '../types';
@@ -37,6 +33,23 @@ async function addCodeOwners(
   return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
 }
 
+function filterUnavailableUsers(
+  config: RenovateConfig,
+  users: string[]
+): Promise<string[]> {
+  return config.filterUnavailableUsers && platform.filterUnavailableUsers
+    ? platform.filterUnavailableUsers(users)
+    : Promise.resolve(users);
+}
+
+function prepareAssigneesReviewers(
+  config: RenovateConfig,
+  usernames: string[]
+): Promise<string[]> {
+  const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
+  return filterUnavailableUsers(config, normalizedUsernames);
+}
+
 export async function addAssigneesReviewers(
   config: RenovateConfig,
   pr: Pr
@@ -47,7 +60,7 @@ export async function addAssigneesReviewers(
   }
   if (assignees.length > 0) {
     try {
-      assignees = assignees.map(noLeadingAtSymbol);
+      assignees = await prepareAssigneesReviewers(config, assignees);
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
@@ -76,7 +89,7 @@ export async function addAssigneesReviewers(
   }
   if (reviewers.length > 0) {
     try {
-      reviewers = [...new Set(reviewers.map(noLeadingAtSymbol))];
+      reviewers = await prepareAssigneesReviewers(config, reviewers);
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
@@ -102,6 +115,7 @@ export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
 ): PlatformPrOptions {
   return {
+    azureAutoApprove: config.azureAutoApprove,
     azureAutoComplete: config.azureAutoComplete,
     azureWorkItemId: config.azureWorkItemId,
     bbUseDefaultReviewers: config.bbUseDefaultReviewers,
@@ -111,14 +125,15 @@ export function getPlatformPrOptions(
       config.gitLabAutomerge,
   };
 }
+export type EnsurePrResult = {
+  prResult: PrResult;
+  pr?: Pr;
+};
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
-): Promise<{
-  prResult: PrResult;
-  pr?: Pr;
-}> {
+): Promise<EnsurePrResult> {
   const config: BranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
@@ -477,89 +492,4 @@ export async function ensurePr(
     logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
   }
   return { prResult: PrResult.Error };
-}
-
-export async function checkAutoMerge(
-  pr: Pr,
-  config: BranchConfig
-): Promise<boolean> {
-  logger.trace({ config }, 'checkAutoMerge');
-  const {
-    branchName,
-    automerge,
-    automergeType,
-    automergeComment,
-    requiredStatusChecks,
-    rebaseRequested,
-  } = config;
-  logger.debug(
-    { automerge, automergeType, automergeComment },
-    `Checking #${pr.number} for automerge`
-  );
-  if (automerge) {
-    logger.debug('PR is configured for automerge');
-    // Return if PR not ready for automerge
-    if (pr.isConflicted) {
-      logger.debug('PR is conflicted');
-      logger.debug({ pr });
-      return false;
-    }
-    if (requiredStatusChecks && pr.canMerge !== true) {
-      logger.debug(
-        { canMergeReason: pr.canMergeReason },
-        'PR is not ready for merge'
-      );
-      return false;
-    }
-    const branchStatus = await platform.getBranchStatus(
-      branchName,
-      requiredStatusChecks
-    );
-    if (branchStatus !== BranchStatus.green) {
-      logger.debug(
-        `PR is not ready for merge (branch status is ${branchStatus})`
-      );
-      return false;
-    }
-    // Check if it's been touched
-    if (await isBranchModified(branchName)) {
-      logger.debug('PR is ready for automerge but has been modified');
-      return false;
-    }
-    if (automergeType === 'pr-comment') {
-      logger.debug(`Applying automerge comment: ${automergeComment}`);
-      // istanbul ignore if
-      if (getAdminConfig().dryRun) {
-        logger.info(
-          `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
-        );
-        return false;
-      }
-      if (rebaseRequested) {
-        await platform.ensureCommentRemoval({
-          number: pr.number,
-          content: automergeComment,
-        });
-      }
-      return platform.ensureComment({
-        number: pr.number,
-        topic: null,
-        content: automergeComment,
-      });
-    }
-    // Let's merge this
-    logger.debug(`Automerging #${pr.number}`);
-    // istanbul ignore if
-    if (getAdminConfig().dryRun) {
-      logger.info(`DRY-RUN: Would merge PR #${pr.number}`);
-      return false;
-    }
-    const res = await platform.mergePr(pr.number, branchName);
-    if (res) {
-      logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
-    }
-    return res;
-  }
-  logger.debug('No automerge');
-  return false;
 }

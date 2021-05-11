@@ -11,7 +11,7 @@ const hostRules = mocked(_hostRules);
 const bitbucketApiHost = 'https://git.company.org';
 const basePath = '/rest/api/1.0/projects/some/repos/repo/browse';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });

@@ -75,6 +75,9 @@ export function getNewValue({
   const parsedRange = parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
   if (rangeStrategy === 'widen') {
+    if (satisfies(newVersion, currentValue)) {
+      return currentValue;
+    }
     const newValue = getNewValue({
       currentValue,
       rangeStrategy: 'replace',
@@ -104,7 +107,9 @@ export function getNewValue({
   const toVersionMajor = major(newVersion);
   const toVersionMinor = minor(newVersion);
   const toVersionPatch = patch(newVersion);
-  const suffix = prerelease(newVersion) ? '-' + prerelease(newVersion)[0] : '';
+  const suffix = prerelease(newVersion)
+    ? '-' + String(prerelease(newVersion)[0])
+    : '';
   // Simple range
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {

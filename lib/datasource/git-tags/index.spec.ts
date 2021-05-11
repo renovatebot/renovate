@@ -1,6 +1,6 @@
-import fs from 'fs-extra';
 import _simpleGit from 'simple-git';
 import { getPkgReleases } from '..';
+import { getName, loadFixture } from '../../../test/util';
 import { id as datasource, getDigest } from '.';
 
 jest.mock('simple-git');
@@ -8,12 +8,9 @@ const simpleGit: any = _simpleGit;
 
 const depName = 'https://github.com/example/example.git';
 
-const lsRemote1 = fs.readFileSync(
-  'lib/datasource/git-refs/__fixtures__/ls-remote-1.txt',
-  'utf8'
-);
+const lsRemote1 = loadFixture('ls-remote-1.txt', '../git-refs');
 
-describe('datasource/git-tags', () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({

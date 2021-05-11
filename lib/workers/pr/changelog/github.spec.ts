@@ -29,7 +29,7 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       hostRules.clear();

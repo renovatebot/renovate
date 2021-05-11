@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
-import { RequestStats } from '../../util/http';
+import type { RequestStats } from '../../util/http/types';
 import { parseUrl } from '../../util/url';
 
 export function printRequestStats(): void {
@@ -24,7 +24,7 @@ export function printRequestStats(): void {
     allRequests.push(
       `${method.toUpperCase()} ${url} ${duration} ${queueDuration}`
     );
-    const { hostname } = parseUrl(url);
+    const { hostname } = parseUrl(url) ?? {};
     requestHosts[hostname] = requestHosts[hostname] || [];
     requestHosts[hostname].push(httpRequest);
   }

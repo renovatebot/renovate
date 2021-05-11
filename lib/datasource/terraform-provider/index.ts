@@ -70,7 +70,7 @@ async function queryRegistry(
   return dep;
 }
 
-// TODO: add long term cache
+// TODO: add long term cache (#9590)
 async function queryReleaseBackend(
   lookupName: string,
   registryURL: string,

@@ -31,7 +31,7 @@ interface TestInput {
   adminConfig?: RepoAdminConfig;
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let processEnvOrig: NodeJS.ProcessEnv;
 
   const cacheDir = '/tmp/renovate/cache/';
@@ -194,7 +194,7 @@ describe(getName(__filename), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { trustLevel: 'high' },
+        adminConfig: { exposeAllEnv: true },
       },
     ],
 
@@ -445,6 +445,36 @@ describe(getName(__filename), () => {
           },
         ],
         adminConfig: { dockerImagePrefix: 'ghcr.io/renovatebot' },
+      },
+    ],
+
+    [
+      'Docker child prefix',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+        },
+        processEnv,
+        inCmd,
+        inOpts: { docker },
+        outCmd: [
+          dockerPullCmd,
+          `docker ps --filter name=myprefix_${image} -aq`,
+          `docker run --rm --name=myprefix_${image} --label=myprefix_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { dockerChildPrefix: 'myprefix_' },
       },
     ],
 

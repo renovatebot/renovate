@@ -31,5 +31,17 @@ exports[`util/host-rules find() returns hosts 1`] = `
 Array [
   "nuget.local",
   "my.local.registry",
+  "another.local.registry",
+  "yet.another.local.registry",
 ]
+`;
+
+exports[`util/host-rules findAll() needs exact host matches 1`] = `
+Object {
+  "hostName": "nuget.org",
+  "hostType": "nuget",
+  "password": "p4$$w0rd",
+  "resolvedHost": "nuget.org",
+  "username": "root",
+}
 `;

@@ -30,7 +30,7 @@ function compareFile(file: string, path: string) {
   );
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   ifSystemSupportsGradle(6).describe('real tests', () => {
     jest.setTimeout(60 * 1000);
 
@@ -239,7 +239,7 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toEqual([
         {
           headers: {
-            'accept-encoding': 'gzip, deflate',
+            'accept-encoding': 'gzip, deflate, br',
             host: 'services.gradle.org',
             'user-agent': 'https://github.com/renovatebot/renovate',
           },
@@ -274,7 +274,7 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toEqual([
         {
           headers: {
-            'accept-encoding': 'gzip, deflate',
+            'accept-encoding': 'gzip, deflate, br',
             host: 'services.gradle.org',
             'user-agent': 'https://github.com/renovatebot/renovate',
           },

@@ -1,3 +1,4 @@
+import { getName } from '../../test/util';
 import {
   parseUrl,
   resolveBaseUrl,
@@ -5,7 +6,7 @@ import {
   validateUrl,
 } from './url';
 
-describe('util/url', () => {
+describe(getName(), () => {
   test.each([
     ['http://foo.io', '', 'http://foo.io'],
     ['http://foo.io/', '', 'http://foo.io'],

@@ -1,12 +1,9 @@
-import { readFileSync } from 'fs';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const content = readFileSync(
-  'lib/manager/setup-cfg/__fixtures__/setup-cfg-1.txt',
-  'utf8'
-);
+const content = loadFixture('setup-cfg-1.txt');
 
-describe('lib/manager/pip_requirements/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

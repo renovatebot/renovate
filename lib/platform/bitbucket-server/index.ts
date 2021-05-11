@@ -89,7 +89,7 @@ export function initPlatform({
       'Init: You must configure a Bitbucket Server username/password'
     );
   }
-  // TODO: Add a connection check that endpoint/username/password combination are valid
+  // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
   const platformConfig: PlatformResult = {
@@ -298,7 +298,7 @@ export async function getPr(
   return pr;
 }
 
-// TODO: coverage
+// TODO: coverage (#9624)
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PrState.All) {
@@ -310,7 +310,7 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-// TODO: coverage
+// TODO: coverage (#9624)
 // istanbul ignore next
 const isRelevantPr = (
   branchName: string,
@@ -321,7 +321,7 @@ const isRelevantPr = (
   (!prTitle || p.title === prTitle) &&
   matchesState(p.state, state);
 
-// TODO: coverage
+// TODO: coverage (#9624)
 export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   // istanbul ignore next
@@ -346,7 +346,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   return config.prList;
 }
 
-// TODO: coverage
+// TODO: coverage (#9624)
 // istanbul ignore next
 export async function findPr({
   branchName,
@@ -538,9 +538,11 @@ export async function setBranchStatus({
 /* istanbul ignore next */
 export function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
-  // TODO: Needs implementation
-  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
-  // BB Server doesnt have issues
+  // This is used by Renovate when creating its own issues,
+  // e.g. for deprecated package warnings,
+  // config error notifications, or "dependencyDashboard"
+  //
+  // Bitbucket Server does not have issues
   return null;
 }
 
@@ -549,33 +551,43 @@ export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.warn({ title }, 'Cannot ensure issue');
-  // TODO: Needs implementation
-  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
-  // BB Server doesnt have issues
+  // This is used by Renovate when creating its own issues,
+  // e.g. for deprecated package warnings,
+  // config error notifications, or "dependencyDashboard"
+  //
+  // Bitbucket Server does not have issues
   return null;
 }
 
 /* istanbul ignore next */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
-  // TODO: Needs implementation
+  // This is used by Renovate when creating its own issues,
+  // e.g. for deprecated package warnings,
+  // config error notifications, or "dependencyDashboard"
+  //
+  // Bitbucket Server does not have issues
   return Promise.resolve([]);
 }
 
 /* istanbul ignore next */
 export function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
-  // TODO: Needs implementation
-  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
-  // BB Server doesnt have issues
+  // This is used by Renovate when creating its own issues,
+  // e.g. for deprecated package warnings,
+  // config error notifications, or "dependencyDashboard"
+  //
+  // Bitbucket Server does not have issues
   return Promise.resolve();
 }
 
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   logger.debug(`addAssignees(${iid}, [${assignees.join(', ')}])`);
-  // TODO: Needs implementation
-  // Currently Renovate does "Create PR" and then "Add assignee" as a two-step process, with this being the second step.
-  // BB Server doesnt support assignees
+  // This is used by Renovate when creating its own issues,
+  // e.g. for deprecated package warnings,
+  // config error notifications, or "dependencyDashboard"
+  //
+  // Bitbucket Server does not have issues
   return Promise.resolve();
 }
 
@@ -626,8 +638,9 @@ export async function addReviewers(
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {
   logger.debug(`deleteLabel(${issueNo}, ${label})`);
-  // TODO: Needs implementation
   // Only used for the "request Renovate to rebase a PR using a label" feature
+  //
+  // Bitbucket Server does not have issues
   return Promise.resolve();
 }
 

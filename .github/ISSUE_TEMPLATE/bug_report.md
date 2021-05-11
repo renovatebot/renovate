@@ -11,7 +11,26 @@ labels: 'type:bug, status:requirements, priority-5-triage'
 
 **What Renovate type, platform and version are you using?**
 
-<!-- Tell us if you're using the hosted App, or if you are self-hosted Renovate yourself. Platform too (GitHub, GitLab, etc) plus which version of Renovate if you're self-hosted. -->
+<!-- Tell us if you're using the hosted App, or if you are self-hosting Renovate yourself. Platform too (GitHub, GitLab, etc) plus which version of Renovate if you're self-hosted. -->
+
+**Renovate type**
+
+- [ ] Hosted app
+- [ ] Self hosted
+
+**Renovate platform**
+
+- [ ] Azure DevOps (dev.azure.com)
+- [ ] Azure DevOps Server (self-hosted)
+- [ ] Bitbucket Cloud (bitbucket.org)
+- [ ] Bitbucket Server (self-hosted)
+- [ ] Gitea (gitea.com, self-hosted)
+- [ ] GitHub (github.com, GitHub Enterprise)
+- [ ] GitLab (gitlab.com, self-hosted)
+
+**Renovate version (if self hosting)**
+
+I'm self hosting Renovate with version: ...
 
 **Describe the bug**
 
@@ -37,7 +56,7 @@ Copy/paste any log here, between the starting and ending backticks
 
 **Have you created a minimal reproduction repository?**
 
-Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
+Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
 
 - [ ] I have provided a minimal reproduction repository
 - [ ] I don't have time for that, but it happens in a public repository I have linked to

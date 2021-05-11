@@ -280,7 +280,7 @@ async function packageLookup(
       return null;
     }
     const opts = getHostOpts(regUrl);
-    // TODO: fix types
+    // TODO: fix types (#9610)
     const versions = (await http.getJson<any>(pkgUrl, opts)).body.packages[
       name
     ];

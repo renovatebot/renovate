@@ -1,3 +1,4 @@
+import { getName } from '../../../test/util';
 import { TokenType } from './common';
 import { extractRawTokens, tokenize } from './tokenizer';
 
@@ -5,7 +6,7 @@ function tokenTypes(input): string[] {
   return extractRawTokens(input).map((token) => token.type);
 }
 
-describe('manager/gradle-lite/tokenizer', () => {
+describe(getName(), () => {
   it('extractTokens', () => {
     const samples = {
       ' ': [TokenType.Space],
@@ -34,7 +35,7 @@ describe('manager/gradle-lite/tokenizer', () => {
         TokenType.RightBrace,
         TokenType.RightBrace,
       ],
-      '@': [TokenType.UnknownLexeme],
+      '@': [TokenType.UnknownFragment],
       "'\\''": [
         TokenType.SingleQuotedStart,
         TokenType.EscapedChar,
@@ -53,23 +54,22 @@ describe('manager/gradle-lite/tokenizer', () => {
       ],
       "'x'": [
         TokenType.SingleQuotedStart,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.SingleQuotedFinish,
       ],
       "'\n'": [
         TokenType.SingleQuotedStart,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.SingleQuotedFinish,
       ],
       "'$x'": [
         TokenType.SingleQuotedStart,
-        TokenType.Char,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.SingleQuotedFinish,
       ],
       "''''''": ['tripleQuotedStart', 'tripleQuotedFinish'],
-      "'''x'''": ['tripleQuotedStart', TokenType.Char, 'tripleQuotedFinish'],
-      "'''\n'''": ['tripleQuotedStart', TokenType.Char, 'tripleQuotedFinish'],
+      "'''x'''": ['tripleQuotedStart', TokenType.Chars, 'tripleQuotedFinish'],
+      "'''\n'''": ['tripleQuotedStart', TokenType.Chars, 'tripleQuotedFinish'],
       "'''\\''''": [
         'tripleQuotedStart',
         TokenType.EscapedChar,
@@ -105,12 +105,12 @@ describe('manager/gradle-lite/tokenizer', () => {
       ],
       '"x"': [
         TokenType.DoubleQuotedStart,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.DoubleQuotedFinish,
       ],
       '"\n"': [
         TokenType.DoubleQuotedStart,
-        TokenType.Char,
+        TokenType.Chars,
         TokenType.DoubleQuotedFinish,
       ],
       // eslint-disable-next-line no-template-curly-in-string
@@ -129,9 +129,7 @@ describe('manager/gradle-lite/tokenizer', () => {
       '"${x()}"': [
         TokenType.DoubleQuotedStart,
         TokenType.IgnoredInterpolationStart,
-        TokenType.UnknownLexeme,
-        TokenType.UnknownLexeme,
-        TokenType.UnknownLexeme,
+        TokenType.UnknownFragment,
         TokenType.RightBrace,
         TokenType.DoubleQuotedFinish,
       ],
@@ -139,7 +137,7 @@ describe('manager/gradle-lite/tokenizer', () => {
       '"${x{}}"': [
         TokenType.DoubleQuotedStart,
         TokenType.IgnoredInterpolationStart,
-        TokenType.UnknownLexeme,
+        TokenType.UnknownFragment,
         TokenType.LeftBrace,
         TokenType.RightBrace,
         TokenType.RightBrace,

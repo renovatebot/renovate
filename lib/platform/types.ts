@@ -73,6 +73,7 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
+  azureAutoApprove?: boolean;
   azureAutoComplete?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
@@ -177,4 +178,5 @@ export interface Platform {
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
+  filterUnavailableUsers?(users: string[]): Promise<string[]>;
 }

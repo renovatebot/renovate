@@ -1,4 +1,4 @@
-import { defaultConfig, git, mocked } from '../../../test/util';
+import { defaultConfig, getName, git, mocked } from '../../../test/util';
 import * as datasourceGitRefs from '../../datasource/git-refs';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
@@ -21,7 +21,7 @@ jest.mock('../../manager/git-submodules');
 jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
-describe('workers/branch/get-updated', () => {
+describe(getName(), () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
     beforeEach(() => {

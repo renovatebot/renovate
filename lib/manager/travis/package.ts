@@ -5,21 +5,21 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { NodeJsPolicies, getPolicies } from '../../versioning/node/schedule';
 import { getSatisfyingVersion, isVersion } from '../../versioning/semver';
-import type { LookupUpdate, PackageUpdateConfig } from '../types';
+import type { PackageUpdateConfig, PackageUpdateResult } from '../types';
 
 export async function getPackageUpdates(
   config: PackageUpdateConfig
-): Promise<LookupUpdate[]> {
+): Promise<PackageUpdateResult> {
   logger.trace('travis.getPackageUpdates()');
   const { supportPolicy } = config;
   if (!supportPolicy?.length) {
-    return [];
+    return { updates: [] };
   }
   const policies = getPolicies();
   for (const policy of supportPolicy) {
     if (!Object.keys(policies).includes(policy)) {
       logger.warn({ policy }, `Unknown supportPolicy`);
-      return [];
+      return { updates: [] };
     }
   }
   logger.debug({ supportPolicy }, `supportPolicy`);
@@ -45,17 +45,18 @@ export async function getPackageUpdates(
   }
   newValue.sort((a, b) => a - b);
 
-  // TODO: `config.currentValue` is a string!
   (config.currentValue as any).sort((a, b) => a - b);
   if (dequal(config.currentValue, newValue)) {
-    return [];
+    return { updates: [] };
   }
-  return [
-    {
-      newValue: newValue.join(','),
-      newMajor,
-      isRange: true,
-      sourceUrl: 'https://github.com/nodejs/node',
-    },
-  ];
+  return {
+    sourceUrl: 'https://github.com/nodejs/node',
+    updates: [
+      {
+        newValue: newValue.join(','),
+        newMajor,
+        isRange: true,
+      },
+    ],
+  };
 }

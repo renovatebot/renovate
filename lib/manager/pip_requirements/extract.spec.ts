@@ -1,41 +1,16 @@
-import { readFileSync } from 'fs';
+import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { extractPackageFile } from './extract';
 
-const requirements1 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements1.txt',
-  'utf8'
-);
-const requirements2 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements2.txt',
-  'utf8'
-);
-const requirements3 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements3.txt',
-  'utf8'
-);
+const requirements1 = loadFixture('requirements1.txt');
+const requirements2 = loadFixture('requirements2.txt');
+const requirements3 = loadFixture('requirements3.txt');
+const requirements4 = loadFixture('requirements4.txt');
+const requirements5 = loadFixture('requirements5.txt');
+const requirements6 = loadFixture('requirements6.txt');
+const requirements7 = loadFixture('requirements7.txt');
 
-const requirements4 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements4.txt',
-  'utf8'
-);
-
-const requirements5 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements5.txt',
-  'utf8'
-);
-
-const requirements6 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements6.txt',
-  'utf8'
-);
-
-const requirements7 = readFileSync(
-  'lib/manager/pip_requirements/__fixtures__/requirements7.txt',
-  'utf8'
-);
-
-describe('lib/manager/pip_requirements/extract', () => {
+describe(getName(), () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
     setAdminConfig();
@@ -113,6 +88,20 @@ describe('lib/manager/pip_requirements/extract', () => {
       ]);
       expect(res.deps).toHaveLength(6);
     });
+
+    it('handles extra spaces around pinned dependency equal signs', () => {
+      const res = extractPackageFile(requirements4, 'unused_file_name', {});
+      expect(res).toMatchSnapshot();
+
+      expect(res.deps[0].currentValue).toStartWith('==');
+      expect(res.deps[0].currentVersion).toStartWith('2.0.12');
+      expect(res.deps[1].currentValue).toStartWith('==');
+      expect(res.deps[1].currentVersion).toStartWith('4.1.1');
+      expect(res.deps[2].currentValue).toStartWith('==');
+      expect(res.deps[2].currentVersion).toStartWith('3.2.1');
+
+      expect(res.deps).toHaveLength(3);
+    });
     it('should not replace env vars in low trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
@@ -128,7 +117,7 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('should replace env vars in high trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ exposeAllEnv: true });
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',

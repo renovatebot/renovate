@@ -1,22 +1,16 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName, loadFixture } from '../../../test/util';
 import { id as datasource, defaultRegistryUrls } from '.';
 
-const consulData: any = fs.readFileSync(
-  'lib/datasource/terraform-provider/__fixtures__/azurerm-provider.json'
-);
-const hashicorpReleases: any = fs.readFileSync(
-  'lib/datasource/terraform-provider/__fixtures__/releaseBackendIndex.json'
-);
-const serviceDiscoveryResult: any = fs.readFileSync(
-  'lib/datasource/terraform-module/__fixtures__/service-discovery.json'
-);
+const consulData: any = loadFixture('azurerm-provider.json');
+const hashicorpReleases: any = loadFixture('releaseBackendIndex.json');
+const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
 
 const primaryUrl = defaultRegistryUrls[0];
 const secondaryUrl = defaultRegistryUrls[1];
 
-describe('datasource/terraform', () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

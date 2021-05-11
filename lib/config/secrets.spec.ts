@@ -5,7 +5,7 @@ import {
 } from '../constants/error-messages';
 import { applySecretsToConfig, validateConfigSecrets } from './secrets';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('validateConfigSecrets(config)', () => {
     it('works with default config', () => {
       expect(() => validateConfigSecrets(defaultConfig)).not.toThrow();

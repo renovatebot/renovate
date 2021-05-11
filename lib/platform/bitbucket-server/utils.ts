@@ -81,7 +81,7 @@ export async function accumulateValues<T = any>(
   let nextUrl = addMaxLength(reqUrl, limit);
 
   while (typeof nextUrl !== 'undefined') {
-    // TODO: fix typing
+    // TODO: fix typing (#9610)
     const { body } = await callApi<{
       values: T[];
       isLastPage: boolean;

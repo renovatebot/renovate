@@ -1,4 +1,4 @@
-import { defaultConfig, partial } from '../../../../test/util';
+import { defaultConfig, getName, partial } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import * as datasourceNpm from '../../../datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
@@ -8,7 +8,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('workers/repository/updates/generate', () => {
+describe(getName(), () => {
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade', () => {
       const branch = [
@@ -28,6 +28,33 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
       expect(res.releaseTimestamp).toBeDefined();
+    });
+    it('handles lockFileMaintenance', () => {
+      const branch = [
+        {
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          isLockFileMaintenance: true,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles lockFileUpdate', () => {
+      const branch = [
+        {
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          isLockfileUpdate: true,
+          currentValue: '^1.0.0',
+          currentVersion: '1.0.0',
+          lockedVersion: '1.0.0',
+          newValue: '^1.0.0',
+          newVersion: '1.0.1',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchSnapshot();
     });
     it('does not group same upgrades', () => {
       const branch = [
@@ -371,6 +398,7 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           currentValue: '0.5.7',
           currentVersion: '0.5.7',
+          newValue: '0.5.8',
           newVersion: '0.5.8',
           group: {},
         },
@@ -474,6 +502,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
+          separateMinorPatch: true,
           updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
         },

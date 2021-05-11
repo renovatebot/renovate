@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../../test/util';
+import { RenovateConfig, getConfig, getName } from '../../../../test/util';
 
 import { LANGUAGE_DOCKER } from '../../../constants/languages';
 import { flattenUpdates } from './flatten';
@@ -11,7 +11,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe('workers/repository/updates/flatten', () => {
+describe(getName(), () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       config.lockFileMaintenance.enabled = true;
@@ -44,8 +44,24 @@ describe('workers/repository/updates/flatten', () => {
             packageFile: 'package.json',
             lockFiles: ['package-lock.json'],
             deps: [
-              { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
-              { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
+              {
+                depName: '@org/a',
+                updates: [
+                  {
+                    newValue: '1.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
               {
                 updateTypes: ['pin'],
                 updates: [{ newValue: '2.0.0' }],
@@ -54,7 +70,12 @@ describe('workers/repository/updates/flatten', () => {
           },
           {
             packageFile: 'backend/package.json',
-            deps: [{ depName: 'bar', updates: [{ newValue: '3.0.0' }] }],
+            deps: [
+              {
+                depName: 'bar',
+                updates: [{ newValue: '3.0.0', sourceUrl: 3 }],
+              },
+            ],
           },
           {
             packageFile: 'frontend/package.json',
@@ -68,6 +89,7 @@ describe('workers/repository/updates/flatten', () => {
               {
                 depName: 'amd64/node',
                 language: LANGUAGE_DOCKER,
+                sourceUrl: 'https://github.com/nodejs/node',
                 updates: [{ newValue: '10.0.1' }],
               },
             ],
@@ -78,6 +100,7 @@ describe('workers/repository/updates/flatten', () => {
               {
                 depName: 'calico/node',
                 language: LANGUAGE_DOCKER,
+                sourceUrl: 'https://calico.com',
                 updates: [{ newValue: '3.2.0', updateType: 'minor' }],
               },
             ],
@@ -109,6 +132,7 @@ describe('workers/repository/updates/flatten', () => {
       };
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(13);
+      expect(res.filter((update) => update.sourceRepoSlug)).toHaveLength(3);
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);

@@ -108,7 +108,7 @@ Here is how you would use these in your Renovate config:
 
 ```json
   "extends": [
-    ":labels(depedendencies,devops)",
+    ":labels(dependencies,devops)",
     ":assignee(rarkins)"
   ]
 ```
@@ -119,53 +119,14 @@ Parameters must be strings, non-quoted, and separated by commas if there are mor
 If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
 Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
 
-## How to Publish Preset Configs
-
-If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
-That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
-
-Let's say that your username on npm and elsewhere is "fastcore".
-In that case, you can choose between publishing your preset config package as `@fastcore/renovate-config` or `renovate-config-fastcore`.
-Let's assume you choose `renovate-config-fastcore` as the package name:
-
-You then need to publish the `renovate-config-fastcore` package where the `package.json` contains the field `renovate-config` and then put your config under the field `default`.
-For example:
-
-```json
-{
-  "name": "renovate-config-fastcore",
-  "version": "0.0.1",
-  ...
-  "renovate-config": {
-    "default": {
-      "extends": ["config:base", "schedule:nonOfficeHours"]
-    }
-  }
-}
-```
-
-Then in each of your repositories you can add your Renovate config like:
-
-```json
-  "extends": ["fastcore"]
-```
-
-Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
-
-Note: if you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
-
-```json
-  "extends": ["@fastcore"]
-```
-
 ## GitHub-hosted Presets
 
 It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a renovate.json file in the default branch, e.g. master.
+In such cases Renovate will simply look for a `renovate.json` file in the default branch, e.g. `main`.
 
 To host your preset config on GitHub:
 
-- Create a new repository. Normally you'd call it renovate-config but it can be named anything
+- Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
 - Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked first and then `renovate.json`. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
 - In other repos, reference it in an extends array like "github>owner/name", for example:
 
@@ -179,18 +140,18 @@ You do not need to add it as a devDependency or add any other files to the prese
 ## GitLab-hosted Presets
 
 It is also possible to host your preset config using just a regular GitLab repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a renovate.json file in the default branch, (for now only the master branch is supported).
+In such cases Renovate will simply look for a `renovate.json` file in the default branch.
 
 To host your preset config on GitLab:
 
-- Create a new repository on GitLab. Normally you'd call it renovate-config but it can be named anything
+- Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
 - Add a renovate.json to this new repo containing the preset config. No other files are necessary
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
 ## Gitea-hosted Presets
 
 It is also possible to host your preset config using just a regular Gitea repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `renovate.json` file in the default branch, (for now only the _master_ branch is supported).
+In such cases Renovate will simply look for a `renovate.json` file in the default branch.
 
 To host your preset config on Gitea:
 
@@ -202,7 +163,6 @@ To host your preset config on Gitea:
 
 Renovate also supports local presets, e.g. presets that are hosted on the same platform as the target repository.
 This is especially helpful in self-hosted scenarios where public presets cannot be used.
-Local presets are only supported on GitHub, GitLab, Gitea and Bitbucket Server.
 Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`.
 Renovate will determine the current platform and look up the preset from there.
 
@@ -236,4 +196,45 @@ For example the result may be:
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["local>myorgname/.github:renovate-config"]
 }
+```
+
+## npm-hosted presets
+
+Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
+
+If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
+That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
+
+Let's say that your username on npm and elsewhere is "fastcore".
+In that case, you can choose between publishing your preset config package as `@fastcore/renovate-config` or `renovate-config-fastcore`.
+Let's assume you choose `renovate-config-fastcore` as the package name.
+
+You then need to publish the `renovate-config-fastcore` package where the `package.json` contains the field `renovate-config` and then put your config under the field `default`.
+For example:
+
+```json
+{
+  "name": "renovate-config-fastcore",
+  "version": "0.0.1",
+  ...
+  "renovate-config": {
+    "default": {
+      "extends": ["config:base", "schedule:nonOfficeHours"]
+    }
+  }
+}
+```
+
+Then in each of your repositories you can add your Renovate config like:
+
+```json
+  "extends": ["fastcore"]
+```
+
+Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
+
+Note: if you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
+
+```json
+  "extends": ["@fastcore"]
 ```

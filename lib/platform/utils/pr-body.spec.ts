@@ -1,14 +1,9 @@
-import fs from 'fs-extra';
+import { getName, loadFixture } from '../../../test/util';
 import { smartTruncate } from './pr-body';
 
-describe('platform/utils/pr-body', () => {
-  let prBody: string;
-  beforeAll(async () => {
-    prBody = await fs.readFile(
-      'lib/platform/utils/__fixtures__/pr-body.txt',
-      'utf8'
-    );
-  });
+const prBody = loadFixture('pr-body.txt');
+
+describe(getName(), () => {
   describe('.smartTruncate', () => {
     it('truncates to 1000', () => {
       const body = smartTruncate(prBody, 1000);

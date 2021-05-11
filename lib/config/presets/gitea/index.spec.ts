@@ -12,7 +12,7 @@ const hostRules = mocked(_hostRules);
 const giteaApiHost = gitea.Endpoint;
 const basePath = '/repos/some/repo/contents';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });

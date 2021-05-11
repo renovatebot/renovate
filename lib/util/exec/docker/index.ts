@@ -72,11 +72,9 @@ async function getDockerTag(
   constraint: string,
   scheme: string
 ): Promise<string> {
-  // TODO: fixme
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  const { isValid, isVersion, matches, sortVersions } = versioning.get(scheme);
+  const ver = versioning.get(scheme);
 
-  if (!isValid(constraint)) {
+  if (!ver.isValid(constraint)) {
     logger.warn({ constraint }, `Invalid ${scheme} version constraint`);
     return 'latest';
   }
@@ -93,9 +91,9 @@ async function getDockerTag(
   if (imageReleases?.releases) {
     let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
-      (version) => isVersion(version) && matches(version, constraint)
+      (version) => ver.isVersion(version) && ver.matches(version, constraint)
     );
-    versions = versions.sort(sortVersions);
+    versions = versions.sort(ver.sortVersions.bind(ver));
     if (versions.length) {
       const version = versions.pop();
       logger.debug(
@@ -115,12 +113,19 @@ async function getDockerTag(
   return 'latest';
 }
 
-function getContainerName(image: string): string {
-  return `renovate_${image}`.replace(/\//g, '_');
+function getContainerName(image: string, prefix?: string): string {
+  return `${prefix || 'renovate_'}${image}`.replace(/\//g, '_');
 }
 
-export async function removeDockerContainer(image: string): Promise<void> {
-  const containerName = getContainerName(image);
+function getContainerLabel(prefix: string): string {
+  return `${prefix || 'renovate_'}child`;
+}
+
+export async function removeDockerContainer(
+  image: string,
+  prefix: string
+): Promise<void> {
+  const containerName = getContainerName(image, prefix);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
     const res = await rawExec(cmd, {
@@ -146,11 +151,15 @@ export async function removeDockerContainer(image: string): Promise<void> {
 }
 
 // istanbul ignore next
-export async function removeDanglingContainers(): Promise<void> {
+export async function removeDanglingContainers(prefix: string): Promise<void> {
   try {
-    const res = await rawExec(`docker ps --filter label=renovate_child -aq`, {
-      encoding: 'utf-8',
-    });
+    const containerLabel = getContainerLabel(prefix);
+    const res = await rawExec(
+      `docker ps --filter label=${containerLabel} -aq`,
+      {
+        encoding: 'utf-8',
+      }
+    );
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
         .trim()
@@ -187,11 +196,12 @@ export async function generateDockerCommand(
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
   const { localDir, cacheDir } = config;
-  const { dockerUser, dockerImagePrefix } = getAdminConfig();
+  const { dockerUser, dockerChildPrefix, dockerImagePrefix } = getAdminConfig();
   const result = ['docker run --rm'];
-  const containerName = getContainerName(image);
+  const containerName = getContainerName(image, dockerChildPrefix);
+  const containerLabel = getContainerLabel(dockerChildPrefix);
   result.push(`--name=${containerName}`);
-  result.push(`--label=renovate_child`);
+  result.push(`--label=${containerLabel}`);
   if (dockerUser) {
     result.push(`--user=${dockerUser}`);
   }
