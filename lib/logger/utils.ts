@@ -1,15 +1,10 @@
 import { Stream } from 'stream';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { RequestError } from 'got';
 import { clone } from '../util/clone';
+import { HttpError } from '../util/http/types';
 import { redactedFields, sanitize } from '../util/sanitize';
-
-export interface BunyanRecord extends Record<string, any> {
-  level: number;
-  msg: string;
-  module?: string;
-}
+import type { BunyanRecord, BunyanStream } from './types';
 
 const excludeProps = ['pid', 'time', 'v', 'hostname'];
 
@@ -67,7 +62,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
   }
 
   // handle got error
-  if (err instanceof RequestError) {
+  if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
       headers: clone(err.options.headers),
       url: err.options.url?.toString(),
@@ -150,11 +145,6 @@ export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
 
   return valueType === 'string' ? sanitize(value as string) : value;
 }
-
-type BunyanStream = (NodeJS.WritableStream | Stream) & {
-  writable?: boolean;
-  write: (chunk: BunyanRecord, enc, cb) => void;
-};
 
 export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
   if (streamConfig.type === 'rotating-file') {

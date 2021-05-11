@@ -10,6 +10,7 @@ import type {
   RenovateConfig,
   RenovateOptions,
   ValidationMessage,
+  ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
 
@@ -17,11 +18,6 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, RenovateOptions['parent']>;
-
-export interface ValidationResult {
-  errors: ValidationMessage[];
-  warnings: ValidationMessage[];
-}
 
 const managerList = getManagerList();
 

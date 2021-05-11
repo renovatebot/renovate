@@ -10,6 +10,7 @@ import { privateCacheDir, readFile } from '../../util/fs';
 import { Http } from '../../util/http';
 import * as cargoVersioning from '../../versioning/cargo';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { CrateRecord, RegistryFlavor, RegistryInfo } from './types';
 
 export const id = 'crate';
 export const customRegistrySupport = true;
@@ -21,30 +22,6 @@ const http = new Http(id);
 
 const CRATES_IO_BASE_URL =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
-
-export enum RegistryFlavor {
-  /** https://crates.io, supports rawgit access */
-  CratesIo,
-
-  /** https://cloudsmith.io, needs git clone */
-  Cloudsmith,
-
-  /** unknown, assuming private git repository */
-  Other,
-}
-
-export interface RegistryInfo {
-  flavor: RegistryFlavor;
-
-  /** raw URL of the registry, as specified in cargo config */
-  rawUrl?: string;
-
-  /** parsed URL of the registry */
-  url?: URL;
-
-  /** path where the registry is cloned */
-  clonePath?: string;
-}
 
 export function getIndexSuffix(lookupName: string): string[] {
   const len = lookupName.length;
@@ -60,11 +37,6 @@ export function getIndexSuffix(lookupName: string): string[] {
   }
 
   return [lookupName.slice(0, 2), lookupName.slice(2, 4), lookupName];
-}
-
-interface CrateRecord {
-  vers: string;
-  yanked: boolean;
 }
 
 export async function fetchCrateRecordsPayload(
