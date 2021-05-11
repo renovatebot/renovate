@@ -50,7 +50,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     cacheNamespace,
     url
   );
-  /* istanbul ignore next line */
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -75,7 +75,7 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
     logger.debug({ hashes, urls }, 'Could not calculate hash for URLs');
     return null;
   }
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (distinctHashes.length > 1) {
     logger.warn({ urls }, 'Found multiple hashes for single def');
   }
@@ -151,7 +151,7 @@ export async function updateDependency({
       existingRegExStr += '\n';
     }
     const existingDef = regEx(existingRegExStr);
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (!existingDef.test(fileContent)) {
       logger.debug('Cannot match existing string');
       return null;

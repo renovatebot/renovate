@@ -41,7 +41,6 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     for (const column of tableDefinitions) {
       const { header, value } = column;
       try {
-        // istanbul ignore else
         if (value) {
           res[header] = template.compile(value, upgrade).replace(/^``$/, '');
         } else {

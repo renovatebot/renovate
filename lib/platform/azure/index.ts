@@ -147,7 +147,7 @@ export async function initRepo({
   const repos = await azureApiGit.getRepositories();
   const repo = getRepoByName(repository, repos);
   logger.debug({ repositoryDetails: repo }, 'Repository details');
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
@@ -696,24 +696,24 @@ export function massageMarkdown(input: string): string {
     .replace('</details>', '');
 }
 
-/* istanbul ignore next */
+/* c8 ignore next */
 export function findIssue(): Promise<Issue | null> {
   logger.warn(`findIssue() is not implemented`);
   return null;
 }
 
-/* istanbul ignore next */
+/* c8 ignore next */
 export function ensureIssue(): Promise<EnsureIssueResult | null> {
   logger.warn(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
-/* istanbul ignore next */
+/* c8 ignore next */
 export function ensureIssueClosing(): Promise<void> {
   return Promise.resolve();
 }
 
-/* istanbul ignore next */
+/* c8 ignore next */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation (#9592)

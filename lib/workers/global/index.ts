@@ -50,7 +50,7 @@ function haveReachedLimits(): boolean {
   return false;
 }
 
-/* istanbul ignore next */
+/* c8 ignore next */
 function checkEnv(): void {
   const range = pkg.engines.node;
   const rangeNext = pkg['engines-next']?.node;
@@ -75,7 +75,7 @@ function checkEnv(): void {
 export async function validatePresets(config: GlobalConfig): Promise<void> {
   try {
     await resolveConfigPresets(config);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     throw new Error(CONFIG_PRESETS_INVALID);
   }
 }

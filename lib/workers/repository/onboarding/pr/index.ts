@@ -90,12 +90,12 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getPrList(config, branches));
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (config.prHeader) {
     const prHeader = String(config.prHeader || '');
     prBody = `${prHeader}\n\n${prBody}`;
   }
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (config.prFooter) {
     const prFooter = String(config.prFooter);
     prBody = `${prBody}\n---\n\n${prFooter}\n`;

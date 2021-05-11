@@ -143,7 +143,7 @@ export function getMavenUrl(
 export async function downloadMavenXml(
   pkgUrl: url.URL | null
 ): Promise<MavenXml | null> {
-  /* istanbul ignore if */
+  /* c8 ignore next 3 */
   if (!pkgUrl) {
     return {};
   }
@@ -185,7 +185,7 @@ export async function getDependencyInfo(
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
   const { xml: pomContent } = await downloadMavenXml(pomUrl);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!pomContent) {
     return result;
   }

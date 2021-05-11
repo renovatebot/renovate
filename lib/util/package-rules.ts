@@ -223,7 +223,7 @@ function matchesRule(
         /* c8 ignore next */
         if (version.isVersion(compareVersion)) {
           const isMatch = version.matches(compareVersion, matchCurrentVersion);
-          // istanbul ignore if
+          /* c8 ignore next 3 */
           if (!isMatch) {
             return false;
           }

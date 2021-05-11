@@ -17,7 +17,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       .map((dep) => dep.split(/:(.*)/))
       .map((arr) => {
         const [depName, currentValue] = arr;
-        // istanbul ignore if
+        /* c8 ignore next 3 */
         if (!(depName && currentValue)) {
           logger.warn({ content }, 'Incomplete npm.depends match');
         }
@@ -31,7 +31,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   } catch (err) /* c8 ignore next */ {
     logger.warn({ content }, 'Failed to parse meteor package.js');
   }
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!deps.length) {
     return null;
   }

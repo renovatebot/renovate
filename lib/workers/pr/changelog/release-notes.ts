@@ -20,7 +20,7 @@ export async function getReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (!apiBaseUrl) {
     logger.debug('No apiBaseUrl');
     return [];
@@ -55,7 +55,7 @@ export function getCachedReleaseList(
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult !== undefined) {
     return cachedResult;
   }
@@ -205,7 +205,7 @@ export function getReleaseNotesMdFile(
 ): Promise<ChangeLogFile | null> {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult !== undefined) {
     return cachedResult;
   }
@@ -222,7 +222,7 @@ export async function getReleaseNotesMd(
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (skippedRepos.includes(repository)) {
     return null;
   }
@@ -330,7 +330,6 @@ export async function addReleaseNotes(
     let releaseNotes: ChangeLogNotes;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
-    // istanbul ignore else: no cache tests
     if (!releaseNotes) {
       releaseNotes = await getReleaseNotesMd(
         repository,
@@ -338,7 +337,6 @@ export async function addReleaseNotes(
         input.project.baseUrl,
         input.project.apiBaseUrl
       );
-      // istanbul ignore else: should be tested
       if (!releaseNotes) {
         releaseNotes = await getReleaseNotes(
           repository,

@@ -98,7 +98,7 @@ export async function exec(
   const { dockerChildPrefix, customEnvVariables } = getAdminConfig();
   const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cwdFile) {
     cwd = join(execConfig.localDir, dirname(cwdFile));
   }

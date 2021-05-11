@@ -81,7 +81,7 @@ export async function updateArtifacts(
   const { constraints = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(existingError);

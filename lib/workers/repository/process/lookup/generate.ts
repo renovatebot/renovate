@@ -37,7 +37,7 @@ export function generateUpdate(
       currentVersion,
       newVersion,
     });
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.warn(
       { err, currentValue, rangeStrategy, currentVersion, newVersion },
       'getNewValue error'

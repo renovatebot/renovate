@@ -54,12 +54,12 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (!rawFileContents) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
       throw new Error(REPOSITORY_CHANGED);
     }
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (!rawFileContents.length) {
       rawFileContents = '{}';
     }
@@ -69,7 +69,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     if (fileType === '.json5') {
       try {
         configFileParsed = JSON5.parse(rawFileContents);
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },
           'Error parsing renovate config renovate.json5'
@@ -110,7 +110,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       }
       try {
         configFileParsed = JSON.parse(rawFileContents);
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) /* c8 ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },
           'Error parsing renovate config'
@@ -178,7 +178,7 @@ export async function mergeRenovateConfig(
   logger.debug({ config: migratedConfig }, 'migrated config');
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = decryptConfig(migratedConfig);
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
@@ -194,14 +194,14 @@ export async function mergeRenovateConfig(
     logger.trace({ config: resolvedConfig }, 'resolved config after migrating');
     resolvedConfig = migrationResult.migratedConfig;
   }
-  // istanbul ignore if
+  /* c8 ignore next 6 */
   if (is.string(resolvedConfig.npmrc)) {
     logger.debug(
       'Ignoring any .npmrc files in repository due to configured npmrc'
     );
     npmApi.setNpmrc(resolvedConfig.npmrc);
   }
-  // istanbul ignore if
+  /* c8 ignore start */
   if (resolvedConfig.hostRules) {
     logger.debug('Setting hostRules from config');
     for (const rule of resolvedConfig.hostRules) {
@@ -215,10 +215,10 @@ export async function mergeRenovateConfig(
       }
     }
     delete resolvedConfig.hostRules;
-  }
+  } /* c8 ignore end */
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
   returnConfig.renovateJsonPresent = true;
-  // istanbul ignore if
+  /* c8 ignore next 6 */
   if (returnConfig.ignorePaths?.length) {
     logger.debug(
       { ignorePaths: returnConfig.ignorePaths },

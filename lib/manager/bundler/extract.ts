@@ -100,7 +100,7 @@ export async function extractPackageFile(
         while (lineNumber < lines.length && sourceLine.trim() !== 'end') {
           lineNumber += 1;
           sourceLine = lines[lineNumber];
-          // istanbul ignore if
+          /* c8 ignore next 4 */
           if (sourceLine === null || sourceLine === undefined) {
             logger.info({ content, fileName }, 'Undefined sourceLine');
             sourceLine = 'end';

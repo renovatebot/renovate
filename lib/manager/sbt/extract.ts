@@ -38,7 +38,7 @@ const getPackageFileVersion = (str: string): string =>
   https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
  */
 const normalizeScalaVersion = (str: string): string => {
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!str) {
     return str;
   }

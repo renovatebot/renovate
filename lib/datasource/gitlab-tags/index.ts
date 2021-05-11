@@ -31,7 +31,7 @@ export async function getReleases({
     cacheNamespace,
     getCacheKey(depHost, repo)
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }

@@ -1,4 +1,3 @@
-// istanbul ignore file: types only
 export interface Repo {
   name?: string;
   type: 'composer' | 'git' | 'package' | 'vcs';

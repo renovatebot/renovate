@@ -22,7 +22,7 @@ export default function configSerializer(
       if (val && contentFields.includes(this.key)) {
         this.update('[content]');
       }
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (val && arrayFields.includes(this.key)) {
         this.update('[Array]');
       }

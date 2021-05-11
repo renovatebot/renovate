@@ -39,7 +39,7 @@ export async function getResourceUrl(
     resultCacheKey
   );
 
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -50,7 +50,7 @@ export async function getResourceUrl(
       cacheNamespace,
       responseCacheKey
     );
-    // istanbul ignore else: currently not testable
+
     if (!servicesIndexRaw) {
       servicesIndexRaw = (await http.getJson<ServicesIndexRaw>(url)).body;
       await packageCache.set(
@@ -73,7 +73,7 @@ export async function getResourceUrl(
       .sort((x, y) => semver.compare(x.version, y.version));
     const { serviceId, version } = services.pop();
 
-    // istanbul ignore if
+    /* c8 ignore next 10 */
     if (
       resourceType === 'RegistrationsBaseUrl' &&
       !version?.startsWith('3.0.0-') &&
@@ -165,7 +165,8 @@ export async function getReleases(
     return null;
   }
 
-  // istanbul ignore if: only happens when no stable version exists
+  // only happens when no stable version exists
+  /* c8 ignore next 5 */
   if (latestStable === null) {
     const last = catalogEntries.pop();
     latestStable = removeBuildMeta(last.version);
@@ -181,7 +182,6 @@ export async function getReleases(
       registryUrl,
       'PackageBaseAddress'
     );
-    // istanbul ignore else: this is a required v3 api
     if (is.nonEmptyString(packageBaseAddress)) {
       const nuspecUrl = `${ensureTrailingSlash(
         packageBaseAddress
@@ -209,7 +209,6 @@ export async function getReleases(
     return dep;
   }
 
-  // istanbul ignore else: not easy testable
   if (homepage) {
     // only assign if not assigned
     dep.sourceUrl ??= homepage;

@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import {
@@ -14,6 +12,7 @@ import {
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
+/* c8 ignore start */
 function generateBranchUpgradeCache(
   upgrade: BranchUpgradeConfig
 ): BranchUpgradeCache {
@@ -76,14 +75,14 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
       upgrades,
     };
   } catch (err) {
-    // istanbul ignore if
+    /* c8 ignore start */
     if (err.response?.statusCode === 404) {
       logger.warn(
         { err, branchName },
         '404 error when generating branch cache'
       );
       return null;
-    }
+    } /* c8 ignore stop */
     logger.error({ err, branchName }, 'Error generating branch cache');
     return null;
   }
@@ -96,3 +95,4 @@ export async function setBranchCache(branches: BranchConfig[]): Promise<void> {
   }
   getCache().branches = branchCache.filter(Boolean);
 }
+/* c8 ignore stop */

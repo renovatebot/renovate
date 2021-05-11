@@ -544,7 +544,7 @@ export function parseGradle(
       urls.push(...matchResult.urls);
     }
 
-    // istanbul ignore if
+    /* c8 ignore next 8 */
     if (tokens.length >= prevTokensLength) {
       // Should not happen, but it's better to be prepared
       logger.warn(

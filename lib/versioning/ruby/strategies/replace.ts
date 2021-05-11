@@ -37,7 +37,7 @@ function isCommonRubyMinorRange(range: string): boolean {
 
 function reduceOnePrecision(version: string): string {
   const versionParts = version.split('.');
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (versionParts.length === 1) {
     return version;
   }
@@ -90,7 +90,7 @@ export default ({ to, range }: { range: string; to: string }): string => {
       newRange = newRange.replace(firstPart, newFirstPart);
     }
   }
-  // istanbul ignore if
+  /* c8 ignore next 7 */
   if (!satisfies(to, newRange)) {
     logger.warn(
       { range, to, newRange },

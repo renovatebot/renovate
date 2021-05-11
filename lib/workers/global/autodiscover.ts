@@ -41,7 +41,7 @@ export async function autodiscoverRepositories(
     { length: discovered.length, repositories: discovered },
     `Autodiscovered repositories`
   );
-  // istanbul ignore if
+  /* c8 ignore start */
   if (config.repositories?.length) {
     logger.debug(
       'Checking autodiscovered repositories against configured repositories'
@@ -64,6 +64,6 @@ export async function autodiscoverRepositories(
         );
       }
     }
-  }
+  } /* c8 ignore stop */
   return { ...config, repositories: discovered };
 }

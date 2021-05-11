@@ -34,7 +34,7 @@ function notEmpty(s: string): boolean {
 }
 
 function npm2cargo(input: string): string {
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!input) {
     return input;
   }
@@ -96,7 +96,7 @@ function getNewValue({
     newVersion,
   });
   let newCargo = npm2cargo(newSemver);
-  // istanbul ignore if
+  /* c8 ignore next 7 */
   if (!newCargo) {
     logger.info(
       { currentValue, newSemver },

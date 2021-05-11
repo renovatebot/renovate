@@ -20,7 +20,7 @@ export async function getReleases({
     cacheNamespace,
     cacheKey
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -49,7 +49,7 @@ export async function getReleases({
     res = res.body;
     const response = JSON.parse(res);
 
-    // istanbul ignore if
+    /* c8 ignore next 7 */
     if (response.results.length > 1) {
       logger.warn(
         { dependency: lookupName },

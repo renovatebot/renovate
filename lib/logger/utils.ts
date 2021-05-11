@@ -78,7 +78,6 @@ export default function prepareError(err: Error): Record<string, unknown> {
       options[k] = err.options[k];
     }
 
-    // istanbul ignore else
     if (err.response) {
       response.response = {
         statusCode: err.response?.statusCode,

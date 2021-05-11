@@ -3,7 +3,7 @@ import { platform } from '../../../platform';
 import * as repositoryCache from '../../../util/cache/repository';
 import { pruneStaleBranches } from './prune';
 
-/* c8 ignore next */
+/* c8 ignore start */
 export async function finaliseRepo(
   config: RenovateConfig,
   branchList: string[]
@@ -13,4 +13,4 @@ export async function finaliseRepo(
   await platform.ensureIssueClosing(
     `Action Required: Fix Renovate Configuration`
   );
-}
+} /* c8 ignore stop */

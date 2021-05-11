@@ -209,7 +209,7 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (!config.defaultBranch) {
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
@@ -398,7 +398,7 @@ async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
   } as any;
-  // istanbul ignore if
+  /* c8 ignore next 5 */
   if (config.ignorePrAuthor) {
     // https://docs.gitlab.com/ee/api/merge_requests.html#list-merge-requests
     // default: `scope=created_by_me`
@@ -510,7 +510,7 @@ export async function createPr({
   pr.number = pr.iid;
   pr.sourceBranch = sourceBranch;
   pr.displayNumber = `Merge Request #${pr.iid}`;
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (config.prList) {
     config.prList.push(pr);
   }
@@ -741,7 +741,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
         paginate: true,
       }
     );
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];

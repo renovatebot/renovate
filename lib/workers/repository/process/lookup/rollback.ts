@@ -10,25 +10,25 @@ export function getRollbackUpdate(
 ): LookupUpdate {
   const { packageFile, versioning, depName, currentValue } = config;
   const version = allVersioning.get(versioning);
-  // istanbul ignore if
+  /* c8 ignore start */
   if (!('isLessThanRange' in version)) {
     logger.debug(
       { versioning },
       'Current versioning does not support isLessThanRange()'
     );
     return null;
-  }
+  } /* c8 ignore stop */
   const lessThanVersions = versions.filter((v) =>
     version.isLessThanRange(v.version, currentValue)
   );
-  // istanbul ignore if
+  /* c8 ignore start */
   if (!lessThanVersions.length) {
     logger.debug(
       { packageFile, depName, currentValue },
       'Missing version has nothing to roll back to'
     );
     return null;
-  }
+  } /* c8 ignore stop */
   logger.debug(
     { packageFile, depName, currentValue },
     `Current version not found - rolling back`
@@ -39,7 +39,7 @@ export function getRollbackUpdate(
   );
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
   const newVersion = lessThanVersions.pop()?.version;
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');
     return null;

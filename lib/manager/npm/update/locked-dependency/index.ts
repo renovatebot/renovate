@@ -68,7 +68,8 @@ export async function updateLockedDependency(
         `${depName}@${currentVersion} not found in ${lockFile} - no work to do`
       );
       // Don't return null if we're a parent update or else the whole update will fail
-      // istanbul ignore if: too hard to replicate
+      // too hard to replicate
+      /* c8 ignore next 6 */
       if (isParentUpdate) {
         const res = {};
         res[packageFile] = packageFileContent;
@@ -171,7 +172,8 @@ export async function updateLockedDependency(
         parentUpdateConfig,
         true
       );
-      // istanbul ignore if: hard to test due to recursion
+      // hard to test due to recursion
+      /* c8 ignore next 6 */
       if (!parentUpdateResult) {
         logger.debug(
           `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`

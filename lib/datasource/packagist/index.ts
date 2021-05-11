@@ -114,7 +114,7 @@ async function getPackagistFile(
   const cacheKey = regUrl + key;
   // Check the persistent cache for public registries
   const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult && cachedResult.sha256 === sha256) {
     return cachedResult.res as Promise<PackagistFile>;
   }
@@ -132,7 +132,7 @@ async function getPackagistFile(
 
 function extractDepReleases(versions: RegistryFile): ReleaseResult {
   const dep: ReleaseResult = { releases: null };
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (!versions) {
     dep.releases = [];
     return dep;
@@ -207,7 +207,7 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
   const cachedResult = memCache.get<Promise<AllPackages | null>>(cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult !== undefined) {
     return cachedResult;
   }
@@ -222,7 +222,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
     cacheNamespace,
     name
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }

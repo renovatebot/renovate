@@ -28,7 +28,7 @@ export async function getRawRefs({
     cacheNamespace,
     lookupName
   );
-  /* istanbul ignore next line */
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }

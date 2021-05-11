@@ -61,7 +61,7 @@ async function queryRegistry(
   const latestVersion = dep.releases.find(
     (release) => res.version === release.version
   );
-  // istanbul ignore else
+
   if (latestVersion) {
     latestVersion.releaseTimestamp = res.published_at;
   }
@@ -117,7 +117,7 @@ export async function getReleases({
     cacheNamespace,
     pkgUrl
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }

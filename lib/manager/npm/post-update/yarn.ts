@@ -120,7 +120,7 @@ export async function generateLockFile(
         preCommands,
       },
     };
-    /* istanbul ignore next 4 */
+    /* c8 ignore next 4 */
     if (getAdminConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;

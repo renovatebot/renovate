@@ -43,7 +43,7 @@ export async function createOnboardingBranch(
 
   const commitMessage = `${commitMessagePrefix} ${onboardingCommitMessage}`.trim();
 
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;

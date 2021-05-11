@@ -55,7 +55,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
     }
     upgrade.references = references.join(', ');
     const { currentVersion, newVersion, updateType, versioning } = upgrade;
-    // istanbul ignore if
+    /* c8 ignore start */
     if (updateType === 'minor') {
       try {
         const version = get(versioning);
@@ -65,7 +65,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
       } catch (err) {
         // do nothing
       }
-    }
+    } /* c8 ignore stop */
     /* eslint-enable no-param-reassign */
   });
 }

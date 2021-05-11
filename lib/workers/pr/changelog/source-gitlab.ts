@@ -19,7 +19,7 @@ function getCachedTags(
 ): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${versionScheme}-${repository}`;
   const cachedResult = memCache.get<Promise<string[]>>(cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult !== undefined) {
     return cachedResult;
   }

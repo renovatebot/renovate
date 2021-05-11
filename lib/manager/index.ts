@@ -60,7 +60,7 @@ export async function extractAllPackageFiles(
   const m = managers.get(manager);
   if (m.extractAllPackageFiles) {
     const res = await m.extractAllPackageFiles(config, files);
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (!res) {
       return null;
     }

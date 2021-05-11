@@ -64,7 +64,7 @@ export async function getTerraformServiceDiscoveryResult(
     cacheNamespace,
     registryUrl
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -107,7 +107,7 @@ export async function getReleases({
     cacheNamespace,
     cacheURL
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -148,7 +148,7 @@ export async function getReleases({
     return dep;
   } catch (err) {
     const failureCodes = ['EAI_AGAIN'];
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (failureCodes.includes(err.code)) {
       throw new ExternalHostError(err);
     }

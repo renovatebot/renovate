@@ -30,7 +30,7 @@ class LineMapper {
     const lineMeta = this.imageLines.find(
       ({ line, used }) => !used && line.includes(imageName)
     );
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (!lineMeta) {
       return null;
     }
@@ -84,7 +84,7 @@ export function extractPackageFile(
       .map((service) => {
         const dep = getDep(service.image);
         const lineNumber = lineMapper.pluckLineNumber(service.image);
-        // istanbul ignore if
+        /* c8 ignore next 3 */
         if (!lineNumber) {
           return null;
         }

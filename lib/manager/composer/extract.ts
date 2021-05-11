@@ -60,8 +60,10 @@ function parseRepositories(
         if (repo.packagist === false || repo['packagist.org'] === false) {
           packagist = false;
         }
-      } // istanbul ignore else: invalid repo
-      else if (['packagist', 'packagist.org'].includes(key) && repo === false) {
+      } else if (
+        ['packagist', 'packagist.org'].includes(key) &&
+        repo === false
+      ) {
         packagist = false;
       }
     });

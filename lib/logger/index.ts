@@ -22,12 +22,10 @@ const problems = new ProblemStream();
 const stdout: bunyan.Stream = {
   name: 'stdout',
   level:
-    (process.env.LOG_LEVEL as bunyan.LogLevel) ||
-    /* istanbul ignore next: not testable */ 'info',
+    (process.env.LOG_LEVEL as bunyan.LogLevel) || /* c8 ignore next */ 'info',
   stream: process.stdout,
 };
 
-// istanbul ignore else: not testable
 if (process.env.LOG_FORMAT !== 'json') {
   // TODO: typings (#9615)
   const prettyStdOut = new RenovateStream() as any;

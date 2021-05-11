@@ -34,7 +34,7 @@ export async function initRepo(
   config = applySecretsToConfig(config);
   await setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (config.printConfig) {
     logger.debug({ config }, 'Full resolved config including presets');
   }

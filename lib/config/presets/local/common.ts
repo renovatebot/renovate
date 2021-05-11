@@ -17,7 +17,8 @@ export async function fetchJSONFile(
   try {
     raw = await platform.getRawFile(fileName, repo);
   } catch (err) {
-    // istanbul ignore if: not testable with nock
+    // not testable with nock
+    /* c8 ignore next 3 */
     if (err instanceof ExternalHostError) {
       throw err;
     }

@@ -21,10 +21,10 @@ const config: InitialOptionsTsJest = {
     : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
-      branches: 94,
-      functions: 100,
-      lines: 100,
-      statements: 100,
+      branches: 94.0,
+      functions: 99.7,
+      lines: 96.7,
+      statements: 96.7,
     },
   },
   reporters: ['default', './tmp/tools/jest-gh-reporter.js'],

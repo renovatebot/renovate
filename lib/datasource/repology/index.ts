@@ -184,7 +184,7 @@ async function getCachedPackage(
     cacheNamespace,
     cacheKey
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }

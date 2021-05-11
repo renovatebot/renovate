@@ -33,7 +33,7 @@ export async function getTags(
     return tags.map((tag) => tag.name).filter(Boolean);
   } catch (err) {
     logger.info({ sourceRepo: repository }, 'Failed to fetch Gitlab tags');
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (err.message?.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
       throw err;
@@ -67,7 +67,7 @@ export async function getReleaseNotesMd(
     return null;
   }
   const { path: changelogFile, id } = files.shift();
-  /* istanbul ignore if */
+  /* c8 ignore next 5 */
   if (files.length !== 0) {
     logger.debug(
       `Multiple candidates for changelog file, using ${changelogFile}`

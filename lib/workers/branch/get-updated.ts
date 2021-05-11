@@ -40,7 +40,7 @@ export async function getUpdatedPackageFiles(
         reuseExistingBranch ? config.branchName : config.baseBranch
       );
     }
-    // istanbul ignore if
+    /* c8 ignore start */
     if (reuseExistingBranch && !packageFileContent) {
       logger.debug(
         { packageFile, depName },
@@ -50,7 +50,7 @@ export async function getUpdatedPackageFiles(
         ...config,
         reuseExistingBranch: false,
       });
-    }
+    } /* c8 ignore stop */
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else if (upgrade.isRemediation) {
@@ -61,7 +61,8 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch ? config.branchName : config.baseBranch
         );
       }
-      // istanbul ignore if: to hard to test
+      // to hard to test
+      /* c8 ignore start */
       if (reuseExistingBranch && !lockFileContent) {
         logger.debug(
           { lockFile, depName },
@@ -71,7 +72,7 @@ export async function getUpdatedPackageFiles(
           ...config,
           reuseExistingBranch: false,
         });
-      }
+      } /* c8 ignore stop */
       const updateLockedDependency = get(manager, 'updateLockedDependency');
       const files = await updateLockedDependency({
         ...upgrade,
@@ -175,7 +176,6 @@ export async function getUpdatedPackageFiles(
         updatedFileContents[packageFile] = newContent;
       }
       if (newContent === packageFileContent) {
-        // istanbul ignore else
         if (upgrade.manager === 'git-submodules') {
           updatedFileContents[packageFile] = newContent;
         } else if (upgrade.rangeStrategy === 'update-lockfile') {
@@ -234,7 +234,6 @@ export async function getUpdatedPackageFiles(
         updatedPackageFiles.push(packageFile);
         for (const res of results) {
           const { file, artifactError } = res;
-          // istanbul ignore else
           if (file) {
             updatedArtifacts.push(file);
           } else if (artifactError) {

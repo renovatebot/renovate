@@ -250,7 +250,7 @@ export async function resolveConfigPresets(
           `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
         );
       } else if (ignorePresets.includes(preset)) {
-        /* c8 ignore next */
+        /* c8 ignore next 3 */
         logger.debug(
           `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
         );

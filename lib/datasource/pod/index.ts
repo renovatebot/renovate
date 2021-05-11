@@ -164,7 +164,7 @@ export async function getReleases({
     registryUrl + podName
   );
 
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (cachedResult !== undefined) {
     logger.trace(`CocoaPods: Return cached result for ${podName}`);
     return cachedResult;

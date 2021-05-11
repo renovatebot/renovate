@@ -131,7 +131,7 @@ export async function getRepos(): Promise<string[]> {
 async function getBranchProtection(
   branchName: string
 ): Promise<BranchProtection> {
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (config.parentRepo) {
     return {};
   }
@@ -176,7 +176,7 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
   config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
-  // istanbul ignore if
+  /* c8 ignore next 6 */
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
     logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
@@ -210,11 +210,11 @@ export async function initRepo({
       }
     }`
     );
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (!repo.defaultBranchRef?.name) {
       throw new Error(REPOSITORY_EMPTY);
     }
@@ -402,7 +402,6 @@ export async function initRepo({
   }
 
   const parsedEndpoint = URL.parse(defaults.endpoint);
-  // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken;
@@ -512,7 +511,7 @@ async function getClosedPrs(): Promise<PrList> {
         'pullRequests'
       );
       const prNumbers: number[] = [];
-      // istanbul ignore if
+      /* c8 ignore next 4 */
       if (!nodes?.length) {
         logger.debug({ query }, 'No graphql data, returning empty list');
         return {};
@@ -612,7 +611,7 @@ async function getOpenPrs(): Promise<PrList> {
         }
       );
       const prNumbers: number[] = [];
-      // istanbul ignore if
+      /* c8 ignore next 4 */
       if (!nodes?.length) {
         logger.debug({ query }, 'No graphql res.data');
         return {};
@@ -628,7 +627,7 @@ async function getOpenPrs(): Promise<PrList> {
         // https://developer.github.com/v4/enum/mergeablestate
         const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS', 'UNSTABLE'];
         const hasNegativeReview = pr.reviews?.nodes?.length > 0;
-        // istanbul ignore if
+        /* c8 ignore next 4 */
         if (hasNegativeReview) {
           pr.canMerge = false;
           pr.canMergeReason = `hasNegativeReview`;
@@ -636,7 +635,7 @@ async function getOpenPrs(): Promise<PrList> {
           pr.canMerge = true;
         } else if (config.forkToken && pr.mergeStateStatus === 'BLOCKED') {
           // The main token can't merge but maybe the forking token can
-          // istanbul ignore next
+          /* c8 ignore next */
           pr.canMerge = true;
         } else {
           pr.canMerge = false;
@@ -800,7 +799,7 @@ const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (config.branchPrs[branchName]) {
     return config.branchPrs[branchName];
   }
@@ -1024,7 +1023,7 @@ export async function setBranchStatus({
   state,
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (config.parentRepo) {
     logger.debug('Cannot set branch status when in forking mode');
     return;
@@ -1480,7 +1479,7 @@ export async function createPr({
       draft: draftPR,
     },
   };
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify = true;
@@ -1496,7 +1495,7 @@ export async function createPr({
     { branch: sourceBranch, pr: pr.number, draft: draftPR },
     'PR created'
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (config.prList) {
     config.prList.push(pr);
   }
@@ -1525,7 +1524,7 @@ export async function updatePr({
   const options: any = {
     body: patchBody,
   };
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (config.forkToken) {
     options.token = config.forkToken;
   }
@@ -1548,7 +1547,7 @@ export async function mergePr(
   branchName: string
 ): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
-  // istanbul ignore if
+  /* c8 ignore start */
   if (config.prReviewsRequired) {
     logger.debug(
       { branch: branchName, prNo },
@@ -1569,14 +1568,14 @@ export async function mergePr(
       return false;
     }
     logger.debug('Found approving reviews');
-  }
+  } /* c8 ignore stop */
   const url = `repos/${
     config.parentRepo || config.repository
   }/pulls/${prNo}/merge`;
   const options: any = {
     body: {} as { merge_method?: string },
   };
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (config.forkToken) {
     options.token = config.forkToken;
   }
@@ -1719,7 +1718,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     } else {
       logger.debug('No vulnerability alerts found');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* c8 ignore next */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
   return alerts;

@@ -230,7 +230,6 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       ...options,
     };
 
-    // istanbul ignore else: needs test
     if (options?.baseUrl) {
       // eslint-disable-next-line no-param-reassign
       url = resolveBaseUrl(options.baseUrl, url);

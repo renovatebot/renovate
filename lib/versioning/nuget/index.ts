@@ -23,7 +23,7 @@ function parse(version: string): any {
 function compare(version1: string, version2: string): number {
   const parsed1 = parse(version1);
   const parsed2 = parse(version2);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!(parsed1 && parsed2)) {
     return 1;
   }

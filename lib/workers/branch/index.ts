@@ -94,7 +94,7 @@ export async function processBranch(
       await handlepr(config, existingPr);
       return { branchExists: false, result: BranchResult.AlreadyExisted };
     }
-    // istanbul ignore if
+    /* c8 ignore start */
     if (!branchExists && config.dependencyDashboardApproval) {
       if (dependencyDashboardCheck) {
         logger.debug(`Branch ${config.branchName} is approved for creation`);
@@ -102,7 +102,7 @@ export async function processBranch(
         logger.debug(`Branch ${config.branchName} needs approval`);
         return { branchExists, result: BranchResult.NeedsApproval };
       }
-    }
+    } /* c8 ignore stop */
     if (
       !branchExists &&
       isLimitReached(Limit.Branches) &&
@@ -202,7 +202,7 @@ export async function processBranch(
         logger.debug('Skipping branch update as not within schedule');
         return { branchExists, result: BranchResult.NotScheduled };
       }
-      // istanbul ignore if
+      /* c8 ignore next 4 */
       if (!branchPr) {
         logger.debug('Skipping PR creation out of schedule');
         return { branchExists, result: BranchResult.NotScheduled };
@@ -249,19 +249,19 @@ export async function processBranch(
       }
     }
 
-    // istanbul ignore if
+    /* c8 ignore start */
     if (
       dependencyDashboardCheck === 'rebase' ||
       config.dependencyDashboardRebaseAllOpen
     ) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
-    } else {
+    } /* c8 ignore stop */ else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
     const res = await getUpdatedPackageFiles(config);
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (res.artifactErrors && config.artifactErrors) {
       res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
     }
@@ -328,12 +328,12 @@ export async function processBranch(
       }
     } else if (config.updatedArtifacts?.length && branchPr) {
       // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
-      // istanbul ignore if
+      /* c8 ignore start */
       if (getAdminConfig().dryRun) {
         logger.info(
           `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`
         );
-      } else {
+      } /* c8 ignore stop */ else {
         // Remove artifacts error comment only if this run has successfully updated artifacts
         await platform.ensureCommentRemoval({
           number: branchPr.number,
@@ -346,7 +346,7 @@ export async function processBranch(
       config.rebaseRequested ||
       branchPr?.isConflicted;
     const commitSha = await commitFilesToBranch(config);
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (branchPr && platform.refreshPr) {
       await platform.refreshPr(branchPr.number);
     }

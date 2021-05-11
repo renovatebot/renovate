@@ -19,7 +19,7 @@ export function getNpmrc(): Npmrc | null {
 }
 
 function envReplace(value: any, env = process.env): any {
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!is.string(value)) {
     return value;
   }

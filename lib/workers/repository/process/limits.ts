@@ -29,7 +29,7 @@ export async function getPrHourlyRemaining(
       logger.debug(`PR hourly limit remaining: ${prsRemaining}`);
       return prsRemaining;
     } catch (err) {
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (err instanceof ExternalHostError) {
         throw err;
       }

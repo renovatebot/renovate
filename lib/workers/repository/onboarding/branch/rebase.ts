@@ -18,7 +18,7 @@ const defaultConfigFile = (config: RenovateConfig): string =>
 function getCommitMessage(config: RenovateConfig): string {
   const configFile = defaultConfigFile(config);
   let commitMessage: string;
-  // istanbul ignore if
+  /* c8 ignore start */
   if (config.semanticCommits === 'enabled') {
     commitMessage = config.semanticCommitType;
     if (config.semanticCommitScope) {
@@ -26,7 +26,7 @@ function getCommitMessage(config: RenovateConfig): string {
     }
     commitMessage += ': ';
     commitMessage += 'add ' + configFile;
-  } else {
+  } /* c8 ignore stop */ else {
     commitMessage = 'Add ' + configFile;
   }
   return commitMessage;
@@ -54,7 +54,7 @@ export async function rebaseOnboardingBranch(
   /* c8 ignore next */
   const commitMessage = getCommitMessage(config);
 
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;

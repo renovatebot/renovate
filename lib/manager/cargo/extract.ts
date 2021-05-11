@@ -188,7 +188,7 @@ export async function extractPackageFile(
   }
   const lockFileName = await findLocalSiblingOrParent(fileName, 'Cargo.lock');
   const res: PackageFile = { deps };
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (lockFileName) {
     res.lockFiles = [lockFileName];
   }

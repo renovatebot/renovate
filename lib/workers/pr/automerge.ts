@@ -73,7 +73,7 @@ export async function checkAutoMerge(
   }
   if (automergeType === 'pr-comment') {
     logger.debug(`Applying automerge comment: ${automergeComment}`);
-    // istanbul ignore if
+    /* c8 ignore start */
     if (getAdminConfig().dryRun) {
       logger.info(
         `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
@@ -82,7 +82,7 @@ export async function checkAutoMerge(
         automerged: false,
         prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
       };
-    }
+    } /* c8 ignore stop */
     if (rebaseRequested) {
       await platform.ensureCommentRemoval({
         number: pr.number,
@@ -97,14 +97,14 @@ export async function checkAutoMerge(
     return { automerged: true, branchRemoved: false };
   }
   // Let's merge this
-  // istanbul ignore if
+  /* c8 ignore start */
   if (getAdminConfig().dryRun) {
     logger.info(`DRY-RUN: Would merge PR #${pr.number}`);
     return {
       automerged: false,
       prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
     };
-  }
+  } /* c8 ignore stop */
   logger.debug(`Automerging #${pr.number}`);
   const res = await platform.mergePr(pr.number, branchName);
   if (res) {
@@ -113,7 +113,7 @@ export async function checkAutoMerge(
     try {
       await deleteBranch(branchName);
       branchRemoved = true;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* c8 ignore next */ {
       logger.warn({ branchName, err }, 'Branch auto-remove failed');
     }
     return { automerged: true, branchRemoved };

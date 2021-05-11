@@ -35,7 +35,7 @@ export async function checkOnboardingBranch(
         'Branch updated'
       );
     }
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (platform.refreshPr) {
       const onboardingPr = await platform.getBranchPr(config.onboardingBranch);
       await platform.refreshPr(onboardingPr.number);
@@ -47,7 +47,7 @@ export async function checkOnboardingBranch(
     }
     logger.debug('Need to create onboarding PR');
     const commit = await createOnboardingBranch(config);
-    // istanbul ignore if
+    /* c8 ignore next 6 */
     if (commit) {
       logger.info(
         { branch: config.onboardingBranch, commit, onboarding: true },

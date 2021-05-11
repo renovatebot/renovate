@@ -47,7 +47,7 @@ function extractUrl(content: string): string | null {
   if (i === -1) {
     return null;
   }
-  /* istanbul ignore else */
+
   if (isSpace(content[i])) {
     i += 1;
   }

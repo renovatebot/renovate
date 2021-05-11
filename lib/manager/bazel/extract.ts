@@ -18,7 +18,7 @@ interface UrlParsedResult {
 }
 
 function parseUrl(urlString: string): UrlParsedResult | null {
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!urlString) {
     return null;
   }

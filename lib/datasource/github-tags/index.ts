@@ -34,7 +34,7 @@ async function getTagCommit(
     cacheNamespace,
     getCacheKey(registryUrl, githubRepo, `tag-${tag}`)
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -95,7 +95,7 @@ export async function getDigest(
     cacheNamespace,
     getCacheKey(registryUrl, repo, 'commit')
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -139,7 +139,7 @@ async function getTags({
     cacheNamespace,
     getCacheKey(registryUrl, repo, 'tags')
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }

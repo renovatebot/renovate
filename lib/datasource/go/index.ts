@@ -172,13 +172,14 @@ export async function getReleases({
       res = await bitbucket.getReleases(source);
       break;
     }
-    /* istanbul ignore next: can never happen, makes lint happy */
+    /* can never happen, makes lint happy */
+    /* c8 ignore next 3 */
     default: {
       return null;
     }
   }
 
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!res) {
     return null;
   }
@@ -251,7 +252,8 @@ export async function getDigest(
     case bitbucket.id: {
       return bitbucket.getDigest(source, tag);
     }
-    /* istanbul ignore next: can never happen, makes lint happy */
+    /* can never happen, makes lint happy */
+    /* c8 ignore next 3 */
     default: {
       return null;
     }

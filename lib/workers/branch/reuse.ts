@@ -34,12 +34,12 @@ export async function shouldReuseExistingBranch(
     }
     if (pr.labels?.includes(config.rebaseLabel)) {
       logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
-      // istanbul ignore if
+      /* c8 ignore start */
       if (getAdminConfig().dryRun) {
         logger.info(
           `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
         );
-      } else {
+      } /* c8 ignore stop */ else {
         await platform.deleteLabel(pr.number, config.rebaseLabel);
       }
       return { reuseExistingBranch: false };

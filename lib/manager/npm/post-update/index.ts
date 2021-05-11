@@ -509,7 +509,7 @@ export async function getAdditionalFiles(
       upgrades
     );
     if (res.error) {
-      // istanbul ignore if
+      /* c8 ignore start */
       if (res.stderr?.includes('No matching version found for')) {
         for (const upgrade of config.upgrades) {
           if (
@@ -527,7 +527,7 @@ export async function getAdditionalFiles(
             throw new ExternalHostError(err, npmId);
           }
         }
-      }
+      } /* c8 ignore stop */
       artifactErrors.push({
         lockFile: npmLock,
         stderr: res.stderr,
@@ -571,7 +571,7 @@ export async function getAdditionalFiles(
       upgrades
     );
     if (res.error) {
-      // istanbul ignore if
+      /* c8 ignore start */
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
         for (const upgrade of config.upgrades) {
           /* eslint-disable no-useless-escape */
@@ -593,7 +593,7 @@ export async function getAdditionalFiles(
           }
           /* eslint-enable no-useless-escape */
         }
-      }
+      } /* c8 ignore stop */
       artifactErrors.push({
         lockFile: yarnLock,
         stderr: res.stderr,
@@ -637,7 +637,7 @@ export async function getAdditionalFiles(
       upgrades
     );
     if (res.error) {
-      // istanbul ignore if
+      /* c8 ignore start */
       if (res.stdout?.includes(`No compatible version found:`)) {
         for (const upgrade of config.upgrades) {
           if (
@@ -657,7 +657,7 @@ export async function getAdditionalFiles(
             );
           }
         }
-      }
+      } /* c8 ignore stop */
       artifactErrors.push({
         lockFile: pnpmShrinkwrap,
         stderr: res.stderr,
@@ -714,9 +714,8 @@ export async function getAdditionalFiles(
       env,
       skipInstalls
     );
-    // istanbul ignore else
     if (res.stderr) {
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (res.stderr.includes('ENOSPC: no space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }

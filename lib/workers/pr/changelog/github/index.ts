@@ -31,7 +31,7 @@ export async function getTags(
   } catch (err) {
     logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
     logger.debug({ err });
-    // istanbul ignore if
+    /* c8 ignore next 4 */
     if (err.message?.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
       throw err;
@@ -55,7 +55,7 @@ export async function getReleaseNotesMd(
     `${apiPrefix}/git/trees/${defaultBranch}`
   );
 
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (res.body.truncated) {
     logger.debug({ repository }, 'Git tree truncated');
   }
@@ -69,7 +69,7 @@ export async function getReleaseNotesMd(
     return null;
   }
   const { path: changelogFile, sha } = files.shift();
-  /* istanbul ignore if */
+  /* c8 ignore next 5 */
   if (files.length !== 0) {
     logger.debug(
       `Multiple candidates for changelog file, using ${changelogFile}`

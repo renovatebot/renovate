@@ -11,7 +11,7 @@ export function commitFilesToBranch(
   config: BranchConfig
 ): Promise<string | null> {
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
-  // istanbul ignore if
+  /* c8 ignore start */
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter((f) => {
       const filename = f.name === '|delete|' ? f.contents.toString() : f.name;
@@ -24,19 +24,19 @@ export function commitFilesToBranch(
       }
       return true;
     });
-  }
+  } /* c8 ignore stop */
   if (!is.nonEmptyArray(updatedFiles)) {
     logger.debug(`No files to commit`);
     return null;
   }
   const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
   logger.debug(`${fileLength} file(s) to commit`);
-  // istanbul ignore if
+  /* c8 ignore next 4 */
   if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     return null;
   }
-  // istanbul ignore if
+  /* c8 ignore next 6 */
   if (
     config.branchName !== sanitize(config.branchName) ||
     config.commitMessage !== sanitize(config.commitMessage)

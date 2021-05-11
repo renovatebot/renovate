@@ -27,7 +27,7 @@ export async function prepareGradleCommand(
   args: string | null
 ): Promise<string> {
   /* eslint-disable no-bitwise */
-  // istanbul ignore if
+  /* c8 ignore start */
   if (gradlew?.isFile() === true) {
     // if the file is not executable by others
     if ((gradlew.mode & 0o1) === 0) {
@@ -39,6 +39,7 @@ export async function prepareGradleCommand(
     }
     return `${gradlewName} ${args}`;
   }
+  /* c8 ignore stop */
   /* eslint-enable no-bitwise */
   return null;
 }

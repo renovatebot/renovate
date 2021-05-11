@@ -42,7 +42,7 @@ export function loadModules<T>(
   for (const moduleName of moduleNames) {
     const modulePath = join(relatePath(__dirname, dirname), moduleName);
     const module = require(modulePath); // eslint-disable-line
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (!module || (validate && !validate(module, moduleName))) {
       throw new Error(`Invalid module: ${modulePath}`);
     }

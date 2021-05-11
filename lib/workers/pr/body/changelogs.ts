@@ -6,7 +6,7 @@ import releaseNotesHbs from '../changelog/hbs-template';
 
 export function getChangelogs(config: BranchConfig): string {
   let releaseNotes = '';
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!config.hasReleaseNotes) {
     return releaseNotes;
   }

@@ -58,7 +58,7 @@ export async function extract(
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch];
   const configHash = hasha(JSON.stringify(config));
-  // istanbul ignore if
+  /* c8 ignore start */
   if (
     cachedExtract?.sha === baseBranchSha &&
     cachedExtract?.configHash === configHash
@@ -77,7 +77,7 @@ export async function extract(
     } catch (err) {
       logger.info({ err }, 'Error deleting cached dep updates');
     }
-  } else {
+  } /* c8 ignore stop */ else {
     await checkoutBranch(baseBranch);
     packageFiles = await extractAllDependencies(config);
     cache.scan[baseBranch] = {
@@ -124,7 +124,6 @@ export async function update(
   branches: BranchConfig[]
 ): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
-  // istanbul ignore else
   if (config.repoIsOnboarded) {
     res = await writeUpdates(config, branches);
   }

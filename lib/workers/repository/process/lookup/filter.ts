@@ -133,7 +133,7 @@ export function filterVersions(
   // Filter the latest
 
   // No filtering if no latest
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!latestVersion) {
     return filteredVersions;
   }

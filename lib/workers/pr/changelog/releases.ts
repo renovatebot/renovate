@@ -33,7 +33,7 @@ export async function getInRangeReleases(
     depName,
     datasource,
   } = config;
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!isGetPkgReleasesConfig(config)) {
     return null;
   }

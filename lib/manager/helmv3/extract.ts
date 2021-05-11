@@ -94,7 +94,7 @@ export async function extractPackageFile(
     packageFileVersion,
   };
   const lockFileName = getSiblingFileName(fileName, 'Chart.lock');
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];
   }

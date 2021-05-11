@@ -3,7 +3,7 @@ import { checkOnboardingBranch } from '../onboarding/branch';
 import { mergeRenovateConfig } from './merge';
 import { detectSemanticCommits } from './semantic';
 
-/* c8 ignore next */
+/* c8 ignore start */
 export async function getRepoConfig(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {
@@ -15,4 +15,4 @@ export async function getRepoConfig(
     config.semanticCommits = await detectSemanticCommits();
   }
   return config;
-}
+} /* c8 ignore stop */

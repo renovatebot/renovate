@@ -113,7 +113,7 @@ function processChars(acc: Token[], token: Token): Token[] {
   const tokenType = token.type;
   const prevToken: Token = acc[acc.length - 1];
   if ([TokenType.Chars, TokenType.EscapedChar].includes(tokenType)) {
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (prevToken?.type === TokenType.String) {
       prevToken.value += token.value;
     } else {

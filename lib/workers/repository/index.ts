@@ -60,13 +60,13 @@ export async function renovateRepository(
   if (config.localDir && !config.persistRepoData) {
     try {
       await deleteLocalFile('.');
-    } catch (err) /* istanbul ignore if */ {
+    } catch (err) {
       logger.warn({ err }, 'localDir deletion error');
     }
   }
   try {
     await fs.remove(privateCacheDir());
-  } catch (err) /* istanbul ignore if */ {
+  } catch (err) {
     logger.warn({ err }, 'privateCacheDir deletion error');
   }
   const splits = getSplits();

@@ -265,7 +265,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     )
   ).body;
 
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!pr) {
     return null;
   }
@@ -442,7 +442,7 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
 export async function findIssue(title: string): Promise<Issue> {
   logger.debug(`findIssue(${title})`);
 
-  /* istanbul ignore if */
+  /* c8 ignore next 4 */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot findIssue');
     return null;
@@ -488,7 +488,7 @@ export async function ensureIssue({
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
 
-  /* istanbul ignore if */
+  /* c8 ignore next 5 */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
     logger.debug({ title }, 'Failed to ensure Issue');
@@ -553,7 +553,7 @@ export async function ensureIssue({
   return null;
 }
 
-/* istanbul ignore next */
+/* c8 ignore next */
 export async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
 
@@ -582,7 +582,7 @@ export async function getIssueList(): Promise<Issue[]> {
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  /* istanbul ignore if */
+  /* c8 ignore next 4 */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
@@ -624,7 +624,7 @@ export async function addReviewers(
   );
 }
 
-/* istanbul ignore next */
+/* c8 ignore next */
 export function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
@@ -705,7 +705,7 @@ export async function createPr({
       )
     ).body;
     const pr = utils.prInfo(prRes);
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (config.prList) {
       config.prList.push(pr);
     }

@@ -177,7 +177,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     try {
       result = await super.request<T>(url, opts);
 
-      // istanbul ignore else: Can result be null ???
       if (result !== null) {
         if (opts.paginate) {
           // Check if result is paginated
@@ -187,7 +186,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
             parseLinkHeader(result.headers.link as string);
           if (linkHeader?.next && linkHeader?.last) {
             let lastPage = +linkHeader.last.page;
-            // istanbul ignore else: needs a test
             if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
               lastPage = Math.min(pageLimit, lastPage);
             }

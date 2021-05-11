@@ -34,7 +34,7 @@ export async function getRepositoryData(
     cacheNamespace,
     cacheKey
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedIndex) {
     return cachedIndex;
   }

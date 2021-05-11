@@ -11,7 +11,7 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
     hostRules.find({
       hostType: options.hostType,
       url,
-    }) || /* istanbul ignore next: can only happen in tests */ {};
+    }) || /* c8 ignore next */ {};
   const { username, password, token, enabled, authType } = foundRules;
   if (options.headers?.authorization || options.password || options.token) {
     logger.trace({ url }, `Authorization already set`);

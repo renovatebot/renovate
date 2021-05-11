@@ -1,10 +1,10 @@
-/* istanbul ignore file */
 import { WrappedNodeRedisClient, createNodeRedisClient } from 'handy-redis';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 
 let client: WrappedNodeRedisClient | undefined;
 
+/* c8 ignore start */
 function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
 }
@@ -80,3 +80,4 @@ export function init(url: string): void {
     },
   });
 }
+/* c8 ignore stop */

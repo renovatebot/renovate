@@ -18,7 +18,6 @@ export async function getManagerPackageFiles(
     logger.debug(`${manager} is disabled`);
     return [];
   }
-  // istanbul ignore else
   if (is.nonEmptyArray(fileList)) {
     logger.debug(
       `Matched ${

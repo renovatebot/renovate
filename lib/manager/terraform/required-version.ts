@@ -15,7 +15,7 @@ export function extractTerraformRequiredVersion(
   let lineNumber = startingLine;
   let braceCounter = 0;
   do {
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (lineNumber > lines.length - 1) {
       logger.debug(`Malformed Terraform file detected.`);
     }

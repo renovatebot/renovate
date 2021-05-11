@@ -6,7 +6,7 @@ import { logger } from '../logger';
 import { getOptions } from './definitions';
 import type { GlobalConfig, RenovateOptions } from './types';
 
-// istanbul ignore if
+/* c8 ignore start */
 if (process.env.ENV_PREFIX) {
   for (const [key, val] of Object.entries(process.env)) {
     if (key.startsWith(process.env.ENV_PREFIX)) {
@@ -14,6 +14,7 @@ if (process.env.ENV_PREFIX) {
     }
   }
 }
+/* c8 ignore stop */
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
@@ -35,7 +36,8 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     try {
       config = JSON.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
+      /* c8 ignore next 2 */
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);
     }
@@ -56,7 +58,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
       const envName = getEnvName(option);
       if (env[envName]) {
         // TODO: add tests
-        /* c8 ignore next 14 */
+        /* c8 ignore start */
         if (option.type === 'array' && option.subType === 'object') {
           try {
             const parsed = JSON.parse(env[envName]);
@@ -71,7 +73,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
           } catch (err) {
             logger.debug({ val: env[envName], envName }, 'Could not parse CLI');
           }
-        } else {
+        } /* c8 ignore stop */ else {
           const coerce = coersions[option.type];
           config[option.name] = coerce(env[envName]);
         }

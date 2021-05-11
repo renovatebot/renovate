@@ -55,7 +55,7 @@ export async function getDependency(
     cacheNamespace,
     packageUrl
   );
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult) {
     return cachedResult;
   }
@@ -181,7 +181,7 @@ export async function getDependency(
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
       }

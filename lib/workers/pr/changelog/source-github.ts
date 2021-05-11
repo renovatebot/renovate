@@ -17,7 +17,7 @@ function getCachedTags(
 ): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${repository}`;
   const cachedResult = memCache.get<Promise<string[]>>(cacheKey);
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (cachedResult !== undefined) {
     return cachedResult;
   }
@@ -49,7 +49,7 @@ export async function getChangeLogJSON({
     hostType: PLATFORM_TYPE_GITHUB,
     url,
   });
-  // istanbul ignore if
+  /* c8 ignore start */
   if (!config.token) {
     if (host.endsWith('github.com')) {
       logger.warn(
@@ -63,7 +63,7 @@ export async function getChangeLogJSON({
       'Repository URL does not match any known github hosts - skipping changelog retrieval'
     );
     return null;
-  }
+  } /* c8 ignore stop */
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
@@ -123,7 +123,6 @@ export async function getChangeLogJSON({
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
-      // istanbul ignore else
       if (!release) {
         release = {
           version: next.version,

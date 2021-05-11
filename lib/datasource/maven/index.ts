@@ -61,7 +61,7 @@ async function getVersionsFromMetadata(
     cacheNamespace,
     cacheKey
   );
-  /* istanbul ignore if */
+  /* c8 ignore next 3 */
   if (cachedVersions) {
     return cachedVersions;
   }

@@ -65,7 +65,7 @@ export async function addAssigneesReviewers(
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
       if (assignees.length > 0) {
-        // istanbul ignore if
+        /* c8 ignore next 3 */
         if (getAdminConfig().dryRun) {
           logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
         } else {
@@ -94,7 +94,7 @@ export async function addAssigneesReviewers(
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
       if (reviewers.length > 0) {
-        // istanbul ignore if
+        /* c8 ignore next 3 */
         if (getAdminConfig().dryRun) {
           logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
         } else {
@@ -322,7 +322,7 @@ export async function ensurePr(
   try {
     if (existingPr) {
       logger.debug('Processing existing PR');
-      // istanbul ignore if
+      /* c8 ignore start */
       if (
         !existingPr.hasAssignees &&
         !existingPr.hasReviewers &&
@@ -331,7 +331,7 @@ export async function ensurePr(
       ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
-      }
+      } /* c8 ignore stop */
       // Check if existing PR needs updating
       const reviewableIndex = existingPr.body.indexOf(
         '<!-- Reviewable:start -->'
@@ -368,7 +368,7 @@ export async function ensurePr(
           'PR body changed'
         );
       }
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (getAdminConfig().dryRun) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
@@ -383,13 +383,13 @@ export async function ensurePr(
       return { prResult: PrResult.Updated, pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
-    // istanbul ignore if
+    /* c8 ignore next 3 */
     if (config.updateType === 'rollback') {
       logger.info('Creating Rollback PR');
     }
     let pr: Pr;
     try {
-      // istanbul ignore if
+      /* c8 ignore next 4 */
       if (getAdminConfig().dryRun) {
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
@@ -453,7 +453,7 @@ export async function ensurePr(
       }
       content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (getAdminConfig().dryRun) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
@@ -479,7 +479,7 @@ export async function ensurePr(
     logger.debug(`Created ${pr.displayNumber}`);
     return { prResult: PrResult.Created, pr };
   } catch (err) {
-    // istanbul ignore if
+    /* c8 ignore start */
     if (
       err instanceof ExternalHostError ||
       err.message === REPOSITORY_CHANGED ||
@@ -488,7 +488,7 @@ export async function ensurePr(
     ) {
       logger.debug('Passing error up');
       throw err;
-    }
+    } /* c8 ignore stop */
     logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
   }
   return { prResult: PrResult.Error };
