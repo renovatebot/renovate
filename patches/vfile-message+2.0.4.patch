@@ -1,0 +1,13 @@
+diff --git a/node_modules/vfile-message/types/index.d.ts b/node_modules/vfile-message/types/index.d.ts
+index d217843..31c853a 100644
+--- a/node_modules/vfile-message/types/index.d.ts
++++ b/node_modules/vfile-message/types/index.d.ts
+@@ -6,7 +6,7 @@ declare namespace vfileMessage {
+   /**
+    * Create a virtual message.
+    */
+-  interface VFileMessage extends Error {
++  interface VFileMessage extends Omit<Error, 'location'> {
+     /**
+      * Constructor of a message for `reason` at `position` from `origin`.
+      * When an error is passed in as `reason`, copies the `stack`.
