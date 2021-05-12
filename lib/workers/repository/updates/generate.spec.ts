@@ -546,5 +546,46 @@ describe(getName(), () => {
         res.upgrades.map((upgrade) => upgrade.fileReplacePosition)
       ).toStrictEqual([undefined, undefined, 4, 1]);
     });
+    it('passes through pendingChecks', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          pendingChecks: ['check'],
+        },
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          pendingChecks: ['check'],
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.pendingChecks).toHaveLength(1);
+      expect(res.upgrades).toHaveLength(2);
+    });
+    it('filters pendingChecks', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          pendingChecks: ['check'],
+        },
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.pendingChecks).toBeUndefined();
+      expect(res.upgrades).toHaveLength(1);
+    });
   });
 });

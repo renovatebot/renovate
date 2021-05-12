@@ -7,6 +7,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { MavenProp } from './types';
 
 export function parsePom(raw: string): XmlDocument | null {
   let project: XmlDocument;
@@ -33,12 +34,6 @@ export function parsePom(raw: string): XmlDocument | null {
 
 function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
-}
-
-interface MavenProp {
-  val: string;
-  fileReplacePosition: number;
-  packageFile: string;
 }
 
 function depFromNode(node: XmlElement): PackageDependency | null {

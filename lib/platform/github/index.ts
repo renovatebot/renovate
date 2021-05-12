@@ -384,7 +384,7 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        logger.error(
+        logger.warn(
           { err: err.err || err },
           'Error updating fork from upstream - cannot continue'
         );

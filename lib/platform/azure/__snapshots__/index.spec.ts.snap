@@ -36,6 +36,7 @@ Object {
   "body": undefined,
   "completionOptions": Object {
     "deleteSourceBranch": true,
+    "mergeCommitMessage": "The Title",
     "squashMerge": true,
   },
   "createdAt": undefined,
@@ -49,6 +50,7 @@ Object {
   "sourceRefName": undefined,
   "state": "open",
   "targetBranch": undefined,
+  "title": "The Title",
 }
 `;
 

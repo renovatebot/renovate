@@ -6,6 +6,7 @@ import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
 export const id = 'pypi';
 export const customRegistrySupport = true;
@@ -18,22 +19,6 @@ export const caching = true;
 
 const githubRepoPattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
-
-type PypiJSONRelease = {
-  requires_python?: string;
-  upload_time?: string;
-  yanked?: boolean;
-};
-type Releases = Record<string, PypiJSONRelease[]>;
-type PypiJSON = {
-  info: {
-    name: string;
-    home_page?: string;
-    project_urls?: Record<string, string>;
-  };
-
-  releases?: Releases;
-};
 
 function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');

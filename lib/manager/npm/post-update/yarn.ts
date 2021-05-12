@@ -14,12 +14,7 @@ import { ExecOptions, exec } from '../../../util/exec';
 import { readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
-
-export interface GenerateLockFileResult {
-  error?: boolean;
-  lockFile?: string;
-  stderr?: string;
-}
+import { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
   cwd: string

@@ -8,7 +8,11 @@ import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
-import type { MavenDependency } from './types';
+import type {
+  ArtifactInfoResult,
+  ArtifactsInfo,
+  MavenDependency,
+} from './types';
 import {
   downloadMavenXml,
   getDependencyInfo,
@@ -80,8 +84,6 @@ async function getVersionsFromMetadata(
   return versions;
 }
 
-type ArtifactsInfo = Record<string, boolean | null>;
-
 // istanbul ignore next
 function isValidArtifactsInfo(
   info: ArtifactsInfo | null,
@@ -92,8 +94,6 @@ function isValidArtifactsInfo(
   }
   return versions.every((v) => info[v] !== undefined);
 }
-
-type ArtifactInfoResult = [string, boolean | string | null];
 
 async function getArtifactInfo(
   version: string,

@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import type { RangeStrategy } from '../../types';
 import type { RangeConfig } from '../types';
-import { ComposerManagerData } from './types';
+import type { ComposerManagerData } from './types';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const {

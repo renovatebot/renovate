@@ -1,5 +1,6 @@
 import * as datasourceGitTags from '../../datasource/git-tags';
 import type { PackageDependency, PackageFile } from '../types';
+import type { MatchResult } from './types';
 
 const regExps = {
   wildcard: /^.*?/,
@@ -87,13 +88,6 @@ function searchKeysForState(state): (keyof typeof regExps)[] {
       return [DEPS];
   }
 }
-interface MatchResult {
-  idx: number;
-  len: number;
-  label: string;
-  substr: string;
-}
-
 function getMatch(str: string, state: string): MatchResult | null {
   const keys = searchKeysForState(state);
   let result = null;
