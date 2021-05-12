@@ -30,6 +30,8 @@ Array [
 ]
 `;
 
+exports[`util/git/index has minimum git version 1`] = `"2.30.1"`;
+
 exports[`util/git/index initRepo()) should fetch latest 1`] = `
 Array [
   "master message",

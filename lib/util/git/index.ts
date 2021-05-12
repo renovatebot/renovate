@@ -19,6 +19,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
+import { isVersion } from '../../versioning/semver';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { configSigningKey, writePrivateKey } from './private-key';
 
@@ -139,6 +140,23 @@ let git: SimpleGit | undefined;
 let gitInitialized: boolean;
 
 let privateKeySet = false;
+
+export async function gitVersion(): Promise<string> {
+  const globalGit = Git();
+  let res = null;
+  try {
+    const raw = await globalGit.raw(['--version']);
+    for (const section of raw.split(' ')) {
+      if (isVersion(section)) {
+        res = section;
+        continue; // eslint-disable-line no-continue
+      }
+    }
+  } catch (err) {
+    logger.warn({ err }, 'Error fetching git version');
+  }
+  return res;
+}
 
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};

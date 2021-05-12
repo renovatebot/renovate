@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
+import { api as semver } from '../../versioning/semver';
 import * as git from '.';
 
 describe(getName(), () => {
@@ -87,6 +88,12 @@ describe(getName(), () => {
     await base.cleanup();
   });
 
+  it('has minimum git version', async () => {
+    const res = await git.gitVersion();
+    // git show-current was introduced in 2.22.0
+    expect(semver.isVersion).toBeTrue();
+    expect(semver.isGreaterThan(res, '2.21.0')).toBeTrue();
+  });
   describe('checkoutBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
       await expect(git.checkoutBranch(defaultBranch)).resolves.not.toThrow();
