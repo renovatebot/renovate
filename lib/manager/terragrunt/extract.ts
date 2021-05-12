@@ -1,9 +1,9 @@
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
+import { TerragruntDependencyTypes } from './common';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
+import type { TerraformManagerData } from './types';
 import {
-  TerraformManagerData,
-  TerragruntDependencyTypes,
   checkFileContainsDependency,
   getTerragruntDependencyType,
 } from './util';

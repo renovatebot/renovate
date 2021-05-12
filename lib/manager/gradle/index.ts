@@ -16,7 +16,6 @@ import type {
   Upgrade,
 } from '../types';
 import {
-  GradleDependency,
   collectVersionVariables,
   init,
   updateGradleVersion,
@@ -25,6 +24,7 @@ import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
+import type { GradleDependency } from './types';
 import { extraEnv, gradleWrapperFileName, prepareGradleCommand } from './utils';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =

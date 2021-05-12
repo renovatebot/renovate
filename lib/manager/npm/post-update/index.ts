@@ -23,6 +23,13 @@ import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
+import type {
+  AdditionalPackageFiles,
+  ArtifactError,
+  DetermineLockFileDirsResult,
+  UpdatedArtifacts,
+  WriteExistingFilesResult,
+} from './types';
 import * as yarn from './yarn';
 
 /* c8 ignore start */
@@ -31,13 +38,6 @@ import * as yarn from './yarn';
 /* c8 ignore next */
 const getDirs = (arr: string[]): string[] =>
   Array.from(new Set(arr.filter(Boolean)));
-
-export interface DetermineLockFileDirsResult {
-  yarnLockDirs: string[];
-  npmLockDirs: string[];
-  pnpmShrinkwrapDirs: string[];
-  lernaJsonFiles: string[];
-}
 
 /* c8 ignore next */
 export function determineLockFileDirs(
@@ -266,20 +266,6 @@ export async function writeUpdatedPackageFiles(
   }
 }
 
-export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFile>[];
-}
-
-interface ArtifactError {
-  lockFile: string;
-  stderr: string;
-}
-
-interface UpdatedArtifacts {
-  name: string;
-  contents: string | Buffer;
-}
-
 /* c8 ignore next */
 async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
@@ -401,10 +387,6 @@ async function updateYarnOffline(
   }
 }
 
-export interface WriteExistingFilesResult {
-  artifactErrors: ArtifactError[];
-  updatedArtifacts: UpdatedArtifacts[];
-}
 /* c8 ignore next */
 export async function getAdditionalFiles(
   config: PostUpdateConfig,

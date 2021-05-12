@@ -410,6 +410,7 @@ export async function createPr({
         completionOptions: {
           mergeStrategy: config.defaultMergeMethod,
           deleteSourceBranch: true,
+          mergeCommitMessage: title,
         },
       },
       config.repoId,
@@ -632,6 +633,7 @@ export async function mergePr(
     completionOptions: {
       mergeStrategy: mergeMethod,
       deleteSourceBranch: true,
+      mergeCommitMessage: pr.title,
     },
   };
 

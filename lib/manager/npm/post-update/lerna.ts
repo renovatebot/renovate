@@ -6,12 +6,8 @@ import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
+import type { GenerateLockFileResult } from './types';
 import { getOptimizeCommand } from './yarn';
-
-export interface GenerateLockFileResult {
-  error?: boolean;
-  stderr?: string;
-}
 
 // Exported for testability
 export function getLernaVersion(

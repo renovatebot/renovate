@@ -2,11 +2,9 @@ import * as datasourceHelm from '../../datasource/helm';
 import { SkipReason } from '../../types';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
+import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import type { ExtractionResult, ResourceManagerData } from './types';
 import {
-  ExtractionResult,
-  ResourceManagerData,
-  TerraformDependencyTypes,
-  TerraformResourceTypes,
   checkIfStringIsPath,
   keyValueExtractionRegex,
   resourceTypeExtractionRegex,

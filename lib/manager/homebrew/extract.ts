@@ -2,6 +2,7 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency, PackageFile } from '../types';
+import type { UrlPathParsedResult } from './types';
 import { isSpace, removeComments, skip } from './util';
 
 function parseSha256(idx: number, content: string): string | null {
@@ -52,12 +53,6 @@ function extractUrl(content: string): string | null {
     i += 1;
   }
   return parseUrl(i, content);
-}
-
-export interface UrlPathParsedResult {
-  currentValue: string;
-  ownerName: string;
-  repoName: string;
 }
 
 export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
