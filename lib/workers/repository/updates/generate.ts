@@ -311,6 +311,14 @@ export function generateBranchConfig(
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
   }
+  if (!config.upgrades?.every((upgrade) => upgrade.pendingChecks)) {
+    // A branch should only have pendingChecks if all upgrades have pendingChecks
+    delete config.pendingChecks;
+    // If the branch isn't pending, then remove any upgrades within which *are*
+    config.upgrades = config.upgrades.filter(
+      (upgrade) => !upgrade.pendingChecks
+    );
+  }
   const tableRows = config.upgrades
     .map((upgrade) => getTableValues(upgrade))
     .filter(Boolean);

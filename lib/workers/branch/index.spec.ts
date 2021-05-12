@@ -12,7 +12,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import * as _npmPostExtract from '../../manager/npm/post-update';
-import type { WriteExistingFilesResult } from '../../manager/npm/post-update';
+import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';

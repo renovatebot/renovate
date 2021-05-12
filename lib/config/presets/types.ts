@@ -21,3 +21,17 @@ export interface ParsedPreset {
   presetName: string;
   params?: string[];
 }
+
+export type PresetFetcher = (
+  repo: string,
+  fileName: string,
+  endpoint: string
+) => Promise<Preset>;
+
+export type FetchPresetConfig = {
+  pkgName: string;
+  filePreset: string;
+  presetPath?: string;
+  endpoint: string;
+  fetch: PresetFetcher;
+};
