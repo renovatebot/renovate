@@ -25,11 +25,15 @@ export async function raiseConfigWarningIssue(
     if (getAdminConfig().dryRun) {
       logger.info(`DRY-RUN: Would update PR #${pr.number}`);
     } else {
-      await platform.updatePr({
-        number: pr.number,
-        prTitle: config.onboardingPrTitle,
-        prBody: body,
-      });
+      try {
+        await platform.updatePr({
+          number: pr.number,
+          prTitle: config.onboardingPrTitle,
+          prBody: body,
+        });
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ err }, 'Error updating onboarding PR');
+      }
     }
   } else if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would ensure config error issue');
