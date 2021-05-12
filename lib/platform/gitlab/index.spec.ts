@@ -303,28 +303,28 @@ describe(getName(), () => {
     it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
       const gitlabIgnoreRepoUrlBefore = process.env.GITLAB_IGNORE_REPO_URL;
       process.env.GITLAB_IGNORE_REPO_URL = 'true';
-      const selfHostedUrl = 'http://mycompany.com';
+      const selfHostedUrl = 'http://mycompany.com/gitlab';
       httpMock
         .scope(selfHostedUrl)
-        .get('/gitlab/api/v4/user')
+        .get('/api/v4/user')
         .reply(200, {
           email: 'a@b.com',
           name: 'Renovate Bot',
         })
-        .get('/gitlab/api/v4/version')
+        .get('/api/v4/version')
         .reply(200, {
           version: '13.8',
         });
       gitlab.initPlatform({
-        endpoint: `${selfHostedUrl}/gitlab/api/v4`,
+        endpoint: `${selfHostedUrl}/api/v4`,
         token: 'mytoken',
       });
       httpMock
         .scope(selfHostedUrl)
-        .get('/gitlab/api/v4/projects/some%2Frepo%2Fproject')
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
           default_branch: 'master',
-          http_url_to_repo: `${selfHostedUrl}/gitlab/repo.git`,
+          http_url_to_repo: `${selfHostedUrl}/some/repo/project.git`,
         });
       await gitlab.initRepo({
         repository: 'some/repo/project',

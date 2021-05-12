@@ -11,7 +11,7 @@ hostRules.add({
 });
 
 const gitlabApiHost = 'https://gitlab.com';
-const selfHostedUrl = 'http://mycompany.com';
+const selfHostedUrl = 'http://mycompany.com/gitlab';
 
 describe(getName(), () => {
   let gitlabApi: GitlabHttp;
@@ -52,7 +52,7 @@ describe(getName(), () => {
   it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
     const gitlabIgnoreRepoUrlBefore = process.env.GITLAB_IGNORE_REPO_URL;
     process.env.GITLAB_IGNORE_REPO_URL = 'true';
-    setBaseUrl(`${selfHostedUrl}/gitlab/api/v4/`);
+    setBaseUrl(`${selfHostedUrl}/api/v4/`);
 
     httpMock
       .scope(selfHostedUrl)
@@ -95,7 +95,7 @@ describe(getName(), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('sets baseUrl', () => {
-    expect(() => setBaseUrl(`${selfHostedUrl}/gitlab/api/v4/`)).not.toThrow();
+    expect(() => setBaseUrl(`${selfHostedUrl}/api/v4/`)).not.toThrow();
   });
 
   describe('fails with', () => {
