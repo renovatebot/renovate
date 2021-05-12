@@ -11,6 +11,7 @@ hostRules.add({
 });
 
 const gitlabApiHost = 'https://gitlab.com';
+const selfHostedUrl = 'http://mycompany.com';
 
 describe(getName(), () => {
   let gitlabApi: GitlabHttp;
@@ -48,6 +49,33 @@ describe(getName(), () => {
     expect(trace).toHaveLength(3);
     expect(trace).toMatchSnapshot();
   });
+  it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
+    const gitlabIgnoreRepoUrlBefore = process.env.GITLAB_IGNORE_REPO_URL;
+    process.env.GITLAB_IGNORE_REPO_URL = 'true';
+    setBaseUrl(`${selfHostedUrl}/gitlab/api/v4/`);
+
+    httpMock
+      .scope(selfHostedUrl)
+      .get('/gitlab/api/v4/some-url')
+      .reply(200, ['a'], {
+        link:
+          '<https://mycompany.com/gitlab/api/v4/some-url&page=2>; rel="next", <https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="last"',
+      })
+      .get('/gitlab/api/v4/some-url&page=2')
+      .reply(200, ['b', 'c'], {
+        link:
+          '<https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="next", <https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="last"',
+      })
+      .get('/gitlab/api/v4/some-url&page=3')
+      .reply(200, ['d']);
+    const res = await gitlabApi.getJson('some-url', { paginate: true });
+    expect(res.body).toHaveLength(4);
+
+    const trace = httpMock.getTrace();
+    expect(trace).toHaveLength(3);
+    expect(trace).toMatchSnapshot();
+    process.env.GITLAB_IGNORE_REPO_URL = gitlabIgnoreRepoUrlBefore;
+  });
   it('attempts to paginate', async () => {
     httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, ['a'], {
       link: '<https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
@@ -67,9 +95,7 @@ describe(getName(), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('sets baseUrl', () => {
-    expect(() =>
-      setBaseUrl('https://gitlab.renovatebot.com/api/v4/')
-    ).not.toThrow();
+    expect(() => setBaseUrl(`${selfHostedUrl}/gitlab/api/v4/`)).not.toThrow();
   });
 
   describe('fails with', () => {
