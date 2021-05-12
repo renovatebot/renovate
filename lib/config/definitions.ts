@@ -351,7 +351,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'requireConfig',
-    description: 'Set to true if repositories must have a config to activate.',
+    description:
+      'Set to false if it should be optional for repositories to contain a config.',
     stage: 'repository',
     type: 'boolean',
     default: true,
