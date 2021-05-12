@@ -1,3 +1,4 @@
+import URL from 'url';
 import parseLinkHeader from 'parse-link-header';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -42,8 +43,16 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         try {
           const linkHeader = parseLinkHeader(result.headers.link as string);
           if (linkHeader?.next) {
+            const nextUrl = new URL.URL(linkHeader.next.url);
+            if (process.env.GITLAB_IGNORE_REPO_URL) {
+              const defaultEndpoint = new URL.URL(baseUrl);
+              nextUrl.protocol = defaultEndpoint.protocol;
+              nextUrl.host = defaultEndpoint.host;
+            }
+            logger.debug(`following pagination, next url: ${nextUrl}`);
+
             result.body = result.body.concat(
-              (await this.request<T>(linkHeader.next.url, opts)).body
+              (await this.request<T>(nextUrl, opts)).body
             );
           }
         } catch (err) /* istanbul ignore next */ {
