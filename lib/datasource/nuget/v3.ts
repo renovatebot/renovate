@@ -173,7 +173,7 @@ export async function getReleases(
         dep.sourceUrl = sourceUrl;
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
     if (err instanceof HttpError && err.response?.statusCode === 404) {
       logger.debug(
@@ -187,7 +187,7 @@ export async function getReleases(
       `Cannot obtain sourceUrl`
     );
     return dep;
-  }
+  } /* c8 ignore stop */
 
   if (homepage) {
     // only assign if not assigned

@@ -145,9 +145,9 @@ export async function writeExistingFiles(
     if (is.string(npmrc)) {
       try {
         await outputFile(npmrcFilename, `${npmrc}\n`);
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
-      }
+      } /* c8 ignore stop */
     }
     if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);
@@ -159,9 +159,9 @@ export async function writeExistingFiles(
             .replace('--install.pure-lockfile true', '')
             .replace('--install.frozen-lockfile true', '')
         );
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
-      }
+      } /* c8 ignore stop */
     }
     const { npmLock } = packageFile;
     if (npmLock) {

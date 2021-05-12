@@ -35,9 +35,10 @@ export async function checkYarnrc(
         yarnPath = pathLine.replace(/^yarn-path\s+"?(.+?)"?$/, '$1');
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     // not found
-  }
+  } /* c8 ignore stop */
+
   return { offlineMirror, yarnPath };
 }
 
@@ -173,12 +174,12 @@ export async function generateLockFile(
       );
       try {
         await remove(lockFileName);
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         logger.debug(
           { err, lockFileName },
           'Error removing yarn.lock for lock file maintenance'
         );
-      }
+      } /* c8 ignore stop */
     }
 
     // Run the commands

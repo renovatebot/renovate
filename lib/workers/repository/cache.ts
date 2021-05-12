@@ -58,9 +58,9 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
     if (sha) {
       try {
         isModified = await isBranchModified(branchName);
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         // Do nothing
-      }
+      } /* c8 ignore stop */
     }
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)

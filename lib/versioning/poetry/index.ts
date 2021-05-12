@@ -71,41 +71,41 @@ function npm2poetry(input: string): string {
 const equals = (a: string, b: string): boolean => {
   try {
     return npm.equals(padZeroes(a), padZeroes(b));
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     return pep440.equals(a, b);
-  }
+  } /* c8 ignore stop */
 };
 
 const getMajor = (version: string): number => {
   try {
     return npm.getMajor(padZeroes(version));
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     return pep440.getMajor(version);
-  }
+  } /* c8 ignore stop */
 };
 
 const getMinor = (version: string): number => {
   try {
     return npm.getMinor(padZeroes(version));
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     return pep440.getMinor(version);
-  }
+  } /* c8 ignore stop */
 };
 
 const getPatch = (version: string): number => {
   try {
     return npm.getPatch(padZeroes(version));
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     return pep440.getPatch(version);
-  }
+  } /* c8 ignore stop */
 };
 
 const isGreaterThan = (a: string, b: string): boolean => {
   try {
     return npm.isGreaterThan(padZeroes(a), padZeroes(b));
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     return pep440.isGreaterThan(a, b);
-  }
+  } /* c8 ignore stop */
 };
 
 const isLessThanRange = (version: string, range: string): boolean =>
@@ -170,12 +170,13 @@ function getNewValue({
       ) {
         return currentValue;
       }
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.info(
         { err },
         'Poetry versioning: Error caught checking if newVersion satisfies currentValue'
       );
-    }
+    } /* c8 ignore stop */
+
     const parsedRange = parseRange(npmCurrentValue);
     const element = parsedRange[parsedRange.length - 1];
     if (parsedRange.length === 1 && element.operator) {

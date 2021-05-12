@@ -25,7 +25,7 @@ async function cargoUpdate(
   };
   try {
     await exec(cmd, execOptions);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     // Two different versions of one dependency can be present in the same
     // crate, and when that happens an attempt to update it with --package ${dep}
     // key results in cargo exiting with error code `101` and an error message:
@@ -44,7 +44,7 @@ async function cargoUpdate(
     } else {
       throw err; // this is caught below
     }
-  }
+  } /* c8 ignore stop */
 }
 
 export async function updateArtifacts({

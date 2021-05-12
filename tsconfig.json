@@ -11,6 +11,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": false,
     "noUnusedLocals": true,
+    "importHelpers": true,
     "lib": ["es2018"],
     "types": ["node", "jest"],
     "allowJs": true,

@@ -4,7 +4,7 @@ import { migrateConfig } from './migration';
 import type { GlobalConfig } from './types';
 
 export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
-  let configFile = env.RENOVATE_CONFIG_FILE || 'config';
+  let configFile = env.RENOVATE_CONFIG_FILE /* c8 ignore next */ || 'config';
   if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
     logger.debug('Checking for config file in ' + configFile);

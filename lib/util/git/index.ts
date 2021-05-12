@@ -120,7 +120,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
   try {
     const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
     return res.replace('refs/remotes/origin/', '').trim();
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     checkForPlatformFailure(err);
     if (
       err.message.startsWith(
@@ -130,7 +130,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
       throw new Error(REPOSITORY_EMPTY);
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 let config: LocalConfig = {} as any;
@@ -156,13 +156,13 @@ async function fetchBranchCommits(): Promise<void> {
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ err }, 'git error');
     if (err.message?.includes('Please ask the owner to check their account')) {
       throw new Error(REPOSITORY_DISABLED);
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -211,10 +211,10 @@ async function setBranchPrefix(branchPrefix: string): Promise<void> {
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
     try {
       await git.fetch(['origin', ref, '--depth=2', '--force']);
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       checkForPlatformFailure(err);
       throw err;
-    }
+    } /* c8 ignore stop */
   }
 }
 
@@ -240,10 +240,10 @@ export async function getSubmodules(): Promise<string[]> {
       .trim()
       .split(/[\n\s]/)
       .filter((_e: string, i: number) => i % 2);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error getting submodules');
     return [];
-  }
+  } /* c8 ignore stop */
 }
 
 export async function syncGit(): Promise<void> {
@@ -268,12 +268,12 @@ export async function syncGit(): Promise<void> {
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.debug({ durationMs }, 'git fetch completed');
       clone = false;
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
       logger.warn({ err }, 'git fetch error');
-    }
+    } /* c8 ignore stop */
   }
   if (clone) {
     await fs.emptyDir(config.localDir);
@@ -287,7 +287,7 @@ export async function syncGit(): Promise<void> {
         );
       }
       await git.clone(config.url, '.', opts);
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
@@ -296,7 +296,8 @@ export async function syncGit(): Promise<void> {
         throw err;
       }
       throw new ExternalHostError(err, 'git');
-    }
+    } /* c8 ignore stop */
+
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
@@ -336,11 +337,12 @@ export async function syncGit(): Promise<void> {
       logger.debug({ gitAuthorEmail }, 'Setting git author email');
       await git.raw(['config', 'user.email', gitAuthorEmail]);
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     checkForPlatformFailure(err);
     logger.debug({ err }, 'Error setting git author config');
     throw new Error(TEMPORARY_ERROR);
-  }
+  } /* c8 ignore stop */
+
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
   if (config.branchPrefix) {
     await setBranchPrefix(config.branchPrefix);
@@ -366,9 +368,9 @@ async function syncBranch(branchName: string): Promise<void> {
   try {
     await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
     await git.fetch(['origin', branchName, '--depth=2']);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     checkForPlatformFailure(err);
-  }
+  } /* c8 ignore stop */
 }
 
 export function branchExists(branchName: string): boolean {
@@ -419,10 +421,10 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     checkForPlatformFailure(err);
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function getFileList(): Promise<string[]> {
@@ -521,10 +523,11 @@ export async function deleteBranch(branchName: string): Promise<void> {
   try {
     await git.raw(['push', '--delete', 'origin', branchName]);
     logger.debug({ branchName }, 'Deleted remote branch');
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     checkForPlatformFailure(err);
     logger.debug({ branchName }, 'No remote branch to delete');
-  }
+  } /* c8 ignore stop */
+
   try {
     await deleteLocalBranch(branchName);
     /* c8 ignore next */
@@ -567,11 +570,11 @@ export async function getBranchFiles(branchName: string): Promise<string[]> {
       `origin/${branchName}^`,
     ]);
     return diff.files.map((file) => file.file);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'getBranchFiles error');
     checkForPlatformFailure(err);
     return null;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function getFile(
@@ -714,7 +717,7 @@ export async function commitFiles({
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
     return commit;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     checkForPlatformFailure(err);
     if (err.message.includes(`'refs/heads/renovate' exists`)) {
       const error = new Error(CONFIG_VALIDATION);
@@ -747,7 +750,7 @@ export async function commitFiles({
     logger.debug({ err }, 'Unknown error committing files');
     // We don't know why this happened, so this will cause bubble up to a branch error
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export function getUrl({

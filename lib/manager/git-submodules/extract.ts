@@ -76,9 +76,10 @@ async function getModules(
       const [, name, path] = line.split(/submodule\.(.+?)\.path\s(.+)/);
       res.push({ name, path });
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error getting git submodules during extract');
-  }
+  } /* c8 ignore stop */
+
   return res;
 }
 
@@ -120,13 +121,13 @@ export default async function extractPackageFile(
             currentValue,
             currentDigest,
           };
-        } catch (err) /* c8 ignore next */ {
+        } catch (err) /* c8 ignore start */ {
           logger.warn(
             { err },
             'Error mapping git submodules during extraction'
           );
           return null;
-        }
+        } /* c8 ignore stop */
       })
     )
   ).filter(Boolean);

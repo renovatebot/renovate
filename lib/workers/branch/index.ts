@@ -56,9 +56,9 @@ const rebasingRegex = /\*\*Rebasing\*\*: .*/;
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
     await deleteBranch(branchName);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
-  }
+  } /* c8 ignore stop */
 }
 
 export interface ProcessBranchResult {
@@ -404,7 +404,7 @@ export async function processBranch(
         config.branchAutomergeFailureMessage = mergeStatus;
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 404) {
       logger.debug({ err }, 'Received a 404 error - aborting run');
       throw new Error(REPOSITORY_CHANGED);
@@ -476,7 +476,8 @@ export async function processBranch(
     }
     // Don't throw here - we don't want to stop the other renovations
     return { branchExists, result: BranchResult.Error };
-  }
+  } /* c8 ignore stop */
+
   try {
     logger.debug('Ensuring PR');
     logger.debug(
@@ -575,7 +576,7 @@ export async function processBranch(
         logger.debug('PR is not configured for automerge');
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (
       err instanceof ExternalHostError ||
       [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)
@@ -585,7 +586,8 @@ export async function processBranch(
     }
     // Otherwise don't throw here - we don't want to stop the other renovations
     logger.error({ err }, `Error ensuring PR: ${String(err.message)}`);
-  }
+  } /* c8 ignore stop */
+
   if (!branchExists) {
     return { branchExists: true, result: BranchResult.PrCreated };
   }

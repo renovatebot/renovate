@@ -122,10 +122,10 @@ export async function getRepos(): Promise<string[]> {
       { paginate: 'all' }
     );
     return res.body.map((repo) => repo.full_name);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 async function getBranchProtection(
@@ -246,7 +246,7 @@ export async function initRepo({
       // This happens if we don't have Administrator read access, it is not a critical error
       logger.debug('Could not find allowed merge methods for repo');
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug('Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
@@ -275,7 +275,8 @@ export async function initRepo({
     }
     logger.debug({ err }, 'Unknown GitHub initRepo error');
     throw err;
-  }
+  } /* c8 ignore stop */
+
   // This shouldn't be necessary, but occasional strange errors happened until it was added
   config.issueList = null;
   config.prList = null;
@@ -330,7 +331,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Created new default branch in fork');
-        } catch (err) /* c8 ignore next */ {
+        } catch (err) /* c8 ignore start */ {
           if (err.response?.body?.message === 'Reference already exists') {
             logger.debug(
               `Branch ${config.defaultBranch} already exists in the fork`
@@ -341,7 +342,8 @@ export async function initRepo({
               'Could not create parent defaultBranch in fork'
             );
           }
-        }
+        } /* c8 ignore stop */
+
         logger.debug(
           `Setting ${config.defaultBranch} as default branch for ${config.repository}`
         );
@@ -354,14 +356,15 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Successfully changed default branch for fork');
-        } catch (err) /* c8 ignore next */ {
+        } catch (err) /* c8 ignore start */ {
           logger.warn({ err }, 'Could not set default branch');
-        }
+        } /* c8 ignore stop */
       }
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
-    }
+    } /* c8 ignore stop */
+
     if (existingRepos.includes(config.repository)) {
       logger.debug(
         { repository_fork: config.repository },
@@ -383,7 +386,7 @@ export async function initRepo({
             token: forkToken || opts.token,
           }
         );
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         logger.warn(
           { err: err.err || err },
           'Error updating fork from upstream - cannot continue'
@@ -392,7 +395,7 @@ export async function initRepo({
           throw err;
         }
         throw new ExternalHostError(err);
-      }
+      } /* c8 ignore stop */
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
       existingRepos.push(config.repository);
@@ -532,9 +535,9 @@ async function getClosedPrs(): Promise<PrList> {
       }
       prNumbers.sort();
       logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.warn({ query, err }, 'getClosedPrs error');
-    }
+    } /* c8 ignore stop */
   }
   return config.closedPrList;
 }
@@ -662,9 +665,9 @@ async function getOpenPrs(): Promise<PrList> {
       }
       prNumbers.sort();
       logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.warn({ query, err }, 'getOpenPrs error');
-    }
+    } /* c8 ignore stop */
   }
   return config.openPrList;
 }
@@ -741,10 +744,11 @@ export async function getPrList(): Promise<Pr[]> {
           { paginate: true }
         )
       ).body;
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
-    }
+    } /* c8 ignore stop */
+
     config.prList = prList
       .filter(
         (pr) =>
@@ -894,7 +898,7 @@ export async function getBranchStatus(
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 404) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted'
@@ -903,7 +907,8 @@ export async function getBranchStatus(
     }
     logger.debug('Unknown error when checking branch status');
     throw err;
-  }
+  } /* c8 ignore stop */
+
   logger.debug(
     { state: commitStatus.state, statuses: commitStatus.statuses },
     'branch status check result'
@@ -936,7 +941,7 @@ export async function getBranchStatus(
       /* c8 ignore next */
       logger.debug({ result: checkRunsRaw }, 'No check runs found');
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -948,7 +953,8 @@ export async function getBranchStatus(
     } else {
       logger.warn({ err }, 'Error retrieving check runs');
     }
-  }
+  } /* c8 ignore stop */
+
   if (checkRuns.length === 0) {
     if (commitStatus.state === 'success') {
       return BranchStatus.green;
@@ -1007,13 +1013,13 @@ export async function getBranchStatusCheck(
       }
     }
     return null;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 404) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function setBranchStatus({
@@ -1055,10 +1061,10 @@ export async function setBranchStatus({
     // update status cache
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ err, url }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
-  }
+  } /* c8 ignore stop */
 }
 
 // Issue
@@ -1210,7 +1216,7 @@ export async function ensureIssue({
     // reset issueList so that it will be fetched again as-needed
     delete config.issueList;
     return 'created';
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(
         `Issues are disabled, so could not create issue: ${
@@ -1220,7 +1226,7 @@ export async function ensureIssue({
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  }
+  } /* c8 ignore stop */
   return null;
 }
 
@@ -1270,9 +1276,9 @@ export async function addReviewers(
         },
       }
     );
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Failed to assign reviewer');
-  }
+  } /* c8 ignore stop */
 }
 
 async function addLabels(
@@ -1298,9 +1304,9 @@ export async function deleteLabel(
     await githubApi.deleteJson(
       `repos/${repository}/issues/${issueNo}/labels/${label}`
     );
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
-  }
+  } /* c8 ignore stop */
 }
 
 async function addComment(issueNo: number, body: string): Promise<void> {
@@ -1355,13 +1361,13 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     ).body;
     logger.debug(`Found ${comments.length} comments`);
     return comments;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function ensureComment({
@@ -1410,7 +1416,7 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1420,7 +1426,7 @@ export async function ensureComment({
       logger.warn({ err }, 'Error ensuring comment');
     }
     return false;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function ensureCommentRemoval({
@@ -1450,9 +1456,9 @@ export async function ensureCommentRemoval({
       logger.debug({ issueNo }, 'Removing comment');
       await deleteComment(commentId);
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error deleting comment');
-  }
+  } /* c8 ignore stop */
 }
 
 // Pull Request
@@ -1534,12 +1540,12 @@ export async function updatePr({
       options
     );
     logger.debug({ pr: prNo }, 'PR updated');
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');
-  }
+  } /* c8 ignore stop */
 }
 
 export async function mergePr(
@@ -1718,8 +1724,9 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     } else {
       logger.debug('No vulnerability alerts found');
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
-  }
+  } /* c8 ignore stop */
+
   return alerts;
 }

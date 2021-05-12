@@ -76,9 +76,10 @@ export function extractPackageFile(content: string): PackageFile | null {
         } while (line.trim() !== ')');
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error extracting go modules');
-  }
+  } /* c8 ignore stop */
+
   if (!deps.length) {
     return null;
   }

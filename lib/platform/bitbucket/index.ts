@@ -93,10 +93,10 @@ export async function getRepos(): Promise<string[]> {
       `/2.0/repositories/?role=contributor`
     );
     return repos.map((repo) => repo.full_name);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function getRawFile(
@@ -154,13 +154,13 @@ export async function initRepo({
     };
 
     logger.debug(`${repository} owner = ${config.owner}`);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
-  }
+  } /* c8 ignore stop */
 
   const { hostname } = URL.parse(defaults.endpoint);
 
@@ -306,10 +306,10 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
       )
     ).body;
     return branch.target.hash;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
     return null;
-  }
+  } /* c8 ignore stop */
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
@@ -433,10 +433,10 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
         )
       ).body.values || /* c8 ignore next */ []
     );
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error finding issues');
     return [];
-  }
+  } /* c8 ignore stop */
 }
 
 export async function findIssue(title: string): Promise<Issue> {
@@ -539,7 +539,7 @@ export async function ensureIssue({
       );
       return 'created';
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(
         `Issues are disabled, so could not create issue: ${
@@ -549,7 +549,7 @@ export async function ensureIssue({
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  }
+  } /* c8 ignore stop */
   return null;
 }
 
@@ -710,10 +710,10 @@ export async function createPr({
       config.prList.push(pr);
     }
     return pr;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error creating pull request');
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 interface Reviewer {
@@ -770,9 +770,10 @@ export async function mergePr(
       }
     );
     logger.debug('Automerging succeeded');
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     return false;
-  }
+  } /* c8 ignore stop */
+
   return true;
 }
 

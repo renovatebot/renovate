@@ -69,8 +69,9 @@ export function extractPackageFile(content: string): PackageFile {
       logger.debug({ deps }, 'Found dependencies in helm-values');
       return { deps };
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.error({ err }, 'Error parsing helm-values parsed content');
-  }
+  } /* c8 ignore stop */
+
   return null;
 }

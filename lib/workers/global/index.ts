@@ -75,9 +75,9 @@ function checkEnv(): void {
 export async function validatePresets(config: GlobalConfig): Promise<void> {
   try {
     await resolveConfigPresets(config);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     throw new Error(CONFIG_PRESETS_INVALID);
-  }
+  } /* c8 ignore stop */
 }
 
 export async function start(): Promise<number> {
@@ -112,7 +112,7 @@ export async function start(): Promise<number> {
       await repositoryWorker.renovateRepository(repoConfig);
       setMeta({});
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));
     } else {
@@ -123,7 +123,7 @@ export async function start(): Promise<number> {
       logger.debug(`Missing config`);
       return 2;
     }
-  } finally {
+  } /* c8 ignore stop */ finally {
     globalFinalize(config);
     logger.debug(`Renovate exiting`);
   }

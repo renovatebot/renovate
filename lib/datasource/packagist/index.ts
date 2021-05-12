@@ -256,7 +256,7 @@ async function packageLookup(
     const dep = extractDepReleases(versions);
     logger.trace({ dep }, 'dep');
     return dep;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.host === 'packagist.org') {
       if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
         throw new ExternalHostError(err);
@@ -266,7 +266,7 @@ async function packageLookup(
       }
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export function getReleases({

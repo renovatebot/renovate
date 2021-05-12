@@ -182,8 +182,9 @@ export function extractPackageFile(
       logger.trace({ deps }, 'Found dependencies in pre-commit config');
       return { deps };
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.error({ filename, err }, 'Error scanning parsed pre-commit config');
-  }
+  } /* c8 ignore stop */
+
   return null;
 }

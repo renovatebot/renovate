@@ -84,16 +84,15 @@ async function getVersionsFromMetadata(
   return versions;
 }
 
-/* c8 ignore next */
 function isValidArtifactsInfo(
   info: ArtifactsInfo | null,
   versions: string[]
-): boolean {
+): boolean /* c8 ignore start */ {
   if (!info) {
     return false;
   }
   return versions.every((v) => info[v] !== undefined);
-}
+} /* c8 ignore stop */
 
 async function getArtifactInfo(
   version: string,

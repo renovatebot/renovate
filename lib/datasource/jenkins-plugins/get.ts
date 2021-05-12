@@ -88,13 +88,13 @@ async function getJenkinsUpdateCenterResponse<T>(
       { durationMs },
       `jenkins-plugins: Fetched Jenkins plugins ${cache.name}`
     );
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     // eslint-disable-next-line no-param-reassign
     cache.cache = Object.create(null);
     throw new ExternalHostError(
       new Error(`jenkins-plugins: Fetch plugins ${cache.name} error`)
     );
-  }
+  } /* c8 ignore stop */
 
   return response;
 }

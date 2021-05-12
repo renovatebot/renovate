@@ -36,11 +36,10 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
     try {
       config = JSON.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
-    } catch (err) {
-      /* c8 ignore next 2 */
+    } catch (err) /* c8 ignore start */ {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);
-    }
+    } /* c8 ignore stop */
   }
 
   config.hostRules ||= [];
@@ -58,6 +57,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
       const envName = getEnvName(option);
       if (env[envName]) {
         // TODO: add tests
+
         /* c8 ignore start */
         if (option.type === 'array' && option.subType === 'object') {
           try {

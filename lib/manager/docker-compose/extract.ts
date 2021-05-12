@@ -82,11 +82,11 @@ export function extractPackageFile(
 
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn(
       { fileName, content, err },
       'Error extracting Docker Compose file'
     );
     return null;
-  }
+  } /* c8 ignore stop */
 }

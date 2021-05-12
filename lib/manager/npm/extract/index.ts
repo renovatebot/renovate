@@ -324,10 +324,10 @@ export async function extractPackageFile(
           dep.prettyDepType = depTypes[depType];
           deps.push(dep);
         }
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         logger.debug({ fileName, depType, err }, 'Error parsing package.json');
         return null;
-      }
+      } /* c8 ignore stop */
     }
   }
   if (deps.length === 0) {

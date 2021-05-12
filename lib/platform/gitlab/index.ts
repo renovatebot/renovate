@@ -247,7 +247,7 @@ export async function initRepo({
       gitAuthorName: global.gitAuthor?.name,
       gitAuthorEmail: global.gitAuthor?.email,
     });
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
@@ -266,7 +266,8 @@ export async function initRepo({
     }
     logger.debug({ err }, 'Unknown GitLab initRepo error');
     throw err;
-  }
+  } /* c8 ignore stop */
+
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
@@ -308,13 +309,13 @@ async function getStatus(
         useCache,
       })
     ).body;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
@@ -425,13 +426,13 @@ async function fetchPrList(): Promise<Pr[]> {
         createdAt: pr.created_at,
       })
     );
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function getPrList(): Promise<Pr[]> {
@@ -472,9 +473,9 @@ async function tryPrAutomerge(
           },
         }
       );
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.debug({ err }, 'Automerge on PR creation failed');
-    }
+    } /* c8 ignore stop */
   }
 }
 
@@ -592,7 +593,7 @@ export async function mergePr(iid: number): Promise<boolean> {
       }
     );
     return true;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 401) {
       logger.debug('No permissions to merge PR');
       return false;
@@ -604,7 +605,7 @@ export async function mergePr(iid: number): Promise<boolean> {
     logger.debug({ err }, 'merge PR error');
     logger.debug('PR merge failed');
     return false;
-  }
+  } /* c8 ignore stop */
 }
 
 export function massageMarkdown(input: string): string {
@@ -710,7 +711,7 @@ export async function setBranchStatus({
 
     // update status cache
     await getStatus(branchName, false);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (
       err.body?.message?.startsWith(
         'Cannot transition status via :enqueue from :pending'
@@ -722,7 +723,7 @@ export async function setBranchStatus({
       logger.debug({ err });
       logger.warn('Failed to set branch status');
     }
-  }
+  } /* c8 ignore stop */
 }
 
 // Issue
@@ -771,10 +772,10 @@ export async function findIssue(title: string): Promise<Issue | null> {
       number: issue.iid,
       body: issueBody,
     };
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn('Error finding issue');
     return null;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function ensureIssue({
@@ -818,13 +819,14 @@ export async function ensureIssue({
       delete config.issueList;
       return 'created';
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  }
+  } /* c8 ignore stop */
+
   return null;
 }
 
@@ -935,9 +937,9 @@ export async function deleteLabel(
         body: { labels },
       }
     );
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
-  }
+  } /* c8 ignore stop */
 }
 
 async function getComments(issueNo: number): Promise<GitlabComment[]> {

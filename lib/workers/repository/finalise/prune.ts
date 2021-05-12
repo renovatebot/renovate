@@ -68,7 +68,7 @@ async function cleanUpBranches(
         logger.info({ branch: branchName }, `Deleting orphan branch`);
         await deleteBranch(branchName);
       }
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       if (err.message?.includes("bad revision 'origin/")) {
         logger.debug(
           { branchName },
@@ -77,7 +77,7 @@ async function cleanUpBranches(
       } else if (err.message !== REPOSITORY_CHANGED) {
         logger.warn({ err, branch: branchName }, 'Error pruning branch');
       }
-    }
+    } /* c8 ignore stop */
   }
 }
 

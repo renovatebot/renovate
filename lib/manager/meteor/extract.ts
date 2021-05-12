@@ -28,9 +28,10 @@ export function extractPackageFile(content: string): PackageFile | null {
         };
       })
       .filter((dep) => dep.depName && dep.currentValue);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ content }, 'Failed to parse meteor package.js');
-  }
+  } /* c8 ignore stop */
+
   /* c8 ignore next 3 */
   if (!deps.length) {
     return null;

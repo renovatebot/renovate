@@ -108,10 +108,10 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function ensureCommentRemoval(
@@ -142,7 +142,7 @@ export async function ensureCommentRemoval(
     if (commentId) {
       await deleteComment(config, prNo, commentId);
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error ensuring comment removal');
-  }
+  } /* c8 ignore stop */
 }

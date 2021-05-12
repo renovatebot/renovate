@@ -69,7 +69,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     if (fileType === '.json5') {
       try {
         configFileParsed = JSON5.parse(rawFileContents);
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         logger.debug(
           { renovateConfig: rawFileContents },
           'Error parsing renovate config renovate.json5'
@@ -80,7 +80,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           configFileName,
           configFileParseError: { validationError, validationMessage },
         };
-      }
+      } /* c8 ignore stop */
     } else {
       let allowDuplicateKeys = true;
       let jsonValidationError = jsonValidator.validate(
@@ -110,7 +110,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       }
       try {
         configFileParsed = JSON.parse(rawFileContents);
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         logger.debug(
           { renovateConfig: rawFileContents },
           'Error parsing renovate config'
@@ -121,7 +121,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           configFileName,
           configFileParseError: { validationError, validationMessage },
         };
-      }
+      } /* c8 ignore stop */
     }
     logger.debug(
       { fileName: configFileName, config: configFileParsed },

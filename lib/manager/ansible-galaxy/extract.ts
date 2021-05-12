@@ -85,8 +85,8 @@ export default function extractPackageFile(
       return null;
     }
     return { deps };
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ err }, 'Error extracting ansible-galaxy deps');
     return null;
-  }
+  } /* c8 ignore stop */
 }

@@ -39,7 +39,7 @@ export async function tryBranchAutomerge(
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       if (err.message === 'not ready') {
         logger.debug('Branch is not ready for automerge');
         return 'not ready';
@@ -74,7 +74,7 @@ export async function tryBranchAutomerge(
       }
       logger.warn({ err }, 'Unknown error when attempting branch automerge');
       return 'failed';
-    }
+    } /* c8 ignore stop */
   } else if (branchStatus === BranchStatus.red) {
     return 'branch status error';
   } else {

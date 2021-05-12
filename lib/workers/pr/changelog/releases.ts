@@ -63,9 +63,9 @@ export async function getInRangeReleases(
       }
     }
     return releases;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.debug({ err }, 'getInRangeReleases err');
     logger.debug({ datasource, depName }, 'Error getting releases');
     return null;
-  }
+  } /* c8 ignore stop */
 }

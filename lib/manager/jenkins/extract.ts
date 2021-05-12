@@ -62,9 +62,10 @@ function extractYaml(content: string): PackageDependency[] {
         }
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error parsing Jenkins plugins');
-  }
+  } /* c8 ignore stop */
+
   return deps;
 }
 

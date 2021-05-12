@@ -112,10 +112,10 @@ export async function getRepos(): Promise<string[]> {
     );
     logger.debug({ result }, 'result of getRepos()');
     return result;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function getRawFile(
@@ -229,7 +229,7 @@ export async function initRepo({
     };
 
     return repoConfig;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
@@ -239,7 +239,7 @@ export async function initRepo({
 
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function getRepoForceRebase(): Promise<boolean> {
@@ -759,10 +759,10 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
-  }
+  } /* c8 ignore stop */
 }
 
 export async function ensureCommentRemoval({
@@ -792,9 +792,9 @@ export async function ensureCommentRemoval({
     if (commentId) {
       await deleteComment(prNo, commentId);
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error ensuring comment removal');
-  }
+  } /* c8 ignore stop */
 }
 
 // Pull Request
@@ -854,7 +854,7 @@ export async function createPr({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
       { body }
     );
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (
       err.body?.errors?.[0]?.exceptionName ===
       'com.atlassian.bitbucket.pull.EmptyPullRequestException'
@@ -866,7 +866,7 @@ export async function createPr({
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 
   const pr: BbsPr = {
     displayNumber: `Pull Request #${prInfoRes.body.id}`,

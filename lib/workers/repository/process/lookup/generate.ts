@@ -37,13 +37,14 @@ export function generateUpdate(
       currentVersion,
       newVersion,
     });
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn(
       { err, currentValue, rangeStrategy, currentVersion, newVersion },
       'getNewValue error'
     );
     update.newValue = currentValue;
-  }
+  } /* c8 ignore stop */
+
   update.newMajor = versioning.getMajor(newVersion);
   update.newMinor = versioning.getMinor(newVersion);
   update.updateType =

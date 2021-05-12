@@ -36,7 +36,7 @@ async function updateRubyGemsVersions(): Promise<void> {
     newLines = (await http.get(url, options)).body;
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug({ durationMs }, 'Rubygems: Fetched rubygems.org versions');
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode !== 416) {
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
@@ -47,7 +47,7 @@ async function updateRubyGemsVersions(): Promise<void> {
     logger.debug('Rubygems: No update');
     lastSync = new Date();
     return;
-  }
+  } /* c8 ignore stop */
 
   function processLine(line: string): void {
     let split: string[];
@@ -74,12 +74,12 @@ async function updateRubyGemsVersions(): Promise<void> {
           packageReleases[pkg].push(copystr(lineVersion));
         }
       }
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.warn(
         { err, line, split, pkg, versions },
         'Rubygems line parsing error'
       );
-    }
+    } /* c8 ignore stop */
   }
 
   for (const line of newLines.split('\n')) {

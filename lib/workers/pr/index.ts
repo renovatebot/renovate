@@ -416,7 +416,7 @@ export async function ensurePr(
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr.number, prTitle }, 'PR created');
       }
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.debug({ err }, 'Pull request creation error');
       if (
         err.body?.message === 'Validation failed' &&
@@ -440,7 +440,8 @@ export async function ensurePr(
         }
       }
       return { prResult: PrResult.Error };
-    }
+    } /* c8 ignore stop */
+
     if (
       config.branchAutomergeFailureMessage &&
       !config.suppressNotifications.includes('branchAutomergeFailure')

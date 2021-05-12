@@ -62,9 +62,9 @@ export function parseKustomize(content: string): Kustomize | null {
   let pkg = null;
   try {
     pkg = safeLoad(content, { json: true });
-  } catch (e) /* c8 ignore next */ {
+  } catch (e) /* c8 ignore start */ {
     return null;
-  }
+  } /* c8 ignore stop */
 
   if (!pkg) {
     return null;

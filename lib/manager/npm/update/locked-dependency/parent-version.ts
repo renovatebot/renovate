@@ -82,10 +82,11 @@ export async function findFirstParentVersion(
         return parentVersion;
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'findFirstSupportingVersion error');
     return null;
-  }
+  } /* c8 ignore stop */
+
   logger.debug(`Could not find a matching version`);
   return null;
 }

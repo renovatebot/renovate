@@ -39,14 +39,14 @@ export async function getReleaseList(
     }
 
     return await github.getReleaseList(apiBaseUrl, repository);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 404) {
       logger.debug({ repository }, 'getReleaseList 404');
     } else {
       logger.info({ repository, err }, 'getReleaseList error');
     }
     return [];
-  }
+  } /* c8 ignore stop */
 }
 
 export function getCachedReleaseList(
@@ -124,9 +124,9 @@ export async function getReleaseNotes(
               repository: `${baseUrl}${repository}`,
             });
           }
-        } catch (err) /* c8 ignore next */ {
+        } catch (err) /* c8 ignore start */ {
           logger.warn({ err, baseUrl, repository }, 'Error linkifying');
-        }
+        } /* c8 ignore stop */
       } else {
         releaseNotes = null;
       }
@@ -189,14 +189,14 @@ export async function getReleaseNotesMdFileInner(
     }
 
     return await github.getReleaseNotesMd(repository, apiBaseUrl);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.statusCode === 404) {
       logger.debug('Error 404 getting changelog md');
     } else {
       logger.debug({ err, repository }, 'Error getting changelog md');
     }
     return null;
-  }
+  } /* c8 ignore stop */
 }
 
 export function getReleaseNotesMdFile(
@@ -260,9 +260,9 @@ export async function getReleaseNotesMd(
                   body = linkify(body, {
                     repository: `${baseUrl}${repository}`,
                   });
-                } catch (err) /* c8 ignore next */ {
+                } catch (err) /* c8 ignore start */ {
                   logger.warn({ body, err }, 'linkify error');
-                }
+                } /* c8 ignore stop */
               }
               return {
                 body,
@@ -270,9 +270,9 @@ export async function getReleaseNotesMd(
               };
             }
           }
-        } catch (err) /* c8 ignore next */ {
+        } catch (err) /* c8 ignore start */ {
           logger.warn({ err }, `Error parsing ${changelogFile}`);
-        }
+        } /* c8 ignore stop */
       }
     }
     logger.trace({ repository }, `No level ${level} changelogs headings found`);

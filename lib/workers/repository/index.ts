@@ -19,9 +19,9 @@ let renovateVersion = 'unknown';
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
-} catch (err) /* c8 ignore next */ {
+} catch (err) /* c8 ignore start */ {
   logger.debug({ err }, 'Error getting renovate version');
-}
+} /* c8 ignore stop */
 
 /* c8 ignore next */
 export async function renovateRepository(
@@ -52,11 +52,12 @@ export async function renovateRepository(
     }
     await finaliseRepo(config, branchList);
     repoResult = processResult(config, res);
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
-  }
+  } /* c8 ignore stop */
+
   if (config.localDir && !config.persistRepoData) {
     try {
       await deleteLocalFile('.');

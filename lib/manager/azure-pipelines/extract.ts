@@ -55,10 +55,10 @@ export function parseAzurePipelines(
   let pkg = null;
   try {
     pkg = safeLoad(content, { json: true });
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.info({ filename, err }, 'Error parsing azure-pipelines content');
     return null;
-  }
+  } /* c8 ignore stop */
 
   if (!pkg || !pkg.resources) {
     return null;

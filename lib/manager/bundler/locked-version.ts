@@ -34,8 +34,9 @@ export function extractLockFileEntries(
         }
       }
     });
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.error({ err }, `Failed to parse the lockfile`);
-  }
+  } /* c8 ignore stop */
+
   return gemLock;
 }

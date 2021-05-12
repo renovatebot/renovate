@@ -113,9 +113,9 @@ export async function checkAutoMerge(
     try {
       await deleteBranch(branchName);
       branchRemoved = true;
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore start */ {
       logger.warn({ branchName, err }, 'Branch auto-remove failed');
-    }
+    } /* c8 ignore stop */
     return { automerged: true, branchRemoved };
   }
   return {

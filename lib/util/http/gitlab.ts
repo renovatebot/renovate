@@ -46,9 +46,9 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
               (await this.request<T>(linkHeader.next.url, opts)).body
             );
           }
-        } catch (err) /* c8 ignore next */ {
+        } catch (err) /* c8 ignore start */ {
           logger.warn({ err }, 'Pagination error');
-        }
+        } /* c8 ignore stop */
       }
       return result;
     } catch (err) {

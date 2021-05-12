@@ -143,7 +143,7 @@ If you need any further assistance then you can also [request help here](${confi
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
       await addAssigneesReviewers(config, pr);
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (
       err.statusCode === 422 &&
       err.response?.body?.errors?.[0]?.message?.startsWith(
@@ -155,5 +155,5 @@ If you need any further assistance then you can also [request help here](${confi
       return;
     }
     throw err;
-  }
+  } /* c8 ignore stop */
 }

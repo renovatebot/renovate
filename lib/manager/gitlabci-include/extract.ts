@@ -46,14 +46,15 @@ export function extractPackageFile(
         }
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug({ err });
       logger.debug('YAML exception extracting GitLab CI includes');
     } else {
       logger.warn({ err }, 'Error extracting GitLab CI includes');
     }
-  }
+  } /* c8 ignore stop */
+
   if (!deps.length) {
     return null;
   }

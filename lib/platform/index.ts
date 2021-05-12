@@ -74,9 +74,10 @@ export function parseGitAuthor(input: string): GitAuthor | null {
         return result;
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.error({ err }, 'Unknown error parsing gitAuthor');
-  }
+  } /* c8 ignore stop */
+
   // give up
   return null;
 }

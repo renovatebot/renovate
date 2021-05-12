@@ -72,12 +72,12 @@ function parseRepositories(
     } else {
       logger.debug('Disabling packagist.org');
     }
-  } catch (e) /* c8 ignore next */ {
+  } catch (e) /* c8 ignore start */ {
     logger.debug(
       { repositories: repoJson },
       'Error parsing composer.json repositories config'
     );
-  }
+  } /* c8 ignore stop */
 }
 
 export async function extractPackageFile(
@@ -105,7 +105,7 @@ export async function extractPackageFile(
     res.lockFiles = [lockfilePath];
     try {
       lockParsed = JSON.parse(lockContents) as ComposerLock;
-    } catch (err) /* c8 ignore next */ {
+    } catch (err) /* c8 ignore next 2 */ {
       logger.warn({ err }, 'Error processing composer.lock');
     }
   }
@@ -173,10 +173,10 @@ export async function extractPackageFile(
           }
           deps.push(dep);
         }
-      } catch (err) /* c8 ignore next */ {
+      } catch (err) /* c8 ignore start */ {
         logger.debug({ fileName, depType, err }, 'Error parsing composer.json');
         return null;
-      }
+      } /* c8 ignore stop */
     }
   }
   if (!deps.length) {

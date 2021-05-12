@@ -286,13 +286,13 @@ export async function getPkgReleases(
         lookupName,
       })
     );
-  } catch (e) /* c8 ignore next */ {
+  } catch (e) /* c8 ignore start */ {
     if (e instanceof ExternalHostError) {
       e.hostType = config.datasource;
       e.lookupName = lookupName;
     }
     throw e;
-  }
+  } /* c8 ignore stop */
   if (!res) {
     return res;
   }

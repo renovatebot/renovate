@@ -142,12 +142,12 @@ export async function removeDockerContainer(
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn(
       { image, containerName, cmd, err },
       'Could not remove Docker container'
     );
-  }
+  } /* c8 ignore stop */
 }
 
 /* c8 ignore next */
@@ -173,7 +173,7 @@ export async function removeDanglingContainers(prefix: string): Promise<void> {
     } else {
       logger.debug('No dangling containers to remove');
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.errno === 'ENOMEM') {
       throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
     }
@@ -182,7 +182,7 @@ export async function removeDanglingContainers(prefix: string): Promise<void> {
     } else {
       logger.warn({ err }, 'Error removing dangling containers');
     }
-  }
+  } /* c8 ignore stop */
 }
 
 export async function generateDockerCommand(

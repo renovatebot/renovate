@@ -25,7 +25,7 @@ export function extractPackageFile(content: string): PackageFile {
         }
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug(
         { err },
@@ -37,7 +37,8 @@ export function extractPackageFile(content: string): PackageFile {
         'Error extracting Docker images from a Cloud Build configuration file.'
       );
     }
-  }
+  } /* c8 ignore stop */
+
   if (!deps.length) {
     return null;
   }

@@ -49,9 +49,10 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
       }
     }
-  } catch (err) /* c8 ignore next */ {
+  } catch (err) /* c8 ignore start */ {
     logger.warn({ err }, 'Error extracting terragrunt plugins');
-  }
+  } /* c8 ignore stop */
+
   deps.forEach((dep) => {
     switch (dep.managerData.terragruntDependencyType) {
       case TerragruntDependencyTypes.terragrunt:
