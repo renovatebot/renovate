@@ -540,7 +540,98 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should return gradle.kts dependencies 1`] = `Array []`;
+exports[`manager/gradle/index extractPackageFile should return gradle.kts dependencies 1`] = `
+Array [
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "%scala-version%",
+        "depGroup": "org.scala-lang",
+        "depName": "org.scala-lang:scala-library",
+        "name": "scala-library",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+        "skipReason": "version-placeholder",
+      },
+      Object {
+        "currentValue": "3.9.0",
+        "datasource": "sbt-package",
+        "depGroup": "com.typesafe.scala-logging",
+        "depName": "com.typesafe.scala-logging:scala-logging",
+        "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": null,
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+    ],
+    "packageFile": "build.gradle.kts",
+  },
+]
+`;
 
 exports[`manager/gradle/index extractPackageFile should return gradle.kts dependencies 2`] = `
 Array [
@@ -1151,11 +1242,3 @@ Array [
   },
 ]
 `;
-
-exports[`manager/gradle/index updateDependency should update an existing module dependency 1`] = `Array []`;
-
-exports[`manager/gradle/index updateDependency should update an existing plugin dependency 1`] = `Array []`;
-
-exports[`manager/gradle/index updateDependency should update an existing plugin dependency with Kotlin DSL 1`] = `Array []`;
-
-exports[`manager/gradle/index updateDependency should update dependencies in same file 1`] = `Array []`;

@@ -260,7 +260,7 @@ describe(getName(), () => {
       expect(buildGradleContentUpdated).toMatch('cglib:cglib-nodep:3.2.8');
       expect(buildGradleContentUpdated).not.toMatch('cglib:cglib-nodep:3.1');
 
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toBeEmpty();
     });
 
     it('should update an existing plugin dependency', () => {
@@ -293,7 +293,7 @@ describe(getName(), () => {
         'id "com.github.ben-manes.versions" version "0.20.0"'
       );
 
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toBeEmpty();
     });
 
     it('should update an existing plugin dependency with Kotlin DSL', () => {
@@ -326,7 +326,7 @@ describe(getName(), () => {
         'id("com.github.ben-manes.versions") version "0.20.0"'
       );
 
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toBeEmpty();
     });
 
     it('should update dependencies in same file', () => {
@@ -364,7 +364,7 @@ describe(getName(), () => {
         "classpath 'org.apache.openjpa:openjpa:3.1.2'"
       );
 
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toBeEmpty();
     });
   });
 });
