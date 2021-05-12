@@ -175,7 +175,7 @@
     "redis": "3.1.2",
     "registry-auth-token": "4.2.1",
     "remark": "13.0.0",
-    "remark-github": "10.0.1",
+    "remark-github": "10.1.0",
     "semver": "7.3.5",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",

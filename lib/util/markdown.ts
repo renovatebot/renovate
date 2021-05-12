@@ -28,7 +28,7 @@ export function sanitizeMarkdown(markdown: string): string {
  */
 export async function linkify(
   content: string,
-  options: github.Options
+  options: github.RemarkGithubOptions
 ): Promise<string> {
   // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
   const output = await remark()

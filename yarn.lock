@@ -8070,10 +8070,10 @@ registry-auth-token@4.2.1, registry-auth-token@^4.0.0:
   dependencies:
     rc "^1.2.8"
 
-remark-github@10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/remark-github/-/remark-github-10.0.1.tgz#d258d73fb6bf33a9d42e5a8f04931d684bec06cf"
-  integrity sha512-iPF467c+bs4vi+vFyDjZCLlKNmHbWF5uo6IIILsHMbbP3dEqsI+m40zMmxY978Z2dUdl6YKiyf07uZad9bFMmw==
+remark-github@10.1.0:
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/remark-github/-/remark-github-10.1.0.tgz#1c2777c1d4082b56d7890af656a0a525e49cacfc"
+  integrity sha512-q0BTFb41N6/uXQVkxRwLRTFRfLFPYP+8li26Js5XC0GKritCSaxrftd+t+8sfN+1i9BtmJPUKoS7CZwtccj0Fg==
   dependencies:
     mdast-util-find-and-replace "^1.0.0"
     mdast-util-to-string "^1.0.0"
