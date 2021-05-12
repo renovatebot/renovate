@@ -300,6 +300,39 @@ describe(getName(), () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
+      const gitlabIgnoreRepoUrlBefore = process.env.GITLAB_IGNORE_REPO_URL;
+      process.env.GITLAB_IGNORE_REPO_URL = 'true';
+      const selfHostedUrl = 'http://mycompany.com';
+      httpMock
+        .scope(selfHostedUrl)
+        .get('/gitlab/api/v4/user')
+        .reply(200, {
+          email: 'a@b.com',
+          name: 'Renovate Bot',
+        })
+        .get('/gitlab/api/v4/version')
+        .reply(200, {
+          version: '13.8',
+        });
+      gitlab.initPlatform({
+        endpoint: `${selfHostedUrl}/gitlab/api/v4`,
+        token: 'mytoken',
+      });
+      httpMock
+        .scope(selfHostedUrl)
+        .get('/gitlab/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `${selfHostedUrl}/gitlab/repo.git`,
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo/project',
+        localDir: '',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      process.env.GITLAB_IGNORE_REPO_URL = gitlabIgnoreRepoUrlBefore;
+    });
   });
   describe('getRepoForceRebase', () => {
     it('should return false', async () => {
