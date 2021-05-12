@@ -56,17 +56,17 @@ describe(getName(), () => {
 
     httpMock
       .scope(selfHostedUrl)
-      .get('/gitlab/api/v4/some-url')
+      .get('/api/v4/some-url')
       .reply(200, ['a'], {
         link:
           '<https://mycompany.com/gitlab/api/v4/some-url&page=2>; rel="next", <https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="last"',
       })
-      .get('/gitlab/api/v4/some-url&page=2')
+      .get('/api/v4/some-url&page=2')
       .reply(200, ['b', 'c'], {
         link:
           '<https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="next", <https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="last"',
       })
-      .get('/gitlab/api/v4/some-url&page=3')
+      .get('/api/v4/some-url&page=3')
       .reply(200, ['d']);
     const res = await gitlabApi.getJson('some-url', { paginate: true });
     expect(res.body).toHaveLength(4);
