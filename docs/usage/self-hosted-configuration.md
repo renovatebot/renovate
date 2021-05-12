@@ -331,7 +331,7 @@ Warning: this is an experimental feature and may be modified or removed in a fut
 
 ## requireConfig
 
-If this is configured to `false`, it means that Renovate won't require a config file such as `renovate.json` to be present in each repository and will run even if one is missing.
+If this is set to `false`, it means that Renovate won't require a config file such as `renovate.json` to be present in each repository and will run even if one is missing.
 
 ## secrets
 
