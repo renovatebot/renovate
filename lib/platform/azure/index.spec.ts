@@ -629,6 +629,7 @@ describe(getName(), () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
+        title: 'The Title',
         displayNumber: `Pull Request #456`,
         createdBy: {
           id: 123,
@@ -642,6 +643,7 @@ describe(getName(), () => {
         completionOptions: {
           squashMerge: true,
           deleteSourceBranch: true,
+          mergeCommitMessage: 'The Title',
         },
       };
       const updateFn = jest
@@ -1068,6 +1070,7 @@ describe(getName(), () => {
             getPullRequestById: jest.fn(() => ({
               lastMergeSourceCommit: lastMergeSourceCommitMock,
               targetRefName: 'refs/heads/ding',
+              title: 'title',
             })),
             updatePullRequest: updatePullRequestMock,
           } as any)
@@ -1086,6 +1089,7 @@ describe(getName(), () => {
           completionOptions: {
             mergeStrategy: GitPullRequestMergeStrategy.Squash,
             deleteSourceBranch: true,
+            mergeCommitMessage: 'title',
           },
         },
         '1',

@@ -68,16 +68,45 @@ function npm2poetry(input: string): string {
   return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
 }
 
-const equals = (a: string, b: string): boolean => pep440.equals(a, b);
+const equals = (a: string, b: string): boolean => {
+  try {
+    return npm.equals(padZeroes(a), padZeroes(b));
+  } catch (err) /* istanbul ignore next */ {
+    return pep440.equals(a, b);
+  }
+};
 
-const getMajor = (version: string): number => pep440.getMajor(version);
+const getMajor = (version: string): number => {
+  try {
+    return npm.getMajor(padZeroes(version));
+  } catch (err) /* istanbul ignore next */ {
+    return pep440.getMajor(version);
+  }
+};
 
-const getMinor = (version: string): number => pep440.getMinor(version);
+const getMinor = (version: string): number => {
+  try {
+    return npm.getMinor(padZeroes(version));
+  } catch (err) /* istanbul ignore next */ {
+    return pep440.getMinor(version);
+  }
+};
 
-const getPatch = (version: string): number => pep440.getPatch(version);
+const getPatch = (version: string): number => {
+  try {
+    return npm.getPatch(padZeroes(version));
+  } catch (err) /* istanbul ignore next */ {
+    return pep440.getPatch(version);
+  }
+};
 
-const isGreaterThan = (a: string, b: string): boolean =>
-  pep440.isGreaterThan(a, b);
+const isGreaterThan = (a: string, b: string): boolean => {
+  try {
+    return npm.isGreaterThan(padZeroes(a), padZeroes(b));
+  } catch (err) /* istanbul ignore next */ {
+    return pep440.isGreaterThan(a, b);
+  }
+};
 
 const isLessThanRange = (version: string, range: string): boolean =>
   npm.isVersion(padZeroes(version)) &&
@@ -86,9 +115,10 @@ const isLessThanRange = (version: string, range: string): boolean =>
 export const isValid = (input: string): string | boolean =>
   npm.isValid(poetry2npm(input));
 
-const isStable = (version: string): boolean => pep440.isStable(version);
+const isStable = (version: string): boolean => npm.isStable(padZeroes(version));
 
-const isVersion = (input: string): string | boolean => pep440.isVersion(input);
+const isVersion = (input: string): string | boolean =>
+  npm.isVersion(padZeroes(input));
 
 const matches = (version: string, range: string): boolean =>
   npm.isVersion(padZeroes(version)) &&

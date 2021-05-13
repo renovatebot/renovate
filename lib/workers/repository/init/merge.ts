@@ -18,7 +18,7 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import { RepoFileConfig } from './common';
+import type { RepoFileConfig } from './types';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const fileList = await getFileList();

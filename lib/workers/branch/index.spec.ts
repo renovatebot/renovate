@@ -12,7 +12,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import * as _npmPostExtract from '../../manager/npm/post-update';
-import type { WriteExistingFilesResult } from '../../manager/npm/post-update';
+import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
@@ -324,6 +324,19 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
+
+    it('returns if pending checks', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      config.pendingChecks = ['stabilityDays'];
+      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+    });
+
     it('returns if branch automerged', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],

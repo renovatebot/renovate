@@ -82,7 +82,7 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
   if (env.GITHUB_COM_TOKEN) {
     config.hostRules.push({
       hostType: PLATFORM_TYPE_GITHUB,
-      domainName: 'github.com',
+      matchHost: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });
   }

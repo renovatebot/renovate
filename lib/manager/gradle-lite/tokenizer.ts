@@ -1,5 +1,6 @@
 import moo from 'moo';
-import { StringInterpolation, Token, TokenType } from './common';
+import { TokenType } from './common';
+import { StringInterpolation, Token } from './types';
 
 const escapedCharRegex = /\\['"bfnrt\\]/;
 const escapedChars = {
