@@ -6,9 +6,10 @@ import {
   mockExecSequence,
 } from '../../../test/exec-util';
 import { env, getName, loadFixture } from '../../../test/util';
-import { setUtilConfig } from '../../util';
+import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
+import { setFsConfig } from '../../util/fs';
 import * as extract from './extract';
 import { extractPackageFile } from '.';
 
@@ -43,7 +44,8 @@ describe(getName(), () => {
       jest.resetModules();
       extract.resetModule();
 
-      await setUtilConfig(config);
+      await setExecConfig(config);
+      setFsConfig(config);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py
