@@ -2,11 +2,11 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { setFsConfig } from '../../util/fs';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from './artifacts';
 import {
@@ -51,9 +51,14 @@ describe('updateArtifacts', () => {
     );
     getRandomString.mockReturnValue('not-so-random' as any);
     await setExecConfig(config);
-    setFsConfig(config);
+    setAdminConfig({ ...config });
     docker.resetPrefetchedImages();
   });
+
+  afterEach(() => {
+    setAdminConfig();
+  });
+
   it('aborts if no lock file found', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -149,7 +154,6 @@ describe('updateArtifacts', () => {
   it('supports docker mode', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
-    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);

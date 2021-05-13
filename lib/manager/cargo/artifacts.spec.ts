@@ -3,6 +3,7 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
@@ -19,10 +20,7 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
-const config = {
-  // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-};
+const config = {};
 
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
@@ -31,7 +29,14 @@ describe('.updateArtifacts()', () => {
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setExecConfig(config);
+    setAdminConfig({
+      // `join` fixes Windows CI
+      localDir: join('/tmp/github/some/repo'),
+    });
     docker.resetPrefetchedImages();
+  });
+  afterEach(() => {
+    setAdminConfig();
   });
   it('returns null if no Cargo.lock found', async () => {
     fs.stat.mockRejectedValue(new Error('not found!'));

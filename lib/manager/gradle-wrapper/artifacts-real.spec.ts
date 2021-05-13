@@ -3,8 +3,8 @@ import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
 import { getName, git, partial } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
-import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
@@ -38,13 +38,14 @@ describe(getName(), () => {
     beforeEach(async () => {
       jest.resetAllMocks();
       await setExecConfig(config);
-      setFsConfig(config);
+      setAdminConfig({ ...config });
       httpMock.setup();
     });
 
     afterEach(async () => {
       await Git(fixtures).checkout(['HEAD', '--', '.']);
       httpMock.reset();
+      setAdminConfig();
     });
 
     it('replaces existing value', async () => {
@@ -163,7 +164,7 @@ describe(getName(), () => {
       const cfg = { ...config, localDir: resolve(fixtures, './wrongCmd') };
 
       await setExecConfig(cfg);
-      setFsConfig(cfg);
+      setAdminConfig({ ...cfg });
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
@@ -186,13 +187,14 @@ describe(getName(), () => {
     });
 
     it('gradlew not found', async () => {
+      setAdminConfig({
+        localDir: 'some-dir',
+      });
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: undefined,
-        config: {
-          localDir: 'some-dir',
-        },
+        config: {},
       });
 
       expect(res).toBeNull();

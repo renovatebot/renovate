@@ -1,6 +1,7 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, getName } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
@@ -10,10 +11,8 @@ jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
 
-const config = {
-  // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-};
+const config = {};
+const localDir = join('/tmp/github/some/repo'); // `join` fixes Windows CI
 
 describe(getName(), () => {
   beforeEach(async () => {
@@ -22,6 +21,11 @@ describe(getName(), () => {
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setExecConfig(config);
+    setAdminConfig({ localDir });
+  });
+
+  afterEach(() => {
+    setAdminConfig();
   });
 
   it('returns null if no mix.lock found', async () => {

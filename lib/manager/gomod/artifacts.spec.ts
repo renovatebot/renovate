@@ -3,11 +3,11 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import * as gomod from './artifacts';
@@ -59,8 +59,11 @@ describe('.updateArtifacts()', () => {
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     await setExecConfig(config);
-    setFsConfig(config);
+    setAdminConfig({ ...config });
     docker.resetPrefetchedImages();
+  });
+  afterEach(() => {
+    setAdminConfig();
   });
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -148,7 +151,6 @@ describe('.updateArtifacts()', () => {
   it('supports docker mode without credentials', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
-    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -193,7 +195,6 @@ describe('.updateArtifacts()', () => {
   it('supports docker mode with credentials', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
-    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -220,7 +221,6 @@ describe('.updateArtifacts()', () => {
   it('supports docker mode with goModTidy', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
-    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename

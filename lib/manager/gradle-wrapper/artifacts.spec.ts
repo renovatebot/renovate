@@ -12,10 +12,10 @@ import {
   git,
   partial,
 } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
-import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import * as dcUpdate from '.';
 
@@ -51,7 +51,7 @@ describe(getName(), () => {
     });
 
     await setExecConfig(config);
-    setFsConfig(config);
+    setAdminConfig({ ...config });
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
@@ -59,6 +59,7 @@ describe(getName(), () => {
 
   afterEach(() => {
     httpMock.reset();
+    setAdminConfig();
   });
 
   it('replaces existing value', async () => {
@@ -97,13 +98,14 @@ describe(getName(), () => {
   });
 
   it('gradlew not found', async () => {
+    setAdminConfig({
+      localDir: 'some-dir',
+    });
     const res = await dcUpdate.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: undefined,
-      config: {
-        localDir: 'some-dir',
-      },
+      config: {},
     });
 
     expect(res).toBeNull();

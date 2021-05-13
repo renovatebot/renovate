@@ -39,7 +39,6 @@ import { smartLinks } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
-  localDir: string;
   mergeMethod: helper.PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
@@ -226,14 +225,12 @@ const platform: Platform = {
 
   async initRepo({
     repository,
-    localDir,
     cloneSubmodules,
   }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
     config = {} as any;
     config.repository = repository;
-    config.localDir = localDir;
     config.cloneSubmodules = cloneSubmodules;
 
     // Attempt to fetch information about repository

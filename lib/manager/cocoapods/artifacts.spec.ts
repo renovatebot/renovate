@@ -3,6 +3,7 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
@@ -24,16 +25,17 @@ const datasource = mocked(_datasource);
 
 delete process.env.CP_HOME_DIR;
 
-const config = {
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-};
+const config = {};
+const localDir = join('/tmp/github/some/repo');
+const cacheDir = join('/tmp/cache');
 
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+
     await setExecConfig(config);
+    setAdminConfig({ localDir, cacheDir });
 
     datasource.getPkgReleases.mockResolvedValue({
       releases: [
@@ -45,6 +47,9 @@ describe('.updateArtifacts()', () => {
         { version: '1.2.5' },
       ],
     });
+  });
+  afterEach(() => {
+    setAdminConfig();
   });
   it('returns null if no Podfile.lock found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -72,15 +77,15 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null for invalid local directory', async () => {
     const execSnapshots = mockExecAll(exec);
-    const noLocalDirConfig = {
+    setAdminConfig({
       localDir: undefined,
-    };
+    });
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: ['foo'],
         newPackageFileContent: '',
-        config: noLocalDirConfig,
+        config: {},
       })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();

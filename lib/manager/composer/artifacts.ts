@@ -77,9 +77,10 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
+  const { allowScripts, cacheDir: adminCacheDir } = getAdminConfig();
   const cacheDir =
     process.env.COMPOSER_CACHE_DIR ||
-    upath.join(config.cacheDir, './others/composer');
+    upath.join(adminCacheDir, './others/composer');
   await ensureDir(cacheDir);
   logger.debug(`Using composer cache ${cacheDir}`);
 
@@ -124,7 +125,7 @@ export async function updateArtifacts({
       args += ' --ignore-platform-reqs';
     }
     args += ' --no-ansi --no-interaction';
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!allowScripts || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');

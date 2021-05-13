@@ -1,11 +1,11 @@
 import { withDir } from 'tmp-promise';
 import { getName } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import {
   findLocalSiblingOrParent,
   getSubDirectory,
   localPathExists,
   readLocalFile,
-  setFsConfig,
   writeLocalFile,
 } from '.';
 
@@ -46,7 +46,7 @@ describe(getName(), () => {
     it('returns path for file', async () => {
       await withDir(
         async (localDir) => {
-          setFsConfig({
+          setAdminConfig({
             localDir: localDir.path,
           });
 

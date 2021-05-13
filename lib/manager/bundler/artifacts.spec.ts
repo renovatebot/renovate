@@ -2,12 +2,12 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, git, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
@@ -46,7 +46,10 @@ describe('bundler.updateArtifacts()', () => {
     docker.resetPrefetchedImages();
 
     await setExecConfig(config);
-    setFsConfig(config);
+    setAdminConfig({ ...config });
+  });
+  afterEach(() => {
+    setAdminConfig();
   });
   it('returns null by default', async () => {
     expect(
@@ -121,7 +124,6 @@ describe('bundler.updateArtifacts()', () => {
     beforeEach(async () => {
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await setExecConfig({ ...config, binarySource: BinarySource.Docker });
-      setFsConfig({ ...config, binarySource: BinarySource.Docker });
     });
     it('.ruby-version', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');

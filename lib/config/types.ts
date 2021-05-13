@@ -83,17 +83,19 @@ export interface GlobalOnlyConfig {
 // Config options used within the repository worker, but not user configurable
 // The below should contain config options where admin=true
 export interface RepoAdminConfig {
-  allowCustomCrateRegistries?: boolean;
-  allowPostUpgradeCommandTemplating?: boolean;
-  allowScripts?: boolean;
-  allowedPostUpgradeCommands?: string[];
-  customEnvVariables?: Record<string, string>;
-  dockerChildPrefix?: string;
-  dockerImagePrefix?: string;
-  dockerUser?: string;
-  dryRun?: boolean;
-  exposeAllEnv?: boolean;
-  privateKey?: string | Buffer;
+  allowCustomCrateRegistries: boolean | undefined;
+  allowPostUpgradeCommandTemplating: boolean | undefined;
+  allowScripts: boolean | undefined;
+  allowedPostUpgradeCommands: string[] | undefined;
+  customEnvVariables: Record<string, string> | undefined;
+  dockerChildPrefix: string | undefined;
+  dockerImagePrefix: string | undefined;
+  dockerUser: string | undefined;
+  dryRun: boolean | undefined;
+  exposeAllEnv: boolean | undefined;
+  privateKey: string | Buffer | undefined;
+  localDir: string | undefined;
+  cacheDir: string | undefined;
 }
 
 export interface LegacyAdminConfig {

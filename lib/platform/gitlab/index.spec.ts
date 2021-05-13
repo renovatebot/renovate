@@ -164,7 +164,6 @@ describe(getName(), () => {
   async function initRepo(
     repoParams: RepoParams = {
       repository: 'some/repo',
-      localDir: '',
     },
     repoResp = null,
     scope = httpMock.scope(gitlabApiHost)
@@ -191,7 +190,6 @@ describe(getName(), () => {
         .reply(200, okReturn);
       await gitlab.initRepo({
         repository: 'some/repo/project',
-        localDir: '',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -203,7 +201,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow('always error');
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -216,7 +213,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -229,7 +225,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -242,7 +237,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -255,7 +249,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -268,7 +261,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -281,7 +273,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -296,7 +287,6 @@ describe(getName(), () => {
         });
       await gitlab.initRepo({
         repository: 'some/repo/project',
-        localDir: '',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -306,7 +296,6 @@ describe(getName(), () => {
       await initRepo(
         {
           repository: 'some/repo/project',
-          localDir: '',
         },
         {
           default_branch: 'master',
@@ -322,7 +311,6 @@ describe(getName(), () => {
       await initRepo(
         {
           repository: 'some/repo/project',
-          localDir: '',
         },
         {
           default_branch: 'master',

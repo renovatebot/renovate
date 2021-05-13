@@ -11,7 +11,6 @@ export type Result<T> = T | Promise<T>;
 
 export interface ManagerConfig {
   binarySource?: string;
-  localDir?: string;
   registryUrls?: string[];
 }
 
@@ -21,7 +20,6 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig {
   binarySource?: string;
-  localDir?: string;
   registryUrls?: string[];
   endpoint?: string;
   gradle?: { timeout?: number };
@@ -185,7 +183,6 @@ export interface Upgrade<T = Record<string, any>>
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
-  localDir?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;

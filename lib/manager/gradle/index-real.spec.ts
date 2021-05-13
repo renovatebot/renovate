@@ -1,6 +1,7 @@
 import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { getName } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import type { ExtractConfig } from '../types';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import * as manager from '.';
@@ -23,7 +24,8 @@ describe(getName(), () => {
     beforeEach(async () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });
       successFile = '';
-      testRunConfig = { ...baseConfig, localDir: workingDir.path };
+      setAdminConfig({ localDir: workingDir.path });
+      testRunConfig = { ...baseConfig };
       await fsExtra.copy(`${fixtures}/minimal-project`, workingDir.path);
       await fsExtra.copy(`${fixtures}/gradle-wrappers/6`, workingDir.path);
 

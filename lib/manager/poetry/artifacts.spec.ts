@@ -3,6 +3,7 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { loadFixture, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
@@ -25,15 +26,15 @@ const env = mocked(_env);
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
-const config = {
-  localDir: join('/tmp/github/some/repo'),
-};
+const config = {};
+const localDir = join('/tmp/github/some/repo');
 
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setExecConfig(config);
+    setAdminConfig({ localDir });
     docker.resetPrefetchedImages();
   });
   it('returns null if no poetry.lock found', async () => {

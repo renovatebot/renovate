@@ -7,6 +7,7 @@ import Git, {
   StatusResult as StatusResult_,
 } from 'simple-git';
 import { join } from 'upath';
+import { getAdminConfig } from '../../config/admin';
 import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/types';
 import {
@@ -35,7 +36,6 @@ export type DiffResult = DiffResult_;
 export type CommitSha = string;
 
 interface StorageConfig {
-  localDir: string;
   currentBranch?: string;
   url: string;
   extraCloneOpts?: GitOptions;
@@ -170,7 +170,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  git = Git(config.localDir);
+  const { localDir } = getAdminConfig();
+  git = Git(localDir);
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -251,8 +252,9 @@ export async function syncGit(): Promise<void> {
     return;
   }
   gitInitialized = true;
-  logger.debug('Initializing git repository into ' + config.localDir);
-  const gitHead = join(config.localDir, '.git/HEAD');
+  const { localDir } = getAdminConfig();
+  logger.debug('Initializing git repository into ' + localDir);
+  const gitHead = join(localDir, '.git/HEAD');
   let clone = true;
 
   if (await fs.exists(gitHead)) {
@@ -276,7 +278,7 @@ export async function syncGit(): Promise<void> {
     }
   }
   if (clone) {
-    await fs.emptyDir(config.localDir);
+    await fs.emptyDir(localDir);
     const cloneStart = Date.now();
     try {
       // clone only the default branch
@@ -631,7 +633,8 @@ export async function commitFiles({
     await writePrivateKey();
     privateKeySet = true;
   }
-  await configSigningKey(config.localDir);
+  const { localDir } = getAdminConfig();
+  await configSigningKey(localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
@@ -642,7 +645,7 @@ export async function commitFiles({
       // istanbul ignore if
       if (file.name === '|delete|') {
         deleted.push(file.contents as string);
-      } else if (await isDirectory(join(config.localDir, file.name))) {
+      } else if (await isDirectory(join(localDir, file.name))) {
         fileNames.push(file.name);
         await git.add(file.name);
       } else {
@@ -654,7 +657,7 @@ export async function commitFiles({
         } else {
           contents = file.contents;
         }
-        await fs.outputFile(join(config.localDir, file.name), contents);
+        await fs.outputFile(join(localDir, file.name), contents);
       }
     }
     // istanbul ignore if

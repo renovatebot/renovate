@@ -1,5 +1,6 @@
 import { stat } from 'fs-extra';
 import { resolve } from 'upath';
+import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -54,7 +55,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const projectDir = config.localDir;
+    const { localDir: projectDir } = getAdminConfig();
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
     const gradlew = gradleWrapperFileName(config);
     const gradlewPath = resolve(projectDir, `./${gradlew}`);

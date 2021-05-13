@@ -10,11 +10,11 @@ import {
   loadFixture,
   mocked,
 } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { setFsConfig } from '../../util/fs';
 import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('child_process');
@@ -84,7 +84,11 @@ describe(getName(), () => {
 
   beforeAll(async () => {
     await setExecConfig(utilConfig);
-    setFsConfig(utilConfig);
+    setAdminConfig({ ...utilConfig });
+  });
+
+  afterAll(() => {
+    setAdminConfig();
   });
 
   beforeEach(() => {

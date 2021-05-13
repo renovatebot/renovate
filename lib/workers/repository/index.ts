@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { setAdminConfig } from '../../config/admin';
+import { getAdminConfig, setAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
@@ -35,9 +35,10 @@ export async function renovateRepository(
   logger.trace({ config });
   let repoResult: ProcessResult;
   queue.clear();
+  const { localDir } = getAdminConfig();
   try {
-    await fs.ensureDir(config.localDir);
-    logger.debug('Using localDir: ' + config.localDir);
+    await fs.ensureDir(localDir);
+    logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
     const { branches, branchList, packageFiles } = await extractDependencies(
@@ -57,7 +58,7 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (config.localDir && !config.persistRepoData) {
+  if (localDir && !config.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {

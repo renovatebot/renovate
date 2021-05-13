@@ -12,7 +12,6 @@ import * as datasourcePackagist from '../../datasource/packagist';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
-import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as composer from './artifacts';
@@ -27,11 +26,15 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const datasource = mocked(_datasource);
 
 const config = {
+  composerIgnorePlatformReqs: true,
+  ignoreScripts: false,
+};
+
+const adminConfig = {
+  allowScripts: false,
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
-  composerIgnorePlatformReqs: true,
-  ignoreScripts: false,
 };
 
 const repoStatus = partial<StatusResult>({
@@ -46,10 +49,12 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setExecConfig(config);
-    setFsConfig(config);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    setAdminConfig({ allowScripts: false });
+    setAdminConfig({ ...adminConfig });
+  });
+  afterEach(() => {
+    setAdminConfig();
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -66,7 +71,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
     git.getRepoStatus.mockResolvedValue(repoStatus);
-    setAdminConfig({ allowScripts: true });
+    setAdminConfig({ ...adminConfig, allowScripts: true });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -197,7 +202,6 @@ describe('.updateArtifacts()', () => {
   it('supports docker mode', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
-    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
 
     const execSnapshots = mockExecAll(exec);
