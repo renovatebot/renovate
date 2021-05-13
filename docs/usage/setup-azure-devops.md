@@ -67,7 +67,7 @@ module.exports = {
   hostRules: [
     {
       hostType: 'npm',
-      hostName: 'pkgs.dev.azure.com',
+      matchHost: 'pkgs.dev.azure.com',
       username: 'apikey',
       password: process.env.TOKEN,
     },
@@ -82,7 +82,7 @@ For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure Dev
 ### Yarn users
 
 To do a succesfull `yarn install` you need to match the URL of the registry fully.
-Use the `baseUrl` config option to specify the full path to the registry.
+Use the `matchHost` config option to specify the full path to the registry.
 
 ```javascript
 module.exports = {
@@ -91,13 +91,13 @@ module.exports = {
   token: process.env.TOKEN,
   hostRules: [
     {
-      baseUrl:
+      matchHost:
         'https://myorg.pkgs.visualstudio.com/_packaging/myorg/npm/registry/',
       token: process.env.TOKEN,
       hostType: 'npm',
     },
     {
-      domainName: 'github.com',
+      matchHost: 'github.com',
       token: process.env.GITHUB_COM_TOKEN,
     },
   ],

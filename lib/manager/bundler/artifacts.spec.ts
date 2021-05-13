@@ -231,7 +231,7 @@ describe('bundler.updateArtifacts()', () => {
       bundlerHostRules.findAllAuthenticatable.mockReturnValue([
         {
           hostType: 'bundler',
-          hostName: 'gems.private.com',
+          matchHost: 'gems.private.com',
           resolvedHost: 'gems.private.com',
           username: 'some-user',
           password: 'some-password',
@@ -273,7 +273,7 @@ describe('bundler.updateArtifacts()', () => {
       bundlerHostRules.findAllAuthenticatable.mockReturnValue([
         {
           hostType: 'bundler',
-          hostName: 'gems-private.com',
+          matchHost: 'gems-private.com',
           resolvedHost: 'gems-private.com',
           username: 'some-user',
           password: 'some-password',
@@ -318,7 +318,7 @@ describe('bundler.updateArtifacts()', () => {
       bundlerHostRules.findAllAuthenticatable.mockReturnValue([
         {
           hostType: 'bundler',
-          hostName: 'gems-private.com',
+          matchHost: 'gems-private.com',
           resolvedHost: 'gems-private.com',
           username: 'some-user',
           password: 'some-password',
@@ -363,7 +363,7 @@ describe('bundler.updateArtifacts()', () => {
       bundlerHostRules.findAllAuthenticatable.mockReturnValue([
         {
           hostType: 'bundler',
-          hostName: 'gems-private.com',
+          matchHost: 'gems-private.com',
           resolvedHost: 'gems-private.com',
           username: 'some-user',
           password: 'some-password',
