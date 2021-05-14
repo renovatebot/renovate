@@ -193,6 +193,12 @@ function getNewValue({
       }
     }
   }
+  if (!npm.isVersion(newVersion)) {
+    logger.debug(
+      'Cannot massage python version to npm - returning currentValue'
+    );
+    return currentValue;
+  }
   const newSemver = npm.getNewValue({
     currentValue: poetry2npm(currentValue),
     rangeStrategy,

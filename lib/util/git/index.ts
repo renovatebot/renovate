@@ -11,6 +11,7 @@ import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
+  REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -420,6 +421,10 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
+    if (err.message?.includes('fatal: ambiguous argument')) {
+      logger.warn({ err }, 'Failed to checkout branch');
+      throw new Error(TEMPORARY_ERROR);
+    }
     throw err;
   }
 }
@@ -495,6 +500,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
       ])
     ).trim();
   } catch (err) /* istanbul ignore next */ {
+    if (err.messages?.includes('fatal: bad revision')) {
+      await fetchBranchCommits();
+      if (!branchExists(branchName)) {
+        logger.debug('Branch has been deleted');
+        throw new Error(REPOSITORY_CHANGED);
+      }
+    }
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
   const { gitAuthorEmail } = config;
@@ -619,6 +631,20 @@ export type CommitFilesConfig = {
   force?: boolean;
 };
 
+async function gitAdd(files: string | string[]): Promise<void> {
+  try {
+    await git.add(files);
+  } catch (err) /* istanbul ignore next */ {
+    if (
+      !err.message.includes(
+        'The following paths are ignored by one of your .gitignore files'
+      )
+    ) {
+      throw err;
+    }
+  }
+}
+
 export async function commitFiles({
   branchName,
   files,
@@ -644,7 +670,7 @@ export async function commitFiles({
         deleted.push(file.contents as string);
       } else if (await isDirectory(join(config.localDir, file.name))) {
         fileNames.push(file.name);
-        await git.add(file.name);
+        await gitAdd(file.name);
       } else {
         fileNames.push(file.name);
         let contents: Buffer;
@@ -662,7 +688,7 @@ export async function commitFiles({
       fileNames.unshift('-f');
     }
     if (fileNames.length) {
-      await git.add(fileNames);
+      await gitAdd(fileNames);
     }
     if (deleted.length) {
       for (const f of deleted) {
@@ -727,6 +753,15 @@ export async function commitFiles({
     ) {
       logger.warn(
         'App has not been granted permissions to update Workflows - aborting branch.'
+      );
+      return null;
+    }
+    if (
+      err.message.includes('remote rejected') &&
+      files?.some((file) => file.name?.startsWith('.github/workflows/'))
+    ) {
+      logger.warn(
+        'Workflows update rejection - aborting branch. Please check permissions.'
       );
       return null;
     }
