@@ -22,6 +22,7 @@ describe(getName(), () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
+  const envBefore = process.env;
 
   beforeEach(async () => {
     // reset module
@@ -45,9 +46,11 @@ describe(getName(), () => {
     });
     httpMock.reset();
     httpMock.setup();
+    process.env = { ...envBefore };
   });
   afterEach(() => {
     httpMock.reset();
+    process.env = envBefore;
   });
 
   async function initFakePlatform(version: string) {
@@ -301,7 +304,6 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
-      const gitlabIgnoreRepoUrlBefore = process.env.GITLAB_IGNORE_REPO_URL;
       process.env.GITLAB_IGNORE_REPO_URL = 'true';
       const selfHostedUrl = 'http://mycompany.com/gitlab';
       httpMock
@@ -331,7 +333,6 @@ describe(getName(), () => {
         localDir: '',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
-      process.env.GITLAB_IGNORE_REPO_URL = gitlabIgnoreRepoUrlBefore;
     });
   });
   describe('getRepoForceRebase', () => {

@@ -15,16 +15,19 @@ const selfHostedUrl = 'http://mycompany.com/gitlab';
 
 describe(getName(), () => {
   let gitlabApi: GitlabHttp;
+  const envBefore = process.env;
 
   beforeEach(() => {
     gitlabApi = new GitlabHttp();
     setBaseUrl(`${gitlabApiHost}/api/v4/`);
     httpMock.setup();
+    process.env = { ...envBefore };
   });
 
   afterEach(() => {
     jest.resetAllMocks();
     httpMock.reset();
+    process.env = envBefore;
   });
 
   it('paginates', async () => {
@@ -50,7 +53,6 @@ describe(getName(), () => {
     expect(trace).toMatchSnapshot();
   });
   it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
-    const gitlabIgnoreRepoUrlBefore = process.env.GITLAB_IGNORE_REPO_URL;
     process.env.GITLAB_IGNORE_REPO_URL = 'true';
     setBaseUrl(`${selfHostedUrl}/api/v4/`);
 
@@ -74,7 +76,6 @@ describe(getName(), () => {
     const trace = httpMock.getTrace();
     expect(trace).toHaveLength(3);
     expect(trace).toMatchSnapshot();
-    process.env.GITLAB_IGNORE_REPO_URL = gitlabIgnoreRepoUrlBefore;
   });
   it('attempts to paginate', async () => {
     httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, ['a'], {
