@@ -115,7 +115,7 @@ export async function initPlatform(
 
   const platformRule: HostRule = {
     hostType: returnConfig.platform,
-    hostName: URL.parse(returnConfig.endpoint).hostname,
+    matchHost: URL.parse(returnConfig.endpoint).hostname,
   };
   ['token', 'username', 'password'].forEach((field) => {
     if (config[field]) {

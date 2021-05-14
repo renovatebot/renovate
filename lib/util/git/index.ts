@@ -420,6 +420,10 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
+    if (err.message?.includes('fatal: ambiguous argument')) {
+      logger.warn({ err }, 'Failed to checkout branch');
+      throw new Error(TEMPORARY_ERROR);
+    }
     throw err;
   }
 }
@@ -483,15 +487,20 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     return false;
   }
   // Retrieve the author of the most recent commit
-  const lastAuthor = (
-    await git.raw([
-      'log',
-      '-1',
-      '--pretty=format:%ae',
-      `origin/${branchName}`,
-      '--',
-    ])
-  ).trim();
+  let lastAuthor: string;
+  try {
+    lastAuthor = (
+      await git.raw([
+        'log',
+        '-1',
+        '--pretty=format:%ae',
+        `origin/${branchName}`,
+        '--',
+      ])
+    ).trim();
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error checking last author for isBranchModified');
+  }
   const { gitAuthorEmail } = config;
   if (
     lastAuthor === gitAuthorEmail ||

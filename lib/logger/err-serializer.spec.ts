@@ -43,7 +43,7 @@ describe(getName(), () => {
       hostRules.clear();
       hostRules.add({
         hostType: 'any',
-        baseUrl,
+        matchHost: baseUrl,
         token: 'token',
       });
     });
