@@ -1,6 +1,6 @@
 import _fs from 'fs-extra';
 import { setAdminConfig } from '../../config/admin';
-import { UpdateArtifactsConfig } from '../types';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;

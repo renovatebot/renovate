@@ -5,7 +5,7 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, git, partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
-import { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
 

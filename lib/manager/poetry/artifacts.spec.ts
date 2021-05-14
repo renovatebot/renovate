@@ -10,7 +10,7 @@ import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
-import { UpdateArtifactsConfig } from '../types';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
 const pyproject10toml = loadFixture('pyproject.10.toml');

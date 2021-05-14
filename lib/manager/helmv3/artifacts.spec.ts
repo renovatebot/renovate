@@ -8,7 +8,7 @@ import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { UpdateArtifactsConfig } from '../types';
+import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from './artifacts';
 
 jest.mock('fs-extra');

@@ -16,7 +16,7 @@ import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
-import { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git';
 import * as dcUpdate from '.';
 
 jest.mock('child_process');

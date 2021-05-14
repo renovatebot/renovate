@@ -8,7 +8,7 @@ import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import * as gomod from './artifacts';
 

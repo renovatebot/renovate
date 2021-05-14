@@ -8,8 +8,8 @@ import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as _env from '../../util/exec/env';
-import { StatusResult } from '../../util/git';
-import { UpdateArtifactsConfig } from '../types';
+import type { StatusResult } from '../../util/git';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');

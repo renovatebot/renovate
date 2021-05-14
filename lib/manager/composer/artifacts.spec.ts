@@ -12,7 +12,7 @@ import * as datasourcePackagist from '../../datasource/packagist';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
-import { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as composer from './artifacts';
 

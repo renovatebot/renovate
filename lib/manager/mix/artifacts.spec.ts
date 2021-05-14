@@ -5,7 +5,7 @@ import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
-import { UpdateArtifactsConfig } from '../types';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
 jest.mock('child_process');
