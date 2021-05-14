@@ -547,13 +547,30 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  await syncBranch(branchName);
-  await git.reset(ResetMode.HARD);
-  await git.checkout(['-B', branchName, 'origin/' + branchName]);
-  await git.checkout(config.currentBranch);
-  await git.merge(['--ff-only', branchName]);
-  await git.push('origin', config.currentBranch);
-  incLimitedValue(Limit.Commits);
+  let status;
+  try {
+    await syncBranch(branchName);
+    await git.reset(ResetMode.HARD);
+    await git.checkout(['-B', branchName, 'origin/' + branchName]);
+    await git.checkout(config.currentBranch);
+    status = await git.status();
+    await git.merge(['--ff-only', branchName]);
+    await git.push('origin', config.currentBranch);
+    incLimitedValue(Limit.Commits);
+  } catch (err) {
+    logger.debug(
+      {
+        baseBranch: config.currentBranch,
+        baseSha: config.currentBranchSha,
+        branchName,
+        branchSha: getBranchCommit(branchName),
+        status,
+        err,
+      },
+      'mergeBranch error'
+    );
+    throw err;
+  }
 }
 
 export async function getBranchLastCommitTime(
