@@ -631,6 +631,20 @@ export type CommitFilesConfig = {
   force?: boolean;
 };
 
+async function gitAdd(files: string | string[]): Promise<void> {
+  try {
+    await git.add(files);
+  } catch (err) /* istanbul ignore next */ {
+    if (
+      !err.message.includes(
+        'The following paths are ignored by one of your .gitignore files'
+      )
+    ) {
+      throw err;
+    }
+  }
+}
+
 export async function commitFiles({
   branchName,
   files,
@@ -656,7 +670,7 @@ export async function commitFiles({
         deleted.push(file.contents as string);
       } else if (await isDirectory(join(config.localDir, file.name))) {
         fileNames.push(file.name);
-        await git.add(file.name);
+        await gitAdd(file.name);
       } else {
         fileNames.push(file.name);
         let contents: Buffer;
@@ -674,7 +688,7 @@ export async function commitFiles({
       fileNames.unshift('-f');
     }
     if (fileNames.length) {
-      await git.add(fileNames);
+      await gitAdd(fileNames);
     }
     if (deleted.length) {
       for (const f of deleted) {
@@ -731,14 +745,6 @@ export async function commitFiles({
       error.validationError = 'An existing branch is blocking Renovate';
       error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
       throw error;
-    }
-    if (
-      err.message.includes(
-        'The following paths are ignored by one of your .gitignore files'
-      )
-    ) {
-      logger.warn("Cannot commit .gitignore'd files - aborting branch");
-      return null;
     }
     if (
       err.message.includes(
