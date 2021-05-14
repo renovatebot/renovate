@@ -734,6 +734,14 @@ export async function commitFiles({
     }
     if (
       err.message.includes(
+        'The following paths are ignored by one of your .gitignore files'
+      )
+    ) {
+      logger.warn("Cannot commit .gitignore'd files - aborting branch");
+      return null;
+    }
+    if (
+      err.message.includes(
         'refusing to allow a GitHub App to create or update workflow'
       )
     ) {
