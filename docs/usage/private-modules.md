@@ -211,3 +211,48 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Replace the existing public key in the HTML with the public key you generated in the step prior
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
+
+### hostRules Configuration using Environment Variables
+
+For self-hosted users, it is possible to use environment variables to configure the most common type of `hostRules` for authentication.
+
+The format of the environment variables should be all upper-case and follow:
+
+- Datasource name (e.g. `NPM`, `PYPI`)
+- Underscore (`_`)
+- `matchHost`
+- Underscore
+- Field name (`TOKEN`, `USER_NAME`, or `PASSWORD`)
+
+Hyphens (`-`) in datasource or host name should be replaced with double underscores (`__`) and periods (`.`) in host names replaced with single underscore (`_`).
+
+Examples:
+
+`NPM_REGISTRY_NPJS_ORG_TOKEN=abc123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "npm",
+      "matchHost": "registry.npmjs.org",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+`GITLAB__TAGS_CODE__HOST_COMPANY_COM_USERNAME=bot GITLAB__TAGS_CODE__HOST_COMPANY_COM_PASSWORD=botpass123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "gitlab-tags",
+      "matchHost": "code-host.company.com",
+      "username": "bot",
+      "password": "botpass123"
+    }
+  ]
+}
+```
