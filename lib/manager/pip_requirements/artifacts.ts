@@ -29,6 +29,10 @@ export async function updateArtifacts({
         cmd.push(`hashin ${depConstraint} -r ${packageFileName}`);
       }
     }
+    if (!cmd.length) {
+      logger.debug('No hashin commands to run - returning');
+      return null;
+    }
     const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {
