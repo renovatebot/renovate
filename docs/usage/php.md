@@ -27,7 +27,7 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
 {
   "hostRules": [
     {
-      "hostName": "some.vendor.com",
+      "matchHost": "some.vendor.com",
       "hostType": "packagist",
       "username": "<your-username>",
       "password": "<your-password>"
@@ -46,7 +46,7 @@ You may encrypt your `password` only, but you can encrypt your `username` as wel
 {
   "hostRules": [
     {
-      "hostName": "some.vendor.com",
+      "matchHost": "some.vendor.com",
       "hostType": "packagist",
       "encrypted": {
         "username": "<your-encrypted-password",

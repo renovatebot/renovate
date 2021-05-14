@@ -68,6 +68,25 @@ describe(getName(), () => {
       JCENTER_REPO,
       GOOGLE_REPO,
     ]);
+
+    ({ urls } = parseGradle(
+      'maven("https://repository.mycompany.com/m2/repository")'
+    ));
+    expect(urls).toStrictEqual([
+      'https://repository.mycompany.com/m2/repository',
+    ]);
+
+    ({ urls } = parseGradle(
+      'maven { url = uri("https://maven.springframework.org/release") }'
+    ));
+    expect(urls).toStrictEqual(['https://maven.springframework.org/release']);
+
+    ({ urls } = parseGradle(
+      "maven { url 'https://repository.mycompany.com/m2/repository' }"
+    ));
+    expect(urls).toStrictEqual([
+      'https://repository.mycompany.com/m2/repository',
+    ]);
   });
   it('parses long form deps', () => {
     let deps;

@@ -34,7 +34,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
-import type { AzurePr } from './types';
+import { AzurePr, AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -410,10 +410,24 @@ export async function createPr({
         completionOptions: {
           mergeStrategy: config.defaultMergeMethod,
           deleteSourceBranch: true,
+          mergeCommitMessage: title,
         },
       },
       config.repoId,
       pr.pullRequestId
+    );
+  }
+  if (platformOptions?.azureAutoApprove) {
+    pr = await azureApiGit.createPullRequestReviewer(
+      {
+        reviewerUrl: pr.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      },
+      config.repoId,
+      pr.pullRequestId,
+      pr.createdBy.id
     );
   }
   await Promise.all(
@@ -619,6 +633,7 @@ export async function mergePr(
     completionOptions: {
       mergeStrategy: mergeMethod,
       deleteSourceBranch: true,
+      mergeCommitMessage: pr.title,
     },
   };
 

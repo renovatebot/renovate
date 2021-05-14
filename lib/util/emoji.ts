@@ -1,7 +1,7 @@
 import emoji from 'node-emoji';
 import type { RenovateConfig } from '../config/types';
 
-let unicodeEmoji = false;
+let unicodeEmoji = true;
 
 export function setEmojiConfig(_config: RenovateConfig): void {
   unicodeEmoji = _config.unicodeEmoji;

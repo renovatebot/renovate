@@ -18,10 +18,18 @@ import {
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { validateUrl } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
+import type {
+  AdditionalPackageFiles,
+  ArtifactError,
+  DetermineLockFileDirsResult,
+  UpdatedArtifacts,
+  WriteExistingFilesResult,
+} from './types';
 import * as yarn from './yarn';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
@@ -29,12 +37,6 @@ import * as yarn from './yarn';
 const getDirs = (arr: string[]): string[] =>
   Array.from(new Set(arr.filter(Boolean)));
 
-export interface DetermineLockFileDirsResult {
-  yarnLockDirs: string[];
-  npmLockDirs: string[];
-  pnpmShrinkwrapDirs: string[];
-  lernaJsonFiles: string[];
-}
 // istanbul ignore next
 export function determineLockFileDirs(
   config: PostUpdateConfig,
@@ -262,20 +264,6 @@ export async function writeUpdatedPackageFiles(
   }
 }
 
-export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFile>[];
-}
-
-interface ArtifactError {
-  lockFile: string;
-  stderr: string;
-}
-
-interface UpdatedArtifacts {
-  name: string;
-  contents: string | Buffer;
-}
-
 // istanbul ignore next
 async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
@@ -397,10 +385,6 @@ async function updateYarnOffline(
   }
 }
 
-export interface WriteExistingFilesResult {
-  artifactErrors: ArtifactError[];
-  updatedArtifacts: UpdatedArtifacts[];
-}
 // istanbul ignore next
 export async function getAdditionalFiles(
   config: PostUpdateConfig,
@@ -444,11 +428,11 @@ export async function getAdditionalFiles(
   });
   for (const hostRule of npmHostRules) {
     if (hostRule.resolvedHost) {
-      const uri = hostRule.baseUrl
-        ? hostRule.baseUrl.replace(/^https?:/, '')
-        : `//${hostRule.resolvedHost}/`;
+      let uri = hostRule.matchHost;
+      uri = validateUrl(uri) ? uri.replace(/^https?:/, '') : `//${uri}/`;
       if (hostRule.token) {
-        additionalNpmrcContent.push(`${uri}:_authToken=${hostRule.token}`);
+        const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
+        additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);
       } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
         const password = Buffer.from(hostRule.password).toString('base64');
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);

@@ -35,22 +35,24 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
-  if (/~>\s*0\.\d+/.test(currentValue) && npm.getMajor(newVersion) === 0) {
-    const testFullVersion = /(~>\s*0\.)(\d+)\.\d$/;
-    let replaceValue = '';
-    if (testFullVersion.test(currentValue)) {
-      replaceValue = `$1${npm.getMinor(newVersion)}.0`;
-    } else {
-      replaceValue = `$1${npm.getMinor(newVersion)}$3`;
+  if (rangeStrategy === 'replace') {
+    if (/~>\s*0\.\d+/.test(currentValue) && npm.getMajor(newVersion) === 0) {
+      const testFullVersion = /(~>\s*0\.)(\d+)\.\d$/;
+      let replaceValue = '';
+      if (testFullVersion.test(currentValue)) {
+        replaceValue = `$1${npm.getMinor(newVersion)}.0`;
+      } else {
+        replaceValue = `$1${npm.getMinor(newVersion)}$3`;
+      }
+      return currentValue.replace(/(~>\s*0\.)(\d+)(.*)$/, replaceValue);
     }
-    return currentValue.replace(/(~>\s*0\.)(\d+)(.*)$/, replaceValue);
-  }
-  // handle special ~> 1.2 case
-  if (/(~>\s*)\d+\.\d+$/.test(currentValue)) {
-    return currentValue.replace(
-      /(~>\s*)\d+\.\d+$/,
-      `$1${npm.getMajor(newVersion)}.0`
-    );
+    // handle special ~> 1.2 case
+    if (/(~>\s*)\d+\.\d+$/.test(currentValue)) {
+      return currentValue.replace(
+        /(~>\s*)\d+\.\d+$/,
+        `$1${npm.getMajor(newVersion)}.0`
+      );
+    }
   }
   return npm.getNewValue({
     currentValue,

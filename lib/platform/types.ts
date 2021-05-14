@@ -73,6 +73,7 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
+  azureAutoApprove?: boolean;
   azureAutoComplete?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;

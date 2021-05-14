@@ -59,7 +59,7 @@ export function getNewValue({
     logger.warn('Empty currentValue: ' + currentValue);
     return currentValue;
   }
-  if (rangeStrategy === 'replace') {
+  if (rangeStrategy === 'auto' || rangeStrategy === 'replace') {
     if (satisfies(newVersion, currentValue)) {
       return currentValue;
     }

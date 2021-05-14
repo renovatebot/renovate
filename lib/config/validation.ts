@@ -4,11 +4,13 @@ import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import { getOptions } from './definitions';
+import { migrateConfig } from './migration';
 import { resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
   RenovateOptions,
   ValidationMessage,
+  ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
 
@@ -16,11 +18,6 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, RenovateOptions['parent']>;
-
-export interface ValidationResult {
-  errors: ValidationMessage[];
-  warnings: ValidationMessage[];
-}
 
 const managerList = getManagerList();
 
@@ -255,6 +252,15 @@ export async function validateConfig(
               const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
                 if (is.string(subval)) {
+                  if (
+                    parentName === 'packageRules' &&
+                    subval.startsWith('group:')
+                  ) {
+                    warnings.push({
+                      topic: 'Configuration Warning',
+                      message: `${currentPath}: you should not extend "group:" presets`,
+                    });
+                  }
                   if (tzRe.test(subval)) {
                     const [, timezone] = tzRe.exec(subval);
                     const [validTimezone, errorMessage] = hasValidTimezone(
@@ -297,10 +303,14 @@ export async function validateConfig(
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
                 if (is.object(packageRule)) {
-                  const resolvedRule = await resolveConfigPresets(
-                    packageRule as RenovateConfig,
-                    config
-                  );
+                  const resolvedRule = migrateConfig({
+                    packageRules: [
+                      await resolveConfigPresets(
+                        packageRule as RenovateConfig,
+                        config
+                      ),
+                    ],
+                  }).migratedConfig.packageRules[0];
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );

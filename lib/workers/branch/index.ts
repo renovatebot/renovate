@@ -120,6 +120,13 @@ export async function processBranch(
       logger.debug('Reached commits limit - skipping branch');
       return { branchExists, result: BranchResult.CommitLimitReached };
     }
+    if (
+      !branchExists &&
+      branchConfig.pendingChecks &&
+      !dependencyDashboardCheck
+    ) {
+      return { branchExists: false, result: BranchResult.Pending };
+    }
     if (branchExists) {
       logger.debug('Checking if PR has been edited');
       const branchIsModified = await isBranchModified(config.branchName);

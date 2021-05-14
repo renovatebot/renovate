@@ -178,7 +178,7 @@ This setting is only applicable if you opt in to configure `automerge` to `true`
 
 Automerging defaults to using Pull Requests (`automergeType="pr"`).
 In that case Renovate first creates a branch and associated Pull Request, and then automerges the PR on a subsequent run once it detects the PR's status checks are "green".
-If by the next run the PR is already behind master branch then it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
+If by the next run the PR is already behind the base branch it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
 If Renovate is scheduled for hourly runs on the repository but commits are made every 15 minutes to the main branch, then an automerge like this will keep getting deferred with every rebase.
 
 Note: if you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
@@ -193,6 +193,12 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
+## azureAutoApprove
+
+Setting this to `true` will automatically approve the PRs in Azure DevOps.
+
+You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
+
 ## azureAutoComplete
 
 Setting this to `true` will configure PRs in Azure DevOps to auto-complete after all (if any) branch policies have been met.
@@ -206,12 +212,12 @@ Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renova
 
 ## baseBranches
 
-By default, Renovate will detect and process only the repository's default branch, e.g. `master`.
+By default, Renovate will detect and process only the repository's default branch.
 For most projects, this is the expected approach.
 However, Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
-- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `master` and `next`: `"baseBranches": ["master", "next"]`
+- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
@@ -608,7 +614,7 @@ Configure this to `false` if you want to disable release notes fetching
 
 ## fileMatch
 
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
+`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override the default values to customize for your project's needs.
 
 Sometimes file matches are really simple - for example with Go Modules Renovate looks for any `go.mod` file, and you probably don't need to change that default.
 
@@ -736,11 +742,10 @@ Example: If you have set `branchPrefix: "deps-"` and `hashedBranchLength: 12` it
 
 ## hostRules
 
-Currently the purpose of `hostRules` is to configure credentials for host authentication.
+The primary purpose of `hostRules` is to configure credentials for host authentication.
 You tell Renovate how to match against the host you need authenticated, and then you also tell it which credentials to use.
 
-The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`.
-All are optional, but you can only have one of the last three per rule.
+The lookup keys for `hostRules` are: `hostType` and `matchHost`, both of which are optional.
 
 Supported credential fields are `token`, `username`, `password`, `timeout`, `enabled` and `insecureRegistry`.
 
@@ -750,7 +755,7 @@ Example for configuring `docker` auth:
 {
   "hostRules": [
     {
-      "domainName": "docker.io",
+      "matchHost": "docker.io",
       "username": "<some-username>",
       "password": "<some-password>"
     }
@@ -764,7 +769,7 @@ To disable requests to a particular host, you can configure a rule like:
 {
   "hostRules": [
     {
-      "hostName": "registry.npmjs.org",
+      "matchHost": "registry.npmjs.org",
       "enabled": false
     }
   ]
@@ -836,7 +841,7 @@ To abort Renovate for errors for a specific `docker` host:
 {
   "hostRules": [
     {
-      "hostName": "docker.company.com",
+      "matchHost": "docker.company.com",
       "abortOnError": true
     }
   ]
@@ -855,7 +860,7 @@ An example for npm basic auth with token:
 {
   "hostRules": [
     {
-      "domainName": "npm.custom.org",
+      "matchHost": "npm.custom.org",
       "token": "<some-token>",
       "authType": "Basic"
     }
@@ -864,13 +869,6 @@ An example for npm basic auth with token:
 ```
 
 This will generate the following header: `authorization: Basic <some-token>`.
-
-### baseUrl
-
-Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host.
-For example, `"baseUrl": "https://api.github.com"` is equivalent to `"hostName": "api.github.com"` but `"baseUrl": "https://api.github.com/google/"` is not.
-
-Renovate does not do a "longest match" algorithm to pick between multiple matching `baseUrl` values in different rules, so put the longer `baseUrl` rule _after_ the shorter one in your `hostRules`.
 
 ### concurrentRequestLimit
 
@@ -884,29 +882,22 @@ Example config:
 {
   "hostRules": [
     {
-      "hostName": "github.com",
+      "matchHost": "github.com",
       "concurrentRequestLimit": 2
     }
   ]
 }
 ```
 
-### domainName
-
-If you have any uncertainty about exactly which hosts a service uses, then it can be more reliable to use `domainName` instead of `hostName` or `baseUrl`.
-e.g. configure `"hostName": "docker.io"` to cover both `index.docker.io` and `auth.docker.io` and any other host that's in use.
-
 ### enableHttp2
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
 
-### hostName
-
 ### hostType
 
 `hostType` is another way to filter rules and can be either a platform such as `github` and `bitbucket-server`, or it can be a datasource such as `docker` and `rubygems`.
-You usually don't need to configure it in a host rule if you have already configured `domainName`, `hostName` or `baseUrl` and only one host type is in use for those, as is usually the case.
-`hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `baseUrl` rules could achieve the same thing.
+You usually don't need to configure it in a host rule if you have already configured `matchHost` and only one host type is in use for those, as is usually the case.
+`hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `matchHost` rules could achieve the same thing.
 
 ### insecureRegistry
 
@@ -921,12 +912,18 @@ Example:
 {
   "hostRules": [
     {
-      "hostName": "reg.insecure.com",
+      "matchHost": "reg.insecure.com",
       "insecureRegistry": true
     }
   ]
 }
 ```
+
+### matchHost
+
+This can be a base URL (e.g. `https://api.github.com`) or a hostname like `github.com` or `api.github.com`.
+If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
+Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 
 ### timeout
 
@@ -1027,6 +1024,18 @@ If you wish for Renovate to process only select paths in the repository, use `in
 
 Alternatively, if you need to just _exclude_ certain paths in the repository then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
+
+## internalChecksFilter
+
+This setting determines whether Renovate controls when and how filtering of internal checks are performed, particularly when multiple versions of the same update type are available.
+Currently this applies to the `stabilityDays` check only.
+
+- `none`: No filtering will be performed, and the highest release will be used regardless of whether it's pending or not
+- `strict`: All pending releases will be filtered. PRs will be skipped unless a non-pending version is available
+- `flexible`: Similar to strict, but in the case where all versions are pending then a PR will be created with the highest pending version
+
+The `flexible` mode can result in "flapping" of Pull Requests, where e.g. a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `stabilityDays`.
+We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you have visibility into suppressed PRs.
 
 ## java
 
@@ -1317,7 +1326,7 @@ Use this field to restrict rules to a particular branch. e.g.
 {
   "packageRules": [
     {
-      "matchBaseBranches": ["master"],
+      "matchBaseBranches": ["main"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
@@ -1358,10 +1367,10 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 ### matchCurrentVersion
 
-`matchCurrentVersion` can be an exact semver version or a semver range.
+`matchCurrentVersion` can be an exact SemVer version or a SemVer range.
 
-This field also supports Regular Expressions which have to begin and end with `/`.
-For example, the following will enforce that only `1.*` versions:
+This field also supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
 
 ```json
 {
@@ -1374,8 +1383,8 @@ For example, the following will enforce that only `1.*` versions:
 }
 ```
 
-This field also supports a special negated regex syntax for ignoring certain versions.
-Use the syntax `!/ /` like the following:
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
 
 ```json
 {
@@ -2025,7 +2034,7 @@ Currently Renovate's default behavior is to only automerge if every status check
 
 Setting this option to `null` means that Renovate will ignore _all_ status checks.
 You can set this if you don't have any status checks but still want Renovate to automerge PRs.
-Beware: configuring Renovate to automerge without any tests can lead to broken builds on your default branch, please think again before enabling this!
+Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
 
 In future, this might be configurable to allow certain status checks to be ignored/required.
 See [issue 1853 at the Renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
@@ -2116,7 +2125,9 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 }
 ```
 
-Technical details: We mostly rely on the text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
+Technical details: We mostly rely on the text parsing of the library [@breejs/later](https://github.com/breejs/later) but only its concepts of "days", "time_before", and "time_after".
+Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
+Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 ## semanticCommitScope
 
@@ -2148,7 +2159,7 @@ It is recommended that you leave this setting to `true`, because of the polite w
 For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives.
 In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released.
 You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it.
-Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested.
+Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to the base branch once it's tested.
 After that, Renovate will resume providing you updates to 3.x again!
 i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
@@ -2238,7 +2249,7 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseStale=true and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.

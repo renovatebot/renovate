@@ -351,7 +351,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'requireConfig',
-    description: 'Set to true if repositories must have a config to activate.',
+    description:
+      'Set to false if it is optional for repositories to contain a config.',
     stage: 'repository',
     type: 'boolean',
     default: true,
@@ -715,6 +716,13 @@ const options: RenovateOptions[] = [
       'The id of an existing work item on Azure Boards to link to each PR.',
     type: 'integer',
     default: 0,
+  },
+  {
+    name: 'azureAutoApprove',
+    description:
+      'If set to true, Azure DevOps PRs will be automatically approved.',
+    type: 'boolean',
+    default: false,
   },
   // depType
   {
@@ -1179,6 +1187,13 @@ const options: RenovateOptions[] = [
     default: 0,
   },
   {
+    name: 'internalChecksFilter',
+    description: 'When/how to filter based on internal checks.',
+    type: 'string',
+    allowedValues: ['strict', 'flexible', 'none'],
+    default: 'none',
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
@@ -1302,7 +1317,7 @@ const options: RenovateOptions[] = [
     description: 'Branch topic.',
     type: 'string',
     default:
-      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
     cli: false,
   },
   {
@@ -1695,26 +1710,8 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'domainName',
-    description: 'Domain name for a host rule. e.g. "docker.io".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'hostName',
-    description: 'Hostname for a host rule. e.g. "index.docker.io".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'baseUrl',
-    description: 'baseUrl for a host rule. e.g. "https://api.github.com/".',
+    name: 'matchHost',
+    description: 'A domain name, host name or base URL to match against',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
