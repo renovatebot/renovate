@@ -552,7 +552,11 @@ export async function mergeBranch(branchName: string): Promise<void> {
     await syncBranch(branchName);
     await git.reset(ResetMode.HARD);
     await git.checkout(['-B', branchName, 'origin/' + branchName]);
-    await git.checkout(config.currentBranch);
+    await git.checkout([
+      '-B',
+      config.currentBranch,
+      'origin/' + config.currentBranch,
+    ]);
     status = await git.status();
     await git.merge(['--ff-only', branchName]);
     await git.push('origin', config.currentBranch);
