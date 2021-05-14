@@ -501,11 +501,11 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     ).trim();
   } catch (err) /* istanbul ignore next */ {
     if (err.messages?.includes('fatal: bad revision')) {
-      await fetchBranchCommits();
-      if (!branchExists(branchName)) {
-        logger.debug('Branch has been deleted');
-        throw new Error(REPOSITORY_CHANGED);
-      }
+      logger.debug(
+        { err },
+        'Remote branch not found when checking last commit author - aborting run'
+      );
+      throw new Error(REPOSITORY_CHANGED);
     }
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
