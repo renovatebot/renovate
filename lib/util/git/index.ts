@@ -11,6 +11,7 @@ import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
+  REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -499,6 +500,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
       ])
     ).trim();
   } catch (err) /* istanbul ignore next */ {
+    if (err.messages?.includes('fatal: bad revision')) {
+      await fetchBranchCommits();
+      if (!branchExists(branchName)) {
+        logger.debug('Branch has been deleted');
+        throw new Error(REPOSITORY_CHANGED);
+      }
+    }
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
   const { gitAuthorEmail } = config;
