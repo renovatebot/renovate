@@ -18,7 +18,7 @@ export const http = new Http(id);
 export const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 export const defaultRegistryUrls = ['https://index.docker.io'];
 
-export async function getECRAuthToken(
+async function getECRAuthToken(
   region: string,
   opts: HostRule
 ): Promise<string | null> {
