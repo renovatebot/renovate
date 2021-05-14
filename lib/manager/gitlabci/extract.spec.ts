@@ -1,8 +1,13 @@
 import { getName, logger } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import type { PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
 describe(getName(), () => {
+  beforeEach(() => {
+    setAdminConfig({ localDir: '' });
+  });
+
   describe('extractAllPackageFiles()', () => {
     it('returns null for empty', async () => {
       expect(

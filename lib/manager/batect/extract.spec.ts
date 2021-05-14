@@ -1,4 +1,5 @@
 import { getName } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
@@ -27,6 +28,10 @@ function createGitDependency(repo: string, version: string): PackageDependency {
 
 describe(getName(), () => {
   describe('extractPackageFile()', () => {
+    beforeEach(() => {
+      setAdminConfig({ localDir: '' });
+    });
+
     it('returns empty array for empty configuration file', async () => {
       expect(
         await extractAllPackageFiles({}, [`${fixturesDir}/empty/batect.yml`])

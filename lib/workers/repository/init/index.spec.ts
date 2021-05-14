@@ -5,6 +5,7 @@ import * as _apis from './apis';
 import * as _config from './config';
 import * as _merge from './merge';
 import { initRepo } from '.';
+import { setAdminConfig } from '../../../config/admin';
 
 jest.mock('../../../util/git');
 jest.mock('../onboarding/branch');
@@ -22,6 +23,13 @@ const onboarding = mocked(_onboarding);
 const secrets = mocked(_secrets);
 
 describe(getName(), () => {
+  beforeEach(() => {
+    setAdminConfig({ localDir: '', cacheDir: '' });
+  });
+  afterEach(() => {
+    setAdminConfig();
+  });
+
   describe('initRepo', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue({} as never);

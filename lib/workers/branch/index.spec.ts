@@ -94,7 +94,7 @@ describe(getName(), () => {
           body: '',
         },
       });
-      setAdminConfig();
+      setAdminConfig({ localDir: '', cacheDir: '' });
       sanitize.sanitize.mockImplementation((input) => input);
     });
     afterEach(() => {
@@ -382,7 +382,7 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      setAdminConfig({ dryRun: true });
+      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -634,7 +634,7 @@ describe(getName(), () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
       } as Pr);
-      setAdminConfig({ dryRun: true });
+      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 
@@ -644,7 +644,7 @@ describe(getName(), () => {
         state: PrState.Open,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      setAdminConfig({ dryRun: true });
+      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 
@@ -666,7 +666,7 @@ describe(getName(), () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setAdminConfig({ dryRun: true });
+      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -699,7 +699,7 @@ describe(getName(), () => {
         pr: {},
       } as EnsurePrResult);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setAdminConfig({ dryRun: true });
+      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -774,6 +774,8 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
       const adminConfig = {
+        localDir: '',
+        cacheDir: '',
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
@@ -854,6 +856,8 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
       const adminConfig = {
+        localDir: '',
+        cacheDir: '',
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
@@ -923,6 +927,8 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       const adminConfig = {
+        localDir: '',
+        cacheDir: '',
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
         exposeAllEnv: true,
@@ -1003,6 +1009,8 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
       const adminConfig = {
+        localDir: '',
+        cacheDir: '',
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
@@ -1133,6 +1141,8 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
       const adminConfig = {
+        localDir: '',
+        cacheDir: '',
         allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
         allowPostUpgradeCommandTemplating: true,
         trustLevel: 'high',

@@ -1,4 +1,5 @@
 import _fs from 'fs-extra';
+import { setAdminConfig } from '../../config/admin';
 import { updateArtifacts } from './artifacts';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
@@ -17,6 +18,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
+    setAdminConfig({ localDir: '' });
   });
   it('returns null if no updatedDeps were provided', async () => {
     expect(

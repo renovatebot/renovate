@@ -11,6 +11,10 @@ import {
 
 describe(getName(), () => {
   describe('readLocalFile', () => {
+    beforeEach(() => {
+      setAdminConfig({ localDir: '' });
+    });
+
     it('reads buffer', async () => {
       expect(await readLocalFile(__filename)).toBeInstanceOf(Buffer);
     });

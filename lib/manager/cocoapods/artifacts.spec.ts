@@ -78,8 +78,9 @@ describe('.updateArtifacts()', () => {
   it('returns null for invalid local directory', async () => {
     const execSnapshots = mockExecAll(exec);
     setAdminConfig({
-      localDir: undefined,
+      localDir: '',
     });
+
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
