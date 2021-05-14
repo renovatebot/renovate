@@ -14,10 +14,6 @@ export function bootstrap(): void {
     ) {
       process.env[envVar] = process.env[envVar.toLowerCase()];
     }
-
-    if (process.env[envVar]) {
-      process.env[envVar.toLowerCase()] = process.env[envVar];
-    }
   });
 
   if (
