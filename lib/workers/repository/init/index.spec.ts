@@ -1,11 +1,11 @@
 import { getName, logger, mocked } from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
 import * as _config from './config';
 import * as _merge from './merge';
 import { initRepo } from '.';
-import { setAdminConfig } from '../../../config/admin';
 
 jest.mock('../../../util/git');
 jest.mock('../onboarding/branch');
