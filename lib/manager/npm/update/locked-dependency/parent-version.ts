@@ -23,6 +23,14 @@ export async function findFirstParentVersion(
       depName: targetDepName,
     };
     const targetDep = await getPkgReleases(lookupConfig);
+    // istanbul ignore if
+    if (!targetDep) {
+      logger.warn(
+        { targetDepName },
+        'Could not look up target dependency for remediation'
+      );
+      return null;
+    }
     const targetVersions = targetDep.releases
       .map((release) => release.version)
       .filter(
@@ -36,6 +44,14 @@ export async function findFirstParentVersion(
       depName: parentName,
     };
     const parentDep = await getPkgReleases(lookupConfig);
+    // istanbul ignore if
+    if (!parentDep) {
+      logger.info(
+        { parentName },
+        'Could not look up parent dependency for remediation'
+      );
+      return null;
+    }
     const parentVersions = parentDep.releases
       .map((release) => release.version)
       .filter(
@@ -83,7 +99,7 @@ export async function findFirstParentVersion(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'findFirstSupportingVersion error');
+    logger.warn({ err }, 'findFirstParentVersion error');
     return null;
   }
   logger.debug(`Could not find a matching version`);
