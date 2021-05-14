@@ -101,7 +101,7 @@ export async function exec(
   if (cwdFile) {
     cwd = join(localDir, dirname(cwdFile));
   }
-  cwd = cwd || opts.cwd || localDir || null;
+  cwd = cwd || opts.cwd || localDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };
