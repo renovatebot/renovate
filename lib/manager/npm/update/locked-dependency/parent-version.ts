@@ -35,6 +35,7 @@ export async function findFirstParentVersion(
       .map((release) => release.version)
       .filter(
         (version) =>
+          semver.isVersion(version) &&
           semver.isStable(version) &&
           (version === targetVersion ||
             semver.isGreaterThan(version, targetVersion))
@@ -56,6 +57,7 @@ export async function findFirstParentVersion(
       .map((release) => release.version)
       .filter(
         (version) =>
+          semver.isVersion(version) &&
           semver.isStable(version) &&
           (version === parentStartingVersion ||
             semver.isGreaterThan(version, parentStartingVersion))
@@ -99,7 +101,10 @@ export async function findFirstParentVersion(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'findFirstParentVersion error');
+    logger.warn(
+      { parentName, parentStartingVersion, targetDepName, targetVersion, err },
+      'findFirstParentVersion error'
+    );
     return null;
   }
   logger.debug(`Could not find a matching version`);
