@@ -13,21 +13,15 @@ export function add(params: HostRule): void {
   const rule = clone(params);
   const matchedFields = legacyHostFields.filter((field) => rule[field]);
   if (matchedFields.length) {
-    logger.warn(
-      `Legacy hostRules fields ${matchedFields.join(
-        '+'
-      )} should be migrated to "matchHost"`
-    );
     if (rule.matchHost || matchedFields.length > 1) {
-      matchedFields.push('matchHost');
       throw new Error(
-        `hostRules cannot contain more than one host-matching field - use "matchHost" only. Found: [${matchedFields.join(
-          ', '
-        )}]`
+        `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
       );
     }
-    rule.matchHost = rule[matchedFields[0]];
-    delete rule[matchedFields[0]];
+    const field = matchedFields[0];
+    logger.warn({ field }, 'Legacy hostRules field needs migrating');
+    rule.matchHost = rule[field];
+    delete rule[field];
   }
 
   const confidentialFields = ['password', 'token'];
