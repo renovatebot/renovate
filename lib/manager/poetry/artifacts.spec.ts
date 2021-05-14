@@ -10,6 +10,7 @@ import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
+import { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
 const pyproject10toml = loadFixture('pyproject.10.toml');
@@ -26,14 +27,14 @@ const env = mocked(_env);
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
-const config = {};
+const config: UpdateArtifactsConfig = {};
 const localDir = join('/tmp/github/some/repo');
 
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(config);
+    await setExecConfig({});
     setAdminConfig({ localDir });
     docker.resetPrefetchedImages();
   });

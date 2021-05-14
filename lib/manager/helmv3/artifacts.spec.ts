@@ -8,6 +8,7 @@ import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from './artifacts';
 
 jest.mock('fs-extra');
@@ -20,7 +21,7 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
-const config = {};
+const config: UpdateArtifactsConfig = {};
 const localDir = join('/tmp/github/some/repo'); // `join` fixes Windows CI
 
 describe('.updateArtifacts()', () => {
@@ -29,7 +30,7 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(config);
+    await setExecConfig({});
     setAdminConfig({ localDir });
     docker.resetPrefetchedImages();
   });

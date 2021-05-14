@@ -5,13 +5,14 @@ import { setAdminConfig } from '../../config/admin';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
+import { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
 
-const config = {};
+const config: UpdateArtifactsConfig = {};
 const localDir = join('/tmp/github/some/repo'); // `join` fixes Windows CI
 
 describe(getName(), () => {
@@ -20,7 +21,7 @@ describe(getName(), () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(config);
+    await setExecConfig({});
     setAdminConfig({ localDir });
   });
 

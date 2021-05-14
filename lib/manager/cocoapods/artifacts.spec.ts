@@ -9,6 +9,7 @@ import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as _env from '../../util/exec/env';
 import { StatusResult } from '../../util/git';
+import { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');
@@ -25,7 +26,7 @@ const datasource = mocked(_datasource);
 
 delete process.env.CP_HOME_DIR;
 
-const config = {};
+const config: UpdateArtifactsConfig = {};
 const localDir = join('/tmp/github/some/repo');
 const cacheDir = join('/tmp/cache');
 
@@ -34,7 +35,7 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
-    await setExecConfig(config);
+    await setExecConfig({});
     setAdminConfig({ localDir, cacheDir });
 
     datasource.getPkgReleases.mockResolvedValue({
