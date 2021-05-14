@@ -236,7 +236,7 @@ export async function initRepo({
         host,
         repository: newPathname + '/' + repository,
       });
-      logger.debug(`using URL ${url} based on configured endpoint`);
+      logger.debug({ url }, 'using URL based on configured endpoint');
     } else {
       logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
       const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);

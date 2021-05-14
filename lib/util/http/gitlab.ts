@@ -48,7 +48,6 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
               nextUrl.protocol = defaultEndpoint.protocol;
               nextUrl.host = defaultEndpoint.host;
             }
-            logger.debug(`following pagination, next url: ${nextUrl}`);
 
             result.body = result.body.concat(
               (await this.request<T>(nextUrl, opts)).body
