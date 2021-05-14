@@ -422,6 +422,10 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
+    if (err.message?.includes('fatal: ambiguous argument')) {
+      logger.warn({ err }, 'Failed to checkout branch');
+      throw new Error(TEMPORARY_ERROR);
+    }
     throw err;
   }
 }

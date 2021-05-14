@@ -45,7 +45,7 @@ describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
       setAdminConfig({ localDir: `${__dirname}/__fixtures__` });
-      hostRules.add({ hostName: 'github.com', token: 'abc123' });
+      hostRules.add({ matchHost: 'github.com', token: 'abc123' });
       let res: PackageFile;
       expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', {});
