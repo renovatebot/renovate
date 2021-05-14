@@ -781,9 +781,8 @@ export async function commitFiles({
       err.message.includes('remote rejected') &&
       files?.some((file) => file.name?.startsWith('.github/workflows/'))
     ) {
-      logger.warn(
-        'Workflows update rejection - aborting branch. Please check permissions.'
-      );
+      logger.debug({ err }, 'commitFiles error');
+      logger.info('Workflows update rejection - aborting branch.');
       return null;
     }
     if (err.message.includes('protected branch hook declined')) {
