@@ -14,6 +14,11 @@ export async function findFirstParentVersion(
   targetDepName: string,
   targetVersion: string
 ): Promise<string | null> {
+  // istanbul ignore if
+  if (!semver.isVersion(parentStartingVersion)) {
+    logger.debug('parentStartingVersion is not a version - cannot remediate');
+    return null;
+  }
   logger.debug(
     `Finding first version of ${parentName} starting with ${parentStartingVersion} which supports >= ${targetDepName}@${targetVersion}`
   );
