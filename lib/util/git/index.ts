@@ -512,7 +512,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
       ])
     ).trim();
   } catch (err) /* istanbul ignore next */ {
-    if (err.messages?.includes('fatal: bad revision')) {
+    if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
         { err },
         'Remote branch not found when checking last commit author - aborting run'
