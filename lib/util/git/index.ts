@@ -433,7 +433,19 @@ export async function getFileList(): Promise<string[]> {
   await syncGit();
   const branch = config.currentBranch;
   const submodules = await getSubmodules();
-  const files: string = await git.raw(['ls-tree', '-r', branch]);
+  let files: string;
+  try {
+    files = await git.raw(['ls-tree', '-r', branch]);
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: Not a valid object name')) {
+      logger.debug(
+        { err },
+        'Branch not found when checking branch list - aborting'
+      );
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
+  }
   // istanbul ignore if
   if (!files) {
     return [];
