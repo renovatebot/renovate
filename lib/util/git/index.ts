@@ -433,7 +433,19 @@ export async function getFileList(): Promise<string[]> {
   await syncGit();
   const branch = config.currentBranch;
   const submodules = await getSubmodules();
-  const files: string = await git.raw(['ls-tree', '-r', branch]);
+  let files: string;
+  try {
+    files = await git.raw(['ls-tree', '-r', branch]);
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: Not a valid object name')) {
+      logger.debug(
+        { err },
+        'Branch not found when checking branch list - aborting'
+      );
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
+  }
   // istanbul ignore if
   if (!files) {
     return [];
@@ -500,12 +512,12 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
       ])
     ).trim();
   } catch (err) /* istanbul ignore next */ {
-    if (err.messages?.includes('fatal: bad revision')) {
-      await fetchBranchCommits();
-      if (!branchExists(branchName)) {
-        logger.debug('Branch has been deleted');
-        throw new Error(REPOSITORY_CHANGED);
-      }
+    if (err.message?.includes('fatal: bad revision')) {
+      logger.debug(
+        { err },
+        'Remote branch not found when checking last commit author - aborting run'
+      );
+      throw new Error(REPOSITORY_CHANGED);
     }
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
@@ -552,7 +564,11 @@ export async function mergeBranch(branchName: string): Promise<void> {
     await syncBranch(branchName);
     await git.reset(ResetMode.HARD);
     await git.checkout(['-B', branchName, 'origin/' + branchName]);
-    await git.checkout(config.currentBranch);
+    await git.checkout([
+      '-B',
+      config.currentBranch,
+      'origin/' + config.currentBranch,
+    ]);
     status = await git.status();
     await git.merge(['--ff-only', branchName]);
     await git.push('origin', config.currentBranch);
@@ -777,9 +793,8 @@ export async function commitFiles({
       err.message.includes('remote rejected') &&
       files?.some((file) => file.name?.startsWith('.github/workflows/'))
     ) {
-      logger.warn(
-        'Workflows update rejection - aborting branch. Please check permissions.'
-      );
+      logger.debug({ err }, 'commitFiles error');
+      logger.info('Workflows update rejection - aborting branch.');
       return null;
     }
     if (err.message.includes('protected branch hook declined')) {

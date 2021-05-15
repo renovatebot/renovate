@@ -402,7 +402,10 @@ export async function getAdditionalFiles(
   }
   if (
     !config.updatedPackageFiles?.length &&
-    config.upgrades?.every((upgrade) => upgrade.isRemediation)
+    config.transitiveRemediation &&
+    config.upgrades?.every(
+      (upgrade) => upgrade.isRemediation || upgrade.isVulnerabilityAlert
+    )
   ) {
     logger.debug('Skipping lock file generation for remediations');
     return { artifactErrors, updatedArtifacts };

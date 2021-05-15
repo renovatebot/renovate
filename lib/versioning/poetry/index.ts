@@ -199,14 +199,22 @@ function getNewValue({
     );
     return currentValue;
   }
-  const newSemver = npm.getNewValue({
-    currentValue: poetry2npm(currentValue),
-    rangeStrategy,
-    currentVersion,
-    newVersion,
-  });
-  const newPoetry = npm2poetry(newSemver);
-  return newPoetry;
+  try {
+    const newSemver = npm.getNewValue({
+      currentValue: poetry2npm(currentValue),
+      rangeStrategy,
+      currentVersion,
+      newVersion,
+    });
+    const newPoetry = npm2poetry(newSemver);
+    return newPoetry;
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug(
+      { currentValue, rangeStrategy, currentVersion, newVersion, err },
+      'Could not generate new value using npm.getNewValue()'
+    );
+    return currentValue;
+  }
 }
 
 function sortVersions(a: string, b: string): number {
