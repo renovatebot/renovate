@@ -8,7 +8,6 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../util/fs';
-import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFile } from '../types';
 import type {
@@ -72,8 +71,6 @@ function extractFromSection(
     }
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (pep440Versioning.isValid(dep.currentValue)) {
-      dep.versioning = pep440Versioning.id;
     } else if (poetryVersioning.isValid(dep.currentValue)) {
       dep.versioning = poetryVersioning.id;
     } else {
