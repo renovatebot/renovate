@@ -55,7 +55,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
-    if (!rawFileContents) {
+    if (!is.string(rawFileContents)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
       throw new Error(REPOSITORY_CHANGED);
     }
