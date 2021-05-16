@@ -465,7 +465,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
     } catch (err) {
       if (err.statusCode === 404) {
         logger.debug(`No branch protection found`);
-      } else if (err.statusCode === 403) {
+      } else if (
+        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED ||
+        err.statusCode === 403
+      ) {
         logger.debug(
           'Branch protection: Do not have permissions to detect branch protection'
         );
