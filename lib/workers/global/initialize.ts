@@ -35,7 +35,7 @@ function limitCommitsPerRun(config: RenovateConfig): void {
   setMaxLimit(Limit.Commits, limit);
 }
 
-async function checkVersions(): Promise<void> {
+export async function checkVersions(): Promise<void> {
   const validGitVersion = await validateGitVersion();
   if (!validGitVersion) {
     throw new Error('Init: git version needs upgrading');
