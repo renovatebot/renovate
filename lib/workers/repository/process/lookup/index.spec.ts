@@ -295,6 +295,17 @@ describe(getName(), () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+    it('handles update-lockfile', async () => {
+      config.currentValue = '^1.2.1';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.depName = 'q';
+      config.datasource = datasourceNpmId;
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates[0].updateType).toEqual('minor');
+    });
     it('widens minor ranged versions if configured', async () => {
       config.currentValue = '~1.3.0';
       config.rangeStrategy = 'widen';
@@ -722,6 +733,7 @@ describe(getName(), () => {
     it('should allow unstable versions if the ignoreUnstable=false', async () => {
       config.currentValue = '2.5.16';
       config.ignoreUnstable = false;
+      config.respectLatest = false;
       config.depName = 'vue';
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/vue').reply(200, vueJson);

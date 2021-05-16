@@ -148,7 +148,10 @@ export async function getReleases({
   const source = await getDatasource(lookupName);
 
   if (!source) {
-    logger.warn({ lookupName }, 'Unsupported dependency.');
+    logger.info(
+      { lookupName },
+      'Unsupported go host - cannot look up versions'
+    );
     return null;
   }
 

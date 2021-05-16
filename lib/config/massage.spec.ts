@@ -27,6 +27,7 @@ describe(getName(), () => {
         packageRules: [
           {
             matchPackageNames: ['foo'],
+            separateMajorMinor: false,
             minor: {
               semanticCommitType: 'feat',
             },

@@ -331,6 +331,8 @@ Warning: this is an experimental feature and may be modified or removed in a fut
 
 ## requireConfig
 
+If this is set to `false`, it means that Renovate won't require a config file such as `renovate.json` to be present in each repository and will run even if one is missing.
+
 ## secrets
 
 Secrets may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
@@ -365,7 +367,7 @@ It could then be used in a repository config or preset like so:
 {
   "hostRules": [
     {
-      "domainName": "google.com",
+      "matchHost": "google.com",
       "token": "{{ secrets.GOOGLE_TOKEN }}"
     }
   ]

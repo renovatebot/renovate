@@ -45,7 +45,7 @@ describe(getName(), () => {
   });
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
-      hostRules.add({ hostName: 'github.com', token: 'abc123' });
+      hostRules.add({ matchHost: 'github.com', token: 'abc123' });
       let res: PackageFile;
       expect(
         await extractPackageFile('', '.gitmodules.1', { localDir })

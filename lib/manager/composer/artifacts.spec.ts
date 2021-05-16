@@ -9,9 +9,10 @@ import {
 } from '../../constants/platforms';
 import * as _datasource from '../../datasource';
 import * as datasourcePackagist from '../../datasource/packagist';
-import { setUtilConfig } from '../../util';
+import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
+import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as composer from './artifacts';
@@ -44,7 +45,8 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setUtilConfig(config);
+    await setExecConfig(config);
+    setFsConfig(config);
     docker.resetPrefetchedImages();
     hostRules.clear();
     setAdminConfig({ allowScripts: false });
@@ -78,23 +80,23 @@ describe('.updateArtifacts()', () => {
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
       hostType: PLATFORM_TYPE_GITHUB,
-      hostName: 'api.github.com',
+      matchHost: 'api.github.com',
       token: 'github-token',
     });
     hostRules.add({
       hostType: PLATFORM_TYPE_GITLAB,
-      hostName: 'gitlab.com',
+      matchHost: 'gitlab.com',
       token: 'gitlab-token',
     });
     hostRules.add({
       hostType: datasourcePackagist.id,
-      hostName: 'packagist.renovatebot.com',
+      matchHost: 'packagist.renovatebot.com',
       username: 'some-username',
       password: 'some-password',
     });
     hostRules.add({
       hostType: datasourcePackagist.id,
-      baseUrl: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
+      matchHost: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
       username: 'some-other-username',
       password: 'some-other-password',
     });
@@ -194,7 +196,8 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
 
     const execSnapshots = mockExecAll(exec);

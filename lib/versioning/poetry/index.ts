@@ -193,14 +193,28 @@ function getNewValue({
       }
     }
   }
-  const newSemver = npm.getNewValue({
-    currentValue: poetry2npm(currentValue),
-    rangeStrategy,
-    currentVersion,
-    newVersion,
-  });
-  const newPoetry = npm2poetry(newSemver);
-  return newPoetry;
+  if (!npm.isVersion(newVersion)) {
+    logger.debug(
+      'Cannot massage python version to npm - returning currentValue'
+    );
+    return currentValue;
+  }
+  try {
+    const newSemver = npm.getNewValue({
+      currentValue: poetry2npm(currentValue),
+      rangeStrategy,
+      currentVersion,
+      newVersion,
+    });
+    const newPoetry = npm2poetry(newSemver);
+    return newPoetry;
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug(
+      { currentValue, rangeStrategy, currentVersion, newVersion, err },
+      'Could not generate new value using npm.getNewValue()'
+    );
+    return currentValue;
+  }
 }
 
 function sortVersions(a: string, b: string): number {

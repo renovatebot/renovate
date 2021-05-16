@@ -12,9 +12,10 @@ import {
   git,
   partial,
 } from '../../../test/util';
-import { setUtilConfig } from '../../util';
+import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
+import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import * as dcUpdate from '.';
 
@@ -49,7 +50,8 @@ describe(getName(), () => {
       LC_ALL: 'en_US',
     });
 
-    await setUtilConfig(config);
+    await setExecConfig(config);
+    setFsConfig(config);
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
