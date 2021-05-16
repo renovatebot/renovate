@@ -20,7 +20,7 @@ const repoAdminOptions = [
 ];
 
 export function setAdminConfig(
-  config: RenovateConfig & RepoAdminConfig = {}
+  config: RenovateConfig | RepoAdminConfig = {}
 ): RenovateConfig {
   adminConfig = {};
   const result = { ...config };
