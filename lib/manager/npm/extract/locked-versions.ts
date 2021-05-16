@@ -1,7 +1,7 @@
 import { valid } from 'semver';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../types';
-import { NpmManagerData } from '../types';
+import type { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';

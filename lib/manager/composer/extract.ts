@@ -81,7 +81,7 @@ function parseRepositories(
 export async function extractPackageFile(
   content: string,
   fileName: string
-): Promise<PackageFile<ComposerManagerData>> {
+): Promise<PackageFile<ComposerManagerData> | null> {
   logger.trace(`composer.extractPackageFile(${fileName})`);
   let composerJson: ComposerConfig;
   try {

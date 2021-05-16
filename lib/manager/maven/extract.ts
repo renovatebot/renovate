@@ -41,7 +41,7 @@ interface MavenProp {
   packageFile: string;
 }
 
-interface MavenPackageFile extends PackageFile {
+export interface MavenPackageFile extends PackageFile {
   mavenProps?: Record<string, any>;
   parent?: string;
 }

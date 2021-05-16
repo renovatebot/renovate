@@ -19,7 +19,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../types';
-import {
+import type {
   LernaClient,
   NpmLockFiles,
   NpmManagerData,
@@ -80,7 +80,7 @@ export async function extractPackageFile(
   } else {
     yarnWorkspacesPackages = packageJson.workspaces?.packages;
   }
-  const packageJsonType: PackageJsonType = mightBeABrowserLibrary(packageJson)
+  const packageJsonType = mightBeABrowserLibrary(packageJson)
     ? 'library'
     : 'app';
 

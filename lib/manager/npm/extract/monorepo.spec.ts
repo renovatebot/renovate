@@ -1,4 +1,4 @@
-import { LernaClient } from '../types';
+import type { LernaClient } from '../types';
 import { detectMonorepos } from './monorepo';
 
 describe('manager/npm/extract', () => {

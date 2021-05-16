@@ -14,7 +14,7 @@ export function hasKey<K extends string, T>(
   return typeof o === 'object' && k in o;
 }
 
-export function filterUndefined(input: unknown): any {
+export function filterUndefined<T = any>(input: T): T {
   if (is.array(input)) {
     return input.filter((x) => x !== undefined).map((x) => filterUndefined(x));
   }
