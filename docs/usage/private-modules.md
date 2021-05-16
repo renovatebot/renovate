@@ -212,19 +212,20 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
 
-### hostRules Configuration using Environment Variables
+### hostRules configuration using environment variables
 
-For self-hosted users, it is possible to use environment variables to configure the most common type of `hostRules` for authentication.
+Self-hosted users can use environment variables to configure the most common types of `hostRules` for authentication.
 
-The format of the environment variables should be all upper-case and follow:
+The format of the environment variables must be all upper-case and follow:
 
 - Datasource name (e.g. `NPM`, `PYPI`)
 - Underscore (`_`)
 - `matchHost`
-- Underscore
+- Underscore (`_`)
 - Field name (`TOKEN`, `USER_NAME`, or `PASSWORD`)
 
-Hyphens (`-`) in datasource or host name should be replaced with double underscores (`__`) and periods (`.`) in host names replaced with single underscore (`_`).
+Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
+Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 Examples:
 
