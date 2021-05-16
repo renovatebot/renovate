@@ -150,7 +150,7 @@ export async function validateGitVersion(): Promise<boolean> {
   try {
     const raw = await globalGit.raw(['--version']);
     console.warn(raw); // eslint-disable-line
-    for (const section of raw.split(' ')) {
+    for (const section of raw.split(/\s+/)) {
       if (semver.isVersion(section)) {
         version = section;
         break;
