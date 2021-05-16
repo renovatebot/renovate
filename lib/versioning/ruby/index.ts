@@ -110,6 +110,7 @@ const getNewValue = ({
         newValue = bump({ range: vtrim(currentValue), to: vtrim(newVersion) });
         break;
       case 'auto':
+      case 'widen':
       case 'replace':
         newValue = replace({
           range: vtrim(currentValue),
