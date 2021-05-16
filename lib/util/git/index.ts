@@ -793,7 +793,8 @@ export async function commitFiles({
       return null;
     }
     if (
-      err.message.includes('remote rejected') &&
+      (err.message.includes('remote rejected') ||
+        err.message.includes('403')) &&
       files?.some((file) => file.name?.startsWith('.github/workflows/'))
     ) {
       logger.debug({ err }, 'commitFiles error');
