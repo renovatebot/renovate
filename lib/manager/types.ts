@@ -195,6 +195,7 @@ export interface Upgrade<T = Record<string, any>>
   version?: string;
   isLockFileMaintenance?: boolean;
   isRemediation?: boolean;
+  isVulnerabilityAlert?: boolean;
 }
 
 export interface ArtifactError {

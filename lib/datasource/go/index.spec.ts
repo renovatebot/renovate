@@ -263,9 +263,9 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.info).toHaveBeenCalledWith(
         { lookupName: 'some.unknown.website/example/module' },
-        'Unsupported dependency.'
+        'Unsupported go host - cannot look up versions'
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
       expect(logger.logger.fatal).not.toHaveBeenCalled();

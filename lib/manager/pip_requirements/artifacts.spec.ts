@@ -31,6 +31,17 @@ describe('.updateArtifacts()', () => {
       })
     ).toBeNull();
   });
+  it('returns null if no hashes', async () => {
+    fs.readFile.mockResolvedValueOnce('eventlet==0.30.2\npbr>=1.9\n' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.txt',
+        updatedDeps: ['eventlet'],
+        newPackageFileContent,
+        config,
+      })
+    ).toBeNull();
+  });
   it('returns null if unchanged', async () => {
     fs.readFile.mockResolvedValueOnce(newPackageFileContent as any);
     expect(

@@ -733,6 +733,7 @@ describe(getName(), () => {
     it('should allow unstable versions if the ignoreUnstable=false', async () => {
       config.currentValue = '2.5.16';
       config.ignoreUnstable = false;
+      config.respectLatest = false;
       config.depName = 'vue';
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/vue').reply(200, vueJson);

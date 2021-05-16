@@ -919,6 +919,7 @@ export async function getBranchStatus(
         accept: 'application/vnd.github.antiope-preview+json',
       },
       paginate: true,
+      paginationField: 'check_runs',
     };
     const checkRunsRaw = (
       await githubApi.getJson<{
