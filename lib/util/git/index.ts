@@ -149,6 +149,7 @@ export async function validateGitVersion(): Promise<boolean> {
   const globalGit = Git();
   try {
     const raw = await globalGit.raw(['--version']);
+    console.warn(raw); // eslint-disable-line
     for (const section of raw.split(' ')) {
       if (semver.isVersion(section)) {
         version = section;
@@ -162,8 +163,9 @@ export async function validateGitVersion(): Promise<boolean> {
   // istanbul ignore if
   if (
     !(
-      version === GIT_MINIMUM_VERSION ||
-      semver.isGreaterThan(version, GIT_MINIMUM_VERSION)
+      version &&
+      (version === GIT_MINIMUM_VERSION ||
+        semver.isGreaterThan(version, GIT_MINIMUM_VERSION))
     )
   ) {
     logger.error(
