@@ -7,6 +7,7 @@ import {
   platform,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -62,6 +63,8 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
+const adminConfig: RepoAdminConfig = { localDir: '', cacheDir: '' };
+
 describe(getName(), () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
@@ -94,7 +97,7 @@ describe(getName(), () => {
           body: '',
         },
       });
-      setAdminConfig({ localDir: '', cacheDir: '' });
+      setAdminConfig(adminConfig);
       sanitize.sanitize.mockImplementation((input) => input);
     });
     afterEach(() => {
@@ -773,14 +776,12 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      const adminConfig = {
-        localDir: '',
-        cacheDir: '',
+      setAdminConfig({
+        ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
-      };
-      setAdminConfig(adminConfig);
+      });
 
       const result = await branchWorker.processBranch({
         ...config,
@@ -855,14 +856,12 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      const adminConfig = {
-        localDir: '',
-        cacheDir: '',
+      setAdminConfig({
+        ...adminConfig,
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
-      };
-      setAdminConfig(adminConfig);
+      });
 
       exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
 
@@ -926,14 +925,12 @@ describe(getName(), () => {
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      const adminConfig = {
-        localDir: '',
-        cacheDir: '',
+      setAdminConfig({
+        ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
         exposeAllEnv: true,
-      };
-      setAdminConfig(adminConfig);
+      });
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
@@ -1008,14 +1005,12 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      const adminConfig = {
-        localDir: '',
-        cacheDir: '',
+      setAdminConfig({
+        ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
-      };
-      setAdminConfig(adminConfig);
+      });
 
       const inconfig: BranchConfig = {
         ...config,
@@ -1140,14 +1135,12 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      const adminConfig = {
-        localDir: '',
-        cacheDir: '',
+      setAdminConfig({
+        ...adminConfig,
         allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
         allowPostUpgradeCommandTemplating: true,
         trustLevel: 'high',
-      };
-      setAdminConfig(adminConfig);
+      });
 
       const inconfig: BranchConfig = {
         ...config,

@@ -19,12 +19,16 @@ const repoAdminOptions = [
   'cacheDir',
 ];
 
-export function setAdminConfig(config: RenovateConfig = {}): void {
+export function setAdminConfig(
+  config: RenovateConfig & RepoAdminConfig = {}
+): RenovateConfig {
   adminConfig = {};
+  const result = { ...config };
   for (const option of repoAdminOptions) {
     adminConfig[option] = config[option];
-    delete config[option]; // eslint-disable-line no-param-reassign
+    delete result[option]; // eslint-disable-line no-param-reassign
   }
+  return result;
 }
 
 export function getAdminConfig(): RepoAdminConfig {

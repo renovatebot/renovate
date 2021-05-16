@@ -28,8 +28,7 @@ export async function renovateRepository(
   repoConfig: RenovateConfig
 ): Promise<ProcessResult> {
   splitInit();
-  let config = { ...repoConfig };
-  setAdminConfig(config);
+  let config = setAdminConfig(repoConfig);
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });

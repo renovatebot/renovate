@@ -42,7 +42,6 @@ export interface CustomExtractConfig extends ExtractConfig {
 export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
-  cacheDir?: string;
   composerIgnorePlatformReqs?: boolean;
   currentValue?: string;
   postUpdateOptions?: string[];
@@ -275,7 +274,6 @@ export interface ManagerApi {
 
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
-  cacheDir?: string;
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;

@@ -4,6 +4,7 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
@@ -23,17 +24,19 @@ const env = mocked(_env);
 
 const config: UpdateArtifactsConfig = {};
 
+const adminConfig: RepoAdminConfig = {
+  // `join` fixes Windows CI
+  localDir: join('/tmp/github/some/repo'),
+};
+
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig({});
-    setAdminConfig({
-      // `join` fixes Windows CI
-      localDir: join('/tmp/github/some/repo'),
-    });
+    await setExecConfig(adminConfig as never);
+    setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
   afterEach(() => {
@@ -134,7 +137,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Cargo.lock with docker', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);

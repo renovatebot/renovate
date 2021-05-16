@@ -4,6 +4,7 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
@@ -21,8 +22,11 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
+const adminConfig: RepoAdminConfig = {
+  localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
+};
+
 const config: UpdateArtifactsConfig = {};
-const localDir = join('/tmp/github/some/repo'); // `join` fixes Windows CI
 
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
@@ -30,8 +34,8 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig({});
-    setAdminConfig({ localDir });
+    await setExecConfig(adminConfig as never);
+    setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
   afterEach(() => {
@@ -106,7 +110,7 @@ describe('.updateArtifacts()', () => {
 
   it('returns updated Chart.lock with docker', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     git.getFile.mockResolvedValueOnce('Old Chart.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Chart.lock' as any);

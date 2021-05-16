@@ -1,14 +1,17 @@
 import * as upath from 'upath';
 import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { extractPackageFile } from './extract';
 
-const localDir = upath.resolve('lib/manager/nuget/__fixtures__');
+const adminConfig: RepoAdminConfig = {
+  localDir: upath.resolve('lib/manager/nuget/__fixtures__'),
+};
 
 describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      setAdminConfig({ localDir });
+      setAdminConfig(adminConfig);
     });
     afterEach(() => {
       setAdminConfig();

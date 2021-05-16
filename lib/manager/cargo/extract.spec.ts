@@ -2,7 +2,9 @@ import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { writeLocalFile } from '../../util/fs';
+import { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
 
 const cargo1toml = loadFixture('Cargo.1.toml');
@@ -15,16 +17,18 @@ const cargo6toml = loadFixture('Cargo.6.toml');
 
 describe(getName(), () => {
   describe('extractPackageFile()', () => {
-    let config;
+    let config: ExtractConfig;
+    let adminConfig: RepoAdminConfig;
+
     beforeEach(async () => {
       config = {};
       const tmpDir = await dir();
-      const localDir = join(tmpDir.path, 'local');
-      const cacheDir = join(tmpDir.path, 'cache');
-      setAdminConfig({
-        localDir,
-        cacheDir,
-      });
+      adminConfig = {
+        localDir: join(tmpDir.path, 'local'),
+        cacheDir: join(tmpDir.path, 'cache'),
+      };
+
+      setAdminConfig(adminConfig);
     });
     afterEach(() => {
       setAdminConfig();

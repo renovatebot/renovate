@@ -7,9 +7,11 @@ import {
 } from '../../../test/exec-util';
 import { env, getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
+import { ExtractConfig } from '../types';
 import * as extract from './extract';
 import { extractPackageFile } from '.';
 
@@ -17,9 +19,12 @@ const packageFile = 'setup.py';
 const content = loadFixture(packageFile);
 const jsonContent = loadFixture('setup.py.json');
 
-const config = {};
-const localDir = '/tmp/github/some/repo';
-const cacheDir = '/tmp/renovate/cache';
+const adminConfig: RepoAdminConfig = {
+  localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
+};
+
+const config: ExtractConfig = {};
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
@@ -43,8 +48,8 @@ describe(getName(), () => {
       jest.resetModules();
       extract.resetModule();
 
-      await setExecConfig({});
-      setAdminConfig({ localDir, cacheDir });
+      await setExecConfig(adminConfig as never);
+      setAdminConfig(adminConfig);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py
