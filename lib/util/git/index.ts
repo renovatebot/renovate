@@ -20,7 +20,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
-import { isVersion } from '../../versioning/semver';
+import { api as semver } from '../../versioning/semver';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { configSigningKey, writePrivateKey } from './private-key';
 
@@ -142,21 +142,38 @@ let gitInitialized: boolean;
 
 let privateKeySet = false;
 
-export async function gitVersion(): Promise<string> {
+export const GIT_MINIMUM_VERSION = '2.22.0'; // git show-current
+
+export async function validateGitVersion(): Promise<boolean> {
+  let version: string;
   const globalGit = Git();
-  let res = null;
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(' ')) {
-      if (isVersion(section)) {
-        res = section;
-        continue; // eslint-disable-line no-continue
+      if (semver.isVersion(section)) {
+        version = section;
+        break;
       }
     }
-  } catch (err) {
-    logger.warn({ err }, 'Error fetching git version');
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Error fetching git version');
+    return false;
   }
-  return res;
+  // istanbul ignore if
+  if (
+    !(
+      version === GIT_MINIMUM_VERSION ||
+      semver.isGreaterThan(version, GIT_MINIMUM_VERSION)
+    )
+  ) {
+    logger.error(
+      { detectedVersion: version, minimumVersion: GIT_MINIMUM_VERSION },
+      'Git version needs upgrading'
+    );
+    return false;
+  }
+  logger.debug(`Found valid git version: ${version}`);
+  return true;
 }
 
 async function fetchBranchCommits(): Promise<void> {
