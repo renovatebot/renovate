@@ -229,7 +229,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 Examples:
 
-`NPM_REGISTRY_NPJS_ORG_TOKEN=abc123`:
+`NPM_REGISTRY_NPMJS_ORG_TOKEN=abc123`:
 
 ```json
 {
