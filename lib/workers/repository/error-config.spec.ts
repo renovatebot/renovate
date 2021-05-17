@@ -26,7 +26,7 @@ describe(getName(), () => {
     });
     it('creates issues', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'package.json';
+      error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
       const res = await raiseConfigWarningIssue(config, error);
@@ -34,7 +34,7 @@ describe(getName(), () => {
     });
     it('creates issues (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'package.json';
+      error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
       setAdminConfig({ dryRun: true });
@@ -43,7 +43,7 @@ describe(getName(), () => {
     });
     it('handles onboarding', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'package.json';
+      error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
@@ -55,7 +55,7 @@ describe(getName(), () => {
     });
     it('handles onboarding (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'package.json';
+      error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),

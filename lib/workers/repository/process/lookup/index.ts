@@ -226,6 +226,7 @@ export async function lookupUpdates(
       const update = generateUpdate(
         config,
         versioning,
+        rangeStrategy,
         lockedVersion || currentVersion,
         bucket,
         release

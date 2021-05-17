@@ -1,4 +1,5 @@
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
+import { getAdminConfig } from '../../config/admin';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
@@ -18,7 +19,8 @@ import { getConfiguredRegistries } from './util';
  * The update of the right boundary does not make sense regarding to the lowest version restore rule,
  * so we don't include it in the extracting regexp
  */
-const checkVersion = /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
+const checkVersion =
+  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
 const elemNames = new Set([
   'PackageReference',
   'PackageVersion',
@@ -69,10 +71,8 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
 
-  const registries = await getConfiguredRegistries(
-    packageFile,
-    config.localDir
-  );
+  const { localDir } = getAdminConfig();
+  const registries = await getConfiguredRegistries(packageFile, localDir);
   const registryUrls = registries
     ? registries.map((registry) => registry.url)
     : undefined;

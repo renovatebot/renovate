@@ -31,9 +31,8 @@ export function detectMonorepos(
     const { lernaJsonFile } = managerData;
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
-      const internalPackagePatterns = (is.array(packages)
-        ? packages
-        : [packages]
+      const internalPackagePatterns = (
+        is.array(packages) ? packages : [packages]
       ).map((pattern) => getSiblingFileName(packageFile, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
