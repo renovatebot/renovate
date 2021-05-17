@@ -12,11 +12,13 @@ import {
   git,
   partial,
 } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
-import { setFsConfig } from '../../util/fs';
-import { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git';
+import type { UpdateArtifactsConfig } from '../types';
 import * as dcUpdate from '.';
 
 jest.mock('child_process');
@@ -26,11 +28,16 @@ jest.mock('../../util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const fixtures = resolve(__dirname, './__fixtures__');
-const config = {
+
+const adminConfig: RepoAdminConfig = {
   localDir: resolve(fixtures, './testFiles'),
+};
+
+const dockerAdminConfig = { ...adminConfig, binarySource: BinarySource.Docker };
+
+const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
 };
-const dockerConfig = { ...config, binarySource: BinarySource.Docker };
 
 addReplacingSerializer('gradlew.bat', '<gradlew>');
 addReplacingSerializer('./gradlew', '<gradlew>');
@@ -50,8 +57,8 @@ describe(getName(), () => {
       LC_ALL: 'en_US',
     });
 
-    await setExecConfig(config);
-    setFsConfig(config);
+    await setExecConfig(adminConfig as never);
+    setAdminConfig(adminConfig);
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
@@ -59,6 +66,7 @@ describe(getName(), () => {
 
   afterEach(() => {
     httpMock.reset();
+    setAdminConfig();
   });
 
   it('replaces existing value', async () => {
@@ -97,13 +105,12 @@ describe(getName(), () => {
   });
 
   it('gradlew not found', async () => {
+    setAdminConfig({ ...adminConfig, localDir: 'some-dir' });
     const res = await dcUpdate.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: undefined,
-      config: {
-        localDir: 'some-dir',
-      },
+      config: {},
     });
 
     expect(res).toBeNull();
@@ -148,7 +155,10 @@ describe(getName(), () => {
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
-      config: dockerConfig,
+      config: {
+        ...config,
+        ...dockerAdminConfig,
+      },
     });
 
     expect(result).toHaveLength(1);

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
@@ -31,12 +32,12 @@ export function resetPrefetchedImages(): void {
 }
 
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
-  if (typeof x === 'string') {
+  if (is.nonEmptyString(x)) {
     return [x, x];
   }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
-    if (typeof from === 'string' && typeof to === 'string') {
+    if (is.nonEmptyString(from) && is.nonEmptyString(to)) {
       return [from, to];
     }
   }
@@ -195,8 +196,13 @@ export async function generateDockerCommand(
   const volumes = options.volumes || [];
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
-  const { localDir, cacheDir } = config;
-  const { dockerUser, dockerChildPrefix, dockerImagePrefix } = getAdminConfig();
+  const {
+    localDir,
+    cacheDir,
+    dockerUser,
+    dockerChildPrefix,
+    dockerImagePrefix,
+  } = getAdminConfig();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);
