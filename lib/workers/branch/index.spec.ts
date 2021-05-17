@@ -385,7 +385,7 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
+      setAdminConfig({ ...adminConfig, dryRun: true });
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -637,7 +637,7 @@ describe(getName(), () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
       } as Pr);
-      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
+      setAdminConfig({ ...adminConfig, dryRun: true });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 
@@ -647,7 +647,7 @@ describe(getName(), () => {
         state: PrState.Open,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
+      setAdminConfig({ ...adminConfig, dryRun: true });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 
@@ -669,7 +669,7 @@ describe(getName(), () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
+      setAdminConfig({ ...adminConfig, dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -702,7 +702,7 @@ describe(getName(), () => {
         pr: {},
       } as EnsurePrResult);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setAdminConfig({ localDir: '', cacheDir: '', dryRun: true });
+      setAdminConfig({ ...adminConfig, dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
