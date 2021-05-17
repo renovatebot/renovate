@@ -6,10 +6,6 @@ import { promisify } from 'util';
 
 export type Opt<T> = T | null | undefined;
 
-export interface ExecConfig {
-  binarySource: string;
-}
-
 export type VolumesPair = [string, string];
 export type VolumeOption = Opt<string | VolumesPair>;
 
