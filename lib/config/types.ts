@@ -131,9 +131,8 @@ export type PostUpgradeTasks = {
   executionMode: ExecutionMode;
 };
 
-type UpdateConfig<
-  T extends RenovateSharedConfig = RenovateSharedConfig
-> = Partial<Record<UpdateType, T>>;
+type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =
+  Partial<Record<UpdateType, T>>;
 
 export type RenovateRepository =
   | string

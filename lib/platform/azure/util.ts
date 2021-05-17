@@ -162,9 +162,7 @@ export function max4000Chars(str: string): string {
   return str;
 }
 
-export function getProjectAndRepo(
-  str: string
-): {
+export function getProjectAndRepo(str: string): {
   project: string;
   repo: string;
 } {

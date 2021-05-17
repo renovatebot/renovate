@@ -53,7 +53,7 @@ function getCallerFileName(): string | null {
   try {
     const err = new Error();
 
-    const stack = (err.stack as unknown) as NodeJS.CallSite[];
+    const stack = err.stack as unknown as NodeJS.CallSite[];
 
     let currentFile = null;
     for (const frame of stack) {

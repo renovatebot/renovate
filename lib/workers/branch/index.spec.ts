@@ -1068,14 +1068,18 @@ describe(getName(), () => {
       });
       expect(exec.exec).toHaveBeenCalledTimes(2);
       expect(
-        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-          (f) => f.name === 'modified_file'
-        ).contents as Buffer).toString()
+        (
+          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+            (f) => f.name === 'modified_file'
+          ).contents as Buffer
+        ).toString()
       ).toBe('modified file content again');
       expect(
-        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-          (f) => f.name === 'deleted_then_created_file'
-        ).contents as Buffer).toString()
+        (
+          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+            (f) => f.name === 'deleted_then_created_file'
+          ).contents as Buffer
+        ).toString()
       ).toBe('this file was once deleted');
       expect(
         commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
@@ -1194,9 +1198,11 @@ describe(getName(), () => {
       });
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
-        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-          (f) => f.name === 'modified_file'
-        ).contents as Buffer).toString()
+        (
+          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+            (f) => f.name === 'modified_file'
+          ).contents as Buffer
+        ).toString()
       ).toBe('modified file content');
     });
   });

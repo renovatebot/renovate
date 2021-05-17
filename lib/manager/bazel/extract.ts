@@ -256,9 +256,10 @@ export function extractPackageFile(
       dep.datasource = datasourceGo.id;
       dep.lookupName = importpath;
       if (remote) {
-        const remoteMatch = /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/.exec(
-          remote
-        );
+        const remoteMatch =
+          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/.exec(
+            remote
+          );
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.lookupName = remote.replace('https://', '');
         } else {

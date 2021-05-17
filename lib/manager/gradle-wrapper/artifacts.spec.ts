@@ -170,8 +170,7 @@ describe(getName(), () => {
           'user-agent': 'https://github.com/renovatebot/renovate',
         },
         method: 'GET',
-        url:
-          'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+        url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
       },
     ]);
   });
@@ -205,8 +204,7 @@ describe(getName(), () => {
           'user-agent': 'https://github.com/renovatebot/renovate',
         },
         method: 'GET',
-        url:
-          'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+        url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
       },
     ]);
   });

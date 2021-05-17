@@ -115,9 +115,9 @@ export async function getReleases(
   const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
   const packageRegistration = await http.getJson<PackageRegistration>(url);
   const catalogPages = packageRegistration.body.items || [];
-  const catalogPagesQueue = catalogPages.map((page) => (): Promise<
-    CatalogEntry[]
-  > => getCatalogEntry(page));
+  const catalogPagesQueue = catalogPages.map(
+    (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(page)
+  );
   const catalogEntries = (
     await pAll(catalogPagesQueue, { concurrency: 5 })
   ).flat();

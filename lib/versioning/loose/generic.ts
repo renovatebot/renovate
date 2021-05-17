@@ -124,7 +124,8 @@ export const create = ({
 
 export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion
-> implements VersioningApi {
+> implements VersioningApi
+{
   private _getSection(version: string, index: number): number {
     const parsed = this._parse(version);
     return parsed && parsed.release.length > index

@@ -308,14 +308,12 @@ function matchesState(state: string, desiredState: string): boolean {
 
 // TODO: coverage (#9624)
 // istanbul ignore next
-const isRelevantPr = (
-  branchName: string,
-  prTitle: string | null | undefined,
-  state: string
-) => (p: Pr): boolean =>
-  p.sourceBranch === branchName &&
-  (!prTitle || p.title === prTitle) &&
-  matchesState(p.state, state);
+const isRelevantPr =
+  (branchName: string, prTitle: string | null | undefined, state: string) =>
+  (p: Pr): boolean =>
+    p.sourceBranch === branchName &&
+    (!prTitle || p.title === prTitle) &&
+    matchesState(p.state, state);
 
 // TODO: coverage (#9624)
 export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
