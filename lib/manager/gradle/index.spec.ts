@@ -16,7 +16,7 @@ import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { ExtractConfig } from '../types';
+import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('child_process');

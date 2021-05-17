@@ -4,7 +4,7 @@ import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import { writeLocalFile } from '../../util/fs';
-import { ExtractConfig } from '../types';
+import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
 
 const cargo1toml = loadFixture('Cargo.1.toml');

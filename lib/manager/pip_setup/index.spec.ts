@@ -11,7 +11,7 @@ import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
-import { ExtractConfig } from '../types';
+import type { ExtractConfig } from '../types';
 import * as extract from './extract';
 import { extractPackageFile } from '.';
 
