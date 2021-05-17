@@ -137,7 +137,7 @@ export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
     return;
   }
   const error = new Error(CONFIG_VALIDATION);
-  error.location = repoConfig.configFileName;
+  error.validationSource = repoConfig.configFileName;
   error.validationError = repoConfig.configFileParseError.validationError;
   error.validationMessage = repoConfig.configFileParseError.validationMessage;
   throw error;
@@ -161,7 +161,7 @@ export async function mergeRenovateConfig(
   const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
-    error.location = repoConfig.configFileName;
+    error.validationSource = repoConfig.configFileName;
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
