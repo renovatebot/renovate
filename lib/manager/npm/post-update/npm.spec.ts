@@ -3,7 +3,6 @@ import upath from 'upath';
 
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
-import { BinarySource } from '../../../config/types';
 import * as _env from '../../../util/exec/env';
 import * as _fs from '../../../util/fs/proxies';
 import * as npmHelper from './npm';
@@ -120,7 +119,7 @@ describe('generateLockFile', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = false;
-    const binarySource = BinarySource.Global;
+    const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
@@ -135,7 +134,7 @@ describe('generateLockFile', () => {
   it('runs twice if remediating', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const binarySource = BinarySource.Global;
+    const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
@@ -182,7 +181,7 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { binarySource: BinarySource.Docker, constraints: { npm: '^6.0.0' } }
+      { binarySource: 'docker', constraints: { npm: '^6.0.0' } }
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');

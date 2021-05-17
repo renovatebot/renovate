@@ -7,7 +7,6 @@ import {
 } from '../../../test/exec-util';
 import { env, getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource } from '../../config/types';
 import type { RepoAdminConfig } from '../../config/types';
 import * as fs from '../../util/fs';
 import type { ExtractConfig } from '../types';
@@ -76,7 +75,7 @@ describe(getName(), () => {
     });
 
     it('returns found deps (docker)', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
 
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(jsonContent);

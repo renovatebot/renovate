@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { getAdminConfig } from '../../../config/admin';
-import { BinarySource } from '../../../config/types';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
@@ -154,7 +153,7 @@ export async function removeDockerContainer(
 // istanbul ignore next
 export async function removeDanglingContainers(): Promise<void> {
   const { binarySource, dockerChildPrefix } = getAdminConfig();
-  if (binarySource !== BinarySource.Docker) {
+  if (binarySource !== 'docker') {
     return;
   }
 

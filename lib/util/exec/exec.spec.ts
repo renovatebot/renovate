@@ -6,7 +6,6 @@ import {
 import { envMock } from '../../../test/exec-util';
 import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource } from '../../config/types';
 import type { RepoAdminConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { RawExecOptions, VolumeOption } from './common';
@@ -204,7 +203,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -231,7 +230,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -266,7 +265,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -286,7 +285,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -316,7 +315,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -342,7 +341,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -368,7 +367,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -396,7 +395,7 @@ describe(getName(), () => {
         ],
         adminConfig: {
           dockerUser: 'foobar',
-          binarySource: BinarySource.Docker,
+          binarySource: 'docker',
         },
       },
     ],
@@ -425,7 +424,7 @@ describe(getName(), () => {
         ],
         adminConfig: {
           dockerImagePrefix: 'ghcr.io/renovatebot',
-          binarySource: BinarySource.Docker,
+          binarySource: 'docker',
         },
       },
     ],
@@ -454,7 +453,7 @@ describe(getName(), () => {
         ],
         adminConfig: {
           dockerChildPrefix: 'myprefix_',
-          binarySource: BinarySource.Docker,
+          binarySource: 'docker',
         },
       },
     ],
@@ -487,7 +486,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -519,7 +518,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -541,7 +540,7 @@ describe(getName(), () => {
             maxBuffer: 1024,
           },
         ],
-        adminConfig: { binarySource: BinarySource.Docker },
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
@@ -565,7 +564,7 @@ describe(getName(), () => {
           customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_VALUE',
           },
-          binarySource: BinarySource.Docker,
+          binarySource: 'docker',
         },
       },
     ],
@@ -590,7 +589,7 @@ describe(getName(), () => {
           customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
           },
-          binarySource: BinarySource.Docker,
+          binarySource: 'docker',
         },
       },
     ],
@@ -621,7 +620,7 @@ describe(getName(), () => {
           customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_VALUE',
           },
-          binarySource: BinarySource.Docker,
+          binarySource: 'docker',
         },
       },
     ],
@@ -652,7 +651,7 @@ describe(getName(), () => {
           customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
           },
-          binarySource: BinarySource.Docker,
+          binarySource: 'docker',
         },
       },
     ],
@@ -695,19 +694,19 @@ describe(getName(), () => {
       return undefined;
     });
 
-    setAdminConfig({ binarySource: BinarySource.Global });
+    setAdminConfig({ binarySource: 'global' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setAdminConfig({ binarySource: BinarySource.Docker });
+    setAdminConfig({ binarySource: 'docker' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setAdminConfig({ binarySource: BinarySource.Global });
+    setAdminConfig({ binarySource: 'global' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setAdminConfig({ binarySource: BinarySource.Docker });
+    setAdminConfig({ binarySource: 'docker' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
@@ -730,7 +729,7 @@ describe(getName(), () => {
   });
 
   it('wraps error if removeDockerContainer throws an error', async () => {
-    setAdminConfig({ binarySource: BinarySource.Docker });
+    setAdminConfig({ binarySource: 'docker' });
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });

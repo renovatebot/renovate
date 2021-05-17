@@ -3,7 +3,6 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource } from '../../config/types';
 import type { RepoAdminConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';
@@ -99,7 +98,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Global });
+    setAdminConfig({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
     fs.readLocalFile.mockResolvedValueOnce(null);
@@ -122,7 +121,7 @@ describe('bundler.updateArtifacts()', () => {
     beforeEach(() => {
       setAdminConfig({
         ...adminConfig,
-        binarySource: BinarySource.Docker,
+        binarySource: 'docker',
       });
     });
     it('.ruby-version', async () => {
@@ -152,7 +151,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('constraints options', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -184,7 +183,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid constraints options', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -217,7 +216,7 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration environment variables', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -257,7 +256,7 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration as command with bundler < 2', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -302,7 +301,7 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration as command with bundler >= 2', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -347,7 +346,7 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration as command with bundler == latest', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');

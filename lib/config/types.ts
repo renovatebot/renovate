@@ -80,11 +80,6 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
 }
 
-export enum BinarySource {
-  Docker = 'docker',
-  Global = 'global',
-}
-
 // Config options used within the repository worker, but not user configurable
 // The below should contain config options where admin=true
 export interface RepoAdminConfig {
@@ -92,7 +87,7 @@ export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
-  binarySource?: BinarySource;
+  binarySource?: 'docker' | 'global';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;

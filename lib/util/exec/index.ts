@@ -1,7 +1,6 @@
 import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
-import { BinarySource } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import {
@@ -99,7 +98,7 @@ export async function exec(
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
-  const useDocker = binarySource === BinarySource.Docker && docker;
+  const useDocker = binarySource === 'docker' && docker;
   if (useDocker) {
     logger.debug('Using docker to execute');
     const dockerOptions = {

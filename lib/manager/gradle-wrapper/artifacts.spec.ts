@@ -13,7 +13,6 @@ import {
   partial,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource } from '../../config/types';
 import type { RepoAdminConfig } from '../../config/types';
 import { resetPrefetchedImages } from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git';
@@ -32,7 +31,7 @@ const adminConfig: RepoAdminConfig = {
   localDir: resolve(fixtures, './testFiles'),
 };
 
-const dockerAdminConfig = { ...adminConfig, binarySource: BinarySource.Docker };
+const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 
 const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',

@@ -11,7 +11,6 @@ import {
   mocked,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource } from '../../config/types';
 import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
@@ -33,7 +32,7 @@ const adminConfig: RepoAdminConfig = {
 
 const dockerAdminConfig = {
   ...adminConfig,
-  binarySource: BinarySource.Docker,
+  binarySource: 'docker',
 };
 
 const gradleOutput = {
