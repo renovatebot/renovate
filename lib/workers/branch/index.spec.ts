@@ -12,7 +12,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import * as _npmPostExtract from '../../manager/npm/post-update';
-import type { WriteExistingFilesResult } from '../../manager/npm/post-update';
+import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
@@ -1065,14 +1065,18 @@ describe(getName(), () => {
       });
       expect(exec.exec).toHaveBeenCalledTimes(2);
       expect(
-        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-          (f) => f.name === 'modified_file'
-        ).contents as Buffer).toString()
+        (
+          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+            (f) => f.name === 'modified_file'
+          ).contents as Buffer
+        ).toString()
       ).toBe('modified file content again');
       expect(
-        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-          (f) => f.name === 'deleted_then_created_file'
-        ).contents as Buffer).toString()
+        (
+          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+            (f) => f.name === 'deleted_then_created_file'
+          ).contents as Buffer
+        ).toString()
       ).toBe('this file was once deleted');
       expect(
         commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
@@ -1191,9 +1195,11 @@ describe(getName(), () => {
       });
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
-        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-          (f) => f.name === 'modified_file'
-        ).contents as Buffer).toString()
+        (
+          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+            (f) => f.name === 'modified_file'
+          ).contents as Buffer
+        ).toString()
       ).toBe('modified file content');
     });
   });

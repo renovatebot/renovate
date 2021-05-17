@@ -14,6 +14,7 @@ Object {
       "matchPackageNames": Array [
         "foo",
       ],
+      "separateMajorMinor": false,
     },
     Object {
       "matchPackageNames": Array [

@@ -742,11 +742,10 @@ Example: If you have set `branchPrefix: "deps-"` and `hashedBranchLength: 12` it
 
 ## hostRules
 
-Currently the purpose of `hostRules` is to configure credentials for host authentication.
+The primary purpose of `hostRules` is to configure credentials for host authentication.
 You tell Renovate how to match against the host you need authenticated, and then you also tell it which credentials to use.
 
-The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`.
-All are optional, but you can only have one of the last three per rule.
+The lookup keys for `hostRules` are: `hostType` and `matchHost`, both of which are optional.
 
 Supported credential fields are `token`, `username`, `password`, `timeout`, `enabled` and `insecureRegistry`.
 
@@ -756,7 +755,7 @@ Example for configuring `docker` auth:
 {
   "hostRules": [
     {
-      "domainName": "docker.io",
+      "matchHost": "docker.io",
       "username": "<some-username>",
       "password": "<some-password>"
     }
@@ -770,7 +769,7 @@ To disable requests to a particular host, you can configure a rule like:
 {
   "hostRules": [
     {
-      "hostName": "registry.npmjs.org",
+      "matchHost": "registry.npmjs.org",
       "enabled": false
     }
   ]
@@ -842,7 +841,7 @@ To abort Renovate for errors for a specific `docker` host:
 {
   "hostRules": [
     {
-      "hostName": "docker.company.com",
+      "matchHost": "docker.company.com",
       "abortOnError": true
     }
   ]
@@ -861,7 +860,7 @@ An example for npm basic auth with token:
 {
   "hostRules": [
     {
-      "domainName": "npm.custom.org",
+      "matchHost": "npm.custom.org",
       "token": "<some-token>",
       "authType": "Basic"
     }
@@ -870,13 +869,6 @@ An example for npm basic auth with token:
 ```
 
 This will generate the following header: `authorization: Basic <some-token>`.
-
-### baseUrl
-
-Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host.
-For example, `"baseUrl": "https://api.github.com"` is equivalent to `"hostName": "api.github.com"` but `"baseUrl": "https://api.github.com/google/"` is not.
-
-Renovate does not do a "longest match" algorithm to pick between multiple matching `baseUrl` values in different rules, so put the longer `baseUrl` rule _after_ the shorter one in your `hostRules`.
 
 ### concurrentRequestLimit
 
@@ -890,29 +882,22 @@ Example config:
 {
   "hostRules": [
     {
-      "hostName": "github.com",
+      "matchHost": "github.com",
       "concurrentRequestLimit": 2
     }
   ]
 }
 ```
 
-### domainName
-
-If you have any uncertainty about exactly which hosts a service uses, then it can be more reliable to use `domainName` instead of `hostName` or `baseUrl`.
-e.g. configure `"hostName": "docker.io"` to cover both `index.docker.io` and `auth.docker.io` and any other host that's in use.
-
 ### enableHttp2
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
 
-### hostName
-
 ### hostType
 
 `hostType` is another way to filter rules and can be either a platform such as `github` and `bitbucket-server`, or it can be a datasource such as `docker` and `rubygems`.
-You usually don't need to configure it in a host rule if you have already configured `domainName`, `hostName` or `baseUrl` and only one host type is in use for those, as is usually the case.
-`hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `baseUrl` rules could achieve the same thing.
+You usually don't need to configure it in a host rule if you have already configured `matchHost` and only one host type is in use for those, as is usually the case.
+`hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `matchHost` rules could achieve the same thing.
 
 ### insecureRegistry
 
@@ -927,7 +912,7 @@ Example:
 {
   "hostRules": [
     {
-      "hostName": "reg.insecure.com",
+      "matchHost": "reg.insecure.com",
       "insecureRegistry": true
     }
   ]

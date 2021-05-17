@@ -4,20 +4,10 @@ import * as datasourceHelm from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { Doc } from './types';
 
 const isValidChartName = (name: string): boolean =>
   !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
-
-interface Doc {
-  releases?: {
-    chart: string;
-    version: string;
-  }[];
-  repositories?: {
-    name: string;
-    url: string;
-  }[];
-}
 
 export function extractPackageFile(
   content: string,

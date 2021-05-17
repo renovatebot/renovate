@@ -3,19 +3,7 @@ import { safeLoad } from 'js-yaml';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageFile } from '../types';
-
-interface DockerComposeConfig {
-  version?: string;
-  services?: Record<string, DockerComposeService>;
-}
-
-interface DockerComposeService {
-  image?: string;
-  build?: {
-    context?: string;
-    dockerfile?: string;
-  };
-}
+import type { DockerComposeConfig } from './types';
 
 class LineMapper {
   private imageLines: { line: string; lineNumber: number; used: boolean }[];
@@ -47,7 +35,7 @@ export function extractPackageFile(
   let config: DockerComposeConfig;
   try {
     // TODO: fix me (#9610)
-    config = safeLoad(content, { json: true }) as unknown;
+    config = safeLoad(content, { json: true }) as DockerComposeConfig;
     if (!config) {
       logger.debug(
         { fileName },

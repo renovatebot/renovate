@@ -59,6 +59,36 @@ describe(getName(), () => {
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(3);
     });
+    it('uses paginationField', async () => {
+      const url = '/some-url';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(
+          200,
+          { the_field: ['a'], total: 4 },
+          {
+            link: `<${url}?page=2>; rel="next", <${url}?page=3>; rel="last"`,
+          }
+        )
+        .get(`${url}?page=2`)
+        .reply(
+          200,
+          { the_field: ['b', 'c'], total: 4 },
+          {
+            link: `<${url}?page=3>; rel="next", <${url}?page=3>; rel="last"`,
+          }
+        )
+        .get(`${url}?page=3`)
+        .reply(200, { the_field: ['d'], total: 4 });
+      const res: any = await githubApi.getJson('some-url', {
+        paginate: true,
+        paginationField: 'the_field',
+      });
+      expect(res.body.the_field).toEqual(['a', 'b', 'c', 'd']);
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(3);
+    });
     it('attempts to paginate', async () => {
       const url = '/some-url';
       httpMock

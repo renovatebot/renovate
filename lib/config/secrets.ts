@@ -64,7 +64,7 @@ function replaceSecretsInString(
   const disallowedPrefixes = ['branch', 'commit', 'group', 'pr', 'semantic'];
   if (disallowedPrefixes.some((prefix) => key.startsWith(prefix))) {
     const error = new Error(CONFIG_VALIDATION);
-    error.location = 'config';
+    error.validationSource = 'config';
     error.validationError = 'Disallowed secret substitution';
     error.validationMessage = `The field ${key} may not use secret substitution`;
     throw error;
@@ -74,7 +74,7 @@ function replaceSecretsInString(
       return secrets[secretName];
     }
     const error = new Error(CONFIG_VALIDATION);
-    error.location = 'config';
+    error.validationSource = 'config';
     error.validationError = 'Unknown secret name';
     error.validationMessage = `The following secret name was not found in config: ${String(
       secretName
