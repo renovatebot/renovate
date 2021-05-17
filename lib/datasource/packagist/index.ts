@@ -143,8 +143,8 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
     providerPackages,
   } = registryMeta;
   if (files) {
-    const queue = files.map((file) => (): Promise<PackagistFile> =>
-      getPackagistFile(regUrl, file)
+    const queue = files.map(
+      (file) => (): Promise<PackagistFile> => getPackagistFile(regUrl, file)
     );
     const resolvedFiles = await pAll(queue, { concurrency: 5 });
     for (const res of resolvedFiles) {
