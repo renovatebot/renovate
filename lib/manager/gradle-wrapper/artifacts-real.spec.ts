@@ -3,7 +3,8 @@ import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
 import { getName, git, partial } from '../../../test/util';
-import { setUtilConfig } from '../../util';
+import { setExecConfig } from '../../util/exec';
+import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
@@ -36,7 +37,8 @@ describe(getName(), () => {
 
     beforeEach(async () => {
       jest.resetAllMocks();
-      await setUtilConfig(config);
+      await setExecConfig(config);
+      setFsConfig(config);
       httpMock.setup();
     });
 
@@ -160,7 +162,8 @@ describe(getName(), () => {
     it('gradlew failed', async () => {
       const cfg = { ...config, localDir: resolve(fixtures, './wrongCmd') };
 
-      await setUtilConfig(cfg);
+      await setExecConfig(cfg);
+      setFsConfig(cfg);
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
@@ -244,8 +247,7 @@ describe(getName(), () => {
             'user-agent': 'https://github.com/renovatebot/renovate',
           },
           method: 'GET',
-          url:
-            'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+          url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
         },
       ]);
     });
@@ -279,8 +281,7 @@ describe(getName(), () => {
             'user-agent': 'https://github.com/renovatebot/renovate',
           },
           method: 'GET',
-          url:
-            'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+          url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
         },
       ]);
     });

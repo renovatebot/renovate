@@ -9,18 +9,13 @@ import * as bitbucket from '../bitbucket-tags';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type { DataSource } from './types';
 
 export const id = 'go';
 export const customRegistrySupport = false;
 
 const http = new Http(id);
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
-
-interface DataSource {
-  datasource: string;
-  registryUrl?: string;
-  lookupName: string;
-}
 
 async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (goModule.startsWith('gopkg.in/')) {
@@ -153,7 +148,10 @@ export async function getReleases({
   const source = await getDatasource(lookupName);
 
   if (!source) {
-    logger.warn({ lookupName }, 'Unsupported dependency.');
+    logger.info(
+      { lookupName },
+      'Unsupported go host - cannot look up versions'
+    );
     return null;
   }
 

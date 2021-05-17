@@ -198,7 +198,7 @@ module.exports = {
   hostRules: [
     {
       hostType: 'docker',
-      hostName: 'your.host.io',
+      matchHost: 'your.host.io',
       username: '<your-username>',
       password: process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD,
     },
@@ -215,7 +215,7 @@ This is how you connect to a private Helm repository:
 module.exports = {
   hostRules: [
     {
-      hostName: 'your.host.io',
+      matchHost: 'your.host.io',
       username: '<your-username>',
       password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
     },

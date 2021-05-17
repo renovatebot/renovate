@@ -6,7 +6,8 @@ import { BinarySource } from '../../util/exec/common';
 import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { PythonSetup, getExtractFile, parseReport } from './util';
+import type { PythonSetup } from './types';
+import { getExtractFile, parseReport } from './util';
 
 export const pythonVersions = ['python', 'python3', 'python3.8', 'python3.9'];
 let pythonAlias: string | null = null;
@@ -82,7 +83,7 @@ export async function extractPackageFile(
   try {
     setup = await extractSetupFile(content, packageFile, config);
   } catch (err) {
-    logger.warn({ err, content, packageFile }, 'Failed to read setup.py file');
+    logger.debug({ err, content, packageFile }, 'Failed to read setup.py file');
   }
   if (!setup) {
     return null;

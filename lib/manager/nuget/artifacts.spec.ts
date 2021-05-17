@@ -2,10 +2,11 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
-import { setUtilConfig } from '../../util';
+import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import { setFsConfig } from '../../util/fs';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from './artifacts';
 import {
@@ -22,15 +23,12 @@ jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const getConfiguredRegistries: jest.Mock<
-  typeof _getConfiguredRegistries
-> = _getConfiguredRegistries as any;
-const getDefaultRegistries: jest.Mock<
-  typeof _getDefaultRegistries
-> = _getDefaultRegistries as any;
-const getRandomString: jest.Mock<
-  typeof _getRandomString
-> = _getRandomString as any;
+const getConfiguredRegistries: jest.Mock<typeof _getConfiguredRegistries> =
+  _getConfiguredRegistries as any;
+const getDefaultRegistries: jest.Mock<typeof _getDefaultRegistries> =
+  _getDefaultRegistries as any;
+const getRandomString: jest.Mock<typeof _getRandomString> =
+  _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
 const config = {
@@ -49,7 +47,8 @@ describe('updateArtifacts', () => {
       Promise.resolve(dirName)
     );
     getRandomString.mockReturnValue('not-so-random' as any);
-    await setUtilConfig(config);
+    await setExecConfig(config);
+    setFsConfig(config);
     docker.resetPrefetchedImages();
   });
   it('aborts if no lock file found', async () => {
@@ -146,7 +145,8 @@ describe('updateArtifacts', () => {
 
   it('supports docker mode', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);

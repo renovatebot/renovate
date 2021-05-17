@@ -1,13 +1,13 @@
 import upath from 'upath';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
+import { TokenType } from './common';
 import {
   ManagerData,
   PackageVariables,
   Token,
-  TokenType,
   VariableRegistry,
-} from './common';
+} from './types';
 
 const artifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$'
