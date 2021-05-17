@@ -208,8 +208,9 @@ export function collectVersionVariables(
     }
 
     if (!dep.currentValue) {
-      const dependencyLiteralRegex =
-        dependencyStringLiteralExpressionFormatMatch(dependency);
+      const dependencyLiteralRegex = dependencyStringLiteralExpressionFormatMatch(
+        dependency
+      );
       const currentValue = dependencyLiteralRegex.exec(buildGradleContent)?.[1];
       if (currentValue) {
         dep.currentValue = currentValue;
@@ -263,8 +264,9 @@ function updateLocalVariables(
     const match = regex.exec(buildGradleContent);
     if (match) {
       const variableDefinitionRegex = variableDefinitionFormatMatch(match[1]);
-      const variableDefinitionMatch =
-        variableDefinitionRegex.exec(buildGradleContent);
+      const variableDefinitionMatch = variableDefinitionRegex.exec(
+        buildGradleContent
+      );
       if (variableDefinitionMatch) {
         return buildGradleContent.replace(
           variableDefinitionMatch[0],

@@ -23,10 +23,9 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue; // eslint-disable-line no-continue
     }
 
-    const tagMatch =
-      /^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
-        line
-      );
+    const tagMatch = /^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
+      line
+    );
     if (tagMatch?.groups) {
       const { depName, currentValue } = tagMatch.groups;
       const dep: PackageDependency = {

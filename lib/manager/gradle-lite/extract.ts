@@ -58,11 +58,11 @@ export async function extractAllPackageFiles(
         extractedDeps.push(...deps);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
-        const {
-          deps,
-          urls,
-          vars: gradleVars,
-        } = parseGradle(content, vars, packageFile);
+        const { deps, urls, vars: gradleVars } = parseGradle(
+          content,
+          vars,
+          packageFile
+        );
         urls.forEach((url) => {
           if (!registryUrls.includes(url)) {
             registryUrls.push(url);

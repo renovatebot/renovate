@@ -42,20 +42,14 @@ describe(getName(), () => {
       expect(res.deps).toHaveLength(3);
     });
     it('extracts multiple dependencies', () => {
-      const res = extractPackageFile(
-        requirements2,
-        'unused_file_name',
-        config
-      ).deps;
+      const res = extractPackageFile(requirements2, 'unused_file_name', config)
+        .deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
     it('handles comments and commands', () => {
-      const res = extractPackageFile(
-        requirements3,
-        'unused_file_name',
-        config
-      ).deps;
+      const res = extractPackageFile(requirements3, 'unused_file_name', config)
+        .deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });

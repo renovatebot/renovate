@@ -147,7 +147,10 @@ describe(getName(), () => {
       const configParser = await import('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules.map((rule) => rule.a)).toMatchObject([
-        1, 2, 3, 4,
+        1,
+        2,
+        3,
+        4,
       ]);
     });
     it('merges constraints', async () => {

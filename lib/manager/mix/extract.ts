@@ -5,8 +5,7 @@ import { getSiblingFileName, localPathExists } from '../../util/fs';
 import type { PackageDependency, PackageFile } from '../types';
 
 const depSectionRegExp = /defp\s+deps.*do/g;
-const depMatchRegExp =
-  /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
+const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
 
 export async function extractPackageFile(
   content: string,

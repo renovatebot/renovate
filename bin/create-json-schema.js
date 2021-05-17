@@ -86,8 +86,9 @@ function addChildrenArrayInParents() {
 function createSchemaForChildConfigs() {
   for (const option of options) {
     if (option.parent) {
-      properties[option.parent].items.allOf[0].properties[option.name] =
-        createSingleConfig(option);
+      properties[option.parent].items.allOf[0].properties[
+        option.name
+      ] = createSingleConfig(option);
     }
   }
 }

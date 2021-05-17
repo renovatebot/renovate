@@ -12,8 +12,11 @@ export function getBucket(
   newVersion: string,
   versioning: allVersioning.VersioningApi
 ): string {
-  const { separateMajorMinor, separateMultipleMajor, separateMinorPatch } =
-    config;
+  const {
+    separateMajorMinor,
+    separateMultipleMajor,
+    separateMinorPatch,
+  } = config;
   if (!separateMajorMinor) {
     return 'latest';
   }

@@ -101,7 +101,8 @@ describe(getName(), () => {
           { tag_name: `v1.0.0` },
           {
             tag_name: `v1.0.1`,
-            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+            body:
+              'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
           },
         ]);
 
@@ -122,7 +123,8 @@ describe(getName(), () => {
           { tag_name: `v1.0.0` },
           {
             tag_name: `v1.0.1`,
-            body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+            body:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
           },
         ]);
       const res = await getReleaseList(
@@ -143,7 +145,8 @@ describe(getName(), () => {
           { tag_name: `v1.0.0` },
           {
             tag_name: `v1.0.1`,
-            body: 'some body #123, [#124](https://my.custom.domain/some/yet-other-repository/issues/124)',
+            body:
+              'some body #123, [#124](https://my.custom.domain/some/yet-other-repository/issues/124)',
           },
         ]);
       const res = await getReleaseList(
@@ -180,7 +183,8 @@ describe(getName(), () => {
             { tag_name: `${prefix}1.0.0` },
             {
               tag_name: `${prefix}1.0.1`,
-              body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+              body:
+                'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
             },
           ]);
         const res = await getReleaseNotes(
@@ -204,7 +208,8 @@ describe(getName(), () => {
             { tag_name: `${prefix}1.0.0` },
             {
               tag_name: `${prefix}1.0.1`,
-              body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+              body:
+                'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
             },
           ]);
 

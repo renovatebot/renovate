@@ -13,9 +13,7 @@ import {
   partial,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
+import { BinarySource, RepoAdminConfig } from '../../config/types';
 import { resetPrefetchedImages } from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git';
 import type { UpdateArtifactsConfig } from '../types';
@@ -47,7 +45,7 @@ function readString(...paths: string[]): Promise<string> {
 }
 
 describe(getName(), () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     httpMock.setup();
 
@@ -57,7 +55,6 @@ describe(getName(), () => {
       LC_ALL: 'en_US',
     });
 
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
     resetPrefetchedImages();
 
@@ -173,7 +170,8 @@ describe(getName(), () => {
           'user-agent': 'https://github.com/renovatebot/renovate',
         },
         method: 'GET',
-        url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+        url:
+          'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
       },
     ]);
   });
@@ -207,7 +205,8 @@ describe(getName(), () => {
           'user-agent': 'https://github.com/renovatebot/renovate',
         },
         method: 'GET',
-        url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+        url:
+          'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
       },
     ]);
   });

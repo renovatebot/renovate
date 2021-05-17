@@ -298,8 +298,9 @@ describe(getName(), () => {
         enabled: true,
         separateMinorPatch: true,
       };
-      const { isMigrated, migratedConfig } =
-        configMigration.migrateConfig(config);
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config
+      );
       expect(isMigrated).toBe(false);
       expect(migratedConfig).toMatchObject(config);
     });

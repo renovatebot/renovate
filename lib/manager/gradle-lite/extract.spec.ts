@@ -4,12 +4,14 @@ import { extractAllPackageFiles } from '.';
 jest.mock('../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
-  fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
-    const content = files?.[fileName];
-    return typeof content === 'string'
-      ? Promise.resolve(content)
-      : Promise.reject(`File not found: ${fileName}`);
-  });
+  fs.readLocalFile.mockImplementation(
+    (fileName: string): Promise<string> => {
+      const content = files?.[fileName];
+      return typeof content === 'string'
+        ? Promise.resolve(content)
+        : Promise.reject(`File not found: ${fileName}`);
+    }
+  );
 }
 
 describe(getName(), () => {

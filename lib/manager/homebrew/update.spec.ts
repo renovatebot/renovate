@@ -28,7 +28,8 @@ describe(getName(), () => {
         repoName: 'aide',
         sha256:
           '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
-        url: 'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
+        url:
+          'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
       },
       newValue: 'v0.17.7',
     };
@@ -54,7 +55,8 @@ describe(getName(), () => {
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        url:
+          'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       },
       newValue: 'v0.9.3',
     };
@@ -82,7 +84,8 @@ describe(getName(), () => {
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        url:
+          'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       },
       newValue: 'v0.9.3',
     };
@@ -133,7 +136,8 @@ describe(getName(), () => {
         repoName: 'invalid/repo/name',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        url:
+          'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       },
       newValue: 'v0.9.3',
     };
@@ -163,7 +167,8 @@ describe(getName(), () => {
         repoName: 'wrong-version/archive/v10.2.3.tar.gz',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        url:
+          'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       },
       newValue: 'v0.9.3',
     };
@@ -202,7 +207,8 @@ describe(getName(), () => {
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        url:
+          'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       },
       newValue: 'v0.9.3',
     };
@@ -236,7 +242,8 @@ describe(getName(), () => {
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        url:
+          'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       },
       newValue: 'v0.9.3',
     };
@@ -271,7 +278,8 @@ describe(getName(), () => {
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        url:
+          'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       },
       newValue: 'v0.9.3',
     };
@@ -305,7 +313,8 @@ describe(getName(), () => {
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        url:
+          'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       },
       newValue: 'v0.9.3',
     };
@@ -332,7 +341,8 @@ describe(getName(), () => {
         repoName: 'aide',
         sha256:
           '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
-        url: 'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
+        url:
+          'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
       },
       newValue: 'v0.17.7',
     };

@@ -93,7 +93,7 @@ export function find(search: HostRuleSearch): HostRule {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }
-  let res = {} as any as HostRule;
+  let res = ({} as any) as HostRule;
   // First, apply empty rule matches
   hostRules
     .filter((rule) => isEmptyRule(rule))

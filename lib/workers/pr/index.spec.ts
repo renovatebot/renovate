@@ -81,10 +81,12 @@ function setupGitlabChangelogMock() {
           },
         ],
         releaseNotes: {
-          url: 'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+          url:
+            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
         },
         compare: {
-          url: 'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+          url:
+            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
         },
       },
     ],
@@ -174,7 +176,8 @@ describe(getName(), () => {
     const existingPr: Pr = {
       displayNumber: 'Existing PR',
       title: 'Update dependency dummy to v1.1.0',
-      body: 'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
+      body:
+        'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     } as never;
     beforeEach(() => {
       jest.resetAllMocks();

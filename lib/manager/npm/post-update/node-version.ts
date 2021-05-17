@@ -40,9 +40,8 @@ export async function getNodeConstraint(
   let lockfileVersion = 1;
   try {
     const lockFileName = getSiblingFileName(packageFile, 'package-lock.json');
-    lockfileVersion = JSON.parse(
-      await readLocalFile(lockFileName, 'utf8')
-    ).lockfileVersion;
+    lockfileVersion = JSON.parse(await readLocalFile(lockFileName, 'utf8'))
+      .lockfileVersion;
   } catch (err) {
     // do nothing
   }

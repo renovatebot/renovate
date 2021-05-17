@@ -1,9 +1,7 @@
 import { TerraformDependencyTypes } from './common';
 
-export const keyValueExtractionRegex =
-  /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/;
-export const resourceTypeExtractionRegex =
-  /^\s*resource\s+"(?<type>[^\s]+)"\s+"(?<name>[^"]+)"\s*{/;
+export const keyValueExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/;
+export const resourceTypeExtractionRegex = /^\s*resource\s+"(?<type>[^\s]+)"\s+"(?<name>[^"]+)"\s*{/;
 
 export function getTerraformDependencyType(
   value: string

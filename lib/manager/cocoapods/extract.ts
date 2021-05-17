@@ -48,8 +48,9 @@ export function parseLine(line: string): ParsedLine {
 export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
   if (git?.startsWith('https://github.com/')) {
-    const githubMatch =
-      /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/.exec(git);
+    const githubMatch = /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/.exec(
+      git
+    );
     const { account, repo } = githubMatch?.groups || {};
     if (account && repo) {
       return {

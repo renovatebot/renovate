@@ -3,7 +3,7 @@ import upath from 'upath';
 
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
-import { BinarySource } from '../../../util/exec/common';
+import { BinarySource } from '../../../config/types';
 import * as _env from '../../../util/exec/env';
 import * as _fs from '../../../util/fs/proxies';
 import * as npmHelper from './npm';

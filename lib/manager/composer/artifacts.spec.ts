@@ -3,15 +3,13 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { BinarySource, RepoAdminConfig } from '../../config/types';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 import * as _datasource from '../../datasource';
 import * as datasourcePackagist from '../../datasource/packagist';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
@@ -46,11 +44,10 @@ const repoStatus = partial<StatusResult>({
 });
 
 describe('.updateArtifacts()', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(adminConfig as never);
     docker.resetPrefetchedImages();
     hostRules.clear();
     setAdminConfig(adminConfig);
@@ -202,8 +199,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
 
     const execSnapshots = mockExecAll(exec);
@@ -234,6 +230,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Global });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
@@ -246,10 +243,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          binarySource: BinarySource.Global,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();

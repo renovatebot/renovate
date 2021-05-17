@@ -4,10 +4,8 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { loadFixture, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { BinarySource, RepoAdminConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
@@ -35,10 +33,9 @@ const adminConfig: RepoAdminConfig = {
 const config: UpdateArtifactsConfig = {};
 
 describe('.updateArtifacts()', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
@@ -133,8 +130,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -159,8 +155,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker (constraints)', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce(
       '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
     );

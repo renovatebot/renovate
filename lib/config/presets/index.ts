@@ -175,8 +175,13 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const { presetSource, packageName, presetPath, presetName, params } =
-    parsePreset(preset);
+  const {
+    presetSource,
+    packageName,
+    presetPath,
+    presetName,
+    params,
+  } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
     packageName,
     presetPath,

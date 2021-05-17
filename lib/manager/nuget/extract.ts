@@ -19,8 +19,7 @@ import { getConfiguredRegistries } from './util';
  * The update of the right boundary does not make sense regarding to the lowest version restore rule,
  * so we don't include it in the extracting regexp
  */
-const checkVersion =
-  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
+const checkVersion = /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
 const elemNames = new Set([
   'PackageReference',
   'PackageVersion',

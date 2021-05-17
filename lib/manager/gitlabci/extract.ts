@@ -61,10 +61,9 @@ export function extractPackageFile(content: string): PackageFile | null {
           foundImage = false;
           const serviceImageLine = skipCommentLines(lines, lineNumber + 1);
           logger.trace(`serviceImageLine: "${serviceImageLine.line}"`);
-          const serviceImageMatch =
-            /^\s*-\s*(?:name:\s*)?'?"?([^\s'"]+)'?"?\s*$/.exec(
-              serviceImageLine.line
-            );
+          const serviceImageMatch = /^\s*-\s*(?:name:\s*)?'?"?([^\s'"]+)'?"?\s*$/.exec(
+            serviceImageLine.line
+          );
           if (serviceImageMatch) {
             logger.trace('serviceImageMatch');
             foundImage = true;

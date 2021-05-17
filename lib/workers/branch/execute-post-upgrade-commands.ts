@@ -22,8 +22,10 @@ export async function postUpgradeCommandsExecutor(
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const artifactErrors = [...(config.artifactErrors || [])];
-  const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
-    getAdminConfig();
+  const {
+    allowedPostUpgradeCommands,
+    allowPostUpgradeCommandTemplating,
+  } = getAdminConfig();
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -182,8 +184,10 @@ export default async function executePostUpgradeCommands(
       postUpgradeTasks.executionMode === 'update'
   );
 
-  const { updatedArtifacts, artifactErrors } =
-    await postUpgradeCommandsExecutor(updateUpgradeCommands, config);
+  const {
+    updatedArtifacts,
+    artifactErrors,
+  } = await postUpgradeCommandsExecutor(updateUpgradeCommands, config);
   return postUpgradeCommandsExecutor(branchUpgradeCommands, {
     ...config,
     updatedArtifacts,

@@ -84,8 +84,7 @@ const lexer = moo.states({
     [TokenType.DoubleQuotedFinish]: { match: '"', pop: 1 },
     variable: {
       // Supported: ${foo}, $foo, ${ foo.bar.baz }, $foo.bar.baz
-      match:
-        /\${\s*[a-zA-Z_][a-zA-Z0-9_]*(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*/,
+      match: /\${\s*[a-zA-Z_][a-zA-Z0-9_]*(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*/,
       value: (x: string): string =>
         x.replace(/^\${?\s*/, '').replace(/\s*}$/, ''),
     },

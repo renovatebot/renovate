@@ -3,9 +3,7 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
+import { BinarySource, RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
@@ -25,12 +23,15 @@ jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const getConfiguredRegistries: jest.Mock<typeof _getConfiguredRegistries> =
-  _getConfiguredRegistries as any;
-const getDefaultRegistries: jest.Mock<typeof _getDefaultRegistries> =
-  _getDefaultRegistries as any;
-const getRandomString: jest.Mock<typeof _getRandomString> =
-  _getRandomString as any;
+const getConfiguredRegistries: jest.Mock<
+  typeof _getConfiguredRegistries
+> = _getConfiguredRegistries as any;
+const getDefaultRegistries: jest.Mock<
+  typeof _getDefaultRegistries
+> = _getDefaultRegistries as any;
+const getRandomString: jest.Mock<
+  typeof _getRandomString
+> = _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
 const adminConfig: RepoAdminConfig = {
@@ -42,7 +43,7 @@ const adminConfig: RepoAdminConfig = {
 const config: UpdateArtifactsConfig = {};
 
 describe('updateArtifacts', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     getDefaultRegistries.mockReturnValue([] as any);
@@ -51,7 +52,6 @@ describe('updateArtifacts', () => {
       Promise.resolve(dirName)
     );
     getRandomString.mockReturnValue('not-so-random' as any);
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
@@ -153,8 +153,7 @@ describe('updateArtifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -170,6 +169,7 @@ describe('updateArtifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Global });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -179,10 +179,7 @@ describe('updateArtifacts', () => {
         packageFileName: 'project.csproj',
         updatedDeps: ['dep'],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          binarySource: BinarySource.Global,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();

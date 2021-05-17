@@ -15,8 +15,12 @@ export function filterVersions(
   latestVersion: string,
   releases: Release[]
 ): Release[] {
-  const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
-    config;
+  const {
+    ignoreUnstable,
+    ignoreDeprecated,
+    respectLatest,
+    allowedVersions,
+  } = config;
   let versioning;
   function isVersionStable(version: string): boolean {
     if (!versioning.isStable(version)) {

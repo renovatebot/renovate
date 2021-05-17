@@ -6,13 +6,8 @@ import { promisify } from 'util';
 
 export type Opt<T> = T | null | undefined;
 
-export enum BinarySource {
-  Docker = 'docker',
-  Global = 'global',
-}
-
 export interface ExecConfig {
-  binarySource: Opt<BinarySource>;
+  binarySource: string;
 }
 
 export type VolumesPair = [string, string];

@@ -4,9 +4,7 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
+import { BinarySource, RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -57,13 +55,12 @@ const goEnv = {
 };
 
 describe('.updateArtifacts()', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
@@ -154,8 +151,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -168,15 +164,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Docker,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Global });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -189,17 +183,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Global,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -215,17 +205,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Docker,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with goModTidy', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -244,7 +230,6 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          binarySource: BinarySource.Docker,
           postUpdateOptions: ['gomodTidy'],
         },
       })

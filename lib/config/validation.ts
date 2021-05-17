@@ -263,8 +263,9 @@ export async function validateConfig(
                   }
                   if (tzRe.test(subval)) {
                     const [, timezone] = tzRe.exec(subval);
-                    const [validTimezone, errorMessage] =
-                      hasValidTimezone(timezone);
+                    const [validTimezone, errorMessage] = hasValidTimezone(
+                      timezone
+                    );
                     if (!validTimezone) {
                       errors.push({
                         topic: 'Configuration Error',
@@ -313,9 +314,9 @@ export async function validateConfig(
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
-                  const selectorLength = Object.keys(resolvedRule).filter(
-                    (ruleKey) => selectors.includes(ruleKey)
-                  ).length;
+                  const selectorLength = Object.keys(
+                    resolvedRule
+                  ).filter((ruleKey) => selectors.includes(ruleKey)).length;
                   if (!selectorLength) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
                       packageRule

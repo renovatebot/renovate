@@ -67,10 +67,9 @@ export function migrateConfig(
         delete migratedConfig.pathRules;
       } else if (key === 'suppressNotifications') {
         if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
-          migratedConfig.suppressNotifications =
-            migratedConfig.suppressNotifications.filter(
-              (item) => item !== 'prEditNotification'
-            );
+          migratedConfig.suppressNotifications = migratedConfig.suppressNotifications.filter(
+            (item) => item !== 'prEditNotification'
+          );
         }
       } else if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
@@ -128,10 +127,8 @@ export function migrateConfig(
               )
                 ? migratedConfig.packageRules
                 : [];
-              const payload = migrateConfig(
-                packageFile as RenovateConfig,
-                key
-              ).migratedConfig;
+              const payload = migrateConfig(packageFile as RenovateConfig, key)
+                .migratedConfig;
               for (const subrule of payload.packageRules || []) {
                 subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
@@ -155,10 +152,8 @@ export function migrateConfig(
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
           : [];
-        const depTypePackageRule = migrateConfig(
-          val as RenovateConfig,
-          key
-        ).migratedConfig;
+        const depTypePackageRule = migrateConfig(val as RenovateConfig, key)
+          .migratedConfig;
         depTypePackageRule.depTypeList = [key];
         delete depTypePackageRule.packageRules;
         migratedConfig.packageRules.push(depTypePackageRule);
