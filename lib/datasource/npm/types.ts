@@ -1,3 +1,6 @@
+import type { OutgoingHttpHeaders } from '../../util/http/types';
+import type { Release, ReleaseResult } from '../types';
+
 export interface NpmResponse {
   _id: string;
   name?: string;
@@ -21,4 +24,26 @@ export interface NpmResponse {
   };
   homepage?: string;
   time?: Record<string, string>;
+}
+
+export interface NpmRelease extends Release {
+  gitRef?: string;
+}
+export interface NpmDependency extends ReleaseResult {
+  releases: NpmRelease[];
+  deprecationSource?: string;
+  name: string;
+  homepage: string;
+  sourceUrl: string;
+  versions: Record<string, any>;
+  'dist-tags': Record<string, string>;
+  sourceDirectory?: string;
+}
+
+export type Npmrc = Record<string, any>;
+
+export interface PackageResolution {
+  headers: OutgoingHttpHeaders;
+  packageUrl: string;
+  registryUrl: string;
 }

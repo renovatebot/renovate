@@ -3,10 +3,11 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, git, mocked } from '../../../test/util';
 import * as _datasource from '../../datasource';
-import { setUtilConfig } from '../../util';
+import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import { setFsConfig } from '../../util/fs';
 import { StatusResult } from '../../util/git';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
@@ -44,7 +45,8 @@ describe('bundler.updateArtifacts()', () => {
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     docker.resetPrefetchedImages();
 
-    await setUtilConfig(config);
+    await setExecConfig(config);
+    setFsConfig(config);
   });
   it('returns null by default', async () => {
     expect(
@@ -118,7 +120,8 @@ describe('bundler.updateArtifacts()', () => {
   describe('Docker', () => {
     beforeEach(async () => {
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-      await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+      await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+      setFsConfig({ ...config, binarySource: BinarySource.Docker });
     });
     it('.ruby-version', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
@@ -228,7 +231,7 @@ describe('bundler.updateArtifacts()', () => {
       bundlerHostRules.findAllAuthenticatable.mockReturnValue([
         {
           hostType: 'bundler',
-          hostName: 'gems.private.com',
+          matchHost: 'gems.private.com',
           resolvedHost: 'gems.private.com',
           username: 'some-user',
           password: 'some-password',
@@ -270,7 +273,7 @@ describe('bundler.updateArtifacts()', () => {
       bundlerHostRules.findAllAuthenticatable.mockReturnValue([
         {
           hostType: 'bundler',
-          hostName: 'gems-private.com',
+          matchHost: 'gems-private.com',
           resolvedHost: 'gems-private.com',
           username: 'some-user',
           password: 'some-password',
@@ -315,7 +318,7 @@ describe('bundler.updateArtifacts()', () => {
       bundlerHostRules.findAllAuthenticatable.mockReturnValue([
         {
           hostType: 'bundler',
-          hostName: 'gems-private.com',
+          matchHost: 'gems-private.com',
           resolvedHost: 'gems-private.com',
           username: 'some-user',
           password: 'some-password',
@@ -360,7 +363,7 @@ describe('bundler.updateArtifacts()', () => {
       bundlerHostRules.findAllAuthenticatable.mockReturnValue([
         {
           hostType: 'bundler',
-          hostName: 'gems-private.com',
+          matchHost: 'gems-private.com',
           resolvedHost: 'gems-private.com',
           username: 'some-user',
           password: 'some-password',

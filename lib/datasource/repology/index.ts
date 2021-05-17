@@ -5,6 +5,7 @@ import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { getQueryString } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { RepologyPackage, RepologyPackageType } from './types';
 
 export const id = 'repology';
 export const customRegistrySupport = true;
@@ -15,17 +16,7 @@ const http = new Http(id);
 const cacheNamespace = `datasource-${id}-list`;
 const cacheMinutes = 60;
 
-export type RepologyPackageType = 'binname' | 'srcname';
 const packageTypes: RepologyPackageType[] = ['binname', 'srcname'];
-
-export interface RepologyPackage {
-  repo: string;
-  visiblename: string;
-  version: string;
-  srcname?: string;
-  binname?: string;
-  origversion?: string;
-}
 
 async function queryPackages(url: string): Promise<RepologyPackage[]> {
   try {
@@ -101,7 +92,7 @@ function findPackageInResponse(
   // In some cases Repology bundles multiple packages into a single project, which might result in ambiguous results.
   // We need to do additional filtering by matching allowed package types passed as params with package description.
   // Remaining packages are the one we are looking for
-  let packagesWithType;
+  let packagesWithType: RepologyPackage[];
   for (const pkgType of types) {
     packagesWithType = repoPackages.filter(
       (pkg) => !pkg[pkgType] || pkg[pkgType] === pkgName

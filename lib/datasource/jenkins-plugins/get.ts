@@ -5,6 +5,12 @@ import { getElapsedMinutes } from '../../util/date';
 import { Http } from '../../util/http';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { id } from './common';
+import type {
+  JenkinsCache,
+  JenkinsCacheTypes,
+  JenkinsPluginsInfoResponse,
+  JenkinsPluginsVersionsResponse,
+} from './types';
 
 const http = new Http(id);
 
@@ -12,36 +18,6 @@ const packageInfoUrl =
   'https://updates.jenkins.io/current/update-center.actual.json';
 const packageVersionsUrl =
   'https://updates.jenkins.io/current/plugin-versions.json';
-
-type JenkinsCacheTypes = ReleaseResult | Release[];
-
-interface JenkinsCache<T> {
-  name: string;
-  dataUrl: string;
-  lastSync: Date;
-  cacheTimeMin: number;
-  cache: Record<string, T>;
-  updatePromise?: Promise<void> | undefined;
-}
-
-interface JenkinsPluginInfo {
-  name: string;
-  scm?: string;
-}
-
-interface JenkinsPluginVersion {
-  version: string;
-  buildDate?: string;
-  url?: string;
-}
-
-interface JenkinsPluginsInfoResponse {
-  plugins: Record<string, JenkinsPluginInfo>;
-}
-
-interface JenkinsPluginsVersionsResponse {
-  plugins: Record<string, Record<string, JenkinsPluginVersion>>;
-}
 
 function hasCacheExpired(cache: JenkinsCache<JenkinsCacheTypes>): boolean {
   return getElapsedMinutes(cache.lastSync) >= cache.cacheTimeMin;

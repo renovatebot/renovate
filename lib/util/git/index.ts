@@ -11,6 +11,7 @@ import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
+  REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -420,6 +421,10 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
+    if (err.message?.includes('fatal: ambiguous argument')) {
+      logger.warn({ err }, 'Failed to checkout branch');
+      throw new Error(TEMPORARY_ERROR);
+    }
     throw err;
   }
 }
@@ -428,7 +433,19 @@ export async function getFileList(): Promise<string[]> {
   await syncGit();
   const branch = config.currentBranch;
   const submodules = await getSubmodules();
-  const files: string = await git.raw(['ls-tree', '-r', branch]);
+  let files: string;
+  try {
+    files = await git.raw(['ls-tree', '-r', branch]);
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: Not a valid object name')) {
+      logger.debug(
+        { err },
+        'Branch not found when checking branch list - aborting'
+      );
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
+  }
   // istanbul ignore if
   if (!files) {
     return [];
@@ -483,15 +500,27 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     return false;
   }
   // Retrieve the author of the most recent commit
-  const lastAuthor = (
-    await git.raw([
-      'log',
-      '-1',
-      '--pretty=format:%ae',
-      `origin/${branchName}`,
-      '--',
-    ])
-  ).trim();
+  let lastAuthor: string;
+  try {
+    lastAuthor = (
+      await git.raw([
+        'log',
+        '-1',
+        '--pretty=format:%ae',
+        `origin/${branchName}`,
+        '--',
+      ])
+    ).trim();
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: bad revision')) {
+      logger.debug(
+        { err },
+        'Remote branch not found when checking last commit author - aborting run'
+      );
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    logger.warn({ err }, 'Error checking last author for isBranchModified');
+  }
   const { gitAuthorEmail } = config;
   if (
     lastAuthor === gitAuthorEmail ||
@@ -530,13 +559,34 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  await syncBranch(branchName);
-  await git.reset(ResetMode.HARD);
-  await git.checkout(['-B', branchName, 'origin/' + branchName]);
-  await git.checkout(config.currentBranch);
-  await git.merge(['--ff-only', branchName]);
-  await git.push('origin', config.currentBranch);
-  incLimitedValue(Limit.Commits);
+  let status;
+  try {
+    await syncBranch(branchName);
+    await git.reset(ResetMode.HARD);
+    await git.checkout(['-B', branchName, 'origin/' + branchName]);
+    await git.checkout([
+      '-B',
+      config.currentBranch,
+      'origin/' + config.currentBranch,
+    ]);
+    status = await git.status();
+    await git.merge(['--ff-only', branchName]);
+    await git.push('origin', config.currentBranch);
+    incLimitedValue(Limit.Commits);
+  } catch (err) {
+    logger.debug(
+      {
+        baseBranch: config.currentBranch,
+        baseSha: config.currentBranchSha,
+        branchName,
+        branchSha: getBranchCommit(branchName),
+        status,
+        err,
+      },
+      'mergeBranch error'
+    );
+    throw err;
+  }
 }
 
 export async function getBranchLastCommitTime(
@@ -614,6 +664,20 @@ export type CommitFilesConfig = {
   force?: boolean;
 };
 
+async function gitAdd(files: string | string[]): Promise<void> {
+  try {
+    await git.add(files);
+  } catch (err) /* istanbul ignore next */ {
+    if (
+      !err.message.includes(
+        'The following paths are ignored by one of your .gitignore files'
+      )
+    ) {
+      throw err;
+    }
+  }
+}
+
 export async function commitFiles({
   branchName,
   files,
@@ -639,7 +703,7 @@ export async function commitFiles({
         deleted.push(file.contents as string);
       } else if (await isDirectory(join(config.localDir, file.name))) {
         fileNames.push(file.name);
-        await git.add(file.name);
+        await gitAdd(file.name);
       } else {
         fileNames.push(file.name);
         let contents: Buffer;
@@ -657,7 +721,7 @@ export async function commitFiles({
       fileNames.unshift('-f');
     }
     if (fileNames.length) {
-      await git.add(fileNames);
+      await gitAdd(fileNames);
     }
     if (deleted.length) {
       for (const f of deleted) {
@@ -710,7 +774,7 @@ export async function commitFiles({
     checkForPlatformFailure(err);
     if (err.message.includes(`'refs/heads/renovate' exists`)) {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'None';
+      error.validationSource = 'None';
       error.validationError = 'An existing branch is blocking Renovate';
       error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
       throw error;
@@ -725,9 +789,18 @@ export async function commitFiles({
       );
       return null;
     }
+    if (
+      (err.message.includes('remote rejected') ||
+        err.message.includes('403')) &&
+      files?.some((file) => file.name?.startsWith('.github/workflows/'))
+    ) {
+      logger.debug({ err }, 'commitFiles error');
+      logger.info('Workflows update rejection - aborting branch.');
+      return null;
+    }
     if (err.message.includes('protected branch hook declined')) {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = branchName;
+      error.validationSource = branchName;
       error.validationError = 'Renovate branch is protected';
       error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
       throw error;

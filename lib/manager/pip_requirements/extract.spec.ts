@@ -42,14 +42,20 @@ describe(getName(), () => {
       expect(res.deps).toHaveLength(3);
     });
     it('extracts multiple dependencies', () => {
-      const res = extractPackageFile(requirements2, 'unused_file_name', config)
-        .deps;
+      const res = extractPackageFile(
+        requirements2,
+        'unused_file_name',
+        config
+      ).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
     it('handles comments and commands', () => {
-      const res = extractPackageFile(requirements3, 'unused_file_name', config)
-        .deps;
+      const res = extractPackageFile(
+        requirements3,
+        'unused_file_name',
+        config
+      ).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
@@ -87,6 +93,20 @@ describe(getName(), () => {
         'http://example.com/private-pypi/',
       ]);
       expect(res.deps).toHaveLength(6);
+    });
+
+    it('handles extra spaces around pinned dependency equal signs', () => {
+      const res = extractPackageFile(requirements4, 'unused_file_name', {});
+      expect(res).toMatchSnapshot();
+
+      expect(res.deps[0].currentValue).toStartWith('==');
+      expect(res.deps[0].currentVersion).toStartWith('2.0.12');
+      expect(res.deps[1].currentValue).toStartWith('==');
+      expect(res.deps[1].currentVersion).toStartWith('4.1.1');
+      expect(res.deps[2].currentValue).toStartWith('==');
+      expect(res.deps[2].currentVersion).toStartWith('3.2.1');
+
+      expect(res.deps).toHaveLength(3);
     });
     it('should not replace env vars in low trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
