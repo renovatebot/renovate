@@ -94,6 +94,8 @@ export interface RepoAdminConfig {
   dryRun?: boolean;
   exposeAllEnv?: boolean;
   privateKey?: string | Buffer;
+  localDir?: string;
+  cacheDir?: string;
 }
 
 export interface LegacyAdminConfig {
