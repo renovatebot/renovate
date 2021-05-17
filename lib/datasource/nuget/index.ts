@@ -12,9 +12,10 @@ export const defaultRegistryUrls = [v3.getDefaultFeed()];
 export const defaultVersioning = nugetVersioning.id;
 export const registryStrategy = 'merge';
 
-export function parseRegistryUrl(
-  registryUrl: string
-): { feedUrl: string; protocolVersion: number } {
+export function parseRegistryUrl(registryUrl: string): {
+  feedUrl: string;
+  protocolVersion: number;
+} {
   try {
     const parsedUrl = urlApi.parse(registryUrl);
     let protocolVersion = 2;

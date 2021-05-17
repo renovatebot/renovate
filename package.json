@@ -179,7 +179,7 @@
     "semver-utils": "1.1.4",
     "shlex": "2.0.2",
     "shortid": "2.2.16",
-    "simple-git": "2.38.0",
+    "simple-git": "2.38.1",
     "slugify": "1.5.2",
     "traverse": "0.6.6",
     "upath": "2.0.1",
@@ -189,7 +189,7 @@
     "xmldoc": "1.1.2"
   },
   "optionalDependencies": {
-    "re2": "1.15.9"
+    "re2": "1.16.0"
   },
   "devDependencies": {
     "@actions/core": "1.2.7",
@@ -252,7 +252,7 @@
     "mockdate": "3.0.5",
     "nock": "13.0.11",
     "npm-run-all": "4.1.5",
-    "prettier": "2.2.1",
+    "prettier": "2.3.0",
     "pretty-quick": "3.1.0",
     "rimraf": "3.0.2",
     "semantic-release": "17.4.2",

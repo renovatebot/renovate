@@ -25,15 +25,12 @@ jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const getConfiguredRegistries: jest.Mock<
-  typeof _getConfiguredRegistries
-> = _getConfiguredRegistries as any;
-const getDefaultRegistries: jest.Mock<
-  typeof _getDefaultRegistries
-> = _getDefaultRegistries as any;
-const getRandomString: jest.Mock<
-  typeof _getRandomString
-> = _getRandomString as any;
+const getConfiguredRegistries: jest.Mock<typeof _getConfiguredRegistries> =
+  _getConfiguredRegistries as any;
+const getDefaultRegistries: jest.Mock<typeof _getDefaultRegistries> =
+  _getDefaultRegistries as any;
+const getRandomString: jest.Mock<typeof _getRandomString> =
+  _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
 const adminConfig: RepoAdminConfig = {

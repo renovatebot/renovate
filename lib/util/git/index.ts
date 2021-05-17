@@ -777,7 +777,7 @@ export async function commitFiles({
     checkForPlatformFailure(err);
     if (err.message.includes(`'refs/heads/renovate' exists`)) {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'None';
+      error.validationSource = 'None';
       error.validationError = 'An existing branch is blocking Renovate';
       error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
       throw error;
@@ -803,7 +803,7 @@ export async function commitFiles({
     }
     if (err.message.includes('protected branch hook declined')) {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = branchName;
+      error.validationSource = branchName;
       error.validationError = 'Renovate branch is protected';
       error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
       throw error;
