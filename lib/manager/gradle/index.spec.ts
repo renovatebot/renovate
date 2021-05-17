@@ -11,7 +11,8 @@ import {
   mocked,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource, RepoAdminConfig } from '../../config/types';
+import { BinarySource } from '../../config/types';
+import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { ExtractConfig } from '../types';

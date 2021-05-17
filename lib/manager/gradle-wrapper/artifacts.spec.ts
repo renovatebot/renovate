@@ -13,7 +13,8 @@ import {
   partial,
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource, RepoAdminConfig } from '../../config/types';
+import { BinarySource } from '../../config/types';
+import type { RepoAdminConfig } from '../../config/types';
 import { resetPrefetchedImages } from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git';
 import type { UpdateArtifactsConfig } from '../types';

@@ -6,7 +6,8 @@ import {
 import { envMock } from '../../../test/exec-util';
 import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource, RepoAdminConfig } from '../../config/types';
+import { BinarySource } from '../../config/types';
+import type { RepoAdminConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';

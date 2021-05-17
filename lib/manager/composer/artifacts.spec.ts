@@ -3,7 +3,8 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { BinarySource, RepoAdminConfig } from '../../config/types';
+import { BinarySource } from '../../config/types';
+import type { RepoAdminConfig } from '../../config/types';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
