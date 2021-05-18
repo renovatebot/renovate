@@ -14,7 +14,7 @@ import type {
 } from '../../config/types';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { getProblems, logger, setMeta } from '../../logger';
-import { setUtilConfig } from '../../util';
+import { setExecConfig } from '../../util/exec';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
@@ -103,7 +103,7 @@ export async function start(): Promise<number> {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
-      await setUtilConfig(repoConfig);
+      await setExecConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
         repoConfig.hostRules.forEach((rule) => hostRules.add(rule));

@@ -168,14 +168,13 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
-  localDir,
   renovateUsername,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
+  config = { repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -384,7 +383,7 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        logger.error(
+        logger.warn(
           { err: err.err || err },
           'Error updating fork from upstream - cannot continue'
         );
@@ -465,7 +464,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
     } catch (err) {
       if (err.statusCode === 404) {
         logger.debug(`No branch protection found`);
-      } else if (err.statusCode === 403) {
+      } else if (
+        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED ||
+        err.statusCode === 403
+      ) {
         logger.debug(
           'Branch protection: Do not have permissions to detect branch protection'
         );
@@ -633,6 +635,10 @@ async function getOpenPrs(): Promise<PrList> {
           pr.canMerge = false;
           pr.canMergeReason = `hasNegativeReview`;
         } else if (canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.canMerge = true;
+        } else if (config.forkToken && pr.mergeStateStatus === 'BLOCKED') {
+          // The main token can't merge but maybe the forking token can
+          // istanbul ignore next
           pr.canMerge = true;
         } else {
           pr.canMerge = false;
@@ -916,6 +922,7 @@ export async function getBranchStatus(
         accept: 'application/vnd.github.antiope-preview+json',
       },
       paginate: true,
+      paginationField: 'check_runs',
     };
     const checkRunsRaw = (
       await githubApi.getJson<{
@@ -1683,8 +1690,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
-        url:
-          'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+        url: 'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
       },
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.'
     );

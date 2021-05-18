@@ -39,13 +39,15 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
     });
     it('handles comments', () => {
-      const res = extractPackageFile('# some comment\n# another\n\nFROM node\n')
-        .deps;
+      const res = extractPackageFile(
+        '# some comment\n# another\n\nFROM node\n'
+      ).deps;
       expect(res).toMatchSnapshot();
     });
     it('handles custom hosts', () => {
-      const res = extractPackageFile('FROM registry2.something.info/node:8\n')
-        .deps;
+      const res = extractPackageFile(
+        'FROM registry2.something.info/node:8\n'
+      ).deps;
       expect(res).toMatchSnapshot();
     });
     it('handles custom hosts and suffix', () => {

@@ -38,7 +38,8 @@ export async function extractPackageFile(
     if (rubyMatch) {
       res.constraints = { ruby: rubyMatch[1] };
     }
-    const gemMatchRegex = /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/;
+    const gemMatchRegex =
+      /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/;
     const gemMatch = gemMatchRegex.exec(line);
     if (gemMatch) {
       const dep: PackageDependency = {

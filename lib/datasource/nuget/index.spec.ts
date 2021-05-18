@@ -435,6 +435,42 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
     });
+    it('processes real data (v3) nuspec fetch error', async () => {
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .twice()
+        .reply(200, JSON.parse(nugetIndexV3))
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
+        .reply(200, pkgListV3Registration)
+        .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
+        .replyWithError('unknown');
+      const res = await getPkgReleases({
+        ...configV3,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+      expect(res.sourceUrl).not.toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('processes real data (v3) nuspec fetch 404 error', async () => {
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .twice()
+        .reply(200, JSON.parse(nugetIndexV3))
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
+        .reply(200, pkgListV3Registration)
+        .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
+        .reply(404);
+      const res = await getPkgReleases({
+        ...configV3,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+      expect(res.sourceUrl).not.toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('processes real data (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')

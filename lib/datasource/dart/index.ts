@@ -1,6 +1,7 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { DartResult } from './types';
 
 export const id = 'dart';
 export const defaultRegistryUrls = ['https://pub.dartlang.org/'];
@@ -14,15 +15,6 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   let result: ReleaseResult = null;
   const pkgUrl = `${registryUrl}api/packages/${lookupName}`;
-  interface DartResult {
-    versions?: {
-      version: string;
-      published?: string;
-    }[];
-    latest?: {
-      pubspec?: { homepage?: string; repository?: string };
-    };
-  }
 
   let raw: HttpResponse<DartResult> = null;
   try {

@@ -3,10 +3,13 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from './artifacts';
 
 jest.mock('fs-extra');
@@ -19,7 +22,9 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
-const config = {
+const config: UpdateArtifactsConfig = {};
+
+const adminConfig: RepoAdminConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
 };
@@ -30,8 +35,12 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(config);
+    await setExecConfig(adminConfig as never);
+    setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
+  });
+  afterEach(() => {
+    setAdminConfig();
   });
   it('returns null if no Cargo.lock found', async () => {
     fs.stat.mockRejectedValue(new Error('not found!'));
@@ -128,7 +137,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Cargo.lock with docker', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
