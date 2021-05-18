@@ -332,11 +332,11 @@ export async function syncGit(): Promise<void> {
     const { gitAuthorName, gitAuthorEmail } = config;
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
-      await git.raw(['config', 'user.name', gitAuthorName]);
+      await git.addConfig('user.name', gitAuthorName);
     }
     if (gitAuthorEmail) {
       logger.debug({ gitAuthorEmail }, 'Setting git author email');
-      await git.raw(['config', 'user.email', gitAuthorEmail]);
+      await git.addConfig('user.email', gitAuthorEmail);
     }
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
