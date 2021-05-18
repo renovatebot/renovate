@@ -427,6 +427,12 @@ export async function getAdditionalFiles(
   await writeExistingFiles(config, packageFiles);
   await writeUpdatedPackageFiles(config);
 
+  const env = getChildProcessEnv([
+    'NPM_CONFIG_CACHE',
+    'YARN_CACHE_FOLDER',
+    'npm_config_store',
+  ]);
+
   // Determine the additional npmrc content to add based on host rules
   const additionalNpmrcContent = [];
   const npmHostRules = hostRules.findAll({
@@ -438,6 +444,11 @@ export async function getAdditionalFiles(
       uri = validateUrl(uri) ? uri.replace(/^https?:/, '') : `//${uri}/`;
       if (hostRule.token) {
         const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
+
+        // Yarn 2
+        env.YARN_NPM_REGISTRY_SERVER = uri;
+        env.YARN_NPM_AUTH_TOKEN = hostRule.token;
+
         additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);
       } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
         const password = Buffer.from(hostRule.password).toString('base64');
@@ -447,11 +458,6 @@ export async function getAdditionalFiles(
     }
   }
 
-  const env = getChildProcessEnv([
-    'NPM_CONFIG_CACHE',
-    'YARN_CACHE_FOLDER',
-    'npm_config_store',
-  ]);
   env.NPM_CONFIG_CACHE =
     env.NPM_CONFIG_CACHE || upath.join(config.cacheDir, './others/npm');
   await ensureDir(env.NPM_CONFIG_CACHE);
