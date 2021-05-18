@@ -5,7 +5,12 @@ on:
     branches:
       - main
       - v24
-  pull_request:
+
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: 'Dry-Run'
+        default: 'true'
 
 env:
   # Currently no way to detect automatically (#8153)
@@ -25,7 +30,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [14]
         python-version: [3.8]
         java-version: [11]
@@ -160,3 +165,56 @@ jobs:
 
       - name: Type check
         run: yarn type-check
+
+  release:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    # release shouldn't need more than 5 min
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
+
+      - name: Check dry run
+        run: |
+          if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          elif [[ "${{github.ref}}" == "refs/heads/${{env.DEFAULT_BRANCH}}" ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          elif [[ "${{github.ref}}" =~ ^refs/heads/v[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          fi
+
+      # full checkout for semantic-release
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+
+      - name: Cache Yarn packages
+        uses: actions/cache@v2.1.5
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: semantic-release
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+          npx semantic-release --dry-run ${{env.DRY_RUN}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
