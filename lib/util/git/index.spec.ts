@@ -77,6 +77,9 @@ describe(getName(), () => {
     });
     await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     await git.syncGit();
+    // override some local git settings for better testing
+    const local = Git(tmpDir.path);
+    await local.addConfig('commit.gpgsign', 'false');
   });
 
   afterEach(async () => {
