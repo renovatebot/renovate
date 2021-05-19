@@ -453,13 +453,16 @@ export async function getAdditionalFiles(
     'npm_config_store',
   ]);
   env.NPM_CONFIG_CACHE =
-    env.NPM_CONFIG_CACHE || upath.join(config.cacheDir, './others/npm');
+    env.NPM_CONFIG_CACHE ||
+    upath.join(getAdminConfig().cacheDir, './others/npm');
   await ensureDir(env.NPM_CONFIG_CACHE);
   env.YARN_CACHE_FOLDER =
-    env.YARN_CACHE_FOLDER || upath.join(config.cacheDir, './others/yarn');
+    env.YARN_CACHE_FOLDER ||
+    upath.join(getAdminConfig().cacheDir, './others/yarn');
   await ensureDir(env.YARN_CACHE_FOLDER);
   env.npm_config_store =
-    env.npm_config_store || upath.join(config.cacheDir, './others/pnpm');
+    env.npm_config_store ||
+    upath.join(getAdminConfig().cacheDir, './others/pnpm');
   await ensureDir(env.npm_config_store);
   env.NODE_ENV = 'dev';
 
