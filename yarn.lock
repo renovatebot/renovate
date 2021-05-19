@@ -8284,10 +8284,10 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-semantic-release@17.4.2:
-  version "17.4.2"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-17.4.2.tgz#b5147b5a629c227b7074ad4cc89920a14cb08c96"
-  integrity sha512-TPLWuoe2L2DmgnQEh+OLWW5V1T+ZAa1xWuHXsuPAWEko0BqSdLPl+5+BlQ+D5Bp27S5gDJ1//Y1tgbmvUhnOCw==
+semantic-release@17.4.3:
+  version "17.4.3"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-17.4.3.tgz#e01b2d0c0adaf5a6cc427359f1df755d1e908927"
+  integrity sha512-lTOUSrkbaQ+TRs3+BmtJhLtPSyiO7iTGmh5SyuEFqNO8HQbQ4nzXg4UlPrDQasO/C0eFK/V0eCbOzJdjtKBOYw==
   dependencies:
     "@semantic-release/commit-analyzer" "^8.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -8305,7 +8305,7 @@ semantic-release@17.4.2:
     git-log-parser "^1.2.0"
     hook-std "^2.0.0"
     hosted-git-info "^4.0.0"
-    lodash "^4.17.15"
+    lodash "^4.17.21"
     marked "^2.0.0"
     marked-terminal "^4.1.1"
     micromatch "^4.0.2"
