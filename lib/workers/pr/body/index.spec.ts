@@ -1,6 +1,6 @@
 import { platform } from '../../../../test/util';
-import { RenovateConfig } from '../../../config';
 import { getConfig } from '../../../config/defaults';
+import type { RenovateConfig } from '../../../config/types';
 
 import { getPrBody } from '.';
 
@@ -9,7 +9,7 @@ describe('workers/pr/body', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     config = getConfig();
-    platform.getPrBody = jest.fn((input) => input);
+    platform.massageMarkdown = jest.fn((input) => input);
   });
   it('generate the message markdown', async () => {
     const branchName = 'test/markdown';
