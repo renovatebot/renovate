@@ -5,6 +5,7 @@ import type { RequestStats } from '../../util/http/types';
 
 export function printRequestStats(): void {
   const httpRequests = memCache.get<RequestStats[]>('http-requests');
+  // istanbul ignore next
   if (!httpRequests) {
     return;
   }

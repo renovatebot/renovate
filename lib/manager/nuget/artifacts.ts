@@ -1,4 +1,5 @@
 import { join } from 'path';
+import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { id, parseRegistryUrl } from '../../datasource/nuget';
 import { logger } from '../../logger';
@@ -28,8 +29,9 @@ async function addSourceCmds(
   config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
+  const { localDir } = getAdminConfig();
   const registries =
-    (await getConfiguredRegistries(packageFileName, config.localDir)) ||
+    (await getConfiguredRegistries(packageFileName, localDir)) ||
     getDefaultRegistries();
   const result = [];
   for (const registry of registries) {

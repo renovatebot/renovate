@@ -1,6 +1,7 @@
 import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import type { LookupUpdate } from '../../../../manager/types';
+import { RangeStrategy } from '../../../../types';
 import type { VersioningApi } from '../../../../versioning';
 import type { LookupUpdateConfig } from './types';
 import { getUpdateType } from './update-type';
@@ -8,6 +9,7 @@ import { getUpdateType } from './update-type';
 export function generateUpdate(
   config: LookupUpdateConfig,
   versioning: VersioningApi,
+  rangeStrategy: RangeStrategy,
   currentVersion: string,
   bucket: string,
   release: Release
@@ -29,7 +31,7 @@ export function generateUpdate(
       update[field] = release[field];
     }
   }
-  const { currentValue, rangeStrategy } = config;
+  const { currentValue } = config;
   try {
     update.newValue = versioning.getNewValue({
       currentValue,

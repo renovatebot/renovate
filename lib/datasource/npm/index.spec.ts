@@ -11,7 +11,8 @@ import { id as datasource, getNpmrc, resetCache, setNpmrc } from '.';
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> = _registryAuthToken as never;
+const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> =
+  _registryAuthToken as never;
 let npmResponse: any;
 
 describe(getName(), () => {
@@ -271,7 +272,7 @@ describe(getName(), () => {
   it('should use host rules by hostName if provided', async () => {
     hostRules.add({
       hostType: 'npm',
-      hostName: 'npm.mycustomregistry.com',
+      matchHost: 'npm.mycustomregistry.com',
       token: 'abcde',
     });
     httpMock
@@ -289,7 +290,7 @@ describe(getName(), () => {
   it('should use host rules by baseUrl if provided', async () => {
     hostRules.add({
       hostType: 'npm',
-      baseUrl:
+      matchHost:
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/',
       token: 'abcde',
     });

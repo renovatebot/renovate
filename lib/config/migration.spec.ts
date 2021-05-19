@@ -298,9 +298,8 @@ describe(getName(), () => {
         enabled: true,
         separateMinorPatch: true,
       };
-      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-        config
-      );
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
       expect(isMigrated).toBe(false);
       expect(migratedConfig).toMatchObject(config);
     });
@@ -658,5 +657,29 @@ describe(getName(), () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
     expect(migratedConfig.packageRules).toHaveLength(3);
+  });
+  it('it migrates hostRules fields', () => {
+    const config: RenovateConfig = {
+      hostRules: [
+        {
+          baseUrl: 'https://some.domain.com',
+          token: 'abc123',
+        },
+        {
+          domainName: 'domain.com',
+          token: 'abc123',
+        },
+        {
+          hostName: 'some.domain.com',
+          token: 'abc123',
+        },
+      ],
+    } as any;
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
   });
 });
