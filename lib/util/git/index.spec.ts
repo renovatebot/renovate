@@ -2,7 +2,6 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
 import * as git from '.';
 
 describe(getName(), () => {
@@ -69,8 +68,8 @@ describe(getName(), () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setAdminConfig({ localDir: tmpDir.path });
     await git.initRepo({
+      localDir: tmpDir.path,
       url: origin.path,
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
@@ -109,6 +108,7 @@ describe(getName(), () => {
       await repo.commit('Add submodule');
       await git.initRepo({
         cloneSubmodules: true,
+        localDir: tmpDir.path,
         url: base.path,
       });
       await git.syncGit();
@@ -373,6 +373,7 @@ describe(getName(), () => {
       await git.checkoutBranch('develop');
 
       await git.initRepo({
+        localDir: tmpDir.path,
         url: base.path,
       });
 
@@ -394,6 +395,7 @@ describe(getName(), () => {
       await repo.checkout(defaultBranch);
 
       await git.initRepo({
+        localDir: tmpDir.path,
         url: base.path,
       });
 
@@ -401,6 +403,7 @@ describe(getName(), () => {
       expect(git.branchExists('renovate/test')).toBe(true);
 
       await git.initRepo({
+        localDir: tmpDir.path,
         url: base.path,
       });
 
@@ -429,6 +432,7 @@ describe(getName(), () => {
       await repo.commit('Add submodule');
       await git.initRepo({
         cloneSubmodules: true,
+        localDir: tmpDir.path,
         url: base.path,
       });
       await git.syncGit();
@@ -439,6 +443,7 @@ describe(getName(), () => {
     it('should use extra clone configuration', async () => {
       await fs.emptyDir(tmpDir.path);
       await git.initRepo({
+        localDir: tmpDir.path,
         url: origin.path,
         extraCloneOpts: {
           '-c': 'extra.clone.config=test-extra-config-value',

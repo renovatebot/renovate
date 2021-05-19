@@ -184,6 +184,7 @@ describe(getName(), () => {
 
     return gitea.initRepo({
       repository: mockRepo.full_name,
+      localDir: '',
       ...config,
     });
   }
@@ -250,6 +251,7 @@ describe(getName(), () => {
   describe('initRepo', () => {
     const initRepoCfg: RepoParams = {
       repository: mockRepo.full_name,
+      localDir: '',
     };
 
     it('should propagate API errors', async () => {

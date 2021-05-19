@@ -52,6 +52,7 @@ import type {
 
 let config: {
   repository: string;
+  localDir: string;
   email: string;
   prList: any[];
   issueList: GitlabIssue[];
@@ -165,11 +166,13 @@ export async function getJsonFile(
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
+  localDir,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
+  config.localDir = localDir;
   config.cloneSubmodules = cloneSubmodules;
   config.ignorePrAuthor = ignorePrAuthor;
 

@@ -27,6 +27,7 @@ export interface RepoResult {
 }
 
 export interface RepoParams {
+  localDir: string;
   repository: string;
   endpoint?: string;
   forkMode?: string;

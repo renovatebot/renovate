@@ -28,7 +28,7 @@ interface TestInput {
   inOpts: ExecOptions;
   outCmd: string[];
   outOpts: RawExecOptions[];
-  adminConfig?: Partial<RepoAdminConfig>;
+  adminConfig?: RepoAdminConfig;
 }
 
 describe(getName(), () => {
@@ -40,7 +40,10 @@ describe(getName(), () => {
   const defaultCwd = `-w "${cwd}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" -v "${cacheDir}":"${cacheDir}"`;
 
-  const execConfig = {};
+  const execConfig = {
+    cacheDir,
+    localDir: cwd,
+  };
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
@@ -53,6 +56,7 @@ describe(getName(), () => {
 
   afterEach(() => {
     process.env = processEnvOrig;
+    setAdminConfig();
   });
 
   const image = 'image';
@@ -717,7 +721,7 @@ describe(getName(), () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-    setAdminConfig({ cacheDir, localDir: cwd, ...adminConfig });
+    setAdminConfig(adminConfig);
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);

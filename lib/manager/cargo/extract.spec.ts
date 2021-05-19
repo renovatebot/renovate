@@ -1,10 +1,7 @@
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { getName, loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import { writeLocalFile } from '../../util/fs';
-import type { ExtractConfig } from '../types';
+import { setFsConfig, writeLocalFile } from '../../util/fs';
 import { extractPackageFile } from './extract';
 
 const cargo1toml = loadFixture('Cargo.1.toml');
@@ -17,21 +14,9 @@ const cargo6toml = loadFixture('Cargo.6.toml');
 
 describe(getName(), () => {
   describe('extractPackageFile()', () => {
-    let config: ExtractConfig;
-    let adminConfig: RepoAdminConfig;
-
-    beforeEach(async () => {
+    let config;
+    beforeEach(() => {
       config = {};
-      const tmpDir = await dir();
-      adminConfig = {
-        localDir: join(tmpDir.path, 'local'),
-        cacheDir: join(tmpDir.path, 'cache'),
-      };
-
-      setAdminConfig(adminConfig);
-    });
-    afterEach(() => {
-      setAdminConfig();
     });
     it('returns null for invalid toml', async () => {
       expect(
@@ -82,17 +67,35 @@ describe(getName(), () => {
       expect(res.deps).toHaveLength(4);
     });
     it('extracts registry urls from .cargo/config.toml', async () => {
+      const tmpDir = await dir();
+      const localDir = join(tmpDir.path, 'local');
+      const cacheDir = join(tmpDir.path, 'cache');
+      setFsConfig({
+        localDir,
+        cacheDir,
+      });
       await writeLocalFile('.cargo/config.toml', cargo6configtoml);
+
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
+        localDir,
       });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
     it('extracts registry urls from .cargo/config (legacy path)', async () => {
+      const tmpDir = await dir();
+      const localDir = join(tmpDir.path, 'local');
+      const cacheDir = join(tmpDir.path, 'cache');
+      setFsConfig({
+        localDir,
+        cacheDir,
+      });
       await writeLocalFile('.cargo/config', cargo6configtoml);
+
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
+        localDir,
       });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
@@ -105,19 +108,35 @@ describe(getName(), () => {
       expect(res.deps).toHaveLength(1);
     });
     it('fails to parse cargo config with invalid TOML', async () => {
+      const tmpDir = await dir();
+      const localDir = join(tmpDir.path, 'local');
+      const cacheDir = join(tmpDir.path, 'cache');
+      setFsConfig({
+        localDir,
+        cacheDir,
+      });
       await writeLocalFile('.cargo/config', '[registries');
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
+        localDir,
       });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
     it('ignore cargo config registries with missing index', async () => {
+      const tmpDir = await dir();
+      const localDir = join(tmpDir.path, 'local');
+      const cacheDir = join(tmpDir.path, 'cache');
+      setFsConfig({
+        localDir,
+        cacheDir,
+      });
       await writeLocalFile('.cargo/config', '[registries.mine]\nfoo = "bar"');
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
+        localDir,
       });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);

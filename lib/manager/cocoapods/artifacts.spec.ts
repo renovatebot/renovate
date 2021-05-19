@@ -3,14 +3,11 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as _env from '../../util/exec/env';
-import type { StatusResult } from '../../util/git';
-import type { UpdateArtifactsConfig } from '../types';
+import { StatusResult } from '../../util/git';
 import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');
@@ -27,9 +24,7 @@ const datasource = mocked(_datasource);
 
 delete process.env.CP_HOME_DIR;
 
-const config: UpdateArtifactsConfig = {};
-
-const adminConfig: RepoAdminConfig = {
+const config = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
 };
@@ -38,9 +33,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-
-    await setExecConfig(adminConfig as never);
-    setAdminConfig(adminConfig);
+    await setExecConfig(config);
 
     datasource.getPkgReleases.mockResolvedValue({
       releases: [
@@ -52,9 +45,6 @@ describe('.updateArtifacts()', () => {
         { version: '1.2.5' },
       ],
     });
-  });
-  afterEach(() => {
-    setAdminConfig();
   });
   it('returns null if no Podfile.lock found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -82,16 +72,15 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null for invalid local directory', async () => {
     const execSnapshots = mockExecAll(exec);
-    setAdminConfig({
-      localDir: '',
-    });
-
+    const noLocalDirConfig = {
+      localDir: undefined,
+    };
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: ['foo'],
         newPackageFileContent: '',
-        config: {},
+        config: noLocalDirConfig,
       })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -127,7 +116,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Podfile', async () => {
     const execSnapshots = mockExecAll(exec);
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Old Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
@@ -145,7 +134,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Podfile and Pods files', async () => {
     const execSnapshots = mockExecAll(exec);
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Old Manifest.lock' as any);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     fs.readFile.mockResolvedValueOnce('Pods manifest' as any);
@@ -198,7 +187,10 @@ describe('.updateArtifacts()', () => {
   it('dynamically selects Docker image tag', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({
+      ...config,
+      binarySource: 'docker',
+    });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
 
@@ -219,7 +211,10 @@ describe('.updateArtifacts()', () => {
   it('falls back to the `latest` Docker image tag', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({
+      ...config,
+      binarySource: 'docker',
+    });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
     datasource.getPkgReleases.mockResolvedValueOnce({

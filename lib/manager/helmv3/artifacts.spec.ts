@@ -3,13 +3,10 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from './artifacts';
 
 jest.mock('fs-extra');
@@ -22,11 +19,10 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
-const adminConfig: RepoAdminConfig = {
-  localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
+const config = {
+  // `join` fixes Windows CI
+  localDir: join('/tmp/github/some/repo'),
 };
-
-const config: UpdateArtifactsConfig = {};
 
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
@@ -34,12 +30,8 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(adminConfig as never);
-    setAdminConfig(adminConfig);
+    await setExecConfig(config);
     docker.resetPrefetchedImages();
-  });
-  afterEach(() => {
-    setAdminConfig();
   });
   it('returns null if no Chart.lock found', async () => {
     const updatedDeps = ['dep1'];
@@ -110,7 +102,7 @@ describe('.updateArtifacts()', () => {
 
   it('returns updated Chart.lock with docker', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     git.getFile.mockResolvedValueOnce('Old Chart.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Chart.lock' as any);

@@ -3,15 +3,13 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import type { StatusResult } from '../../util/git';
+import { setFsConfig } from '../../util/fs';
+import { StatusResult } from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
-import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from './artifacts';
 
 jest.mock('fs-extra');
@@ -38,13 +36,10 @@ require gopkg.in/russross/blackfriday.v1 v1.0.0
 replace github.com/pkg/errors => ../errors
 `;
 
-const adminConfig: RepoAdminConfig = {
+const config = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
-};
-
-const config: UpdateArtifactsConfig = {
   constraints: { go: '1.14' },
 };
 
@@ -63,12 +58,9 @@ describe('.updateArtifacts()', () => {
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
-    await setExecConfig(adminConfig as never);
-    setAdminConfig(adminConfig);
+    await setExecConfig(config);
+    setFsConfig(config);
     docker.resetPrefetchedImages();
-  });
-  afterEach(() => {
-    setAdminConfig();
   });
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -155,7 +147,8 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode without credentials', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -199,7 +192,8 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode with credentials', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -225,7 +219,8 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode with goModTidy', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename

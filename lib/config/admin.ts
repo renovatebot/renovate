@@ -3,7 +3,7 @@ import type { RenovateConfig, RepoAdminConfig } from './types';
 let adminConfig: RepoAdminConfig = {};
 
 // TODO: once admin config work is complete, add a test to make sure this list includes all options with admin=true (#9603)
-const repoAdminOptions = [
+export const repoAdminOptions = [
   'allowCustomCrateRegistries',
   'allowPostUpgradeCommandTemplating',
   'allowScripts',
@@ -15,20 +15,14 @@ const repoAdminOptions = [
   'dryRun',
   'exposeAllEnv',
   'privateKey',
-  'localDir',
-  'cacheDir',
 ];
 
-export function setAdminConfig(
-  config: RenovateConfig | RepoAdminConfig = {}
-): RenovateConfig {
+export function setAdminConfig(config: RenovateConfig = {}): void {
   adminConfig = {};
-  const result = { ...config };
   for (const option of repoAdminOptions) {
     adminConfig[option] = config[option];
-    delete result[option]; // eslint-disable-line no-param-reassign
+    delete config[option]; // eslint-disable-line no-param-reassign
   }
-  return result;
 }
 
 export function getAdminConfig(): RepoAdminConfig {

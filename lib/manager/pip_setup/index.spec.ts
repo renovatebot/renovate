@@ -6,12 +6,10 @@ import {
   mockExecSequence,
 } from '../../../test/exec-util';
 import { env, getName, loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';
-import type { ExtractConfig } from '../types';
+import { setFsConfig } from '../../util/fs';
 import * as extract from './extract';
 import { extractPackageFile } from '.';
 
@@ -19,12 +17,10 @@ const packageFile = 'setup.py';
 const content = loadFixture(packageFile);
 const jsonContent = loadFixture('setup.py.json');
 
-const adminConfig: RepoAdminConfig = {
+const config = {
   localDir: '/tmp/github/some/repo',
   cacheDir: '/tmp/renovate/cache',
 };
-
-const config: ExtractConfig = {};
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
@@ -48,16 +44,12 @@ describe(getName(), () => {
       jest.resetModules();
       extract.resetModule();
 
-      await setExecConfig(adminConfig as never);
-      setAdminConfig(adminConfig);
+      await setExecConfig(config);
+      setFsConfig(config);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py
       jest.spyOn(fs, 'writeLocalFile').mockResolvedValue();
-    });
-
-    afterEach(() => {
-      setAdminConfig();
     });
 
     it('returns found deps', async () => {

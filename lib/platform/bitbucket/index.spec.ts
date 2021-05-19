@@ -84,6 +84,7 @@ describe(getName(), () => {
 
     await bitbucket.initRepo({
       repository: 'some/repo',
+      localDir: '',
       ...config,
     });
 
@@ -148,6 +149,7 @@ describe(getName(), () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
+          localDir: '',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

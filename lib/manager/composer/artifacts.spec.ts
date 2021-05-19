@@ -3,7 +3,6 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
@@ -13,9 +12,9 @@ import * as datasourcePackagist from '../../datasource/packagist';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
-import type { StatusResult } from '../../util/git';
+import { setFsConfig } from '../../util/fs';
+import { StatusResult } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import type { UpdateArtifactsConfig } from '../types';
 import * as composer from './artifacts';
 
 jest.mock('child_process');
@@ -27,16 +26,12 @@ jest.mock('../../util/git');
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const datasource = mocked(_datasource);
 
-const config: UpdateArtifactsConfig = {
-  composerIgnorePlatformReqs: true,
-  ignoreScripts: false,
-};
-
-const adminConfig: RepoAdminConfig = {
-  allowScripts: false,
+const config = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+  composerIgnorePlatformReqs: true,
+  ignoreScripts: false,
 };
 
 const repoStatus = partial<StatusResult>({
@@ -50,13 +45,11 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(adminConfig as never);
+    await setExecConfig(config);
+    setFsConfig(config);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    setAdminConfig(adminConfig);
-  });
-  afterEach(() => {
-    setAdminConfig();
+    setAdminConfig({ allowScripts: false });
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -73,7 +66,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
     git.getRepoStatus.mockResolvedValue(repoStatus);
-    setAdminConfig({ ...adminConfig, allowScripts: true });
+    setAdminConfig({ allowScripts: true });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -203,7 +196,8 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setFsConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
 
     const execSnapshots = mockExecAll(exec);

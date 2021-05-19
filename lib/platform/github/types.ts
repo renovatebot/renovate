@@ -69,6 +69,7 @@ export interface LocalRepoConfig {
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
+  localDir: string;
   isGhe: boolean;
   renovateUsername: string;
   productLinks: any;

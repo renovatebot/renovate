@@ -1,3 +1,14 @@
+import type { RenovateConfig } from '../config/types';
+import { setExecConfig } from './exec';
+import { setFsConfig } from './fs';
+
+export async function setUtilConfig(
+  config: Partial<RenovateConfig>
+): Promise<void> {
+  await setExecConfig(config);
+  setFsConfig(config);
+}
+
 export function sampleSize(array: string[], n: number): string[] {
   const length = array == null ? 0 : array.length;
   if (!length || n < 1) {

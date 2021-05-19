@@ -168,13 +168,14 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
+  localDir,
   renovateUsername,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { repository, cloneSubmodules, ignorePrAuthor } as any;
+  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove

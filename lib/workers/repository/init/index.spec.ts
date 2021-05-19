@@ -1,5 +1,4 @@
 import { getName, logger, mocked } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
@@ -23,13 +22,6 @@ const onboarding = mocked(_onboarding);
 const secrets = mocked(_secrets);
 
 describe(getName(), () => {
-  beforeEach(() => {
-    setAdminConfig({ localDir: '', cacheDir: '' });
-  });
-  afterEach(() => {
-    setAdminConfig();
-  });
-
   describe('initRepo', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue({} as never);

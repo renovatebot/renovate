@@ -13,6 +13,8 @@ export enum BinarySource {
 
 export interface ExecConfig {
   binarySource: Opt<BinarySource>;
+  localDir: Opt<string>;
+  cacheDir: Opt<string>;
 }
 
 export type VolumesPair = [string, string];

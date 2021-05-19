@@ -2,15 +2,13 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import type { StatusResult } from '../../util/git';
-import type { UpdateArtifactsConfig } from '../types';
+import { setFsConfig } from '../../util/fs';
+import { StatusResult } from '../../util/git';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
 
@@ -28,13 +26,7 @@ jest.mock('../../../lib/util/git');
 jest.mock('../../../lib/util/host-rules');
 jest.mock('./host-rules');
 
-const adminConfig: RepoAdminConfig = {
-  // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-};
-
-const config: UpdateArtifactsConfig = {};
+let config;
 
 describe('bundler.updateArtifacts()', () => {
   beforeEach(async () => {
@@ -43,15 +35,18 @@ describe('bundler.updateArtifacts()', () => {
 
     delete process.env.GEM_HOME;
 
+    config = {
+      // `join` fixes Windows CI
+      localDir: join('/tmp/github/some/repo'),
+      cacheDir: join('/tmp/cache'),
+    };
+
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     docker.resetPrefetchedImages();
 
-    await setExecConfig(adminConfig as never);
-    setAdminConfig(adminConfig);
-  });
-  afterEach(() => {
-    setAdminConfig();
+    await setExecConfig(config);
+    setFsConfig(config);
   });
   it('returns null by default', async () => {
     expect(
@@ -125,10 +120,8 @@ describe('bundler.updateArtifacts()', () => {
   describe('Docker', () => {
     beforeEach(async () => {
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-      await setExecConfig({
-        ...adminConfig,
-        binarySource: BinarySource.Docker,
-      });
+      await setExecConfig({ ...config, binarySource: BinarySource.Docker });
+      setFsConfig({ ...config, binarySource: BinarySource.Docker });
     });
     it('.ruby-version', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');

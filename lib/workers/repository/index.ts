@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { getAdminConfig, setAdminConfig } from '../../config/admin';
+import { setAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
@@ -28,16 +28,16 @@ export async function renovateRepository(
   repoConfig: RenovateConfig
 ): Promise<ProcessResult> {
   splitInit();
-  let config = setAdminConfig(repoConfig);
+  let config = { ...repoConfig };
+  setAdminConfig(config);
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
   let repoResult: ProcessResult;
   queue.clear();
-  const { localDir } = getAdminConfig();
   try {
-    await fs.ensureDir(localDir);
-    logger.debug('Using localDir: ' + localDir);
+    await fs.ensureDir(config.localDir);
+    logger.debug('Using localDir: ' + config.localDir);
     config = await initRepo(config);
     addSplit('init');
     const { branches, branchList, packageFiles } = await extractDependencies(
@@ -57,7 +57,7 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (localDir && !config.persistRepoData) {
+  if (config.localDir && !config.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {
