@@ -71,6 +71,7 @@ export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
   baseDir?: string;
+  cacheDir?: string;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -101,8 +102,6 @@ export interface RepoAdminConfig {
 }
 
 export interface LegacyAdminConfig {
-  cacheDir?: string;
-
   endpoint?: string;
 
   localDir?: string;

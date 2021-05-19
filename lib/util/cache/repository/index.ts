@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import { join } from 'upath';
+import { getAdminConfig } from '../../../config/admin';
 import type {
   RenovateConfig,
   RepositoryCacheConfig,
@@ -16,7 +17,7 @@ let cache: Cache = Object.create({});
 
 export function getCacheFileName(config: RenovateConfig): string {
   return join(
-    config.cacheDir,
+    getAdminConfig().cacheDir,
     '/renovate/repository/',
     config.platform,
     config.repository + '.json'
