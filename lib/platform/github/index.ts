@@ -168,14 +168,13 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
-  localDir,
   renovateUsername,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
+  config = { repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -465,7 +464,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
     } catch (err) {
       if (err.statusCode === 404) {
         logger.debug(`No branch protection found`);
-      } else if (err.statusCode === 403) {
+      } else if (
+        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED ||
+        err.statusCode === 403
+      ) {
         logger.debug(
           'Branch protection: Do not have permissions to detect branch protection'
         );
@@ -1688,8 +1690,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
-        url:
-          'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+        url: 'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
       },
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.'
     );
