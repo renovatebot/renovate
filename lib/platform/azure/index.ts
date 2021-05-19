@@ -34,13 +34,18 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
-import type { AzurePr } from './types';
+import { AzurePr, AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getNewBranchName,
+  getProjectAndRepo,
   getRenovatePRFormat,
+  getRepoByName,
+  getStorageExtraCloneOpts,
+  max4000Chars,
+  streamToString,
 } from './util';
 
 interface Config {
@@ -84,7 +89,7 @@ export function initPlatform({
       'Init: You must configure an Azure DevOps token, or a username and password'
     );
   }
-  // TODO: Add a connection check that endpoint/token combination are valid
+  // TODO: Add a connection check that endpoint/token combination are valid (#9593)
   const res = {
     endpoint: ensureTrailingSlash(endpoint),
   };
@@ -103,34 +108,43 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
-export async function getJsonFile(fileName: string): Promise<any | null> {
-  try {
-    const json = await azureHelper.getFile(
-      config.repoId,
-      fileName,
-      config.defaultBranch
-    );
-    return JSON.parse(json);
-  } catch (err) {
-    return null;
+export async function getRawFile(
+  fileName: string,
+  repoName?: string
+): Promise<string | null> {
+  const azureApiGit = await azureApi.gitApi();
+
+  let repoId: string;
+  if (repoName) {
+    const repos = await azureApiGit.getRepositories();
+    const repo = getRepoByName(repoName, repos);
+    repoId = repo.id;
+  } else {
+    repoId = config.repoId;
   }
+
+  const buf = await azureApiGit.getItemContent(repoId, fileName);
+  const str = await streamToString(buf);
+  return str;
+}
+
+export async function getJsonFile(
+  fileName: string,
+  repoName?: string
+): Promise<any | null> {
+  const raw = await getRawFile(fileName, repoName);
+  return JSON.parse(raw);
 }
 
 export async function initRepo({
   repository,
-  localDir,
   cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  const names = azureHelper.getProjectAndRepo(repository);
-  const repo = repos.filter(
-    (c) =>
-      c.name.toLowerCase() === names.repo.toLowerCase() &&
-      c.project.name.toLowerCase() === names.project.toLowerCase()
-  )[0];
+  const repo = getRepoByName(repository, repos);
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   // istanbul ignore if
   if (!repo.defaultBranch) {
@@ -144,6 +158,7 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
+  const names = getProjectAndRepo(repository);
   config.defaultMergeMethod = await azureHelper.getMergeMethod(
     repo.id,
     names.project
@@ -162,9 +177,8 @@ export async function initRepo({
   const url = repo.remoteUrl || manualUrl;
   await git.initRepo({
     ...config,
-    localDir,
     url,
-    extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
+    extraCloneOpts: getStorageExtraCloneOpts(opts),
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
     cloneSubmodules,
@@ -367,7 +381,7 @@ export async function createPr({
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = getNewBranchName(sourceBranch);
   const targetRefName = getNewBranchName(targetBranch);
-  const description = azureHelper.max4000Chars(sanitize(body));
+  const description = max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
@@ -394,10 +408,24 @@ export async function createPr({
         completionOptions: {
           mergeStrategy: config.defaultMergeMethod,
           deleteSourceBranch: true,
+          mergeCommitMessage: title,
         },
       },
       config.repoId,
       pr.pullRequestId
+    );
+  }
+  if (platformOptions?.azureAutoApprove) {
+    pr = await azureApiGit.createPullRequestReviewer(
+      {
+        reviewerUrl: pr.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      },
+      config.repoId,
+      pr.pullRequestId,
+      pr.createdBy.id
     );
   }
   await Promise.all(
@@ -428,7 +456,7 @@ export async function updatePr({
   };
 
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
+    objToUpdate.description = max4000Chars(sanitize(body));
   }
 
   if (state === PrState.Open) {
@@ -603,6 +631,7 @@ export async function mergePr(
     completionOptions: {
       mergeStrategy: mergeMethod,
       deleteSourceBranch: true,
+      mergeCommitMessage: pr.title,
     },
   };
 
@@ -687,7 +716,7 @@ export function ensureIssueClosing(): Promise<void> {
 /* istanbul ignore next */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
-  // TODO: Needs implementation
+  // TODO: Needs implementation (#9592)
   return Promise.resolve([]);
 }
 

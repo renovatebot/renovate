@@ -12,3 +12,5 @@ coreImage:
   repository: bitnami/harbor-core
   tag: 2.1.3-debian-10-r38
 ```
+
+If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.

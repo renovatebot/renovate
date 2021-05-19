@@ -8,6 +8,7 @@ import { BitbucketCommit, BitbucketTag } from './types';
 const bitbucketHttp = new BitbucketHttp();
 
 export const id = 'bitbucket-tags';
+export const customRegistrySupport = true;
 export const registryStrategy = 'first';
 export const defaultRegistryUrls = ['https://bitbucket.org'];
 

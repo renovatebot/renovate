@@ -4,8 +4,10 @@ import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
 import * as githubReleases from '../github-releases';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type { TagResponse } from './types';
 
 export const id = 'github-tags';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 
@@ -14,14 +16,6 @@ const http = new GithubHttp();
 const cacheNamespace = 'datasource-github-tags';
 function getCacheKey(registryUrl: string, repo: string, type: string): string {
   return `${registryUrl}:${repo}:${type}`;
-}
-
-interface TagResponse {
-  object: {
-    type: string;
-    url: string;
-    sha: string;
-  };
 }
 
 async function getTagCommit(

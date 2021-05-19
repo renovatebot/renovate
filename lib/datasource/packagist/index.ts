@@ -1,5 +1,4 @@
 import URL from 'url';
-
 import pAll from 'p-all';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -9,8 +8,16 @@ import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  AllPackages,
+  PackageMeta,
+  PackagistFile,
+  RegistryFile,
+  RegistryMeta,
+} from './types';
 
 export const id = 'packagist';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://packagist.org'];
 export const defaultVersioning = composerVersioning.id;
 export const registryStrategy = 'hunt';
@@ -19,36 +26,15 @@ const http = new Http(id);
 
 // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
 function getHostOpts(url: string): HttpOptions {
-  const opts: HttpOptions = {};
+  let opts: HttpOptions = {};
   const { username, password } = hostRules.find({
     hostType: id,
     url,
   });
   if (username && password) {
-    Object.assign(opts, { username, password });
+    opts = { ...opts, username, password };
   }
   return opts;
-}
-
-interface PackageMeta {
-  includes?: Record<string, { sha256: string }>;
-  packages: Record<string, RegistryFile>;
-  'provider-includes': Record<string, { sha256: string }>;
-  providers: Record<string, { sha256: string }>;
-  'providers-url'?: string;
-}
-
-interface RegistryFile {
-  key: string;
-  sha256: string;
-}
-interface RegistryMeta {
-  files?: RegistryFile[];
-  providerPackages: Record<string, string>;
-  providersUrl?: string;
-  providersLazyUrl?: string;
-  includesFiles?: RegistryFile[];
-  packages?: Record<string, RegistryFile>;
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
@@ -91,11 +77,6 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
     }
   }
   return meta;
-}
-
-interface PackagistFile {
-  providers: Record<string, RegistryFile>;
-  packages?: Record<string, RegistryFile>;
 }
 
 async function getPackagistFile(
@@ -151,15 +132,6 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
   return dep;
 }
 
-interface AllPackages {
-  packages: Record<string, RegistryFile>;
-  providersUrl: string;
-  providersLazyUrl: string;
-  providerPackages: Record<string, string>;
-
-  includesPackages: Record<string, ReleaseResult>;
-}
-
 async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   const registryMeta = await getRegistryMeta(regUrl);
   const {
@@ -171,8 +143,8 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
     providerPackages,
   } = registryMeta;
   if (files) {
-    const queue = files.map((file) => (): Promise<PackagistFile> =>
-      getPackagistFile(regUrl, file)
+    const queue = files.map(
+      (file) => (): Promise<PackagistFile> => getPackagistFile(regUrl, file)
     );
     const resolvedFiles = await pAll(queue, { concurrency: 5 });
     for (const res of resolvedFiles) {
@@ -228,7 +200,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
-  // TODO: fix types
+  // TODO: fix types (#9610)
   const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
     dep = extractDepReleases(res);
@@ -277,7 +249,7 @@ async function packageLookup(
       return null;
     }
     const opts = getHostOpts(regUrl);
-    // TODO: fix types
+    // TODO: fix types (#9610)
     const versions = (await http.getJson<any>(pkgUrl, opts)).body.packages[
       name
     ];

@@ -21,10 +21,6 @@ export const presets: Record<string, Preset> = {
       'workarounds:all',
     ],
   },
-  'base-js': {
-    description: 'Base configuration for Javascript (deprecated)',
-    extends: ['config:base'],
-  },
   'js-app': {
     description: 'Default configuration for webapps',
     extends: ['config:base', ':pinAllExceptPeerDependencies'],

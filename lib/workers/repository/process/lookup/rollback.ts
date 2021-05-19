@@ -50,13 +50,10 @@ export function getRollbackUpdate(
     newVersion,
   });
   return {
-    updateType: 'rollback',
-    branchName:
-      '{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x',
-    commitMessageAction: 'Roll back',
-    isRollback: true,
-    newValue,
+    bucket: 'rollback',
     newMajor: version.getMajor(newVersion),
-    semanticCommitType: 'fix',
+    newValue,
+    newVersion,
+    updateType: 'rollback',
   };
 }

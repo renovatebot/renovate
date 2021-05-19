@@ -1,6 +1,7 @@
 import { join } from 'path';
-import { INTERRUPTED } from '../../constants/error-messages';
-import { id } from '../../datasource/nuget';
+import { getAdminConfig } from '../../config/admin';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
+import { id, parseRegistryUrl } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -28,8 +29,9 @@ async function addSourceCmds(
   config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
+  const { localDir } = getAdminConfig();
   const registries =
-    (await getConfiguredRegistries(packageFileName, config.localDir)) ||
+    (await getConfiguredRegistries(packageFileName, localDir)) ||
     getDefaultRegistries();
   const result = [];
   for (const registry of registries) {
@@ -37,7 +39,8 @@ async function addSourceCmds(
       hostType: id,
       url: registry.url,
     });
-    let addSourceCmd = `dotnet nuget add source ${registry.url} --configfile ${nugetConfigFile}`;
+    const registryInfo = parseRegistryUrl(registry.url);
+    let addSourceCmd = `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile}`;
     if (registry.name) {
       // Add name for registry, if known.
       addSourceCmd += ` --name ${registry.name}`;
@@ -57,7 +60,7 @@ async function runDotnetRestore(
 ): Promise<void> {
   const execOptions: ExecOptions = {
     docker: {
-      image: 'renovate/dotnet',
+      image: 'dotnet',
     },
   };
 
@@ -139,7 +142,7 @@ export async function updateArtifacts({
     ];
   } catch (err) {
     // istanbul ignore if
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug({ err }, 'Failed to generate lock file');

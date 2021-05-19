@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/extract .extractPackageFile() updates internal packages 1`] = `
+exports[`manager/npm/extract/monorepo .extractPackageFile() updates internal packages 1`] = `
 Array [
   Object {
     "deps": Array [
@@ -17,10 +17,12 @@ Array [
         "depName": "foo",
       },
     ],
-    "lernaDir": ".",
     "lernaPackages": Array [
       "packages/*",
     ],
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "packageFile": "package.json",
     "packages": Array [
       "packages/*",
@@ -39,7 +41,9 @@ Array [
       },
     ],
     "lernaClient": undefined,
-    "lernaDir": ".",
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
@@ -47,7 +51,9 @@ Array [
   },
   Object {
     "lernaClient": undefined,
-    "lernaDir": ".",
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
@@ -56,7 +62,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses lerna package settings 1`] = `
+exports[`manager/npm/extract/monorepo .extractPackageFile() uses lerna package settings 1`] = `
 Array [
   Object {
     "deps": Array [
@@ -75,10 +81,12 @@ Array [
         "depName": "foo",
       },
     ],
-    "lernaDir": ".",
     "lernaPackages": Array [
       "packages/*",
     ],
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "packageFile": "package.json",
     "packages": Array [
       "packages/*",
@@ -98,7 +106,9 @@ Array [
       },
     ],
     "lernaClient": undefined,
-    "lernaDir": ".",
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
@@ -106,7 +116,9 @@ Array [
   },
   Object {
     "lernaClient": undefined,
-    "lernaDir": ".",
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
@@ -115,14 +127,16 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings with lerna 1`] = `
+exports[`manager/npm/extract/monorepo .extractPackageFile() uses yarn workspaces package settings with lerna 1`] = `
 Array [
   Object {
     "lernaClient": "yarn",
-    "lernaDir": ".",
     "lernaPackages": Array [
       "oldpackages/*",
     ],
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "packageFile": "package.json",
     "yarnWorkspacesPackages": Array [
       "packages/*",
@@ -130,7 +144,9 @@ Array [
   },
   Object {
     "lernaClient": "yarn",
-    "lernaDir": ".",
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
@@ -138,7 +154,9 @@ Array [
   },
   Object {
     "lernaClient": "yarn",
-    "lernaDir": ".",
+    "managerData": Object {
+      "lernaJsonFile": "lerna.json",
+    },
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
@@ -147,7 +165,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings without lerna 1`] = `
+exports[`manager/npm/extract/monorepo .extractPackageFile() uses yarn workspaces package settings without lerna 1`] = `
 Array [
   Object {
     "packageFile": "package.json",
@@ -156,7 +174,9 @@ Array [
   Object {
     "hasYarnWorkspaces": true,
     "lernaClient": undefined,
-    "lernaDir": undefined,
+    "managerData": Object {
+      "lernaJsonFile": undefined,
+    },
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
@@ -164,7 +184,9 @@ Array [
   },
   Object {
     "lernaClient": undefined,
-    "lernaDir": undefined,
+    "managerData": Object {
+      "lernaJsonFile": undefined,
+    },
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",

@@ -4,20 +4,10 @@ import * as datasourceHelm from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { Doc } from './types';
 
 const isValidChartName = (name: string): boolean =>
   !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
-
-interface Doc {
-  releases?: {
-    chart: string;
-    version: string;
-  }[];
-  repositories?: {
-    name: string;
-    url: string;
-  }[];
-}
 
 export function extractPackageFile(
   content: string,
@@ -35,8 +25,7 @@ export function extractPackageFile(
   }
   for (const doc of docs) {
     if (!(doc && is.array(doc.releases))) {
-      logger.debug({ fileName }, 'helmfile.yaml has no releases');
-      return null;
+      continue; // eslint-disable-line no-continue
     }
 
     if (doc.repositories) {
@@ -92,6 +81,11 @@ export function extractPackageFile(
 
       return res;
     });
+  }
+
+  if (!deps.length) {
+    logger.debug({ fileName }, 'helmfile.yaml has no releases');
+    return null;
   }
 
   return { deps, datasource: datasourceHelm.id } as PackageFile;

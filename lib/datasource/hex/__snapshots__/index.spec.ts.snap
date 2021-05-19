@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/hex getReleases process public repo without auth 1`] = `
+exports[`datasource/hex/index getReleases process public repo without auth 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/certifi",
+  "registryUrl": "https://hex.pm/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2015-09-10T13:58:55.620Z",
@@ -88,12 +89,12 @@ Object {
 }
 `;
 
-exports[`datasource/hex getReleases process public repo without auth 2`] = `
+exports[`datasource/hex/index getReleases process public repo without auth 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -103,9 +104,10 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases processes real data 1`] = `
+exports[`datasource/hex/index getReleases processes real data 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/certifi",
+  "registryUrl": "https://hex.pm/",
   "releases": Array [
     Object {
       "releaseTimestamp": "2015-09-10T13:58:55.620Z",
@@ -191,12 +193,12 @@ Object {
 }
 `;
 
-exports[`datasource/hex getReleases processes real data 2`] = `
+exports[`datasource/hex/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -206,12 +208,12 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for 401 1`] = `
+exports[`datasource/hex/index getReleases returns null for 401 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -221,12 +223,12 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for 404 1`] = `
+exports[`datasource/hex/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -236,12 +238,12 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for empty result 1`] = `
+exports[`datasource/hex/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -251,12 +253,12 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for missing fields 1`] = `
+exports[`datasource/hex/index getReleases returns null for missing fields 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -266,12 +268,12 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null for unknown error 1`] = `
+exports[`datasource/hex/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -281,12 +283,12 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases returns null with wrong auth token 1`] = `
+exports[`datasource/hex/index getReleases returns null with wrong auth token 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer this_simple_token",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -297,12 +299,12 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases throws for 5xx 1`] = `
+exports[`datasource/hex/index getReleases throws for 5xx 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -312,12 +314,12 @@ Array [
 ]
 `;
 
-exports[`datasource/hex getReleases throws for 429 1`] = `
+exports[`datasource/hex/index getReleases throws for 429 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

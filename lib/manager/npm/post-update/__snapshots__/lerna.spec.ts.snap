@@ -1,6 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
+
 exports[`manager/npm/post-update/lerna generateLockFiles() allows scripts for trust level high 1`] = `
 Array [
+  Object {
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "npm install  --no-audit --package-lock-only",
     "options": Object {
@@ -43,6 +62,24 @@ Array [
 exports[`manager/npm/post-update/lerna generateLockFiles() defaults to latest if lerna version unspecified 1`] = `
 Array [
   Object {
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
@@ -83,6 +120,24 @@ Array [
 
 exports[`manager/npm/post-update/lerna generateLockFiles() generates package-lock.json files 1`] = `
 Array [
+  Object {
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
@@ -125,6 +180,24 @@ Array [
 exports[`manager/npm/post-update/lerna generateLockFiles() generates yarn.lock files 1`] = `
 Array [
   Object {
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
     "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
@@ -163,49 +236,26 @@ Array [
 ]
 `;
 
-exports[`manager/npm/post-update/lerna generateLockFiles() maps dot files 1`] = `
-Array [
-  Object {
-    "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
-    "options": Object {
-      "cwd": "some-dir",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-  Object {
-    "cmd": "lerna bootstrap --no-ci --ignore-scripts -- --ignore-scripts  --no-audit --package-lock-only",
-    "options": Object {
-      "cwd": "some-dir",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
 exports[`manager/npm/post-update/lerna generateLockFiles() performs full npm install 1`] = `
 Array [
+  Object {
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "npm install --ignore-scripts  --no-audit",
     "options": Object {
@@ -244,4 +294,3 @@ Array [
   },
 ]
 `;
-

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/terragrunt/extract extractPackageFile() extracts terragrunt sources 1`] = `
+exports[`manager/terragrunt/extract extractPackageFile() extracts terragrunt sources 1`] = `
 Object {
   "deps": Array [
     Object {

@@ -132,6 +132,7 @@ export interface CombinedCommitStatus {
 
 export type RepoSearchParams = {
   uid?: number;
+  archived?: boolean;
 };
 
 export type IssueCreateParams = IssueUpdateParams;

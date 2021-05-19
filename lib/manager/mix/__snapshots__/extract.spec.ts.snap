@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/mix/extract extractPackageFile() extracts all dependencies 1`] = `
+exports[`manager/mix/extract extractPackageFile() extracts all dependencies 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -70,7 +70,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/mix/extract extractPackageFile() returns empty for invalid dependency file 1`] = `
+exports[`manager/mix/extract extractPackageFile() returns empty for invalid dependency file 1`] = `
 Object {
   "deps": Array [],
 }

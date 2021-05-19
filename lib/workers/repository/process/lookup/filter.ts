@@ -15,12 +15,8 @@ export function filterVersions(
   latestVersion: string,
   releases: Release[]
 ): Release[] {
-  const {
-    ignoreUnstable,
-    ignoreDeprecated,
-    respectLatest,
-    allowedVersions,
-  } = config;
+  const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
+    config;
   let versioning;
   function isVersionStable(version: string): boolean {
     if (!versioning.isStable(version)) {
@@ -39,8 +35,10 @@ export function filterVersions(
   }
 
   // Leave only versions greater than current
-  let filteredVersions = releases.filter((v) =>
-    versioning.isGreaterThan(v.version, currentVersion)
+  let filteredVersions = releases.filter(
+    (v) =>
+      versioning.isVersion(v.version) &&
+      versioning.isGreaterThan(v.version, currentVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
@@ -96,7 +94,7 @@ export function filterVersions(
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
-      error.configFile = 'config';
+      error.validationSource = 'config';
       error.validationError = 'Invalid `allowedVersions`';
       error.validationMessage =
         'The following allowedVersions does not parse as a valid version or range: ' +
@@ -105,45 +103,36 @@ export function filterVersions(
     }
   }
 
-  // Return all versions if we aren't ignore unstable. Also ignore latest
-  if (config.followTag || ignoreUnstable === false) {
+  if (config.followTag) {
     return filteredVersions;
   }
 
-  // if current is unstable then allow unstable in the current major only
-  if (!isVersionStable(currentVersion)) {
-    // Allow unstable only in current major
-    return filteredVersions.filter(
-      (v) =>
-        isVersionStable(v.version) ||
-        (versioning.getMajor(v.version) ===
-          versioning.getMajor(currentVersion) &&
-          versioning.getMinor(v.version) ===
-            versioning.getMinor(currentVersion) &&
-          versioning.getPatch(v.version) ===
-            versioning.getPatch(currentVersion))
+  if (
+    respectLatest &&
+    latestVersion &&
+    !versioning.isGreaterThan(currentVersion, latestVersion)
+  ) {
+    filteredVersions = filteredVersions.filter(
+      (v) => !versioning.isGreaterThan(v.version, latestVersion)
     );
   }
 
-  // Normal case: remove all unstable
-  filteredVersions = filteredVersions.filter((v) => isVersionStable(v.version));
+  if (!ignoreUnstable) {
+    return filteredVersions;
+  }
 
-  // Filter the latest
+  if (isVersionStable(currentVersion)) {
+    return filteredVersions.filter((v) => isVersionStable(v.version));
+  }
 
-  // No filtering if no latest
-  // istanbul ignore if
-  if (!latestVersion) {
-    return filteredVersions;
-  }
-  // No filtering if not respecting latest
-  if (respectLatest === false) {
-    return filteredVersions;
-  }
-  // No filtering if currentVersion is already past latest
-  if (versioning.isGreaterThan(currentVersion, latestVersion)) {
-    return filteredVersions;
-  }
+  // if current is unstable then allow unstable in the current major only
+  // Allow unstable only in current major
   return filteredVersions.filter(
-    (v) => !versioning.isGreaterThan(v.version, latestVersion)
+    (v) =>
+      isVersionStable(v.version) ||
+      (versioning.getMajor(v.version) === versioning.getMajor(currentVersion) &&
+        versioning.getMinor(v.version) ===
+          versioning.getMinor(currentVersion) &&
+        versioning.getPatch(v.version) === versioning.getPatch(currentVersion))
   );
 }

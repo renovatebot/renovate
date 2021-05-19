@@ -1,9 +1,11 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
+import { getName } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import * as git from '.';
 
-describe('platform/git', () => {
+describe(getName(), () => {
   jest.setTimeout(15000);
 
   const masterCommitDate = new Date();
@@ -67,14 +69,17 @@ describe('platform/git', () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
+    setAdminConfig({ localDir: tmpDir.path });
     await git.initRepo({
-      localDir: tmpDir.path,
       url: origin.path,
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
     });
-    await git.setBranchPrefix('renovate/');
+    await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     await git.syncGit();
+    // override some local git settings for better testing
+    const local = Git(tmpDir.path);
+    await local.addConfig('commit.gpgsign', 'false');
   });
 
   afterEach(async () => {
@@ -104,7 +109,6 @@ describe('platform/git', () => {
       await repo.commit('Add submodule');
       await git.initRepo({
         cloneSubmodules: true,
-        localDir: tmpDir.path,
         url: base.path,
       });
       await git.syncGit();
@@ -145,11 +149,17 @@ describe('platform/git', () => {
     it('should return false when branch is not found', async () => {
       expect(await git.isBranchModified('renovate/not_found')).toBe(false);
     });
-    it('should return true when author matches', async () => {
+    it('should return false when author matches', async () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
     });
-    it('should return false when custom author', async () => {
+    it('should return false when author is ignored', async () => {
+      await git.setUserRepoConfig({
+        gitIgnoredAuthors: ['custom@example.com'],
+      });
+      expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
+    });
+    it('should return true when custom author is unknown', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
     });
   });
@@ -291,21 +301,19 @@ describe('platform/git', () => {
         files,
         message: 'Update something',
       });
-      expect(commit).not.toBeNull();
+      expect(commit).toBeNull();
     });
     it('does not push when no diff', async () => {
-      const branchName = 'renovate/something';
-      const local = Git(tmpDir.path);
-      await local.push('origin', `${defaultBranch}:${branchName}`);
-      await local.fetch([
-        'origin',
-        `refs/heads/${branchName}:refs/remotes/origin/${branchName}`,
-      ]);
-      const files = [];
+      const files = [
+        {
+          name: 'future_file',
+          contents: 'future',
+        },
+      ];
       const commit = await git.commitFiles({
-        branchName,
+        branchName: 'renovate/future_branch',
         files,
-        message: 'Update something',
+        message: 'No change update',
       });
       expect(commit).toBeNull();
     });
@@ -365,7 +373,6 @@ describe('platform/git', () => {
       await git.checkoutBranch('develop');
 
       await git.initRepo({
-        localDir: tmpDir.path,
         url: base.path,
       });
 
@@ -387,22 +394,20 @@ describe('platform/git', () => {
       await repo.checkout(defaultBranch);
 
       await git.initRepo({
-        localDir: tmpDir.path,
         url: base.path,
       });
 
-      await git.setBranchPrefix('renovate/');
+      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
 
       await git.initRepo({
-        localDir: tmpDir.path,
         url: base.path,
       });
 
       await repo.checkout('renovate/test');
       await repo.commit('past message3', ['--amend']);
 
-      await git.setBranchPrefix('renovate/');
+      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
     });
 
@@ -424,7 +429,6 @@ describe('platform/git', () => {
       await repo.commit('Add submodule');
       await git.initRepo({
         cloneSubmodules: true,
-        localDir: tmpDir.path,
         url: base.path,
       });
       await git.syncGit();
@@ -435,7 +439,6 @@ describe('platform/git', () => {
     it('should use extra clone configuration', async () => {
       await fs.emptyDir(tmpDir.path);
       await git.initRepo({
-        localDir: tmpDir.path,
         url: origin.path,
         extraCloneOpts: {
           '-c': 'extra.clone.config=test-extra-config-value',

@@ -6,7 +6,7 @@ import type { BranchConfig } from '../../types';
 export async function getPrConfigDescription(
   config: BranchConfig
 ): Promise<string> {
-  let prBody = `\n\n---\n\n### Renovate configuration\n\n`;
+  let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
   if (
     config.schedule &&

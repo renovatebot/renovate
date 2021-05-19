@@ -16,20 +16,20 @@ export const presets: Record<string, Preset> = {
   },
   mapbox: {
     description: 'All mapbox-related packages',
-    matchPackagePatterns: ['^(leaflet|mapbox)'],
+    matchPackagePrefixes: ['leaflet', 'mapbox'],
   },
   emberTemplateLint: {
     description: 'All ember-template-lint packages',
-    matchPackagePatterns: ['^ember-template-lint'],
+    matchPackagePrefixes: ['ember-template-lint'],
   },
   eslint: {
     description: 'All eslint packages',
     matchPackageNames: ['babel-eslint'],
-    matchPackagePatterns: ['^@typescript-eslint/', '^eslint'],
+    matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   stylelint: {
     description: 'All stylelint packages',
-    matchPackagePatterns: ['^stylelint'],
+    matchPackagePrefixes: ['stylelint'],
   },
   tslint: {
     description: 'All tslint packages',
@@ -49,7 +49,7 @@ export const presets: Record<string, Preset> = {
   postcss: {
     description: 'All postcss packages',
     matchPackageNames: ['postcss'],
-    matchPackagePatterns: ['^postcss-'],
+    matchPackagePrefixes: ['postcss-'],
   },
   jsUnitTest: {
     description: 'Unit test packages for javascript',
@@ -65,14 +65,7 @@ export const presets: Record<string, Preset> = {
       'proxyquire',
       'supertest',
     ],
-    matchPackagePatterns: [
-      '^chai',
-      '^jest',
-      '^mocha',
-      '^qunit',
-      '^sinon',
-      '^should',
-    ],
+    matchPackagePrefixes: ['chai', 'jest', 'mocha', 'qunit', 'sinon', 'should'],
   },
   unitTest: {
     description: 'All unit test packages',
@@ -93,6 +86,6 @@ export const presets: Record<string, Preset> = {
   googleapis: {
     matchDatasources: ['npm'],
     description: 'All googleapis packages',
-    matchPackagePatterns: ['^@google-cloud/'],
+    matchPackagePrefixes: ['@google-cloud/'],
   },
 };

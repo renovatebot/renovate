@@ -62,7 +62,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -94,7 +94,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -126,7 +126,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer some-token",
       "host": "my.custom.domain",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -153,7 +153,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -179,7 +179,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -205,7 +205,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -231,7 +231,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -257,7 +257,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -274,7 +274,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -291,7 +291,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -308,7 +308,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -323,7 +323,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -338,7 +338,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -347,7 +347,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -365,7 +365,7 @@ Closes ADAPT-207
 
 See merge request itentialopensource/adapter-utils!177
 
-* * *
+***
 ",
   "url": "https://gitlab.com/itentialopensource/adapter-utils/blob/master/CHANGELOG.md#4330-05-15-2020",
 }
@@ -376,7 +376,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -386,7 +386,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -396,7 +396,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -441,7 +441,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -451,7 +451,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -461,7 +461,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -491,7 +491,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -501,7 +501,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -511,7 +511,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -526,7 +526,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -536,7 +536,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -551,7 +551,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -561,7 +561,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -571,7 +571,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -616,7 +616,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -626,7 +626,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -636,7 +636,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -651,7 +651,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -660,7 +660,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -691,7 +691,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -701,7 +701,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -711,7 +711,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -789,7 +789,7 @@ Object {
     ([#4730](https://github.com/facebook/jest/pull/4730))
 -   \`[jest-runtime]\` Use realpath to match transformers
     ([#5000](https://github.com/facebook/jest/pull/5000))
--   \`[expect]\` [**BREAKING**] Replace identity equality with Object.is in toBe
+-   \`[expect]\` \\\\[**BREAKING**] Replace identity equality with Object.is in toBe
     matcher ([#4917](https://github.com/facebook/jest/pull/4917))
 
 ##### Features
@@ -810,18 +810,18 @@ Object {
     ([#4866](https://github.com/facebook/jest/pull/4866))
 -   \`[eslint-plugin-jest]\` Add \`prefer-to-have-length\` lint rule.
     ([#4771](https://github.com/facebook/jest/pull/4771))
--   \`[jest-environment-jsdom]\` [**BREAKING**] Upgrade to JSDOM@11
+-   \`[jest-environment-jsdom]\` \\\\[**BREAKING**] Upgrade to JSDOM@11
     ([#4770](https://github.com/facebook/jest/pull/4770))
--   \`[jest-environment-*]\` [**BREAKING**] Add Async Test Environment APIs, dispose
+-   \`[jest-environment-*]\` \\\\[**BREAKING**] Add Async Test Environment APIs, dispose
     is now teardown ([#4506](https://github.com/facebook/jest/pull/4506))
 -   \`[jest-cli]\` Add an option to clear the cache
     ([#4430](https://github.com/facebook/jest/pull/4430))
 -   \`[babel-plugin-jest-hoist]\` Improve error message, that the second argument of
     \`jest.mock\` must be an inline function
     ([#4593](https://github.com/facebook/jest/pull/4593))
--   \`[jest-snapshot]\` [**BREAKING**] Concatenate name of test and snapshot
+-   \`[jest-snapshot]\` \\\\[**BREAKING**] Concatenate name of test and snapshot
     ([#4460](https://github.com/facebook/jest/pull/4460))
--   \`[jest-cli]\` [**BREAKING**] Fail if no tests are found
+-   \`[jest-cli]\` \\\\[**BREAKING**] Fail if no tests are found
     ([#3672](https://github.com/facebook/jest/pull/3672))
 -   \`[jest-diff]\` Highlight only last of odd length leading spaces
     ([#4558](https://github.com/facebook/jest/pull/4558))
@@ -855,7 +855,7 @@ Object {
     ([#4614](https://github.com/facebook/jest/pull/4614))
 -   \`[jest-runtime]\` Support sourcemaps in transformers
     ([#3458](https://github.com/facebook/jest/pull/3458))
--   \`[jest-snapshot]\` [**BREAKING**] Add a serializer for \`jest.fn\` to allow a
+-   \`[jest-snapshot]\` \\\\[**BREAKING**] Add a serializer for \`jest.fn\` to allow a
     snapshot of a jest mock ([#4668](https://github.com/facebook/jest/pull/4668))
 -   \`[jest-worker]\` Initial version of parallel worker abstraction, say hello!
     ([#4497](https://github.com/facebook/jest/pull/4497))
@@ -877,7 +877,7 @@ Object {
     ([#5093](https://github.com/facebook/jest/pull/5093))
 -   \`[jest-util]\` \`jest-util\` should not depend on \`jest-mock\`
     ([#4992](https://github.com/facebook/jest/pull/4992))
--   \`[*]\` [**BREAKING**] Drop support for Node.js version 4
+-   \`[*]\` \\\\[**BREAKING**] Drop support for Node.js version 4
     ([#4769](https://github.com/facebook/jest/pull/4769))
 -   \`[docs]\` Wrap code comments at 80 characters
     ([#4781](https://github.com/facebook/jest/pull/4781))
@@ -918,7 +918,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -928,7 +928,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -938,7 +938,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -962,7 +962,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer some-token",
       "host": "my.custom.domain",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -972,7 +972,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer some-token",
       "host": "my.custom.domain",
       "user-agent": "https://github.com/renovatebot/renovate",

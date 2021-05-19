@@ -1,20 +1,17 @@
 import simpleGit from 'simple-git';
 import * as packageCache from '../../util/cache/package';
+import { getRemoteUrlWithToken } from '../../util/git/url';
 import * as semver from '../../versioning/semver';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type { RawRefs } from './types';
 
 export const id = 'git-refs';
+export const customRegistrySupport = false;
 
 const cacheMinutes = 10;
 
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
-
-export interface RawRefs {
-  type: string;
-  value: string;
-  hash: string;
-}
 
 export async function getRawRefs({
   lookupName,
@@ -32,7 +29,7 @@ export async function getRawRefs({
   }
 
   // fetch remote tags
-  const lsRemote = await git.listRemote([lookupName]);
+  const lsRemote = await git.listRemote([getRemoteUrlWithToken(lookupName)]);
   if (!lsRemote) {
     return null;
   }

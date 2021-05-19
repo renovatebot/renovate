@@ -1,6 +1,7 @@
 import { stat } from 'fs-extra';
 import { resolve } from 'upath';
-import { INTERRUPTED } from '../../constants/error-messages';
+import { getAdminConfig } from '../../config/admin';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
@@ -54,7 +55,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const projectDir = config.localDir;
+    const { localDir: projectDir } = getAdminConfig();
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
     const gradlew = gradleWrapperFileName(config);
     const gradlewPath = resolve(projectDir, `./${gradlew}`);
@@ -86,7 +87,7 @@ export async function updateArtifacts({
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
-        image: 'renovate/gradle',
+        image: 'gradle',
       },
       extraEnv,
     };
@@ -94,7 +95,7 @@ export async function updateArtifacts({
       await exec(cmd, execOptions);
     } catch (err) {
       // istanbul ignore if
-      if (err.message === INTERRUPTED) {
+      if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
       logger.warn(

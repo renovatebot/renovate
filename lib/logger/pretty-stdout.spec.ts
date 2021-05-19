@@ -1,6 +1,7 @@
 import chalk from 'chalk';
+import { getName } from '../../test/util';
 import * as prettyStdout from './pretty-stdout';
-import type { BunyanRecord } from './utils';
+import type { BunyanRecord } from './types';
 
 jest.mock('chalk', () =>
   ['bgRed', 'blue', 'gray', 'green', 'magenta', 'red'].reduce(
@@ -9,7 +10,7 @@ jest.mock('chalk', () =>
   )
 );
 
-describe('logger/pretty-stdout', () => {
+describe(getName(), () => {
   describe('getMeta(rec)', () => {
     it('returns empty string if null rec', () => {
       expect(prettyStdout.getMeta(null as any)).toEqual('');

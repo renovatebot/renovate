@@ -46,7 +46,7 @@ module.exports = {
 ### CLI
 
 ```
-$ node renovate --help
+node renovate --help
 ```
 
 To configure any `<list>` items, separate with commas.

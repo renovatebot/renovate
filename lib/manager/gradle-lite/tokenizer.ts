@@ -1,5 +1,6 @@
 import moo from 'moo';
-import { StringInterpolation, Token, TokenType } from './common';
+import { TokenType } from './common';
+import { StringInterpolation, Token } from './types';
 
 const escapedCharRegex = /\\['"bfnrt\\]/;
 const escapedChars = {
@@ -19,7 +20,7 @@ const escapedChars = {
   },
 };
 
-export const rawLexer = {
+const lexer = moo.states({
   // Top-level Groovy lexemes
   main: {
     [TokenType.LineComment]: { match: /\/\/.*?$/ },
@@ -55,26 +56,26 @@ export const rawLexer = {
       match: '"',
       push: TokenType.DoubleQuotedStart,
     },
-    [TokenType.UnknownLexeme]: { match: /./ },
+    [TokenType.UnknownFragment]: moo.fallback,
   },
 
   // Tokenize triple-quoted string literal characters
   [TokenType.TripleSingleQuotedStart]: {
     ...escapedChars,
     [TokenType.TripleQuotedFinish]: { match: "'''", pop: 1 },
-    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
+    [TokenType.Chars]: moo.fallback,
   },
   [TokenType.TripleDoubleQuotedStart]: {
     ...escapedChars,
     [TokenType.TripleQuotedFinish]: { match: '"""', pop: 1 },
-    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
+    [TokenType.Chars]: moo.fallback,
   },
 
   // Tokenize single-quoted string literal characters
   [TokenType.SingleQuotedStart]: {
     ...escapedChars,
     [TokenType.SingleQuotedFinish]: { match: "'", pop: 1 },
-    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
+    [TokenType.Chars]: moo.fallback,
   },
 
   // Tokenize double-quoted string literal chars and interpolations
@@ -83,7 +84,8 @@ export const rawLexer = {
     [TokenType.DoubleQuotedFinish]: { match: '"', pop: 1 },
     variable: {
       // Supported: ${foo}, $foo, ${ foo.bar.baz }, $foo.bar.baz
-      match: /\${\s*[a-zA-Z_][a-zA-Z0-9_]*(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*/,
+      match:
+        /\${\s*[a-zA-Z_][a-zA-Z0-9_]*(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*/,
       value: (x: string): string =>
         x.replace(/^\${?\s*/, '').replace(/\s*}$/, ''),
     },
@@ -91,7 +93,7 @@ export const rawLexer = {
       match: /\${/,
       push: TokenType.IgnoredInterpolationStart,
     },
-    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
+    [TokenType.Chars]: moo.fallback,
   },
 
   // Ignore interpolation of complex expressions˙,
@@ -102,34 +104,18 @@ export const rawLexer = {
       push: TokenType.IgnoredInterpolationStart,
     },
     [TokenType.RightBrace]: { match: '}', pop: 1 },
-    [TokenType.UnknownLexeme]: { match: /[^]/, lineBreaks: true },
+    [TokenType.UnknownFragment]: moo.fallback,
   },
-};
-
-/*
-  Turn UnknownLexeme chars to UnknownFragment strings
- */
-function processUnknownLexeme(acc: Token[], token: Token): Token[] {
-  if (token.type === TokenType.UnknownLexeme) {
-    const prevToken: Token = acc[acc.length - 1];
-    if (prevToken?.type === TokenType.UnknownFragment) {
-      prevToken.value += token.value;
-    } else {
-      acc.push({ ...token, type: TokenType.UnknownFragment });
-    }
-  } else {
-    acc.push(token);
-  }
-  return acc;
-}
+});
 
 //
-// Turn separated chars of string literal to single String token
+// Turn substrings of chars and escaped chars into single String token
 //
-function processChar(acc: Token[], token: Token): Token[] {
+function processChars(acc: Token[], token: Token): Token[] {
   const tokenType = token.type;
   const prevToken: Token = acc[acc.length - 1];
-  if ([TokenType.Char, TokenType.EscapedChar].includes(tokenType)) {
+  if ([TokenType.Chars, TokenType.EscapedChar].includes(tokenType)) {
+    // istanbul ignore if
     if (prevToken?.type === TokenType.String) {
       prevToken.value += token.value;
     } else {
@@ -213,7 +199,6 @@ function filterTokens({ type }: Token): boolean {
 }
 
 export function extractRawTokens(input: string): Token[] {
-  const lexer = moo.states(rawLexer);
   lexer.reset(input);
   return Array.from(lexer).map(
     ({ type, offset, value }) => ({ type, offset, value } as Token)
@@ -222,8 +207,7 @@ export function extractRawTokens(input: string): Token[] {
 
 export function processTokens(tokens: Token[]): Token[] {
   return tokens
-    .reduce(processUnknownLexeme, [])
-    .reduce(processChar, [])
+    .reduce(processChars, [])
     .reduce(processInterpolation, [])
     .filter(filterTokens);
 }

@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { parseSyml } from '@yarnpkg/parsers';
 import upath from 'upath';
+import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
@@ -9,6 +10,7 @@ import { getChildProcessEnv } from '../../../util/exec/env';
 import {
   deleteLocalFile,
   ensureDir,
+  getSubDirectory,
   outputFile,
   readFile,
   remove,
@@ -17,10 +19,18 @@ import {
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { validateUrl } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
+import type {
+  AdditionalPackageFiles,
+  ArtifactError,
+  DetermineLockFileDirsResult,
+  UpdatedArtifacts,
+  WriteExistingFilesResult,
+} from './types';
 import * as yarn from './yarn';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
@@ -28,12 +38,6 @@ import * as yarn from './yarn';
 const getDirs = (arr: string[]): string[] =>
   Array.from(new Set(arr.filter(Boolean)));
 
-export interface DetermineLockFileDirsResult {
-  yarnLockDirs: string[];
-  npmLockDirs: string[];
-  pnpmShrinkwrapDirs: string[];
-  lernaDirs: string[];
-}
 // istanbul ignore next
 export function determineLockFileDirs(
   config: PostUpdateConfig,
@@ -42,13 +46,13 @@ export function determineLockFileDirs(
   const npmLockDirs = [];
   const yarnLockDirs = [];
   const pnpmShrinkwrapDirs = [];
-  const lernaDirs = [];
+  const lernaJsonFiles = [];
 
   for (const upgrade of config.upgrades) {
     if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
       // Return every directory that contains a lockfile
-      if (upgrade.lernaDir && upgrade.npmLock) {
-        lernaDirs.push(upgrade.lernaDir);
+      if (upgrade.managerData?.lernaJsonFile && upgrade.npmLock) {
+        lernaJsonFiles.push(upgrade.managerData.lernaJsonFile);
       } else {
         yarnLockDirs.push(upgrade.yarnLock);
         npmLockDirs.push(upgrade.npmLock);
@@ -72,7 +76,7 @@ export function determineLockFileDirs(
       yarnLockDirs: getDirs(yarnLockDirs),
       npmLockDirs: getDirs(npmLockDirs),
       pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
-      lernaDirs: getDirs(lernaDirs),
+      lernaJsonFiles: getDirs(lernaJsonFiles),
     };
   }
 
@@ -92,15 +96,15 @@ export function determineLockFileDirs(
     logger.trace(`Checking ${String(p.name)} for lock files`);
     const packageFile = getPackageFile(p.name);
     // lerna first
-    if (packageFile.lernaDir && packageFile.npmLock) {
+    if (packageFile.managerData?.lernaJsonFile && packageFile.npmLock) {
       logger.debug(`${packageFile.packageFile} has lerna lock file`);
-      lernaDirs.push(packageFile.lernaDir);
+      lernaJsonFiles.push(packageFile.managerData.lernaJsonFile);
     } else if (
-      packageFile.lernaDir &&
+      packageFile.managerData?.lernaJsonFile &&
       packageFile.yarnLock &&
       !packageFile.hasYarnWorkspaces
     ) {
-      lernaDirs.push(packageFile.lernaDir);
+      lernaJsonFiles.push(packageFile.managerData.lernaJsonFile);
     } else {
       // push full lock file names and convert them later
       yarnLockDirs.push(packageFile.yarnLock);
@@ -113,7 +117,7 @@ export function determineLockFileDirs(
     yarnLockDirs: getDirs(yarnLockDirs),
     npmLockDirs: getDirs(npmLockDirs),
     pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
-    lernaDirs: getDirs(lernaDirs),
+    lernaJsonFiles: getDirs(lernaJsonFiles),
   };
 }
 
@@ -122,18 +126,6 @@ export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
 ): Promise<void> {
-  const npmrcFile = upath.join(config.localDir, '.npmrc');
-  if (config.npmrc) {
-    logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await outputFile(npmrcFile, `${String(config.npmrc)}\n`);
-  } else if (config.ignoreNpmrcFile) {
-    logger.debug('Removing ignored .npmrc file before artifact generation');
-    await remove(npmrcFile);
-  }
-  if (is.string(config.yarnrc)) {
-    logger.debug(`Writing repo .yarnrc (${config.localDir})`);
-    await outputFile(upath.join(config.localDir, '.yarnrc'), config.yarnrc);
-  }
   if (!packageFiles.npm) {
     return;
   }
@@ -142,14 +134,15 @@ export async function writeExistingFiles(
     { packageFiles: npmFiles.map((n) => n.packageFile) },
     'Writing package.json files'
   );
+  const { localDir } = getAdminConfig();
   for (const packageFile of npmFiles) {
     const basedir = upath.join(
-      config.localDir,
+      localDir,
       upath.dirname(packageFile.packageFile)
     );
     const npmrc: string = packageFile.npmrc || config.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
-    if (npmrc) {
+    if (is.string(npmrc)) {
       try {
         await outputFile(npmrcFilename, `${npmrc}\n`);
       } catch (err) /* istanbul ignore next */ {
@@ -172,7 +165,7 @@ export async function writeExistingFiles(
     }
     const { npmLock } = packageFile;
     if (npmLock) {
-      const npmLockPath = upath.join(config.localDir, npmLock);
+      const npmLockPath = upath.join(localDir, npmLock);
       if (
         process.env.RENOVATE_REUSE_PACKAGE_LOCK === 'false' ||
         config.reuseLockFiles === false
@@ -234,11 +227,12 @@ export async function writeUpdatedPackageFiles(
     logger.debug('No files found');
     return;
   }
+  const { localDir } = getAdminConfig();
   for (const packageFile of config.updatedPackageFiles) {
     if (packageFile.name.endsWith('package-lock.json')) {
       logger.debug(`Writing package-lock file: ${packageFile.name}`);
       await outputFile(
-        upath.join(config.localDir, packageFile.name),
+        upath.join(localDir, packageFile.name),
         packageFile.contents
       );
       continue; // eslint-disable-line
@@ -267,24 +261,10 @@ export async function writeUpdatedPackageFiles(
       logger.warn({ err }, 'Error adding token to package files');
     }
     await outputFile(
-      upath.join(config.localDir, packageFile.name),
+      upath.join(localDir, packageFile.name),
       JSON.stringify(massagedFile)
     );
   }
-}
-
-export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFile>[];
-}
-
-interface ArtifactError {
-  lockFile: string;
-  stderr: string;
-}
-
-interface UpdatedArtifacts {
-  name: string;
-  contents: string | Buffer;
 }
 
 // istanbul ignore next
@@ -408,10 +388,6 @@ async function updateYarnOffline(
   }
 }
 
-export interface WriteExistingFilesResult {
-  artifactErrors: ArtifactError[];
-  updatedArtifacts: UpdatedArtifacts[];
-}
 // istanbul ignore next
 export async function getAdditionalFiles(
   config: PostUpdateConfig,
@@ -429,7 +405,10 @@ export async function getAdditionalFiles(
   }
   if (
     !config.updatedPackageFiles?.length &&
-    config.upgrades?.every((upgrade) => upgrade.isRemediation)
+    config.transitiveRemediation &&
+    config.upgrades?.every(
+      (upgrade) => upgrade.isRemediation || upgrade.isVulnerabilityAlert
+    )
   ) {
     logger.debug('Skipping lock file generation for remediations');
     return { artifactErrors, updatedArtifacts };
@@ -454,27 +433,16 @@ export async function getAdditionalFiles(
     hostType: 'npm',
   });
   for (const hostRule of npmHostRules) {
-    if (hostRule.token) {
-      if (hostRule.baseUrl) {
-        additionalNpmrcContent.push(
-          `${hostRule.baseUrl}:_authToken=${hostRule.token}`
-            .replace('https://', '//')
-            .replace('http://', '//')
-        );
-      } else if (hostRule.hostName) {
-        additionalNpmrcContent.push(
-          `//${hostRule.hostName}/:_authToken=${hostRule.token}`
-        );
-      }
-    } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
-      if (hostRule.baseUrl) {
-        const uri = hostRule.baseUrl.replace(/^https?:/, '');
+    if (hostRule.resolvedHost) {
+      let uri = hostRule.matchHost;
+      uri = validateUrl(uri) ? uri.replace(/^https?:/, '') : `//${uri}/`;
+      if (hostRule.token) {
+        const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
+        additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);
+      } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
+        const password = Buffer.from(hostRule.password).toString('base64');
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
-        additionalNpmrcContent.push(`${uri}:_password=${hostRule.password}`);
-      } else if (hostRule.hostName) {
-        const uri = `//${hostRule.hostName}/`;
-        additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
-        additionalNpmrcContent.push(`${uri}:_password=${hostRule.password}`);
+        additionalNpmrcContent.push(`${uri}:_password=${password}`);
       }
     }
   }
@@ -505,19 +473,20 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
-  for (const lockFile of dirs.npmLockDirs) {
-    const lockFileDir = upath.dirname(lockFile);
-    const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+  const { localDir } = getAdminConfig();
+  for (const npmLock of dirs.npmLockDirs) {
+    const lockFileDir = upath.dirname(npmLock);
+    const fullLockFileDir = upath.join(localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
       fullLockFileDir,
       npmrcContent,
       additionalNpmrcContent
     );
-    const fileName = upath.basename(lockFile);
+    const fileName = upath.basename(npmLock);
     logger.debug(`Generating ${fileName} for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.npmLock === lockFile
+      (upgrade) => upgrade.npmLock === npmLock
     );
     const res = await npm.generateLockFile(
       fullLockFileDir,
@@ -547,20 +516,20 @@ export async function getAdditionalFiles(
         }
       }
       artifactErrors.push({
-        lockFile,
+        lockFile: npmLock,
         stderr: res.stderr,
       });
     } else {
       const existingContent = await getFile(
-        lockFile,
+        npmLock,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
       if (res.lockFile === existingContent) {
-        logger.debug(`${lockFile} hasn't changed`);
+        logger.debug(`${npmLock} hasn't changed`);
       } else {
-        logger.debug(`${lockFile} needs updating`);
+        logger.debug(`${npmLock} needs updating`);
         updatedArtifacts.push({
-          name: lockFile,
+          name: npmLock,
           contents: res.lockFile.replace(new RegExp(`${token}`, 'g'), ''),
         });
       }
@@ -568,9 +537,9 @@ export async function getAdditionalFiles(
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
-  for (const lockFile of dirs.yarnLockDirs) {
-    const lockFileDir = upath.dirname(lockFile);
-    const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+  for (const yarnLock of dirs.yarnLockDirs) {
+    const lockFileDir = upath.dirname(yarnLock);
+    const fullLockFileDir = upath.join(localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
       fullLockFileDir,
@@ -580,10 +549,10 @@ export async function getAdditionalFiles(
     logger.debug(`Generating yarn.lock for ${lockFileDir}`);
     const lockFileName = upath.join(lockFileDir, 'yarn.lock');
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.yarnLock === lockFile
+      (upgrade) => upgrade.yarnLock === yarnLock
     );
     const res = await yarn.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
+      upath.join(localDir, lockFileDir),
       env,
       config,
       upgrades
@@ -613,7 +582,7 @@ export async function getAdditionalFiles(
         }
       }
       artifactErrors.push({
-        lockFile,
+        lockFile: yarnLock,
         stderr: res.stderr,
       });
     } else {
@@ -629,15 +598,15 @@ export async function getAdditionalFiles(
           name: lockFileName,
           contents: res.lockFile,
         });
-        await updateYarnOffline(lockFileDir, config.localDir, updatedArtifacts);
+        await updateYarnOffline(lockFileDir, localDir, updatedArtifacts);
       }
     }
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
-  for (const lockFile of dirs.pnpmShrinkwrapDirs) {
-    const lockFileDir = upath.dirname(lockFile);
-    const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+  for (const pnpmShrinkwrap of dirs.pnpmShrinkwrapDirs) {
+    const lockFileDir = upath.dirname(pnpmShrinkwrap);
+    const fullLockFileDir = upath.join(localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
       fullLockFileDir,
@@ -646,10 +615,10 @@ export async function getAdditionalFiles(
     );
     logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.pnpmShrinkwrap === lockFile
+      (upgrade) => upgrade.pnpmShrinkwrap === pnpmShrinkwrap
     );
     const res = await pnpm.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
+      upath.join(localDir, lockFileDir),
       env,
       config,
       upgrades
@@ -677,12 +646,12 @@ export async function getAdditionalFiles(
         }
       }
       artifactErrors.push({
-        lockFile,
+        lockFile: pnpmShrinkwrap,
         stderr: res.stderr,
       });
     } else {
       const existingContent = await getFile(
-        lockFile,
+        pnpmShrinkwrap,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
       if (res.lockFile === existingContent) {
@@ -690,7 +659,7 @@ export async function getAdditionalFiles(
       } else {
         logger.debug('pnpm-lock.yaml needs updating');
         updatedArtifacts.push({
-          name: lockFile,
+          name: pnpmShrinkwrap,
           contents: res.lockFile,
         });
       }
@@ -698,11 +667,11 @@ export async function getAdditionalFiles(
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
-  for (const lernaDir of dirs.lernaDirs) {
+  for (const lernaJsonFile of dirs.lernaJsonFiles) {
     let lockFile: string;
-    logger.debug(`Finding package.json for lerna directory "${lernaDir}"`);
+    logger.debug(`Finding package.json for lerna location "${lernaJsonFile}"`);
     const lernaPackageFile = packageFiles.npm.find(
-      (p) => upath.dirname(p.packageFile) === lernaDir
+      (p) => getSubDirectory(p.packageFile) === getSubDirectory(lernaJsonFile)
     );
     if (!lernaPackageFile) {
       logger.debug('No matching package.json found');
@@ -715,7 +684,10 @@ export async function getAdditionalFiles(
     }
     const skipInstalls =
       lockFile === 'npm-shrinkwrap.json' ? false : config.skipInstalls;
-    const fullLearnaFileDir = upath.join(config.localDir, lernaDir);
+    const fullLearnaFileDir = upath.join(
+      localDir,
+      getSubDirectory(lernaJsonFile)
+    );
     const npmrcContent = await getNpmrcContent(fullLearnaFileDir);
     await updateNpmrcContent(
       fullLearnaFileDir,
@@ -785,7 +757,7 @@ export async function getAdditionalFiles(
         );
         if (existingContent) {
           logger.trace('Found lock file');
-          const lockFilePath = upath.join(config.localDir, filename);
+          const lockFilePath = upath.join(localDir, filename);
           logger.trace('Checking against ' + lockFilePath);
           try {
             let newContent: string;

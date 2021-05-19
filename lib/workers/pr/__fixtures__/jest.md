@@ -386,7 +386,7 @@
 * `[docs]` Wrap code comments at 80 characters
   ([#4781](https://github.com/facebook/jest/pull/4781))
 * `[eslint-plugin-jest]` Removed from the Jest core repo, and moved to
-  https://github.com/jest-community/eslint-plugin-jest
+  <https://github.com/jest-community/eslint-plugin-jest>
   ([#4867](https://github.com/facebook/jest/pull/4867))
 * `[babel-jest]` Explicitly bump istanbul to newer versions
   ([#4616](https://github.com/facebook/jest/pull/4616))
@@ -1058,7 +1058,7 @@
 
 ## jest 18.0.0
 
-See https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html
+See <https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html>
 
 * The testResultsProcessor function is now required to return the modified
   results.
@@ -1213,7 +1213,7 @@ See https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html
 
 ## jest 15.0.0
 
-* See https://facebook.github.io/jest/blog/2016/09/01/jest-15.html
+* See <https://facebook.github.io/jest/blog/2016/09/01/jest-15.html>
 * Jest by default now also recognizes files ending in `.spec.js` and `.test.js`
   as test files.
 * Completely replaced most Jasmine matchers with new Jest matchers.
@@ -1326,7 +1326,7 @@ See https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html
   a git or hg repo.
 * Added `--setupTestFrameworkFile` to cli.
 * Added support for coverage thresholds. See
-  http://facebook.github.io/jest/docs/api.html#coveragethreshold-object.
+  <http://facebook.github.io/jest/docs/api.html#coveragethreshold-object>.
 * Updated to jsdom 9.0.
 * Updated and improved stack trace reporting.
 * Added `module.filename` and removed the invalid `module.__filename` field.
@@ -1348,7 +1348,7 @@ See https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html
 ## jest-cli 12.0.0
 
 * Reimplemented `node-haste` as `jest-haste-map`:
-  https://github.com/facebook/jest/pull/896
+  <https://github.com/facebook/jest/pull/896>
 * Fixes for the upcoming release of nodejs 6.
 * Removed global mock caching which caused negative side-effects on test runs.
 * Updated Jasmine from 2.3.4 to 2.4.1.
@@ -1450,10 +1450,10 @@ See https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html
 * Removed `mock-modules`, `node-haste` and `mocks` virtual modules. This is a
   breaking change of undocumented public API. Usage of this API can safely be
   automatically updated through an automated codemod:
-* Example: http://astexplorer.net/#/zrybZ6UvRA
+* Example: <http://astexplorer.net/#/zrybZ6UvRA>
 * Codemod:
-  https://github.com/cpojer/js-codemod/blob/master/transforms/jest-update.js
-* jscodeshift: https://github.com/facebook/jscodeshift
+  <https://github.com/cpojer/js-codemod/blob/master/transforms/jest-update.js>
+* jscodeshift: <https://github.com/facebook/jscodeshift>
 * Removed `navigator.onLine` and `mockSetReadOnlyProperty` from the global jsdom
   environment. Use `window.navigator.onLine = true;` in your test setup and
   `Object.defineProperty` instead.

@@ -53,3 +53,11 @@
 # not valid src string
 - src: timezone
   version: "0.1.0"
+
+# git protocol
+- src: git+git://github.com/org/repo.git
+  version: "47.11"
+
+# including . character
+- src: git+git://github.com/org/re.po.git
+  version: "47.11"

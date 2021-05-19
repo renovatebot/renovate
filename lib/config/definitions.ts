@@ -32,6 +32,7 @@ const options: RenovateOptions[] = [
     default: {
       commands: [],
       fileFilters: [],
+      executionMode: 'update',
     },
   },
   {
@@ -52,6 +53,16 @@ const options: RenovateOptions[] = [
     subType: 'string',
     parent: 'postUpgradeTasks',
     default: [],
+    cli: false,
+  },
+  {
+    name: 'executionMode',
+    description:
+      'Controls whether the post upgrade tasks runs for every update or once per upgrade branch',
+    type: 'string',
+    parent: 'postUpgradeTasks',
+    allowedValues: ['update', 'branch'],
+    default: 'update',
     cli: false,
   },
   {
@@ -104,6 +115,17 @@ const options: RenovateOptions[] = [
     additionalProperties: {
       type: 'string',
       format: 'uri',
+    },
+  },
+  {
+    name: 'secrets',
+    description: 'Object containing secret name/value pairs',
+    type: 'object',
+    admin: true,
+    mergeable: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
     },
   },
   {
@@ -233,12 +255,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'dockerMapDotfiles',
+    name: 'dockerChildPrefix',
     description:
-      'Map relevant home directory dotfiles into containers when binarySource=docker.',
+      'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
+    type: 'string',
     admin: true,
-    type: 'boolean',
-    default: false,
+    default: 'renovate_',
   },
   {
     name: 'dockerImagePrefix',
@@ -264,13 +286,6 @@ const options: RenovateOptions[] = [
     admin: true,
   },
   // Log options
-  {
-    name: 'logLevel',
-    description: 'Logging level. Deprecated, use `LOG_LEVEL` environment.',
-    stage: 'global',
-    type: 'string',
-    allowedValues: ['fatal', 'error', 'warn', 'info', 'debug', 'trace'],
-  },
   {
     name: 'logFile',
     description: 'Log file path.',
@@ -326,8 +341,18 @@ const options: RenovateOptions[] = [
     admin: true,
   },
   {
+    name: 'forkToken',
+    description:
+      'Will be used on GitHub when `forkMode` is set to `true` to clone the repositories.',
+    stage: 'repository',
+    type: 'string',
+    default: '',
+    admin: true,
+  },
+  {
     name: 'requireConfig',
-    description: 'Set to true if repositories must have a config to activate.',
+    description:
+      'Set to false if it is optional for repositories to contain a config.',
     stage: 'repository',
     type: 'boolean',
     default: true,
@@ -450,17 +475,33 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'trustLevel',
+    name: 'exposeAllEnv',
     description:
-      'Set this to "high" if the bot should trust the repository owners/contents.',
+      'Configure this to true to allow passing of all env variables to package managers.',
     admin: true,
-    type: 'string',
-    default: 'low',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'allowScripts',
+    description:
+      'Configure this to true if repositories are allowed to run install scripts.',
+    admin: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'allowCustomCrateRegistries',
+    description:
+      'Configure this to true if custom crate registries are allowed.',
+    admin: true,
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'ignoreScripts',
     description:
-      'Configure this to true if trustLevel is high but you wish to skip running scripts when updating lock files.',
+      'Configure this to true if allowScripts=true but you wish to skip running scripts when updating lock files.',
     type: 'boolean',
     default: false,
   },
@@ -533,12 +574,6 @@ const options: RenovateOptions[] = [
     admin: true,
   },
   {
-    name: 'ignoreNpmrcFile',
-    description: 'Whether to ignore any .npmrc file found in repository.',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'autodiscover',
     description: 'Autodiscover all repositories.',
     stage: 'global',
@@ -588,6 +623,14 @@ const options: RenovateOptions[] = [
     cli: false,
     admin: true,
     stage: 'global',
+  },
+  {
+    name: 'gitIgnoredAuthors',
+    description:
+      'Additional git authors which are ignored by Renovate. Must conform to RFC5322.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
   },
   {
     name: 'enabledManagers',
@@ -673,6 +716,13 @@ const options: RenovateOptions[] = [
       'The id of an existing work item on Azure Boards to link to each PR.',
     type: 'integer',
     default: 0,
+  },
+  {
+    name: 'azureAutoApprove',
+    description:
+      'If set to true, Azure DevOps PRs will be automatically approved.',
+    type: 'boolean',
+    default: false,
   },
   // depType
   {
@@ -782,6 +832,32 @@ const options: RenovateOptions[] = [
     name: 'excludePackageNames',
     description:
       'Package names to exclude. Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchPackagePrefixes',
+    description:
+      'Package name prefixes to match. Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludePackagePrefixes',
+    description:
+      'Package name prefixes to exclude. Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1004,8 +1080,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'patch',
-    description:
-      'Configuration to apply when an update type is patch. Only applies if `separateMinorPatch` is set to true.',
+    description: 'Configuration to apply when an update type is patch.',
     stage: 'package',
     type: 'object',
     default: {},
@@ -1018,7 +1093,6 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      recreateClosed: true,
       rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
@@ -1041,6 +1115,19 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
       commitMessageTopic: '{{{depName}}} commit hash',
+    },
+    cli: false,
+    mergeable: true,
+  },
+  {
+    name: 'rollback',
+    description: 'Configuration to apply when rolling back a version.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      branchTopic: '{{{depNameSanitized}}}-rollback',
+      commitMessageAction: 'Roll back',
+      semanticCommitType: 'fix',
     },
     cli: false,
     mergeable: true,
@@ -1098,6 +1185,13 @@ const options: RenovateOptions[] = [
       'Number of days required before a new release is considered to be stabilized.',
     type: 'integer',
     default: 0,
+  },
+  {
+    name: 'internalChecksFilter',
+    description: 'When/how to filter based on internal checks.',
+    type: 'string',
+    allowedValues: ['strict', 'flexible', 'none'],
+    default: 'none',
   },
   {
     name: 'prCreation',
@@ -1223,7 +1317,7 @@ const options: RenovateOptions[] = [
     description: 'Branch topic.',
     type: 'string',
     default:
-      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
     cli: false,
   },
   {
@@ -1428,6 +1522,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'filterUnavailableUsers',
+    description: 'Filter reviewers and assignees based on their availability.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'reviewersSampleSize',
     description: 'Take a random sample of given size from reviewers.',
     type: 'integer',
@@ -1479,6 +1579,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodUpdateImportPaths',
       'gomodTidy',
       'npmDedupe',
       'yarnDedupeFewer',
@@ -1609,26 +1710,8 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'domainName',
-    description: 'Domain name for a host rule. e.g. "docker.io".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'hostName',
-    description: 'Hostname for a host rule. e.g. "index.docker.io".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'baseUrl',
-    description: 'baseUrl for a host rule. e.g. "https://api.github.com/".',
+    name: 'matchHost',
+    description: 'A domain name, host name or base URL to match against',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -1692,6 +1775,17 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     parent: 'hostRules',
     default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'authType',
+    description:
+      'Authentication type for http header. e.g. "Bearer" or "Basic".',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: 'Bearer',
     cli: false,
     env: false,
   },

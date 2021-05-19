@@ -26,7 +26,7 @@ function isEmptyObject(obj: any): boolean {
  * Determines the datasource(id) to be used for this dependency
  * @param repository the full git url, ie git@github.com/user/project.
  *        Used in debug statements to clearly indicate the related dependency.
- * @param hostName the hostname (ie github.com)
+ * @param hostname the hostname (ie github.com)
  *        Used to determine which renovate datasource should be used.
  *        Is matched literally against `github.com` and `gitlab.com`.
  *        If that doesn't match, `hostRules.find()` is used to find related sources.
@@ -34,17 +34,17 @@ function isEmptyObject(obj: any): boolean {
  */
 function determineDatasource(
   repository: string,
-  hostName: string
+  hostname: string
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
-  if (hostName === 'github.com') {
-    logger.debug({ repository, hostName }, 'Found github dependency');
+  if (hostname === 'github.com') {
+    logger.debug({ repository, hostname }, 'Found github dependency');
     return { datasource: githubTagsId };
   }
-  if (hostName === 'gitlab.com') {
-    logger.debug({ repository, hostName }, 'Found gitlab dependency');
+  if (hostname === 'gitlab.com') {
+    logger.debug({ repository, hostname }, 'Found gitlab dependency');
     return { datasource: gitlabTagsId };
   }
-  const hostUrl = 'https://' + hostName;
+  const hostUrl = 'https://' + hostname;
   const res = find({ url: hostUrl });
   if (isEmptyObject(res)) {
     // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
@@ -52,7 +52,7 @@ function determineDatasource(
       { repository, hostUrl },
       'Provided hostname does not match any hostRules. Ignoring'
     );
-    return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostName] };
+    return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
     [PLATFORM_TYPE_GITEA, gitlabTagsId],
@@ -64,14 +64,14 @@ function determineDatasource(
         { repository, hostUrl, hostType },
         `Provided hostname matches a ${hostType} hostrule.`
       );
-      return { datasource: sourceId, registryUrls: [hostName] };
+      return { datasource: sourceId, registryUrls: [hostname] };
     }
   }
   logger.debug(
     { repository, registry: hostUrl },
     'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
   );
-  return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostName] };
+  return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostname] };
 }
 
 function extractDependency(
@@ -89,15 +89,17 @@ function extractDependency(
 
   const urlMatchers = [
     // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo
-    regEx('^https?:\\/\\/(?<hostName>[^\\/]+)\\/(?<depName>\\S*)'),
+    regEx('^https?:\\/\\/(?<hostname>[^\\/]+)\\/(?<depName>\\S*)'),
     // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
-    regEx('^git@(?<hostName>[^:]+):(?<depName>\\S*)'),
+    regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
+    // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
+    /^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/,
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
     if (match) {
-      const { hostName, depName } = match.groups;
-      const sourceDef = determineDatasource(repository, hostName);
+      const { hostname, depName } = match.groups;
+      const sourceDef = determineDatasource(repository, hostname);
       return {
         ...sourceDef,
         depName,

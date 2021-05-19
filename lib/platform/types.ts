@@ -27,7 +27,6 @@ export interface RepoResult {
 }
 
 export interface RepoParams {
-  localDir: string;
   repository: string;
   endpoint?: string;
   forkMode?: string;
@@ -47,6 +46,7 @@ export interface Pr {
   canMerge?: boolean;
   canMergeReason?: string;
   createdAt?: string;
+  closedAt?: string;
   displayNumber?: string;
   hasAssignees?: boolean;
   hasReviewers?: boolean;
@@ -72,6 +72,7 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
+  azureAutoApprove?: boolean;
   azureAutoComplete?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
@@ -139,7 +140,8 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
-  getJsonFile(fileName: string): Promise<any | null>;
+  getRawFile(fileName: string, repo?: string): Promise<string | null>;
+  getJsonFile(fileName: string, repo?: string): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
@@ -175,4 +177,5 @@ export interface Platform {
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
+  filterUnavailableUsers?(users: string[]): Promise<string[]>;
 }

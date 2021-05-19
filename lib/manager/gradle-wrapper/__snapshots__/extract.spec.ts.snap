@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts all version line 1`] = `
+exports[`manager/gradle-wrapper/extract extractPackageFile() extracts all version line 1`] = `
 Array [
   Object {
     "currentValue": "4.10.3",
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts bin version line 1`] = `
+exports[`manager/gradle-wrapper/extract extractPackageFile() extracts bin version line 1`] = `
 Array [
   Object {
     "currentValue": "4.8",
@@ -22,7 +22,18 @@ Array [
 ]
 `;
 
-exports[`lib/manager/gradle-wrapper/extract extractPackageFile() handles whitespace 1`] = `
+exports[`manager/gradle-wrapper/extract extractPackageFile() extracts prerelease version line 1`] = `
+Array [
+  Object {
+    "currentValue": "7.0-milestone-1",
+    "datasource": "gradle-version",
+    "depName": "gradle",
+    "versioning": "gradle",
+  },
+]
+`;
+
+exports[`manager/gradle-wrapper/extract extractPackageFile() handles whitespace 1`] = `
 Array [
   Object {
     "currentValue": "4.10.3",

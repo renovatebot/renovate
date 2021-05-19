@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
-import { BranchConfig, ProcessBranchResult } from '../types';
+import { BranchConfig, BranchResult } from '../types';
 
 function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   let item = ' - [ ] ';
@@ -77,7 +77,7 @@ export async function ensureMasterIssue(
   logger.debug('Ensuring Dependency Dashboard');
   const hasBranches =
     is.nonEmptyArray(branches) &&
-    branches.some((branch) => branch.res !== ProcessBranchResult.Automerged);
+    branches.some((branch) => branch.result !== BranchResult.Automerged);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
     if (getAdminConfig().dryRun) {
       logger.info(
@@ -98,7 +98,7 @@ export async function ensureMasterIssue(
   issueBody = appendRepoProblems(config, issueBody);
 
   const pendingApprovals = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.NeedsApproval
+    (branch) => branch.result === BranchResult.NeedsApproval
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
@@ -109,7 +109,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.NotScheduled
+    (branch) => branch.result === BranchResult.NotScheduled
   );
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
@@ -122,9 +122,9 @@ export async function ensureMasterIssue(
   }
   const rateLimited = branches.filter(
     (branch) =>
-      branch.res === ProcessBranchResult.BranchLimitReached ||
-      branch.res === ProcessBranchResult.PrLimitReached ||
-      branch.res === ProcessBranchResult.CommitLimitReached
+      branch.result === BranchResult.BranchLimitReached ||
+      branch.result === BranchResult.PrLimitReached ||
+      branch.result === BranchResult.CommitLimitReached
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -136,7 +136,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const errorList = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.Error
+    (branch) => branch.result === BranchResult.Error
   );
   if (errorList.length) {
     issueBody += '## Errored\n\n';
@@ -148,7 +148,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingPr = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.NeedsPrApproval
+    (branch) => branch.result === BranchResult.NeedsPrApproval
   );
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
@@ -160,7 +160,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const prEdited = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.PrEdited
+    (branch) => branch.result === BranchResult.PrEdited
   );
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
@@ -172,7 +172,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const prPending = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.Pending
+    (branch) => branch.result === BranchResult.Pending
   );
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
@@ -183,20 +183,20 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const otherRes = [
-    ProcessBranchResult.Pending,
-    ProcessBranchResult.NeedsApproval,
-    ProcessBranchResult.NeedsPrApproval,
-    ProcessBranchResult.NotScheduled,
-    ProcessBranchResult.PrLimitReached,
-    ProcessBranchResult.CommitLimitReached,
-    ProcessBranchResult.BranchLimitReached,
-    ProcessBranchResult.AlreadyExisted,
-    ProcessBranchResult.Error,
-    ProcessBranchResult.Automerged,
-    ProcessBranchResult.PrEdited,
+    BranchResult.Pending,
+    BranchResult.NeedsApproval,
+    BranchResult.NeedsPrApproval,
+    BranchResult.NotScheduled,
+    BranchResult.PrLimitReached,
+    BranchResult.CommitLimitReached,
+    BranchResult.BranchLimitReached,
+    BranchResult.AlreadyExisted,
+    BranchResult.Error,
+    BranchResult.Automerged,
+    BranchResult.PrEdited,
   ];
   const inProgress = branches.filter(
-    (branch) => !otherRes.includes(branch.res)
+    (branch) => !otherRes.includes(branch.result)
   );
   if (inProgress.length) {
     issueBody += '## Open\n\n';
@@ -216,7 +216,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.AlreadyExisted
+    (branch) => branch.result === BranchResult.AlreadyExisted
   );
   if (alreadyExisted.length) {
     issueBody += '## Ignored or Blocked\n\n';

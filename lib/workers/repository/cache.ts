@@ -2,11 +2,11 @@
 
 import { logger } from '../../logger';
 import { platform } from '../../platform';
-import {
+import { getCache } from '../../util/cache/repository';
+import type {
   BranchCache,
   BranchUpgradeCache,
-  getCache,
-} from '../../util/cache/repository';
+} from '../../util/cache/repository/types';
 import {
   getBranchCommit,
   getBranchParentSha,
@@ -76,6 +76,14 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
       upgrades,
     };
   } catch (err) {
+    // istanbul ignore if
+    if (err.response?.statusCode === 404) {
+      logger.warn(
+        { err, branchName },
+        '404 error when generating branch cache'
+      );
+      return null;
+    }
     logger.error({ err, branchName }, 'Error generating branch cache');
     return null;
   }

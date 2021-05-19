@@ -11,6 +11,6 @@ export function mightBeABrowserLibrary(packageJson: NpmPackage): boolean {
     return false;
   }
   // TODO: how can we know if it's a node.js library only, and not browser?
-  // Otherwise play it safe and return true
+  // Otherwise play it safe and return true (#9616)
   return true;
 }

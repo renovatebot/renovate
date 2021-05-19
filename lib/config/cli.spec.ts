@@ -1,9 +1,10 @@
+import { getName } from '../../test/util';
 import * as datasourceDocker from '../datasource/docker';
 import * as cli from './cli';
 import getArgv from './config/__fixtures__/argv';
 import type { RenovateOptions } from './types';
 
-describe('config/cli', () => {
+describe(getName(), () => {
   let argv: string[];
   beforeEach(() => {
     argv = getArgv();
@@ -78,12 +79,12 @@ describe('config/cli', () => {
     });
     it('parses json lists correctly', () => {
       argv.push(
-        `--host-rules=[{"domainName":"docker.io","hostType":"${datasourceDocker.id}","username":"user","password":"password"}]`
+        `--host-rules=[{"matchHost":"docker.io","hostType":"${datasourceDocker.id}","username":"user","password":"password"}]`
       );
       expect(cli.getConfig(argv)).toEqual({
         hostRules: [
           {
-            domainName: 'docker.io',
+            matchHost: 'docker.io',
             hostType: datasourceDocker.id,
             username: 'user',
             password: 'password',

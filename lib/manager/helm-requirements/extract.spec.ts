@@ -1,10 +1,10 @@
-import { fs } from '../../../test/util';
+import { fs, getName } from '../../../test/util';
 import { SkipReason } from '../../types';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-describe('lib/manager/helm-requirements/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -93,11 +93,15 @@ describe('lib/manager/helm-requirements/extract', () => {
         - name: redis
           version: 0.9.0
           repository: '@placeholder'
+        - name: example
+          version: 1.0.0
+          repository: alias:longalias
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
         aliases: {
           placeholder: 'https://my-registry.gcr.io/',
+          longalias: 'https://registry.example.com/',
         },
       });
       expect(result).not.toBeNull();

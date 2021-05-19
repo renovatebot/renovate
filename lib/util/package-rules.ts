@@ -1,30 +1,15 @@
+import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { PackageRule, UpdateType, mergeChildConfig } from '../config';
+import { mergeChildConfig } from '../config';
+import type { PackageRule, PackageRuleInputConfig } from '../config/types';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
 import { configRegexPredicate, isConfigRegex, regEx } from './regex';
 
-// TODO: move to `../config`
-export interface Config extends Record<string, any> {
-  versioning?: string;
-  packageFile?: string;
-  depType?: string;
-  depTypes?: string[];
-  depName?: string;
-  currentValue?: string;
-  currentVersion?: string;
-  lockedVersion?: string;
-  updateType?: UpdateType;
-  isBump?: boolean;
-  sourceUrl?: string;
-  language?: string;
-  baseBranch?: string;
-  manager?: string;
-  datasource?: string;
-  packageRules?: (PackageRule & Config)[];
-}
-
-function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
+function matchesRule(
+  inputConfig: PackageRuleInputConfig,
+  packageRule: PackageRule
+): boolean {
   const {
     versioning,
     packageFile,
@@ -53,22 +38,32 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const matchDepTypes = packageRule.matchDepTypes || [];
   const matchPackageNames = packageRule.matchPackageNames || [];
   let matchPackagePatterns = packageRule.matchPackagePatterns || [];
+  const matchPackagePrefixes = packageRule.matchPackagePrefixes || [];
   const excludePackageNames = packageRule.excludePackageNames || [];
   const excludePackagePatterns = packageRule.excludePackagePatterns || [];
+  const excludePackagePrefixes = packageRule.excludePackagePrefixes || [];
   const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes || [];
   const matchCurrentVersion = packageRule.matchCurrentVersion || null;
   const matchUpdateTypes = packageRule.matchUpdateTypes || [];
   let positiveMatch = false;
   // Massage a positive patterns patch if an exclude one is present
   if (
-    (excludePackageNames.length || excludePackagePatterns.length) &&
-    !(matchPackageNames.length || matchPackagePatterns.length)
+    (excludePackageNames.length ||
+      excludePackagePatterns.length ||
+      excludePackagePrefixes.length) &&
+    !(
+      matchPackageNames.length ||
+      matchPackagePatterns.length ||
+      matchPackagePrefixes.length
+    )
   ) {
     matchPackagePatterns = ['.*'];
   }
   if (matchFiles.length) {
     const isMatch = matchFiles.some(
-      (fileName) => packageFile === fileName || lockFiles?.includes(fileName)
+      (fileName) =>
+        packageFile === fileName ||
+        (is.array(lockFiles) && lockFiles?.includes(fileName))
     );
     if (!isMatch) {
       return false;
@@ -132,7 +127,12 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (depName && (matchPackageNames.length || matchPackagePatterns.length)) {
+  if (
+    depName &&
+    (matchPackageNames.length ||
+      matchPackagePatterns.length ||
+      matchPackagePrefixes.length)
+  ) {
     let isMatch = matchPackageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
@@ -147,6 +147,12 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
           isMatch = true;
         }
       }
+    }
+    // prefix match is also "or"
+    if (!isMatch && matchPackagePrefixes.length) {
+      isMatch = matchPackagePrefixes.some((prefix) =>
+        depName.startsWith(prefix)
+      );
     }
     if (!isMatch) {
       return false;
@@ -171,6 +177,15 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
         isMatch = true;
       }
     }
+    if (isMatch) {
+      return false;
+    }
+    positiveMatch = true;
+  }
+  if (depName && excludePackagePrefixes.length) {
+    const isMatch = excludePackagePrefixes.some((prefix) =>
+      depName.startsWith(prefix)
+    );
     if (isMatch) {
       return false;
     }
@@ -234,7 +249,9 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   return positiveMatch;
 }
 
-export function applyPackageRules<T extends Config>(inputConfig: T): T {
+export function applyPackageRules<T extends PackageRuleInputConfig>(
+  inputConfig: T
+): T {
   let config = { ...inputConfig };
   const packageRules = config.packageRules || [];
   logger.trace(
@@ -248,8 +265,10 @@ export function applyPackageRules<T extends Config>(inputConfig: T): T {
       config = mergeChildConfig(config, packageRule);
       delete config.matchPackageNames;
       delete config.matchPackagePatterns;
+      delete config.matchPackagePrefixes;
       delete config.excludePackageNames;
       delete config.excludePackagePatterns;
+      delete config.excludePackagePrefixes;
       delete config.matchDepTypes;
       delete config.matchCurrentVersion;
     }

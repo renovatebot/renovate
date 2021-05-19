@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Child process execution wrapper Supports image prefetch 1`] = `
+exports[`util/exec/exec Supports image prefetch 1`] = `
 Array [
   "echo hello",
   "echo hello",

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { INTERRUPTED } from '../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
@@ -29,10 +29,14 @@ export async function updateArtifacts({
         cmd.push(`hashin ${depConstraint} -r ${packageFileName}`);
       }
     }
+    if (!cmd.length) {
+      logger.debug('No hashin commands to run - returning');
+      return null;
+    }
     const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {
-        image: 'renovate/python',
+        image: 'python',
         tagScheme: 'pip_requirements',
         preCommands: ['pip install hashin'],
       },
@@ -54,7 +58,7 @@ export async function updateArtifacts({
     ];
   } catch (err) {
     // istanbul ignore if
-    if (err.message === INTERRUPTED) {
+    if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug({ err }, `Failed to update ${packageFileName} file`);

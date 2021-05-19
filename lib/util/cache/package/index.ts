@@ -1,8 +1,8 @@
 import type { GlobalConfig } from '../../../config/types';
 import * as memCache from '../memory';
-import type { PackageCache } from './common';
 import * as fileCache from './file';
 import * as redisCache from './redis';
+import type { PackageCache } from './types';
 
 let cacheProxy: PackageCache;
 
@@ -52,7 +52,7 @@ export function init(config: GlobalConfig): void {
 }
 
 export function cleanup(config: GlobalConfig): void {
-  if (config.redisUrl) {
+  if (config?.redisUrl) {
     redisCache.end();
   }
 }

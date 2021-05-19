@@ -1,7 +1,8 @@
 // istanbul ignore file
+import { parseUrl } from '../url';
 import { HttpError } from './types';
 
-// TODO: remove when code is refactored
+// TODO: remove when code is refactored (#9651)
 
 Object.defineProperty(HttpError.prototype, 'statusCode', {
   get: function statusCode(this: HttpError) {
@@ -29,6 +30,13 @@ Object.defineProperty(HttpError.prototype, 'headers', {
 Object.defineProperty(HttpError.prototype, 'url', {
   get: function url(this: HttpError) {
     return this.response?.url;
+  },
+});
+
+Object.defineProperty(HttpError.prototype, 'host', {
+  get: function url(this: HttpError) {
+    const { host } = parseUrl(this.response?.url) ?? {};
+    return host;
   },
 });
 

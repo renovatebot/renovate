@@ -1,10 +1,11 @@
-import { git, mocked, partial } from '../../../test/util';
+import { getName, git, mocked, partial } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import * as _limits from '../global/limits';
 import { BranchConfig, PrResult } from '../types';
+import * as prAutomerge from './automerge';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
 import * as codeOwners from './code-owners';
@@ -80,12 +81,10 @@ function setupGitlabChangelogMock() {
           },
         ],
         releaseNotes: {
-          url:
-            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+          url: 'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
         },
         compare: {
-          url:
-            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+          url: 'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
         },
       },
     ],
@@ -98,7 +97,7 @@ function setupGitlabChangelogMock() {
   gitlabChangelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
 }
 
-describe('workers/pr', () => {
+describe(getName(), () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;
@@ -114,14 +113,14 @@ describe('workers/pr', () => {
       jest.clearAllMocks();
     });
     it('should not automerge if not configured', async () => {
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
     it('should automerge comment', async () => {
@@ -129,7 +128,7 @@ describe('workers/pr', () => {
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -139,7 +138,7 @@ describe('workers/pr', () => {
       config.automergeComment = '!merge';
       config.rebaseRequested = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -147,25 +146,25 @@ describe('workers/pr', () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       git.isBranchModified.mockResolvedValueOnce(true);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
       pr.canMerge = undefined;
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
       pr.isConflicted = true;
-      await prWorker.checkAutoMerge(pr, config);
+      await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
   });
@@ -175,8 +174,7 @@ describe('workers/pr', () => {
     const existingPr: Pr = {
       displayNumber: 'Existing PR',
       title: 'Update dependency dummy to v1.1.0',
-      body:
-        'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
+      body: 'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     } as never;
     beforeEach(() => {
       jest.resetAllMocks();
@@ -408,6 +406,17 @@ describe('workers/pr', () => {
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
+    it('should filter assignees and reviewers based on their availability', async () => {
+      config.assignees = ['@foo', 'bar'];
+      config.reviewers = ['foo', '@bar', 'foo@bar.com'];
+      config.filterUnavailableUsers = true;
+      platform.filterUnavailableUsers = jest.fn();
+      platform.filterUnavailableUsers.mockResolvedValue(['foo']);
+      await prWorker.ensurePr(config);
+      expect(platform.addAssignees.mock.calls).toMatchSnapshot();
+      expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+      expect(platform.filterUnavailableUsers.mock.calls).toMatchSnapshot();
     });
     it('should determine assignees from code owners', async () => {
       config.assigneesFromCodeOwners = true;

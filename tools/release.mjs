@@ -1,7 +1,7 @@
 import shell from 'shelljs';
-import { program } from './utils.mjs';
+import { options } from './utils.mjs';
 
-const version = program.release;
+const version = options.release;
 // const sha = program.sha;
 
 // let err = false;

@@ -58,7 +58,7 @@ describe('getChildProcess environment when trustlevel set to low', () => {
 
   describe('getChildProcessEnv when trustlevel set to high', () => {
     it('returns process.env if trustlevel set to high', () => {
-      setAdminConfig({ trustLevel: 'high' });
+      setAdminConfig({ exposeAllEnv: true });
       expect(getChildProcessEnv()).toMatchObject(process.env);
     });
   });

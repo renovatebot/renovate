@@ -4,6 +4,10 @@ export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
 }
 
+export function trimTrailingSlash(url: string): string {
+  return url.replace(/\/+$/, '');
+}
+
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   const inputString = input.toString();
 
@@ -42,5 +46,13 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
     return httpOnly ? !!protocol.startsWith('http') : !!protocol;
   } catch (err) {
     return false;
+  }
+}
+
+export function parseUrl(url: string): URL | null {
+  try {
+    return new URL(url);
+  } catch (err) {
+    return null;
   }
 }

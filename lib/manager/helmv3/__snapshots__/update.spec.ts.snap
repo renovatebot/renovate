@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/helmv3/update .bumpPackageVersion() increments 1`] = `
+exports[`manager/helmv3/update .bumpPackageVersion() increments 1`] = `
 "apiVersion: v2
 name: test
 version: 0.0.3
 "
 `;
 
-exports[`lib/manager/helmv3/update .bumpPackageVersion() updates 1`] = `
+exports[`manager/helmv3/update .bumpPackageVersion() updates 1`] = `
 "apiVersion: v2
 name: test
 version: 0.1.0

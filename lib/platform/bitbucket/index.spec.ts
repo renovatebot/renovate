@@ -1,5 +1,6 @@
 import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -34,7 +35,7 @@ lxml==3.6.0
 mccabe==0.6.1
 `;
 
-describe('platform/bitbucket', () => {
+describe(getName(), () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -83,7 +84,6 @@ describe('platform/bitbucket', () => {
 
     await bitbucket.initRepo({
       repository: 'some/repo',
-      localDir: '',
       ...config,
     });
 
@@ -148,7 +148,6 @@ describe('platform/bitbucket', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -845,19 +844,26 @@ describe('platform/bitbucket', () => {
       const data = { foo: 'bar' };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .reply(200, JSON.stringify(data));
       const res = await bitbucket.getJsonFile('file.json');
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null on errors', async () => {
+    it('throws on malformed JSON', async () => {
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
+        .reply(200, '!@#');
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('throws on errors', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .replyWithError('some error');
-      const res = await bitbucket.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

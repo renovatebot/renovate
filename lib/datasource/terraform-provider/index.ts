@@ -5,8 +5,13 @@ import { Http } from '../../util/http';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  TerraformProvider,
+  TerraformProviderReleaseBackend,
+} from './types';
 
 export const id = 'terraform-provider';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = [
   'https://registry.terraform.io',
   'https://releases.hashicorp.com',
@@ -15,27 +20,6 @@ export const defaultVersioning = hashicorpVersioning.id;
 export const registryStrategy = 'hunt';
 
 const http = new Http(id);
-
-interface TerraformProvider {
-  namespace: string;
-  name: string;
-  provider: string;
-  source?: string;
-  versions: string[];
-  version: string;
-  published_at: string;
-}
-
-interface TerraformProviderReleaseBackend {
-  [key: string]: {
-    name: string;
-    versions: VersionsReleaseBackend;
-  };
-}
-
-interface VersionsReleaseBackend {
-  [key: string]: Record<string, any>;
-}
 
 async function queryRegistry(
   lookupName: string,
@@ -69,7 +53,7 @@ async function queryRegistry(
   return dep;
 }
 
-// TODO: add long term cache
+// TODO: add long term cache (#9590)
 async function queryReleaseBackend(
   lookupName: string,
   registryURL: string,

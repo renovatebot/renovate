@@ -6,7 +6,7 @@ import { BitbucketHttp, setBaseUrl } from './bitbucket';
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let api: BitbucketHttp;
   beforeEach(() => {
     api = new BitbucketHttp();
@@ -18,7 +18,7 @@ describe(getName(__filename), () => {
     hostRules.clear();
     hostRules.add({
       hostType: PLATFORM_TYPE_BITBUCKET,
-      baseUrl,
+      matchHost: baseUrl,
       token: 'token',
     });
 

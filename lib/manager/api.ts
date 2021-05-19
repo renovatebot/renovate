@@ -1,11 +1,13 @@
 import * as ansible from './ansible';
 import * as ansibleGalaxy from './ansible-galaxy';
+import * as argoCD from './argocd';
 import * as azurePipelines from './azure-pipelines';
 import * as batect from './batect';
 import * as batectWrapper from './batect-wrapper';
 import * as bazel from './bazel';
 import * as buildkite from './buildkite';
 import * as bundler from './bundler';
+import * as cake from './cake';
 import * as cargo from './cargo';
 import * as cdnurl from './cdnurl';
 import * as circleci from './circleci';
@@ -64,12 +66,14 @@ export default api;
 
 api.set('ansible', ansible);
 api.set('ansible-galaxy', ansibleGalaxy);
+api.set('argocd', argoCD);
 api.set('azure-pipelines', azurePipelines);
 api.set('batect', batect);
 api.set('batect-wrapper', batectWrapper);
 api.set('bazel', bazel);
 api.set('buildkite', buildkite);
 api.set('bundler', bundler);
+api.set('cake', cake);
 api.set('cargo', cargo);
 api.set('cdnurl', cdnurl);
 api.set('circleci', circleci);

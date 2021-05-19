@@ -13,15 +13,22 @@ export function extractPackageFile(content: string): PackageFile | null {
       const orbs = /^\s*orbs:\s*$/.exec(line);
       if (orbs) {
         logger.trace(`Matched orbs on line ${lineNumber}`);
-        let foundOrb: boolean;
+        let foundOrbOrNoop: boolean;
         do {
-          foundOrb = false;
+          foundOrbOrNoop = false;
           const orbLine = lines[lineNumber + 1];
           logger.trace(`orbLine: "${orbLine}"`);
+          const yamlNoop = /^\s*(#|$)/.exec(orbLine);
+          if (yamlNoop) {
+            logger.debug('orbNoop');
+            foundOrbOrNoop = true;
+            lineNumber += 1;
+            continue; // eslint-disable-line no-continue
+          }
           const orbMatch = /^\s+([^:]+):\s(.+)$/.exec(orbLine);
           if (orbMatch) {
             logger.trace('orbMatch');
-            foundOrb = true;
+            foundOrbOrNoop = true;
             lineNumber += 1;
             const depName = orbMatch[1];
             const [orbName, currentValue] = orbMatch[2].split('@');
@@ -37,7 +44,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             };
             deps.push(dep);
           }
-        } while (foundOrb);
+        } while (foundOrbOrNoop);
       }
       const match = /^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
       if (match) {

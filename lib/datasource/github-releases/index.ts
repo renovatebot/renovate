@@ -2,8 +2,10 @@ import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GithubRelease } from './types';
 
 export const id = 'github-releases';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 
@@ -15,12 +17,6 @@ function getCacheKey(depHost: string, repo: string): string {
   const type = 'tags';
   return `${depHost}:${repo}:${type}`;
 }
-
-type GithubRelease = {
-  tag_name: string;
-  published_at: string;
-  prerelease: boolean;
-};
 
 /**
  * github.getReleases

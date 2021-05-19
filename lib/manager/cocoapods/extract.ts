@@ -4,6 +4,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import type { PackageDependency, PackageFile } from '../types';
+import type { ParsedLine } from './types';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
@@ -14,27 +15,15 @@ const regexMappings = [
   /^\s*source\s*(['"])(?<source>[^'"]+)\1/,
 ];
 
-export interface ParsedLine {
-  depName?: string;
-  groupName?: string;
-  spec?: string;
-  subspec?: string;
-  currentValue?: string;
-  git?: string;
-  tag?: string;
-  path?: string;
-  source?: string;
-}
-
 export function parseLine(line: string): ParsedLine {
-  const result: ParsedLine = {};
+  let result: ParsedLine = {};
   if (!line) {
     return result;
   }
   for (const regex of Object.values(regexMappings)) {
     const match = regex.exec(line.replace(/#.*$/, ''));
     if (match?.groups) {
-      Object.assign(result, match.groups);
+      result = { ...result, ...match.groups };
     }
   }
 
@@ -59,9 +48,8 @@ export function parseLine(line: string): ParsedLine {
 export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
   if (git?.startsWith('https://github.com/')) {
-    const githubMatch = /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/.exec(
-      git
-    );
+    const githubMatch =
+      /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/.exec(git);
     const { account, repo } = githubMatch?.groups || {};
     if (account && repo) {
       return {

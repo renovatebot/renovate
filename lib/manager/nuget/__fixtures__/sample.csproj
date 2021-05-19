@@ -46,4 +46,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <Choose>
+    <When Condition="some-condition-like-exists">
+      <ItemGroup>
+        <ProjectReference Include="My.Package.csproj" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="My.Package" Version="1.0.0" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 </Project>

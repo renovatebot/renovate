@@ -22,10 +22,10 @@ export function mergeChildConfig<T, TChild>(
     ) {
       logger.trace(`mergeable option: ${option.name}`);
       if (option.name === 'constraints') {
-        config[option.name] = Object.assign(
-          parentConfig[option.name],
-          childConfig[option.name]
-        );
+        config[option.name] = {
+          ...parentConfig[option.name],
+          ...childConfig[option.name],
+        };
       } else if (option.type === 'array') {
         config[option.name] = (parentConfig[option.name] as unknown[]).concat(
           config[option.name]
@@ -42,5 +42,5 @@ export function mergeChildConfig<T, TChild>(
       );
     }
   }
-  return Object.assign(config, config.force);
+  return { ...config, ...config.force };
 }

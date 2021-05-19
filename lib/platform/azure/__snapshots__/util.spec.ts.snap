@@ -1,6 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/azure/helpers getRenovatePRFormat should be formated (closed v2) 1`] = `
+exports[`platform/azure/util getProjectAndRepo should return the object with project and repo 1`] = `
+Object {
+  "project": "prjName",
+  "repo": "myRepoName",
+}
+`;
+
+exports[`platform/azure/util getProjectAndRepo should return the object with same strings 1`] = `
+Object {
+  "project": "myRepoName",
+  "repo": "myRepoName",
+}
+`;
+
+exports[`platform/azure/util getRenovatePRFormat should be formated (closed v2) 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -14,7 +28,7 @@ Object {
 }
 `;
 
-exports[`platform/azure/helpers getRenovatePRFormat should be formated (closed) 1`] = `
+exports[`platform/azure/util getRenovatePRFormat should be formated (closed) 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -28,7 +42,7 @@ Object {
 }
 `;
 
-exports[`platform/azure/helpers getRenovatePRFormat should be formated (isConflicted) 1`] = `
+exports[`platform/azure/util getRenovatePRFormat should be formated (isConflicted) 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -43,7 +57,7 @@ Object {
 }
 `;
 
-exports[`platform/azure/helpers getRenovatePRFormat should be formated (not closed) 1`] = `
+exports[`platform/azure/util getRenovatePRFormat should be formated (not closed) 1`] = `
 Object {
   "body": undefined,
   "createdAt": undefined,
@@ -56,3 +70,23 @@ Object {
   "targetBranch": undefined,
 }
 `;
+
+exports[`platform/azure/util getStorageExtraCloneOpts should configure basic auth 1`] = `
+Object {
+  "-c": "http.extraheader=AUTHORIZATION: basic dXNlcjpwYXNz",
+}
+`;
+
+exports[`platform/azure/util getStorageExtraCloneOpts should configure bearer token 1`] = `
+Object {
+  "-c": "http.extraheader=AUTHORIZATION: bearer token",
+}
+`;
+
+exports[`platform/azure/util getStorageExtraCloneOpts should configure personal access token 1`] = `
+Object {
+  "-c": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+}
+`;
+
+exports[`platform/azure/util max4000Chars should be the same 1`] = `"Hello"`;

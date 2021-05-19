@@ -84,6 +84,16 @@ describe('semver.getNewValue()', () => {
       ['^1.2.3', '4.0.0', '^4.0.0'],
       ['^1.2.3', '4.5.6', '^4.0.0'],
       ['^1.0.0', '4.5.6', '^4.0.0'],
+
+      ['^0.2.3', '0.2.4', '^0.2.3'],
+      ['^2.3.0', '2.4.0', '^2.3.0'],
+      ['^2.3.4', '2.4.5', '^2.3.4'],
+      ['^0.0.1', '0.0.2', '^0.0.2'],
+      ['^1.0.1', '2.0.2', '^2.0.0'],
+      ['^1.2.3', '1.2.3', '^1.2.3'],
+      ['^1.2.3', '1.2.2', '^1.2.2'],
+
+      ['^0.9.21', '0.9.22', '^0.9.21'], // #4762
     ].forEach(([currentValue, newVersion, expectedValue]) => {
       expect(
         semver.getNewValue({
@@ -314,5 +324,39 @@ describe('semver.getNewValue()', () => {
         newVersion: '1.0.1',
       })
     ).toEqual('>= 1.0.1 < 2');
+  });
+  it('widens', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '<=1.2.3',
+        rangeStrategy: 'widen',
+        currentVersion: '1.0.0',
+        newVersion: '1.2.3',
+      })
+    ).toEqual('<=1.2.3');
+    expect(
+      semver.getNewValue({
+        currentValue: '<=1.2.3',
+        rangeStrategy: 'widen',
+        currentVersion: '1.0.0',
+        newVersion: '1.2.4',
+      })
+    ).toEqual('<=1.2.4');
+    expect(
+      semver.getNewValue({
+        currentValue: '>=1.2.3',
+        rangeStrategy: 'widen',
+        currentVersion: '1.0.0',
+        newVersion: '1.2.3',
+      })
+    ).toEqual('>=1.2.3');
+    expect(
+      semver.getNewValue({
+        currentValue: '>=1.2.3',
+        rangeStrategy: 'widen',
+        currentVersion: '1.0.0',
+        newVersion: '1.2.1',
+      })
+    ).toEqual('>=1.2.3 || 1.2.1');
   });
 });

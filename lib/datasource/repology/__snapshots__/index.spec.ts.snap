@@ -2,6 +2,7 @@
 
 exports[`datasource/repology/index getReleases returns correct version for api package 1`] = `
 Object {
+  "registryUrl": "https://repology.org/",
   "releases": Array [
     Object {
       "version": "1.181",
@@ -15,7 +16,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -25,7 +26,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -37,6 +38,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns correct version for binary package 1`] = `
 Object {
+  "registryUrl": "https://repology.org/",
   "releases": Array [
     Object {
       "version": "1.14.2-2+deb10u1",
@@ -50,7 +52,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -62,6 +64,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns correct version for multi-package project with different name 1`] = `
 Object {
+  "registryUrl": "https://repology.org/",
   "releases": Array [
     Object {
       "version": "12.2-4+deb10u1",
@@ -75,7 +78,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -87,6 +90,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns correct version for multi-package project with same name 1`] = `
 Object {
+  "registryUrl": "https://repology.org/",
   "releases": Array [
     Object {
       "version": "9.3.0-r2",
@@ -100,7 +104,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -112,6 +116,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns correct version for source package 1`] = `
 Object {
+  "registryUrl": "https://repology.org/",
   "releases": Array [
     Object {
       "version": "1.181",
@@ -125,7 +130,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -135,7 +140,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -147,6 +152,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns multiple versions if they are present in repository 1`] = `
 Object {
+  "registryUrl": "https://repology.org/",
   "releases": Array [
     Object {
       "version": "1:11.0.7.10-1.el8_1",
@@ -175,7 +181,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -185,7 +191,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -200,7 +206,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -210,7 +216,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -225,7 +231,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -235,7 +241,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -250,7 +256,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -260,7 +266,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -275,7 +281,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -285,7 +291,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -295,7 +301,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -310,7 +316,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -325,7 +331,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -335,7 +341,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -345,7 +351,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -360,7 +366,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -375,7 +381,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -385,7 +391,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "repology.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/git-refs getDigest() returns digest for HEAD 1`] = `"a9920c014aebc28dc1b23e7efcc006d0455cc710"`;
+exports[`datasource/git-refs/index getDigest() returns digest for HEAD 1`] = `"a9920c014aebc28dc1b23e7efcc006d0455cc710"`;
 
-exports[`datasource/git-refs getDigest() returns digest for tag 1`] = `"2b52829c7c1bd65b3501c450849c53b90b11fa0e"`;
+exports[`datasource/git-refs/index getDigest() returns digest for tag 1`] = `"2b52829c7c1bd65b3501c450849c53b90b11fa0e"`;
 
-exports[`datasource/git-refs getReleases returns versions filtered from tags 1`] = `
+exports[`datasource/git-refs/index getReleases returns versions filtered from tags 1`] = `
 Object {
   "releases": Array [
     Object {

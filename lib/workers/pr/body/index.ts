@@ -1,6 +1,5 @@
 import { platform } from '../../../platform';
 import * as template from '../../../util/template';
-import { get } from '../../../versioning';
 import type { BranchConfig } from '../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
@@ -54,18 +53,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
-    const { currentVersion, newVersion, updateType, versioning } = upgrade;
-    // istanbul ignore if
-    if (updateType === 'minor') {
-      try {
-        const version = get(versioning);
-        if (version.getMinor(currentVersion) === version.getMinor(newVersion)) {
-          upgrade.updateType = 'patch';
-        }
-      } catch (err) {
-        // do nothing
-      }
-    }
     /* eslint-enable no-param-reassign */
   });
 }
@@ -78,7 +65,7 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
     notes: getPrNotes(config) + getPrExtraNotes(config),
     changelogs: getChangelogs(config),
     configDescription: await getPrConfigDescription(config),
-    controls: getControls(),
+    controls: await getControls(config),
     footer: getPrFooter(config),
   };
   const prBodyTemplate = config.prBodyTemplate;

@@ -1,67 +1,23 @@
-import { readFileSync } from 'fs';
-import { fs } from '../../../test/util';
+import { fs, getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-const pyproject1toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.1.toml',
-  'utf8'
-);
-
-const pyproject2toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.2.toml',
-  'utf8'
-);
-
-const pyproject3toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.3.toml',
-  'utf8'
-);
-
-const pyproject4toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.4.toml',
-  'utf8'
-);
-
-const pyproject5toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.5.toml',
-  'utf8'
-);
-
-const pyproject6toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.6.toml',
-  'utf8'
-);
-
-const pyproject7toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.7.toml',
-  'utf8'
-);
-
-const pyproject8toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.8.toml',
-  'utf8'
-);
-
-const pyproject9toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.9.toml',
-  'utf8'
-);
+const pyproject1toml = loadFixture('pyproject.1.toml');
+const pyproject2toml = loadFixture('pyproject.2.toml');
+const pyproject3toml = loadFixture('pyproject.3.toml');
+const pyproject4toml = loadFixture('pyproject.4.toml');
+const pyproject5toml = loadFixture('pyproject.5.toml');
+const pyproject6toml = loadFixture('pyproject.6.toml');
+const pyproject7toml = loadFixture('pyproject.7.toml');
+const pyproject8toml = loadFixture('pyproject.8.toml');
+const pyproject9toml = loadFixture('pyproject.9.toml');
 
 // pyproject.10.toml use by artifacts
+const pyproject11toml = loadFixture('pyproject.11.toml');
+const pyproject11tomlLock = loadFixture('pyproject.11.toml.lock');
 
-const pyproject11toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.11.toml',
-  'utf8'
-);
-
-const pyproject11tomlLock = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.11.toml.lock',
-  'utf8'
-);
-
-describe('lib/manager/poetry/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     let filename: string;
     const OLD_ENV = process.env;
@@ -90,7 +46,7 @@ describe('lib/manager/poetry/extract', () => {
     });
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
       const res = await extractPackageFile(pyproject2toml, filename);
-      expect(res.deps).toMatchSnapshot();
+      expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(7);
     });
     it('handles case with no dependencies', async () => {
@@ -99,7 +55,7 @@ describe('lib/manager/poetry/extract', () => {
     });
     it('handles multiple constraint dependencies', async () => {
       const res = await extractPackageFile(pyproject4toml, filename);
-      expect(res.deps).toMatchSnapshot();
+      expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('extracts registries', async () => {

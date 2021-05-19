@@ -14,10 +14,11 @@ Array [
         "prettyDepType": "dependency",
       },
     ],
-    "ignoreNpmrcFile": undefined,
     "lernaClient": undefined,
-    "lernaDir": undefined,
     "lernaPackages": undefined,
+    "managerData": Object {
+      "lernaJsonFile": undefined,
+    },
     "npmLock": undefined,
     "npmrc": undefined,
     "packageFile": "package.json",

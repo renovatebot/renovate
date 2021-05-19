@@ -3,7 +3,7 @@
  */
 
 declare interface Error {
-  configFile?: string;
+  validationSource?: string;
 
   validationError?: string;
   validationMessage?: string;

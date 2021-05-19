@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/clojure/extract extractPackageFile 1`] = `
+exports[`manager/leiningen/extract extractPackageFile 1`] = `
 Object {
   "deps": Array [
     Object {

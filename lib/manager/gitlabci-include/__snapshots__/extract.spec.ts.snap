@@ -1,20 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/gitlabci-include/extract extractPackageFile() extracts local include block 1`] = `
-Array [
-  Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "currentDigest": undefined,
-    "currentValue": "3.11",
-    "datasource": "docker",
-    "depName": "alpine",
-    "depType": "image",
-    "replaceString": "alpine:3.11",
-  },
-]
-`;
-
-exports[`lib/manager/gitlabci-include/extract extractPackageFile() extracts multiple include blocks 1`] = `
+exports[`manager/gitlabci-include/extract extractPackageFile() extracts multiple include blocks 1`] = `
 Array [
   Object {
     "currentValue": "1.0.0",
@@ -33,30 +19,6 @@ Array [
     "depName": "mikebryant/include-source-example3",
     "depType": "repository",
     "skipReason": "unknown-version",
-  },
-]
-`;
-
-exports[`lib/manager/gitlabci-include/extract extractPackageFile() extracts multiple local include blocks 1`] = `
-Array [
-  Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "currentDigest": undefined,
-    "currentValue": "3.11",
-    "datasource": "docker",
-    "depName": "alpine",
-    "depType": "image",
-    "replaceString": "alpine:3.11",
-  },
-  Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
-    "currentDigest": undefined,
-    "currentValue": "12",
-    "datasource": "docker",
-    "depName": "node",
-    "depType": "image",
-    "replaceString": "node:12",
   },
 ]
 `;

@@ -13,7 +13,8 @@ jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
 
 type ECR = _AWS.ECR;
-type GetAuthorizationTokenCommandOutput = _AWS.GetAuthorizationTokenCommandOutput;
+type GetAuthorizationTokenCommandOutput =
+  _AWS.GetAuthorizationTokenCommandOutput;
 const AWS = mocked(_AWS);
 
 const baseUrl = 'https://index.docker.io/v2';
@@ -41,7 +42,7 @@ function mockEcrAuthReject(msg: string) {
   );
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({
@@ -68,6 +69,20 @@ describe(getName(__filename), () => {
       const res = docker.getRegistryRepository(
         'my.local.registry/prefix/image',
         'https://my.local.registry/prefix'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('supports http registryUrls', () => {
+      const res = docker.getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'http://my.local.registry/prefix'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('supports schemeless registryUrls', () => {
+      const res = docker.getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'my.local.registry/prefix'
       );
       expect(res).toMatchSnapshot();
     });
@@ -241,6 +256,40 @@ describe(getName(__filename), () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('passes credentials to ECR client', async () => {
+      httpMock
+        .scope(amazonUrl)
+        .get('/')
+        .reply(200, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      mockEcrAuthResolve({
+        authorizationData: [{ authorizationToken: 'abcdef' }],
+      });
+
+      await getDigest(
+        {
+          datasource: 'docker',
+          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
+        'some-tag'
+      );
+
+      const trace = httpMock.getTrace();
+      expect(trace).toMatchSnapshot();
+      expect(AWS.ECR).toHaveBeenCalledWith({
+        credentials: {
+          accessKeyId: 'some-username',
+          secretAccessKey: 'some-password',
+        },
+        region: 'us-east-1',
+      });
+    });
     it('supports ECR authentication', async () => {
       httpMock
         .scope(amazonUrl)
@@ -389,8 +438,7 @@ describe(getName(__filename), () => {
           200,
           { tags },
           {
-            link:
-              '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
+            link: '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
           }
         )
         .get('/')

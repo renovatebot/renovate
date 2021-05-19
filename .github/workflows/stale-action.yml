@@ -1,0 +1,33 @@
+# Go to https://github.com/actions/stale for the full documentation of these options.
+
+name: 'Close stale bug reports that lack reproduction'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3.0.18
+        with:
+          # Rate limit per run, (defaults to 30, but we've increased it to 40 for now).
+          operations-per-run: 40
+
+          # Only issues with both `reproduction:needed` and `type:bug` will be touched by the stale bot.
+          only-issue-labels: 'reproduction:needed,type:bug'
+
+          # A issue that has any assignee is getting worked on, so is exempt from stale bot.
+          exempt-all-issue-assignees: true
+
+          # Remove stale label from issue/PR on updates or comments, defaults to true.
+          remove-stale-when-updated: true
+
+          # Wait 14 days until making issue stale and posting a message.
+          days-before-issue-stale: 14
+          stale-issue-message: 'When a bug has been marked as needing a reproduction, it means nobody can work on it until one is provided. In cases where no reproduction is possible, or the issue creator does not have the time to reproduce, we unfortunately need to close such issues as they are non-actionable and serve no benefit by remaining open. This issue will be closed after 7 days of inactivity.'
+          stale-issue-label: 'stale'
+
+          # Close out issue after 7 stale days.
+          days-before-issue-close: 7
+          close-issue-message: 'This bug report has been closed as we need a reproduction to work on this. If the original poster or anybody else with the same problem discovers that they can reproduce it, please create a new issue, and reference this issue.'

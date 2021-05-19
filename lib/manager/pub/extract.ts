@@ -40,7 +40,7 @@ export function extractPackageFile(
   packageFile: string
 ): PackageFile | null {
   try {
-    // TODO: fix me
+    // TODO: fix me (#9610)
     const doc = safeLoad(content, { json: true }) as any;
     const deps = [
       ...getDeps(doc.dependencies, {

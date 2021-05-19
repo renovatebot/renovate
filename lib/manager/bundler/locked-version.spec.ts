@@ -1,26 +1,12 @@
-import { readFileSync } from 'fs';
+import { loadFixture } from '../../../test/util';
 import { extractLockFileEntries } from './locked-version';
 
-const railsGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.rails.lock',
-  'utf8'
-);
-const webPackerGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.webpacker.lock',
-  'utf8'
-);
-const mastodonGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.mastodon.lock',
-  'utf8'
-);
-const rubyCIGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.rubyci.lock',
-  'utf8'
-);
-const gitlabFossGemfileLock = readFileSync(
-  'lib/manager/bundler/__fixtures__/Gemfile.gitlab-foss.lock',
-  'utf8'
-);
+const railsGemfileLock = loadFixture('Gemfile.rails.lock');
+const webPackerGemfileLock = loadFixture('Gemfile.webpacker.lock');
+const mastodonGemfileLock = loadFixture('Gemfile.mastodon.lock');
+const rubyCIGemfileLock = loadFixture('Gemfile.rubyci.lock');
+const gitlabFossGemfileLock = loadFixture('Gemfile.gitlab-foss.lock');
+
 describe('/lib/manager/bundler/locked-version', () => {
   test('Parse Rails Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(railsGemfileLock);

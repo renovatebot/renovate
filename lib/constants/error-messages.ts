@@ -12,7 +12,9 @@ export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 
 // Config Error
 export const CONFIG_VALIDATION = 'config-validation';
+export const CONFIG_PRESETS_INVALID = 'config-presets-invalid';
 export const CONFIG_SECRETS_EXPOSED = 'config-secrets-exposed';
+export const CONFIG_SECRETS_INVALID = 'config-secrets-invalid';
 
 // Repository Errors - causes repo to be considered as disabled
 export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';
@@ -35,7 +37,6 @@ export const REPOSITORY_UNINITIATED = 'uninitiated';
 export const REPOSITORY_CHANGED = 'repository-changed';
 export const TEMPORARY_ERROR = 'temporary-error';
 export const NO_VULNERABILITY_ALERTS = 'no-vulnerability-alerts';
-export const INTERRUPTED = 'interrupted';
 
 // Manager Error
 export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';

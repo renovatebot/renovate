@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/extract .extractPackageFile() catches invalid names 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() catches invalid names 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -11,10 +11,11 @@ Object {
       "skipReason": "invalid-name",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
@@ -28,7 +29,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts engines 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts engines 1`] = `
 Object {
   "constraints": Object {
     "node": ">= 8.9.2",
@@ -133,24 +134,25 @@ Object {
       "prettyDepType": "engine",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
   "packageJsonName": undefined,
   "packageJsonType": "library",
   "pnpmShrinkwrap": undefined,
-  "skipInstalls": false,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts non-npmjs 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts non-npmjs 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -295,10 +297,11 @@ Object {
       "sourceUrl": "https://github.com/owner/n",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
@@ -312,7 +315,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts npm package alias 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts npm package alias 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -343,24 +346,25 @@ Object {
       "skipReason": "unknown-version",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
-  "npmLock": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
+  "npmLock": "package-lock.json",
   "npmrc": undefined,
   "packageFileVersion": undefined,
   "packageJsonName": undefined,
   "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
-  "skipInstalls": true,
+  "skipInstalls": false,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts volta 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts volta 1`] = `
 Object {
   "constraints": Object {
     "node": "8.9.2",
@@ -402,10 +406,11 @@ Object {
       "skipReason": "unknown-volta",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
@@ -419,7 +424,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() extracts volta yarn unknown-version 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() extracts volta yarn unknown-version 1`] = `
 Object {
   "constraints": Object {
     "node": "8.9.2",
@@ -455,10 +460,11 @@ Object {
       "skipReason": "unknown-version",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
@@ -472,7 +478,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -590,10 +596,11 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
-  "lernaDir": ".",
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": "lerna.json",
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
@@ -607,7 +614,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds "npmClient":"yarn" in lerna.json 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds "npmClient":"yarn" in lerna.json 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -725,10 +732,11 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "yarn",
-  "lernaDir": ".",
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": "lerna.json",
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
@@ -742,7 +750,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds a lock file 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds a lock file 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -860,10 +868,11 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
@@ -877,14 +886,15 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds complex yarn workspaces 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds complex yarn workspaces 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
-  "lernaDir": ".",
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": "lerna.json",
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "0.0.8",
@@ -900,7 +910,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds lerna 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds lerna 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -1018,10 +1028,11 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
-  "lernaDir": ".",
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": "lerna.json",
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
@@ -1035,14 +1046,15 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
-  "lernaDir": ".",
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": "lerna.json",
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "0.0.8",
@@ -1058,14 +1070,15 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "0.0.8",
@@ -1081,7 +1094,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractPackageFile() returns an array of dependencies 1`] = `
+exports[`manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [
@@ -1199,10 +1212,11 @@ Object {
       "prettyDepType": "resolutions",
     },
   ],
-  "ignoreNpmrcFile": undefined,
   "lernaClient": undefined,
-  "lernaDir": undefined,
   "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
   "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",

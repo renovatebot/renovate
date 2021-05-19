@@ -7,23 +7,22 @@ import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { HelmRepository, RepositoryData } from './types';
 
 export const id = 'helm';
 
 const http = new Http(id);
 
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://charts.helm.sh/stable'];
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
-  additionalBranchPrefix: 'helm-',
   commitMessageTopic: 'Helm release {{depName}}',
   group: {
     commitMessageTopic: '{{{groupName}}} Helm releases',
   },
 };
-
-export type RepositoryData = Record<string, ReleaseResult>;
 
 export async function getRepositoryData(
   repository: string
@@ -57,21 +56,10 @@ export async function getRepositoryData(
     throw err;
   }
   try {
-    interface HelmRepository {
-      entries: Record<
-        string,
-        {
-          home?: string;
-          sources?: string[];
-          version: string;
-          created: string;
-        }[]
-      >;
-    }
-    const doc: HelmRepository = yaml.safeLoad(res.body, {
+    const doc = yaml.safeLoad(res.body, {
       json: true,
-    }) as any;
-    if (!is.plainObject<Record<string, unknown>>(doc)) {
+    }) as HelmRepository;
+    if (!is.plainObject<HelmRepository>(doc)) {
       logger.warn(`Failed to parse index.yaml from ${repository}`);
       return null;
     }

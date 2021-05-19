@@ -1,21 +1,15 @@
 import is from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import * as shortid from 'shortid';
-
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import { RenovateStream } from './pretty-stdout';
-import { BunyanRecord, ProblemStream, withSanitizer } from './utils';
+import type { BunyanRecord, Logger } from './types';
+import { ProblemStream, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT || shortid.generate();
 let curMeta = {};
-
-export interface LogError {
-  level: bunyan.LogLevel;
-  meta: any;
-  msg?: string;
-}
 
 const problems = new ProblemStream();
 
@@ -29,7 +23,7 @@ const stdout: bunyan.Stream = {
 
 // istanbul ignore else: not testable
 if (process.env.LOG_FORMAT !== 'json') {
-  // TODO: typings
+  // TODO: typings (#9615)
   const prettyStdOut = new RenovateStream() as any;
   prettyStdOut.pipe(process.stdout);
   stdout.stream = prettyStdOut;
@@ -60,21 +54,20 @@ const bunyanLogger = bunyan.createLogger({
   ].map(withSanitizer),
 });
 
-const logFactory = (level: bunyan.LogLevelString): any => (
-  p1: any,
-  p2: any
-): void => {
-  if (p2) {
-    // meta and msg provided
-    bunyanLogger[level]({ logContext, ...curMeta, ...p1 }, p2);
-  } else if (is.string(p1)) {
-    // only message provided
-    bunyanLogger[level]({ logContext, ...curMeta }, p1);
-  } else {
-    // only meta provided
-    bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
-  }
-};
+const logFactory =
+  (level: bunyan.LogLevelString): any =>
+  (p1: any, p2: any): void => {
+    if (p2) {
+      // meta and msg provided
+      bunyanLogger[level]({ logContext, ...curMeta, ...p1 }, p2);
+    } else if (is.string(p1)) {
+      // only message provided
+      bunyanLogger[level]({ logContext, ...curMeta }, p1);
+    } else {
+      // only meta provided
+      bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
+    }
+  };
 
 const loggerLevels: bunyan.LogLevelString[] = [
   'trace',
@@ -84,21 +77,6 @@ const loggerLevels: bunyan.LogLevelString[] = [
   'error',
   'fatal',
 ];
-
-interface Logger {
-  trace(msg: string): void;
-  trace(meta: Record<string, any>, msg?: string): void;
-  debug(msg: string): void;
-  debug(meta: Record<string, any>, msg?: string): void;
-  info(msg: string): void;
-  info(meta: Record<string, any>, msg?: string): void;
-  warn(msg: string): void;
-  warn(meta: Record<string, any>, msg?: string): void;
-  error(msg: string): void;
-  error(meta: Record<string, any>, msg?: string): void;
-  fatal(msg: string): void;
-  fatal(meta: Record<string, any>, msg?: string): void;
-}
 
 export const logger: Logger = {} as any;
 

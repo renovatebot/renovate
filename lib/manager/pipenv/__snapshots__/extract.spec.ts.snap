@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/pipenv/extract extractPackageFile() extracts dependencies 1`] = `
+exports[`manager/pipenv/extract extractPackageFile() extracts dependencies 1`] = `
 Object {
   "constraints": Object {
     "python": "== 3.6.*",
@@ -61,7 +61,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/pipenv/extract extractPackageFile() extracts example pipfile 1`] = `
+exports[`manager/pipenv/extract extractPackageFile() extracts example pipfile 1`] = `
 Object {
   "constraints": Object {
     "python": "== 2.7.*",
@@ -136,7 +136,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
+exports[`manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
 Object {
   "constraints": Object {
     "python": "== 3.6.*",
@@ -187,7 +187,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/pipenv/extract extractPackageFile() supports custom index 1`] = `
+exports[`manager/pipenv/extract extractPackageFile() supports custom index 1`] = `
 Object {
   "constraints": Object {},
   "deps": Array [

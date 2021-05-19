@@ -9,6 +9,7 @@ Object {
 
 exports[`datasource/jenkins-plugins/index getReleases returns package releases for a hit for info and releases 1`] = `
 Object {
+  "registryUrl": "https://updates.jenkins.io/",
   "releases": Array [
     Object {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.10/email-ext.hpi",

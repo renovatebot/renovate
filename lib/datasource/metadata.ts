@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../util/host-rules';
@@ -17,6 +18,7 @@ const manualChangelogUrls = {
       'https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md',
     'react-native':
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
+    sharp: 'https://github.com/lovell/sharp/blob/master/docs/changelog.md',
     'zone.js':
       'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },
@@ -54,6 +56,7 @@ const manualChangelogUrls = {
       'https://gitlab.com/gitlab-org/gitlab-foss/-/blob/master/CHANGELOG.md',
     'gitlab/gitlab-runner':
       'https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md',
+    'google/cloud-sdk': 'https://cloud.google.com/sdk/docs/release-notes',
     neo4j: 'https://neo4j.com/release-notes/',
   },
 };
@@ -68,6 +71,7 @@ const manualSourceUrls = {
   },
   docker: {
     'amd64/traefik': 'https://github.com/containous/traefik',
+    'coredns/coredns': 'https://github.com/coredns/coredns',
     'docker/compose': 'https://github.com/docker/compose',
     'drone/drone': 'https://github.com/drone/drone',
     'drone/drone-runner-docker':
@@ -80,6 +84,7 @@ const manualSourceUrls = {
       'https://github.com/GoogleContainerTools/kaniko',
     'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/gitlab-foss',
     'gitlab/gitlab-runner': 'https://gitlab.com/gitlab-org/gitlab-runner',
+    'gitea/gitea': 'https://github.com/go-gitea/gitea',
     'hashicorp/terraform': 'https://github.com/hashicorp/terraform',
     node: 'https://github.com/nodejs/node',
     traefik: 'https://github.com/containous/traefik',
@@ -228,7 +233,7 @@ export function addMetaData(
   // Clean up any empty urls
   const urls = ['homepage', 'sourceUrl', 'changelogUrl', 'dependencyUrl'];
   for (const url of urls) {
-    if (validateUrl(dep[url]?.trim())) {
+    if (is.string(dep[url]) && validateUrl(dep[url].trim())) {
       dep[url] = dep[url].trim();
     } else {
       delete dep[url];

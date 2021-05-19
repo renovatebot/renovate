@@ -1,6 +1,7 @@
+import { getName } from '../../../../test/util';
 import { mightBeABrowserLibrary } from './type';
 
-describe('manager/npm/extract/type', () => {
+describe(getName(), () => {
   describe('.mightBeABrowserLibrary()', () => {
     it('is not a library if private', () => {
       const isLibrary = mightBeABrowserLibrary({ private: true });

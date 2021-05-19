@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
+import type { RenovateConfig } from '../../../config/types';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
@@ -17,13 +17,19 @@ const defaultConfigFile = (config: RenovateConfig): string =>
     ? config.onboardingConfigFileName
     : configFileNames[0];
 
+async function getJsonFile(file: string): Promise<RenovateConfig | null> {
+  try {
+    return await platform.getJsonFile(file);
+  } catch (err) {
+    return null;
+  }
+}
+
 async function validateOptimizeForDisabled(
   config: RenovateConfig
 ): Promise<void> {
   if (config.optimizeForDisabled) {
-    const renovateConfig = await platform.getJsonFile(
-      defaultConfigFile(config)
-    );
+    const renovateConfig = await getJsonFile(defaultConfigFile(config));
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
@@ -32,9 +38,7 @@ async function validateOptimizeForDisabled(
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   if (!config.includeForks && config.isFork) {
-    const renovateConfig = await platform.getJsonFile(
-      defaultConfigFile(config)
-    );
+    const renovateConfig = await getJsonFile(defaultConfigFile(config));
     if (!renovateConfig?.includeForks) {
       throw new Error(REPOSITORY_FORKED);
     }

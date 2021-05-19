@@ -6,7 +6,11 @@ import {
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
 import type { Preset } from '../types';
-import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID_JSON,
+  fetchPreset,
+} from '../util';
 
 const http = new BitbucketServerHttp();
 
@@ -34,25 +38,27 @@ export async function fetchJSONFile(
   }
   if (!res.body.isLastPage) {
     logger.warn({ size: res.body.size }, 'Renovate config to big');
-    throw new Error('invalid preset JSON');
+    throw new Error(PRESET_INVALID_JSON);
   }
   try {
     const content = res.body.lines.map((l) => l.text).join('');
     const parsed = JSON.parse(content);
     return parsed;
   } catch (err) {
-    throw new Error('invalid preset JSON');
+    throw new Error(PRESET_INVALID_JSON);
   }
 }
 
 export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
+  presetPath: string,
   endpoint: string
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
     filePreset,
+    presetPath,
     endpoint,
     fetch: fetchJSONFile,
   });

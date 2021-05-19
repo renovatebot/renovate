@@ -135,7 +135,7 @@ exports[`manager/bazel/update updateDependency updates commit-based http archive
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -161,7 +161,7 @@ exports[`manager/bazel/update updateDependency updates finds url instead of urls
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -175,7 +175,7 @@ exports[`manager/bazel/update updateDependency updates http archive with content
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -189,7 +189,7 @@ exports[`manager/bazel/update updateDependency updates http_archive with urls ar
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "mirror.bazel.build",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -198,7 +198,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

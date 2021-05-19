@@ -1,6 +1,8 @@
-import { TerraformDependencyTypes, getTerraformDependencyType } from './util';
+import { getName } from '../../../test/util';
+import { TerraformDependencyTypes } from './common';
+import { getTerraformDependencyType } from './util';
 
-describe('lib/manager/terraform/extract', () => {
+describe(getName(), () => {
   describe('getTerraformDependencyType()', () => {
     it('returns TerraformDependencyTypes.module', () => {
       expect(getTerraformDependencyType('module')).toBe(

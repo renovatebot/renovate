@@ -1,11 +1,15 @@
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
+import { TerraformDependencyTypes } from './common';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
 import {
   analyzeTerraformProvider,
   extractTerraformProvider,
 } from './providers';
-import { extractTerraformRequiredProviders } from './required-providers';
+import {
+  analyzeTerraformRequiredProvider,
+  extractTerraformRequiredProviders,
+} from './required-providers';
 import {
   analyseTerraformVersion,
   extractTerraformRequiredVersion,
@@ -14,14 +18,14 @@ import {
   analyseTerraformResource,
   extractTerraformResource,
 } from './resources';
+import type { TerraformManagerData } from './types';
 import {
-  TerraformDependencyTypes,
-  TerraformManagerData,
   checkFileContainsDependency,
   getTerraformDependencyType,
 } from './util';
 
-const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
+const dependencyBlockExtractionRegex =
+  /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
 const contentCheckList = [
   'module "',
   'provider "',
@@ -98,6 +102,8 @@ export function extractPackageFile(content: string): PackageFile | null {
   deps.forEach((dep) => {
     switch (dep.managerData.terraformDependencyType) {
       case TerraformDependencyTypes.required_providers:
+        analyzeTerraformRequiredProvider(dep);
+        break;
       case TerraformDependencyTypes.provider:
         analyzeTerraformProvider(dep);
         break;

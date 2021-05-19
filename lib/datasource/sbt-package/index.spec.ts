@@ -1,23 +1,15 @@
-import fs from 'fs';
 import nock from 'nock';
-import upath from 'upath';
 import { getPkgReleases } from '..';
+import { getName, loadFixture } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-plugin/util';
 import * as sbtPlugin from '.';
 
-const mavenIndexHtml = fs.readFileSync(
-  upath.resolve(__dirname, `./__fixtures__/maven-index.html`),
-  'utf8'
-);
+const mavenIndexHtml = loadFixture(`maven-index.html`);
+const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
 
-const sbtPluginIndex = fs.readFileSync(
-  upath.resolve(__dirname, `./__fixtures__/sbt-plugins-index.html`),
-  'utf8'
-);
-
-describe('datasource/sbt', () => {
+describe(getName(), () => {
   it('parses Maven index directory', () => {
     expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
   });
@@ -180,6 +172,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '1.2.0' }, { version: '1.2.3' }],
       });
       expect(
@@ -191,6 +184,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '1.2.3' }],
       });
     });
@@ -205,6 +199,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '6.5.4' }],
         homepage: 'http://www.scalatest.org',
         sourceUrl: 'https://github.com/scalatest/scalatest',
@@ -218,6 +213,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '6.5.4' }],
         sourceUrl: 'https://github.com/scalatest/scalatest',
       });
@@ -230,6 +226,7 @@ describe('datasource/sbt', () => {
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '6.5.4' }],
         homepage: 'http://www.scalatest.org',
       });

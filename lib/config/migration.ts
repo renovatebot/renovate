@@ -1,11 +1,17 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal';
 import { logger } from '../logger';
-import type { HostRule } from '../types';
 import { clone } from '../util/clone';
 import { getOptions } from './definitions';
-import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
+import { removedPresets } from './presets/common';
+import type {
+  MigratedConfig,
+  MigratedRenovateConfig,
+  RenovateConfig,
+  RenovateOptions,
+} from './types';
+import { mergeChildConfig } from './utils';
 
 const options = getOptions();
 
@@ -27,24 +33,10 @@ const removedOptions = [
   'lazyGrouping',
 ];
 
-export interface MigratedConfig {
-  isMigrated: boolean;
-  migratedConfig: RenovateConfig;
-}
-
-interface MigratedRenovateConfig extends RenovateConfig {
-  endpoints?: HostRule[];
-  pathRules: PackageRule[];
-  packages: PackageRule[];
-
-  node?: RenovateConfig;
-  travis?: RenovateConfig;
-}
-
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
-  // TODO: remove any type
+  // TODO: remove any type (#9611)
   parentKey?: string | any
 ): MigratedConfig {
   try {
@@ -75,9 +67,10 @@ export function migrateConfig(
         delete migratedConfig.pathRules;
       } else if (key === 'suppressNotifications') {
         if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
-          migratedConfig.suppressNotifications = migratedConfig.suppressNotifications.filter(
-            (item) => item !== 'prEditNotification'
-          );
+          migratedConfig.suppressNotifications =
+            migratedConfig.suppressNotifications.filter(
+              (item) => item !== 'prEditNotification'
+            );
         }
       } else if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
@@ -105,11 +98,20 @@ export function migrateConfig(
         migratedConfig.hostType = val;
         delete migratedConfig.platform;
       } else if (parentKey === 'hostRules' && key === 'endpoint') {
-        migratedConfig.baseUrl = val;
+        migratedConfig.matchHost ||= val;
         delete migratedConfig.endpoint;
       } else if (parentKey === 'hostRules' && key === 'host') {
-        migratedConfig.hostName = val;
+        migratedConfig.matchHost ||= val;
         delete migratedConfig.host;
+      } else if (parentKey === 'hostRules' && key === 'baseUrl') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.baseUrl;
+      } else if (parentKey === 'hostRules' && key === 'hostName') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.hostName;
+      } else if (parentKey === 'hostRules' && key === 'domainName') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.domainName;
       } else if (key === 'packageRules' && is.plainObject(val)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
@@ -126,8 +128,10 @@ export function migrateConfig(
               )
                 ? migratedConfig.packageRules
                 : [];
-              const payload = migrateConfig(packageFile as RenovateConfig, key)
-                .migratedConfig;
+              const payload = migrateConfig(
+                packageFile as RenovateConfig,
+                key
+              ).migratedConfig;
               for (const subrule of payload.packageRules || []) {
                 subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
@@ -151,8 +155,10 @@ export function migrateConfig(
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
           : [];
-        const depTypePackageRule = migrateConfig(val as RenovateConfig, key)
-          .migratedConfig;
+        const depTypePackageRule = migrateConfig(
+          val as RenovateConfig,
+          key
+        ).migratedConfig;
         depTypePackageRule.depTypeList = [key];
         delete depTypePackageRule.packageRules;
         migratedConfig.packageRules.push(depTypePackageRule);
@@ -166,6 +172,8 @@ export function migrateConfig(
         }
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(/{{baseDir}}/g, '{{packageFileDir}}');
+      } else if (is.string(val) && val.includes('{{depNameShort}}')) {
+        migratedConfig[key] = val.replace(/{{depNameShort}}/g, '{{depName}}');
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
       } else if (key === 'rebaseStalePrs') {
@@ -187,11 +195,19 @@ export function migrateConfig(
           migratedConfig.rebaseWhen = 'never';
         }
       } else if (key === 'exposeEnv') {
+        migratedConfig.exposeAllEnv = val;
         delete migratedConfig.exposeEnv;
-        if (val === true) {
-          migratedConfig.trustLevel = 'high';
-        } else if (val === false) {
-          migratedConfig.trustLevel = 'low';
+      } else if (key === 'trustLevel') {
+        delete migratedConfig.trustLevel;
+        if (val === 'high') {
+          migratedConfig.allowCustomCrateRegistries ??= true;
+          migratedConfig.allowScripts ??= true;
+          migratedConfig.exposeAllEnv ??= true;
+        }
+      } else if (key === 'ignoreNpmrcFile') {
+        delete migratedConfig.ignoreNpmrcFile;
+        if (!is.string(migratedConfig.npmrc)) {
+          migratedConfig.npmrc = '';
         }
       } else if (
         key === 'branchName' &&
@@ -242,22 +258,15 @@ export function migrateConfig(
         }
         const presets = migratedConfig.extends;
         for (let i = 0; i < presets.length; i += 1) {
-          let preset = presets[i];
+          const preset = presets[i];
           if (is.string(preset)) {
-            if (preset === 'config:application' || preset === ':js-app') {
-              preset = 'config:js-app';
-            } else if (preset === ':library' || preset === 'config:library') {
-              preset = 'config:js-lib';
-            } else if (preset.startsWith(':masterIssue')) {
-              preset = preset.replace('masterIssue', 'dependencyDashboard');
-            } else if (
-              [':unpublishSafe', 'default:unpublishSafe'].includes(preset)
-            ) {
-              preset = 'npm:unpublishSafe';
+            const newPreset = removedPresets[preset];
+            if (newPreset !== undefined) {
+              presets[i] = newPreset;
             }
-            presets[i] = preset;
           }
         }
+        migratedConfig.extends = migratedConfig.extends.filter(Boolean);
       } else if (key === 'unpublishSafe') {
         if (val === true) {
           migratedConfig.extends = migratedConfig.extends || [];
@@ -547,7 +556,25 @@ export function migrateConfig(
         }
       }
     }
-    const isMigrated = !equal(config, migratedConfig);
+    // Migrate nested packageRules
+    if (is.nonEmptyArray(migratedConfig.packageRules)) {
+      const existingRules = migratedConfig.packageRules;
+      migratedConfig.packageRules = [];
+      for (const packageRule of existingRules) {
+        if (is.array(packageRule.packageRules)) {
+          logger.debug('Flattening nested packageRules');
+          // merge each subrule and add to the parent list
+          for (const subrule of packageRule.packageRules) {
+            const combinedRule = mergeChildConfig(packageRule, subrule);
+            delete combinedRule.packageRules;
+            migratedConfig.packageRules.push(combinedRule);
+          }
+        } else {
+          migratedConfig.packageRules.push(packageRule);
+        }
+      }
+    }
+    const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
       // recursive call in case any migrated configs need further migrating
       return {
