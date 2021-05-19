@@ -1,4 +1,4 @@
-# New package manager question template
+# New package manager questionnaire
 
 **Did you read our documentation on adding a package manager?**
 
@@ -101,7 +101,7 @@
 
 ## Artifacts
 
-### Are lock files or checksum files used? Are the mandatory?
+### Are lock files or checksum files used? Are they mandatory?
 
 ### If so, what tool and exact commands should be used if updating one or more package versions in a dependency file?
 
