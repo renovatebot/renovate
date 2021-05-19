@@ -1,6 +1,7 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
 import type { HostRule } from '../types';
+import type { GitNoVerifyOption } from '../util/git';
 
 export type RenovateConfigStage =
   | 'global'
@@ -72,6 +73,7 @@ export interface GlobalOnlyConfig {
   baseDir?: string;
   cacheDir?: string;
   forceCli?: boolean;
+  gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
@@ -252,6 +254,10 @@ export interface ValidationMessage {
 }
 
 export interface RenovateOptionBase {
+  /**
+   * If true, the option can only be configured by people with access to the Renovate instance.
+   * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
+   */
   admin?: boolean;
 
   allowedValues?: string[];
