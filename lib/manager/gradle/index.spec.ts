@@ -10,11 +10,13 @@ import {
   loadFixture,
   mocked,
 } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { setFsConfig } from '../../util/fs';
+import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('child_process');
@@ -26,17 +28,21 @@ const fs = mocked(_fs);
 jest.mock('../../util/exec/env');
 const env = mocked(_env);
 
+const adminConfig: RepoAdminConfig = {
+  localDir: join('/foo/bar'),
+};
+
+const dockerAdminConfig = {
+  ...adminConfig,
+  binarySource: BinarySource.Docker,
+};
+
 const gradleOutput = {
   stdout: 'gradle output',
   stderr: '',
 };
 
-const utilConfig = {
-  localDir: join('/foo/bar'),
-};
-
-const config = {
-  ...utilConfig,
+const config: ExtractConfig = {
   gradle: {
     timeout: 60,
   },
@@ -83,8 +89,12 @@ describe(getName(), () => {
   }
 
   beforeAll(async () => {
-    await setExecConfig(utilConfig);
-    setFsConfig(utilConfig);
+    await setExecConfig(adminConfig as never);
+    setAdminConfig(adminConfig);
+  });
+
+  afterAll(() => {
+    setAdminConfig();
   });
 
   beforeEach(() => {
@@ -205,9 +215,8 @@ describe(getName(), () => {
     });
 
     it('should use docker if required', async () => {
-      const dockerConfig = { ...config, binarySource: BinarySource.Docker };
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-      await setExecConfig(dockerConfig);
+      await setExecConfig(dockerAdminConfig);
       const execSnapshots = setupMocks({ wrapperFilename: null });
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
@@ -217,9 +226,8 @@ describe(getName(), () => {
     });
 
     it('should use docker even if gradlew is available', async () => {
-      const dockerConfig = { ...config, binarySource: BinarySource.Docker };
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-      await setExecConfig(dockerConfig);
+      await setExecConfig(dockerAdminConfig);
       const execSnapshots = setupMocks();
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
@@ -229,9 +237,8 @@ describe(getName(), () => {
     });
 
     it('should use docker even if gradlew.bat is available on Windows', async () => {
-      const dockerConfig = { ...config, binarySource: BinarySource.Docker };
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-      await setExecConfig(dockerConfig);
+      await setExecConfig(dockerAdminConfig);
       jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
       const execSnapshots = setupMocks({ wrapperFilename: 'gradlew.bat' });
       const dependencies = await extractAllPackageFiles(config, [
