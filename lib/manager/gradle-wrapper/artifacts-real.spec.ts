@@ -3,17 +3,23 @@ import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
 import { getName, git, partial } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
-import { setFsConfig } from '../../util/fs';
-import { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
+import type { UpdateArtifactsConfig } from '../types';
 import * as dcUpdate from '.';
 
 jest.mock('../../util/git');
 
 const fixtures = resolve(__dirname, './__fixtures__');
-const config = {
+
+const adminConfig: RepoAdminConfig = {
   localDir: resolve(fixtures, './testFiles'),
+};
+
+const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
 };
 
@@ -37,14 +43,15 @@ describe(getName(), () => {
 
     beforeEach(async () => {
       jest.resetAllMocks();
-      await setExecConfig(config);
-      setFsConfig(config);
+      await setExecConfig(adminConfig as never);
+      setAdminConfig(adminConfig);
       httpMock.setup();
     });
 
     afterEach(async () => {
       await Git(fixtures).checkout(['HEAD', '--', '.']);
       httpMock.reset();
+      setAdminConfig();
     });
 
     it('replaces existing value', async () => {
@@ -160,17 +167,20 @@ describe(getName(), () => {
     });
 
     it('gradlew failed', async () => {
-      const cfg = { ...config, localDir: resolve(fixtures, './wrongCmd') };
+      const wrongCmdConfig = {
+        ...adminConfig,
+        localDir: resolve(fixtures, './wrongCmd'),
+      };
 
-      await setExecConfig(cfg);
-      setFsConfig(cfg);
+      await setExecConfig(wrongCmdConfig);
+      setAdminConfig(wrongCmdConfig);
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
           `./testFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
-        config: cfg,
+        config,
       });
 
       expect(res[0].artifactError.lockFile).toEqual(
@@ -186,13 +196,12 @@ describe(getName(), () => {
     });
 
     it('gradlew not found', async () => {
+      setAdminConfig({ localDir: 'some-dir' });
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: undefined,
-        config: {
-          localDir: 'some-dir',
-        },
+        config: {},
       });
 
       expect(res).toBeNull();
@@ -234,7 +243,7 @@ describe(getName(), () => {
 
       expect(
         await readString(
-          config.localDir,
+          adminConfig.localDir,
           `./gradle/wrapper/gradle-wrapper.properties`
         )
       ).toEqual(newContent);
@@ -247,8 +256,7 @@ describe(getName(), () => {
             'user-agent': 'https://github.com/renovatebot/renovate',
           },
           method: 'GET',
-          url:
-            'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+          url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
         },
       ]);
     });
@@ -282,8 +290,7 @@ describe(getName(), () => {
             'user-agent': 'https://github.com/renovatebot/renovate',
           },
           method: 'GET',
-          url:
-            'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+          url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
         },
       ]);
     });

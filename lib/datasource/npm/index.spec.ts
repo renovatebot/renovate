@@ -11,7 +11,8 @@ import { id as datasource, getNpmrc, resetCache, setNpmrc } from '.';
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> = _registryAuthToken as never;
+const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> =
+  _registryAuthToken as never;
 let npmResponse: any;
 
 describe(getName(), () => {
