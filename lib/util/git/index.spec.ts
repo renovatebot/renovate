@@ -1,8 +1,11 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
+import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import * as git from '.';
+import { GitNoVerifyOption, setNoVerify } from '.';
 
 describe(getName(), () => {
   jest.setTimeout(15000);
@@ -68,19 +71,24 @@ describe(getName(), () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
+    setAdminConfig({ localDir: tmpDir.path });
     await git.initRepo({
-      localDir: tmpDir.path,
       url: origin.path,
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
     });
     await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    setNoVerify([]);
     await git.syncGit();
+    // override some local git settings for better testing
+    const local = Git(tmpDir.path);
+    await local.addConfig('commit.gpgsign', 'false');
   });
 
   afterEach(async () => {
     await tmpDir.cleanup();
     await origin.cleanup();
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -111,7 +119,6 @@ describe(getName(), () => {
       await repo.commit('Add submodule');
       await git.initRepo({
         cloneSubmodules: true,
-        localDir: tmpDir.path,
         url: base.path,
       });
       await git.syncGit();
@@ -320,6 +327,95 @@ describe(getName(), () => {
       });
       expect(commit).toBeNull();
     });
+
+    it('does not pass --no-verify', async () => {
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+      });
+
+      expect(commitSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+    });
+
+    it('passes --no-verify to commit', async () => {
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+      setNoVerify([GitNoVerifyOption.Commit]);
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+      });
+
+      expect(commitSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+    });
+
+    it('passes --no-verify to push', async () => {
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+      setNoVerify([GitNoVerifyOption.Push]);
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+      });
+
+      expect(commitSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ '--no-verify': null })
+      );
+    });
   });
 
   describe('getCommitMessages()', () => {
@@ -376,7 +472,6 @@ describe(getName(), () => {
       await git.checkoutBranch('develop');
 
       await git.initRepo({
-        localDir: tmpDir.path,
         url: base.path,
       });
 
@@ -398,7 +493,6 @@ describe(getName(), () => {
       await repo.checkout(defaultBranch);
 
       await git.initRepo({
-        localDir: tmpDir.path,
         url: base.path,
       });
 
@@ -406,7 +500,6 @@ describe(getName(), () => {
       expect(git.branchExists('renovate/test')).toBe(true);
 
       await git.initRepo({
-        localDir: tmpDir.path,
         url: base.path,
       });
 
@@ -435,7 +528,6 @@ describe(getName(), () => {
       await repo.commit('Add submodule');
       await git.initRepo({
         cloneSubmodules: true,
-        localDir: tmpDir.path,
         url: base.path,
       });
       await git.syncGit();
@@ -446,7 +538,6 @@ describe(getName(), () => {
     it('should use extra clone configuration', async () => {
       await fs.emptyDir(tmpDir.path);
       await git.initRepo({
-        localDir: tmpDir.path,
         url: origin.path,
         extraCloneOpts: {
           '-c': 'extra.clone.config=test-extra-config-value',
