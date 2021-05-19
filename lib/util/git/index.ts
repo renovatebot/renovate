@@ -2,14 +2,16 @@ import URL from 'url';
 import fs from 'fs-extra';
 import Git, {
   DiffResult as DiffResult_,
+  Options,
   ResetMode,
   SimpleGit,
   StatusResult as StatusResult_,
+  TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { configFileNames } from '../../config/app-strings';
-import { RenovateConfig } from '../../config/types';
+import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -22,9 +24,11 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { GitNoVerifyOption, getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
-export * from './private-key';
+export { GitNoVerifyOption, setNoVerify } from './config';
+export { setPrivateKey } from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
@@ -736,9 +740,13 @@ export async function commitFiles({
         }
       }
     }
-    const commitRes = await git.commit(message, [], {
-      '--no-verify': null,
-    });
+
+    const commitOptions: Options = {};
+    if (getNoVerify().includes(GitNoVerifyOption.Commit)) {
+      commitOptions['--no-verify'] = null;
+    }
+
+    const commitRes = await git.commit(message, [], commitOptions);
     if (
       commitRes.summary &&
       commitRes.summary.changes === 0 &&
@@ -757,11 +765,20 @@ export async function commitFiles({
       );
       return null;
     }
-    const pushRes = await git.push('origin', `${branchName}:${branchName}`, {
+
+    const pushOptions: TaskOptions = {
       '--force': null,
       '-u': null,
-      '--no-verify': null,
-    });
+    };
+    if (getNoVerify().includes(GitNoVerifyOption.Push)) {
+      pushOptions['--no-verify'] = null;
+    }
+
+    const pushRes = await git.push(
+      'origin',
+      `${branchName}:${branchName}`,
+      pushOptions
+    );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     // Fetch it after create

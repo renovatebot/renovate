@@ -1,9 +1,11 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
+import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import * as git from '.';
+import { GitNoVerifyOption, setNoVerify } from '.';
 
 describe(getName(), () => {
   jest.setTimeout(15000);
@@ -76,6 +78,7 @@ describe(getName(), () => {
       gitAuthorEmail: 'Jest@example.com',
     });
     await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
     const local = Git(tmpDir.path);
@@ -85,6 +88,7 @@ describe(getName(), () => {
   afterEach(async () => {
     await tmpDir.cleanup();
     await origin.cleanup();
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -316,6 +320,95 @@ describe(getName(), () => {
         message: 'No change update',
       });
       expect(commit).toBeNull();
+    });
+
+    it('does not pass --no-verify', async () => {
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+      });
+
+      expect(commitSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+    });
+
+    it('passes --no-verify to commit', async () => {
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+      setNoVerify([GitNoVerifyOption.Commit]);
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+      });
+
+      expect(commitSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+    });
+
+    it('passes --no-verify to push', async () => {
+      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      const files = [
+        {
+          name: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+      setNoVerify([GitNoVerifyOption.Push]);
+
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Pass no-verify',
+      });
+
+      expect(commitSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.not.objectContaining({ '--no-verify': null })
+      );
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ '--no-verify': null })
+      );
     });
   });
 
