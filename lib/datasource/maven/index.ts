@@ -7,7 +7,11 @@ import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
-import type { MavenDependency } from './types';
+import type {
+  ArtifactInfoResult,
+  ArtifactsInfo,
+  MavenDependency,
+} from './types';
 import {
   downloadMavenXml,
   getDependencyInfo,
@@ -79,8 +83,6 @@ async function getVersionsFromMetadata(
   return versions;
 }
 
-type ArtifactsInfo = Record<string, boolean | null>;
-
 // istanbul ignore next
 function isValidArtifactsInfo(
   info: ArtifactsInfo | null,
@@ -91,8 +93,6 @@ function isValidArtifactsInfo(
   }
   return versions.every((v) => info[v] !== undefined);
 }
-
-type ArtifactInfoResult = [string, boolean | string | null];
 
 async function getArtifactInfo(
   version: string,
@@ -113,10 +113,8 @@ async function filterMissingArtifacts(
 ): Promise<Release[]> {
   const cacheNamespace = 'datasource-maven-metadata';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-  let artifactsInfo: ArtifactsInfo | null = await packageCache.get<ArtifactsInfo>(
-    cacheNamespace,
-    cacheKey
-  );
+  let artifactsInfo: ArtifactsInfo | null =
+    await packageCache.get<ArtifactsInfo>(cacheNamespace, cacheKey);
 
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
     const queue = versions
@@ -129,8 +127,10 @@ async function filterMissingArtifacts(
         return [version, artifactUrl];
       })
       .filter(([_, artifactUrl]) => Boolean(artifactUrl))
-      .map(([version, artifactUrl]) => (): Promise<ArtifactInfoResult> =>
-        getArtifactInfo(version, artifactUrl)
+      .map(
+        ([version, artifactUrl]) =>
+          (): Promise<ArtifactInfoResult> =>
+            getArtifactInfo(version, artifactUrl)
       );
     const results = await pAll(queue, { concurrency: 5 });
     artifactsInfo = results.reduce(

@@ -1,10 +1,5 @@
 import { hasKey } from '../../util/object';
-
-export type HelmDockerImageDependency = {
-  registry?: string;
-  repository: string;
-  tag: string;
-};
+import { HelmDockerImageDependency } from './types';
 
 const parentKeyRe = /image$/i;
 

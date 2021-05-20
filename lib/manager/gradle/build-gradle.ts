@@ -1,5 +1,5 @@
 import { regEx } from '../../util/regex';
-import { BuildDependency } from './gradle-updates-report';
+import { BuildDependency, GradleDependency, UpdateFunction } from './types';
 
 /**
  * Functions adapted/ported from https://github.com/patrikerdes/gradle-use-latest-versions-plugin
@@ -7,20 +7,6 @@ import { BuildDependency } from './gradle-updates-report';
  */
 
 let variables: Record<string, string> = {};
-
-export interface GradleDependency {
-  group: string;
-  name: string;
-  version?: string;
-}
-
-interface UpdateFunction {
-  (
-    dependency: GradleDependency,
-    buildGradleContent: string,
-    newValue: string
-  ): string;
-}
 
 const groovyQuotes = `(?:["'](?:""|'')?)`;
 const groovyVersionVariable = `(?:${groovyQuotes}\\$)?{?([^\\s"'{}$)]+)}?${groovyQuotes}?`;
@@ -222,9 +208,8 @@ export function collectVersionVariables(
     }
 
     if (!dep.currentValue) {
-      const dependencyLiteralRegex = dependencyStringLiteralExpressionFormatMatch(
-        dependency
-      );
+      const dependencyLiteralRegex =
+        dependencyStringLiteralExpressionFormatMatch(dependency);
       const currentValue = dependencyLiteralRegex.exec(buildGradleContent)?.[1];
       if (currentValue) {
         dep.currentValue = currentValue;
@@ -278,9 +263,8 @@ function updateLocalVariables(
     const match = regex.exec(buildGradleContent);
     if (match) {
       const variableDefinitionRegex = variableDefinitionFormatMatch(match[1]);
-      const variableDefinitionMatch = variableDefinitionRegex.exec(
-        buildGradleContent
-      );
+      const variableDefinitionMatch =
+        variableDefinitionRegex.exec(buildGradleContent);
       if (variableDefinitionMatch) {
         return buildGradleContent.replace(
           variableDefinitionMatch[0],

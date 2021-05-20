@@ -3,8 +3,8 @@ import { id as datasource, defaultRegistryUrls } from '../../datasource/maven';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { ManagerData, PackageVariables, VariableRegistry } from './common';
 import { parseGradle, parseProps } from './parser';
+import type { ManagerData, PackageVariables, VariableRegistry } from './types';
 import {
   getVars,
   isGradleFile,
@@ -58,11 +58,11 @@ export async function extractAllPackageFiles(
         extractedDeps.push(...deps);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
-        const { deps, urls, vars: gradleVars } = parseGradle(
-          content,
-          vars,
-          packageFile
-        );
+        const {
+          deps,
+          urls,
+          vars: gradleVars,
+        } = parseGradle(content, vars, packageFile);
         urls.forEach((url) => {
           if (!registryUrls.includes(url)) {
             registryUrls.push(url);

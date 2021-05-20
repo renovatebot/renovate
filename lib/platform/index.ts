@@ -3,7 +3,7 @@ import type { GlobalConfig } from '../config/types';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
-import { setPrivateKey } from '../util/git';
+import { setNoVerify, setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
 import { parseUrl } from '../util/url';
 import platforms from './api';
@@ -85,6 +85,7 @@ export async function initPlatform(
   config: GlobalConfig
 ): Promise<GlobalConfig> {
   setPrivateKey(config.gitPrivateKey);
+  setNoVerify(config.gitNoVerify ?? []);
   setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
@@ -115,7 +116,7 @@ export async function initPlatform(
 
   const platformRule: HostRule = {
     hostType: returnConfig.platform,
-    hostName: parseUrl(returnConfig.endpoint).hostname,
+    matchHost: parseUrl(returnConfig.endpoint).hostname,
   };
   ['token', 'username', 'password'].forEach((field) => {
     if (config[field]) {

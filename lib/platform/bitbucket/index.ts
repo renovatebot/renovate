@@ -121,7 +121,6 @@ export async function getJsonFile(
 // Initialize bitbucket by getting base branch and SHA
 export async function initRepo({
   repository,
-  localDir,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
@@ -178,7 +177,6 @@ export async function initRepo({
 
   await git.initRepo({
     ...config,
-    localDir,
     url,
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,

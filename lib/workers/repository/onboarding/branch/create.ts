@@ -41,7 +41,8 @@ export async function createOnboardingBranch(
     } ${configFile}`;
   }
 
-  const commitMessage = `${commitMessagePrefix} ${onboardingCommitMessage}`.trim();
+  const commitMessage =
+    `${commitMessagePrefix} ${onboardingCommitMessage}`.trim();
 
   // istanbul ignore if
   if (getAdminConfig().dryRun) {

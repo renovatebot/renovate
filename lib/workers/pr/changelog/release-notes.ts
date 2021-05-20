@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { linkify } from 'linkify-markdown';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
@@ -7,6 +6,7 @@ import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
+import { linkify } from '../../../util/markdown';
 import { validateUrl } from '../../../util/url';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -104,7 +104,7 @@ export async function getReleaseNotes(
   const releaseList = await getCachedReleaseList(apiBaseUrl, repository);
   logger.trace({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
-  releaseList.forEach((release) => {
+  for (const release of releaseList) {
     if (
       release.tag === version ||
       release.tag === `v${version}` ||
@@ -120,7 +120,7 @@ export async function getReleaseNotes(
       if (releaseNotes.body.length) {
         try {
           if (baseUrl !== 'https://gitlab.com/') {
-            releaseNotes.body = linkify(releaseNotes.body, {
+            releaseNotes.body = await linkify(releaseNotes.body, {
               repository: `${baseUrl}${repository}`,
             });
           }
@@ -131,7 +131,7 @@ export async function getReleaseNotes(
         releaseNotes = null;
       }
     }
-  });
+  }
   logger.trace({ releaseNotes });
   return releaseNotes;
 }
@@ -246,7 +246,7 @@ export async function getReleaseNotesMd(
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
-                  body = linkify(body, {
+                  body = await linkify(body, {
                     repository: `${baseUrl}${repository}`,
                   });
                 } catch (err) /* istanbul ignore next */ {
