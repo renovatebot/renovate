@@ -781,6 +781,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
+        localDir: '/localDir',
       });
 
       const result = await branchWorker.processBranch({
@@ -790,7 +791,6 @@ describe(getName(), () => {
           commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
-        localDir: '/localDir',
         upgrades: [
           {
             ...defaultConfig,
@@ -861,13 +861,13 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
+        localDir: '/localDir',
       });
 
       exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
 
       await branchWorker.processBranch({
         ...config,
-        localDir: '/localDir',
         upgrades: [
           {
             ...defaultConfig,
@@ -930,6 +930,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
         exposeAllEnv: true,
+        localDir: '/localDir',
       });
       const result = await branchWorker.processBranch({
         ...config,
@@ -938,7 +939,6 @@ describe(getName(), () => {
           commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
-        localDir: '/localDir',
         upgrades: [
           {
             ...defaultConfig,
@@ -1010,6 +1010,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
+        localDir: '/localDir',
       });
 
       const inconfig: BranchConfig = {
@@ -1024,7 +1025,6 @@ describe(getName(), () => {
             'modified_then_deleted_file',
           ],
         },
-        localDir: '/localDir',
         upgrades: [
           {
             ...defaultConfig,
@@ -1144,6 +1144,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
         allowPostUpgradeCommandTemplating: true,
         trustLevel: 'high',
+        localDir: '/localDir',
       });
 
       const inconfig: BranchConfig = {
@@ -1158,7 +1159,6 @@ describe(getName(), () => {
             'modified_then_deleted_file',
           ],
         },
-        localDir: '/localDir',
         upgrades: [
           {
             ...defaultConfig,

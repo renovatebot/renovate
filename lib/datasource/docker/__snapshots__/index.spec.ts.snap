@@ -419,34 +419,6 @@ Array [
 ]
 `;
 
-exports[`datasource/docker/index getRegistryRepository handles local registries 1`] = `
-Object {
-  "registry": "https://registry:5000",
-  "repository": "org/package",
-}
-`;
-
-exports[`datasource/docker/index getRegistryRepository supports http registryUrls 1`] = `
-Object {
-  "registry": "http://my.local.registry/prefix",
-  "repository": "image",
-}
-`;
-
-exports[`datasource/docker/index getRegistryRepository supports registryUrls 1`] = `
-Object {
-  "registry": "https://my.local.registry/prefix",
-  "repository": "image",
-}
-`;
-
-exports[`datasource/docker/index getRegistryRepository supports schemeless registryUrls 1`] = `
-Object {
-  "registry": "https://my.local.registry/prefix",
-  "repository": "image",
-}
-`;
-
 exports[`datasource/docker/index getReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
 Array [
   Object {
