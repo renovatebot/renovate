@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import * as memCache from '../../util/cache/memory';
 import {
   encodeCase,
@@ -37,21 +37,10 @@ describe(getName(), () => {
     const lookupName = 'github.com/go-kit/kit';
 
     it('listVersions', async () => {
-      httpMock.scope(baseUrl).get('/github.com/go-kit/kit/@v/list').reply(
-        200,
-        `
-        v0.7.0
-        v0.3.0
-        v0.8.0
-        v0.6.0
-        v0.10.0
-        v0.5.0
-        v0.9.0
-        v0.4.0
-        v0.1.0
-        v0.2.0
-        `
-      );
+      httpMock
+        .scope(baseUrl)
+        .get('/github.com/go-kit/kit/@v/list')
+        .reply(200, loadFixture('go-kit.list.txt'));
 
       const versions = await listVersions(baseUrl, lookupName);
 
