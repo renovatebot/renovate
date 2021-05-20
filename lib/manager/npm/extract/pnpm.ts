@@ -1,6 +1,4 @@
 import yaml from 'js-yaml';
-import upath from 'upath';
-import { getAdminConfig } from '../../../config/admin';
 import { logger } from '../../../logger';
 import {
   findLocalSiblingOrParent,
