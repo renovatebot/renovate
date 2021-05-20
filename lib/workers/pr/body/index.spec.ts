@@ -3,18 +3,14 @@ import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
 import { getPrBody } from '.';
 
-jest.mock('./config-description', () => ({
-  getPrConfigDescription: jest.fn(() => ''),
-}));
-jest.mock('./controls', () => ({
-  getControls: jest.fn(() => ''),
-}));
+jest.mock('./config-description');
+jest.mock('./controls');
 
 describe(getName(), () => {
   let config: RenovateConfig;
   beforeEach(() => {
     config = getConfig();
-    platform.massageMarkdown = jest.fn((input) => input);
+    platform.massageMarkdown.mockImplementation((input) => input);
   });
   it('generate the message markdown', async () => {
     const branchName = 'test/markdown';
