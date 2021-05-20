@@ -1,6 +1,5 @@
-import findUp from 'find-up';
 import * as fs from 'fs-extra';
-import { dirname, isAbsolute, join, parse } from 'upath';
+import { isAbsolute, join, parse } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 
@@ -104,27 +103,6 @@ export function localPathExists(pathName: string): Promise<boolean> {
     .stat(join(localDir, pathName))
     .then((s) => !!s)
     .catch(() => false);
-}
-
-/**
- * Tries to find one of the provided `fileNames` next to `existingFileNameWithPath`,
- * then in its parent directory, then in the grandparent directory,
- * until we reach the top-level of the `localDir` from the config.
- */
-export async function findUpInsidePath(
-  fileNames: string | string[],
-  existingFileNameWithPath: string
-): Promise<string | null> {
-  const fileFound = await findUp(fileNames, {
-    cwd: dirname(existingFileNameWithPath),
-    type: 'file',
-  });
-
-  if (!fileFound || !(await localPathExists(fileFound))) {
-    return null;
-  }
-
-  return fileFound;
 }
 
 /**
