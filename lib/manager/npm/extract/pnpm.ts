@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { logger } from '../../../logger';
 import {
@@ -19,7 +20,7 @@ export async function extractPnpmFilters(
     }) as PnpmWorkspaceFile;
     if (
       !Array.isArray(contents.packages) ||
-      !contents.packages.every((item) => typeof item === 'string')
+      !contents.packages.every((item) => is.string(item))
     ) {
       logger.debug(
         { fileName },
