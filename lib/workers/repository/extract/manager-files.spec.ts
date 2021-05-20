@@ -1,5 +1,5 @@
-import { fs, getConfig, mocked } from '../../../../test/util';
-import { RenovateConfig } from '../../../config';
+import { fs, getConfig, getName, mocked } from '../../../../test/util';
+import type { RenovateConfig } from '../../../config/types';
 import * as _html from '../../../manager/html';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';
@@ -11,7 +11,7 @@ jest.mock('../../../util/fs');
 const fileMatch = mocked(_fileMatch);
 const html = mocked(_html);
 
-describe('workers/repository/extract/manager-files', () => {
+describe(getName(), () => {
   describe('getManagerPackageFiles()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

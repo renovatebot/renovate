@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/cloudbuild/extract extractPackageFile() extracts multiple image lines 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "19.03.8",
+    "datasource": "docker",
+    "depName": "gcr.io/cloud-builders/docker",
+    "replaceString": "gcr.io/cloud-builders/docker:19.03.8",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "12",
+    "datasource": "docker",
+    "depName": "node",
+    "replaceString": "node:12",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "gcr.io/cloud-builders/kubectl",
+    "replaceString": "gcr.io/cloud-builders/kubectl",
+  },
+]
+`;

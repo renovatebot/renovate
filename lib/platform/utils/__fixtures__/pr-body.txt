@@ -82,7 +82,7 @@ This PR contains the following updates:
 
 ---
 
-### Renovate configuration
+### Configuration
 
 :date: **Schedule**: At any time (no schedule defined).
 

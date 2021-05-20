@@ -3,7 +3,7 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _fs from '../../../util/fs/proxies';
-import { PostUpdateConfig } from '../../common';
+import type { PostUpdateConfig } from '../../types';
 import * as _pnpmHelper from './pnpm';
 
 jest.mock('child_process');
@@ -24,7 +24,6 @@ describe('generateLockFile', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {
-    config.dockerMapDotfiles = true;
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);

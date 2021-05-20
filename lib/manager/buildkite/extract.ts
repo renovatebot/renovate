@@ -2,7 +2,7 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isVersion } from '../../versioning/semver';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -21,9 +21,8 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else if (isPluginsSection) {
         logger.debug(`serviceImageLine: "${line}"`);
         const { currentIndent } = /^(?<currentIndent>\s*)/.exec(line).groups;
-        const depLineMatch = /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/.exec(
-          line
-        );
+        const depLineMatch =
+          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/.exec(line);
         if (currentIndent.length <= pluginsIndent.length) {
           isPluginsSection = false;
           pluginsIndent = '';
@@ -35,13 +34,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           if (depName.startsWith('https://') || depName.startsWith('git@')) {
             logger.debug({ dependency: depName }, 'Skipping git plugin');
             skipReason = SkipReason.GitPlugin;
-          } else if (!isVersion(currentValue)) {
-            logger.debug(
-              { currentValue },
-              'Skipping non-pinned current version'
-            );
-            skipReason = SkipReason.InvalidVersion;
-          } else {
+          } else if (isVersion(currentValue)) {
             const splitName = depName.split('/');
             if (splitName.length === 1) {
               repo = `buildkite-plugins/${depName}-buildkite-plugin`;
@@ -52,8 +45,14 @@ export function extractPackageFile(content: string): PackageFile | null {
                 { dependency: depName },
                 'Something is wrong with buildkite plugin name'
               );
-              skipReason = SkipReason.Unknown;
+              skipReason = SkipReason.InvalidDependencySpecification;
             }
+          } else {
+            logger.debug(
+              { currentValue },
+              'Skipping non-pinned current version'
+            );
+            skipReason = SkipReason.InvalidVersion;
           }
           const dep: PackageDependency = {
             depName,

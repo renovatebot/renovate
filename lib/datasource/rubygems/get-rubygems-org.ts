@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getElapsedMinutes } from '../../util/date';
 import { Http } from '../../util/http';
-import { ReleaseResult } from '../common';
+import type { ReleaseResult } from '../types';
 import { id } from './common';
 
 const http = new Http(id);
@@ -88,10 +89,7 @@ async function updateRubyGemsVersions(): Promise<void> {
 }
 
 function isDataStale(): boolean {
-  const minutesElapsed = Math.floor(
-    (new Date().getTime() - lastSync.getTime()) / (60 * 1000)
-  );
-  return minutesElapsed >= 5;
+  return getElapsedMinutes(lastSync) >= 5;
 }
 
 let updateRubyGemsVersionsPromise: Promise<void> | undefined;
@@ -115,7 +113,6 @@ export async function getRubygemsOrgDependency(
     return null;
   }
   const dep: ReleaseResult = {
-    name: lookupName,
     releases: packageReleases[lookupName].map((version) => ({ version })),
   };
   return dep;

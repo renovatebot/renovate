@@ -1,26 +1,22 @@
 import URL from 'url';
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GitlabTag } from './types';
 
 const gitlabApi = new GitlabHttp();
 
 export const id = 'gitlab-tags';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://gitlab.com'];
 export const registryStrategy = 'first';
 
 const cacheNamespace = 'datasource-gitlab';
+
 function getCacheKey(depHost: string, repo: string): string {
   const type = 'tags';
   return `${depHost}:${repo}:${type}`;
 }
-
-type GitlabTag = {
-  name: string;
-  commit?: {
-    created_at?: string;
-  };
-};
 
 export async function getReleases({
   registryUrl: depHost,

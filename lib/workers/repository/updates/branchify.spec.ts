@@ -1,4 +1,4 @@
-import { RenovateConfig, mocked } from '../../../../test/util';
+import { RenovateConfig, getName, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _changelog from '../changelog';
 import { branchifyUpgrades } from './branchify';
@@ -18,7 +18,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe('workers/repository/updates/branchify', () => {
+describe(getName(), () => {
   describe('branchifyUpgrades()', () => {
     it('returns empty', async () => {
       flattenUpdates.mockResolvedValueOnce([]);

@@ -10,7 +10,6 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "resolveJsonModule": false,
-    "isolatedModules": true,
     "noUnusedLocals": true,
     "lib": ["es2018"],
     "types": ["node", "jest"],

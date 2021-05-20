@@ -4,7 +4,7 @@ import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { add } from '../util/sanitize';
 import { getAdminConfig } from './admin';
-import { RenovateConfig } from './common';
+import type { RenovateConfig } from './types';
 
 export function decryptConfig(config: RenovateConfig): RenovateConfig {
   logger.trace({ config }, 'decryptConfig()');
@@ -48,7 +48,7 @@ export function decryptConfig(config: RenovateConfig): RenovateConfig {
                 { decryptedToken: maskToken(token) },
                 'Migrating npmToken to npmrc'
               );
-              if (decryptedConfig.npmrc) {
+              if (is.string(decryptedConfig.npmrc)) {
                 /* eslint-disable no-template-curly-in-string */
                 if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
                   logger.debug('Replacing ${NPM_TOKEN} with decrypted token');

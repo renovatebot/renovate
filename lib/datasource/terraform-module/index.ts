@@ -3,19 +3,20 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  RegistryRepository,
+  ServiceDiscoveryResult,
+  TerraformRelease,
+} from './types';
 
 export const id = 'terraform-module';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://registry.terraform.io'];
 export const defaultVersioning = hashicorpVersioning.id;
 export const registryStrategy = 'first';
 
 const http = new Http(id);
-
-interface RegistryRepository {
-  registry: string;
-  repository: string;
-}
 
 function getRegistryRepository(
   lookupName: string,
@@ -37,21 +38,6 @@ function getRegistryRepository(
     registry,
     repository,
   };
-}
-
-interface TerraformRelease {
-  namespace: string;
-  name: string;
-  provider: string;
-  source?: string;
-  versions: string[];
-  version: string;
-  published_at: string;
-}
-
-export interface ServiceDiscoveryResult {
-  'modules.v1'?: string;
-  'providers.v1'?: string;
 }
 
 export async function getTerraformServiceDiscoveryResult(
@@ -123,8 +109,6 @@ export async function getReleases({
     }
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
-      name: repository,
-      versions: {},
       releases: null,
     };
     if (res.source) {
@@ -137,11 +121,11 @@ export async function getReleases({
       dep.homepage = `https://registry.terraform.io/modules/${repository}`;
     }
     // set published date for latest release
-    const currentVersion = dep.releases.find(
+    const latestVersion = dep.releases.find(
       (release) => res.version === release.version
     );
-    if (currentVersion) {
-      currentVersion.releaseTimestamp = res.published_at;
+    if (latestVersion) {
+      latestVersion.releaseTimestamp = res.published_at;
     }
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 30;

@@ -3,7 +3,7 @@ import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isVersion } from '../../versioning/semver';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 function getDep(
   lineNumber: number,
@@ -18,22 +18,13 @@ function getDep(
       lineNumber,
     },
     depName,
-    lookupName: depName,
     depType: type,
     currentValue,
   };
-  if (!isVersion(currentValue)) {
-    dep.skipReason = SkipReason.UnsupportedVersion;
-  } else {
-    if (depName.startsWith('gopkg.in/')) {
-      const [pkg] = depName.replace('gopkg.in/', '').split('.');
-      dep.depName = pkg;
-    } else if (depName.startsWith('github.com/')) {
-      dep.depName = depName.replace('github.com/', '');
-    } else {
-      dep.depName = depName;
-    }
+  if (isVersion(currentValue)) {
     dep.datasource = datasourceGo.id;
+  } else {
+    dep.skipReason = SkipReason.UnsupportedVersion;
   }
   const digestMatch = /v0\.0.0-\d{14}-([a-f0-9]{12})/.exec(currentValue);
   if (digestMatch) {
@@ -52,11 +43,10 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
       if (line.startsWith('go ') && validRange(line.replace('go ', ''))) {
-        constraints.go = line.replace('go ', '');
+        constraints.go = line.replace('go ', '^');
       }
-      const replaceMatch = /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/.exec(
-        line
-      );
+      const replaceMatch =
+        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/.exec(line);
       if (replaceMatch) {
         const dep = getDep(lineNumber, replaceMatch, 'replace');
         deps.push(dep);

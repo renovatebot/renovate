@@ -1,6 +1,6 @@
-import { RenovateConfig } from '../../../../config';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { clone } from '../../../../util/clone';
 

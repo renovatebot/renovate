@@ -1,18 +1,18 @@
 import { safeLoad } from 'js-yaml';
 import * as upath from 'upath';
-
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
-import {
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
   BatectConfig,
   BatectFileInclude,
   BatectGitInclude,
   BatectInclude,
+  ExtractionResult,
 } from './types';
 
 function loadConfig(content: string): BatectConfig {
@@ -114,11 +114,6 @@ function extractReferencedConfigFiles(
   ].filter((p) => p !== undefined && p !== null);
 
   return paths.map((p) => upath.join(dirName, p));
-}
-
-interface ExtractionResult {
-  deps: PackageDependency[];
-  referencedConfigFiles: string[];
 }
 
 export function extractPackageFile(

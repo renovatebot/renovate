@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import * as datasourceHelm from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(
   content: string,
@@ -44,9 +44,11 @@ export function extractPackageFile(
     }
 
     res.registryUrls = [dep.repository];
-    if (dep.repository.startsWith('@')) {
-      const repoWithAtRemoved = dep.repository.slice(1);
-      const alias = config.aliases[repoWithAtRemoved];
+    if (dep.repository.startsWith('@') || dep.repository.startsWith('alias:')) {
+      const repoWithPrefixRemoved = dep.repository.slice(
+        dep.repository[0] === '@' ? 1 : 6
+      );
+      const alias = config.aliases[repoWithPrefixRemoved];
       if (alias) {
         res.registryUrls = [alias];
         return res;

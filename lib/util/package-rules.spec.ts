@@ -1,4 +1,4 @@
-import { UpdateType } from '../config';
+import type { PackageRuleInputConfig, UpdateType } from '../config/types';
 import {
   LANGUAGE_DOCKER,
   LANGUAGE_JAVASCRIPT,
@@ -8,9 +8,13 @@ import {
 
 import * as datasourceDocker from '../datasource/docker';
 import * as datasourceOrb from '../datasource/orb';
-import { Config, applyPackageRules } from './package-rules';
+import { applyPackageRules } from './package-rules';
 
-type TestConfig = Config & { x?: number; y?: number };
+type TestConfig = PackageRuleInputConfig & {
+  x?: number;
+  y?: number;
+  groupName?: string;
+};
 
 describe('applyPackageRules()', () => {
   const config1: TestConfig = {
@@ -19,6 +23,8 @@ describe('applyPackageRules()', () => {
     packageRules: [
       {
         matchPackageNames: ['a', 'b'],
+        matchPackagePrefixes: ['xyz/'],
+        excludePackagePrefixes: ['xyz/foo'],
         x: 2,
       },
       {
@@ -27,10 +33,15 @@ describe('applyPackageRules()', () => {
         excludePackagePatterns: ['d'],
         y: 2,
       },
+      {
+        matchPackagePrefixes: ['xyz/'],
+        excludePackageNames: ['xyz/foo'],
+        groupName: 'xyz',
+      },
     ],
   };
   it('applies', () => {
-    const config: Config = {
+    const config: PackageRuleInputConfig = {
       depName: 'a',
       isBump: true,
       currentValue: '1.0.0',
@@ -68,6 +79,7 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
     expect(res.y).toBe(2);
+    expect(res.groupName).toBeUndefined();
   });
   it('applies both rules for b', () => {
     const dep = {
@@ -76,6 +88,7 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
     expect(res.y).toBe(2);
+    expect(res.groupName).toBeUndefined();
   });
   it('applies the second rule', () => {
     const dep = {
@@ -84,6 +97,33 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
     expect(res.y).toBe(2);
+    expect(res.groupName).toBeUndefined();
+  });
+  it('applies matchPackagePrefixes', () => {
+    const dep = {
+      depName: 'xyz/abc',
+    };
+    const res = applyPackageRules({ ...config1, ...dep });
+    expect(res.x).toBe(2);
+    expect(res.y).toBe(2);
+    expect(res.groupName).toBe('xyz');
+  });
+
+  it('applies excludePackageNames', () => {
+    const dep = {
+      depName: 'xyz/foo',
+    };
+    const res = applyPackageRules({ ...config1, ...dep });
+    expect(res.groupName).toBeUndefined();
+  });
+
+  it('applies excludePackagePrefixes', () => {
+    const dep = {
+      depName: 'xyz/foo-a',
+    };
+    const res = applyPackageRules({ ...config1, ...dep });
+    expect(res.x).toBeUndefined();
+    expect(res.groupName).toBe('xyz');
   });
   it('applies the second second rule', () => {
     const dep = {
@@ -467,7 +507,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '^1.0.0',
-        fromVersion: '1.0.3',
+        currentVersion: '1.0.3',
       },
     });
     expect(res1.x).toBeDefined();
@@ -495,7 +535,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '2.4.6',
-        fromVersion: '2.4.6',
+        currentVersion: '2.4.6',
       },
     });
     expect(res1.x).toBeDefined();
@@ -542,7 +582,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     expect(res1.x).toBeDefined();
@@ -562,7 +602,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     const res2 = applyPackageRules({
@@ -570,7 +610,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '5.6.0',
-        fromVersion: '5.6.0',
+        currentVersion: '5.6.0',
       },
     });
     expect(res1.x).toBeDefined();
@@ -591,7 +631,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '4.6.0',
-        fromVersion: '4.6.0',
+        currentVersion: '4.6.0',
       },
     });
     const res2 = applyPackageRules({
@@ -599,11 +639,47 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentValue: '5.6.0',
-        fromVersion: '5.6.0',
+        currentVersion: '5.6.0',
       },
     });
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBeDefined();
+  });
+  it('matches packageFiles', () => {
+    const config: TestConfig = {
+      packageFile: 'examples/foo/package.json',
+      packageRules: [
+        {
+          matchFiles: ['package.json'],
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    expect(res1.x).toBeUndefined();
+    config.packageFile = 'package.json';
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    expect(res2.x).toBeDefined();
+  });
+  it('matches lock files', () => {
+    const config: TestConfig = {
+      packageFile: 'examples/foo/package.json',
+      lockFiles: ['yarn.lock'],
+      packageRules: [
+        {
+          matchFiles: ['yarn.lock'],
+          x: 1,
+        },
+      ],
+    };
+    const res = applyPackageRules(config);
+    expect(res.x).toBeDefined();
   });
   it('matches paths', () => {
     const config: TestConfig = {

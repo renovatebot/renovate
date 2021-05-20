@@ -1,5 +1,5 @@
 import { BranchStatusConfig, Platform, RepoParams, RepoResult } from '..';
-import { partial } from '../../../test/util';
+import { getName, partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -12,9 +12,15 @@ import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/gitea';
+import { PlatformResult } from '../types';
 import * as ght from './gitea-helper';
 
-describe('platform/gitea', () => {
+/**
+ * latest tested gitea version.
+ */
+const GITEA_VERSION = '1.14.0+dev-754-g5d2b7ba63';
+
+describe(getName(), () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
@@ -164,6 +170,12 @@ describe('platform/gitea', () => {
     setBaseUrl('https://gitea.renovatebot.com/api/v1');
   });
 
+  function initFakePlatform(version = GITEA_VERSION): Promise<PlatformResult> {
+    helper.getCurrentUser.mockResolvedValueOnce(mockUser);
+    helper.getVersion.mockResolvedValueOnce(version);
+    return gitea.initPlatform({ token: 'abc' });
+  }
+
   function initFakeRepo(
     repo?: Partial<ght.Repo>,
     config?: Partial<RepoParams>
@@ -172,7 +184,6 @@ describe('platform/gitea', () => {
 
     return gitea.initRepo({
       repository: mockRepo.full_name,
-      localDir: '',
       ...config,
     });
   }
@@ -239,7 +250,6 @@ describe('platform/gitea', () => {
   describe('initRepo', () => {
     const initRepoCfg: RepoParams = {
       repository: mockRepo.full_name,
-      localDir: '',
     };
 
     it('should propagate API errors', async () => {
@@ -1295,29 +1305,43 @@ describe('platform/gitea', () => {
 
   describe('addReviewers', () => {
     it('should assign reviewers', async () => {
-      expect.assertions(2);
+      expect.assertions(3);
+      await initFakePlatform();
       const mockPR = mockPRs[0];
       await expect(
         gitea.addReviewers(mockPR.number, ['me', 'you'])
       ).resolves.not.toThrow();
 
       expect(helper.requestPrReviewers).toHaveBeenCalledTimes(1);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+    it('should should do nothing if version to old', async () => {
+      expect.assertions(3);
+      const mockPR = mockPRs[0];
+      await expect(
+        gitea.addReviewers(mockPR.number, ['me', 'you'])
+      ).resolves.not.toThrow();
+
+      expect(helper.requestPrReviewers).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
     });
     it('catches errors', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
       const mockPR = mockPRs[0];
+      await initFakePlatform();
       helper.requestPrReviewers.mockRejectedValueOnce(null);
       await expect(
         gitea.addReviewers(mockPR.number, ['me', 'you'])
       ).resolves.not.toThrow();
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 
-  describe('getPrBody', () => {
+  describe('massageMarkdown', () => {
     it('should truncate body to 1000000 characters', () => {
       const excessiveBody = '*'.repeat(1000001);
 
-      expect(gitea.getPrBody(excessiveBody)).toHaveLength(1000000);
+      expect(gitea.massageMarkdown(excessiveBody)).toHaveLength(1000000);
     });
   });
 
@@ -1337,11 +1361,17 @@ describe('platform/gitea', () => {
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
-    it('returns null on errors', async () => {
-      helper.getRepoContents.mockRejectedValueOnce('some error');
+    it('throws on malformed JSON', async () => {
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: '!@#',
+      } as never);
       await initFakeRepo({ full_name: 'some/repo' });
-      const res = await gitea.getJsonFile('file.json');
-      expect(res).toBeNull();
+      await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
+    });
+    it('throws on errors', async () => {
+      helper.getRepoContents.mockRejectedValueOnce(new Error('some error'));
+      await initFakeRepo({ full_name: 'some/repo' });
+      await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
   });
 });

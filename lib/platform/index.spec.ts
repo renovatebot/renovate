@@ -1,20 +1,20 @@
+import { getName } from '../../test/util';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../constants/platforms';
 import { loadModules } from '../util/modules';
-
+import type { Platform } from './types';
 import * as platform from '.';
-import { Platform } from '.';
 
 jest.unmock('.');
 
-describe('platform', () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetModules();
   });
 
   it('validates', () => {
     function validate(module: Platform, name: string): boolean {
-      // TODO: test required api
+      // TODO: test required api (#9650)
       if (!module.initPlatform) {
         throw Error(`Missing api on ${name}`);
       }

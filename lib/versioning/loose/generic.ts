@@ -1,4 +1,4 @@
-import { NewValueConfig, VersioningApi } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export interface GenericVersion {
   release: number[];
@@ -84,8 +84,8 @@ export const comparer = (
     return versions.find((v) => equals(v, range)) || null;
   }
   function getNewValue(newValueConfig: NewValueConfig): string {
-    const { toVersion } = newValueConfig || {};
-    return toVersion;
+    const { newVersion } = newValueConfig || {};
+    return newVersion;
   }
   function sortVersions(version: string, other: string): number {
     return compare(version, other);
@@ -124,7 +124,8 @@ export const create = ({
 
 export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion
-> implements VersioningApi {
+> implements VersioningApi
+{
   private _getSection(version: string, index: number): number {
     const parsed = this._parse(version);
     return parsed && parsed.release.length > index
@@ -191,8 +192,8 @@ export abstract class GenericVersioningApi<
 
   // eslint-disable-next-line class-methods-use-this
   getNewValue(newValueConfig: NewValueConfig): string {
-    const { toVersion } = newValueConfig || {};
-    return toVersion;
+    const { newVersion } = newValueConfig || {};
+    return newVersion;
   }
 
   sortVersions(version: string, other: string): number {

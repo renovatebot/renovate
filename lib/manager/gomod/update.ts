@@ -1,5 +1,13 @@
 import { logger } from '../../logger';
-import { UpdateDependencyConfig } from '../common';
+import type { UpdateDependencyConfig } from '../types';
+
+function getDepNameWithNoVersion(depName: string): string {
+  let depNameNoVersion = depName.split('/').slice(0, 3).join('/');
+  if (depNameNoVersion.startsWith('gopkg.in')) {
+    depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
+  }
+  return depNameNoVersion;
+}
 
 export function updateDependency({
   fileContent,
@@ -8,10 +16,7 @@ export function updateDependency({
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depName, depType } = upgrade;
-    let depNameNoVersion = depName.split('/').slice(0, 3).join('/');
-    if (depNameNoVersion.startsWith('gopkg.in')) {
-      depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
-    }
+    const depNameNoVersion = getDepNameWithNoVersion(depName);
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
@@ -74,14 +79,9 @@ export function updateDependency({
         upgrade.newMajor > 1 &&
         !newLine.includes(`/v${upgrade.newMajor}`)
       ) {
-        // If package has no version, pin to latest one.
-        newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
-        if (/^v(0|1)\./.test(upgrade.currentValue)) {
-          // Add version
-          newLine = newLine.replace(
-            updateLineExp,
-            `$1/v${upgrade.newMajor}$2$3`
-          );
+        if (depName === depNameNoVersion) {
+          // If package currently has no version, pin to latest one.
+          newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
         } else {
           // Replace version
           const [oldV] = upgrade.currentValue.split('.');

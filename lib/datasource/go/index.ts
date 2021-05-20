@@ -1,22 +1,21 @@
 import URL from 'url';
+import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
+import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
+import { trimTrailingSlash } from '../../util/url';
 import * as bitbucket from '../bitbucket-tags';
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type { DataSource } from './types';
 
 export const id = 'go';
+export const customRegistrySupport = false;
 
 const http = new Http(id);
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
-
-interface DataSource {
-  datasource: string;
-  registryUrl?: string;
-  lookupName: string;
-}
 
 async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (goModule.startsWith('gopkg.in/')) {
@@ -75,6 +74,27 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
         lookupName: gitlabRes[2].replace(/\/$/, ''),
       };
     }
+
+    const opts = hostRules.find({
+      hostType: PLATFORM_TYPE_GITLAB,
+      url: goSourceUrl,
+    });
+    if (opts.token) {
+      // get server base url from import url
+      const parsedUrl = URL.parse(goSourceUrl);
+
+      // split the go module from the URL: host/go/module -> go/module
+      const split = goModule.split('/');
+      const lookupName = split[1] + '/' + split[2];
+
+      const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+
+      return {
+        datasource: gitlab.id,
+        registryUrl,
+        lookupName,
+      };
+    }
   } else {
     // GitHub Enterprise only returns a go-import meta
     const importMatch = regEx(
@@ -92,8 +112,11 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       const parsedUrl = URL.parse(goImportURL);
 
       // split the go module from the URL: host/go/module -> go/module
-      const split = goModule.split('/');
-      const lookupName = split[1] + '/' + split[2];
+      const lookupName = trimTrailingSlash(parsedUrl.pathname)
+        .replace(/\.git$/, '')
+        .split('/')
+        .slice(-2)
+        .join('/');
 
       return {
         datasource: github.id,
@@ -123,7 +146,16 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
-  let res = null;
+
+  if (!source) {
+    logger.info(
+      { lookupName },
+      'Unsupported go host - cannot look up versions'
+    );
+    return null;
+  }
+
+  let res: ReleaseResult;
 
   switch (source.datasource) {
     case github.id: {
@@ -146,18 +178,24 @@ export async function getReleases({
 
   // istanbul ignore if
   if (!res) {
-    return res;
+    return null;
   }
+
   /**
    * github.com/org/mod/submodule should be tagged as submodule/va.b.c
    * and that tag should be used instead of just va.b.c, although for compatibility
    * the old behaviour stays the same.
    */
-  const nameParts = lookupName.split('/');
+  const nameParts = lookupName.replace(/\/v\d+$/, '').split('/');
   logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
+
+  // If it has more than 3 parts it's a submodule
   if (nameParts.length > 3) {
     const prefix = nameParts.slice(3, nameParts.length).join('/');
     logger.trace(`go.getReleases.prefix:${prefix}`);
+
+    // Filter the releases so that we only get the ones that are for this submodule
+    // Also trim the submodule prefix from the version number
     const submodReleases = res.releases
       .filter((release) => release.version?.startsWith(prefix))
       .map((release) => {
@@ -166,18 +204,19 @@ export async function getReleases({
         return r2;
       });
     logger.trace({ submodReleases }, 'go.getReleases');
-    if (submodReleases.length > 0) {
-      return {
-        sourceUrl: res.sourceUrl,
-        releases: submodReleases,
-      };
-    }
+
+    return {
+      sourceUrl: res.sourceUrl,
+      releases: submodReleases,
+    };
   }
-  if (res?.releases) {
+
+  if (res.releases) {
     res.releases = res.releases.filter((release) =>
       release.version?.startsWith('v')
     );
   }
+
   return res;
 }
 

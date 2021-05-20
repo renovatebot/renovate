@@ -1,27 +1,9 @@
 import { safeLoad } from 'js-yaml';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
-
-interface Container {
-  image: string;
-}
-
-interface Repository {
-  type: 'git' | 'github' | 'bitbucket';
-  name: string;
-  ref: string;
-}
-
-interface Resources {
-  repositories: Repository[];
-  containers: Container[];
-}
-
-interface AzurePipelines {
-  resources: Resources;
-}
+import type { PackageDependency, PackageFile } from '../types';
+import type { AzurePipelines, Container, Repository } from './types';
 
 export function extractRepository(
   repository: Repository

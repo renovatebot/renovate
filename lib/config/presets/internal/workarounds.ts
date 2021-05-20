@@ -1,4 +1,4 @@
-import { Preset } from '../common';
+import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   all: {
@@ -15,7 +15,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchDatasources: ['maven', 'sbt-package'],
-        matchPackagePatterns: ['^commons-'],
+        matchPackagePrefixes: ['commons-'],
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
       },
     ],
@@ -37,7 +37,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchManagers: ['sbt'],
-        matchPackagePatterns: ['^org\\.http4s:'],
+        matchPackagePrefixes: ['org.http4s:'],
         allowedVersions: `!/^1\\.0-\\d+-[a-fA-F0-9]{7}$/`,
       },
     ],

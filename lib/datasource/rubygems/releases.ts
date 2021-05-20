@@ -1,4 +1,4 @@
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { getDependency } from './get';
 import { getRubygemsOrgDependency } from './get-rubygems-org';
 

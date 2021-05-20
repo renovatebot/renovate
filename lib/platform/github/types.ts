@@ -1,4 +1,4 @@
-import { Pr } from '../common';
+import { Pr } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
@@ -69,11 +69,11 @@ export interface LocalRepoConfig {
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
-  localDir: string;
   isGhe: boolean;
   renovateUsername: string;
   productLinks: any;
   ignorePrAuthor: boolean;
+  branchPrs: Pr[];
 }
 
 export type BranchProtection = any;

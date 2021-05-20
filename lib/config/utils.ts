@@ -1,7 +1,7 @@
 import { logger } from '../logger';
 import { clone } from '../util/clone';
-import { RenovateConfig } from './common';
 import * as definitions from './definitions';
+import type { RenovateConfig } from './types';
 
 export function mergeChildConfig<T, TChild>(
   parent: T,
@@ -22,10 +22,10 @@ export function mergeChildConfig<T, TChild>(
     ) {
       logger.trace(`mergeable option: ${option.name}`);
       if (option.name === 'constraints') {
-        config[option.name] = Object.assign(
-          parentConfig[option.name],
-          childConfig[option.name]
-        );
+        config[option.name] = {
+          ...parentConfig[option.name],
+          ...childConfig[option.name],
+        };
       } else if (option.type === 'array') {
         config[option.name] = (parentConfig[option.name] as unknown[]).concat(
           config[option.name]
@@ -42,5 +42,5 @@ export function mergeChildConfig<T, TChild>(
       );
     }
   }
-  return Object.assign(config, config.force);
+  return { ...config, ...config.force };
 }

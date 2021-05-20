@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 
 export function sortBranches(branches: Partial<BranchConfig>[]): void {
   // Sort branches
@@ -13,7 +13,7 @@ export function sortBranches(branches: Partial<BranchConfig>[]): void {
   ];
   logger.trace({ branches }, 'branches');
   branches.sort((a, b) => {
-    if (a.vulnerabilityAlert && !b.vulnerabilityAlert) {
+    if (a.isVulnerabilityAlert && !b.isVulnerabilityAlert) {
       return -1;
     }
     if (a.prPriority !== b.prPriority) {

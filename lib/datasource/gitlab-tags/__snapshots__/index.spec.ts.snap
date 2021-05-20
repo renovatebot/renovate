@@ -1,11 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/gitlab-tags getReleases returns tags from custom registry 1`] = `
+exports[`datasource/gitlab-tags/index getReleases returns tags from custom registry 1`] = `
 Object {
+  "registryUrl": "https://gitlab.company.com/api/v4/",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": "2020-03-04T12:01:37.000-06:00",
+      "releaseTimestamp": "2020-03-04T18:01:37.000Z",
       "version": "v1.0.0",
     },
     Object {
@@ -21,12 +22,12 @@ Object {
 }
 `;
 
-exports[`datasource/gitlab-tags getReleases returns tags from custom registry 2`] = `
+exports[`datasource/gitlab-tags/index getReleases returns tags from custom registry 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitlab.company.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -36,8 +37,9 @@ Array [
 ]
 `;
 
-exports[`datasource/gitlab-tags getReleases returns tags with default registry 1`] = `
+exports[`datasource/gitlab-tags/index getReleases returns tags with default registry 1`] = `
 Object {
+  "registryUrl": "https://gitlab.com",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
@@ -52,12 +54,12 @@ Object {
 }
 `;
 
-exports[`datasource/gitlab-tags getReleases returns tags with default registry 2`] = `
+exports[`datasource/gitlab-tags/index getReleases returns tags with default registry 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

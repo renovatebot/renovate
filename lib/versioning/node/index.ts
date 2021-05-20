@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { NewValueConfig, VersioningApi } from '../common';
 import npm, { isValid, isVersion } from '../npm';
+import type { NewValueConfig, VersioningApi } from '../types';
 import { nodeSchedule } from './schedule';
 
 export const id = 'node';
@@ -11,14 +11,14 @@ export const supportsRanges = false;
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string {
   const res = npm.getNewValue({
     currentValue,
     rangeStrategy,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
   });
   if (isVersion(res)) {
     // normalize out any 'v' prefix
@@ -34,7 +34,7 @@ export function isStable(version: string): boolean {
     const major = npm.getMajor(version);
     const schedule = nodeSchedule[`v${major}`];
     if (schedule?.lts) {
-      // TODO: use the exact release that started LTS
+      // TODO: use the exact release that started LTS (#9716)
       return DateTime.local() > DateTime.fromISO(schedule.lts);
     }
   }

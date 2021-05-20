@@ -43,7 +43,7 @@ By default, `renovate` will maintain separate branches for each dependency.
 So if 20 dependencies need updating, there will be at least 20 branches/PRs.
 Although this may seem undesirable, it's even less desirable if all 20 were in the same Pull Request and it's very difficult to work out which upgrade caused the test failure.
 
-However, you can override the default branch and PR name templates to get a single branch for all dependencies.
+However, you can override the default templates for branch name to get a single branch for all dependencies.
 The `groupName` configuration option can be used at a repository level (e.g. give it the value `All`) and then all dependency updates will be in the same branch/PR.
 
 ## Separate Minor and Major PRs
@@ -66,7 +66,7 @@ Branches have names like `renovate/webpack-1.x` instead of `renovate/webpack-1.2
 We do this because:
 
 - Branches often receive updates (e.g. new patches) before they're merged
-- Naming the branch like `1.x` means its name still names sense if a `1.2.1` release happens
+- Naming the branch like `1.x` means its name still makes sense if a `1.2.1` release happens
 
 Note: You can configure the branch names by using the string template `branchName` and/or its sub-templates `branchPrefix` and `branchTopic`.
 
@@ -80,7 +80,7 @@ This allows users to close unwelcome upgrade PRs and not worry about them being 
 With the default behavior of one branch per dependency, it's often the case that a PR gets merge conflicts after an adjacent dependency update is merged.
 Although platforms often have a web interface for simple merge conflicts, this is still annoying to resolve manually.
 
-`renovate` will rebase any unmergeable branches and add the latest necessary commit on top of the most recent `master` commit.
+`renovate` will rebase any unmergeable branches and add the latest necessary commit on top of the most recent `main` commit.
 
 Note: `renovate` will only do this if the original branch hasn't been modified by anyone else.
 
@@ -90,7 +90,7 @@ String templates (e.g. commit or PR name) are not configurable via CLI options, 
 If you must configure via CLI, use an environment variable instead. e.g.
 
 ```sh
-$ RENOVATE_BRANCH_NAME=foo renovate
+RENOVATE_BRANCH_NAME=foo renovate
 ```
 
 Alternatively, consider using a Configuration File.

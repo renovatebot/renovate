@@ -1,18 +1,15 @@
-import upath from 'upath';
-import { getConfig } from '../../../config/defaults';
+import { getName } from '../../../../test/util';
 import { detectMonorepos } from './monorepo';
 
-// TODO: fix types
-const defaultConfig = getConfig();
-defaultConfig.localDir = upath.resolve('lib/manager/npm/__fixtures__');
-
-describe('manager/npm/extract', () => {
+describe(getName(), () => {
   describe('.extractPackageFile()', () => {
     it('uses lerna package settings', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          lernaDir: '.',
+          managerData: {
+            lernaJsonFile: 'lerna.json',
+          },
           lernaPackages: ['packages/*'],
           packages: ['packages/*'],
           deps: [
@@ -49,16 +46,76 @@ describe('manager/npm/extract', () => {
           packageFile: 'packages/b/package.json',
           packageJsonName: '@org/b',
         },
-      ];
-      await detectMonorepos(defaultConfig, packageFiles);
+      ] as any;
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].lernaDir).toEqual('.');
+      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
+      expect(
+        packageFiles.some((packageFile) =>
+          packageFile.deps?.some((dep) => dep.skipReason)
+        )
+      ).toBe(true);
+    });
+    it('updates internal packages', async () => {
+      const packageFiles = [
+        {
+          packageFile: 'package.json',
+          managerData: {
+            lernaJsonFile: 'lerna.json',
+          },
+          lernaPackages: ['packages/*'],
+          packages: ['packages/*'],
+          deps: [
+            {
+              depName: '@org/a',
+            },
+            {
+              depName: '@org/b',
+            },
+            {
+              depName: '@org/c',
+            },
+            {
+              depName: 'foo',
+            },
+          ],
+        },
+        {
+          packageFile: 'packages/a/package.json',
+          packageJsonName: '@org/a',
+          deps: [
+            {
+              depName: '@org/b',
+            },
+            {
+              depName: '@org/c',
+            },
+            {
+              depName: 'bar',
+            },
+          ],
+        },
+        {
+          packageFile: 'packages/b/package.json',
+          packageJsonName: '@org/b',
+        },
+      ] as any;
+      await detectMonorepos(packageFiles, true);
+      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
+      expect(
+        packageFiles.some((packageFile) =>
+          packageFile.deps?.some((dep) => dep.skipReason)
+        )
+      ).toBe(false);
     });
     it('uses yarn workspaces package settings with lerna', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          lernaDir: '.',
+          managerData: {
+            lernaJsonFile: 'lerna.json',
+          },
           lernaPackages: ['oldpackages/*'],
           lernaClient: 'yarn',
           yarnWorkspacesPackages: ['packages/*'],
@@ -72,9 +129,9 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      await detectMonorepos(defaultConfig, packageFiles);
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].lernaDir).toEqual('.');
+      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
     });
     it('uses yarn workspaces package settings without lerna', async () => {
       const packageFiles = [
@@ -92,7 +149,7 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      await detectMonorepos(defaultConfig, packageFiles);
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
     });
   });

@@ -1,13 +1,9 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
-const input = readFileSync(
-  resolve(__dirname, `./__fixtures__/sample.txt`),
-  'utf8'
-);
+const input = loadFixture(`sample.txt`);
 
-describe('manager/cdnurl/extract', () => {
+describe(getName(), () => {
   it('extractPackageFile', () => {
     expect(extractPackageFile(input)).toMatchSnapshot();
   });

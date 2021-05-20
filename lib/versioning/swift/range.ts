@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { NewValueConfig } from '../common';
+import type { NewValueConfig } from '../types';
 
 const fromParam = /^\s*from\s*:\s*"([^"]+)"\s*$/;
 const fromRange = /^\s*"([^"]+)"\s*\.\.\.\s*$/;
@@ -19,16 +19,16 @@ function toSemverRange(range: string): string {
       return `>=${version}`;
     }
   } else if (binaryRange.test(range)) {
-    const [, fromVersion, op, toVersion] = binaryRange.exec(range);
-    if (semver.valid(fromVersion) && semver.valid(toVersion)) {
+    const [, currentVersion, op, newVersion] = binaryRange.exec(range);
+    if (semver.valid(currentVersion) && semver.valid(newVersion)) {
       return op === '..<'
-        ? `>=${fromVersion} <${toVersion}`
-        : `>=${fromVersion} <=${toVersion}`;
+        ? `>=${currentVersion} <${newVersion}`
+        : `>=${currentVersion} <=${newVersion}`;
     }
   } else if (toRange.test(range)) {
-    const [, op, toVersion] = toRange.exec(range);
-    if (semver.valid(toVersion)) {
-      return op === '..<' ? `<${toVersion}` : `<=${toVersion}`;
+    const [, op, newVersion] = toRange.exec(range);
+    if (semver.valid(newVersion)) {
+      return op === '..<' ? `<${newVersion}` : `<=${newVersion}`;
     }
   }
   return null;
@@ -36,23 +36,23 @@ function toSemverRange(range: string): string {
 
 function getNewValue({
   currentValue,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string {
   if (fromParam.test(currentValue)) {
-    return currentValue.replace(/".*?"/, `"${toVersion}"`);
+    return currentValue.replace(/".*?"/, `"${newVersion}"`);
   }
   if (fromRange.test(currentValue)) {
     const [, version] = fromRange.exec(currentValue);
-    return currentValue.replace(version, toVersion);
+    return currentValue.replace(version, newVersion);
   }
   if (binaryRange.test(currentValue)) {
     const [, , , version] = binaryRange.exec(currentValue);
-    return currentValue.replace(version, toVersion);
+    return currentValue.replace(version, newVersion);
   }
   if (toRange.test(currentValue)) {
     const [, , version] = toRange.exec(currentValue);
-    return currentValue.replace(version, toVersion);
+    return currentValue.replace(version, newVersion);
   }
   return currentValue;
 }

@@ -1,13 +1,4 @@
-The Jenkins manager supports the following format of the plugin list:
+The Jenkins manager supports a custom text or YAML format of the plugin list as described [here](https://github.com/jenkinsci/plugin-installation-manager-tool#plugin-input-format).
+Only versions from the main [Jenkins update center](https://updates.jenkins.io/) are supported.
 
-```text
-plugin1:1.2.3
-plugin2:4.5 # this is a comment
-
-# this line is ignored
-
-# Renovate will not upgrade the following dependency:
-plugin3:7.8.9 # renovate:ignore
-```
-
-There's no strict specification on the name of the files, but usually it's `plugins.txt`
+There are no strict filename rules, the convention is to name the file `plugins.txt` or `plugins.yaml`.

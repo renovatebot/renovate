@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 
 type TableDefinition = {
   header: string;

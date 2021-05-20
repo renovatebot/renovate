@@ -1,27 +1,18 @@
-import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as datasource } from '.';
 
-let res1 = fs.readFileSync(
-  'lib/datasource/cdnjs/__fixtures__/d3-force.json',
-  'utf8'
-);
-res1 = JSON.parse(res1);
-
-let res2 = fs.readFileSync(
-  'lib/datasource/cdnjs/__fixtures__/bulma.json',
-  'utf8'
-);
-res2 = JSON.parse(res2);
+const res1 = loadFixture('d3-force.json');
+const res2 = loadFixture('bulma.json');
 
 const baseUrl = 'https://api.cdnjs.com/';
 
 const pathFor = (s: string): string =>
   `/libraries/${s.split('/').shift()}?fields=homepage,repository,assets`;
 
-describe('datasource/cdnjs', () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

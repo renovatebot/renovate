@@ -3,7 +3,7 @@ import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
@@ -48,14 +48,6 @@ export function getDep(
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
   dep.datasource = datasourceDocker.id;
-  if (
-    dep.depName &&
-    (dep.depName === 'node' || dep.depName.endsWith('/node')) &&
-    dep.depName !== 'calico/node'
-  ) {
-    dep.commitMessageTopic = 'Node.js';
-  }
-
   if (dep.depName === 'ubuntu') {
     dep.versioning = ubuntuVersioning.id;
   }
@@ -103,12 +95,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         { image: copyFromMatch.groups.image },
         'Skipping alias COPY --from'
       );
-    } else if (!Number.isNaN(Number(copyFromMatch.groups.image))) {
-      logger.debug(
-        { image: copyFromMatch.groups.image },
-        'Skipping index reference COPY --from'
-      );
-    } else {
+    } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
       const dep = getDep(copyFromMatch.groups.image);
       logger.debug(
         {
@@ -119,6 +106,11 @@ export function extractPackageFile(content: string): PackageFile | null {
         'Dockerfile COPY --from'
       );
       deps.push(dep);
+    } else {
+      logger.debug(
+        { image: copyFromMatch.groups.image },
+        'Skipping index reference COPY --from'
+      );
     }
   }
   if (!deps.length) {

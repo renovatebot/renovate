@@ -1,6 +1,6 @@
 import { id as datasource } from '../../datasource/pypi';
 import pep440 from '../../versioning/pep440';
-import { PackageDependency, PackageFile, Result } from '../common';
+import type { PackageDependency, PackageFile, Result } from '../types';
 
 function getSectionName(str: string): string {
   const [, sectionName] = /^\[\s*([^\s]+)\s*]\s*$/.exec(str) || [];

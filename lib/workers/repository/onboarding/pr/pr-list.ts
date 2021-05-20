@@ -1,7 +1,7 @@
-import { RenovateConfig } from '../../../../config';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
-import { BranchConfig } from '../../../common';
+import type { BranchConfig } from '../../../types';
 
 export function getPrList(
   config: RenovateConfig,
@@ -46,7 +46,7 @@ export function getPrList(
           text += upgrade.depName.replace(prTitleRe, '@&#8203;$1');
         }
         text += upgrade.isLockfileUpdate
-          ? ` to \`${upgrade.toVersion}\``
+          ? ` to \`${upgrade.newVersion}\``
           : ` to \`${upgrade.newDigest || upgrade.newValue}\``;
         text += '\n';
       }

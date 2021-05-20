@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform escapes names 1`] = `"name [what]"`;
+exports[`platform/index escapes names 1`] = `"name [what]"`;
 
-exports[`platform initializes 1`] = `
+exports[`platform/index initializes 1`] = `
 Object {
   "endpoint": "https://api.bitbucket.org/",
   "gitAuthor": "user@domain.com",
   "hostRules": Array [
     Object {
-      "hostName": "api.bitbucket.org",
       "hostType": "bitbucket",
+      "matchHost": "api.bitbucket.org",
       "password": "123",
       "username": "abc",
     },
@@ -18,13 +18,13 @@ Object {
 }
 `;
 
-exports[`platform initializes no author 1`] = `
+exports[`platform/index initializes no author 1`] = `
 Object {
   "endpoint": "https://api.bitbucket.org/",
   "hostRules": Array [
     Object {
-      "hostName": "api.bitbucket.org",
       "hostType": "bitbucket",
+      "matchHost": "api.bitbucket.org",
       "password": "123",
       "username": "abc",
     },
@@ -33,14 +33,14 @@ Object {
 }
 `;
 
-exports[`platform parses bot email 1`] = `
+exports[`platform/index parses bot email 1`] = `
 Object {
   "address": "some[bot]@users.noreply.github.com",
   "name": "some[bot]",
 }
 `;
 
-exports[`platform parses bot name and email 1`] = `
+exports[`platform/index parses bot name and email 1`] = `
 Object {
   "address": "some[bot]@users.noreply.github.com",
   "name": "some[bot]",

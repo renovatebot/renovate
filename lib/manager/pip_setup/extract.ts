@@ -4,9 +4,10 @@ import { SkipReason } from '../../types';
 import { exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { isSkipComment } from '../../util/ignore';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { dependencyPattern } from '../pip_requirements/extract';
-import { PythonSetup, getExtractFile, parseReport } from './util';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { PythonSetup } from './types';
+import { getExtractFile, parseReport } from './util';
 
 export const pythonVersions = ['python', 'python3', 'python3.8', 'python3.9'];
 let pythonAlias: string | null = null;
@@ -57,7 +58,7 @@ export async function extractSetupFile(
     cwdFile: packageFile,
     timeout: 30000,
     docker: {
-      image: 'renovate/python',
+      image: 'python',
     },
   });
   if (res.stderr) {
@@ -82,7 +83,7 @@ export async function extractPackageFile(
   try {
     setup = await extractSetupFile(content, packageFile, config);
   } catch (err) {
-    logger.warn({ err, content, packageFile }, 'Failed to read setup.py file');
+    logger.debug({ err, content, packageFile }, 'Failed to read setup.py file');
   }
   if (!setup) {
     return null;

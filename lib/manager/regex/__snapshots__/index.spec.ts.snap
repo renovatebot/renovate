@@ -1,5 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/regex/index extracts and applies a registryUrlTemplate 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "registryUrls": Array [
+        "http://registry.gradle.com/",
+      ],
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+  ],
+  "matchStrings": Array [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+  ],
+  "registryUrlTemplate": "http://registry.{{depName}}.com/",
+}
+`;
+
+exports[`manager/regex/index extracts and does not apply a registryUrlTemplate if the result is an invalid url 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+  ],
+  "matchStrings": Array [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+  ],
+  "registryUrlTemplate": "this-is-not-a-valid-url-{{depName}}",
+}
+`;
+
 exports[`manager/regex/index extracts extractVersion 1`] = `
 Object {
   "deps": Array [

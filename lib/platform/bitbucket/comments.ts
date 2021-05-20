@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { BitbucketHttp } from '../../util/http/bitbucket';
-import { EnsureCommentConfig } from '../common';
+import type { EnsureCommentConfig } from '../types';
 import { Config, accumulateValues } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();

@@ -1,9 +1,13 @@
 import * as datasourceGradleVersion from '../../datasource/gradle-version';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import * as gradleVersioning from '../../versioning/gradle';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
-const DISTRIBUTION_URL_REGEX = /^(?<assignment>distributionUrl\s*=\s*)\S*-(?<version>(\d|\.)+)-(?<type>bin|all)\.zip\s*$/;
+// https://regex101.com/r/1GaQ2X/1
+const DISTRIBUTION_URL_REGEX = regEx(
+  '^(?:distributionUrl\\s*=\\s*)\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip\\s*$'
+);
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');

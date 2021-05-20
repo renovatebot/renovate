@@ -2,13 +2,14 @@ import * as url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-import { PackageDependency } from '../common';
-import {
-  GOOGLE_REPO,
-  JCENTER_REPO,
-  MAVEN_REPO,
+import type { PackageDependency } from '../types';
+import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO, TokenType } from './common';
+import { tokenize } from './tokenizer';
+import type {
   ManagerData,
+  MatchConfig,
   PackageVariables,
+  ParseGradleResult,
   StringInterpolation,
   SyntaxHandlerInput,
   SyntaxHandlerOutput,
@@ -16,10 +17,8 @@ import {
   SyntaxMatcher,
   Token,
   TokenMap,
-  TokenType,
   VariableData,
-} from './common';
-import { tokenize } from './tokenizer';
+} from './types';
 import {
   interpolateString,
   isDependencyString,
@@ -339,6 +338,63 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processPredefinedRegistryUrl,
   },
   {
+    // maven("https://repository.mycompany.com/m2/repository")
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { url = uri("https://maven.springframework.org/release") }
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'uri',
+      },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: TokenType.RightParen },
+      { matchType: TokenType.RightBrace },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { url "https://maven.springframework.org/release" }
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: TokenType.RightBrace },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
@@ -430,12 +486,6 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
 ];
 
-interface MatchConfig {
-  tokens: Token[];
-  variables: PackageVariables;
-  packageFile: string;
-}
-
 function tryMatch({
   tokens,
   variables,
@@ -458,18 +508,12 @@ function tryMatch({
   return null;
 }
 
-interface ParseGradleResult {
-  deps: PackageDependency<ManagerData>[];
-  urls: string[];
-  vars: PackageVariables;
-}
-
 export function parseGradle(
   input: string,
   initVars: PackageVariables = {},
   packageFile?: string
 ): ParseGradleResult {
-  const vars: PackageVariables = { ...initVars };
+  let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<ManagerData>[] = [];
   const urls = [];
 
@@ -481,7 +525,7 @@ export function parseGradle(
       deps.push(...matchResult.deps);
     }
     if (matchResult?.vars) {
-      Object.assign(vars, matchResult.vars);
+      vars = { ...vars, ...matchResult.vars };
     }
     if (matchResult?.urls) {
       urls.push(...matchResult.urls);

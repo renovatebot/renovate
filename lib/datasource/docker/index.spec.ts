@@ -4,8 +4,8 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, mocked, partial } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
+import { id } from './common';
 import { MediaType } from './types';
-import * as docker from '.';
 
 const hostRules = mocked(_hostRules);
 
@@ -13,7 +13,8 @@ jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
 
 type ECR = _AWS.ECR;
-type GetAuthorizationTokenCommandOutput = _AWS.GetAuthorizationTokenCommandOutput;
+type GetAuthorizationTokenCommandOutput =
+  _AWS.GetAuthorizationTokenCommandOutput;
 const AWS = mocked(_AWS);
 
 const baseUrl = 'https://index.docker.io/v2';
@@ -41,7 +42,7 @@ function mockEcrAuthReject(msg: string) {
   );
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({
@@ -56,22 +57,6 @@ describe(getName(__filename), () => {
     httpMock.reset();
   });
 
-  describe('getRegistryRepository', () => {
-    it('handles local registries', () => {
-      const res = docker.getRegistryRepository(
-        'registry:5000/org/package',
-        'https://index.docker.io'
-      );
-      expect(res).toMatchSnapshot();
-    });
-    it('supports registryUrls', () => {
-      const res = docker.getRegistryRepository(
-        'my.local.registry/prefix/image',
-        'https://my.local.registry/prefix'
-      );
-      expect(res).toMatchSnapshot();
-    });
-  });
   describe('getDigest', () => {
     it('returns null if no token', async () => {
       httpMock
@@ -241,6 +226,40 @@ describe(getName(__filename), () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('passes credentials to ECR client', async () => {
+      httpMock
+        .scope(amazonUrl)
+        .get('/')
+        .reply(200, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      mockEcrAuthResolve({
+        authorizationData: [{ authorizationToken: 'abcdef' }],
+      });
+
+      await getDigest(
+        {
+          datasource: 'docker',
+          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
+        'some-tag'
+      );
+
+      const trace = httpMock.getTrace();
+      expect(trace).toMatchSnapshot();
+      expect(AWS.ECR).toHaveBeenCalledWith({
+        credentials: {
+          accessKeyId: 'some-username',
+          secretAccessKey: 'some-password',
+        },
+        region: 'us-east-1',
+      });
+    });
     it('supports ECR authentication', async () => {
       httpMock
         .scope(amazonUrl)
@@ -372,7 +391,7 @@ describe(getName(__filename), () => {
         .get('/library/node/tags/list?n=10000')
         .reply(403);
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'node',
       });
       expect(res).toBeNull();
@@ -389,8 +408,7 @@ describe(getName(__filename), () => {
           200,
           { tags },
           {
-            link:
-              '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
+            link: '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
           }
         )
         .get('/')
@@ -402,7 +420,7 @@ describe(getName(__filename), () => {
         .get('/user/9287/repos?page=3&per_page=100')
         .reply(200, { tags: ['latest'] }, {});
       const config = {
-        datasource: docker.id,
+        datasource: id,
         depName: 'node',
         registryUrls: ['https://registry.company.com'],
       };
@@ -423,7 +441,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/1.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'registry.company.com/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -443,7 +461,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/undefined')
         .reply(200);
       await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -470,7 +488,7 @@ describe(getName(__filename), () => {
         )
         .reply(200, { token: 'some-token ' });
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'node',
       });
       expect(res.releases).toHaveLength(1);
@@ -498,7 +516,7 @@ describe(getName(__filename), () => {
         )
         .reply(200, { token: 'some-token ' });
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'docker.io/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -524,7 +542,7 @@ describe(getName(__filename), () => {
         .get('/kubernetes-dashboard-amd64/manifests/1.0.0')
         .reply(200);
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
       expect(res.releases).toHaveLength(1);
@@ -538,7 +556,7 @@ describe(getName(__filename), () => {
         .get('/my/node/tags/list?n=10000')
         .replyWithError('error');
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'my/node',
       });
       expect(res).toBeNull();
@@ -556,7 +574,7 @@ describe(getName(__filename), () => {
         .get('/')
         .reply(403);
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'node',
       });
       expect(res).toBeNull();
@@ -587,7 +605,7 @@ describe(getName(__filename), () => {
           },
         });
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'registry.company.com/node',
       });
       const trace = httpMock.getTrace();
@@ -625,7 +643,7 @@ describe(getName(__filename), () => {
           },
         });
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'registry.company.com/node',
       });
       const trace = httpMock.getTrace();
@@ -647,7 +665,7 @@ describe(getName(__filename), () => {
           mediaType: MediaType.manifestV1,
         });
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'registry.company.com/node',
       });
       const trace = httpMock.getTrace();
@@ -666,7 +684,7 @@ describe(getName(__filename), () => {
         .get('/node/manifests/latest')
         .reply(200, {});
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'registry.company.com/node',
       });
       const trace = httpMock.getTrace();
@@ -701,7 +719,7 @@ describe(getName(__filename), () => {
           config: {},
         });
       const res = await getPkgReleases({
-        datasource: docker.id,
+        datasource: id,
         depName: 'registry.company.com/node',
       });
       const trace = httpMock.getTrace();

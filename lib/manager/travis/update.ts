@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import { logger } from '../../logger';
-import { UpdateDependencyConfig } from '../common';
+import type { UpdateDependencyConfig } from '../types';
 
 export function updateDependency({
   fileContent,
@@ -20,7 +20,6 @@ export function updateDependency({
       quote = '';
     }
     let newString = `node_js:\n`;
-    // TODO: `newValue` is a string!
     upgrade.newValue.split(',').forEach((version) => {
       newString += `${indent}- ${quote}${version}${quote}\n`;
     });

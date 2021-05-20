@@ -1,9 +1,8 @@
-import { PackageDependency } from '../common';
-import {
-  ExtractionResult,
-  TerraformDependencyTypes,
-  keyValueExtractionRegex,
-} from './util';
+import type { PackageDependency } from '../types';
+import { TerraformDependencyTypes } from './common';
+import { analyzeTerraformProvider } from './providers';
+import type { ExtractionResult } from './types';
+import { keyValueExtractionRegex } from './util';
 
 export const providerBlockExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+{/;
 
@@ -71,4 +70,11 @@ export function extractTerraformRequiredProviders(
     }
   } while (line.trim() !== '}');
   return { lineNumber, dependencies: deps };
+}
+
+export function analyzeTerraformRequiredProvider(dep: PackageDependency): void {
+  /* eslint-disable no-param-reassign */
+  analyzeTerraformProvider(dep);
+  dep.depType = `required_provider`;
+  /* eslint-enable no-param-reassign */
 }

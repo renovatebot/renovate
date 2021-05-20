@@ -327,13 +327,13 @@ describe('regex', () => {
   });
 
   describe('.getNewValue', () => {
-    it('returns toVersion', () => {
+    it('returns newVersion', () => {
       expect(
         regex.getNewValue({
           currentValue: null,
           rangeStrategy: null,
-          fromVersion: null,
-          toVersion: '1.2.3',
+          currentVersion: null,
+          newVersion: '1.2.3',
         })
       ).toBe('1.2.3');
     });

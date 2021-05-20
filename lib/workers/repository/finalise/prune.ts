@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../../config';
 import { getAdminConfig } from '../../../config/admin';
+import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
@@ -99,7 +99,13 @@ export async function pruneStaleBranches(
     logger.debug('No renovate branches found');
     return;
   }
-  logger.debug({ branchList, renovateBranches }, 'Branch lists');
+  logger.debug(
+    {
+      branchList: branchList?.sort(),
+      renovateBranches: renovateBranches?.sort(),
+    },
+    'Branch lists'
+  );
   const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch

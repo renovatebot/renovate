@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with private variables 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extract deps from native scala file with private variables 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -37,7 +37,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with variables 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extract deps from native scala file with variables 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -74,7 +74,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extracts deps for generic use-cases 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extracts deps for generic use-cases 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -258,7 +258,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -398,7 +398,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -415,7 +415,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined with a trailing comma 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined with a trailing comma 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -442,7 +442,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() skips deps when scala version is missing 1`] = `
+exports[`manager/sbt/extract extractPackageFile() skips deps when scala version is missing 1`] = `
 Object {
   "deps": Array [
     Object {

@@ -1,11 +1,12 @@
+import { getName } from '../../test/util';
 import {
   PLATFORM_TYPE_BITBUCKET,
   PLATFORM_TYPE_GITLAB,
 } from '../constants/platforms';
-import { RenovateOptions } from './definitions';
 import * as env from './env';
+import type { RenovateOptions } from './types';
 
-describe('config/env', () => {
+describe(getName(), () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
       expect(env.getConfig({})).toEqual({ hostRules: [] });
@@ -98,6 +99,33 @@ describe('config/env', () => {
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
+    it('supports password-only', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        NPM_PASSWORD: 'some-password',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('supports domain and host names with case insensitivity', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        GITHUB__TAGS_GITHUB_COM_TOKEN: 'some-token',
+        pypi_my_CUSTOM_HOST_passWORD: 'some-password',
+      };
+      const res = env.getConfig(envParam);
+      expect(res).toMatchSnapshot();
+      expect(res.hostRules).toHaveLength(2);
+    });
+    it('supports datasource env token', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        PYPI_TOKEN: 'some-token',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('rejects incomplete datasource env token', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        PYPI_FOO_TOKEN: 'some-token',
+      };
+      expect(env.getConfig(envParam).hostRules).toHaveLength(0);
+    });
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: PLATFORM_TYPE_BITBUCKET,
@@ -115,6 +143,15 @@ describe('config/env', () => {
         RENOVATE_PASSWORD: 'app-password',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('merges full config from env', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG: '{"enabled":false,"token":"foo"}',
+        RENOVATE_TOKEN: 'a',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.enabled).toBe(false);
+      expect(config.token).toBe('a');
     });
   });
   describe('.getEnvName(definition)', () => {

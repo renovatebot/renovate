@@ -4,6 +4,7 @@ describe('pep440.isValid(input)', () => {
   it('should support a version without equals', () => {
     expect(pep440.isValid('0.750')).toBeTruthy();
     expect(pep440.isValid('1.2.3')).toBeTruthy();
+    expect(pep440.isValid('1.9')).toBeTruthy();
   });
   it('should support irregular versions', () => {
     expect(pep440.isValid('17.04.0')).toBeTruthy();
@@ -136,8 +137,8 @@ describe('pep440.getNewValue()', () => {
     const bumped = getNewValue({
       currentValue,
       rangeStrategy: 'bump',
-      fromVersion: '1.0.0',
-      toVersion: '1.2.3',
+      currentVersion: '1.0.0',
+      newVersion: '1.2.3',
     });
     it(`bumps '${currentValue}' to '${expectedBump}'`, () => {
       expect(bumped).toBe(expectedBump);
@@ -146,8 +147,8 @@ describe('pep440.getNewValue()', () => {
     const replaced = getNewValue({
       currentValue,
       rangeStrategy: 'replace',
-      fromVersion: '1.0.0',
-      toVersion: '1.2.3',
+      currentVersion: '1.0.0',
+      newVersion: '1.2.3',
     });
     const needReplace = pep440.matches('1.2.3', currentValue);
     const expectedReplace = needReplace ? currentValue : bumped;
@@ -158,8 +159,8 @@ describe('pep440.getNewValue()', () => {
     const pinned = getNewValue({
       currentValue,
       rangeStrategy: 'pin',
-      fromVersion: '1.0.0',
-      toVersion: '1.2.3',
+      currentVersion: '1.0.0',
+      newVersion: '1.2.3',
     });
     const expectedPin = '==1.2.3';
     it(`pins '${currentValue}' to '${expectedPin}'`, () => {
@@ -171,8 +172,8 @@ describe('pep440.getNewValue()', () => {
     const invalid = getNewValue({
       currentValue: '==1.0.0',
       rangeStrategy: 'update-lockfile',
-      fromVersion: '1.0.0',
-      toVersion: '1.2.3',
+      currentVersion: '1.0.0',
+      newVersion: '1.2.3',
     });
     expect(invalid).toEqual('==1.2.3');
   });

@@ -1,5 +1,5 @@
-import { RangeStrategy } from '../../versioning';
-import { RangeConfig } from '../common';
+import type { RangeStrategy } from '../../types';
+import type { RangeConfig } from '../types';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (config.rangeStrategy === 'auto') {

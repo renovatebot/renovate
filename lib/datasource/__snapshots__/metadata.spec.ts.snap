@@ -4,11 +4,11 @@ exports[`datasource/metadata Should handle failed parsing of sourceUrls for GitL
 Object {
   "releases": Array [
     Object {
-      "releaseTimestamp": "2020-02-14T13:12:00",
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
       "version": "5.7.0",
     },
     Object {
-      "releaseTimestamp": "2020-02-14T10:04:00",
+      "releaseTimestamp": "2020-02-14T10:04:00.000Z",
       "version": "5.6.1",
     },
   ],
@@ -20,11 +20,11 @@ exports[`datasource/metadata Should handle failed parsing of sourceUrls for othe
 Object {
   "releases": Array [
     Object {
-      "releaseTimestamp": "2020-02-14T13:12:00",
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
       "version": "5.7.0",
     },
     Object {
-      "releaseTimestamp": "2020-02-14T10:04:00",
+      "releaseTimestamp": "2020-02-14T10:04:00.000Z",
       "version": "5.6.1",
     },
   ],
@@ -37,19 +37,19 @@ Object {
   "changelogUrl": "https://github.com/django/django/tree/master/docs/releases",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-07-13T10:14:17",
+      "releaseTimestamp": "2018-07-13T10:14:17.000Z",
       "version": "2.0.0",
     },
     Object {
-      "releaseTimestamp": "2017-10-24T10:09:16",
+      "releaseTimestamp": "2017-10-24T10:09:16.000Z",
       "version": "2.0.0.dev1",
     },
     Object {
-      "releaseTimestamp": "2019-01-20T19:59:28",
+      "releaseTimestamp": "2019-01-20T19:59:28.000Z",
       "version": "2.1.0",
     },
     Object {
-      "releaseTimestamp": "2019-07-16T18:29:00",
+      "releaseTimestamp": "2019-07-16T18:29:00.000Z",
       "version": "2.2.0",
     },
   ],
@@ -61,19 +61,19 @@ exports[`datasource/metadata Should handle manualSourceUrls 1`] = `
 Object {
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-07-13T10:14:17",
+      "releaseTimestamp": "2018-07-13T10:14:17.000Z",
       "version": "2.0.0",
     },
     Object {
-      "releaseTimestamp": "2017-10-24T10:09:16",
+      "releaseTimestamp": "2017-10-24T10:09:16.000Z",
       "version": "2.0.0.dev1",
     },
     Object {
-      "releaseTimestamp": "2019-01-20T19:59:28",
+      "releaseTimestamp": "2019-01-20T19:59:28.000Z",
       "version": "2.1.0",
     },
     Object {
-      "releaseTimestamp": "2019-07-16T18:29:00",
+      "releaseTimestamp": "2019-07-16T18:29:00.000Z",
       "version": "2.2.0",
     },
   ],
@@ -85,11 +85,11 @@ exports[`datasource/metadata Should handle non-url 1`] = `
 Object {
   "releases": Array [
     Object {
-      "releaseTimestamp": "2020-02-14T13:12:00",
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
       "version": "5.7.0",
     },
     Object {
-      "releaseTimestamp": "2020-02-14T10:04:00",
+      "releaseTimestamp": "2020-02-14T10:04:00.000Z",
       "version": "5.6.1",
     },
   ],
@@ -100,19 +100,19 @@ exports[`datasource/metadata Should handle parsing of sourceUrls correctly 1`] =
 Object {
   "releases": Array [
     Object {
-      "releaseTimestamp": "2018-07-13T10:14:17",
+      "releaseTimestamp": "2018-07-13T10:14:17.000Z",
       "version": "2.0.0",
     },
     Object {
-      "releaseTimestamp": "2017-10-24T10:09:16",
+      "releaseTimestamp": "2017-10-24T10:09:16.000Z",
       "version": "2.0.0.dev1",
     },
     Object {
-      "releaseTimestamp": "2019-01-20T19:59:28",
+      "releaseTimestamp": "2019-01-20T19:59:28.000Z",
       "version": "2.1.0",
     },
     Object {
-      "releaseTimestamp": "2019-07-16T18:29:00",
+      "releaseTimestamp": "2019-07-16T18:29:00.000Z",
       "version": "2.2.0",
     },
   ],
@@ -124,11 +124,11 @@ exports[`datasource/metadata Should handle parsing of sourceUrls correctly for G
 Object {
   "releases": Array [
     Object {
-      "releaseTimestamp": "2020-02-14T13:12:00",
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
       "version": "5.7.0",
     },
     Object {
-      "releaseTimestamp": "2020-02-14T10:04:00",
+      "releaseTimestamp": "2020-02-14T10:04:00.000Z",
       "version": "5.6.1",
     },
   ],

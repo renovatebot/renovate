@@ -5,7 +5,7 @@ import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { commitFiles } from '../../util/git';
 import { sanitize } from '../../util/sanitize';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 
 export function commitFilesToBranch(
   config: BranchConfig

@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/terraform-module getReleases processes real data 1`] = `
+exports[`datasource/terraform-module/index getReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
-  "name": "hashicorp/consul/aws",
+  "registryUrl": "https://registry.terraform.io",
   "releases": Array [
     Object {
       "version": "0.0.1",
@@ -72,21 +72,20 @@ Object {
       "version": "0.3.10",
     },
     Object {
-      "releaseTimestamp": "2018-09-20T11:25:22.957584Z",
+      "releaseTimestamp": "2018-09-20T11:25:22.957Z",
       "version": "0.4.0",
     },
   ],
   "sourceUrl": "https://github.com/hashicorp/terraform-aws-consul",
-  "versions": Object {},
 }
 `;
 
-exports[`datasource/terraform-module getReleases processes real data 2`] = `
+exports[`datasource/terraform-module/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -96,7 +95,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -106,12 +105,12 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases processes real data on changed subpath 1`] = `
+exports[`datasource/terraform-module/index getReleases processes real data on changed subpath 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "terraform.foo.bar",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -121,7 +120,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "terraform.foo.bar",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -131,9 +130,9 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases processes real data on changed subpath 2`] = `
+exports[`datasource/terraform-module/index getReleases processes real data on changed subpath 2`] = `
 Object {
-  "name": "hashicorp/consul/aws",
+  "registryUrl": "https://terraform.foo.bar",
   "releases": Array [
     Object {
       "version": "0.0.1",
@@ -202,19 +201,18 @@ Object {
       "version": "0.3.10",
     },
     Object {
-      "releaseTimestamp": "2018-09-20T11:25:22.957584Z",
+      "releaseTimestamp": "2018-09-20T11:25:22.957Z",
       "version": "0.4.0",
     },
   ],
   "sourceUrl": "https://github.com/hashicorp/terraform-aws-consul",
-  "versions": Object {},
 }
 `;
 
-exports[`datasource/terraform-module getReleases processes with registry in name 1`] = `
+exports[`datasource/terraform-module/index getReleases processes with registry in name 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
-  "name": "hashicorp/consul/aws",
+  "registryUrl": "https://registry.terraform.io",
   "releases": Array [
     Object {
       "version": "0.0.1",
@@ -283,21 +281,20 @@ Object {
       "version": "0.3.10",
     },
     Object {
-      "releaseTimestamp": "2018-09-20T11:25:22.957584Z",
+      "releaseTimestamp": "2018-09-20T11:25:22.957Z",
       "version": "0.4.0",
     },
   ],
   "sourceUrl": "https://github.com/hashicorp/terraform-aws-consul",
-  "versions": Object {},
 }
 `;
 
-exports[`datasource/terraform-module getReleases processes with registry in name 2`] = `
+exports[`datasource/terraform-module/index getReleases processes with registry in name 2`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -307,7 +304,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -317,12 +314,12 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases rejects mismatch 1`] = `
+exports[`datasource/terraform-module/index getReleases rejects mismatch 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "terraform.company.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -332,7 +329,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "terraform.company.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -342,12 +339,12 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases rejects servicediscovery 1`] = `
+exports[`datasource/terraform-module/index getReleases rejects servicediscovery 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "terraform.company.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -357,12 +354,12 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases returns null for 404 1`] = `
+exports[`datasource/terraform-module/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -372,7 +369,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -382,12 +379,12 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases returns null for empty result 1`] = `
+exports[`datasource/terraform-module/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -397,7 +394,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -407,12 +404,12 @@ Array [
 ]
 `;
 
-exports[`datasource/terraform-module getReleases returns null for unknown error 1`] = `
+exports[`datasource/terraform-module/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -422,7 +419,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "registry.terraform.io",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

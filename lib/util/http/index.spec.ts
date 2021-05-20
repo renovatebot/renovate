@@ -10,7 +10,7 @@ import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let http: Http;
 
   beforeEach(() => {
@@ -40,7 +40,7 @@ describe(getName(__filename), () => {
     expect(nock.isDone()).toBe(true);
   });
   it('disables hosts', async () => {
-    hostRules.add({ hostName: 'renovate.com', enabled: false });
+    hostRules.add({ matchHost: 'renovate.com', enabled: false });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
       HOST_DISABLED
     );
@@ -135,7 +135,7 @@ describe(getName(__filename), () => {
   });
 
   it('limits concurrency by host', async () => {
-    hostRules.add({ hostName: 'renovate.com', concurrentRequestLimit: 1 });
+    hostRules.add({ matchHost: 'renovate.com', concurrentRequestLimit: 1 });
 
     let foo = false;
     let bar = false;

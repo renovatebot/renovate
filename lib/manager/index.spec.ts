@@ -1,8 +1,9 @@
+import { getName } from '../../test/util';
 import { loadModules } from '../util/modules';
-import { ManagerApi } from './common';
+import type { ManagerApi } from './types';
 import * as manager from '.';
 
-describe('manager', () => {
+describe(getName(), () => {
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
@@ -25,6 +26,9 @@ describe('manager', () => {
         return false;
       }
       if (!module.extractPackageFile && !module.extractAllPackageFiles) {
+        return false;
+      }
+      if (Object.values(module).some((v) => v === undefined)) {
         return false;
       }
       return true;
@@ -98,7 +102,7 @@ describe('manager', () => {
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
-        getPackageUpdates: () => Promise.resolve([]),
+        getPackageUpdates: () => Promise.resolve({ updates: [] }),
       });
       expect(manager.getPackageUpdates('dummy', {} as any)).not.toBeNull();
     });

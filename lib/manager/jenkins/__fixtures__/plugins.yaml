@@ -1,0 +1,26 @@
+plugins:
+  - artifactId: git
+    source:
+      version: latest
+  - artifactId: job-import-plugin
+    source:
+      version: '2.10'
+  - artifactId: invalid-version-plugin
+    source:
+      version: 2.10 # Float will cause the version to be 2.1 and will be ignored with a warning
+  - artifactId: ignore-plugin
+    source:
+      version: '2.10'
+    renovate:
+      ignore: true
+  - artifactId: docker
+  - artifactId: cloudbees-bitbucket-branch-source
+    source:
+      version: experimental
+  - artifactId: script-security
+    source:
+      url: http://ftp-chi.osuosl.org/pub/jenkins/plugins/script-security/1.56/script-security.hpi
+  - artifactId: workflow-step-api
+    groupId: org.jenkins-ci.plugins.workflow
+    source:
+      version: 2.19-rc289.d09828a05a74

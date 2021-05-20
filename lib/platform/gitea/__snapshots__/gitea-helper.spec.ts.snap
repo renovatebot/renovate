@@ -6,7 +6,7 @@ Array [
     "body": "{}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "2",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -24,7 +24,7 @@ Array [
     "body": "{\\"state\\":\\"closed\\"}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "18",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -42,7 +42,7 @@ Array [
     "body": "{\\"state\\":\\"closed\\"}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "18",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -60,7 +60,7 @@ Array [
     "body": "{\\"body\\":\\"some-comment\\"}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "23",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -78,7 +78,7 @@ Array [
     "body": "{\\"state\\":\\"success\\",\\"context\\":\\"some-context\\",\\"description\\":\\"some-description\\",\\"target_url\\":\\"https://gitea.renovatebot.com/commit-status\\"}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "136",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -96,7 +96,7 @@ Array [
     "body": "{\\"state\\":\\"open\\",\\"title\\":\\"Some Issue\\",\\"body\\":\\"just some issue\\",\\"assignees\\":[\\"admin\\"]}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "84",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -114,7 +114,7 @@ Array [
     "body": "{\\"state\\":\\"open\\",\\"title\\":\\"Some PR\\",\\"body\\":\\"Lorem ipsum dolor sit amet\\",\\"base\\":\\"master\\",\\"head\\":\\"pull-req-13\\",\\"assignees\\":[\\"admin\\"],\\"labels\\":[100]}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "144",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -131,7 +131,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -146,7 +146,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -161,7 +161,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -176,7 +176,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -191,7 +191,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -206,7 +206,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -216,7 +216,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -231,7 +231,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -241,7 +241,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -251,7 +251,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -266,7 +266,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -276,7 +276,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -286,7 +286,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -296,7 +296,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -311,7 +311,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -321,7 +321,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -331,7 +331,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -341,7 +341,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -351,7 +351,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -366,7 +366,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -376,7 +376,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -386,7 +386,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -396,7 +396,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -406,7 +406,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -416,7 +416,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -431,7 +431,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -446,7 +446,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -461,7 +461,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -476,7 +476,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -491,7 +491,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -506,7 +506,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -521,7 +521,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -536,7 +536,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -551,12 +551,27 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
     "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/labels",
+  },
+]
+`;
+
+exports[`platform/gitea/gitea-helper getVersion should call /api/v1/version endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/version",
   },
 ]
 `;
@@ -567,7 +582,7 @@ Array [
     "body": "{\\"Do\\":\\"rebase\\"}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "15",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -584,7 +599,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -599,7 +614,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -614,7 +629,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -629,7 +644,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -644,7 +659,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -659,7 +674,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -674,12 +689,12 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/search?uid=13",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/search?uid=13&archived=false",
   },
 ]
 `;
@@ -689,7 +704,7 @@ Array [
   Object {
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "gitea.renovatebot.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -705,7 +720,7 @@ Array [
     "body": "{\\"body\\":\\"new-body\\"}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "19",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -723,7 +738,7 @@ Array [
     "body": "{\\"state\\":\\"closed\\",\\"title\\":\\"new-title\\",\\"body\\":\\"new-body\\",\\"assignees\\":[\\"renovate\\"]}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "81",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
@@ -741,7 +756,7 @@ Array [
     "body": "{\\"state\\":\\"closed\\",\\"title\\":\\"new-title\\",\\"body\\":\\"new-body\\",\\"assignees\\":[\\"renovate\\"],\\"labels\\":[200]}",
     "headers": Object {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "content-length": "96",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",

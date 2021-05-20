@@ -1,12 +1,12 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../logger';
-import {
+import type {
   GithubGitBlob,
   GithubGitTree,
 } from '../../../../types/platform/github';
 import { GithubHttp } from '../../../../util/http/github';
 import { ensureTrailingSlash } from '../../../../util/url';
-import { ChangeLogFile, ChangeLogNotes } from '../common';
+import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
 const http = new GithubHttp();
 

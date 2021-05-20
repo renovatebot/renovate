@@ -1,12 +1,12 @@
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import { PackageDependency } from '../../manager/common';
+import type { PackageDependency } from '../../manager/types';
 import { writeLocalFile } from '../../util/fs';
 import { escapeRegExp, regEx } from '../../util/regex';
 import { matchAt, replaceAt } from '../../util/string';
 import { compile } from '../../util/template';
-import { BranchUpgradeConfig } from '../common';
+import type { BranchUpgradeConfig } from '../types';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
@@ -29,6 +29,11 @@ export async function confirmIfDepUpdated(
       packageFile,
       upgrade
     );
+    // istanbul ignore if
+    if (!newExtract) {
+      logger.debug({ manager, packageFile }, 'Could not extract package file');
+      return false;
+    }
     newUpgrade = newExtract.deps[depIndex];
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');

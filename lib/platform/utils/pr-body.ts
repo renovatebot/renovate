@@ -1,4 +1,4 @@
-const re = new RegExp(`### Release Notes.*### Renovate configuration`, 'ms');
+const re = new RegExp(`### Release Notes.*### Configuration`, 'ms');
 
 export function smartTruncate(input: string, len: number): string {
   if (input.length < len) {
@@ -6,7 +6,7 @@ export function smartTruncate(input: string, len: number): string {
   }
   const releaseNotesMatch = re.exec(input);
   if (releaseNotesMatch) {
-    const divider = `</details>\n\n---\n\n### Renovate configuration`;
+    const divider = `</details>\n\n---\n\n### Configuration`;
     const [releaseNotes] = releaseNotesMatch;
     const nonReleaseNotesLength =
       input.length - releaseNotes.length - divider.length;

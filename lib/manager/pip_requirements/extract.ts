@@ -5,7 +5,7 @@ import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -63,7 +63,8 @@ export function extractPackageFile(
       if (!matches) {
         return null;
       }
-      const [, depName, , currentValue] = matches;
+      const [, depName, , currVal] = matches;
+      const currentValue = currVal.trim();
       dep = {
         ...dep,
         depName,
@@ -71,7 +72,7 @@ export function extractPackageFile(
         datasource: datasourcePypi.id,
       };
       if (currentValue?.startsWith('==')) {
-        dep.fromVersion = currentValue.replace(/^==/, '');
+        dep.currentVersion = currentValue.replace(/^==\s*/, '');
       }
       return dep;
     })
@@ -84,7 +85,7 @@ export function extractPackageFile(
     res.registryUrls = registryUrls.map((url) => {
       // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
       const cleaned = url.replace(/^"/, '').replace(/"$/, '');
-      if (getAdminConfig().trustLevel !== 'high') {
+      if (!getAdminConfig().exposeAllEnv) {
         return cleaned;
       }
       // interpolate any environment variables

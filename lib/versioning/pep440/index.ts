@@ -1,6 +1,6 @@
 import * as pep440 from '@renovate/pep440';
 import { filter } from '@renovate/pep440/lib/specifier';
-import { VersioningApi } from '../common';
+import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
 export const id = 'pep440';

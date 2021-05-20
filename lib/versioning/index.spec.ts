@@ -1,12 +1,9 @@
 import { getOptions } from '../config/definitions';
 import { loadModules } from '../util/modules';
-import {
-  VersioningApi,
-  VersioningApiConstructor,
-  isVersioningApiConstructor,
-} from './common';
+import { isVersioningApiConstructor } from './common';
 import { GenericVersion, GenericVersioningApi } from './loose/generic';
 import * as semverVersioning from './semver';
+import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
 
 const supportedSchemes = getOptions().find(
@@ -25,7 +22,7 @@ describe('allVersioning.get(versioning)', () => {
       // eslint-disable-next-line new-cap
       const mod = isVersioningApiConstructor(module) ? new module() : module;
 
-      // TODO: test required api
+      // TODO: test required api (#9715)
       if (!mod.isValid || !mod.isVersion) {
         throw Error(`Missing api on ${name}`);
       }
@@ -102,7 +99,7 @@ describe('allVersioning.get(versioning)', () => {
         expect(schemeKeys).toEqual(npmApi);
 
         const apiOrCtor = require('./' + supportedScheme).api;
-        if (allVersioning.isVersioningApiConstructor(apiOrCtor)) {
+        if (isVersioningApiConstructor(apiOrCtor)) {
           return;
         }
 

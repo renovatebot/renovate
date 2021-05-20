@@ -1,20 +1,21 @@
 import {
   RenovateConfig,
   defaultConfig,
+  getName,
   git,
   partial,
   platform,
 } from '../../../../../test/util';
 import { setAdminConfig } from '../../../../config/admin';
 import { logger } from '../../../../logger';
-import { PackageFile } from '../../../../manager/common';
+import type { PackageFile } from '../../../../manager/types';
 import { Pr } from '../../../../platform';
-import { BranchConfig } from '../../../common';
+import type { BranchConfig } from '../../../types';
 import { ensureOnboardingPr } from '.';
 
 jest.mock('../../../../util/git');
 
-describe('workers/repository/onboarding/pr', () => {
+describe(getName(), () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;
     let packageFiles: Record<string, PackageFile[]>;
@@ -29,7 +30,7 @@ describe('workers/repository/onboarding/pr', () => {
       };
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
-      platform.getPrBody = jest.fn((input) => input);
+      platform.massageMarkdown = jest.fn((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
       setAdminConfig();
     });

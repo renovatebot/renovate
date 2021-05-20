@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/gitsubmodules/artifacts updateArtifacts() returns empty content 1`] = `
+exports[`manager/git-submodules/artifact updateArtifacts() returns empty content 1`] = `
 Array [
   Object {
     "file": Object {
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/gitsubmodules/artifacts updateArtifacts() returns two modules 1`] = `
+exports[`manager/git-submodules/artifact updateArtifacts() returns two modules 1`] = `
 Array [
   Object {
     "file": Object {

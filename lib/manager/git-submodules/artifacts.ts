@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export default function updateArtifacts({
   updatedDeps,

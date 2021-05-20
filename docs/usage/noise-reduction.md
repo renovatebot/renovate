@@ -12,7 +12,7 @@ This document will give you some ideas of how to reduce the amount of "noise" in
 
 Of course, please keep in mind that people's definitions of "noise" may differ.
 For some people, it's noisy only if they get a notification or email from GitHub.
-For others, too many commits in their `master` branch may be "noise".
+For others, too many commits in their base branch may be "noise".
 In other words, your mileage may vary.
 If you have any ideas on this topic, please contact the author by starting a [new discussion on the Renovate repository](https://github.com/renovatebot/renovate/discussions).
 
@@ -20,7 +20,7 @@ If you have any ideas on this topic, please contact the author by starting a [ne
 
 To reduce noise, you can reduce the number of updates in total, and a good way to do that is via intelligent grouping of related packages.
 
-As an example, our default `":app"` and `":library"` [presets](/config-presets/) include the rule `"group:monorepos"`, which means that "sibling" packages from known monorepos will always be grouped into the same branch/PR by renovate.
+As an example, our default `":app"` and `":library"` [presets](./config-presets.md) include the rule `"group:monorepos"`, which means that "sibling" packages from known monorepos will always be grouped into the same branch/PR by renovate.
 For example, all `@angular/*` packages that are updated at the same time will be raised in a "Renovate angular monorepo packages" PR.
 And every package in the React monorepo will be grouped together in a React monorepo PR too.
 
@@ -62,11 +62,11 @@ There are multiple reasons why Renovate may need to "recreate" PRs after you mer
 
 1. Conflict with `package.json` (sometimes)
 1. Conflict with lock files (often)
-1. If you have configured Renovate or GitHub that PRs must always be kept up-to-date with master
+1. If you have configured Renovate or GitHub that PRs must always be kept up-to-date with the base branch
 
-Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off `master` before you can test and merge again, and Renovate won't do this until it's back in schedule.
+Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off the base branch before you can test and merge again, and Renovate won't do this until it's back in schedule.
 
-#### Selective scheduling
+### Selective scheduling
 
 Don't think that you need to apply blanket rules to scheduling.
 Remember that Renovate's configuration is highly flexible so you can configure `automerge` anywhere from globally (entire repo) right down to a package/upgrade type level.
@@ -98,8 +98,9 @@ Or perhaps at least weekly:
   ]
 ```
 
-If you're wondering what is supported and not, under the hood, the schedule is parsed using [later.js](https://bunkat.github.io/later/) using the `later.parse.text(scheduleString)` API.
-[This page](https://bunkat.github.io/later/parsers.html#text) explains the supported syntax or you can experiment on the [RunKit playground](https://npm.runkit.com/later).
+If you're wondering what is supported and not, under the hood, the schedule is parsed using [@breejs/later](https://github.com/breejs/later) using the `later.parse.text(scheduleString)` API.
+Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
+Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 ## Automerging
 
@@ -116,24 +117,24 @@ For example, if you have `jest` or `mocha` as a dependency, and it has an upgrad
 If you have a linter like `eslint` or `tslint` and its update passes: automerge them!
 If you have an API with 100% test coverage and `express` is updated: automerge it!
 
-#### Branch automerging
+### Branch automerging
 
 Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged.
 For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
 - Renovate first creates a branch and no PR
-- If tests pass, Renovate pushes a commit directly to `master` without PR
+- If tests pass, Renovate pushes a commit directly to the base branch without PR
 - If tests fail, Renovate raises a PR for you to review
 
-The result is that passing updates are essentially "silent" - the only sign of them are the commits to your `master` branch.
+The result is that passing updates are essentially "silent" - the only sign of them are the commits to your base branch.
 
-#### Automerging and scheduling
+### Automerging and scheduling
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.
 And this is especially so if your repository needs rebasing, e.g. because you use lock files. e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
 
 - At the start of the schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
-- After `abc` passes tests, `Renovate` will automerge it to `master`
+- After `abc` passes tests, `Renovate` will automerge it to your base branch
 - The `xyz` branch probably now has `yarn.lock` conflicts
 - Renovate will immediately check all other branches and rebase them
 - The change to `xyz` branch will trigger another round of CI tests
@@ -161,7 +162,7 @@ How about a PR back to [renovate-config](https://github.com/singapore/renovate-c
 
 ## Lock file considerations
 
-Using lock files greatly increases the chance that merging one PR will result in a second PR becoming conflicted with `master`.
+Using lock files greatly increases the chance that merging one PR will result in a second PR becoming conflicted with the base branch.
 The table below highlights different noise reduction strategies and their effect on pull request and potential lock file conflicts:
 
 | Action                               | Effect on pull requests  | Chance of lock file conflicts |

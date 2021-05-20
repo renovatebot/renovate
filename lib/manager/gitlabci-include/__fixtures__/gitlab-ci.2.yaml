@@ -1,5 +1,0 @@
-include:
-- local: 'lib/manager/gitlabci-include/__fixtures__/include.1.yml'
-
-stages:
-- test

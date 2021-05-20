@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should automerge comment 1`] = `
+Object {
+  "automerged": true,
+  "branchRemoved": false,
+}
+`;
+
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should automerge if enabled and pr is mergeable 1`] = `
+Object {
+  "automerged": true,
+  "branchRemoved": true,
+}
+`;
+
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should indicate if automerge failed 1`] = `
+Object {
+  "automerged": false,
+  "prAutomergeBlockReason": "PlatformRejection",
+}
+`;
+
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should not automerge if enabled and pr is mergeable but branch status is not success 1`] = `
+Object {
+  "automerged": false,
+  "prAutomergeBlockReason": "BranchNotGreen",
+}
+`;
+
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should not automerge if enabled and pr is mergeable but cannot rebase 1`] = `
+Object {
+  "automerged": false,
+  "prAutomergeBlockReason": "BranchModified",
+}
+`;
+
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should not automerge if enabled and pr is mergeable but unstable 1`] = `
+Object {
+  "automerged": false,
+  "prAutomergeBlockReason": "PlatformNotReady",
+}
+`;
+
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should not automerge if enabled and pr is unmergeable 1`] = `
+Object {
+  "automerged": false,
+  "prAutomergeBlockReason": "Conflicted",
+}
+`;
+
+exports[`workers/pr/automerge checkAutoMerge(pr, config) should remove previous automerge comment when rebasing 1`] = `
+Object {
+  "automerged": true,
+  "branchRemoved": false,
+}
+`;

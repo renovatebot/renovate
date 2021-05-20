@@ -1,6 +1,6 @@
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
-import { BumpPackageVersionResult } from '../common';
+import type { BumpPackageVersionResult } from '../types';
 
 export function bumpPackageVersion(
   content: string,

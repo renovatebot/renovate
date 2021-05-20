@@ -1,8 +1,8 @@
 import { valid } from 'semver';
 import { logger } from '../../../logger';
-import { PackageFile } from '../../common';
-import { LockFile } from './common';
+import type { PackageFile } from '../../types';
 import { getNpmLock } from './npm';
+import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
 
 export async function getLockedVersions(
@@ -12,8 +12,10 @@ export async function getLockedVersions(
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
     const { yarnLock, npmLock, pnpmShrinkwrap } = packageFile;
+    const lockFiles = [];
     if (yarnLock) {
       logger.trace('Found yarnLock');
+      lockFiles.push(yarnLock);
       if (!lockFileCache[yarnLock]) {
         logger.trace('Retrieving/parsing ' + yarnLock);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
@@ -22,9 +24,9 @@ export async function getLockedVersions(
       if (!isYarn1) {
         if (lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
-          packageFile.constraints.yarn = '>= 2.2.0';
+          packageFile.constraints.yarn = '^2.2.0';
         } else {
-          packageFile.constraints.yarn = '>= 2.0.0';
+          packageFile.constraints.yarn = '^2.0.0';
         }
       }
       for (const dep of packageFile.deps) {
@@ -32,9 +34,13 @@ export async function getLockedVersions(
           lockFileCache[yarnLock].lockedVersions[
             `${dep.depName}@${dep.currentValue}`
           ];
+        if (dep.depType === 'engines' && dep.depName === 'yarn' && !isYarn1) {
+          dep.lookupName = '@yarnpkg/cli';
+        }
       }
     } else if (npmLock) {
       logger.debug('Found ' + npmLock + ' for ' + packageFile.packageFile);
+      lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
         logger.trace('Retrieving/parsing ' + npmLock);
         lockFileCache[npmLock] = await getNpmLock(npmLock);
@@ -54,6 +60,10 @@ export async function getLockedVersions(
       }
     } else if (pnpmShrinkwrap) {
       logger.debug('TODO: implement pnpm-lock.yaml parsing of lockVersion');
+      lockFiles.push(pnpmShrinkwrap);
+    }
+    if (lockFiles.length) {
+      packageFile.lockFiles = lockFiles;
     }
   }
 }

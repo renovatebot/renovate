@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 1 1`] = `
+exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 1 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -12,7 +12,6 @@ Array [
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "10.0.0",
     "datasource": "docker",
@@ -68,7 +67,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 1`] = `
+exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -80,7 +79,73 @@ Array [
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "commitMessageTopic": "Node.js",
+    "currentDigest": undefined,
+    "currentValue": "10.0.0",
+    "datasource": "docker",
+    "depName": "node",
+    "replaceString": "node:10.0.0",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "9.4.0",
+    "datasource": "docker",
+    "depName": "postgres",
+    "replaceString": "postgres:9.4.0",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "before",
+    "datasource": "docker",
+    "depName": "dockersamples/examplevotingapp_vote",
+    "replaceString": "dockersamples/examplevotingapp_vote:before",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "before",
+    "datasource": "docker",
+    "depName": "dockersamples/examplevotingapp_result",
+    "replaceString": "dockersamples/examplevotingapp_result:before",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "dockersamples/examplevotingapp_worker",
+    "replaceString": "dockersamples/examplevotingapp_worker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "stable",
+    "datasource": "docker",
+    "depName": "dockersamples/visualizer",
+    "replaceString": "dockersamples/visualizer:stable",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "datasource": "docker",
+    "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
+    "skipReason": "contains-variable",
+  },
+]
+`;
+
+exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 without set version key 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "alpine",
+    "datasource": "docker",
+    "depName": "quay.io/something/redis",
+    "replaceString": "quay.io/something/redis:alpine",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "10.0.0",
     "datasource": "docker",

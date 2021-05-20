@@ -1,14 +1,23 @@
-import { RenovateConfig } from '../common';
-
-// TODO: Proper typing
-export type Preset = RenovateConfig & Record<string, unknown>;
-
-export type PresetConfig = {
-  packageName: string;
-  presetName?: string;
-  baseConfig?: RenovateConfig;
+export const removedPresets = {
+  ':automergeBranchMergeCommit': ':automergeBranch',
+  ':automergeBranchPush': ':automergeBranch',
+  ':base': 'config:base',
+  ':app': 'config:js-app',
+  ':js-app': 'config:js-app',
+  ':library': 'config:js-lib',
+  ':masterIssue': ':dependencyDashboard',
+  ':masterIssueApproval': ':dependencyDashboardApproval',
+  ':unpublishSafe': 'npm:unpublishSafe',
+  'config:application': 'config:js-app',
+  'config:base-js': 'config:base',
+  'config:library': 'config:js-lib',
+  'default:automergeBranchMergeCommit': ':automergeBranch',
+  'default:automergeBranchPush': ':automergeBranch',
+  'default:base': 'config:base',
+  'default:app': 'config:js-app',
+  'default:js-app': 'config:js-app',
+  'default:library': 'config:js-lib',
+  'default:unpublishSafe': 'npm:unpublishSafe',
+  'helpers:oddIsUnstable': null,
+  'helpers:oddIsUnstablePackages': null,
 };
-
-export interface PresetApi {
-  getPreset(config: PresetConfig): Promise<Preset> | Preset;
-}

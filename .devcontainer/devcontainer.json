@@ -1,7 +1,5 @@
-// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.106.0/containers/typescript-node-12
 {
-  "name": "Node.js 12 & TypeScript",
+  "name": "Node.js 14",
   "dockerFile": "Dockerfile",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"

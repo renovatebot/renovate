@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/post-update getAdditionalFiles returns no error and empty lockfiles if lock file maintenance exists 1`] = `
+exports[`workers/branch/lock-files/index getAdditionalFiles returns no error and empty lockfiles if lock file maintenance exists 1`] = `
 Object {
   "artifactErrors": Array [],
   "updatedArtifacts": Array [],
 }
 `;
 
-exports[`manager/npm/post-update getAdditionalFiles returns no error and empty lockfiles if updateLockFiles false 1`] = `
+exports[`workers/branch/lock-files/index getAdditionalFiles returns no error and empty lockfiles if updateLockFiles false 1`] = `
 Object {
   "artifactErrors": Array [],
   "updatedArtifacts": Array [],

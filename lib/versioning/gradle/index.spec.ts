@@ -1,7 +1,8 @@
+import { getName } from '../../../test/util';
 import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
 import { api } from '.';
 
-describe('versioning/gradle/compare', () => {
+describe(getName(), () => {
   it('returns equality', () => {
     expect(compare('1', '1')).toEqual(0);
     expect(compare('a', 'a')).toEqual(0);
@@ -112,7 +113,7 @@ describe('versioning/gradle/compare', () => {
   });
 });
 
-describe('versioning/gradle', () => {
+describe(getName(), () => {
   it('isValid', () => {
     expect(api.isValid('1.0.0')).toBe(true);
     expect(api.isValid('[1.12.6,1.18.6]')).toBe(true);
@@ -232,16 +233,16 @@ describe('versioning/gradle', () => {
       api.getNewValue({
         currentValue: '1',
         rangeStrategy: null,
-        fromVersion: null,
-        toVersion: '1.1',
+        currentVersion: null,
+        newVersion: '1.1',
       })
     ).toBe('1.1');
     expect(
       api.getNewValue({
         currentValue: '[1.2.3,]',
         rangeStrategy: null,
-        fromVersion: null,
-        toVersion: '1.2.4',
+        currentVersion: null,
+        newVersion: '1.2.4',
       })
     ).toBeNull();
   });
@@ -259,15 +260,15 @@ describe('versioning/gradle', () => {
       ['[1.2.3,)', '1.2.3', '1.2.4'],
       ['[1.2.3,[', '1.2.3', '1.2.4'],
     ];
-    sample.forEach(([currentValue, fromVersion, toVersion]) => {
+    sample.forEach(([currentValue, currentVersion, newVersion]) => {
       expect(
         api.getNewValue({
           currentValue,
           rangeStrategy: 'pin',
-          fromVersion,
-          toVersion,
+          currentVersion,
+          newVersion,
         })
-      ).toEqual(toVersion);
+      ).toEqual(newVersion);
     });
   });
 });

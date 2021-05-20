@@ -1,22 +1,9 @@
 import is from '@sindresorhus/is';
 import { safeLoad } from 'js-yaml';
-
 import { logger } from '../../logger';
-import { PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
-
-interface DockerComposeConfig {
-  version?: string;
-  services?: Record<string, DockerComposeService>;
-}
-
-interface DockerComposeService {
-  image?: string;
-  build?: {
-    context?: string;
-    dockerfile?: string;
-  };
-}
+import type { PackageFile } from '../types';
+import type { DockerComposeConfig } from './types';
 
 class LineMapper {
   private imageLines: { line: string; lineNumber: number; used: boolean }[];
@@ -47,8 +34,8 @@ export function extractPackageFile(
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
   try {
-    // TODO: fix me
-    config = safeLoad(content, { json: true }) as unknown;
+    // TODO: fix me (#9610)
+    config = safeLoad(content, { json: true }) as DockerComposeConfig;
     if (!config) {
       logger.debug(
         { fileName },
@@ -71,10 +58,12 @@ export function extractPackageFile(
   try {
     const lineMapper = new LineMapper(content, /^\s*image:/);
 
-    const services =
-      'version' in config
-        ? config.services // docker-compose version 2+
-        : config; // docker-compose version 1 (services at top level)
+    // docker-compose v1 places the services at the top level,
+    // docker-compose v2+ places the services within a 'services' key
+    // since docker-compose spec version 1.27, the 'version' key has
+    // become optional and can no longer be used to differentiate
+    // between v1 and v2.
+    const services = config.services || config;
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally

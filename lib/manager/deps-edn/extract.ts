@@ -1,6 +1,6 @@
 import * as datasourceClojure from '../../datasource/clojure';
-import { PackageDependency, PackageFile } from '../common';
 import { expandDepName } from '../leiningen/extract';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];

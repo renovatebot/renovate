@@ -1,7 +1,8 @@
-import { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
-import { RenovateConfig } from '../../config/common';
+import type { RenovateConfig } from '../../config/types';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import {
   BinarySource,
@@ -21,8 +22,6 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
-  localDir: null,
-  cacheDir: null,
 };
 
 export async function setExecConfig(
@@ -33,7 +32,7 @@ export async function setExecConfig(
     execConfig[key] = value || null;
   }
   if (execConfig.binarySource === 'docker') {
-    await removeDanglingContainers();
+    await removeDanglingContainers(getAdminConfig().dockerChildPrefix);
   }
 }
 
@@ -94,13 +93,15 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { env, docker, cwdFile } = opts;
-  const extraEnv = { ...opts.extraEnv, ...getAdminConfig().customEnvVariables };
+  const { dockerChildPrefix, customEnvVariables } = getAdminConfig();
+  const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
   // istanbul ignore if
+  const { localDir } = getAdminConfig();
   if (cwdFile) {
-    cwd = join(execConfig.localDir, dirname(cwdFile));
+    cwd = join(localDir, dirname(cwdFile));
   }
-  cwd = cwd || opts.cwd || execConfig.localDir;
+  cwd = cwd || opts.cwd || localDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };
@@ -140,15 +141,8 @@ export async function exec(
   let res: ExecResult | null = null;
   for (const rawExecCommand of commands) {
     const startTime = Date.now();
-    let timer;
-    const { timeout } = rawExecOptions;
     if (useDocker) {
-      await removeDockerContainer(docker.image);
-      // istanbul ignore next
-      timer = setTimeout(() => {
-        removeDockerContainer(docker.image); // eslint-disable-line
-        logger.info({ timeout, rawExecCommand }, 'Docker run timed out');
-      }, timeout);
+      await removeDockerContainer(docker.image, dockerChildPrefix);
     }
     logger.debug({ command: rawExecCommand }, 'Executing command');
     logger.trace({ commandOptions: rawExecOptions }, 'Command options');
@@ -156,18 +150,25 @@ export async function exec(
       res = await rawExec(rawExecCommand, rawExecOptions);
     } catch (err) {
       logger.trace({ err }, 'rawExec err');
-      clearTimeout(timer);
       if (useDocker) {
-        await removeDockerContainer(docker.image).catch((removeErr: Error) => {
-          const message: string = err.message;
-          throw new Error(
-            `Error: "${removeErr.message}" - Original Error: "${message}"`
-          );
-        });
+        await removeDockerContainer(docker.image, dockerChildPrefix).catch(
+          (removeErr: Error) => {
+            const message: string = err.message;
+            throw new Error(
+              `Error: "${removeErr.message}" - Original Error: "${message}"`
+            );
+          }
+        );
+      }
+      if (err.signal === `SIGTERM`) {
+        logger.debug(
+          { err },
+          'exec interrupted by SIGTERM - run needs to be aborted'
+        );
+        throw new Error(TEMPORARY_ERROR);
       }
       throw err;
     }
-    clearTimeout(timer);
     const durationMs = Math.round(Date.now() - startTime);
     if (res) {
       logger.debug(

@@ -1,1 +1,1 @@
-Keeps git submodules updated within a repository.
+Keeps Git submodules updated within a repository.

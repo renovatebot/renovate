@@ -1,8 +1,7 @@
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import { ReleaseResult } from '../common';
-
+import type { ReleaseResult } from '../types';
 import { id, removeBuildMeta } from './common';
 
 const http = new Http(id);
@@ -16,7 +15,6 @@ export async function getReleases(
   pkgName: string
 ): Promise<ReleaseResult | null> {
   const dep: ReleaseResult = {
-    pkgName,
     releases: [],
   };
   let pkgUrlList = `${feedUrl.replace(

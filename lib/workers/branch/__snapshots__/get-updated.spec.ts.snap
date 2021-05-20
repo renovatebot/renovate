@@ -102,6 +102,34 @@ Object {
 }
 `;
 
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles isRemediation rebase 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": false,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new contents",
+      "name": "package-lock.json",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles isRemediation success 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new contents",
+      "name": "package-lock.json",
+    },
+  ],
+}
+`;
+
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock file errors 1`] = `
 Object {
   "artifactErrors": Array [

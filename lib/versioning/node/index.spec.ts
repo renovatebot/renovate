@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { isStable, api as nodever } from '.';
+import { isStable, isValid, api as nodever } from '.';
 
 describe('semver.getNewValue()', () => {
   let dtLocal: any;
@@ -9,13 +9,13 @@ describe('semver.getNewValue()', () => {
   afterEach(() => {
     DateTime.local = dtLocal;
   });
-  it('returns normalized toVersion', () => {
+  it('returns normalized newVersion', () => {
     expect(
       nodever.getNewValue({
         currentValue: '1.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.0.0',
-        toVersion: 'v1.1.0',
+        currentVersion: '1.0.0',
+        newVersion: 'v1.1.0',
       })
     ).toEqual('1.1.0');
   });
@@ -24,8 +24,8 @@ describe('semver.getNewValue()', () => {
       nodever.getNewValue({
         currentValue: '~8.0.0',
         rangeStrategy: 'replace',
-        fromVersion: '8.0.2',
-        toVersion: 'v8.2.0',
+        currentVersion: '8.0.2',
+        newVersion: 'v8.2.0',
       })
     ).toEqual('~8.2.0');
   });
@@ -53,5 +53,9 @@ describe('semver.getNewValue()', () => {
         args.length ? dtLocal.apply(DateTime, args) : time;
       expect(isStable(version as string)).toBe(result);
     });
+  });
+
+  it('isValid', () => {
+    expect(isValid === nodever.isValid).toBe(true);
   });
 });

@@ -1,19 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/galaxy getReleases processes real data 1`] = `
+exports[`datasource/galaxy/index getReleases processes real data 1`] = `
 Object {
   "dependencyUrl": "https://galaxy.ansible.com/yatesr/timezone",
+  "registryUrl": "https://galaxy.ansible.com/",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2015-11-17T00:43:42Z",
+      "releaseTimestamp": "2015-11-17T00:43:42.000Z",
       "version": "1.0.0",
     },
     Object {
-      "releaseTimestamp": "2017-09-25T00:27:37Z",
+      "releaseTimestamp": "2017-09-25T00:27:37.000Z",
       "version": "1.1.0",
     },
     Object {
-      "releaseTimestamp": "2019-10-28T01:40:43Z",
+      "releaseTimestamp": "2019-10-28T01:40:43.000Z",
       "version": "1.2.0",
     },
   ],
@@ -21,11 +22,11 @@ Object {
 }
 `;
 
-exports[`datasource/galaxy getReleases processes real data 2`] = `
+exports[`datasource/galaxy/index getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -35,11 +36,11 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases return null if searching random username and project name 1`] = `
+exports[`datasource/galaxy/index getReleases return null if searching random username and project name 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -49,11 +50,11 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for 404 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for 404 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -63,11 +64,11 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for empty list 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for empty list 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -77,11 +78,11 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for empty result 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -91,11 +92,11 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for missing fields 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for missing fields 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -105,11 +106,11 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases returns null for unknown error 1`] = `
+exports[`datasource/galaxy/index getReleases returns null for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -119,13 +120,13 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
+exports[`datasource/galaxy/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
 
-exports[`datasource/galaxy getReleases throws for 5xx 2`] = `
+exports[`datasource/galaxy/index getReleases throws for 5xx 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -135,11 +136,11 @@ Array [
 ]
 `;
 
-exports[`datasource/galaxy getReleases throws for 404 1`] = `
+exports[`datasource/galaxy/index getReleases throws for 404 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

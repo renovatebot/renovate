@@ -1,21 +1,20 @@
 import { exec as _exec } from 'child_process';
-import { readFileSync } from 'fs';
 import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
-import { mocked } from '../../../test/util';
+import { loadFixture, mocked } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
-const pyproject10toml = readFileSync(
-  'lib/manager/poetry/__fixtures__/pyproject.10.toml',
-  'utf8'
-);
+const pyproject10toml = loadFixture('pyproject.10.toml');
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -29,15 +28,18 @@ const env = mocked(_env);
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
-const config = {
+const adminConfig: RepoAdminConfig = {
   localDir: join('/tmp/github/some/repo'),
 };
+
+const config: UpdateArtifactsConfig = {};
 
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(config);
+    await setExecConfig(adminConfig as never);
+    setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
   it('returns null if no poetry.lock found', async () => {
@@ -132,10 +134,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated poetry.lock using docker', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({
-      ...config,
-      binarySource: BinarySource.Docker,
-    });
+    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -150,7 +149,10 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          constraints: { python: '~2.7 || ^3.4' },
+          constraints: {
+            python: '~2.7 || ^3.4',
+            poetry: 'poetry>=1.1.2 setuptools poetry-dynamic-versioning>1',
+          },
         },
       })
     ).not.toBeNull();
@@ -158,10 +160,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated poetry.lock using docker (constraints)', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({
-      ...config,
-      binarySource: BinarySource.Docker,
-    });
+    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce(
       '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
     );
@@ -210,7 +209,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          isLockFileMaintenance: true,
+          updateType: 'lockFileMaintenance',
         },
       })
     ).not.toBeNull();

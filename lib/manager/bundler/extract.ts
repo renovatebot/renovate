@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 
 export async function extractPackageFile(
@@ -38,7 +38,8 @@ export async function extractPackageFile(
     if (rubyMatch) {
       res.constraints = { ruby: rubyMatch[1] };
     }
-    const gemMatchRegex = /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/;
+    const gemMatchRegex =
+      /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/;
     const gemMatch = gemMatchRegex.exec(line);
     if (gemMatch) {
       const dep: PackageDependency = {
@@ -185,6 +186,7 @@ export async function extractPackageFile(
     const lockContent = await readLocalFile(gemfileLock, 'utf8');
     if (lockContent) {
       logger.debug({ packageFile: fileName }, 'Found Gemfile.lock file');
+      res.lockFiles = [gemfileLock];
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
         const lockedDepValue = lockedEntries.get(dep.depName);

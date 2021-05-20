@@ -1,7 +1,8 @@
-import { UpdateType } from '../../../config';
+import { getName } from '../../../../test/util';
+import type { UpdateType } from '../../../config/types';
 import { sortBranches } from './sort';
 
-describe('workers/repository/process/sort', () => {
+describe(getName(), () => {
   describe('sortBranches()', () => {
     it('sorts based on updateType and prTitle', () => {
       const branches = [
@@ -51,7 +52,7 @@ describe('workers/repository/process/sort', () => {
       sortBranches(branches);
       expect(branches).toMatchSnapshot();
     });
-    it('sorts based on vulnerabilityAlert', () => {
+    it('sorts based on isVulnerabilityAlert', () => {
       const branches = [
         {
           updateType: 'major' as UpdateType,
@@ -72,7 +73,7 @@ describe('workers/repository/process/sort', () => {
           updateType: 'minor' as UpdateType,
           prTitle: 'a minor update',
           prPriority: -1,
-          vulnerabilityAlert: true,
+          isVulnerabilityAlert: true,
         },
       ];
       sortBranches(branches);

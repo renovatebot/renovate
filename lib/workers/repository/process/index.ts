@@ -1,12 +1,13 @@
-import { RenovateConfig, mergeChildConfig } from '../../../config';
+import { mergeChildConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { PackageFile } from '../../../manager/common';
+import type { PackageFile } from '../../../manager/types';
 import { platform } from '../../../platform';
 import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
-import { BranchConfig } from '../../common';
+import type { BranchConfig } from '../../types';
 import { ExtractResult, extract, lookup, update } from './extract-update';
-import { WriteUpdateResult } from './write';
+import type { WriteUpdateResult } from './write';
 
 function getBaseBranchConfig(
   baseBranch: string,

@@ -1,0 +1,55 @@
+---
+roles:
+  # Install a role from Ansible Galaxy.
+  - name: geerlingguy.java
+    version: 1.9.6
+  - name: geerlingguy.docker
+    version: 2.9.0
+
+collections:
+  # Install a collection from Ansible Galaxy.
+  - name: geerlingguy.php_roles
+    version: 0.9.3
+    source: https://galaxy.ansible.com
+  - name: davidban77.gns3
+    version: 1.2.2
+    type: galaxy
+
+# explicit github repo
+  - name: https://github.com/organization/repo_name.git
+    version: 1.2.2
+    type: git
+
+# explicit git repo
+  - name: https://example.com/organization/repo_name.git
+    version: 1.2.2
+    type: git
+
+# appendix style version definition
+  - name: https://example.com/organization/repo_name.git,1.2.2
+
+#  non standard registry url
+  - name: f5networks.f5_modules
+    source: https://cloud.redhat.com/api/automation-hub/
+
+# fails to import: no version supplied
+  - name: https://foo.bar/organization/repo_name.git
+    type: git
+
+# fails to guess dependency type
+  - name: fooBar
+    version: 1.0.0
+
+# fails as URL and file are not supported
+  - name: foo.Bar
+    type: url
+
+# fails as URL and file are not supported
+  - name: foo.Bar
+    type: file
+
+# abort if there is a unknown key
+  - name: https://example.com/organization/repo_name.git
+    example: "test"
+    version: 1.2.2
+    type: git

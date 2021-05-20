@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitLabBranch } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
-import { Preset, PresetConfig } from '../common';
+import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
 
 const gitlabApi = new GitlabHttp();
@@ -57,11 +57,13 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   pkgName: string,
   presetName: string,
+  presetPath: string,
   endpoint = Endpoint
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
     filePreset: presetName,
+    presetPath,
     endpoint,
     fetch: fetchJSONFile,
   });
@@ -69,7 +71,8 @@ export function getPresetFromEndpoint(
 
 export function getPreset({
   packageName: pkgName,
+  presetPath,
   presetName = 'default',
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(pkgName, presetName, Endpoint);
+  return getPresetFromEndpoint(pkgName, presetName, presetPath, Endpoint);
 }

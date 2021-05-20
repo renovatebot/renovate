@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { UpdateDependencyConfig, Upgrade } from '../common';
+import type { UpdateDependencyConfig, Upgrade } from '../types';
 
 export function updateAtPosition(
   fileContent: string,

@@ -1,6 +1,7 @@
+import { getName } from '../../../test/util';
 import { api as ubuntu } from '.';
 
-describe('versioning/ubuntu', () => {
+describe(getName(), () => {
   // validation
 
   it('isValid', () => {
@@ -231,8 +232,8 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.minSatisfyingVersion(versions, '04.10')).toBeNull();
   });
 
-  it('getNewValue simply returns toVersion', () => {
-    expect(ubuntu.getNewValue({ toVersion: 'foobar' } as never)).toEqual(
+  it('getNewValue simply returns newVersion', () => {
+    expect(ubuntu.getNewValue({ newVersion: 'foobar' } as never)).toEqual(
       'foobar'
     );
   });

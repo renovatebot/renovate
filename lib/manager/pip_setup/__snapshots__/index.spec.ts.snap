@@ -390,9 +390,9 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"lib/manager/pip_setup/__fixtures__/setup.py\\"",
+    "cmd": "<extract.py> \\"setup.py\\"",
     "options": Object {
-      "cwd": "/tmp/github/some/repo/lib/manager/pip_setup/__fixtures__",
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -449,9 +449,9 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"lib/manager/pip_setup/__fixtures__/setup.py\\"",
+    "cmd": "<extract.py> \\"setup.py\\"",
     "options": Object {
-      "cwd": "/tmp/github/some/repo/lib/manager/pip_setup/__fixtures__",
+      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",

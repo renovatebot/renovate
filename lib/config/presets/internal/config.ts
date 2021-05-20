@@ -1,4 +1,4 @@
-import { Preset } from '../common';
+import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   base: {
@@ -20,10 +20,6 @@ export const presets: Record<string, Preset> = {
       'helpers:disableTypesNodeMajor',
       'workarounds:all',
     ],
-  },
-  'base-js': {
-    description: 'Base configuration for Javascript (deprecated)',
-    extends: ['config:base'],
   },
   'js-app': {
     description: 'Default configuration for webapps',

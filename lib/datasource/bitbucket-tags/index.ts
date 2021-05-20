@@ -2,12 +2,13 @@ import * as utils from '../../platform/bitbucket/utils';
 import * as packageCache from '../../util/cache/package';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../util/url';
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BitbucketCommit, BitbucketTag } from './types';
 
 const bitbucketHttp = new BitbucketHttp();
 
 export const id = 'bitbucket-tags';
+export const customRegistrySupport = true;
 export const registryStrategy = 'first';
 export const defaultRegistryUrls = ['https://bitbucket.org'];
 

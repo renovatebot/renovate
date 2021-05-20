@@ -1,19 +1,22 @@
-import fs from 'fs-extra';
-import upath from 'upath';
+import { getName, loadFixture } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import { extractPackageFile } from '.';
 
-const sample = fs.readFileSync(
-  upath.resolve(__dirname, './__fixtures__/mix.exs'),
-  'utf-8'
-);
+const sample = loadFixture('mix.exs');
 
-describe('lib/manager/mix/extract', () => {
+describe(getName(), () => {
+  beforeEach(() => {
+    setAdminConfig({ localDir: '' });
+  });
+
   describe('extractPackageFile()', () => {
-    it('returns empty for invalid dependency file', () => {
-      expect(extractPackageFile('nothing here')).toMatchSnapshot();
+    it('returns empty for invalid dependency file', async () => {
+      expect(
+        await extractPackageFile('nothing here', 'mix.exs')
+      ).toMatchSnapshot();
     });
-    it('extracts all dependencies', () => {
-      const res = extractPackageFile(sample).deps;
+    it('extracts all dependencies', async () => {
+      const res = await extractPackageFile(sample, 'mix.exs');
       expect(res).toMatchSnapshot();
     });
   });

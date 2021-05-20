@@ -1,10 +1,6 @@
 import { getManagerList } from '../../manager';
-import { PackageRule, ValidationMessage } from '../common';
-
-export interface CheckManagerArgs {
-  resolvedRule: PackageRule;
-  currentPath: string;
-}
+import type { ValidationMessage } from '../types';
+import type { CheckManagerArgs } from './types';
 
 /**
  * Only if type condition or context condition violated then errors array will be mutated to store metadata
@@ -33,7 +29,7 @@ export function check({
   return managersErrMessage
     ? [
         {
-          depName: 'Configuration Error',
+          topic: 'Configuration Error',
           message: managersErrMessage,
         },
       ]

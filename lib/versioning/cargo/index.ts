@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
-import { NewValueConfig, VersioningApi } from '../common';
 import { api as npm } from '../npm';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'cargo';
 export const displayName = 'Cargo';
@@ -75,8 +75,8 @@ const isSingleVersion = (constraint: string): string | boolean =>
 function getNewValue({
   currentValue,
   rangeStrategy,
-  fromVersion,
-  toVersion,
+  currentVersion,
+  newVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
     return currentValue;
@@ -86,14 +86,14 @@ function getNewValue({
     if (currentValue.startsWith('= ')) {
       res += ' ';
     }
-    res += toVersion;
+    res += newVersion;
     return res;
   }
   const newSemver = npm.getNewValue({
     currentValue: cargo2npm(currentValue),
     rangeStrategy,
-    fromVersion,
-    toVersion,
+    currentVersion,
+    newVersion,
   });
   let newCargo = npm2cargo(newSemver);
   // istanbul ignore if

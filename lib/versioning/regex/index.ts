@@ -1,8 +1,8 @@
 import { compare, ltr, maxSatisfying, minSatisfying, satisfies } from 'semver';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { regEx } from '../../util/regex';
-import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
+import type { VersioningApiConstructor } from '../types';
 
 export const id = 'regex';
 export const displayName = 'Regular Expression';
@@ -55,14 +55,14 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       !new_config.includes('<patch>')
     ) {
       const error = new Error(CONFIG_VALIDATION);
-      error.configFile = new_config;
+      error.validationSource = new_config;
       error.validationError =
         'regex versioning needs at least one major, minor or patch group defined';
       throw error;
     }
 
     // TODO: should we validate the user has not added extra unsupported
-    // capture groups?
+    // capture groups? (#9717)
     this._config = regEx(new_config);
   }
 

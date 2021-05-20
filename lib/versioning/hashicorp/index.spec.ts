@@ -55,27 +55,69 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue({
         currentValue: '~> 1.2',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
-        toVersion: '2.0.7',
+        currentVersion: '1.2.3',
+        newVersion: '2.0.7',
       })
     ).toEqual('~> 2.0');
     expect(
       semver.getNewValue({
         currentValue: '~> 1.2.0',
         rangeStrategy: 'replace',
-        fromVersion: '1.2.3',
-        toVersion: '2.0.7',
+        currentVersion: '1.2.3',
+        newVersion: '2.0.7',
       })
     ).toEqual('~> 2.0.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14.0',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.1',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('~> 0.15.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14.0',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.1',
+        newVersion: '0.15.1',
+      })
+    ).toEqual('~> 0.15.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14.6',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.6',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('~> 0.15.0');
   });
   it('handles comma dividers', () => {
     expect(
       semver.getNewValue({
         currentValue: '>= 1.0.0, <= 2.0.0',
         rangeStrategy: 'widen',
-        fromVersion: '1.2.3',
-        toVersion: '2.0.7',
+        currentVersion: '1.2.3',
+        newVersion: '2.0.7',
       })
     ).toEqual('>= 1.0.0, <= 2.0.7');
+  });
+  it('updates short ranges', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '0.14',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.2',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('0.15');
+    expect(
+      semver.getNewValue({
+        currentValue: '~> 0.14',
+        rangeStrategy: 'replace',
+        currentVersion: '0.14.2',
+        newVersion: '0.15.0',
+      })
+    ).toEqual('~> 0.15');
   });
 });

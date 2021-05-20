@@ -5,8 +5,13 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { api as semverComposer } from '../../versioning/composer';
-import { PackageDependency, PackageFile } from '../common';
-import type { ComposerConfig, ComposerLock, Repo } from './types';
+import type { PackageDependency, PackageFile } from '../types';
+import type {
+  ComposerConfig,
+  ComposerLock,
+  ComposerManagerData,
+  Repo,
+} from './types';
 import { extractContraints } from './utils';
 
 /**
@@ -95,6 +100,7 @@ export async function extractPackageFile(
   let lockParsed: ComposerLock;
   if (lockContents) {
     logger.debug({ packageFile: fileName }, 'Found composer lock file');
+    res.lockFiles = [lockfilePath];
     try {
       lockParsed = JSON.parse(lockContents) as ComposerLock;
     } catch (err) /* istanbul ignore next */ {
@@ -175,8 +181,11 @@ export async function extractPackageFile(
     return null;
   }
   res.deps = deps;
-  if (composerJson.type) {
-    res.managerData = { composerJsonType: composerJson.type };
+  if (is.string(composerJson.type)) {
+    const managerData: ComposerManagerData = {
+      composerJsonType: composerJson.type,
+    };
+    res.managerData = managerData;
   }
   return res;
 }

@@ -21,7 +21,7 @@ function parseDynamicRevision(str: string): Revision | null {
     const value = str.replace(LATEST_REGEX, '').toLowerCase() || null;
     return {
       type: REV_TYPE_LATEST,
-      value: value !== 'integration' ? value : null,
+      value: value === 'integration' ? null : value,
     };
   }
 

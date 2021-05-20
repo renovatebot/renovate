@@ -6,17 +6,25 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
-import { GlobalConfig, RenovateConfig } from '../common';
 import * as massage from '../massage';
 import * as migration from '../migration';
+import type { GlobalConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
-import { PresetApi } from './common';
+import { removedPresets } from './common';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
+import type { ParsedPreset, PresetApi } from './types';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID,
+  PRESET_NOT_FOUND,
+  PRESET_PROHIBITED_SUBPRESET,
+  PRESET_RENOVATE_CONFIG_NOT_FOUND,
+} from './util';
 
 const presetSources: Record<string, PresetApi> = {
   github,
@@ -59,6 +67,7 @@ export function replaceArgs(
 export function parsePreset(input: string): ParsedPreset {
   let str = input;
   let presetSource: string;
+  let presetPath: string;
   let packageName: string;
   let presetName: string;
   let params: string[];
@@ -91,6 +100,7 @@ export function parsePreset(input: string): ParsedPreset {
     str = str.slice(0, str.indexOf('('));
   }
   const presetsPackages = [
+    'compatibility',
     'config',
     'default',
     'docker',
@@ -126,6 +136,18 @@ export function parsePreset(input: string): ParsedPreset {
     } else {
       presetName = str.slice(1);
     }
+  } else if (str.includes('//')) {
+    // non-scoped namespace with a subdirectory preset
+    const re = /^([\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/;
+
+    // Validation
+    if (str.includes(':')) {
+      throw new Error(PRESET_PROHIBITED_SUBPRESET);
+    }
+    if (!re.test(str)) {
+      throw new Error(PRESET_INVALID);
+    }
+    [, packageName, presetPath, presetName] = re.exec(str);
   } else {
     // non-scoped namespace
     [, packageName] = /(.*?)(:|$)/.exec(str);
@@ -137,7 +159,7 @@ export function parsePreset(input: string): ParsedPreset {
       presetName = 'default';
     }
   }
-  return { presetSource, packageName, presetName, params };
+  return { presetSource, presetPath, packageName, presetName, params };
 }
 
 export async function getPreset(
@@ -145,12 +167,25 @@ export async function getPreset(
   baseConfig?: RenovateConfig
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
-  const { presetSource, packageName, presetName, params } = parsePreset(preset);
+  // Check if the preset has been removed or replaced
+  const newPreset = removedPresets[preset];
+  if (newPreset) {
+    return getPreset(newPreset, baseConfig);
+  }
+  if (newPreset === null) {
+    return {};
+  }
+  const { presetSource, packageName, presetPath, presetName, params } =
+    parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
     packageName,
+    presetPath,
     presetName,
     baseConfig,
   });
+  if (!presetConfig) {
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
     const argMapping = {};
@@ -176,6 +211,8 @@ export async function getPreset(
     'excludePackageNames',
     'matchPackagePatterns',
     'excludePackagePatterns',
+    'matchPackagePrefixes',
+    'excludePackagePrefixes',
   ];
   if (presetKeys.every((key) => packageListKeys.includes(key))) {
     delete presetConfig.description;
@@ -227,12 +264,16 @@ export async function resolveConfigPresets(
             throw err;
           }
           const error = new Error(CONFIG_VALIDATION);
-          if (err.message === 'dep not found') {
+          if (err.message === PRESET_DEP_NOT_FOUND) {
             error.validationError = `Cannot find preset's package (${preset})`;
-          } else if (err.message === 'preset renovate-config not found') {
+          } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
             error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
-          } else if (err.message === 'preset not found') {
+          } else if (err.message === PRESET_NOT_FOUND) {
             error.validationError = `Preset name not found within published preset config (${preset})`;
+          } else if (err.message === PRESET_INVALID) {
+            error.validationError = `Preset is invalid (${preset})`;
+          } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
+            error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
           }
           // istanbul ignore if
           if (existingPresets.length) {
@@ -298,11 +339,4 @@ export async function resolveConfigPresets(
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
   return config;
-}
-
-export interface ParsedPreset {
-  presetSource: string;
-  packageName: string;
-  presetName: string;
-  params?: string[];
 }

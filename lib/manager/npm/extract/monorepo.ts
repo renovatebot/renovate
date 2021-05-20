@@ -2,15 +2,17 @@ import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import minimatch from 'minimatch';
 import upath from 'upath';
+import { getAdminConfig } from '../../../config/admin';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import {
   findUpInsidePath,
   getSiblingFileName,
+  getSubDirectory,
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
-import { ExtractConfig, PackageFile } from '../../common';
+import type { PackageFile } from '../../types';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
   const res = patterns.some(
@@ -82,12 +84,14 @@ export async function findPnpmWorkspace(
 }
 
 export async function detectPnpm(
-  config: ExtractConfig,
   packageFiles: Partial<PackageFile>[]
 ): Promise<void> {
   logger.debug(`Detecting pnpm Workspaces`);
   const packageFilterCache = new Map<string, string[] | null>();
-  const normalizedLocalDir = upath.normalizeSafe(config.localDir);
+
+  const { localDir } = getAdminConfig();
+
+  const normalizedLocalDir = upath.normalizeSafe(localDir);
   for (const p of packageFiles) {
     const { packageFile, pnpmShrinkwrap } = p;
     if (pnpmShrinkwrap) {
@@ -124,59 +128,59 @@ export async function detectPnpm(
 }
 
 export async function detectMonorepos(
-  config: ExtractConfig,
-  packageFiles: Partial<PackageFile>[]
+  packageFiles: Partial<PackageFile>[],
+  updateInternalDeps: boolean
 ): Promise<void> {
-  await detectPnpm(config, packageFiles);
+  await detectPnpm(packageFiles);
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
     const {
       packageFile,
       npmLock,
       yarnLock,
-      lernaDir,
+      managerData = {},
       lernaClient,
       lernaPackages,
       yarnWorkspacesPackages,
     } = p;
-    const basePath = upath.dirname(packageFile);
+    const { lernaJsonFile } = managerData;
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
-      logger.debug(
-        { packageFile, yarnWorkspacesPackages, lernaPackages },
-        'Found monorepo packages with base path ' + JSON.stringify(basePath)
-      );
-      const internalPackagePatterns = (is.array(packages)
-        ? packages
-        : [packages]
-      ).map((pattern) => upath.join(basePath, pattern));
+      const internalPackagePatterns = (
+        is.array(packages) ? packages : [packages]
+      ).map((pattern) => getSiblingFileName(packageFile, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
-          upath.dirname(sp.packageFile),
+          getSubDirectory(sp.packageFile),
           internalPackagePatterns
         )
       );
       const internalPackageNames = internalPackageFiles
         .map((sp) => sp.packageJsonName)
         .filter(Boolean);
-      p.deps?.forEach((dep) => {
-        if (internalPackageNames.includes(dep.depName)) {
-          dep.skipReason = SkipReason.InternalPackage; // eslint-disable-line no-param-reassign
-        }
-      });
+      if (!updateInternalDeps) {
+        p.deps?.forEach((dep) => {
+          if (internalPackageNames.includes(dep.depName)) {
+            dep.skipReason = SkipReason.InternalPackage; // eslint-disable-line no-param-reassign
+          }
+        });
+      }
       for (const subPackage of internalPackageFiles) {
-        subPackage.lernaDir = lernaDir;
+        subPackage.managerData = subPackage.managerData || {};
+        subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.lernaClient = lernaClient;
         subPackage.yarnLock = subPackage.yarnLock || yarnLock;
         subPackage.npmLock = subPackage.npmLock || npmLock;
         if (subPackage.yarnLock) {
           subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
         }
-        subPackage.deps?.forEach((dep) => {
-          if (internalPackageNames.includes(dep.depName)) {
-            dep.skipReason = SkipReason.InternalPackage; // eslint-disable-line no-param-reassign
-          }
-        });
+        if (!updateInternalDeps) {
+          subPackage.deps?.forEach((dep) => {
+            if (internalPackageNames.includes(dep.depName)) {
+              dep.skipReason = SkipReason.InternalPackage; // eslint-disable-line no-param-reassign
+            }
+          });
+        }
       }
     }
   }

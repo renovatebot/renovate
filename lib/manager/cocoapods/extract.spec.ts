@@ -1,25 +1,26 @@
-import fs from 'fs-extra';
-import upath from 'upath';
-
+import { getName, loadFixture } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import { extractPackageFile } from '.';
 
-const simplePodfile = fs.readFileSync(
-  upath.resolve(__dirname, './__fixtures__/Podfile.simple'),
-  'utf-8'
-);
+const simplePodfile = loadFixture('Podfile.simple');
+const complexPodfile = loadFixture('Podfile.complex');
 
-const complexPodfile = fs.readFileSync(
-  upath.resolve(__dirname, './__fixtures__/Podfile.complex'),
-  'utf-8'
-);
+const adminConfig: RepoAdminConfig = {
+  localDir: '',
+};
 
-describe('lib/manager/cocoapods/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
-    it('extracts all dependencies', () => {
-      const simpleResult = extractPackageFile(simplePodfile).deps;
+    it('extracts all dependencies', async () => {
+      setAdminConfig(adminConfig);
+      const simpleResult = (await extractPackageFile(simplePodfile, 'Podfile'))
+        .deps;
       expect(simpleResult).toMatchSnapshot();
 
-      const complexResult = extractPackageFile(complexPodfile).deps;
+      const complexResult = (
+        await extractPackageFile(complexPodfile, 'Podfile')
+      ).deps;
       expect(complexResult).toMatchSnapshot();
     });
   });

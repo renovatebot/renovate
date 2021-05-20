@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { RenovateConfig, ValidationMessage } from './common';
 import * as configMassage from './massage';
 import * as configMigration from './migration';
+import type { RenovateConfig, ValidationMessage } from './types';
 import * as configValidation from './validation';
 
 export async function migrateAndValidate(

@@ -2,7 +2,7 @@ import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 
 export async function prAlreadyExisted(
   config: BranchConfig
@@ -24,7 +24,7 @@ export async function prAlreadyExisted(
     const prDetails = await platform.getPr(pr.number);
     // istanbul ignore if
     if (prDetails.state === PrState.Open) {
-      logger.debug('PR reopened');
+      logger.debug('PR reopened - aborting run');
       throw new Error(REPOSITORY_CHANGED);
     }
     return pr;

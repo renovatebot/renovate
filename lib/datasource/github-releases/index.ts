@@ -1,9 +1,11 @@
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GithubRelease } from './types';
 
 export const id = 'github-releases';
+export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 
@@ -15,12 +17,6 @@ function getCacheKey(depHost: string, repo: string): string {
   const type = 'tags';
   return `${depHost}:${repo}:${type}`;
 }
-
-type GithubRelease = {
-  tag_name: string;
-  published_at: string;
-  prerelease: boolean;
-};
 
 /**
  * github.getReleases
@@ -49,10 +45,9 @@ export async function getReleases({
     registryUrl ?? 'https://github.com/'
   );
   const apiBaseUrl =
-    sourceUrlBase !== 'https://github.com/'
-      ? `${sourceUrlBase}api/v3/`
-      : `https://api.github.com/`;
-
+    sourceUrlBase === 'https://github.com/'
+      ? `https://api.github.com/`
+      : `${sourceUrlBase}api/v3/`;
   const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
   const res = await http.getJson<GithubRelease[]>(url, {
     paginate: true,

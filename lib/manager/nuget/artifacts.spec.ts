@@ -2,11 +2,14 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
-import { setUtilConfig } from '../../util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
+import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
+import type { UpdateArtifactsConfig } from '../types';
 import * as nuget from './artifacts';
 import {
   getConfiguredRegistries as _getConfiguredRegistries,
@@ -22,22 +25,21 @@ jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const getConfiguredRegistries: jest.Mock<
-  typeof _getConfiguredRegistries
-> = _getConfiguredRegistries as any;
-const getDefaultRegistries: jest.Mock<
-  typeof _getDefaultRegistries
-> = _getDefaultRegistries as any;
-const getRandomString: jest.Mock<
-  typeof _getRandomString
-> = _getRandomString as any;
+const getConfiguredRegistries: jest.Mock<typeof _getConfiguredRegistries> =
+  _getConfiguredRegistries as any;
+const getDefaultRegistries: jest.Mock<typeof _getDefaultRegistries> =
+  _getDefaultRegistries as any;
+const getRandomString: jest.Mock<typeof _getRandomString> =
+  _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
-const config = {
+const adminConfig: RepoAdminConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
 };
+
+const config: UpdateArtifactsConfig = {};
 
 describe('updateArtifacts', () => {
   beforeEach(async () => {
@@ -49,9 +51,15 @@ describe('updateArtifacts', () => {
       Promise.resolve(dirName)
     );
     getRandomString.mockReturnValue('not-so-random' as any);
-    await setUtilConfig(config);
+    await setExecConfig(adminConfig as never);
+    setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
+
+  afterEach(() => {
+    setAdminConfig();
+  });
+
   it('aborts if no lock file found', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -146,7 +154,7 @@ describe('updateArtifacts', () => {
 
   it('supports docker mode', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -217,6 +225,28 @@ describe('updateArtifacts', () => {
       }
       return undefined;
     });
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: ['dep'],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('strips protocol version from feed url', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json' as any);
+    getConfiguredRegistries.mockResolvedValueOnce([
+      {
+        name: 'myRegistry',
+        url: 'https://my-registry.example.org#protocolVersion=3',
+      },
+    ] as never);
+    hostRules.find.mockImplementationOnce(() => ({}));
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',

@@ -1,9 +1,10 @@
-import fs from 'fs';
 import { ERROR, WARN } from 'bunyan';
 import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   getConfig,
+  getName,
+  loadFixture,
   logger,
   platform,
 } from '../../../test/util';
@@ -11,11 +12,7 @@ import { setAdminConfig } from '../../config/admin';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { Platform, Pr } from '../../platform';
 import { PrState } from '../../types';
-import {
-  BranchConfig,
-  BranchUpgradeConfig,
-  ProcessBranchResult,
-} from '../common';
+import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 
 type PrUpgrade = BranchUpgradeConfig;
@@ -49,7 +46,7 @@ async function dryRun(
   expect(platform.findPr).toHaveBeenCalledTimes(findPrCalls);
 }
 
-describe('workers/repository/master-issue', () => {
+describe(getName(), () => {
   describe('ensureMasterIssue()', () => {
     beforeEach(() => {
       setAdminConfig();
@@ -110,12 +107,12 @@ describe('workers/repository/master-issue', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          res: ProcessBranchResult.Automerged,
+          result: BranchResult.Automerged,
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          res: ProcessBranchResult.Automerged,
+          result: BranchResult.Automerged,
           dependencyDashboardApproval: false,
         },
       ];
@@ -152,62 +149,85 @@ describe('workers/repository/master-issue', () => {
       await dryRun(branches, platform);
     });
 
+    it('open or update Dependency Dashboard when rules contain approvals', async () => {
+      const branches: BranchConfig[] = [];
+      config.packageRules = [
+        {
+          dependencyDashboardApproval: true,
+        },
+        {},
+      ];
+      config.dependencyDashboardFooter = 'And this is a footer';
+      await dependencyDashboard.ensureMasterIssue(config, branches);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
+      expect(platform.findPr).toHaveBeenCalledTimes(0);
+
+      // same with dry run
+      await dryRun(branches, platform);
+    });
+
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
       const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          res: ProcessBranchResult.NeedsApproval,
+          result: BranchResult.NeedsApproval,
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          res: ProcessBranchResult.NeedsApproval,
+          result: BranchResult.NeedsApproval,
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          res: ProcessBranchResult.NotScheduled,
+          result: BranchResult.NotScheduled,
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          res: ProcessBranchResult.NotScheduled,
+          result: BranchResult.NotScheduled,
           branchName: 'branchName4',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr5',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
-          res: ProcessBranchResult.PrLimitReached,
+          result: BranchResult.PrLimitReached,
           branchName: 'branchName5',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr6',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
-          res: ProcessBranchResult.PrLimitReached,
+          result: BranchResult.PrLimitReached,
           branchName: 'branchName6',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr7',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
-          res: ProcessBranchResult.Error,
+          result: BranchResult.Error,
           branchName: 'branchName7',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr8',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
-          res: ProcessBranchResult.Error,
+          result: BranchResult.Error,
           branchName: 'branchName8',
         },
       ];
@@ -219,10 +239,7 @@ describe('workers/repository/master-issue', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        fs.readFileSync(
-          'lib/workers/repository/__fixtures__/master-issue_with_8_PR.txt',
-          'utf8'
-        )
+        loadFixture('master-issue_with_8_PR.txt')
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
       expect(platform.findPr).toHaveBeenCalledTimes(0);
@@ -237,7 +254,7 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          res: ProcessBranchResult.PrEdited,
+          result: BranchResult.PrEdited,
           branchName: 'branchName1',
         },
         {
@@ -247,7 +264,7 @@ describe('workers/repository/master-issue', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          res: ProcessBranchResult.PrEdited,
+          result: BranchResult.PrEdited,
           branchName: 'branchName2',
         },
       ];
@@ -262,10 +279,7 @@ describe('workers/repository/master-issue', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        fs.readFileSync(
-          'lib/workers/repository/__fixtures__/master-issue_with_2_PR_edited.txt',
-          'utf8'
-        )
+        loadFixture('master-issue_with_2_PR_edited.txt')
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(2);
       expect(platform.getBranchPr.mock.calls[0][0]).toBe('branchName1');
@@ -282,7 +296,7 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          res: ProcessBranchResult.Rebase,
+          result: BranchResult.Rebase,
           branchName: 'branchName1',
         },
         {
@@ -292,14 +306,14 @@ describe('workers/repository/master-issue', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          res: ProcessBranchResult.Rebase,
+          result: BranchResult.Rebase,
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          res: ProcessBranchResult.Rebase,
+          result: BranchResult.Rebase,
           branchName: 'branchName3',
         },
       ];
@@ -315,10 +329,7 @@ describe('workers/repository/master-issue', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        fs.readFileSync(
-          'lib/workers/repository/__fixtures__/master-issue_with_3_PR_in_progress.txt',
-          'utf8'
-        )
+        loadFixture('master-issue_with_3_PR_in_progress.txt')
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(3);
       expect(platform.getBranchPr.mock.calls[0][0]).toBe('branchName1');
@@ -336,7 +347,7 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          res: ProcessBranchResult.AlreadyExisted,
+          result: BranchResult.AlreadyExisted,
           branchName: 'branchName1',
         },
         {
@@ -346,7 +357,7 @@ describe('workers/repository/master-issue', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          res: ProcessBranchResult.AlreadyExisted,
+          result: BranchResult.AlreadyExisted,
           branchName: 'branchName2',
         },
       ];
@@ -362,10 +373,7 @@ describe('workers/repository/master-issue', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        fs.readFileSync(
-          'lib/workers/repository/__fixtures__/master-issue_with_2_PR_closed_ignored.txt',
-          'utf8'
-        )
+        loadFixture('master-issue_with_2_PR_closed_ignored.txt')
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
       expect(platform.findPr).toHaveBeenCalledTimes(2);
@@ -386,7 +394,7 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          res: ProcessBranchResult.NeedsPrApproval,
+          result: BranchResult.NeedsPrApproval,
           branchName: 'branchName1',
         },
         {
@@ -396,21 +404,21 @@ describe('workers/repository/master-issue', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          res: ProcessBranchResult.NeedsPrApproval,
+          result: BranchResult.NeedsPrApproval,
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          res: ProcessBranchResult.NeedsPrApproval,
+          result: BranchResult.NeedsPrApproval,
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          res: ProcessBranchResult.Pending,
+          result: BranchResult.Pending,
           branchName: 'branchName4',
         },
       ];
@@ -423,10 +431,7 @@ describe('workers/repository/master-issue', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        fs.readFileSync(
-          'lib/workers/repository/__fixtures__/master-issue_with_3_PR_in_approval.txt',
-          'utf8'
-        )
+        loadFixture('master-issue_with_3_PR_in_approval.txt')
       );
       expect(platform.findPr).toHaveBeenCalledTimes(0);
 
@@ -442,7 +447,7 @@ describe('workers/repository/master-issue', () => {
           upgrades: [
             { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
           ],
-          res: ProcessBranchResult.Pending,
+          result: BranchResult.Pending,
           branchName: 'branchName1',
         },
       ];

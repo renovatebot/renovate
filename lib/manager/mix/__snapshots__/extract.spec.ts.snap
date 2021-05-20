@@ -1,74 +1,76 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/mix/extract extractPackageFile() extracts all dependencies 1`] = `
-Array [
-  Object {
-    "currentValue": "~> 0.8.1",
-    "datasource": "hex",
-    "depName": "postgrex",
-    "lookupName": "postgrex",
-    "managerData": Object {
-      "lineNumber": 18,
+exports[`manager/mix/extract extractPackageFile() extracts all dependencies 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "~> 0.8.1",
+      "datasource": "hex",
+      "depName": "postgrex",
+      "lookupName": "postgrex",
+      "managerData": Object {
+        "lineNumber": 18,
+      },
     },
-  },
-  Object {
-    "currentValue": ">2.1.0 or <=3.0.0",
-    "datasource": "hex",
-    "depName": "ecto",
-    "lookupName": "ecto",
-    "managerData": Object {
-      "lineNumber": 19,
+    Object {
+      "currentValue": ">2.1.0 or <=3.0.0",
+      "datasource": "hex",
+      "depName": "ecto",
+      "lookupName": "ecto",
+      "managerData": Object {
+        "lineNumber": 19,
+      },
     },
-  },
-  Object {
-    "currentValue": "ninenines/cowboy",
-    "datasource": "github",
-    "depName": "cowboy",
-    "managerData": Object {
-      "lineNumber": 20,
+    Object {
+      "currentValue": "ninenines/cowboy",
+      "datasource": "github",
+      "depName": "cowboy",
+      "managerData": Object {
+        "lineNumber": 20,
+      },
+      "skipReason": "non-hex depTypes",
     },
-    "skipReason": "non-hex depTypes",
-  },
-  Object {
-    "currentValue": "~> 1.0",
-    "datasource": "hex",
-    "depName": "secret",
-    "lookupName": "secret:acme",
-    "managerData": Object {
-      "lineNumber": 21,
+    Object {
+      "currentValue": "~> 1.0",
+      "datasource": "hex",
+      "depName": "secret",
+      "lookupName": "secret:acme",
+      "managerData": Object {
+        "lineNumber": 21,
+      },
     },
-  },
-  Object {
-    "currentValue": ">2.1.0 and <=3.0.0",
-    "datasource": "hex",
-    "depName": "ex_doc",
-    "lookupName": "ex_doc",
-    "managerData": Object {
-      "lineNumber": 22,
+    Object {
+      "currentValue": ">2.1.0 and <=3.0.0",
+      "datasource": "hex",
+      "depName": "ex_doc",
+      "lookupName": "ex_doc",
+      "managerData": Object {
+        "lineNumber": 22,
+      },
     },
-  },
-  Object {
-    "currentValue": ">= 1.0.0",
-    "datasource": "hex",
-    "depName": "jason",
-    "lookupName": "jason",
-    "managerData": Object {
-      "lineNumber": 24,
+    Object {
+      "currentValue": ">= 1.0.0",
+      "datasource": "hex",
+      "depName": "jason",
+      "lookupName": "jason",
+      "managerData": Object {
+        "lineNumber": 24,
+      },
     },
-  },
-  Object {
-    "currentValue": "~> 1.0",
-    "datasource": "hex",
-    "depName": "jason",
-    "lookupName": "jason",
-    "managerData": Object {
-      "lineNumber": 24,
+    Object {
+      "currentValue": "~> 1.0",
+      "datasource": "hex",
+      "depName": "jason",
+      "lookupName": "jason",
+      "managerData": Object {
+        "lineNumber": 24,
+      },
     },
-  },
-]
+  ],
+}
 `;
 
-exports[`lib/manager/mix/extract extractPackageFile() returns empty for invalid dependency file 1`] = `
+exports[`manager/mix/extract extractPackageFile() returns empty for invalid dependency file 1`] = `
 Object {
   "deps": Array [],
 }

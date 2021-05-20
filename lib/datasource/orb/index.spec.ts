@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { id as datasource } from '.';
 
 const orbData = {
@@ -25,7 +26,7 @@ const orbData = {
 
 const baseUrl = 'https://circleci.com';
 
-describe('datasource/orb', () => {
+describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

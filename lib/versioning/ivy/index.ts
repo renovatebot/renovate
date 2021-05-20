@@ -1,4 +1,3 @@
-import { NewValueConfig, VersioningApi } from '../common';
 import maven from '../maven';
 import {
   TYPE_QUALIFIER,
@@ -6,6 +5,7 @@ import {
   isSubversion,
   tokenize,
 } from '../maven/compare';
+import type { NewValueConfig, VersioningApi } from '../types';
 import {
   LATEST_REGEX,
   REV_TYPE_LATEST,
@@ -93,12 +93,12 @@ function getSatisfyingVersion(versions: string[], range: string): string {
 function getNewValue({
   currentValue,
   rangeStrategy,
-  toVersion,
+  newVersion,
 }: NewValueConfig): string | null {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
-    return toVersion;
+    return newVersion;
   }
-  return autoExtendMavenRange(currentValue, toVersion);
+  return autoExtendMavenRange(currentValue, newVersion);
 }
 
 export const api: VersioningApi = {

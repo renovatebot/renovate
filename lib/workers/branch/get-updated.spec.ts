@@ -1,10 +1,10 @@
-import { defaultConfig, git, mocked } from '../../../test/util';
-import * as datasourceGitSubmodules from '../../datasource/git-submodules';
+import { defaultConfig, getName, git, mocked } from '../../../test/util';
+import * as datasourceGitRefs from '../../datasource/git-refs';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
 import * as _helmv3 from '../../manager/helmv3';
 import * as _npm from '../../manager/npm';
-import { BranchConfig } from '../common';
+import type { BranchConfig } from '../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
 
@@ -21,7 +21,7 @@ jest.mock('../../manager/git-submodules');
 jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
-describe('workers/branch/get-updated', () => {
+describe(getName(), () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
     beforeEach(() => {
@@ -111,6 +111,30 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
+    it('handles isRemediation success', async () => {
+      config.upgrades.push({
+        manager: 'npm',
+        isRemediation: true,
+      } as never);
+      npm.updateLockedDependency.mockResolvedValueOnce({
+        'package-lock.json': 'new contents',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles isRemediation rebase', async () => {
+      config.upgrades.push({
+        manager: 'npm',
+        isRemediation: true,
+      } as never);
+      config.reuseExistingBranch = true;
+      git.getFile.mockResolvedValueOnce('existing content');
+      npm.updateLockedDependency.mockResolvedValue({
+        'package-lock.json': 'new contents',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
     it('handles lockFileMaintenance error', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -148,7 +172,7 @@ describe('workers/branch/get-updated', () => {
     it('handles git submodules', async () => {
       config.upgrades.push({
         manager: 'git-submodules',
-        datasource: datasourceGitSubmodules.id,
+        datasource: datasourceGitRefs.id,
       } as never);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);

@@ -1,6 +1,7 @@
+import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-describe('lib/manager/terraform-version/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns a result', () => {
       const res = extractPackageFile('12.0.0\n');

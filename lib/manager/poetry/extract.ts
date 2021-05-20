@@ -3,11 +3,15 @@ import is from '@sindresorhus/is';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { getSiblingFileName, readLocalFile } from '../../util/fs';
+import {
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../util/fs';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
-import { PackageDependency, PackageFile } from '../common';
-import {
+import type { PackageDependency, PackageFile } from '../types';
+import type {
   PoetryFile,
   PoetryLock,
   PoetryLockSection,
@@ -156,9 +160,22 @@ export async function extractPackageFile(
     constraints.python = pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
-  return {
+  const res: PackageFile = {
     deps,
     registryUrls: extractRegistries(pyprojectfile),
     constraints,
   };
+  // Try poetry.lock first
+  let lockFile = getSiblingFileName(fileName, 'poetry.lock');
+  // istanbul ignore next
+  if (await localPathExists(lockFile)) {
+    res.lockFiles = [lockFile];
+  } else {
+    // Try pyproject.lock next
+    lockFile = getSiblingFileName(fileName, 'pyproject.lock');
+    if (await localPathExists(lockFile)) {
+      res.lockFiles = [lockFile];
+    }
+  }
+  return res;
 }

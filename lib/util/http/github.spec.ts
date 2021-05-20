@@ -13,7 +13,7 @@ import { GithubHttp, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
     githubApi = new GithubHttp();
@@ -56,6 +56,36 @@ describe(getName(__filename), () => {
         .reply(200, ['d']);
       const res = await githubApi.getJson('some-url', { paginate: true });
       expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(3);
+    });
+    it('uses paginationField', async () => {
+      const url = '/some-url';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(
+          200,
+          { the_field: ['a'], total: 4 },
+          {
+            link: `<${url}?page=2>; rel="next", <${url}?page=3>; rel="last"`,
+          }
+        )
+        .get(`${url}?page=2`)
+        .reply(
+          200,
+          { the_field: ['b', 'c'], total: 4 },
+          {
+            link: `<${url}?page=3>; rel="next", <${url}?page=3>; rel="last"`,
+          }
+        )
+        .get(`${url}?page=3`)
+        .reply(200, { the_field: ['d'], total: 4 });
+      const res: any = await githubApi.getJson('some-url', {
+        paginate: true,
+        paginationField: 'the_field',
+      });
+      expect(res.body.the_field).toEqual(['a', 'b', 'c', 'd']);
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(3);
     });
@@ -186,6 +216,14 @@ describe(getName(__filename), () => {
         ).rejects.toThrow(
           'Review cannot be requested from pull request author.'
         );
+      });
+      it('should throw original error when pull requests aleady existed', async () => {
+        await expect(
+          fail(422, {
+            message: 'Validation error',
+            errors: [{ message: 'A pull request already exists' }],
+          })
+        ).rejects.toThrow('Validation error');
       });
       it('should throw original error of unknown type', async () => {
         await expect(

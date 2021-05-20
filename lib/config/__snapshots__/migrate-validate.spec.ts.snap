@@ -11,8 +11,8 @@ exports[`config/migrate-validate migrateAndValidate() handles invalid 1`] = `
 Object {
   "errors": Array [
     Object {
-      "depName": "Configuration Error",
       "message": "Invalid configuration option: foo",
+      "topic": "Configuration Error",
     },
   ],
   "foo": "none",

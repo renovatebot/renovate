@@ -1,6 +1,8 @@
 import { Stats } from 'fs';
 import { stat } from 'fs-extra';
 import upath from 'upath';
+import { getAdminConfig } from '../../config/admin';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
 import { logger } from '../../logger';
@@ -8,14 +10,13 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import * as gradleVersioning from '../../versioning/gradle';
-import {
+import type {
   ExtractConfig,
   PackageFile,
   UpdateDependencyConfig,
   Upgrade,
-} from '../common';
+} from '../types';
 import {
-  GradleDependency,
   collectVersionVariables,
   init,
   updateGradleVersion,
@@ -24,6 +25,7 @@ import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
+import type { GradleDependency } from './types';
 import { extraEnv, gradleWrapperFileName, prepareGradleCommand } from './utils';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
@@ -64,7 +66,7 @@ export async function executeGradle(
     timeout,
     cwd,
     docker: {
-      image: 'renovate/gradle',
+      image: 'gradle',
     },
     extraEnv,
   };
@@ -72,6 +74,9 @@ export async function executeGradle(
     logger.debug({ cmd }, 'Start gradle command');
     ({ stdout, stderr } = await exec(cmd, execOptions));
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     if (err.code === TIMEOUT_CODE) {
       throw new ExternalHostError(err, 'gradle');
     }
@@ -88,12 +93,11 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   let rootBuildGradle: string | undefined;
   let gradlew: Stats | null;
+  const { localDir } = getAdminConfig();
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
     const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
-    gradlew = await stat(upath.join(config.localDir, gradlewPath)).catch(
-      () => null
-    );
+    gradlew = await stat(upath.join(localDir, gradlewPath)).catch(() => null);
 
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
       rootBuildGradle = packageFile;
@@ -112,7 +116,7 @@ export async function extractAllPackageFiles(
   }
   logger.debug('Extracting dependencies from all gradle files');
 
-  const cwd = upath.join(config.localDir, upath.dirname(rootBuildGradle));
+  const cwd = upath.join(localDir, upath.dirname(rootBuildGradle));
 
   await createRenovateGradlePlugin(cwd);
   await executeGradle(config, cwd, gradlew);

@@ -1,7 +1,7 @@
 import { safeLoad } from 'js-yaml';
 import * as datasourceDart from '../../datasource/dart';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 function getDeps(
   depsObj: { [x: string]: any },
@@ -40,7 +40,7 @@ export function extractPackageFile(
   packageFile: string
 ): PackageFile | null {
   try {
-    // TODO: fix me
+    // TODO: fix me (#9610)
     const doc = safeLoad(content, { json: true }) as any;
     const deps = [
       ...getDeps(doc.dependencies, {

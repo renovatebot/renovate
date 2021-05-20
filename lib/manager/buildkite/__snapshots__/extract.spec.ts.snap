@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/buildkite/extract extractPackageFile() adds skipReason 1`] = `
+exports[`manager/buildkite/extract extractPackageFile() adds skipReason 1`] = `
 Array [
   Object {
     "currentValue": "v1.3.2.5",
@@ -15,12 +15,12 @@ Array [
   Object {
     "currentValue": "v1.3.2",
     "depName": "github.com/buildkite/plugin-docker-compose",
-    "skipReason": "unknown",
+    "skipReason": "invalid-dependency-specification",
   },
 ]
 `;
 
-exports[`lib/manager/buildkite/extract extractPackageFile() extracts arrays of plugins 1`] = `
+exports[`manager/buildkite/extract extractPackageFile() extracts arrays of plugins 1`] = `
 Array [
   Object {
     "currentValue": "v2.0.1",
@@ -53,7 +53,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/buildkite/extract extractPackageFile() extracts multiple plugins in same file 1`] = `
+exports[`manager/buildkite/extract extractPackageFile() extracts multiple plugins in same file 1`] = `
 Array [
   Object {
     "currentValue": "v1.3.2",
@@ -72,7 +72,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/buildkite/extract extractPackageFile() extracts simple single plugin 1`] = `
+exports[`manager/buildkite/extract extractPackageFile() extracts simple single plugin 1`] = `
 Array [
   Object {
     "currentValue": "v2.0.0",

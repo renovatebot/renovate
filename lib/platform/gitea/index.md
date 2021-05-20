@@ -2,4 +2,4 @@
 
 ## Unsupported platform features/concepts
 
-- **Adding reviewers to PRs not supported**: While Gitea supports a basic implementation for supporting PR reviews, no API support has been implemented so far.
+- **Adding reviewers to PRs not supported**: Gitea versions older than v1.14.0 do not have the required API.

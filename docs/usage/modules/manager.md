@@ -50,13 +50,13 @@ If a manager matches a file that you _don't_ want it to, ignore it using the `ig
 Also, if you ever find that Renovate is _not_ matching a file name that you're certain it should, check your preset config isn't the cause of it.
 The `config:base` preset ignores common test and example directory names, for example.
 
-### Enabling and Disabling Managers
+### Enabling and disabling managers
 
 #### Enabling experimental managers
 
 Most managers are enabled by default.
-For those that aren't, typically because they are considered experimental, you can enable them opt-in.
-For example, if there was a manager called `some-new-manager` then you could enable it this way:
+For those that aren't, typically because they are considered experimental, you can opt-in manually.
+If there was a manager called `some-new-manager` you would enable it like this:
 
 ```json
 {

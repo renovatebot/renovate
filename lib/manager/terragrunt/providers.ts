@@ -1,11 +1,10 @@
-import { PackageDependency } from '../common';
-import {
-  ExtractionResult,
-  TerragruntDependencyTypes,
-  keyValueExtractionRegex,
-} from './util';
+import type { PackageDependency } from '../types';
+import { TerragruntDependencyTypes } from './common';
+import type { ExtractionResult } from './types';
+import { keyValueExtractionRegex } from './util';
 
-export const sourceExtractionRegex = /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
+export const sourceExtractionRegex =
+  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
 
 function extractBracesContent(content): number {
   const stack = [];
