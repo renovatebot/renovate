@@ -227,7 +227,7 @@ The format of the environment variables must be all upper-case and follow:
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
-Examples:
+#### npmjs registry example
 
 `NPM_REGISTRY_NPMJS_ORG_TOKEN=abc123`:
 
@@ -242,6 +242,8 @@ Examples:
   ]
 }
 ```
+
+#### GitLab example
 
 `GITLAB__TAGS_CODE__HOST_COMPANY_COM_USERNAME=bot GITLAB__TAGS_CODE__HOST_COMPANY_COM_PASSWORD=botpass123`:
 
@@ -258,9 +260,9 @@ Examples:
 }
 ```
 
-It's also possible to skip the host part, and just have datasource + credentials.
+#### Datasource and credentials only
 
-Example:
+You can skip the host part, and use just the datasource and credentials.
 
 `DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
 
