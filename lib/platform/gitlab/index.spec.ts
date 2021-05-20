@@ -301,6 +301,7 @@ describe(getName(), () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
       process.env.GITLAB_IGNORE_REPO_URL = 'true';
       const selfHostedUrl = 'http://mycompany.com/gitlab';
@@ -330,6 +331,7 @@ describe(getName(), () => {
         repository: 'some/repo/project',
         localDir: '',
       });
+      expect(git.initRepo.mock.calls).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
