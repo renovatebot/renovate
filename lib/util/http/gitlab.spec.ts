@@ -15,19 +15,17 @@ const selfHostedUrl = 'http://mycompany.com/gitlab';
 
 describe(getName(), () => {
   let gitlabApi: GitlabHttp;
-  const envBefore = process.env;
 
   beforeEach(() => {
     gitlabApi = new GitlabHttp();
     setBaseUrl(`${gitlabApiHost}/api/v4/`);
     httpMock.setup();
-    process.env = { ...envBefore };
+    delete process.env.GITLAB_IGNORE_REPO_URL;
   });
 
   afterEach(() => {
     jest.resetAllMocks();
     httpMock.reset();
-    process.env = envBefore;
   });
 
   it('paginates', async () => {

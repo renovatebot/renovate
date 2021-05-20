@@ -22,7 +22,6 @@ describe(getName(), () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
-  const envBefore = process.env;
 
   beforeEach(async () => {
     // reset module
@@ -46,11 +45,10 @@ describe(getName(), () => {
     });
     httpMock.reset();
     httpMock.setup();
-    process.env = { ...envBefore };
+    delete process.env.GITLAB_IGNORE_REPO_URL;
   });
   afterEach(() => {
     httpMock.reset();
-    process.env = envBefore;
   });
 
   async function initFakePlatform(version: string) {
