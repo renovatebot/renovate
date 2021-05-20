@@ -7,7 +7,7 @@ import {
   readLocalFile,
 } from '../../../util/fs';
 import type { PackageFile } from '../../types';
-import { PnpmWorkspaceFile } from './types';
+import type { PnpmWorkspaceFile } from './types';
 import { matchesAnyPattern } from './utils';
 
 export async function extractPnpmFilters(
