@@ -36,8 +36,7 @@ export async function extractPnpmFilters(
 }
 
 export async function findPnpmWorkspace(
-  packageFile: string,
-  normalizedLocalDir: string
+  packageFile: string
 ): Promise<{ lockFilePath: string; workspaceYamlPath: string } | null> {
   const workspaceYamlPath = await findLocalSiblingOrParent(
     packageFile,
@@ -51,23 +50,23 @@ export async function findPnpmWorkspace(
     );
     return null;
   }
-  const normalizedWorkspaceYamlPath = upath
-    .normalizeSafe(workspaceYamlPath)
-    .slice(normalizedLocalDir.length + 1);
+  // const normalizedWorkspaceYamlPath = upath
+  //   .normalizeSafe(workspaceYamlPath)
+  //   .slice(normalizedLocalDir.length + 1);
   const pnpmLockfilePath = getSiblingFileName(
-    normalizedWorkspaceYamlPath,
+    workspaceYamlPath,
     'pnpm-lock.yaml'
   );
   if (!(await localPathExists(pnpmLockfilePath))) {
     logger.trace(
-      { normalizedWorkspaceYamlPath, packageFile },
+      { workspaceYamlPath, packageFile },
       'Failed to find a pnpm-lock.yaml sibling for the workspace.'
     );
     return null;
   }
   return {
     lockFilePath: pnpmLockfilePath,
-    workspaceYamlPath: normalizedWorkspaceYamlPath,
+    workspaceYamlPath,
   };
 }
 
@@ -77,9 +76,9 @@ export async function detectPnpmWorkspaces(
   logger.debug(`Detecting pnpm Workspaces`);
   const packageFilterCache = new Map<string, string[] | null>();
 
-  const { localDir } = getAdminConfig();
+  // const { localDir } = getAdminConfig();
 
-  const normalizedLocalDir = upath.normalizeSafe(localDir);
+  // const normalizedLocalDir = upath.normalizeSafe(localDir);
   for (const p of packageFiles) {
     const { packageFile, pnpmShrinkwrap } = p;
     if (pnpmShrinkwrap) {
@@ -89,10 +88,7 @@ export async function detectPnpmWorkspaces(
       );
       continue; // eslint-disable-line no-continue
     }
-    const pnpmWorkspace = await findPnpmWorkspace(
-      packageFile,
-      normalizedLocalDir
-    );
+    const pnpmWorkspace = await findPnpmWorkspace(packageFile);
     if (pnpmWorkspace === null) {
       continue; // eslint-disable-line no-continue
     }
