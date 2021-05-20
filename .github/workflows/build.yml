@@ -54,7 +54,7 @@ jobs:
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
         if: env.NODE_VERSION == '14'
-        uses: actions/setup-java@v2.0.0
+        uses: actions/setup-java@v2.1.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
