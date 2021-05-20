@@ -39,6 +39,7 @@ const staticGroups = {
         matchPackagePatterns: ['/node$'],
         excludePackageNames: ['calico/node'],
         commitMessageTopic: 'Node.js',
+        versioning: 'node',
       },
     ],
   },
