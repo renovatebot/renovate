@@ -54,7 +54,6 @@ describe(getName(), () => {
         manager: 'npm',
         enabled: true,
         fileList: ['package.json'],
-        localDir: '/localDir',
       };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce(
