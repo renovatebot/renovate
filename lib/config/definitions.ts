@@ -252,7 +252,7 @@ const options: RenovateOptions[] = [
       'Custom environment variables for child processes and sidecar Docker containers.',
     admin: true,
     type: 'object',
-    default: false,
+    default: {},
   },
   {
     name: 'dockerChildPrefix',
