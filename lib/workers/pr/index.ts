@@ -407,9 +407,9 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: [
-            ...new Set([...config.labels, ...config.addLabels]),
-          ].map((label) => template.compile(label, config)),
+          labels: [...new Set([...config.labels, ...config.addLabels])].map(
+            (label) => template.compile(label, config)
+          ),
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });

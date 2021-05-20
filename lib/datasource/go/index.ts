@@ -10,18 +10,13 @@ import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { http } from './common';
 import * as goproxy from './goproxy';
+import type { DataSource } from './types';
 
 export { id } from './common';
 
 export const customRegistrySupport = false;
 
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab\.[^/]*)\/(.*)$/;
-
-interface DataSource {
-  datasource: string;
-  registryUrl?: string;
-  lookupName: string;
-}
 
 async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (goModule.startsWith('gopkg.in/')) {
@@ -164,7 +159,10 @@ export async function getReleases(
   const source = await getDatasource(lookupName);
 
   if (!source) {
-    logger.warn({ lookupName }, 'Unsupported dependency.');
+    logger.info(
+      { lookupName },
+      'Unsupported go host - cannot look up versions'
+    );
     return null;
   }
 

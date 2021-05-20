@@ -8,7 +8,7 @@ export const customRegistrySupport = false;
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const rawRefs: gitRefs.RawRefs[] = await gitRefs.getRawRefs({ lookupName });
+  const rawRefs = await gitRefs.getRawRefs({ lookupName });
 
   if (rawRefs === null) {
     return null;
@@ -36,7 +36,7 @@ export async function getDigest(
   { lookupName }: Partial<DigestConfig>,
   newValue?: string
 ): Promise<string | null> {
-  const rawRefs: gitRefs.RawRefs[] = await gitRefs.getRawRefs({ lookupName });
+  const rawRefs = await gitRefs.getRawRefs({ lookupName });
   const findValue = newValue || 'HEAD';
   const ref = rawRefs.find((rawRef) => rawRef.value === findValue);
   if (ref) {

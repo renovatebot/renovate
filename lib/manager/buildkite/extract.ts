@@ -21,9 +21,8 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else if (isPluginsSection) {
         logger.debug(`serviceImageLine: "${line}"`);
         const { currentIndent } = /^(?<currentIndent>\s*)/.exec(line).groups;
-        const depLineMatch = /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/.exec(
-          line
-        );
+        const depLineMatch =
+          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/.exec(line);
         if (currentIndent.length <= pluginsIndent.length) {
           isPluginsSection = false;
           pluginsIndent = '';
