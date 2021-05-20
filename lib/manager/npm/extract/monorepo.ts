@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import findUp from 'find-up';
 import yaml from 'js-yaml';
 import minimatch from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import {
+  findUpInsidePath,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
@@ -48,14 +48,13 @@ export async function findPnpmWorkspace(
   packageFile: string,
   normalizedLocalDir: string
 ): Promise<{ lockFilePath: string; workspaceYamlPath: string } | null> {
-  const workspaceYamlPath = await findUp('pnpm-workspace.yaml', {
-    cwd: upath.dirname(upath.join(normalizedLocalDir, packageFile)),
-    type: 'file',
-  });
-  if (
-    !workspaceYamlPath ||
-    !upath.normalizeSafe(workspaceYamlPath).startsWith(normalizedLocalDir)
-  ) {
+  const workspaceYamlPath = await findUpInsidePath(
+    'pnpm-workspace.yaml',
+    upath.join(normalizedLocalDir, packageFile),
+    normalizedLocalDir
+  );
+
+  if (!workspaceYamlPath) {
     logger.trace(
       { packageFile },
       'Failed to locate pnpm-workspace.yaml in a parent directory.'

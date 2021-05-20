@@ -1,10 +1,9 @@
 import cryptoRandomString from 'crypto-random-string';
-import findUp from 'find-up';
 import * as upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { readFile } from '../../util/fs';
+import { findUpInsidePath, readFile } from '../../util/fs';
 
 async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
   try {
@@ -42,15 +41,13 @@ export async function getConfiguredRegistries(
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
   const normalizedLocalDir = upath.normalizeSafe(localDir);
-  const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
-    cwd: upath.dirname(upath.join(normalizedLocalDir, packageFile)),
-    type: 'file',
-  });
+  const nuGetConfigPath = await findUpInsidePath(
+    nuGetConfigFileNames,
+    upath.join(normalizedLocalDir, packageFile),
+    normalizedLocalDir
+  );
 
-  if (
-    !nuGetConfigPath ||
-    upath.normalizeSafe(nuGetConfigPath).startsWith(normalizedLocalDir) !== true
-  ) {
+  if (!nuGetConfigPath) {
     return undefined;
   }
 
