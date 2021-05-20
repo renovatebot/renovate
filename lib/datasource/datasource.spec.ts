@@ -2,7 +2,7 @@ import * as httpMock from '../../test/http-mock';
 import { getName } from '../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../constants/error-messages';
 import { Datasource } from './datasource';
-import { GetReleasesConfig, ReleaseResult } from './types';
+import type { GetReleasesConfig, ReleaseResult } from './types';
 
 const exampleUrl = 'https://example.com/';
 
@@ -11,7 +11,6 @@ class TestDatasource extends Datasource {
     super('test');
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async getReleases(
     getReleasesConfig: GetReleasesConfig
   ): Promise<ReleaseResult> {
