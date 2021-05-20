@@ -227,7 +227,7 @@ The format of the environment variables must be all upper-case and follow:
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
-#### npmjs registry example
+#### npmjs registry token example
 
 `NPM_REGISTRY_NPMJS_ORG_TOKEN=abc123`:
 
@@ -243,7 +243,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 }
 ```
 
-#### GitLab example
+#### GitLab Tags username/password example
 
 `GITLAB__TAGS_CODE__HOST_COMPANY_COM_USERNAME=bot GITLAB__TAGS_CODE__HOST_COMPANY_COM_PASSWORD=botpass123`:
 
