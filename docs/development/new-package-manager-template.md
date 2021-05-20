@@ -107,7 +107,7 @@
 
 ### If applicable, describe how the tool maintains a cache and if it can be controlled via CLI or env? Do you recommend the cache be kept or disabled/ignored?
 
-### If applicable, what command should be used to generate a lock file from scratch if you already have a package file? This will be used for "lock file maintenance".
+### If applicable, what command should be used to generate a lock file from scratch if you already have a package file? This will be used for "lock file maintenance"
 
 ## Other
 
