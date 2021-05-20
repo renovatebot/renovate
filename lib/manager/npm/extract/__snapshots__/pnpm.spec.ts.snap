@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/npm/extract/pnpm .detectPnpmWorkspaces() filters none matching packages 1`] = `
+Array [
+  Object {
+    "packageFile": "package.json",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "packages/a/package.json",
+    "packageJsonName": "@org/a",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "not-matching/b/package.json",
+    "packageJsonName": "@org/b",
+    "pnpmShrinkwrap": undefined,
+  },
+]
+`;
+
+exports[`manager/npm/extract/pnpm .detectPnpmWorkspaces() skips when pnpm shrinkwrap file has already been provided 1`] = `
+Array [
+  Object {
+    "packageFile": "package.json",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+]
+`;
+
+exports[`manager/npm/extract/pnpm .detectPnpmWorkspaces() uses pnpm workspaces 1`] = `
+Array [
+  Object {
+    "packageFile": "package.json",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "packages/a/package.json",
+    "packageJsonName": "@org/a",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "packages/b/package.json",
+    "packageJsonName": "@org/b",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+]
+`;

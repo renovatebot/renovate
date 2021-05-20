@@ -7,7 +7,7 @@ import {
   readLocalFile,
 } from '../../../util/fs';
 import type { PackageFile } from '../../types';
-import { PnpmWorkspaceFile } from './types';
+import type { PnpmWorkspaceFile } from './types';
 import { matchesAnyPattern } from './utils';
 
 export async function extractPnpmFilters(
@@ -18,7 +18,7 @@ export async function extractPnpmFilters(
       json: true,
     }) as PnpmWorkspaceFile;
     if (
-      !contents.packages ||
+      !Array.isArray(contents.packages) ||
       !contents.packages.every((item) => typeof item === 'string')
     ) {
       logger.debug(

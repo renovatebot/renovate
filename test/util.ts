@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { readFileSync } from 'fs';
 import { expect } from '@jest/globals';
 import upath from 'upath';
+import * as _config from '../lib/config/admin';
 import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig as _RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
@@ -81,14 +82,13 @@ export function getName(): string {
   return name;
 }
 
-export function loadFixture(fixtureFile: string, fixtureRoot = '.'): string {
+export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   const callerDir = upath.dirname(getCallerFileName());
-  const fixtureAbsFile = upath.join(
-    callerDir,
-    fixtureRoot,
-    '__fixtures__',
-    fixtureFile
-  );
+  return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
+}
+
+export function loadFixture(fixtureFile: string, fixtureRoot = '.'): string {
+  const fixtureAbsFile = getFixturePath(fixtureFile, fixtureRoot);
   return readFileSync(fixtureAbsFile, { encoding: 'utf8' });
 }
 
@@ -136,4 +136,16 @@ const bufferSerializer: jest.SnapshotSerializerPlugin = {
 
 export function addBufferSerializer(): void {
   expect.addSnapshotSerializer(bufferSerializer);
+}
+
+export function loadLocalFixtureDirectory(
+  fixturePath: string,
+  fixtureRoot = '.'
+): void {
+  const fixtureAbsPath = getFixturePath(fixturePath, fixtureRoot);
+
+  const config = mocked(_config);
+  config.getAdminConfig.mockImplementation(() => ({
+    localDir: fixtureAbsPath,
+  }));
 }
