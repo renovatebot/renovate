@@ -99,6 +99,33 @@ describe(getName(), () => {
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
+    it('supports password-only', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        NPM_PASSWORD: 'some-password',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('supports domain and host names with case insensitivity', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        GITHUB__TAGS_GITHUB_COM_TOKEN: 'some-token',
+        pypi_my_CUSTOM_HOST_passWORD: 'some-password',
+      };
+      const res = env.getConfig(envParam);
+      expect(res).toMatchSnapshot();
+      expect(res.hostRules).toHaveLength(2);
+    });
+    it('supports datasource env token', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        PYPI_TOKEN: 'some-token',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('rejects incomplete datasource env token', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        PYPI_FOO_TOKEN: 'some-token',
+      };
+      expect(env.getConfig(envParam).hostRules).toHaveLength(0);
+    });
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: PLATFORM_TYPE_BITBUCKET,
