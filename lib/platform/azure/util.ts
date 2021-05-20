@@ -162,9 +162,10 @@ export function max4000Chars(str: string): string {
   return str;
 }
 
-export function getProjectAndRepo(
-  str: string
-): { project: string; repo: string } {
+export function getProjectAndRepo(str: string): {
+  project: string;
+  repo: string;
+} {
   logger.trace(`getProjectAndRepo(${str})`);
   const strSplit = str.split(`/`);
   if (strSplit.length === 1) {

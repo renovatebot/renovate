@@ -10,8 +10,8 @@ export async function raiseConfigWarningIssue(
 ): Promise<void> {
   logger.debug('raiseConfigWarningIssue()');
   let body = `There is an error with this repository's Renovate configuration that needs to be fixed. As a precaution, Renovate will stop PRs until it is resolved.\n\n`;
-  if (error.location) {
-    body += `Location: \`${error.location}\`\n`;
+  if (error.validationSource) {
+    body += `Location: \`${error.validationSource}\`\n`;
   }
   body += `Error type: ${error.validationError}\n`;
   if (error.validationMessage) {

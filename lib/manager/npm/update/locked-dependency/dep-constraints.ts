@@ -29,8 +29,9 @@ export function findDepConstraints(
   }
   const { dependencies, requires, version } = lockEntry;
   if (parentDepName && requires) {
-    const constraint = requires[depName];
+    let constraint = requires[depName];
     if (constraint) {
+      constraint = constraint.replace(/(\d)rc$/, '$1-rc');
       // istanbul ignore else
       if (semver.isValid(constraint)) {
         if (semver.matches(currentVersion, constraint)) {

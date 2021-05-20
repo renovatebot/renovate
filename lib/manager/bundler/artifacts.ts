@@ -72,12 +72,8 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
-  const {
-    packageFileName,
-    updatedDeps,
-    newPackageFileContent,
-    config,
-  } = updateArtifact;
+  const { packageFileName, updatedDeps, newPackageFileContent, config } =
+    updateArtifact;
   const { constraints = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');

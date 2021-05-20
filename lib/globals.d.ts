@@ -3,7 +3,7 @@
  */
 
 declare interface Error {
-  location?: string;
+  validationSource?: string;
 
   validationError?: string;
   validationMessage?: string;

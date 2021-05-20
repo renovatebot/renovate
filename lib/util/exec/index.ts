@@ -22,8 +22,6 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
-  localDir: null,
-  cacheDir: null,
 };
 
 export async function setExecConfig(
@@ -99,10 +97,11 @@ export async function exec(
   const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
   // istanbul ignore if
+  const { localDir } = getAdminConfig();
   if (cwdFile) {
-    cwd = join(execConfig.localDir, dirname(cwdFile));
+    cwd = join(localDir, dirname(cwdFile));
   }
-  cwd = cwd || opts.cwd || execConfig.localDir;
+  cwd = cwd || opts.cwd || localDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };

@@ -49,13 +49,14 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   let configFileParsed;
   if (configFileName === 'package.json') {
     // We already know it parses
-    configFileParsed = JSON.parse(await readLocalFile('package.json', 'utf8'))
-      .renovate;
+    configFileParsed = JSON.parse(
+      await readLocalFile('package.json', 'utf8')
+    ).renovate;
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
-    if (!rawFileContents) {
+    if (!is.string(rawFileContents)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -136,7 +137,7 @@ export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
     return;
   }
   const error = new Error(CONFIG_VALIDATION);
-  error.location = repoConfig.configFileName;
+  error.validationSource = repoConfig.configFileName;
   error.validationError = repoConfig.configFileParseError.validationError;
   error.validationMessage = repoConfig.configFileParseError.validationMessage;
   throw error;
@@ -160,7 +161,7 @@ export async function mergeRenovateConfig(
   const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
-    error.location = repoConfig.configFileName;
+    error.validationSource = repoConfig.configFileName;
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
