@@ -1,12 +1,11 @@
-import { getName, loadLocalFixtureDirectory } from '../../../../test/util';
+import { getFixturePath, getName } from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
 import { detectPnpmWorkspaces } from './pnpm';
-
-jest.mock('../../../config/admin');
 
 describe(getName(), () => {
   describe('.detectPnpmWorkspaces()', () => {
     beforeAll(() => {
-      loadLocalFixtureDirectory('pnpm-monorepo/', '..');
+      setAdminConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
     });
 
     it('uses pnpm workspaces', async () => {

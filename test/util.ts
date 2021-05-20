@@ -2,7 +2,6 @@ import crypto from 'crypto';
 import { readFileSync } from 'fs';
 import { expect } from '@jest/globals';
 import upath from 'upath';
-import * as _config from '../lib/config/admin';
 import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig as _RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
@@ -136,16 +135,4 @@ const bufferSerializer: jest.SnapshotSerializerPlugin = {
 
 export function addBufferSerializer(): void {
   expect.addSnapshotSerializer(bufferSerializer);
-}
-
-export function loadLocalFixtureDirectory(
-  fixturePath: string,
-  fixtureRoot = '.'
-): void {
-  const fixtureAbsPath = getFixturePath(fixturePath, fixtureRoot);
-
-  const config = mocked(_config);
-  config.getAdminConfig.mockImplementation(() => ({
-    localDir: fixtureAbsPath,
-  }));
 }
