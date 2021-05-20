@@ -1,13 +1,18 @@
-import { platform } from '../../../../test/util';
+import { getName, platform } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
-
 import { getPrBody } from '.';
 
-describe('workers/pr/body', () => {
+jest.mock('./config-description', () => ({
+  getPrConfigDescription: jest.fn(() => ''),
+}));
+jest.mock('./controls', () => ({
+  getControls: jest.fn(() => ''),
+}));
+
+describe(getName(), () => {
   let config: RenovateConfig;
   beforeEach(() => {
-    jest.resetAllMocks();
     config = getConfig();
     platform.massageMarkdown = jest.fn((input) => input);
   });
