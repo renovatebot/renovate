@@ -257,3 +257,21 @@ Examples:
   ]
 }
 ```
+
+It's also possible to skip the host part, and just have datasource + credentials.
+
+Example:
+
+`DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "username": "bot",
+      "password": "botpass123"
+    }
+  ]
+}
+```
