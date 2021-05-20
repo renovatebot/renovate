@@ -3,6 +3,7 @@ import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse, InternalHttpOptions } from '.';
+import { parseUrl } from '../url';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
 export const setBaseUrl = (url: string): void => {
@@ -42,7 +43,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         try {
           const linkHeader = parseLinkHeader(result.headers.link as string);
           if (linkHeader?.next) {
-            const nextUrl = new URL(linkHeader.next.url);
+            const nextUrl = parseUrl(linkHeader.next.url);
             if (process.env.GITLAB_IGNORE_REPO_URL) {
               const defaultEndpoint = new URL(baseUrl);
               nextUrl.protocol = defaultEndpoint.protocol;

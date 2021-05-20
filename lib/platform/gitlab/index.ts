@@ -22,7 +22,7 @@ import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash, getQueryString } from '../../util/url';
+import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -228,7 +228,7 @@ export async function initRepo({
       res.body.http_url_to_repo === null
     ) {
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
-      const { protocol, host, pathname } = URL.parse(defaults.endpoint);
+      const { protocol, host, pathname } = parseUrl(defaults.endpoint);
       const newPathname = pathname.slice(0, pathname.indexOf('/api'));
       url = git.getUrl({
         protocol: protocol.slice(0, -1) as any,
