@@ -48,9 +48,6 @@ export async function findPnpmWorkspace(
     );
     return null;
   }
-  // const normalizedWorkspaceYamlPath = upath
-  //   .normalizeSafe(workspaceYamlPath)
-  //   .slice(normalizedLocalDir.length + 1);
   const pnpmLockfilePath = getSiblingFileName(
     workspaceYamlPath,
     'pnpm-lock.yaml'
@@ -74,9 +71,6 @@ export async function detectPnpmWorkspaces(
   logger.debug(`Detecting pnpm Workspaces`);
   const packageFilterCache = new Map<string, string[] | null>();
 
-  // const { localDir } = getAdminConfig();
-
-  // const normalizedLocalDir = upath.normalizeSafe(localDir);
   for (const p of packageFiles) {
     const { packageFile, pnpmShrinkwrap } = p;
     if (pnpmShrinkwrap) {
