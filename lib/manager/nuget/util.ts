@@ -39,8 +39,7 @@ export async function getConfiguredRegistries(
   const normalizedLocalDir = upath.normalizeSafe(localDir);
   const nuGetConfigPath = await findUpInsidePath(
     nuGetConfigFileNames,
-    upath.join(normalizedLocalDir, packageFile),
-    normalizedLocalDir
+    upath.join(normalizedLocalDir, packageFile)
   );
 
   if (!nuGetConfigPath) {

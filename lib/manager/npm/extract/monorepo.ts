@@ -52,8 +52,7 @@ export async function findPnpmWorkspace(
 ): Promise<{ lockFilePath: string; workspaceYamlPath: string } | null> {
   const workspaceYamlPath = await findUpInsidePath(
     'pnpm-workspace.yaml',
-    upath.join(normalizedLocalDir, packageFile),
-    normalizedLocalDir
+    upath.join(normalizedLocalDir, packageFile)
   );
 
   if (!workspaceYamlPath) {
