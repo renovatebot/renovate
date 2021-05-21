@@ -38,7 +38,7 @@ export function processHostRules(): HostRulesResult {
         additionalNpmrcContent.push(`${uri}:_password=${password}`);
         additionalYarnRcYml ||= { npmRegistries: {} };
         additionalYarnRcYml.npmRegistries[uri] = {
-          npmAuthIdent: `Buffer.from(${hostRule.username}:${hostRule.password}).toString('base64)`,
+          npmAuthIdent: Buffer.from(`${hostRule.username}:${hostRule.password}`).toString('base64),
         };
       }
     }
