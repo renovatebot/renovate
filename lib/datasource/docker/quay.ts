@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { getAuthHeaders, http } from './common';
+import { http } from './common';
 
 export async function getTagsQuayRegistry(
   repository: string
@@ -19,22 +19,22 @@ export async function getTagsQuayRegistry(
     if (cachedResult !== undefined) {
       return cachedResult;
     }
-    const limit = 10000;
+    const limit = 100;
+
+    const pageUrl = (page: number): string =>
+      `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
 
     let page = 1;
-    let url = `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}`;
+    let url = pageUrl(page);
     do {
       const res = await http.getJson<{
         tags: { name: string }[];
         has_additional: boolean;
-      }>(url, {
-      });
+      }>(url, {});
       const pageTags = res.body.tags.map((tag) => tag.name);
-      url = res.body.has_additional
-        ? `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`
-        : null;
       tags = tags.concat(pageTags);
       page += 1;
+      url = res.body.has_additional ? pageUrl(page) : null;
     } while (url && page < 20);
     const cacheMinutes = 30;
     await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
@@ -42,12 +42,6 @@ export async function getTagsQuayRegistry(
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
-    }
-    if (err.statusCode === 404 && !repository.includes('/')) {
-      logger.debug(
-        `Retrying Tags for ${registry}/${repository} using library/ prefix`
-      );
-      return getTagsQuayRegistry('library/' + repository);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(

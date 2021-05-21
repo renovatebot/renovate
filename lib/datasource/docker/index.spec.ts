@@ -451,9 +451,9 @@ describe(getName(), () => {
       const tags = [{ name: '1.0.0' }];
       httpMock
         .scope('https://quay.io')
-        .get('/v2/')
-        .reply(200, '', {})
-        .get('/api/v1/repository/node/tag/?limit=10000&page=1')
+        .get(
+          '/api/v1/repository/node/tag/?limit=100&page=1&onlyActiveTags=true'
+        )
         .reply(200, { tags, has_additional: false })
         .get('/v2/')
         .reply(200, '', {})
