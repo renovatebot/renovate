@@ -28,7 +28,6 @@ export async function getTagsQuayRegistry(
         tags: { name: string }[];
         has_additional: boolean;
       }>(url, {
-        headers,
       });
       const pageTags = res.body.tags.map((tag) => tag.name);
       url = res.body.has_additional
