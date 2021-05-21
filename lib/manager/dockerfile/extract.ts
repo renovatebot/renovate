@@ -3,7 +3,7 @@ import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
@@ -34,16 +34,23 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 export function getDep(
   currentFrom: string,
-  specifyReplaceString = true
+  specifyReplaceString = true,
+  config: ExtractConfig
 ): PackageDependency {
   if (!is.string(currentFrom)) {
     return {
       skipReason: SkipReason.InvalidValue,
     };
   }
-  const dep = splitImageParts(currentFrom);
+  const aliasedFrom = Object.keys(config.aliases).reduce((from, alias) => {
+    if (from.startsWith(alias)) {
+      return from.replace(alias, config.aliases[alias]);
+    }
+    return from;
+  }, currentFrom);
+  const dep = splitImageParts(aliasedFrom);
   if (specifyReplaceString) {
-    dep.replaceString = currentFrom;
+    dep.replaceString = aliasedFrom;
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
@@ -54,7 +61,11 @@ export function getDep(
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+  config?: ExtractConfig
+): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
 
@@ -72,7 +83,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     } else if (stageNames.includes(fromMatch.groups.image)) {
       logger.debug({ image: fromMatch.groups.image }, 'Skipping alias FROM');
     } else {
-      const dep = getDep(fromMatch.groups.image);
+      const dep = getDep(fromMatch.groups.image, true, config);
       logger.trace(
         {
           depName: dep.depName,
@@ -96,7 +107,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         'Skipping alias COPY --from'
       );
     } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
-      const dep = getDep(copyFromMatch.groups.image);
+      const dep = getDep(copyFromMatch.groups.image, true, config);
       logger.debug(
         {
           depName: dep.depName,
