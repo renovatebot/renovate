@@ -23,11 +23,6 @@ export async function getTagsQuayRegistry(
 
     let page = 1;
     let url = `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}`;
-    const headers = await getAuthHeaders(registry, repository);
-    if (!headers) {
-      logger.debug('Failed to get authHeaders for getTags lookup');
-      return null;
-    }
     do {
       const res = await http.getJson<{
         tags: { name: string }[];
