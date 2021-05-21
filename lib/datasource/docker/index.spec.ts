@@ -468,6 +468,22 @@ describe(getName(), () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('uses quay api and test error', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/node/tag/?limit=100&page=1&onlyActiveTags=true'
+        )
+        .reply(500);
+      const config = {
+        datasource: id,
+        depName: 'node',
+        registryUrls: ['https://quay.io'],
+      };
+      await expect(getPkgReleases(config)).rejects.toThrow(
+        'external-host-error'
+      );
+    });
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
         .scope(amazonUrl)
