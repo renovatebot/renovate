@@ -14,6 +14,8 @@ In short:
 - Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you
 - Publish your own if you wish to reuse them across repositories
 
+Shareable config presets can only be used with the JSON format, other formats are not supported.
+
 ## Goals of Preset Configs
 
 The main reason for supporting preset configs is to decrease duplication.
