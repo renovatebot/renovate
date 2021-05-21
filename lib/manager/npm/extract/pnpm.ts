@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import { logger } from '../../../logger';
 import {
   findLocalSiblingOrParent,
@@ -15,22 +15,22 @@ export async function extractPnpmFilters(
   fileName: string
 ): Promise<string[] | null> {
   try {
-    const contents = yaml.safeLoad(await readLocalFile(fileName, 'utf8'), {
+    const contents = safeLoad(await readLocalFile(fileName, 'utf8'), {
       json: true,
     }) as PnpmWorkspaceFile;
     if (
       !Array.isArray(contents.packages) ||
       !contents.packages.every((item) => is.string(item))
     ) {
-      logger.debug(
+      logger.trace(
         { fileName },
         'Failed to find required "packages" array in pnpm-workspace.yaml'
       );
       return null;
     }
     return contents.packages;
-  } catch (error) {
-    logger.debug({ fileName }, 'Failed to parse pnpm-workspace.yaml');
+  } catch (err) {
+    logger.trace({ fileName, err }, 'Failed to parse pnpm-workspace.yaml');
     return null;
   }
 }
@@ -81,7 +81,7 @@ export async function detectPnpmWorkspaces(
 
     // check if pnpmShrinkwrap-file has already been provided
     if (pnpmShrinkwrap) {
-      logger.debug(
+      logger.trace(
         { packageFile, pnpmShrinkwrap },
         'Found an existing pnpm shrinkwrap file; skipping pnpm monorepo check.'
       );
@@ -106,7 +106,7 @@ export async function detectPnpmWorkspaces(
     if (isPackageInWorkspace) {
       p.pnpmShrinkwrap = lockFilePath;
     } else {
-      logger.debug(
+      logger.trace(
         { packageFile, workspaceYamlPath },
         `Didn't find the package in the pnpm workspace`
       );
