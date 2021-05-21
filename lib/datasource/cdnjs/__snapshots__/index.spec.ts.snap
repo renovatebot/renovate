@@ -187,7 +187,7 @@ Array [
 ]
 `;
 
-exports[`datasource/cdnjs/index getReleases returns null for unknown error 1`] = `
+exports[`datasource/cdnjs/index getReleases throws for unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
