@@ -117,3 +117,17 @@
 
 
     The Renovate team
+
+'retry latest version':
+  comment: >
+    Hi there,
+
+
+    You're reporting a problem with an outdated version of Renovate.
+    Please try the latest version and tell us if that fixes your problem.
+
+
+    Good luck,
+
+
+    The Renovate team
