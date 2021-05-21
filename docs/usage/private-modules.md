@@ -216,7 +216,7 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 
 Self-hosted users can use environment variables to configure the most common types of `hostRules` for authentication.
 
-The format of the environment variables must be all upper-case and follow:
+The format of the environment variables must follow:
 
 - Datasource name (e.g. `NPM`, `PYPI`)
 - Underscore (`_`)
@@ -226,6 +226,8 @@ The format of the environment variables must be all upper-case and follow:
 
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
+
+Note: the following prefixes cannot be supported for this functionality: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
 
 #### npmjs registry token example
 
