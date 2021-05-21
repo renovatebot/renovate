@@ -86,7 +86,7 @@ This makes it suitable for augmenting a preset or base list without displacing t
 ## aliases
 
 The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements` manager only.
+Currently it is needed/supported for the `helm-requirements` and `docker` manager only.
 
 `helm-requirements` includes this default alias:
 
@@ -94,6 +94,16 @@ Currently it is needed/supported for the `helm-requirements` manager only.
 {
   "aliases": {
     "stable": "https://charts.helm.sh/stable"
+  }
+}
+```
+
+When using a `docker` proxy cache `aliases` can be used to map the images prefix on the proxy to the original prefix:
+
+```json
+{
+  "aliases": {
+    "registry.example.com/proxy-cache": "docker.io"
   }
 }
 ```
