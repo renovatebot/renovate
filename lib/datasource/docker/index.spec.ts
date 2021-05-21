@@ -13,8 +13,7 @@ jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
 
 type ECR = _AWS.ECR;
-type GetAuthorizationTokenCommandOutput =
-  _AWS.GetAuthorizationTokenCommandOutput;
+type GetAuthorizationTokenCommandOutput = _AWS.GetAuthorizationTokenCommandOutput;
 const AWS = mocked(_AWS);
 
 const baseUrl = 'https://index.docker.io/v2';
@@ -408,7 +407,8 @@ describe(getName(), () => {
           200,
           { tags },
           {
-            link: '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
+            link:
+              '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
           }
         )
         .get('/')
@@ -444,6 +444,27 @@ describe(getName(), () => {
         datasource: id,
         depName: 'registry.company.com/node',
       });
+      expect(res.releases).toHaveLength(1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('uses quay api', async () => {
+      const tags = [{ name: '1.0.0' }];
+      httpMock
+        .scope('https://quay.io')
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/api/v1/repository/node/tag/?limit=10000&page=1')
+        .reply(200, { tags, has_additional: false })
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/node/manifests/1.0.0')
+        .reply(200, '', {});
+      const config = {
+        datasource: id,
+        depName: 'node',
+        registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

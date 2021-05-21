@@ -16,6 +16,7 @@ import {
   http,
   id,
 } from './common';
+import { getTagsQuayRegistry } from './quay';
 
 // TODO: add got typings when available (#9646)
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
@@ -203,7 +204,13 @@ export async function getReleases({
     lookupName,
     registryUrl
   );
-  const tags = await getTags(registry, repository);
+  const isQuay = registry === 'https://quay.io';
+  let tags: string[] | null;
+  if (isQuay) {
+    tags = await getTagsQuayRegistry(repository);
+  } else {
+    tags = await getTags(registry, repository);
+  }
   if (!tags) {
     return null;
   }
