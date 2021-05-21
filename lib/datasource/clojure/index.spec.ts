@@ -5,7 +5,7 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture, mocked } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
-import { ClojureDatasource as datasource } from '.';
+import { ClojureDatasource } from '.';
 
 jest.mock('fs-extra');
 const fs = mocked(_fs);
@@ -78,14 +78,14 @@ function get(
   depName = 'org.example:package',
   ...registryUrls: string[]
 ): Promise<ReleaseResult | null> {
-  const conf = { versioning, datasource: datasource.id, depName };
+  const conf = { versioning, datasource: ClojureDatasource.id, depName };
   return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
 }
 
 describe(getName(), () => {
   beforeEach(() => {
     hostRules.add({
-      hostType: datasource.id,
+      hostType: ClojureDatasource.id,
       matchHost: 'custom.registry.renovatebot.com',
       token: 'abc123',
     });
