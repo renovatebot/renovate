@@ -7,6 +7,7 @@ Unlike ESLint though:
 - Shared config files can contain many presets
 
 Presets can be defined using either npm packages, or with GitHub/GitLab repositories.
+Only the JSON format is supported.
 Bitbucket-hosted presets are yet to be implemented.
 
 ## Preset config URIs

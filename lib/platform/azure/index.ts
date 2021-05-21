@@ -138,7 +138,6 @@ export async function getJsonFile(
 
 export async function initRepo({
   repository,
-  localDir,
   cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -178,7 +177,6 @@ export async function initRepo({
   const url = repo.remoteUrl || manualUrl;
   await git.initRepo({
     ...config,
-    localDir,
     url,
     extraCloneOpts: getStorageExtraCloneOpts(opts),
     gitAuthorName: global.gitAuthor?.name,

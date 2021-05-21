@@ -15,6 +15,7 @@ In short:
 - Publish your own if you wish to reuse them across repositories
 
 UNSURE IF WANTED HERE: If you create a repository called `renovate-config` in your username namespace, Renovate finds this automatically and will suggest it in the `extends` field in new onboarding pull requests.
+Shareable config presets can only be used with the JSON format, other formats are not supported.
 
 ## Goals of Preset Configs
 

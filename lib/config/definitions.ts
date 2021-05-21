@@ -252,7 +252,7 @@ const options: RenovateOptions[] = [
       'Custom environment variables for child processes and sidecar Docker containers.',
     admin: true,
     type: 'object',
-    default: false,
+    default: {},
   },
   {
     name: 'dockerChildPrefix',
@@ -1957,6 +1957,18 @@ const options: RenovateOptions[] = [
       'Set to true to fetch the entire list of PRs instead of only those authored by the Renovate user.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'gitNoVerify',
+    description:
+      'Which git commands will be run with the `--no-verify` option.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    allowedValues: ['commit', 'push'],
+    default: ['commit', 'push'],
+    stage: 'global',
+    admin: true,
   },
 ];
 
