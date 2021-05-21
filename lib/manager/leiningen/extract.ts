@@ -1,4 +1,4 @@
-import * as datasourceClojure from '../../datasource/clojure';
+import { ClojureDatasource } from '../../datasource/clojure';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ExtractContext } from './types';
 
@@ -45,7 +45,7 @@ export function extractFromVectors(
     if (artifactId && version && fileReplacePosition) {
       result.push({
         ...ctx,
-        datasource: datasourceClojure.id,
+        datasource: ClojureDatasource.id,
         depName: expandDepName(cleanStrLiteral(artifactId)),
         currentValue: cleanStrLiteral(version),
       });
