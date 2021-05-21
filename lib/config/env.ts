@@ -92,7 +92,13 @@ export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
 
   const hostRules: HostRule[] = [];
 
+  const npmEnvPrefixes = ['npm_config_', 'npm_lifecycle_', 'npm_package_'];
+
   for (const envName of Object.keys(env).sort()) {
+    if (npmEnvPrefixes.some((prefix) => envName.startsWith(prefix))) {
+      logger.trace('Ignoring npm env: ' + envName);
+      continue; // eslint-disable-line no-continue
+    }
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName.toLowerCase().replace('__', '-').split('_');
     const hostType = splitEnv.shift();
