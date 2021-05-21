@@ -13,7 +13,8 @@ jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
 
 type ECR = _AWS.ECR;
-type GetAuthorizationTokenCommandOutput = _AWS.GetAuthorizationTokenCommandOutput;
+type GetAuthorizationTokenCommandOutput =
+  _AWS.GetAuthorizationTokenCommandOutput;
 const AWS = mocked(_AWS);
 
 const baseUrl = 'https://index.docker.io/v2';
