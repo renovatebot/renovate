@@ -6,5 +6,5 @@ const language = LANGUAGE_DOCKER;
 export { extractPackageFile, language };
 
 export const defaultConfig = {
-  fileMatch: ['^\\.github\\/(workflows|workflow-templates)\\/[^/]+\\.ya?ml$'],
+  fileMatch: ['^(workflow-templates|\\.github\\/workflows)\\/[^/]+\\.ya?ml$'],
 };
