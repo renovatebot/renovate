@@ -101,24 +101,6 @@ Array [
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if aliases depth is more than 1 1`] = `
-Array [
-  Object {
-    "message": "Invalid alias object configuration",
-    "topic": "Configuration Error",
-  },
-]
-`;
-
-exports[`config/validation validateConfig(config) errors if aliases have invalid url 1`] = `
-Array [
-  Object {
-    "message": "Invalid alias object configuration",
-    "topic": "Configuration Error",
-  },
-]
-`;
-
 exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 1`] = `
 Array [
   Object {
@@ -257,8 +239,6 @@ Array [
   },
 ]
 `;
-
-exports[`config/validation validateConfig(config) validates valid alias objects 1`] = `Array []`;
 
 exports[`config/validation validateConfig(config) warns if hostType has the wrong parent 1`] = `
 Array [

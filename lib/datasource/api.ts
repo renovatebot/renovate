@@ -1,6 +1,6 @@
 import * as bitbucketTags from './bitbucket-tags';
-import * as cdnjs from './cdnjs';
-import * as clojure from './clojure';
+import { CdnJsDatasource } from './cdnjs';
+import { ClojureDatasource } from './clojure';
 import * as crate from './crate';
 import * as dart from './dart';
 import * as docker from './docker';
@@ -36,8 +36,8 @@ const api = new Map<string, DatasourceApi>();
 export default api;
 
 api.set('bitbucket-tags', bitbucketTags);
-api.set('cdnjs', cdnjs);
-api.set('clojure', clojure);
+api.set('cdnjs', new CdnJsDatasource());
+api.set('clojure', new ClojureDatasource());
 api.set('crate', crate);
 api.set('dart', dart);
 api.set('docker', docker);
