@@ -49,6 +49,7 @@ describe('bundler.updateArtifacts()', () => {
 
     await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
+    fs.ensureCacheDir.mockResolvedValue('/tmp/cache/others/gem');
   });
   afterEach(() => {
     setAdminConfig();

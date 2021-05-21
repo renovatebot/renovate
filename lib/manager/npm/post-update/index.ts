@@ -9,7 +9,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
 import {
   deleteLocalFile,
-  ensureDir,
+  ensureCacheDir,
   getSubDirectory,
   outputFile,
   readFile,
@@ -452,18 +452,9 @@ export async function getAdditionalFiles(
     'YARN_CACHE_FOLDER',
     'npm_config_store',
   ]);
-  env.NPM_CONFIG_CACHE =
-    env.NPM_CONFIG_CACHE ||
-    upath.join(getAdminConfig().cacheDir, './others/npm');
-  await ensureDir(env.NPM_CONFIG_CACHE);
-  env.YARN_CACHE_FOLDER =
-    env.YARN_CACHE_FOLDER ||
-    upath.join(getAdminConfig().cacheDir, './others/yarn');
-  await ensureDir(env.YARN_CACHE_FOLDER);
-  env.npm_config_store =
-    env.npm_config_store ||
-    upath.join(getAdminConfig().cacheDir, './others/pnpm');
-  await ensureDir(env.npm_config_store);
+  env.NPM_CONFIG_CACHE = await ensureCacheDir('npm');
+  env.YARN_CACHE_FOLDER = await ensureCacheDir('yarn');
+  env.npm_config_store = await ensureCacheDir('pnpm');
   env.NODE_ENV = 'dev';
 
   let token = '';
