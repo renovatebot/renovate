@@ -2,8 +2,8 @@ import parseLinkHeader from 'parse-link-header';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http, HttpResponse, InternalHttpOptions } from '.';
 import { parseUrl } from '../url';
+import { Http, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
 export const setBaseUrl = (url: string): void => {

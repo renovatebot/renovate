@@ -304,9 +304,9 @@ describe(getName(), () => {
         })
         .get('/api/v4/version')
         .reply(200, {
-          version: '13.8',
+          version: '13.8.0',
         });
-      gitlab.initPlatform({
+      await gitlab.initPlatform({
         endpoint: `${selfHostedUrl}/api/v4`,
         token: 'mytoken',
       });
@@ -319,7 +319,6 @@ describe(getName(), () => {
         });
       await gitlab.initRepo({
         repository: 'some/repo/project',
-        localDir: '',
       });
       expect(git.initRepo.mock.calls).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
