@@ -441,7 +441,7 @@ describe(getName(), () => {
         .get('/v2/node/manifests/1.0.0')
         .reply(200, '', {});
       const config = {
-        datasource: docker.id,
+        datasource: id,
         depName: 'node',
         registryUrls: ['https://quay.io'],
       };
