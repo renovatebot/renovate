@@ -1,4 +1,4 @@
-import * as datasourceClojure from '../../datasource/clojure';
+import { ClojureDatasource } from '../../datasource/clojure';
 import { expandDepName } from '../leiningen/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -16,7 +16,7 @@ export function extractPackageFile(content: string): PackageFile {
     match = regex.exec(rest);
 
     deps.push({
-      datasource: datasourceClojure.id,
+      datasource: ClojureDatasource.id,
       depName: expandDepName(depName),
       currentValue,
       registryUrls: [],
