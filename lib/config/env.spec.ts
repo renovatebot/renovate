@@ -126,6 +126,12 @@ describe(getName(), () => {
       };
       expect(env.getConfig(envParam).hostRules).toHaveLength(0);
     });
+    it('rejects npm env', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        npm_package_devDependencies__types_registry_auth_token: '4.2.0',
+      };
+      expect(env.getConfig(envParam).hostRules).toHaveLength(0);
+    });
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: PLATFORM_TYPE_BITBUCKET,

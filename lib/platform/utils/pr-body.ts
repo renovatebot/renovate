@@ -6,7 +6,7 @@ export function smartTruncate(input: string, len: number): string {
   }
   const releaseNotesMatch = re.exec(input);
   if (releaseNotesMatch) {
-    const divider = `</details>\n\n---\n\n### Configuration`;
+    const divider = `\n\n</details>\n\n---\n\n### Configuration`;
     const [releaseNotes] = releaseNotesMatch;
     const nonReleaseNotesLength =
       input.length - releaseNotes.length - divider.length;
