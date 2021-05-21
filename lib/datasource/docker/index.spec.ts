@@ -407,8 +407,7 @@ describe(getName(), () => {
           200,
           { tags },
           {
-            link:
-              '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
+            link: '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
           }
         )
         .get('/')
