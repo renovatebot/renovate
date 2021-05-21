@@ -1,13 +1,87 @@
+import _yaml from 'js-yaml';
 import { getFixturePath, getName } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
-import { detectPnpmWorkspaces } from './pnpm';
+import { logger } from '../../../logger';
+import * as _fs from '../../../util/fs';
+import {
+  detectPnpmWorkspaces,
+  extractPnpmFilters,
+  findPnpmWorkspace,
+} from './pnpm';
 
 describe(getName(), () => {
-  describe('.detectPnpmWorkspaces()', () => {
-    beforeAll(() => {
-      setAdminConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
+  beforeAll(() => {
+    setAdminConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
+  });
+
+  describe('.extractPnpmFilters()', () => {
+    it('detects errors in pnpm-workspace.yml file structure', async () => {
+      jest.mock('../../../logger');
+      jest
+        .spyOn(_fs, 'readLocalFile')
+        .mockResolvedValueOnce('p!!!ckages:\n\t- "packages/*"');
+
+      const workSpaceFilePath = getFixturePath(
+        'pnpm-monorepo/pnpm-workspace.yml',
+        '..'
+      );
+      const res = await extractPnpmFilters(workSpaceFilePath);
+
+      expect(res).toMatchSnapshot();
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          fileName: expect.any(String),
+        },
+        'Failed to find required "packages" array in pnpm-workspace.yaml'
+      );
     });
 
+    it('detects errors when opening pnpm-workspace.yml file', async () => {
+      jest.mock('../../../logger');
+      jest.spyOn(_yaml, 'safeLoad').mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      const res = await extractPnpmFilters('pnpm-workspace.yml');
+
+      expect(res).toMatchSnapshot();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ fileName: expect.any(String) }),
+        'Failed to parse pnpm-workspace.yaml'
+      );
+    });
+  });
+
+  describe('.findPnpmWorkspace()', () => {
+    it('detects missing pnpm-workspace.yaml', async () => {
+      jest.spyOn(_fs, 'findLocalSiblingOrParent').mockResolvedValueOnce(null);
+
+      const packageFile = 'package.json';
+      const res = await findPnpmWorkspace(packageFile);
+      expect(res).toMatchSnapshot();
+      expect(logger.trace).toHaveBeenCalledWith(
+        expect.objectContaining({ packageFile }),
+        'Failed to locate pnpm-workspace.yaml in a parent directory.'
+      );
+    });
+
+    it('detects missing pnpm-lock.yaml when pnpm-workspace.yaml was already found', async () => {
+      jest.spyOn(_fs, 'localPathExists').mockResolvedValueOnce(false);
+
+      const packageFile = 'package.json';
+      const res = await findPnpmWorkspace(packageFile);
+      expect(res).toMatchSnapshot();
+      expect(logger.trace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workspaceYamlPath: 'pnpm-workspace.yaml',
+          packageFile,
+        }),
+        'Failed to find a pnpm-lock.yaml sibling for the workspace.'
+      );
+    });
+  });
+
+  describe('.detectPnpmWorkspaces()', () => {
     it('uses pnpm workspaces', async () => {
       const packageFiles = [
         {

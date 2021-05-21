@@ -38,11 +38,11 @@ export async function extractPnpmFilters(
 export async function findPnpmWorkspace(
   packageFile: string
 ): Promise<{ lockFilePath: string; workspaceYamlPath: string } | null> {
+  // search for pnpm-workspace.yaml
   const workspaceYamlPath = await findLocalSiblingOrParent(
     packageFile,
     'pnpm-workspace.yaml'
   );
-
   if (!workspaceYamlPath) {
     logger.trace(
       { packageFile },
@@ -50,6 +50,8 @@ export async function findPnpmWorkspace(
     );
     return null;
   }
+
+  // search for pnpm-lock.yaml next to pnpm-workspace.yaml
   const pnpmLockfilePath = getSiblingFileName(
     workspaceYamlPath,
     'pnpm-lock.yaml'
@@ -61,6 +63,7 @@ export async function findPnpmWorkspace(
     );
     return null;
   }
+
   return {
     lockFilePath: pnpmLockfilePath,
     workspaceYamlPath,
@@ -75,6 +78,8 @@ export async function detectPnpmWorkspaces(
 
   for (const p of packageFiles) {
     const { packageFile, pnpmShrinkwrap } = p;
+
+    // check if pnpmShrinkwrap-file has already been provided
     if (pnpmShrinkwrap) {
       logger.debug(
         { packageFile, pnpmShrinkwrap },
@@ -82,11 +87,15 @@ export async function detectPnpmWorkspaces(
       );
       continue; // eslint-disable-line no-continue
     }
+
+    // search for corresponding pnpm workspace
     const pnpmWorkspace = await findPnpmWorkspace(packageFile);
     if (pnpmWorkspace === null) {
       continue; // eslint-disable-line no-continue
     }
     const { workspaceYamlPath, lockFilePath } = pnpmWorkspace;
+
+    // check if package matches workspace filter
     if (!packageFilterCache.has(workspaceYamlPath)) {
       const filters = await extractPnpmFilters(workspaceYamlPath);
       packageFilterCache.set(workspaceYamlPath, filters);
