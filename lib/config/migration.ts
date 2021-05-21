@@ -2,11 +2,15 @@ import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
-import type { HostRule } from '../types';
 import { clone } from '../util/clone';
 import { getOptions } from './definitions';
 import { removedPresets } from './presets/common';
-import type { PackageRule, RenovateConfig, RenovateOptions } from './types';
+import type {
+  MigratedConfig,
+  MigratedRenovateConfig,
+  RenovateConfig,
+  RenovateOptions,
+} from './types';
 import { mergeChildConfig } from './utils';
 
 const options = getOptions();
@@ -28,20 +32,6 @@ const removedOptions = [
   'statusCheckVerify',
   'lazyGrouping',
 ];
-
-export interface MigratedConfig {
-  isMigrated: boolean;
-  migratedConfig: RenovateConfig;
-}
-
-interface MigratedRenovateConfig extends RenovateConfig {
-  endpoints?: HostRule[];
-  pathRules: PackageRule[];
-  packages: PackageRule[];
-
-  node?: RenovateConfig;
-  travis?: RenovateConfig;
-}
 
 // Returns a migrated config
 export function migrateConfig(
@@ -107,11 +97,20 @@ export function migrateConfig(
         migratedConfig.hostType = val;
         delete migratedConfig.platform;
       } else if (parentKey === 'hostRules' && key === 'endpoint') {
-        migratedConfig.baseUrl = val;
+        migratedConfig.matchHost ||= val;
         delete migratedConfig.endpoint;
       } else if (parentKey === 'hostRules' && key === 'host') {
-        migratedConfig.hostName = val;
+        migratedConfig.matchHost ||= val;
         delete migratedConfig.host;
+      } else if (parentKey === 'hostRules' && key === 'baseUrl') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.baseUrl;
+      } else if (parentKey === 'hostRules' && key === 'hostName') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.hostName;
+      } else if (parentKey === 'hostRules' && key === 'domainName') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.domainName;
       } else if (key === 'packageRules' && is.plainObject(val)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
@@ -554,7 +553,9 @@ export function migrateConfig(
     }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {
-      for (const packageRule of migratedConfig.packageRules) {
+      const existingRules = migratedConfig.packageRules;
+      migratedConfig.packageRules = [];
+      for (const packageRule of existingRules) {
         if (is.array(packageRule.packageRules)) {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
@@ -563,22 +564,10 @@ export function migrateConfig(
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
           }
-          // delete the nested packageRules
-          delete packageRule.packageRules;
-          // mark the original rule for deletion if it's now pointless
-          if (
-            !Object.keys(packageRule).some(
-              (key) => !key.startsWith('match') && !key.startsWith('exclude')
-            )
-          ) {
-            packageRule._delete = true;
-          }
+        } else {
+          migratedConfig.packageRules.push(packageRule);
         }
       }
-      // filter out any rules which were marked for deletion in the previous step
-      migratedConfig.packageRules = migratedConfig.packageRules.filter(
-        (rule) => !rule._delete
-      );
     }
     const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {

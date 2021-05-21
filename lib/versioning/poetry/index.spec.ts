@@ -139,6 +139,9 @@ describe(getName(), () => {
     it('handles wildcards', () => {
       expect(versionig.matches('4.2.0', '*')).toBe(true);
     });
+    it('handles short', () => {
+      expect(versionig.matches('1.4', '1.4')).toBe(true);
+    });
   });
   describe('isLessThanRange()', () => {
     it('handles comma', () => {
@@ -323,12 +326,22 @@ describe(getName(), () => {
     it('replaces with version range', () => {
       expect(
         versionig.getNewValue({
-          currentValue: '1.0.0',
+          currentValue: '^1.0.0',
           rangeStrategy: 'replace',
           currentVersion: '1.0.0',
-          newVersion: '^2.0.7',
+          newVersion: '2.0.7',
         })
-      ).toEqual('^2.0.7');
+      ).toEqual('^2.0.0');
+    });
+    it('returns currentValue', () => {
+      expect(
+        versionig.getNewValue({
+          currentValue: '^0.5.15',
+          rangeStrategy: 'replace',
+          currentVersion: '0.5.15',
+          newVersion: '0.6',
+        })
+      ).toEqual('^0.5.15');
     });
     it('bumps naked caret', () => {
       expect(

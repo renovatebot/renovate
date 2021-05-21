@@ -51,7 +51,7 @@ export async function extractPackageFile(
   }
   if (fileName !== 'package.json' && packageJson.renovate) {
     const error = new Error(CONFIG_VALIDATION);
-    error.location = fileName;
+    error.validationSource = fileName;
     error.validationError =
       'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
@@ -346,7 +346,7 @@ export async function extractPackageFile(
   }
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
-    if (hasFancyRefs) {
+    if (hasFancyRefs && lockFiles.npmLock) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references

@@ -19,7 +19,7 @@ You can edit your Renovate configuration **within the `renovate/configure` branc
 ## Check for warnings
 
 If you have any Warnings or Errors listed, see if you need or want to make any changes to address them.
-If you do, then make them in your base branch (e.g. `master`) so that Renovate can recreate its Configure Renovate PR from it on its next cycle.
+If you do, then make them in your base branch (e.g. `main`) so that Renovate can recreate its Configure Renovate PR from it on its next cycle.
 
 ## Configuration location
 

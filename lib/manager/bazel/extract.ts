@@ -10,12 +10,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
-
-interface UrlParsedResult {
-  datasource: string;
-  repo: string;
-  currentValue: string;
-}
+import type { UrlParsedResult } from './types';
 
 function parseUrl(urlString: string): UrlParsedResult | null {
   // istanbul ignore if
@@ -85,23 +80,23 @@ const lexer = moo.states({
         ].join('|')
       ),
     },
-    unknown: { match: /[^]/, lineBreaks: true },
+    unknown: moo.fallback,
   },
   longDoubleQuoted: {
     stringFinish: { match: '"""', pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   doubleQuoted: {
     stringFinish: { match: '"', pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   longSingleQuoted: {
     stringFinish: { match: "'''", pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   singleQuoted: {
     stringFinish: { match: "'", pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
 });
 

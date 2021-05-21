@@ -27,7 +27,6 @@ export interface RepoResult {
 }
 
 export interface RepoParams {
-  localDir: string;
   repository: string;
   endpoint?: string;
   forkMode?: string;
@@ -73,6 +72,7 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
+  azureAutoApprove?: boolean;
   azureAutoComplete?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;

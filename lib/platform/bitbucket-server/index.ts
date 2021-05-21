@@ -145,13 +145,10 @@ export async function getJsonFile(
 // Initialize BitBucket Server by getting base branch
 export async function initRepo({
   repository,
-  localDir,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(
-    `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
-  );
+  logger.debug(`initRepo("${JSON.stringify({ repository }, null, 2)}")`);
   const opts = hostRules.find({
     hostType: defaults.hostType,
     url: defaults.endpoint,
@@ -215,7 +212,6 @@ export async function initRepo({
 
     await git.initRepo({
       ...config,
-      localDir,
       url: gitUrl,
       gitAuthorName: global.gitAuthor?.name,
       gitAuthorEmail: global.gitAuthor?.email,

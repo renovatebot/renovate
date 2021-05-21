@@ -14,7 +14,10 @@ export const registryStrategy = 'merge';
 
 export function parseRegistryUrl(
   registryUrl: string
-): { feedUrl: string; protocolVersion: number } {
+): {
+  feedUrl: string;
+  protocolVersion: number;
+} {
   try {
     const parsedUrl = urlApi.parse(registryUrl);
     let protocolVersion = 2;

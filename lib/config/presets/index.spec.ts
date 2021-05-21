@@ -62,7 +62,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -76,7 +76,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -91,7 +91,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -106,7 +106,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -121,7 +121,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -136,7 +136,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -159,7 +159,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -430,7 +430,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -442,7 +442,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -454,7 +454,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
@@ -466,7 +466,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.location).toMatchSnapshot();
+      expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });

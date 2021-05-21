@@ -1,4 +1,6 @@
 import _fs from 'fs-extra';
+import { setAdminConfig } from '../../config/admin';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
@@ -7,7 +9,7 @@ jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec');
 
-const config = {};
+const config: UpdateArtifactsConfig = {};
 
 const newPackageFileContent = `atomicwrites==1.4.0 \
 --hash=sha256:03472c30eb2c5d1ba9227e4c2ca66ab8287fbfbbda3888aa93dc2e28fc6811b4 \
@@ -17,12 +19,24 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
+    setAdminConfig({ localDir: '' });
   });
   it('returns null if no updatedDeps were provided', async () => {
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [],
+        newPackageFileContent,
+        config,
+      })
+    ).toBeNull();
+  });
+  it('returns null if no hashes', async () => {
+    fs.readFile.mockResolvedValueOnce('eventlet==0.30.2\npbr>=1.9\n' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.txt',
+        updatedDeps: ['eventlet'],
         newPackageFileContent,
         config,
       })

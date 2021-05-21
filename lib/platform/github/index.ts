@@ -168,14 +168,13 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
-  localDir,
   renovateUsername,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
+  config = { repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -384,7 +383,7 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        logger.error(
+        logger.warn(
           { err: err.err || err },
           'Error updating fork from upstream - cannot continue'
         );
@@ -465,7 +464,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
     } catch (err) {
       if (err.statusCode === 404) {
         logger.debug(`No branch protection found`);
-      } else if (err.statusCode === 403) {
+      } else if (
+        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED ||
+        err.statusCode === 403
+      ) {
         logger.debug(
           'Branch protection: Do not have permissions to detect branch protection'
         );
@@ -633,6 +635,10 @@ async function getOpenPrs(): Promise<PrList> {
           pr.canMerge = false;
           pr.canMergeReason = `hasNegativeReview`;
         } else if (canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.canMerge = true;
+        } else if (config.forkToken && pr.mergeStateStatus === 'BLOCKED') {
+          // The main token can't merge but maybe the forking token can
+          // istanbul ignore next
           pr.canMerge = true;
         } else {
           pr.canMerge = false;
@@ -916,6 +922,7 @@ export async function getBranchStatus(
         accept: 'application/vnd.github.antiope-preview+json',
       },
       paginate: true,
+      paginationField: 'check_runs',
     };
     const checkRunsRaw = (
       await githubApi.getJson<{
@@ -1569,9 +1576,13 @@ export async function mergePr(
   const url = `repos/${
     config.parentRepo || config.repository
   }/pulls/${prNo}/merge`;
-  const options = {
+  const options: any = {
     body: {} as { merge_method?: string },
   };
+  // istanbul ignore if
+  if (config.forkToken) {
+    options.token = config.forkToken;
+  }
   let automerged = false;
   if (config.mergeMethod) {
     // This path is taken if we have auto-detected the allowed merge types from the repo
@@ -1588,7 +1599,7 @@ export async function mergePr(
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${options.body.merge_method} merge PR`);
+        logger.warn({ err }, `Failed to ${config.mergeMethod} merge PR`);
         return false;
       }
     }
@@ -1600,29 +1611,20 @@ export async function mergePr(
       logger.debug({ options, url }, `mergePr`);
       await githubApi.putJson(url, options);
     } catch (err1) {
-      logger.debug(
-        { err: err1 },
-        `Failed to ${options.body.merge_method} merge PR`
-      );
+      logger.debug({ err: err1 }, `Failed to rebase merge PR`);
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
         await githubApi.putJson(url, options);
       } catch (err2) {
-        logger.debug(
-          { err: err2 },
-          `Failed to ${options.body.merge_method} merge PR`
-        );
+        logger.debug({ err: err2 }, `Failed to merge squash PR`);
         try {
           options.body.merge_method = 'merge';
           logger.debug({ options, url }, `mergePr`);
           await githubApi.putJson(url, options);
         } catch (err3) {
-          logger.debug(
-            { err: err3 },
-            `Failed to ${options.body.merge_method} merge PR`
-          );
-          logger.debug({ pr: prNo }, 'All merge attempts failed');
+          logger.debug({ err: err3 }, `Failed to merge commit PR`);
+          logger.info({ pr: prNo }, 'All merge attempts failed');
           return false;
         }
       }

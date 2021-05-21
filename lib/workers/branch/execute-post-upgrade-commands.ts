@@ -64,7 +64,7 @@ export async function postUpgradeCommandsExecutor(
 
             logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
-              cwd: config.localDir,
+              cwd: getAdminConfig().localDir,
             });
 
             logger.debug(
