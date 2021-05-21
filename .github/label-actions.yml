@@ -99,3 +99,21 @@
         </details>
 
     </details>
+
+'new package manager':
+  comment: >
+    Hi there,
+
+
+    You're requesting support for a new package manager.
+    We need to know some basic information about this package manager first.
+    Please copy/paste [the new package manager questionnaire](https://github.com/renovatebot/renovate/blob/main/docs/development/new-package-manager-template.md), and fill it out in full.
+
+
+    Once the questionnaire is filled out we will evaluate if adding support for this manager is something we want to do.
+
+
+    Good luck,
+
+
+    The Renovate team
