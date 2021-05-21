@@ -14,8 +14,9 @@ In short:
 - Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you
 - Publish your own if you wish to reuse them across repositories
 
-UNSURE IF WANTED HERE: If you create a repository called `renovate-config` in your username namespace, Renovate finds this automatically and will suggest it in the `extends` field in new onboarding pull requests.
 Shareable config presets can only be used with the JSON format, other formats are not supported.
+
+To learn more about the onboarding behavior read **insert proper link here once the `docs/development/shareable-configs.md` file has the final `h2` that we can link to**.
 
 ## Goals of Preset Configs
 
@@ -140,8 +141,6 @@ To host your preset config on GitHub:
 From then on Renovate will use the Renovate config from the preset repo's default branch.
 You do not need to add it as a devDependency or add any other files to the preset repo.
 
-Renovate finds the relevant configuration file in your `username/renovate-config` repo automatically and will suggest you use it in the `extends` field in onboarding pull requests.
-
 ## GitLab-hosted Presets
 
 It is also possible to host your preset config using just a regular GitLab repository and without needing to publish it to npmjs.
@@ -153,8 +152,6 @@ To host your preset config on GitLab:
 - Add a `renovate.json` to this new repo containing the preset config. No other files are necessary
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
-Renovate finds the relevant configuration file in your `username/renovate-config` repo automatically and will suggest you use it in the `extends` field in onboarding pull requests.
-
 ## Gitea-hosted Presets
 
 It is also possible to host your preset config using just a regular Gitea repository and without needing to publish it to npmjs.
@@ -165,8 +162,6 @@ To host your preset config on Gitea:
 - Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
 - Add a `renovate.json` to this new repository containing the preset config. No other files are necessary
 - In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
-
-Renovate finds the relevant configuration file in your `username/renovate-config` repo automatically and will suggest you use it in the `extends` field in onboarding pull requests.
 
 ## Local presets
 
