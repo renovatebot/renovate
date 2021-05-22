@@ -34,17 +34,17 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 export function getDep(
   currentFrom: string,
-  specifyReplaceString = true,
-  config: ExtractConfig
+  aliases: ExtractConfig['aliases'],
+  specifyReplaceString = true
 ): PackageDependency {
   if (!is.string(currentFrom)) {
     return {
       skipReason: SkipReason.InvalidValue,
     };
   }
-  const aliasedFrom = Object.keys(config.aliases).reduce((from, alias) => {
+  const aliasedFrom = Object.keys(aliases).reduce((from, alias) => {
     if (from.startsWith(alias)) {
-      return from.replace(alias, config.aliases[alias]);
+      return from.replace(alias, aliases[alias]);
     }
     return from;
   }, currentFrom);
@@ -83,7 +83,7 @@ export function extractPackageFile(
     } else if (stageNames.includes(fromMatch.groups.image)) {
       logger.debug({ image: fromMatch.groups.image }, 'Skipping alias FROM');
     } else {
-      const dep = getDep(fromMatch.groups.image, true, config);
+      const dep = getDep(fromMatch.groups.image, config.aliases);
       logger.trace(
         {
           depName: dep.depName,
@@ -107,7 +107,7 @@ export function extractPackageFile(
         'Skipping alias COPY --from'
       );
     } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
-      const dep = getDep(copyFromMatch.groups.image, true, config);
+      const dep = getDep(copyFromMatch.groups.image, config.aliases);
       logger.debug(
         {
           depName: dep.depName,
