@@ -25,7 +25,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -148,7 +147,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -311,7 +309,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -360,7 +357,6 @@ Object {
   "skipInstalls": false,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -420,7 +416,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -474,7 +469,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -610,7 +604,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -746,7 +739,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -882,7 +874,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": "yarn.lock",
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -906,7 +897,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1042,7 +1032,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -1066,7 +1055,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1090,7 +1078,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1226,6 +1213,5 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;

@@ -25,7 +25,6 @@ export interface ExtractConfig {
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
-  yarnrc?: string;
   skipInstalls?: boolean;
   updateInternalDeps?: boolean;
 }
@@ -99,7 +98,6 @@ export interface PackageFile<T = Record<string, any>>
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
-  yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
