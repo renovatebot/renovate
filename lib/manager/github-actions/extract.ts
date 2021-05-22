@@ -3,9 +3,13 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+  config?: ExtractConfig
+): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
   for (const line of content.split('\n')) {
@@ -16,7 +20,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const dockerMatch = /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
-      const dep = getDep(currentFrom);
+      const dep = getDep(currentFrom, config.aliases);
       dep.depType = 'docker';
       dep.versioning = dockerVersioning.id;
       deps.push(dep);

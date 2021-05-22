@@ -34,7 +34,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 export function getDep(
   currentFrom: string,
-  aliases: ExtractConfig['aliases'],
+  aliases?: ExtractConfig['aliases'],
   specifyReplaceString = true
 ): PackageDependency {
   if (!is.string(currentFrom)) {

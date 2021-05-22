@@ -37,16 +37,22 @@ function extractImages(config: BatectConfig): string[] {
     .map((container) => container.image);
 }
 
-function createImageDependency(tag: string): PackageDependency {
+function createImageDependency(
+  tag: string,
+  aliases?: ExtractConfig['aliases']
+): PackageDependency {
   return {
-    ...getDep(tag),
+    ...getDep(tag, aliases),
     versioning: dockerVersioning,
   };
 }
 
-function extractImageDependencies(config: BatectConfig): PackageDependency[] {
+function extractImageDependencies(
+  config: BatectConfig,
+  aliases?: ExtractConfig['aliases']
+): PackageDependency[] {
   const images = extractImages(config);
-  const deps = images.map((image) => createImageDependency(image));
+  const deps = images.map((image) => createImageDependency(image, aliases));
 
   logger.trace({ deps }, 'Loaded images from Batect configuration file');
 
@@ -118,14 +124,15 @@ function extractReferencedConfigFiles(
 
 export function extractPackageFile(
   content: string,
-  fileName: string
+  fileName: string,
+  extractConfig?: ExtractConfig
 ): ExtractionResult | null {
   logger.debug({ fileName }, 'batect.extractPackageFile()');
 
   try {
     const config = loadConfig(content);
     const deps = [
-      ...extractImageDependencies(config),
+      ...extractImageDependencies(config, extractConfig.aliases),
       ...extractBundleDependencies(config),
     ];
 

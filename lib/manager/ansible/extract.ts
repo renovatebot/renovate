@@ -1,10 +1,12 @@
 import { logger } from '../../logger';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export default function extractPackageFile(
-  content: string
+  content: string,
+  packageFile?: string,
+  config?: ExtractConfig
 ): PackageFile | null {
   logger.trace('ansible.extractPackageFile()');
   let deps: PackageDependency[] = [];
@@ -13,7 +15,7 @@ export default function extractPackageFile(
     const match = re.exec(line);
     if (match) {
       const currentFrom = match[1];
-      const dep = getDep(currentFrom);
+      const dep = getDep(currentFrom, config.aliases);
       logger.debug(
         {
           depName: dep.depName,

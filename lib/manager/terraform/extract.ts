@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { TerraformDependencyTypes } from './common';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
 import {
@@ -34,7 +34,11 @@ const contentCheckList = [
   ' "docker_image" ',
 ];
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+  config?: ExtractConfig
+): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
   if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
@@ -111,7 +115,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         analyseTerraformModule(dep);
         break;
       case TerraformDependencyTypes.resource:
-        analyseTerraformResource(dep);
+        analyseTerraformResource(dep, config.aliases);
         break;
       case TerraformDependencyTypes.terraform_version:
         analyseTerraformVersion(dep);

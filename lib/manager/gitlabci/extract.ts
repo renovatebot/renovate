@@ -19,7 +19,11 @@ function skipCommentLines(
   return { line: lines[ln], lineNumber: ln };
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+  config?: ExtractConfig
+): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
@@ -38,7 +42,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               lineNumber = imageNameLine.lineNumber;
               logger.trace(`Matched image name on line ${lineNumber}`);
               const currentFrom = imageNameMatch[1];
-              const dep = getDep(currentFrom);
+              const dep = getDep(currentFrom, config.aliases);
               dep.depType = 'image-name';
               deps.push(dep);
             }
@@ -47,7 +51,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           default: {
             logger.trace(`Matched image on line ${lineNumber}`);
             const currentFrom = imageMatch[1];
-            const dep = getDep(currentFrom);
+            const dep = getDep(currentFrom, config.aliases);
             dep.depType = 'image';
             deps.push(dep);
           }
@@ -70,7 +74,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             foundImage = true;
             const currentFrom = serviceImageMatch[1];
             lineNumber = serviceImageLine.lineNumber;
-            const dep = getDep(currentFrom);
+            const dep = getDep(currentFrom, config.aliases);
             dep.depType = 'service-image';
             deps.push(dep);
           }
@@ -87,7 +91,7 @@ export function extractPackageFile(content: string): PackageFile | null {
 }
 
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
   const filesToExamine = [...packageFiles];
@@ -126,7 +130,7 @@ export async function extractAllPackageFiles(
       }
     }
 
-    const result = extractPackageFile(content);
+    const result = extractPackageFile(content, undefined, config.aliases);
     if (result !== null) {
       results.push({
         packageFile: file,

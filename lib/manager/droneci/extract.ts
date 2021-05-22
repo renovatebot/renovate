@@ -1,8 +1,12 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+  config?: ExtractConfig
+): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
@@ -11,7 +15,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const match = /^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
       if (match) {
         const currentFrom = match[1];
-        const dep = getDep(currentFrom);
+        const dep = getDep(currentFrom, config.aliases);
         logger.debug(
           {
             depName: dep.depName,

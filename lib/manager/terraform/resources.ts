@@ -1,7 +1,7 @@
 import * as datasourceHelm from '../../datasource/helm';
 import { SkipReason } from '../../types';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency } from '../types';
+import type { ExtractConfig, PackageDependency } from '../types';
 import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
 import type { ExtractionResult, ResourceManagerData } from './types';
 import {
@@ -12,9 +12,10 @@ import {
 
 function applyDockerDependency(
   dep: PackageDependency<ResourceManagerData>,
-  value: string
+  value: string,
+  aliases?: ExtractConfig['aliases']
 ): void {
-  const dockerDep = getDep(value);
+  const dockerDep = getDep(value, aliases);
   Object.assign(dep, dockerDep);
 }
 
@@ -63,14 +64,15 @@ export function extractTerraformResource(
 }
 
 export function analyseTerraformResource(
-  dep: PackageDependency<ResourceManagerData>
+  dep: PackageDependency<ResourceManagerData>,
+  aliases?: ExtractConfig['aliases']
 ): void {
   /* eslint-disable no-param-reassign */
 
   switch (dep.managerData.resourceType) {
     case TerraformResourceTypes.docker_container:
       if (dep.managerData.image) {
-        applyDockerDependency(dep, dep.managerData.image);
+        applyDockerDependency(dep, dep.managerData.image, aliases);
         dep.depType = 'docker_container';
       } else {
         dep.skipReason = SkipReason.InvalidDependencySpecification;
@@ -79,7 +81,7 @@ export function analyseTerraformResource(
 
     case TerraformResourceTypes.docker_image:
       if (dep.managerData.name) {
-        applyDockerDependency(dep, dep.managerData.name);
+        applyDockerDependency(dep, dep.managerData.name, aliases);
         dep.depType = 'docker_image';
       } else {
         dep.skipReason = SkipReason.InvalidDependencySpecification;
@@ -88,7 +90,7 @@ export function analyseTerraformResource(
 
     case TerraformResourceTypes.docker_service:
       if (dep.managerData.image) {
-        applyDockerDependency(dep, dep.managerData.image);
+        applyDockerDependency(dep, dep.managerData.image, aliases);
         dep.depType = 'docker_service';
       } else {
         dep.skipReason = SkipReason.InvalidDependencySpecification;

@@ -2,7 +2,7 @@ import { safeLoad } from 'js-yaml';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { AzurePipelines, Container, Repository } from './types';
 
 export function extractRepository(
@@ -28,13 +28,14 @@ export function extractRepository(
 }
 
 export function extractContainer(
-  container: Container
+  container: Container,
+  aliases?: ExtractConfig['aliases']
 ): PackageDependency | null {
   if (!container.image) {
     return null;
   }
 
-  const dep = getDep(container.image);
+  const dep = getDep(container.image, aliases);
   logger.debug(
     {
       depName: dep.depName,
@@ -72,7 +73,8 @@ export function parseAzurePipelines(
 
 export function extractPackageFile(
   content: string,
-  filename: string
+  filename: string,
+  config?: ExtractConfig
 ): PackageFile | null {
   logger.trace(`azurePipelines.extractPackageFile(${filename})`);
   const deps: PackageDependency[] = [];
@@ -92,7 +94,7 @@ export function extractPackageFile(
 
   // grab the containers tags
   for (const container of pkg.resources.containers) {
-    const dep = extractContainer(container);
+    const dep = extractContainer(container, config.aliases);
     if (dep) {
       deps.push(dep);
     }
