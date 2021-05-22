@@ -249,8 +249,8 @@ If left as default (null), a random short ID will be selected.
 
 ## migratePresets
 
-Use this is you have repositories extending a particular preset but it has been removed or renamed.
-This is especially handy if you have a large number of repositories extending a particular preset which you want to rename, without the hassle of updating every repository individually.
+Use this if you have repositories that extend from a particular preset, which has now been renamed or removed.
+This is handy if you have a large number of repositories that all extend from a particular preset which you want to rename, without the hassle of manually updating every repository individually.
 Use an empty string to indicate that the preset should be ignored rather than replaced.
 
 Example:
@@ -263,7 +263,7 @@ modules.exports = {
 };
 ```
 
-In the above example any reference to `@company` preset will be replaced with `local>org/renovate-config`.
+In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
 
 ## onboarding
 
