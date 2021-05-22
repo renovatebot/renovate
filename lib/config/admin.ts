@@ -14,6 +14,7 @@ const repoAdminOptions = [
   'dockerUser',
   'dryRun',
   'exposeAllEnv',
+  'migratePresets',
   'privateKey',
   'localDir',
   'cacheDir',
