@@ -10,7 +10,7 @@ For example, if you think anything is unclear, or you think something needs to b
 
 You need the following dependencies for local development:
 
-- Git `>= 1.22.0`
+- Git
 - Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
