@@ -514,7 +514,7 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
                 });
               }
-            } else if (key === 'customEnvVariables') {
+            } else if (['customEnvVariables', 'migratePresets'].includes(key)) {
               const res = validatePlainObject(val);
               if (res !== true) {
                 errors.push({
