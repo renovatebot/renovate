@@ -392,3 +392,5 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 ## token
 
 ## username
+
+Mandatory if a GitHub app token is in use using the CLI.

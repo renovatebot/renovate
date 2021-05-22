@@ -55,8 +55,13 @@ function getTableValues(
 }
 
 export function generateBranchConfig(
-  branchUpgrades: BranchUpgradeConfig[]
+  upgrades: BranchUpgradeConfig[]
 ): BranchConfig {
+  let branchUpgrades = upgrades;
+  if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
+    // If the branch isn't pending, then remove any upgrades within which *are*
+    branchUpgrades = branchUpgrades.filter((upgrade) => !upgrade.pendingChecks);
+  }
   logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
   let config: BranchConfig = {
     upgrades: [],
@@ -305,14 +310,6 @@ export function generateBranchConfig(
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
-  }
-  if (!config.upgrades?.every((upgrade) => upgrade.pendingChecks)) {
-    // A branch should only have pendingChecks if all upgrades have pendingChecks
-    delete config.pendingChecks;
-    // If the branch isn't pending, then remove any upgrades within which *are*
-    config.upgrades = config.upgrades.filter(
-      (upgrade) => !upgrade.pendingChecks
-    );
   }
   const tableRows = config.upgrades
     .map((upgrade) => getTableValues(upgrade))
