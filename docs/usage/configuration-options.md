@@ -86,7 +86,7 @@ This makes it suitable for augmenting a preset or base list without displacing t
 ## aliases
 
 The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements` and `docker` manager only.
+Currently it is needed/supported for the `helm-requirements` and `docker` managers only.
 
 `helm-requirements` includes this default alias:
 
@@ -98,7 +98,10 @@ Currently it is needed/supported for the `helm-requirements` and `docker` manage
 }
 ```
 
-When using a `docker` proxy cache `aliases` can be used to map the images prefix on the proxy to the original prefix:
+The following `alias` will result in Renovate treating docker images prefixed with `registry.example.com/proxy-cache` as if they were prefixed with `docker.io` instead.
+Renovate will get the tag list from Docker Hub instead of `registry.example.com`.
+This is useful when using a proxy registry like [Harbor Proxy Cache](https://goharbor.io/docs/2.1.0/administration/configure-proxy-cache/) or [Gitlab Dependency Proxy](https://docs.gitlab.com/ce/user/packages/dependency_proxy/).
+These proxies do not support the endpoint for listing all tags and thus can not be used to discover new versions of images.
 
 ```json
 {
