@@ -17,6 +17,7 @@ export async function detectMonorepos(
       packageFile,
       npmLock,
       yarnLock,
+      npmrc,
       managerData = {},
       lernaClient,
       lernaPackages,
@@ -52,6 +53,7 @@ export async function detectMonorepos(
         subPackage.npmLock = subPackage.npmLock || npmLock;
         if (subPackage.yarnLock) {
           subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
+          subPackage.npmrc = subPackage.npmrc || npmrc;
         }
         if (!updateInternalDeps) {
           subPackage.deps?.forEach((dep) => {

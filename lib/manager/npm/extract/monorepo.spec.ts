@@ -139,6 +139,7 @@ describe(getName(), () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
+          npmrc: '@org:registry=//registry.some.org\n',
           yarnWorkspacesPackages: 'packages/*',
         },
         {
