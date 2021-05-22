@@ -1,5 +1,6 @@
 import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { setAdminConfig } from './admin';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
 import type {
@@ -674,6 +675,23 @@ describe(getName(), () => {
           token: 'abc123',
         },
       ],
+    } as any;
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
+  });
+  it('it migrates presets', () => {
+    setAdminConfig({
+      migratePresets: {
+        '@org': 'local>org/renovate-config',
+        '@org2/foo': '',
+      },
+    });
+    const config: RenovateConfig = {
+      extends: ['@org', '@org2/foo'],
     } as any;
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(
       config,

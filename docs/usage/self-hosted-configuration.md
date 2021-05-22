@@ -247,6 +247,24 @@ If left as default (null), a random short ID will be selected.
 
 ## logFileLevel
 
+## migratePresets
+
+Use this is you have repositories extending a particular preset but it has been removed or renamed.
+This is especially handy if you have a large number of repositories extending a particular preset which you want to rename, without the hassle of updating every repository individually.
+Use an empty string to indicate that the preset should be ignored rather than replaced.
+
+Example:
+
+```js
+modules.exports = {
+  migratePresets: {
+    '@company': 'local>org/renovate-config',
+  },
+};
+```
+
+In the above example any reference to `@company` preset will be replaced with `local>org/renovate-config`.
+
 ## onboarding
 
 Set this to `false` only if all three statements are true:

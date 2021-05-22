@@ -96,6 +96,7 @@ export interface RepoAdminConfig {
   dockerUser?: string;
   dryRun?: boolean;
   exposeAllEnv?: boolean;
+  migratePresets?: Record<string, string>;
   privateKey?: string | Buffer;
   localDir?: string;
   cacheDir?: string;
