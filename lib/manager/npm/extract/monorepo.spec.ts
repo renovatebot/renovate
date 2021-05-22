@@ -1,9 +1,11 @@
 import { getName } from '../../../../test/util';
 import { detectMonorepos } from './monorepo';
 
+jest.mock('./pnpm');
+
 describe(getName(), () => {
   describe('.extractPackageFile()', () => {
-    it('uses lerna package settings', () => {
+    it('uses lerna package settings', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -47,7 +49,7 @@ describe(getName(), () => {
           packageJsonName: '@org/b',
         },
       ] as any;
-      detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
       expect(
@@ -56,7 +58,7 @@ describe(getName(), () => {
         )
       ).toBe(true);
     });
-    it('updates internal packages', () => {
+    it('updates internal packages', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -100,7 +102,7 @@ describe(getName(), () => {
           packageJsonName: '@org/b',
         },
       ] as any;
-      detectMonorepos(packageFiles, true);
+      await detectMonorepos(packageFiles, true);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
       expect(
@@ -109,7 +111,7 @@ describe(getName(), () => {
         )
       ).toBe(false);
     });
-    it('uses yarn workspaces package settings with lerna', () => {
+    it('uses yarn workspaces package settings with lerna', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -129,11 +131,11 @@ describe(getName(), () => {
           packageJsonName: '@org/b',
         },
       ];
-      detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
     });
-    it('uses yarn workspaces package settings without lerna', () => {
+    it('uses yarn workspaces package settings without lerna', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -149,7 +151,7 @@ describe(getName(), () => {
           packageJsonName: '@org/b',
         },
       ];
-      detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
     });
   });
