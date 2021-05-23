@@ -167,5 +167,12 @@ describe(getName(), () => {
       };
       expect(getDep(from, aliases)).toMatchSnapshot();
     });
+    it('does not apply aliases to images not prefixed with the given alias', () => {
+      const from = 'renovate/renovate:25.0.0';
+      const aliases = {
+        'registry.example.com/proxy': 'docker.io',
+      };
+      expect(getDep(from, aliases)).toMatchSnapshot();
+    });
   });
 });

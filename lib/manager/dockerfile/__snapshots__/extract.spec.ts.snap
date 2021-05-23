@@ -445,6 +445,17 @@ Array [
 ]
 `;
 
+exports[`manager/dockerfile/extract getDep() does not apply aliases to images not prefixed with the given alias 1`] = `
+Object {
+  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+  "currentDigest": undefined,
+  "currentValue": "25.0.0",
+  "datasource": "docker",
+  "depName": "renovate/renovate",
+  "replaceString": "renovate/renovate:25.0.0",
+}
+`;
+
 exports[`manager/dockerfile/extract getDep() rejects null 1`] = `
 Object {
   "skipReason": "invalid-value",
