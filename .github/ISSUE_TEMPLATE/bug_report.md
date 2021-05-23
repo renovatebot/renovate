@@ -9,12 +9,25 @@ labels: 'type:bug, status:requirements, priority-5-triage'
       Email renovate-disclosure@whitesourcesoftware.com instead.
 -->
 
-**Renovate type**
+**How are you running Renovate?**
 
-- [ ] Hosted app
-- [ ] Self hosted:
+- [ ] WhiteSource Renovate hosted app on github.com
+- [ ] Self hosted
 
-Platform: ...
+If using the hosted app, please skip to the next section.
+Otherwise, if self-hosted, please complete the following:
+
+Please select which platform you are using:
+
+- [ ] Azure DevOps (dev.azure.com)
+- [ ] Azure DevOps Server
+- [ ] Bitbucket Cloud (bitbucket.org)
+- [ ] Bitbucket Server
+- [ ] Gitea
+- [ ] github.com
+- [ ] GitHub Enterprise Server
+- [ ] gitlab.com
+- [ ] GitLab self-hotsed
 
 Renovate version: ...
 
