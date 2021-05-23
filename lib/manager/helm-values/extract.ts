@@ -72,7 +72,7 @@ export function extractPackageFile(
     return null;
   }
   try {
-    const deps = findDependencies(parsedContent, [], config.aliases);
+    const deps = findDependencies(parsedContent, [], config?.aliases);
     if (deps.length) {
       logger.debug({ deps }, 'Found dependencies in helm-values');
       return { deps };

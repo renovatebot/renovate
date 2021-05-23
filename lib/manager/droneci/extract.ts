@@ -15,7 +15,7 @@ export function extractPackageFile(
       const match = /^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
       if (match) {
         const currentFrom = match[1];
-        const dep = getDep(currentFrom, config.aliases);
+        const dep = getDep(currentFrom, config?.aliases);
         logger.debug(
           {
             depName: dep.depName,

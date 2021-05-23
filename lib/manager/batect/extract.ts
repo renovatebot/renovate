@@ -132,7 +132,7 @@ export function extractPackageFile(
   try {
     const config = loadConfig(content);
     const deps = [
-      ...extractImageDependencies(config, extractConfig.aliases),
+      ...extractImageDependencies(config, extractConfig?.aliases),
       ...extractBundleDependencies(config),
     ];
 

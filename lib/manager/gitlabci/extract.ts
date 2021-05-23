@@ -42,7 +42,7 @@ export function extractPackageFile(
               lineNumber = imageNameLine.lineNumber;
               logger.trace(`Matched image name on line ${lineNumber}`);
               const currentFrom = imageNameMatch[1];
-              const dep = getDep(currentFrom, config.aliases);
+              const dep = getDep(currentFrom, config?.aliases);
               dep.depType = 'image-name';
               deps.push(dep);
             }
@@ -51,7 +51,7 @@ export function extractPackageFile(
           default: {
             logger.trace(`Matched image on line ${lineNumber}`);
             const currentFrom = imageMatch[1];
-            const dep = getDep(currentFrom, config.aliases);
+            const dep = getDep(currentFrom, config?.aliases);
             dep.depType = 'image';
             deps.push(dep);
           }
@@ -74,7 +74,7 @@ export function extractPackageFile(
             foundImage = true;
             const currentFrom = serviceImageMatch[1];
             lineNumber = serviceImageLine.lineNumber;
-            const dep = getDep(currentFrom, config.aliases);
+            const dep = getDep(currentFrom, config?.aliases);
             dep.depType = 'service-image';
             deps.push(dep);
           }

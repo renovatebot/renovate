@@ -83,7 +83,7 @@ export function extractPackageFile(
     } else if (stageNames.includes(fromMatch.groups.image)) {
       logger.debug({ image: fromMatch.groups.image }, 'Skipping alias FROM');
     } else {
-      const dep = getDep(fromMatch.groups.image, config.aliases);
+      const dep = getDep(fromMatch.groups.image, config?.aliases);
       logger.trace(
         {
           depName: dep.depName,
@@ -107,7 +107,7 @@ export function extractPackageFile(
         'Skipping alias COPY --from'
       );
     } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
-      const dep = getDep(copyFromMatch.groups.image, config.aliases);
+      const dep = getDep(copyFromMatch.groups.image, config?.aliases);
       logger.debug(
         {
           depName: dep.depName,

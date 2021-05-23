@@ -20,7 +20,7 @@ export function extractPackageFile(
     const dockerMatch = /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
-      const dep = getDep(currentFrom, config.aliases);
+      const dep = getDep(currentFrom, config?.aliases);
       dep.depType = 'docker';
       dep.versioning = dockerVersioning.id;
       deps.push(dep);

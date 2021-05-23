@@ -115,7 +115,7 @@ export function extractPackageFile(
         analyseTerraformModule(dep);
         break;
       case TerraformDependencyTypes.resource:
-        analyseTerraformResource(dep, config.aliases);
+        analyseTerraformResource(dep, config?.aliases);
         break;
       case TerraformDependencyTypes.terraform_version:
         analyseTerraformVersion(dep);

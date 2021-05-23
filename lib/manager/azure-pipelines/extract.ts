@@ -94,7 +94,7 @@ export function extractPackageFile(
 
   // grab the containers tags
   for (const container of pkg.resources.containers) {
-    const dep = extractContainer(container, config.aliases);
+    const dep = extractContainer(container, config?.aliases);
     if (dep) {
       deps.push(dep);
     }
