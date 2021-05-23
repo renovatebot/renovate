@@ -66,7 +66,7 @@ export function getDep(
   }
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
-    dep.replaceString = currentFrom;
+    dep.replaceString = currentFrom.substring(currentFrom.indexOf(dep.depName));
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
