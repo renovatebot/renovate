@@ -1,10 +1,10 @@
 import { getName } from '../../test/util';
-import { getConfigRulesFromNpmrc } from './npmrc';
+import { getConfigFromNpmrc } from './npmrc';
 
 describe(getName(), () => {
-  describe('getConfigRulesFromNpmrc()', () => {
+  describe('getConfigFromNpmrc()', () => {
     it('works with empty string', () => {
-      expect(getConfigRulesFromNpmrc()).toMatchInlineSnapshot(`
+      expect(getConfigFromNpmrc()).toMatchInlineSnapshot(`
         Object {
           "hostRules": Array [],
           "packageRules": Array [],
@@ -12,8 +12,7 @@ describe(getName(), () => {
       `);
     });
     it('supports naked _auth', () => {
-      expect(getConfigRulesFromNpmrc('_auth=some-token'))
-        .toMatchInlineSnapshot(`
+      expect(getConfigFromNpmrc('_auth=some-token')).toMatchInlineSnapshot(`
         Object {
           "hostRules": Array [
             Object {
@@ -28,7 +27,7 @@ describe(getName(), () => {
     });
     it('supports naked registry and _authToken', () => {
       expect(
-        getConfigRulesFromNpmrc(
+        getConfigFromNpmrc(
           'registry=https://corp.registry\n_authToken=some-token'
         )
       ).toMatchInlineSnapshot(`
@@ -54,22 +53,22 @@ describe(getName(), () => {
     });
     it('supports scoped registries', () => {
       expect(
-        getConfigRulesFromNpmrc(
+        getConfigFromNpmrc(
           '@org:registry=https://corp.registry\n//corp.registry:_authToken=some-token\nhttps://other.registry:_auth=other-token\n'
         )
       ).toMatchInlineSnapshot(`
         Object {
           "hostRules": Array [
             Object {
+              "hostType": "npm",
+              "matchHost": "corp.registry",
+              "token": "some-token",
+            },
+            Object {
               "authType": "Basic",
               "hostType": "npm",
               "matchHost": "https://other.registry",
               "token": "other-token",
-            },
-            Object {
-              "hostType": "npm",
-              "matchHost": "corp.registry",
-              "token": "some-token",
             },
           ],
           "packageRules": Array [
