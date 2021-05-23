@@ -4,7 +4,12 @@ import { getConfigFromNpmrc } from './npmrc';
 describe(getName(), () => {
   describe('getConfigFromNpmrc()', () => {
     it('works with empty string', () => {
-      expect(getConfigFromNpmrc()).toEqual({});
+      expect(getConfigFromNpmrc()).toMatchInlineSnapshot(`
+        Object {
+          "hostRules": Array [],
+          "packageRules": Array [],
+        }
+      `);
     });
     it('supports naked _auth', () => {
       expect(getConfigFromNpmrc('_auth=some-token')).toMatchInlineSnapshot(`
@@ -16,6 +21,7 @@ describe(getName(), () => {
               "token": "some-token",
             },
           ],
+          "packageRules": Array [],
         }
       `);
     });

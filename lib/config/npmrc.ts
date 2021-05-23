@@ -1,21 +1,14 @@
 import ini from 'ini';
 import { id as hostType } from '../datasource/npm';
+import { validateUrl } from '../util/url';
 import { RenovateConfig } from './types';
 
-function getMatchHost(input: string): string {
-  if (input.startsWith('https://')) {
-    return input;
-  }
-  return input.split('//')[1];
-}
-
 export function getConfigFromNpmrc(npmrc = ''): RenovateConfig {
-  const res: RenovateConfig = {};
+  const res: RenovateConfig = { hostRules: [], packageRules: [] };
   const parsed = ini.parse(npmrc);
   for (const [key, val] of Object.entries(parsed)) {
     // hostRules
     if (key === '_auth') {
-      res.hostRules ||= [];
       res.hostRules.push({
         hostType,
         authType: 'Basic',
@@ -25,39 +18,37 @@ export function getConfigFromNpmrc(npmrc = ''): RenovateConfig {
       res.hostRules ||= [];
       res.hostRules.push({ hostType, token: val });
     } else if (key.endsWith(':_auth')) {
-      const hostPart = key.replace(/:_auth$/, '');
-      res.hostRules ||= [];
+      const matchHost = key.replace(/:_auth$/, '').replace(/^\/\//, '');
       res.hostRules.push({
         hostType,
-        matchHost: getMatchHost(hostPart),
+        matchHost,
         authType: 'Basic',
         token: val,
       });
     } else if (key.endsWith(':_authToken')) {
-      const hostPart = key.replace(/:_authToken$/, '');
-      res.hostRules ||= [];
+      const matchHost = key.replace(/:_authToken$/, '').replace(/^\/\//, '');
       res.hostRules.push({
         hostType,
-        matchHost: getMatchHost(hostPart),
+        matchHost,
         token: val,
       });
       // packageRules
     } else if (key === 'registry') {
-      const [, host] = val.split('//');
-      res.packageRules ||= [];
-      res.packageRules.push({
-        matchDatasources: [hostType],
-        registryUrls: [`https://${host}`],
-      });
+      if (validateUrl(val, false)) {
+        res.packageRules.push({
+          matchDatasources: [hostType],
+          registryUrls: [val],
+        });
+      }
     } else if (key.endsWith(':registry')) {
-      const [scope] = key.split(':');
-      const [, host] = val.split('//');
-      res.packageRules ||= [];
-      res.packageRules.push({
-        matchDatasources: [hostType],
-        matchPackagePrefixes: [scope],
-        registryUrls: [`https://${host}`],
-      });
+      if (validateUrl(val, false)) {
+        const [scope] = key.split(':');
+        res.packageRules.push({
+          matchDatasources: [hostType],
+          matchPackagePrefixes: [scope],
+          registryUrls: [val],
+        });
+      }
     }
   }
   return res;
