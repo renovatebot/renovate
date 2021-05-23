@@ -25,11 +25,20 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     currentValue = depTagSplit.pop();
     depName = depTagSplit.join(':');
   }
+  const depNameParts = depName.split('/');
+  let registryUrl: string;
+  if (depNameParts.length > 1 && depNameParts[0].includes('.')) {
+    registryUrl = depNameParts.shift();
+    depName = depNameParts.join('/');
+  }
   const dep: PackageDependency = {
     depName,
     currentValue,
     currentDigest,
   };
+  if (registryUrl) {
+    dep.registryUrls = [registryUrl];
+  }
   return dep;
 }
 
