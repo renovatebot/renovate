@@ -450,3 +450,14 @@ Object {
   "skipReason": "invalid-value",
 }
 `;
+
+exports[`manager/dockerfile/extract getDep() resolves aliases 1`] = `
+Object {
+  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+  "currentDigest": undefined,
+  "currentValue": "25.0.0",
+  "datasource": "docker",
+  "depName": "docker.io/renovate/renovate",
+  "replaceString": "docker.io/renovate/renovate:25.0.0",
+}
+`;

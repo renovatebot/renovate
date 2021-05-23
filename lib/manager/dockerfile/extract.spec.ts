@@ -160,5 +160,12 @@ describe(getName(), () => {
     it('rejects null', () => {
       expect(getDep(null)).toMatchSnapshot();
     });
+    it('resolves aliases', () => {
+      const from = 'registry.example.com/proxy/renovate/renovate:25.0.0';
+      const aliases = {
+        'registry.example.com/proxy': 'docker.io',
+      };
+      expect(getDep(from, aliases)).toMatchSnapshot();
+    });
   });
 });
