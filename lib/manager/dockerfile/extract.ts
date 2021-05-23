@@ -42,12 +42,15 @@ export function getDep(
       skipReason: SkipReason.InvalidValue,
     };
   }
-  const aliasedFrom = Object.keys(aliases).reduce((from, alias) => {
-    if (from.startsWith(alias)) {
-      return from.replace(alias, aliases[alias]);
-    }
-    return from;
-  }, currentFrom);
+  let aliasedFrom = currentFrom;
+  if (aliases) {
+    aliasedFrom = Object.keys(aliases).reduce((from, alias) => {
+      if (from.startsWith(alias)) {
+        return from.replace(alias, aliases[alias]);
+      }
+      return from;
+    }, currentFrom);
+  }
   const dep = splitImageParts(aliasedFrom);
   if (specifyReplaceString) {
     dep.replaceString = aliasedFrom;
