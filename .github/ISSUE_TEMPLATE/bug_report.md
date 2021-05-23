@@ -27,7 +27,7 @@ Please select which platform you are using:
 - [ ] github.com
 - [ ] GitHub Enterprise Server
 - [ ] gitlab.com
-- [ ] GitLab self-hotsed
+- [ ] GitLab self-hosted
 
 Renovate version: ...
 
@@ -64,4 +64,5 @@ Please read the [minimal reproductions documentation](https://github.com/renovat
 
 **Additional context**
 
-...<!-- Add any other context about the problem here, including your own debugging or ideas on what went wrong. -->
+<!-- Add any other context about the problem here, including your own debugging or ideas on what went wrong. -->
+...
