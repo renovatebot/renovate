@@ -174,7 +174,7 @@ Array [
     "depName": "k8s-skaffold/skaffold",
     "depType": "final",
     "registryUrls": Array [
-      "gcr.io",
+      "https://gcr.io",
     ],
     "replaceString": "gcr.io/k8s-skaffold/skaffold:v0.11.0",
   },
@@ -191,7 +191,7 @@ Array [
     "depName": "node",
     "depType": "final",
     "registryUrls": Array [
-      "registry.allmine.info:5005",
+      "https://registry.allmine.info:5005",
     ],
     "replaceString": "registry.allmine.info:5005/node:8.7.0",
   },
@@ -236,7 +236,7 @@ Array [
     "depName": "node",
     "depType": "final",
     "registryUrls": Array [
-      "registry2.something.info",
+      "https://registry2.something.info",
     ],
     "replaceString": "registry2.something.info/node:8",
   },
@@ -253,7 +253,7 @@ Array [
     "depName": "node",
     "depType": "final",
     "registryUrls": Array [
-      "registry2.something.info",
+      "https://registry2.something.info",
     ],
     "replaceString": "registry2.something.info/node:8-alpine",
   },
@@ -270,7 +270,7 @@ Array [
     "depName": "someaccount/node",
     "depType": "final",
     "registryUrls": Array [
-      "registry2.something.info",
+      "https://registry2.something.info",
     ],
     "replaceString": "registry2.something.info/someaccount/node:8",
   },
@@ -287,7 +287,7 @@ Array [
     "depName": "node",
     "depType": "final",
     "registryUrls": Array [
-      "registry2.something.info:5005",
+      "https://registry2.something.info:5005",
     ],
     "replaceString": "registry2.something.info:5005/node:8",
   },
@@ -304,7 +304,7 @@ Array [
     "depName": "node",
     "depType": "final",
     "registryUrls": Array [
-      "registry2.something.info:5005",
+      "https://registry2.something.info:5005",
     ],
     "replaceString": "registry2.something.info:5005/node",
   },
@@ -363,6 +363,23 @@ Array [
     "depName": "mynamespace/node",
     "depType": "final",
     "replaceString": "mynamespace/node:8",
+  },
+]
+`;
+
+exports[`manager/dockerfile/extract extractPackageFile() handles registries with a path 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "12.19.1",
+    "datasource": "docker",
+    "depName": "library/node",
+    "depType": "final",
+    "registryUrls": Array [
+      "https://registry.example.com/proxy-cache",
+    ],
+    "replaceString": "registry.example.com/proxy-cache/library/node:12.19.1",
   },
 ]
 `;

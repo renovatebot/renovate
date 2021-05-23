@@ -7,7 +7,10 @@ Array [
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
-    "depName": "quay.io/something/redis",
+    "depName": "something/redis",
+    "registryUrls": Array [
+      "https://quay.io",
+    ],
     "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
@@ -74,7 +77,10 @@ Array [
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
-    "depName": "quay.io/something/redis",
+    "depName": "something/redis",
+    "registryUrls": Array [
+      "https://quay.io",
+    ],
     "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
@@ -141,7 +147,10 @@ Array [
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
-    "depName": "quay.io/something/redis",
+    "depName": "something/redis",
+    "registryUrls": Array [
+      "https://quay.io",
+    ],
     "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
