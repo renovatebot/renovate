@@ -125,15 +125,23 @@ describe('manager/dockerfile/extract', () => {
         'FROM registry2.something.info:5005/node:8\n'
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
+      expect(res[0].depName).toEqual('node');
       expect(res[0].currentValue).toEqual('8');
+    });
+    it('handles registries with a path', () => {
+      const res = extractPackageFile(
+        'FROM registry.example.com/proxy-cache/library/node:12.19.1\n'
+      ).deps;
+      expect(res).toMatchSnapshot();
+      expect(res[0].depName).toEqual('library/node');
+      expect(res[0].currentValue).toEqual('12.19.1');
     });
     it('handles custom hosts with port without tag', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info:5005/node\n'
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
+      expect(res[0].depName).toEqual('node');
     });
     it('handles quay hosts with port', () => {
       const res = extractPackageFile('FROM quay.io:1234/node\n').deps;
@@ -302,7 +310,7 @@ describe('manager/dockerfile/extract', () => {
           "currentValue": "14",
           "depName": "node",
           "registryUrls": Array [
-            "docker.io",
+            "https://docker.io",
           ],
         }
       `);

@@ -376,8 +376,11 @@ Object {
       "currentDigest": undefined,
       "currentValue": "v1",
       "datasource": "docker",
-      "depName": "repo.mycompany.com:8080/foo-service",
+      "depName": "foo-service",
       "depType": "docker_service",
+      "registryUrls": Array [
+        "https://repo.mycompany.com:8080",
+      ],
       "replaceString": "repo.mycompany.com:8080/foo-service:v1",
     },
     Object {

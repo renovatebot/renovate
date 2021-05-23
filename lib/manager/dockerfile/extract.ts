@@ -25,11 +25,22 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     currentValue = depTagSplit.pop();
     depName = depTagSplit.join(':');
   }
-  const depNameParts = depName.split('/');
   let registryUrl: string;
-  if (depNameParts.length > 1 && depNameParts[0].includes('.')) {
-    registryUrl = depNameParts.shift();
-    depName = depNameParts.join('/');
+  const split = depName.split('/');
+  if (split.length > 2) {
+    // Assume the last two segments are the image name
+    depName = split.slice(-2).join('/');
+    registryUrl = split.slice(0, -2).join('/');
+  } else if (
+    // Split a two-part image if the first looks for sure like a hostName
+    split.length === 2 &&
+    (split[0].includes('.') || split[0].includes(':'))
+  ) {
+    registryUrl = split.shift();
+    depName = split.join('/');
+  }
+  if (registryUrl && !/^https?:\/\//.exec(registryUrl)) {
+    registryUrl = `https://${registryUrl}`;
   }
   const dep: PackageDependency = {
     depName,
