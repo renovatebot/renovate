@@ -34,7 +34,6 @@ Renovate version: ...
 **Describe the bug**
 
 ...
-<!-- A clear and concise description of what the bug is. -->
 
 **Relevant debug logs**
 
@@ -65,5 +64,4 @@ Please read the [minimal reproductions documentation](https://github.com/renovat
 
 **Additional context**
 
-...
-<!-- Add any other context about the problem here, including your own debugging or ideas on what went wrong. -->
+...<!-- Add any other context about the problem here, including your own debugging or ideas on what went wrong. -->
