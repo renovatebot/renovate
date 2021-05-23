@@ -100,7 +100,7 @@ Currently it is needed/supported for the `helm-requirements` and `docker` manage
 
 The following `alias` will result in Renovate treating docker images prefixed with `registry.example.com/proxy-cache` as if they were prefixed with `docker.io` instead.
 Renovate will get the tag list from Docker Hub instead of `registry.example.com`.
-This is useful when using a proxy registry like [Harbor Proxy Cache](https://goharbor.io/docs/2.1.0/administration/configure-proxy-cache/) or [Gitlab Dependency Proxy](https://docs.gitlab.com/ce/user/packages/dependency_proxy/).
+This is useful when using a proxy registry like [Harbor Proxy Cache](https://goharbor.io/docs/2.1.0/administration/configure-proxy-cache/) or [GitLab Dependency Proxy](https://docs.gitlab.com/ce/user/packages/dependency_proxy/).
 These proxies do not support the endpoint for listing all tags and thus can not be used to discover new versions of images.
 
 ```json
