@@ -1,5 +1,5 @@
 import { getName, loadFixture } from '../../../test/util';
-import { extractPackageFile, getDep } from './extract';
+import { extractPackageFile, getDep, splitImageParts } from './extract';
 
 const d1 = loadFixture('1.Dockerfile');
 const d2 = loadFixture('2.Dockerfile');
@@ -159,6 +159,29 @@ describe(getName(), () => {
   describe('getDep()', () => {
     it('rejects null', () => {
       expect(getDep(null)).toMatchSnapshot();
+    });
+  });
+  describe('splitImageParts()', () => {
+    it('handles docker hub', () => {
+      expect(splitImageParts('node:14')).toMatchInlineSnapshot(`
+        Object {
+          "currentDigest": undefined,
+          "currentValue": "14",
+          "depName": "node",
+        }
+      `);
+    });
+    it('handles docker hub with full host', () => {
+      expect(splitImageParts('docker.io/node:14')).toMatchInlineSnapshot(`
+        Object {
+          "currentDigest": undefined,
+          "currentValue": "14",
+          "depName": "node",
+          "registryUrls": Array [
+            "docker.io",
+          ],
+        }
+      `);
     });
   });
 });

@@ -171,8 +171,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "v0.11.0",
     "datasource": "docker",
-    "depName": "gcr.io/k8s-skaffold/skaffold",
+    "depName": "k8s-skaffold/skaffold",
     "depType": "final",
+    "registryUrls": Array [
+      "gcr.io",
+    ],
     "replaceString": "gcr.io/k8s-skaffold/skaffold:v0.11.0",
   },
 ]
@@ -185,8 +188,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "8.7.0",
     "datasource": "docker",
-    "depName": "registry.allmine.info:5005/node",
+    "depName": "node",
     "depType": "final",
+    "registryUrls": Array [
+      "registry.allmine.info:5005",
+    ],
     "replaceString": "registry.allmine.info:5005/node:8.7.0",
   },
 ]
@@ -227,8 +233,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "8",
     "datasource": "docker",
-    "depName": "registry2.something.info/node",
+    "depName": "node",
     "depType": "final",
+    "registryUrls": Array [
+      "registry2.something.info",
+    ],
     "replaceString": "registry2.something.info/node:8",
   },
 ]
@@ -241,8 +250,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "8-alpine",
     "datasource": "docker",
-    "depName": "registry2.something.info/node",
+    "depName": "node",
     "depType": "final",
+    "registryUrls": Array [
+      "registry2.something.info",
+    ],
     "replaceString": "registry2.something.info/node:8-alpine",
   },
 ]
@@ -255,8 +267,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "8",
     "datasource": "docker",
-    "depName": "registry2.something.info/someaccount/node",
+    "depName": "someaccount/node",
     "depType": "final",
+    "registryUrls": Array [
+      "registry2.something.info",
+    ],
     "replaceString": "registry2.something.info/someaccount/node:8",
   },
 ]
@@ -269,8 +284,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "8",
     "datasource": "docker",
-    "depName": "registry2.something.info:5005/node",
+    "depName": "node",
     "depType": "final",
+    "registryUrls": Array [
+      "registry2.something.info:5005",
+    ],
     "replaceString": "registry2.something.info:5005/node:8",
   },
 ]
@@ -283,8 +301,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
-    "depName": "registry2.something.info:5005/node",
+    "depName": "node",
     "depType": "final",
+    "registryUrls": Array [
+      "registry2.something.info:5005",
+    ],
     "replaceString": "registry2.something.info:5005/node",
   },
 ]
