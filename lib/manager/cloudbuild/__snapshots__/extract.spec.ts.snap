@@ -11,7 +11,7 @@ Array [
     "registryUrls": Array [
       "https://gcr.io",
     ],
-    "replaceString": "gcr.io/cloud-builders/docker:19.03.8",
+    "replaceString": "cloud-builders/docker:19.03.8",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -30,7 +30,7 @@ Array [
     "registryUrls": Array [
       "https://gcr.io",
     ],
-    "replaceString": "gcr.io/cloud-builders/kubectl",
+    "replaceString": "cloud-builders/kubectl",
   },
 ]
 `;

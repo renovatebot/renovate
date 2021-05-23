@@ -11,7 +11,7 @@ Array [
     "registryUrls": Array [
       "https://quay.io",
     ],
-    "replaceString": "quay.io/something/redis:alpine",
+    "replaceString": "something/redis:alpine",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -81,7 +81,7 @@ Array [
     "registryUrls": Array [
       "https://quay.io",
     ],
-    "replaceString": "quay.io/something/redis:alpine",
+    "replaceString": "something/redis:alpine",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -151,7 +151,7 @@ Array [
     "registryUrls": Array [
       "https://quay.io",
     ],
-    "replaceString": "quay.io/something/redis:alpine",
+    "replaceString": "something/redis:alpine",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",

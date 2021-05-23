@@ -176,7 +176,7 @@ Array [
     "registryUrls": Array [
       "https://gcr.io",
     ],
-    "replaceString": "gcr.io/k8s-skaffold/skaffold:v0.11.0",
+    "replaceString": "k8s-skaffold/skaffold:v0.11.0",
   },
 ]
 `;
@@ -193,7 +193,7 @@ Array [
     "registryUrls": Array [
       "https://registry.allmine.info:5005",
     ],
-    "replaceString": "registry.allmine.info:5005/node:8.7.0",
+    "replaceString": "node:8.7.0",
   },
 ]
 `;
@@ -238,7 +238,7 @@ Array [
     "registryUrls": Array [
       "https://registry2.something.info",
     ],
-    "replaceString": "registry2.something.info/node:8",
+    "replaceString": "node:8",
   },
 ]
 `;
@@ -255,7 +255,7 @@ Array [
     "registryUrls": Array [
       "https://registry2.something.info",
     ],
-    "replaceString": "registry2.something.info/node:8-alpine",
+    "replaceString": "node:8-alpine",
   },
 ]
 `;
@@ -272,7 +272,7 @@ Array [
     "registryUrls": Array [
       "https://registry2.something.info",
     ],
-    "replaceString": "registry2.something.info/someaccount/node:8",
+    "replaceString": "someaccount/node:8",
   },
 ]
 `;
@@ -289,7 +289,7 @@ Array [
     "registryUrls": Array [
       "https://registry2.something.info:5005",
     ],
-    "replaceString": "registry2.something.info:5005/node:8",
+    "replaceString": "node:8",
   },
 ]
 `;
@@ -306,7 +306,7 @@ Array [
     "registryUrls": Array [
       "https://registry2.something.info:5005",
     ],
-    "replaceString": "registry2.something.info:5005/node",
+    "replaceString": "node",
   },
 ]
 `;
@@ -379,7 +379,7 @@ Array [
     "registryUrls": Array [
       "https://registry.example.com/proxy-cache",
     ],
-    "replaceString": "registry.example.com/proxy-cache/library/node:12.19.1",
+    "replaceString": "library/node:12.19.1",
   },
 ]
 `;
