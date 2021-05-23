@@ -61,7 +61,7 @@ describe(getName(), () => {
             Object {
               "authType": "Basic",
               "hostType": "npm",
-              "matchHost": "other.registry",
+              "matchHost": "https://other.registry",
               "token": "other-token",
             },
           ],

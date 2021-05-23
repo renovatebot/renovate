@@ -2,6 +2,13 @@ import ini from 'ini';
 import { id as hostType } from '../datasource/npm';
 import { RenovateConfig } from './types';
 
+function getMatchHost(input: string): string {
+  if (input.startsWith('https://')) {
+    return input;
+  }
+  return input.split('//')[1];
+}
+
 export function getConfigFromNpmrc(npmrc = ''): RenovateConfig {
   const res: RenovateConfig = {};
   const parsed = ini.parse(npmrc);
@@ -18,24 +25,23 @@ export function getConfigFromNpmrc(npmrc = ''): RenovateConfig {
       res.hostRules ||= [];
       res.hostRules.push({ hostType, token: val });
     } else if (key.endsWith(':_auth')) {
-      const [hostPart] = key.replace(/^https?:/, '').split(':');
-      const [, matchHost] = hostPart.split('//');
+      const hostPart = key.replace(/:_auth$/, '');
       res.hostRules ||= [];
       res.hostRules.push({
         hostType,
-        matchHost,
+        matchHost: getMatchHost(hostPart),
         authType: 'Basic',
         token: val,
       });
     } else if (key.endsWith(':_authToken')) {
-      const [hostPart] = key.split(':');
-      const [, matchHost] = hostPart.split('//');
+      const hostPart = key.replace(/:_authToken$/, '');
       res.hostRules ||= [];
       res.hostRules.push({
         hostType,
-        matchHost,
+        matchHost: getMatchHost(hostPart),
         token: val,
       });
+      // packageRules
     } else if (key === 'registry') {
       const [, host] = val.split('//');
       res.packageRules ||= [];
