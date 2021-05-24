@@ -6,7 +6,6 @@ Array [
     "currentValue": "3.7.1",
     "datasource": "docker",
     "depName": "python",
-    "lookupName": "python",
   },
 ]
 `;
@@ -17,7 +16,6 @@ Array [
     "currentValue": "latestn",
     "datasource": "docker",
     "depName": "python",
-    "lookupName": "python",
   },
 ]
 `;
@@ -28,7 +26,6 @@ Array [
     "currentValue": "3.8",
     "datasource": "docker",
     "depName": "python",
-    "lookupName": "python",
   },
 ]
 `;
