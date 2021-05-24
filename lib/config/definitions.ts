@@ -179,6 +179,14 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'deepExtract',
+    description: `Enable extraction of dependencies using package managers.`,
+    type: 'boolean',
+    default: false,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'repositoryCache',
     description: 'Option to do repository extract caching.',
     admin: true,
