@@ -1,5 +1,5 @@
 import { getName, loadFixture } from '../../../test/util';
-import * as datasourceClojure from '../../datasource/clojure';
+import { ClojureDatasource } from '../../datasource/clojure';
 import { extractFromVectors, extractPackageFile, trimAtKey } from './extract';
 
 const leinProjectClj = loadFixture(`project.clj`);
@@ -18,7 +18,7 @@ describe(getName(), () => {
     expect(extractFromVectors('[[]]')).toEqual([]);
     expect(extractFromVectors('[[foo/bar "1.2.3"]]')).toEqual([
       {
-        datasource: datasourceClojure.id,
+        datasource: ClojureDatasource.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
       },
@@ -27,12 +27,12 @@ describe(getName(), () => {
       extractFromVectors('[\t[foo/bar "1.2.3"]\n["foo/baz"  "4.5.6"] ]')
     ).toEqual([
       {
-        datasource: datasourceClojure.id,
+        datasource: ClojureDatasource.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
       },
       {
-        datasource: datasourceClojure.id,
+        datasource: ClojureDatasource.id,
         depName: 'foo:baz',
         currentValue: '4.5.6',
       },
