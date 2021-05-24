@@ -1,13 +1,9 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
+import type { GradleManagerData } from '../types';
 import { TokenType } from './common';
-import {
-  ManagerData,
-  PackageVariables,
-  Token,
-  VariableRegistry,
-} from './types';
+import { PackageVariables, Token, VariableRegistry } from './types';
 
 const artifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$'
@@ -40,7 +36,7 @@ export function isDependencyString(input: string): boolean {
 
 export function parseDependencyString(
   input: string
-): PackageDependency<ManagerData> | null {
+): PackageDependency<GradleManagerData> | null {
   if (!isDependencyString(input)) {
     return null;
   }

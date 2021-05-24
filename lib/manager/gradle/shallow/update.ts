@@ -1,12 +1,12 @@
 import { logger } from '../../../logger';
 import type { UpdateDependencyConfig } from '../../types';
-import type { ManagerData } from './types';
+import type { GradleManagerData } from '../types';
 import { versionLikeSubstring } from './utils';
 
 export function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig<ManagerData>): string | null {
+}: UpdateDependencyConfig<GradleManagerData>): string | null {
   const { depName, currentValue, newValue, managerData } = upgrade;
   const offset = managerData.fileReplacePosition;
   const leftPart = fileContent.slice(0, offset);

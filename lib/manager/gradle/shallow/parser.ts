@@ -3,10 +3,10 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
+import type { GradleManagerData } from '../types';
 import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO, TokenType } from './common';
 import { tokenize } from './tokenizer';
 import type {
-  ManagerData,
   MatchConfig,
   PackageVariables,
   ParseGradleResult,
@@ -514,7 +514,7 @@ export function parseGradle(
   packageFile?: string
 ): ParseGradleResult {
   let vars: PackageVariables = { ...initVars };
-  const deps: PackageDependency<ManagerData>[] = [];
+  const deps: PackageDependency<GradleManagerData>[] = [];
   const urls = [];
 
   const tokens = tokenize(input);
@@ -554,7 +554,7 @@ const propRegex = regEx(
 export function parseProps(
   input: string,
   packageFile?: string
-): { vars: PackageVariables; deps: PackageDependency<ManagerData>[] } {
+): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   let offset = 0;
   const vars = {};
   const deps = [];
