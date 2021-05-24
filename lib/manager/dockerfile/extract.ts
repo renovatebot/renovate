@@ -36,8 +36,8 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     split.length === 2 &&
     (split[0].includes('.') || split[0].includes(':'))
   ) {
-    registryUrl = split.shift();
-    depName = split.join('/');
+    registryUrl = split[0];
+    depName = split[1];
   }
   if (registryUrl && !/^https?:\/\//.exec(registryUrl)) {
     registryUrl = `https://${registryUrl}`;
