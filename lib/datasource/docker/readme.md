@@ -13,7 +13,7 @@ Then you could use the following configuration so that Renovate queries Docker H
 {
   "packageRules": [
     {
-      "matchDataTypes": ["docker"],
+      "matchDatasources": ["docker"],
       "registryUrls": ["https://index.docker.io"]
     }
   ]
