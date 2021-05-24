@@ -6,6 +6,7 @@ import { RenovateConfig } from './types';
 export function getConfigFromNpmrc(npmrc = ''): RenovateConfig {
   const res: RenovateConfig = { hostRules: [], packageRules: [] };
   const parsed = ini.parse(npmrc);
+  // Process rules in order so that they have the same precedence as in the `.npmrc`
   for (const [key, val] of Object.entries(parsed)) {
     // hostRules
     if (key === '_auth') {
