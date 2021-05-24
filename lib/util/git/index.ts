@@ -240,7 +240,7 @@ export async function getSubmodules(): Promise<string[]> {
         '--file',
         '.gitmodules',
         '--get-regexp',
-        'path',
+        '\\.path',
       ])) || ''
     )
       .trim()

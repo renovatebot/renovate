@@ -381,7 +381,7 @@ export async function postExtract(
   packageFiles: PackageFile[],
   updateInternalDeps: boolean
 ): Promise<void> {
-  detectMonorepos(packageFiles, updateInternalDeps);
+  await detectMonorepos(packageFiles, updateInternalDeps);
   await getLockedVersions(packageFiles);
 }
 

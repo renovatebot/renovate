@@ -149,6 +149,17 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'migratePresets',
+    description:
+      'Define presets here which have been removed or renamed and should be migrated automatically.',
+    type: 'object',
+    admin: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'description',
     description: 'Plain text description for a config or preset.',
     type: 'array',
@@ -252,7 +263,7 @@ const options: RenovateOptions[] = [
       'Custom environment variables for child processes and sidecar Docker containers.',
     admin: true,
     type: 'object',
-    default: false,
+    default: {},
   },
   {
     name: 'dockerChildPrefix',
