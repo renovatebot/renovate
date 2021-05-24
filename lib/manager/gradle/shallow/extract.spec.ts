@@ -1,5 +1,5 @@
 import { fs, getName } from '../../../../test/util';
-import { extractAllPackageFiles } from './extract';
+import { extractAllPackageFiles } from '../';
 
 jest.mock('../../../util/fs');
 
