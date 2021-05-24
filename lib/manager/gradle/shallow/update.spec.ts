@@ -1,4 +1,4 @@
-import { updateDependency } from "..";
+import { updateDependency } from '..';
 import { getName } from '../../../../test/util';
 
 describe(getName(), () => {
