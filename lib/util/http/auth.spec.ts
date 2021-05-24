@@ -205,8 +205,7 @@ describe(getName(), () => {
           authorization: 'auth',
         },
         hostname: 'store123.blob.core.windows.net',
-        href:
-          'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+        href: 'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
       });
 
       removeAuthorization(opts);
@@ -214,8 +213,7 @@ describe(getName(), () => {
       expect(opts).toEqual({
         headers: {},
         hostname: 'store123.blob.core.windows.net',
-        href:
-          'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+        href: 'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
       });
     });
 

@@ -89,7 +89,10 @@ export async function updateLockedDependency(
     );
     logger.trace({ deps: lockedDeps, constraints }, 'Matching details');
     if (!constraints.length) {
-      logger.warn('Could not find constraints for the locked dependency');
+      logger.info(
+        { depName, currentVersion, newVersion },
+        'Could not find constraints for the locked dependency - cannot remediate'
+      );
       return null;
     }
     const parentUpdates: UpdateLockedConfig[] = [];

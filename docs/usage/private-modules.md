@@ -56,15 +56,14 @@ If such a package is private, then Renovate must be configured with the relevant
 Renovate does not use any package managers for this step and performs all HTTP(S) lookups itself, including insertion of authentication headers.
 
 Configuring Renovate with credentials requires `hostRules`.
-Each host rule consists of a `hostType` value and/or a way to match against hosts using `baseUrl`, `hostName` or `domainName`.
+Each host rule consists of a `hostType` value and/or a way to match against hosts using `matchHost`.
 
 `hostType` is not particularly important at this step unless you have different credentials for the same host, however it is sometimes useful in later steps so is good to include if you can.
 It can be either a "platform" name (e.g. `github`, `azure`, etc) or a "datasource" name (e.g. `npm`, `maven`, `github-tags`, etc).
 
-`baseUrl` can be used if you want to only apply the credentials for a nested path within the host, e.g. `https://registry.company.com/nested/path/`.
-If the same credentials apply to all paths on a host, then use `hostName` instead, e.g. `registry.company.com`.
-Finally, to apply credentials to all hosts within the domain, use `domainName`, e.g. `company.com`.
-You need to pick _only one_ of these and not configure more than one of these fields within the same host rule, otherwise it will error.
+If you want to apply credentials only for a nested path within a host then write `matchHost` as a base URL like `https://registry.company.com/nested/path/`.
+If the same credentials apply to all paths on a host and not on any subdomains of it then configure `matchHost` with a protocol like `https://registry.company.com`.
+Finally, to apply credentials to all hosts within the domain, use a `matchHost` value with no `https://` prefix, e.g. `company.com` or `registry.company.com`, both of which would apply to a host like `beta.registry.company.com`.
 
 In addition to the above options to match against a host, you need to add the credentials.
 Typically they are either `token`, or `username` + `password`.
@@ -76,11 +75,11 @@ Here is an example of some host rules:
 {
   "hostRules": [
     {
-      "hostName": "registry.npmjs.org",
+      "matchHost": "registry.npmjs.org",
       "token": "abc123"
     },
     {
-      "baseUrl": "https://registry.company.com/pypi-simple/",
+      "matchHost": "https://registry.company.com/pypi-simple/",
       "username": "engineering",
       "password": "abc123"
     }
@@ -174,13 +173,13 @@ If you need to provide credentials to the hosted Renovate App, please do this:
 {
   "hostRules": [
     {
-      "hostName": "registry.npmjs.org",
+      "matchHost": "registry.npmjs.org",
       "encrypted": {
         "token": "3f832f2983yf89hsd98ahadsjfasdfjaslf............"
       }
     },
     {
-      "baseUrl": "https://custom.registry.company.com/pypi/",
+      "matchHost": "https://custom.registry.company.com/pypi/",
       "username": "bot1",
       "encrypted": {
         "password": "p278djfdsi9832jnfdshufwji2r389fdskj........."
@@ -212,3 +211,71 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Replace the existing public key in the HTML with the public key you generated in the step prior
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
+
+### hostRules configuration using environment variables
+
+Self-hosted users can use environment variables to configure the most common types of `hostRules` for authentication.
+
+The format of the environment variables must follow:
+
+- Datasource name (e.g. `NPM`, `PYPI`)
+- Underscore (`_`)
+- `matchHost`
+- Underscore (`_`)
+- Field name (`TOKEN`, `USER_NAME`, or `PASSWORD`)
+
+Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
+Periods (`.`) in host names must be replaced with a single underscore (`_`).
+
+Note: the following prefixes cannot be supported for this functionality: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+
+#### npmjs registry token example
+
+`NPM_REGISTRY_NPMJS_ORG_TOKEN=abc123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "npm",
+      "matchHost": "registry.npmjs.org",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+#### GitLab Tags username/password example
+
+`GITLAB__TAGS_CODE__HOST_COMPANY_COM_USERNAME=bot GITLAB__TAGS_CODE__HOST_COMPANY_COM_PASSWORD=botpass123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "gitlab-tags",
+      "matchHost": "code-host.company.com",
+      "username": "bot",
+      "password": "botpass123"
+    }
+  ]
+}
+```
+
+#### Datasource and credentials only
+
+You can skip the host part, and use just the datasource and credentials.
+
+`DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "username": "bot",
+      "password": "botpass123"
+    }
+  ]
+}
+```

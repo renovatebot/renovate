@@ -1,5 +1,6 @@
-import * as datasourceClojure from '../../datasource/clojure';
+import { ClojureDatasource } from '../../datasource/clojure';
 import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractContext } from './types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`);
@@ -17,11 +18,6 @@ export function trimAtKey(str: string, kwName: string): string | null {
 
 export function expandDepName(name: string): string {
   return name.includes('/') ? name.replace('/', ':') : `${name}:${name}`;
-}
-
-export interface ExtractContext {
-  depType?: string;
-  registryUrls?: string[];
 }
 
 export function extractFromVectors(
@@ -49,7 +45,7 @@ export function extractFromVectors(
     if (artifactId && version && fileReplacePosition) {
       result.push({
         ...ctx,
-        datasource: datasourceClojure.id,
+        datasource: ClojureDatasource.id,
         depName: expandDepName(cleanStrLiteral(artifactId)),
         currentValue: cleanStrLiteral(version),
       });

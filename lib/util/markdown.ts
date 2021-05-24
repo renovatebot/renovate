@@ -1,3 +1,6 @@
+import remark from 'remark';
+import github from 'remark-github';
+
 // Generic replacements/link-breakers
 export function sanitizeMarkdown(markdown: string): string {
   let res = markdown;
@@ -15,4 +18,22 @@ export function sanitizeMarkdown(markdown: string): string {
   res = res.replace(backTickRe, '`$1`');
   res = res.replace(/`#&#8203;(\d+)`/g, '`#$1`');
   return res;
+}
+
+/**
+ *
+ * @param content content to process
+ * @param options github options
+ * @returns linkified content
+ */
+export async function linkify(
+  content: string,
+  options: github.RemarkGithubOptions
+): Promise<string> {
+  // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
+  const output = await remark()
+    .use({ settings: { bullet: '-' } })
+    .use(github, { mentionStrong: false, ...options })
+    .process(content);
+  return output.toString();
 }

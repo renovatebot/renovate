@@ -145,7 +145,7 @@ Object {
   "packageJsonName": undefined,
   "packageJsonType": "library",
   "pnpmShrinkwrap": undefined,
-  "skipInstalls": false,
+  "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
   "yarnrc": undefined,
@@ -351,7 +351,7 @@ Object {
   "managerData": Object {
     "lernaJsonFile": undefined,
   },
-  "npmLock": undefined,
+  "npmLock": "package-lock.json",
   "npmrc": undefined,
   "packageFileVersion": undefined,
   "packageJsonName": undefined,

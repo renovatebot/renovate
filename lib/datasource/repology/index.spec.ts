@@ -3,7 +3,8 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
-import { RepologyPackage, id as datasource } from '.';
+import type { RepologyPackage } from './types';
+import { id as datasource } from '.';
 
 const repologyHost = 'https://repology.org/';
 

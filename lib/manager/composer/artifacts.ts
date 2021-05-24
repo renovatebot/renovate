@@ -25,19 +25,8 @@ import {
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { AuthJson } from './types';
 import { composerVersioningId, getConstraint } from './utils';
-
-interface UserPass {
-  username: string;
-  password: string;
-}
-
-interface AuthJson {
-  'github-oauth'?: Record<string, string>;
-  'gitlab-token'?: Record<string, string>;
-  'gitlab-domains'?: string[];
-  'http-basic'?: Record<string, UserPass>;
-}
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
@@ -56,7 +45,7 @@ function getAuthJson(): string | null {
     .findAll({ hostType: PLATFORM_TYPE_GITLAB })
     ?.forEach((gitlabHostRule) => {
       if (gitlabHostRule?.token) {
-        const host = gitlabHostRule.hostName || 'gitlab.com';
+        const host = gitlabHostRule.resolvedHost || 'gitlab.com';
         authJson['gitlab-token'] = authJson['gitlab-token'] || {};
         authJson['gitlab-token'][host] = gitlabHostRule.token;
         // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
@@ -88,9 +77,10 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
+  const { allowScripts, cacheDir: adminCacheDir } = getAdminConfig();
   const cacheDir =
     process.env.COMPOSER_CACHE_DIR ||
-    upath.join(config.cacheDir, './others/composer');
+    upath.join(adminCacheDir, './others/composer');
   await ensureDir(cacheDir);
   logger.debug(`Using composer cache ${cacheDir}`);
 
@@ -135,7 +125,7 @@ export async function updateArtifacts({
       args += ' --ignore-platform-reqs';
     }
     args += ' --no-ansi --no-interaction';
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!allowScripts || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');

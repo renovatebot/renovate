@@ -35,13 +35,8 @@ function getTableValues(
   if (!upgrade.commitBodyTable) {
     return null;
   }
-  const {
-    datasource,
-    lookupName,
-    depName,
-    currentVersion,
-    newVersion,
-  } = upgrade;
+  const { datasource, lookupName, depName, currentVersion, newVersion } =
+    upgrade;
   const name = lookupName || depName;
   if (datasource && name && currentVersion && newVersion) {
     return [datasource, name, currentVersion, newVersion];
@@ -60,8 +55,13 @@ function getTableValues(
 }
 
 export function generateBranchConfig(
-  branchUpgrades: BranchUpgradeConfig[]
+  upgrades: BranchUpgradeConfig[]
 ): BranchConfig {
+  let branchUpgrades = upgrades;
+  if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
+    // If the branch isn't pending, then remove any upgrades within which *are*
+    branchUpgrades = branchUpgrades.filter((upgrade) => !upgrade.pendingChecks);
+  }
   logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
   let config: BranchConfig = {
     upgrades: [],

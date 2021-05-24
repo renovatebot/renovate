@@ -93,7 +93,8 @@ async function requestGithub<T = unknown>(
   return null;
 }
 
-const githubRegex = /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/;
+const githubRegex =
+  /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/;
 
 async function getReleasesFromGithub(
   lookupName: string,
