@@ -1,12 +1,15 @@
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
-import type { RenovateConfig } from '../../../../config/types';
+import type {
+  RenovateConfig,
+  RenovateSharedConfig,
+} from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { clone } from '../../../../util/clone';
 
-export async function getOnboardingConfig(
+async function getOnboardingConfig(
   config: RenovateConfig
-): Promise<string> {
+): Promise<RenovateSharedConfig> {
   let onboardingConfig = clone(config.onboardingConfig);
 
   let orgPreset: string;
@@ -65,5 +68,14 @@ export async function getOnboardingConfig(
   }
 
   logger.debug({ config: onboardingConfig }, 'onboarding config');
+  return onboardingConfig;
+}
+
+async function getOnboardingConfigContents(
+  config: RenovateConfig
+): Promise<string> {
+  const onboardingConfig = await getOnboardingConfig(config);
   return JSON.stringify(onboardingConfig, null, 2) + '\n';
 }
+
+export { getOnboardingConfig, getOnboardingConfigContents };
