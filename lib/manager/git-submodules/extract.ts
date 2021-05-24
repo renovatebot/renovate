@@ -66,7 +66,7 @@ async function getModules(
         '--file',
         gitModulesPath,
         '--get-regexp',
-        'path',
+        '\\.path',
       ])) ?? /* istanbul ignore next: should never happen */ ''
     )
       .trim()
