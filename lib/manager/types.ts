@@ -28,6 +28,7 @@ export interface ExtractConfig {
   yarnrc?: string;
   skipInstalls?: boolean;
   updateInternalDeps?: boolean;
+  deepExtract?: boolean;
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
@@ -195,6 +196,7 @@ export interface Upgrade<T = Record<string, any>>
   isLockFileMaintenance?: boolean;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
+  deepExtract?: boolean;
 }
 
 export interface ArtifactError {

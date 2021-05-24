@@ -2,16 +2,24 @@ import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as gradleVersioning from '../../versioning/gradle';
 import { ExtractConfig, PackageFile, UpdateDependencyConfig } from '../types';
 import * as deep from './deep';
+import * as shallow from './shallow';
+import { GradleManagerData } from './types';
 
 export function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  return deep.extractAllPackageFiles(config, packageFiles);
+  return config.deepExtract
+    ? deep.extractAllPackageFiles(config, packageFiles)
+    : shallow.extractAllPackageFiles(config, packageFiles);
 }
 
-export function updateDependency(params: UpdateDependencyConfig): string {
-  return deep.updateDependency(params);
+export function updateDependency(
+  params: UpdateDependencyConfig<GradleManagerData>
+): string | null {
+  return params.upgrade?.deepExtract
+    ? deep.updateDependency(params)
+    : shallow.updateDependency(params);
 }
 
 export const language = LANGUAGE_JAVA;

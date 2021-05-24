@@ -43,6 +43,7 @@ const gradleOutput = {
 };
 
 const config: ExtractConfig = {
+  deepExtract: true,
   gradle: {
     timeout: 60,
   },
@@ -256,6 +257,7 @@ describe(getName(), () => {
       const buildGradleContent = loadFixture(`build.gradle.example1`);
       // prettier-ignore
       const upgrade = {
+        deepExtract: true,
         depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8',
       };
       const buildGradleContentUpdated = updateDependency({
@@ -280,6 +282,7 @@ describe(getName(), () => {
         }
         `;
       const upgrade = {
+        deepExtract: true,
         depGroup: 'com.github.ben-manes.versions',
         name: 'com.github.ben-manes.versions.gradle.plugin',
         version: '0.20.0',
@@ -313,6 +316,7 @@ describe(getName(), () => {
         }
         `;
       const upgrade = {
+        deepExtract: true,
         depGroup: 'com.github.ben-manes.versions',
         name: 'com.github.ben-manes.versions.gradle.plugin',
         version: '0.20.0',
@@ -343,6 +347,7 @@ describe(getName(), () => {
       const buildGradleContent = loadFixture(`build.gradle.example1`);
 
       const upgrade = {
+        deepExtract: true,
         depGroup: 'org.apache.openjpa',
         name: 'openjpa',
         version: '3.1.1',
