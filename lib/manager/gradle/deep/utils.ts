@@ -2,8 +2,8 @@ import { Stats } from 'fs';
 import os from 'os';
 import { chmod } from 'fs-extra';
 import upath from 'upath';
-import { BinarySource } from '../../util/exec/common';
-import type { ExtractConfig } from '../types';
+import { BinarySource } from '../../../util/exec/common';
+import type { ExtractConfig } from '../../types';
 
 export const extraEnv = {
   GRADLE_OPTS:

@@ -7,7 +7,7 @@ import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import { setExecConfig } from '../../util/exec';
 import type { StatusResult } from '../../util/git';
-import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
+import { ifSystemSupportsGradle } from '../gradle/deep/__testutil__/gradle';
 import type { UpdateArtifactsConfig } from '../types';
 import * as dcUpdate from '.';
 

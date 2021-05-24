@@ -175,7 +175,7 @@ describe(getName(), () => {
     ]);
   });
   it('parses fixture from "gradle" manager', () => {
-    const content = loadFixture('build.gradle.example1', '../gradle');
+    const content = loadFixture('build.gradle.example1', '../gradle/deep/');
     const { deps } = parseGradle(content, {}, 'build.gradle');
     deps.forEach((dep) => {
       expect(

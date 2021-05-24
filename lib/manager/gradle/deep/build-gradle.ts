@@ -1,4 +1,4 @@
-import { regEx } from '../../util/regex';
+import { regEx } from '../../../util/regex';
 import { BuildDependency, GradleDependency, UpdateFunction } from './types';
 
 /**

@@ -3,21 +3,21 @@ import type { Stats } from 'fs';
 import os from 'os';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/exec-util';
+import { extractAllPackageFiles, updateDependency } from '..';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import {
   addReplacingSerializer,
   getName,
   loadFixture,
   mocked,
-} from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
-import * as docker from '../../util/exec/docker';
-import * as _env from '../../util/exec/env';
-import type { ExtractConfig } from '../types';
-import { extractAllPackageFiles, updateDependency } from '.';
+} from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
+import type { RepoAdminConfig } from '../../../config/types';
+import { setExecConfig } from '../../../util/exec';
+import { BinarySource } from '../../../util/exec/common';
+import * as docker from '../../../util/exec/docker';
+import * as _env from '../../../util/exec/env';
+import type { ExtractConfig } from '../../types';
 
 jest.mock('child_process');
 const exec: jest.Mock<typeof _exec> = _exec as never;
@@ -25,7 +25,7 @@ const exec: jest.Mock<typeof _exec> = _exec as never;
 jest.mock('fs-extra');
 const fs = mocked(_fs);
 
-jest.mock('../../util/exec/env');
+jest.mock('../../../util/exec/env');
 const env = mocked(_env);
 
 const adminConfig: RepoAdminConfig = {
