@@ -1,7 +1,7 @@
 import * as gradleVersioning from '../../versioning/gradle';
 
-export { extractAllPackageFiles } from './extract';
-export { updateDependency } from './update';
+export { extractAllPackageFiles } from '../gradle/shallow/extract';
+export { updateDependency } from '../gradle/shallow/update';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)gradle.properties$', '\\.gradle(\\.kts)?$'],

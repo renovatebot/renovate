@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { getName, loadFixture } from '../../../../test/util';
 import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO } from './common';
 import { parseGradle, parseProps } from './parser';
 
@@ -175,7 +175,7 @@ describe(getName(), () => {
     ]);
   });
   it('parses fixture from "gradle" manager', () => {
-    const content = loadFixture('build.gradle.example1', '../gradle/deep/');
+    const content = loadFixture('build.gradle.example1', '../deep/');
     const { deps } = parseGradle(content, {}, 'build.gradle');
     deps.forEach((dep) => {
       expect(

@@ -1,8 +1,8 @@
 import * as url from 'url';
 import is from '@sindresorhus/is';
-import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
-import type { PackageDependency } from '../types';
+import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
+import type { PackageDependency } from '../../types';
 import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO, TokenType } from './common';
 import { tokenize } from './tokenizer';
 import type {

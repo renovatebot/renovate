@@ -1,7 +1,7 @@
-import { fs, getName } from '../../../test/util';
-import { extractAllPackageFiles } from '.';
+import { fs, getName } from '../../../../test/util';
+import { extractAllPackageFiles } from './extract';
 
-jest.mock('../../util/fs');
+jest.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
   fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
