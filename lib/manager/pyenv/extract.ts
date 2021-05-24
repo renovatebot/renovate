@@ -6,7 +6,6 @@ export function extractPackageFile(content: string): PackageFile {
     depName: 'python',
     currentValue: content.trim(),
     datasource: datasourceDocker.id,
-    lookupName: 'python',
   };
   return { deps: [dep] };
 }
