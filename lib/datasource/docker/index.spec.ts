@@ -447,6 +447,43 @@ describe(getName(), () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('uses quay api', async () => {
+      const tags = [{ name: '5.0.12' }];
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
+        )
+        .reply(200, { tags, has_additional: false })
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/bitnami/redis/manifests/5.0.12')
+        .reply(200, '', {});
+      const config = {
+        datasource: id,
+        depName: 'bitnami/redis',
+        registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res.releases).toHaveLength(1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('uses quay api and test error', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
+        )
+        .reply(500);
+      const config = {
+        datasource: id,
+        depName: 'bitnami/redis',
+        registryUrls: ['https://quay.io'],
+      };
+      await expect(getPkgReleases(config)).rejects.toThrow(
+        'external-host-error'
+      );
+    });
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
         .scope(amazonUrl)
