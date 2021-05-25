@@ -43,8 +43,8 @@ describe(getName(), () => {
       );
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "dockerRepository": "image",
-          "registryHost": "https://my.local.registry/prefix",
+          "dockerRepository": "prefix/image",
+          "registryHost": "https://my.local.registry",
         }
       `);
     });
@@ -55,8 +55,8 @@ describe(getName(), () => {
       );
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "dockerRepository": "image",
-          "registryHost": "http://my.local.registry/prefix",
+          "dockerRepository": "prefix/image",
+          "registryHost": "http://my.local.registry",
         }
       `);
     });
@@ -67,8 +67,8 @@ describe(getName(), () => {
       );
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "dockerRepository": "image",
-          "registryHost": "https://my.local.registry/prefix",
+          "dockerRepository": "prefix/image",
+          "registryHost": "https://my.local.registry",
         }
       `);
     });

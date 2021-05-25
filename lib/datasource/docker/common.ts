@@ -165,9 +165,14 @@ export function getRegistryRepository(
       if (!/^https?:\/\//.test(registryHost)) {
         registryHost = `https://${registryHost}`;
       }
+      let dockerRepository = lookupName.replace(registryEndingWithSlash, '');
+      const fullUrl = `${registryHost}/${dockerRepository}`;
+      const fullUrlParsed = new URL(fullUrl);
+      registryHost = fullUrlParsed.origin;
+      dockerRepository = fullUrl.replace(registryHost, '').substring(1);
       return {
         registryHost,
-        dockerRepository: lookupName.replace(registryEndingWithSlash, ''),
+        dockerRepository,
       };
     }
   }
