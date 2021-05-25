@@ -2,28 +2,28 @@
 
 exports[`datasource/docker/common getRegistryRepository handles local registries 1`] = `
 Object {
-  "registry": "https://registry:5000",
-  "repository": "org/package",
+  "dockerRepository": "org/package",
+  "registryHost": "https://registry:5000",
 }
 `;
 
 exports[`datasource/docker/common getRegistryRepository supports http registryUrls 1`] = `
 Object {
-  "registry": "http://my.local.registry/prefix",
-  "repository": "image",
+  "dockerRepository": "image",
+  "registryHost": "http://my.local.registry/prefix",
 }
 `;
 
 exports[`datasource/docker/common getRegistryRepository supports registryUrls 1`] = `
 Object {
-  "registry": "https://my.local.registry/prefix",
-  "repository": "image",
+  "dockerRepository": "image",
+  "registryHost": "https://my.local.registry/prefix",
 }
 `;
 
 exports[`datasource/docker/common getRegistryRepository supports schemeless registryUrls 1`] = `
 Object {
-  "registry": "https://my.local.registry/prefix",
-  "repository": "image",
+  "dockerRepository": "image",
+  "registryHost": "https://my.local.registry/prefix",
 }
 `;
