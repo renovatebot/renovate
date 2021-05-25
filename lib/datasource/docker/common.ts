@@ -16,7 +16,8 @@ export const id = 'docker';
 export const http = new Http(id);
 
 export const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
-export const defaultRegistryUrls = ['https://index.docker.io'];
+const DOCKER_HUB = 'https://index.docker.io';
+export const defaultRegistryUrls = [DOCKER_HUB];
 
 async function getECRAuthToken(
   region: string,
@@ -155,7 +156,7 @@ export function getRegistryRepository(
   lookupName: string,
   registryUrl: string
 ): RegistryRepository {
-  if (registryUrl !== defaultRegistryUrls[0]) {
+  if (registryUrl !== DOCKER_HUB) {
     const registryEndingWithSlash = ensureTrailingSlash(
       registryUrl.replace(/^https?:\/\//, '')
     );
