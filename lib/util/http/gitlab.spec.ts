@@ -56,13 +56,11 @@ describe(getName(), () => {
       .scope(selfHostedUrl)
       .get('/api/v4/some-url')
       .reply(200, ['a'], {
-        link:
-          '<https://mycompany.com/gitlab/api/v4/some-url&page=2>; rel="next", <https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="last"',
+        link: '<https://mycompany.com/gitlab/api/v4/some-url&page=2>; rel="next", <https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="last"',
       })
       .get('/api/v4/some-url&page=2')
       .reply(200, ['b', 'c'], {
-        link:
-          '<https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="next", <https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="last"',
+        link: '<https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="next", <https://mycompany.com/gitlab/api/v4/some-url&page=3>; rel="last"',
       })
       .get('/api/v4/some-url&page=3')
       .reply(200, ['d']);
