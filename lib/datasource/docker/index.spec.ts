@@ -457,7 +457,7 @@ describe(getName(), () => {
         .reply(200, { tags, has_additional: false })
         .get('/v2/')
         .reply(200, '', {})
-        .get('/v2/bitnami/redis/manifests/1.0.0')
+        .get('/v2/bitnami/redis/manifests/5.0.12')
         .reply(200, '', {});
       const config = {
         datasource: id,
