@@ -46,7 +46,7 @@ export function getConfigFromNpmrc(npmrc = ''): RenovateConfig {
         const [scope] = key.split(':');
         res.packageRules.push({
           matchDatasources: [hostType],
-          matchPackagePrefixes: [scope],
+          matchPackagePrefixes: [ensureTrailingSlash(scope)],
           registryUrls: [val],
         });
       }
