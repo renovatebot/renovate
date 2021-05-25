@@ -9,7 +9,11 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
-import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
+import {
+  ensureTrailingSlash,
+  parseUrl,
+  trimTrailingSlash,
+} from '../../util/url';
 import { MediaType, RegistryRepository } from './types';
 
 export const id = 'docker';
@@ -168,7 +172,7 @@ export function getRegistryRepository(
       let dockerRepository = lookupName.replace(registryEndingWithSlash, '');
       const fullUrl = `${registryHost}/${dockerRepository}`;
       const { origin, pathname } = parseUrl(fullUrl);
-      registryHost = fullUrlParsed.origin;
+      registryHost = origin;
       dockerRepository = pathname.substring(1);
       return {
         registryHost,
