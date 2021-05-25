@@ -1208,7 +1208,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://quay.io/v2/bitnami/redis/manifests/1.0.0",
+    "url": "https://quay.io/v2/bitnami/redis/manifests/5.0.12",
   },
 ]
 `;
