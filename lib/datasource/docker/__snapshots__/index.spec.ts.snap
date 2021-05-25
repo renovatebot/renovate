@@ -1187,7 +1187,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://quay.io/api/v1/repository/node/tag/?limit=100&page=1&onlyActiveTags=true",
+    "url": "https://quay.io/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true",
   },
   Object {
     "headers": Object {
@@ -1208,7 +1208,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://quay.io/v2/node/manifests/1.0.0",
+    "url": "https://quay.io/v2/bitnami/redis/manifests/1.0.0",
   },
 ]
 `;

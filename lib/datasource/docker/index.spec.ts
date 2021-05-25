@@ -452,16 +452,16 @@ describe(getName(), () => {
       httpMock
         .scope('https://quay.io')
         .get(
-          '/api/v1/repository/node/tag/?limit=100&page=1&onlyActiveTags=true'
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
         )
         .reply(200, { tags, has_additional: false })
         .get('/v2/')
         .reply(200, '', {})
-        .get('/v2/node/manifests/1.0.0')
+        .get('/v2/bitnami/redis/manifests/1.0.0')
         .reply(200, '', {});
       const config = {
         datasource: id,
-        depName: 'node',
+        depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
       const res = await getPkgReleases(config);
@@ -472,12 +472,12 @@ describe(getName(), () => {
       httpMock
         .scope('https://quay.io')
         .get(
-          '/api/v1/repository/node/tag/?limit=100&page=1&onlyActiveTags=true'
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
         )
         .reply(500);
       const config = {
         datasource: id,
-        depName: 'node',
+        depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
       await expect(getPkgReleases(config)).rejects.toThrow(
