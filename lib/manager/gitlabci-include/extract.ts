@@ -48,8 +48,7 @@ export function extractPackageFile(
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
-      logger.debug({ err });
-      logger.debug('YAML exception extracting GitLab CI includes');
+      logger.debug({ err }, 'YAML exception extracting GitLab CI includes');
     } else {
       logger.warn({ err }, 'Error extracting GitLab CI includes');
     }

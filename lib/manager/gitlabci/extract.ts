@@ -99,6 +99,11 @@ export async function extractAllPackageFiles(
     const file = filesToExamine.pop();
 
     const content = await readLocalFile(file, 'utf8');
+    if (!content) {
+      logger.debug({ file }, 'Empty or non existent gitlabci file');
+      // eslint-disable-next-line no-continue
+      continue;
+    }
     let doc: GitlabPipeline;
     try {
       doc = yaml.safeLoad(replaceReferenceTags(content), {
