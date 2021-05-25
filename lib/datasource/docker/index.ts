@@ -16,6 +16,7 @@ import {
   http,
   id,
 } from './common';
+import { getTagsQuayRegistry } from './quay';
 
 // TODO: add got typings when available (#9646)
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
@@ -53,11 +54,35 @@ export const defaultConfig = {
   },
 };
 
-async function getTags(
+async function getDockerApiTags(
   registry: string,
   repository: string
 ): Promise<string[] | null> {
   let tags: string[] = [];
+  // AWS ECR limits the maximum number of results to 1000
+  // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
+  const limit = ecrRegex.test(registry) ? 1000 : 10000;
+  let url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
+  const headers = await getAuthHeaders(registry, repository);
+  if (!headers) {
+    logger.debug('Failed to get authHeaders for getTags lookup');
+    return null;
+  }
+  let page = 1;
+  do {
+    const res = await http.getJson<{ tags: string[] }>(url, { headers });
+    tags = tags.concat(res.body.tags);
+    const linkHeader = parseLinkHeader(res.headers.link as string);
+    url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+    page += 1;
+  } while (url && page < 20);
+  return tags;
+}
+
+async function getTags(
+  registry: string,
+  repository: string
+): Promise<string[] | null> {
   try {
     const cacheNamespace = 'datasource-docker-tags';
     const cacheKey = `${registry}:${repository}`;
@@ -69,23 +94,14 @@ async function getTags(
     if (cachedResult !== undefined) {
       return cachedResult;
     }
-    // AWS ECR limits the maximum number of results to 1000
-    // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    const limit = ecrRegex.test(registry) ? 1000 : 10000;
-    let url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
-    const headers = await getAuthHeaders(registry, repository);
-    if (!headers) {
-      logger.debug('Failed to get authHeaders for getTags lookup');
-      return null;
+
+    const isQuay = registry === 'https://quay.io';
+    let tags: string[] | null;
+    if (isQuay) {
+      tags = await getTagsQuayRegistry(repository);
+    } else {
+      tags = await getDockerApiTags(registry, repository);
     }
-    let page = 1;
-    do {
-      const res = await http.getJson<{ tags: string[] }>(url, { headers });
-      tags = tags.concat(res.body.tags);
-      const linkHeader = parseLinkHeader(res.headers.link as string);
-      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
-      page += 1;
-    } while (url && page < 20);
     const cacheMinutes = 30;
     await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
