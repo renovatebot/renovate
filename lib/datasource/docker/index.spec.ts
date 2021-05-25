@@ -448,7 +448,7 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('uses quay api', async () => {
-      const tags = [{ name: '1.0.0' }];
+      const tags = [{ name: '5.0.12' }];
       httpMock
         .scope('https://quay.io')
         .get(
