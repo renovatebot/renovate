@@ -1,5 +1,5 @@
 import { safeLoad } from 'js-yaml';
-import * as datasourceDart from '../../datasource/dart';
+import { DartDatasource } from '../../datasource/dart';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -54,7 +54,7 @@ export function extractPackageFile(
     if (deps.length) {
       return {
         packageFile,
-        datasource: datasourceDart.id,
+        datasource: DartDatasource.id,
         deps,
       };
     }
