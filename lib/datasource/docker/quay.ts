@@ -5,7 +5,7 @@ import { http } from './common';
 
 export async function getTagsQuayRegistry(
   repository: string
-): Promise<string[] | null> {
+): Promise<string[]> {
   const registry = 'https://quay.io';
   let tags: string[] = [];
   try {
