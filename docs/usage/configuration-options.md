@@ -370,7 +370,7 @@ Note: make sure not to mix this up with the term `compatibility`, which Renovate
 
 ## deepExtract
 
-If configured to `true`, then dependency extraction will be done using the relevant package manager instead of JS-based parsing.
+If configured to `true`, then dependency extraction will be done using the relevant package manager instead of JavaScript-based parsing.
 
 This option applies only to the `gradle` manager.
 
