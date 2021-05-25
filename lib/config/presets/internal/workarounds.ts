@@ -10,6 +10,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreSpringCloudNumeric',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
+      'workarounds:reduceRepologyServerLoad',
     ],
   },
   mavenCommonsAncientVersion: {
