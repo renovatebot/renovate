@@ -1,4 +1,4 @@
-import { Stats } from 'fs';
+import type { Stats } from 'fs';
 import os from 'os';
 import { chmod } from 'fs-extra';
 import upath from 'upath';

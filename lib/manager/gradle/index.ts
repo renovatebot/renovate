@@ -1,9 +1,13 @@
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as gradleVersioning from '../../versioning/gradle';
-import { ExtractConfig, PackageFile, UpdateDependencyConfig } from '../types';
+import type {
+  ExtractConfig,
+  PackageFile,
+  UpdateDependencyConfig,
+} from '../types';
 import * as deep from './deep';
 import * as shallow from './shallow';
-import { GradleManagerData } from './types';
+import type { GradleManagerData } from './types';
 
 export function extractAllPackageFiles(
   config: ExtractConfig,

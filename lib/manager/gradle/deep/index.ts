@@ -1,4 +1,4 @@
-import { Stats } from 'fs';
+import type { Stats } from 'fs';
 import { stat } from 'fs-extra';
 import upath from 'upath';
 import { getAdminConfig } from '../../../config/admin';

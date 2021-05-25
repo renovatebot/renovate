@@ -3,7 +3,7 @@ import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
 import { TokenType } from './common';
-import { PackageVariables, Token, VariableRegistry } from './types';
+import type { PackageVariables, Token, VariableRegistry } from './types';
 
 const artifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$'
