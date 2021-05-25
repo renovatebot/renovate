@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName, loadJsonFixture } from '../../../test/util';
-import { id as datasource } from '.';
+import { DartDatasource } from '.';
 
 const body = loadJsonFixture('shared_preferences.json');
 
@@ -20,7 +20,10 @@ describe(getName(), () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/non_sense').reply(200, null);
       expect(
-        await getPkgReleases({ datasource, depName: 'non_sense' })
+        await getPkgReleases({
+          datasource: DartDatasource.id,
+          depName: 'non_sense',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -35,7 +38,7 @@ describe(getName(), () => {
         .reply(200, withoutVersions);
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: DartDatasource.id,
           depName: 'shared_preferences',
         })
       ).toBeNull();
@@ -50,7 +53,7 @@ describe(getName(), () => {
         .reply(200, withoutLatest);
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: DartDatasource.id,
           depName: 'shared_preferences',
         })
       ).toBeNull();
@@ -61,7 +64,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(404);
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: DartDatasource.id,
           depName: 'shared_preferences',
         })
       ).toBeNull();
@@ -72,7 +75,7 @@ describe(getName(), () => {
       let e;
       try {
         await getPkgReleases({
-          datasource,
+          datasource: DartDatasource.id,
           depName: 'shared_preferences',
         });
       } catch (err) {
@@ -86,7 +89,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).get('/shared_preferences').replyWithError('');
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: DartDatasource.id,
           depName: 'shared_preferences',
         })
       ).toBeNull();
@@ -95,7 +98,7 @@ describe(getName(), () => {
     it('processes real data', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(200, body);
       const res = await getPkgReleases({
-        datasource,
+        datasource: DartDatasource.id,
         depName: 'shared_preferences',
       });
       expect(res).toMatchSnapshot();
