@@ -167,9 +167,9 @@ export function getRegistryRepository(
       }
       let dockerRepository = lookupName.replace(registryEndingWithSlash, '');
       const fullUrl = `${registryHost}/${dockerRepository}`;
-      const fullUrlParsed = new URL(fullUrl);
+      const { origin, pathname } = parseUrl(fullUrl);
       registryHost = fullUrlParsed.origin;
-      dockerRepository = fullUrl.replace(registryHost, '').substring(1);
+      dockerRepository = pathname.substring(1);
       return {
         registryHost,
         dockerRepository,
