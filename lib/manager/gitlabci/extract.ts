@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { getDep } from '../dockerfile/extract';
@@ -106,7 +106,7 @@ export async function extractAllPackageFiles(
     }
     let doc: GitlabPipeline;
     try {
-      doc = yaml.safeLoad(replaceReferenceTags(content), {
+      doc = load(replaceReferenceTags(content), {
         json: true,
       }) as GitlabPipeline;
     } catch (err) {

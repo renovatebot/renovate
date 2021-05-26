@@ -1,4 +1,4 @@
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { DartDatasource } from '../../datasource/dart';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
@@ -41,7 +41,7 @@ export function extractPackageFile(
 ): PackageFile | null {
   try {
     // TODO: fix me (#9610)
-    const doc = safeLoad(content, { json: true }) as any;
+    const doc = load(content, { json: true }) as any;
     const deps = [
       ...getDeps(doc.dependencies, {
         depType: 'dependencies',
