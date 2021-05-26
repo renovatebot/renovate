@@ -10,7 +10,7 @@ import {
 
 describe(getName(), () => {
   beforeAll(() => {
-    setAdminConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
+    setAdminConfig({ cloneDir: getFixturePath('pnpm-monorepo/', '..') });
   });
 
   describe('.extractPnpmFilters()', () => {

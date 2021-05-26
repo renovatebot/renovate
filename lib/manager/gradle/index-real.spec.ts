@@ -26,7 +26,7 @@ describe(getName(), () => {
     beforeEach(async () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });
       successFile = '';
-      adminConfig = { localDir: workingDir.path };
+      adminConfig = { cloneDir: workingDir.path };
       setAdminConfig(adminConfig);
       testRunConfig = { ...baseConfig };
       await fsExtra.copy(`${fixtures}/minimal-project`, workingDir.path);

@@ -30,7 +30,7 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const fixtures = resolve(__dirname, './__fixtures__');
 
 const adminConfig: RepoAdminConfig = {
-  localDir: resolve(fixtures, './testFiles'),
+  cloneDir: resolve(fixtures, './testFiles'),
 };
 
 const dockerAdminConfig = { ...adminConfig, binarySource: BinarySource.Docker };
@@ -105,7 +105,7 @@ describe(getName(), () => {
   });
 
   it('gradlew not found', async () => {
-    setAdminConfig({ ...adminConfig, localDir: 'some-dir' });
+    setAdminConfig({ ...adminConfig, cloneDir: 'some-dir' });
     const res = await dcUpdate.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],

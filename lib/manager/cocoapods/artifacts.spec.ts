@@ -30,7 +30,7 @@ delete process.env.CP_HOME_DIR;
 const config: UpdateArtifactsConfig = {};
 
 const adminConfig: RepoAdminConfig = {
-  localDir: join('/tmp/github/some/repo'),
+  cloneDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
 };
 
@@ -83,7 +83,7 @@ describe('.updateArtifacts()', () => {
   it('returns null for invalid local directory', async () => {
     const execSnapshots = mockExecAll(exec);
     setAdminConfig({
-      localDir: '',
+      cloneDir: '',
     });
 
     expect(
