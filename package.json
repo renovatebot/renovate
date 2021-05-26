@@ -28,6 +28,7 @@
     "markdown-lint": "markdownlint-cli2",
     "markdown-lint-fix": "markdownlint-cli2-fix",
     "prepare": "run-s prepare:*",
+    "prepare:husky": "husky install",
     "prepare:generate": "run-s generate:*",
     "prepare:re2": "node tools/check-re2.mjs",
     "prepare:tools": "tsc -p tools",
@@ -145,7 +146,7 @@
     "email-addresses": "3.1.0",
     "fast-safe-stringify": "2.0.7",
     "find-up": "5.0.0",
-    "fs-extra": "9.1.0",
+    "fs-extra": "10.0.0",
     "git-url-parse": "11.4.4",
     "github-url-from-git": "1.5.0",
     "global-agent": "2.2.0",
@@ -242,7 +243,7 @@
     "eslint-plugin-promise": "5.1.0",
     "glob": "7.1.7",
     "graphql": "15.5.0",
-    "husky": "4.3.8",
+    "husky": "6.0.0",
     "jest": "26.6.3",
     "jest-circus": "26.6.3",
     "jest-extended": "0.11.5",
@@ -277,10 +278,5 @@
   },
   "files": [
     "dist"
-  ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
-  }
+  ]
 }
