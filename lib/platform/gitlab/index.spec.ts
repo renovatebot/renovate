@@ -315,7 +315,7 @@ describe(getName(), () => {
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
           default_branch: 'master',
-          http_url_to_repo: `${selfHostedUrl}/some/repo/project.git`,
+          http_url_to_repo: `http://other.host.com/gitlab/some/repo/project.git`,
         });
       await gitlab.initRepo({
         repository: 'some/repo/project',
