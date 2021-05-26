@@ -18,7 +18,7 @@ describe(getName(), () => {
       upgrade = { depName: 'renovate' };
 
       const tmpDir = await dir();
-      adminConfig = { cloneDir: join(tmpDir.path) };
+      adminConfig = { localDir: join(tmpDir.path) };
       setAdminConfig(adminConfig);
     });
     afterAll(() => {

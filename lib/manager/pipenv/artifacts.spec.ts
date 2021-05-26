@@ -26,7 +26,7 @@ const env = mocked(_env);
 
 const adminConfig: RepoAdminConfig = {
   // `join` fixes Windows CI
-  cloneDir: join('/tmp/github/some/repo'),
+  localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
 };
 const dockerAdminConfig = { ...adminConfig, binarySource: BinarySource.Docker };

@@ -16,7 +16,7 @@ jest.mock('../../util/git');
 const fixtures = resolve(__dirname, './__fixtures__');
 
 const adminConfig: RepoAdminConfig = {
-  cloneDir: resolve(fixtures, './testFiles'),
+  localDir: resolve(fixtures, './testFiles'),
 };
 
 const config: UpdateArtifactsConfig = {
@@ -169,7 +169,7 @@ describe(getName(), () => {
     it('gradlew failed', async () => {
       const wrongCmdConfig = {
         ...adminConfig,
-        cloneDir: resolve(fixtures, './wrongCmd'),
+        localDir: resolve(fixtures, './wrongCmd'),
       };
 
       await setExecConfig(wrongCmdConfig);
@@ -196,7 +196,7 @@ describe(getName(), () => {
     });
 
     it('gradlew not found', async () => {
-      setAdminConfig({ cloneDir: 'some-dir' });
+      setAdminConfig({ localDir: 'some-dir' });
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
@@ -243,7 +243,7 @@ describe(getName(), () => {
 
       expect(
         await readString(
-          adminConfig.cloneDir,
+          adminConfig.localDir,
           `./gradle/wrapper/gradle-wrapper.properties`
         )
       ).toEqual(newContent);

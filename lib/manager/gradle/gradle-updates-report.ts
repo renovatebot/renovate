@@ -11,7 +11,7 @@ import type {
 export const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 
 export async function createRenovateGradlePlugin(
-  cloneDir: string
+  localDir: string
 ): Promise<void> {
   const content = `
 import groovy.json.JsonOutput
@@ -47,16 +47,16 @@ gradle.buildFinished {
    def json = JsonOutput.toJson(output)
    outputFile.write json
 }`;
-  const gradleInitFile = join(cloneDir, 'renovate-plugin.gradle');
+  const gradleInitFile = join(localDir, 'renovate-plugin.gradle');
   logger.debug(
     'Creating renovate-plugin.gradle file with renovate gradle plugin'
   );
   await writeFile(gradleInitFile, content);
 }
 
-async function readGradleReport(cloneDir: string): Promise<GradleProject[]> {
+async function readGradleReport(localDir: string): Promise<GradleProject[]> {
   const renovateReportFilename = join(
-    cloneDir,
+    localDir,
     GRADLE_DEPENDENCY_REPORT_FILENAME
   );
   if (!(await exists(renovateReportFilename))) {
@@ -123,9 +123,9 @@ function buildDependency(
 }
 
 export async function extractDependenciesFromUpdatesReport(
-  cloneDir: string
+  localDir: string
 ): Promise<BuildDependency[]> {
-  const gradleProjectConfigurations = await readGradleReport(cloneDir);
+  const gradleProjectConfigurations = await readGradleReport(localDir);
 
   const dependencies = gradleProjectConfigurations
     .map(mergeDependenciesWithRepositories, [])

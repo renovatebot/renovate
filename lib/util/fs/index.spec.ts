@@ -12,7 +12,7 @@ import {
 describe(getName(), () => {
   describe('readLocalFile', () => {
     beforeEach(() => {
-      setAdminConfig({ cloneDir: '' });
+      setAdminConfig({ localDir: '' });
     });
 
     it('reads buffer', async () => {
@@ -49,9 +49,9 @@ describe(getName(), () => {
   describe('findLocalSiblingOrParent', () => {
     it('returns path for file', async () => {
       await withDir(
-        async (cloneDir) => {
+        async (localDir) => {
           setAdminConfig({
-            cloneDir: cloneDir.path,
+            localDir: localDir.path,
           });
 
           await writeLocalFile('crates/one/Cargo.toml', '');

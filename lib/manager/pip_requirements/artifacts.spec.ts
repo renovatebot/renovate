@@ -19,7 +19,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    setAdminConfig({ cloneDir: '' });
+    setAdminConfig({ localDir: '' });
   });
   it('returns null if no updatedDeps were provided', async () => {
     expect(

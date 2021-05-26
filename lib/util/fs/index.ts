@@ -26,8 +26,8 @@ export async function readLocalFile(
   fileName: string,
   encoding?: string
 ): Promise<string | Buffer> {
-  const { cloneDir } = getAdminConfig();
-  const localFileName = join(cloneDir, fileName);
+  const { localDir } = getAdminConfig();
+  const localFileName = join(localDir, fileName);
   try {
     const fileContent = await fs.readFile(localFileName, encoding);
     return fileContent;
@@ -41,15 +41,15 @@ export async function writeLocalFile(
   fileName: string,
   fileContent: string
 ): Promise<void> {
-  const { cloneDir } = getAdminConfig();
-  const localFileName = join(cloneDir, fileName);
+  const { localDir } = getAdminConfig();
+  const localFileName = join(localDir, fileName);
   await fs.outputFile(localFileName, fileContent);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  const { cloneDir } = getAdminConfig();
-  if (cloneDir) {
-    const localFileName = join(cloneDir, fileName);
+  const { localDir } = getAdminConfig();
+  if (localDir) {
+    const localFileName = join(localDir, fileName);
     await fs.remove(localFileName);
   }
 }
@@ -59,8 +59,8 @@ export async function renameLocalFile(
   fromFile: string,
   toFile: string
 ): Promise<void> {
-  const { cloneDir } = getAdminConfig();
-  await fs.move(join(cloneDir, fromFile), join(cloneDir, toFile));
+  const { localDir } = getAdminConfig();
+  await fs.move(join(localDir, fromFile), join(localDir, toFile));
 }
 
 // istanbul ignore next
@@ -70,8 +70,8 @@ export async function ensureDir(dirName: string): Promise<void> {
 
 // istanbul ignore next
 export async function ensureLocalDir(dirName: string): Promise<void> {
-  const { cloneDir } = getAdminConfig();
-  const localDirName = join(cloneDir, dirName);
+  const { localDir } = getAdminConfig();
+  const localDirName = join(localDir, dirName);
   await fs.ensureDir(localDirName);
 }
 
@@ -97,10 +97,10 @@ export function privateCacheDir(): string {
 }
 
 export function localPathExists(pathName: string): Promise<boolean> {
-  const { cloneDir } = getAdminConfig();
+  const { localDir } = getAdminConfig();
   // Works for both files as well as directories
   return fs
-    .stat(join(cloneDir, pathName))
+    .stat(join(localDir, pathName))
     .then((s) => !!s)
     .catch(() => false);
 }
@@ -109,7 +109,7 @@ export function localPathExists(pathName: string): Promise<boolean> {
  * Tries to find `otherFileName` in the directory where
  * `existingFileNameWithPath` is, then in its parent directory, then in the
  * grandparent, until we reach the top-level directory. All paths
- * must be relative to `cloneDir`.
+ * must be relative to `localDir`.
  */
 export async function findLocalSiblingOrParent(
   existingFileNameWithPath: string,

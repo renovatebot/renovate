@@ -71,7 +71,7 @@ describe(getName(), () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setAdminConfig({ cloneDir: tmpDir.path });
+    setAdminConfig({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
       gitAuthorName: 'Jest',

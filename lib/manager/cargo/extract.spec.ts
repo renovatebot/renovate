@@ -24,7 +24,7 @@ describe(getName(), () => {
       config = {};
       const tmpDir = await dir();
       adminConfig = {
-        cloneDir: join(tmpDir.path, 'local'),
+        localDir: join(tmpDir.path, 'local'),
         cacheDir: join(tmpDir.path, 'cache'),
       };
 

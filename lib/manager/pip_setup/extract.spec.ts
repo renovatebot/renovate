@@ -18,7 +18,7 @@ describe(getName(), () => {
     resetModule();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setAdminConfig({ cloneDir: '/tmp/foo/bar' });
+    setAdminConfig({ localDir: '/tmp/foo/bar' });
   });
   describe('parsePythonVersion', () => {
     it('returns major and minor version numbers', () => {
