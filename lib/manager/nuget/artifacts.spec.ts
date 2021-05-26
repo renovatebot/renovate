@@ -35,7 +35,7 @@ const hostRules = mocked(_hostRules);
 
 const adminConfig: RepoAdminConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
+  cloneDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
 };
 
