@@ -28,6 +28,7 @@
     "markdown-lint": "markdownlint-cli2",
     "markdown-lint-fix": "markdownlint-cli2-fix",
     "prepare": "run-s prepare:*",
+    "prepare:husky": "husky install",
     "prepare:generate": "run-s generate:*",
     "prepare:re2": "node tools/check-re2.mjs",
     "prepare:tools": "tsc -p tools",
@@ -277,10 +278,5 @@
   },
   "files": [
     "dist"
-  ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
-  }
+  ]
 }
