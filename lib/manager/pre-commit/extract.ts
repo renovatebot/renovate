@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import {
   PLATFORM_TYPE_GITEA,
   PLATFORM_TYPE_GITHUB,
@@ -155,9 +155,10 @@ export function extractPackageFile(
   content: string,
   filename: string
 ): PackageFile | null {
-  let parsedContent: Record<string, unknown> | PreCommitConfig;
+  type ParsedContent = Record<string, unknown> | PreCommitConfig;
+  let parsedContent: ParsedContent;
   try {
-    parsedContent = yaml.safeLoad(content, { json: true }) as any;
+    parsedContent = load(content, { json: true }) as ParsedContent;
   } catch (err) {
     logger.debug({ filename, err }, 'Failed to parse pre-commit config YAML');
     return null;

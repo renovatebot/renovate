@@ -51,6 +51,7 @@ export function filterInternalChecks(
         if (getElapsedDays(releaseTimestamp) < stabilityDays) {
           // Skip it if it doesn't pass checks
           logger.debug(
+            { depName },
             `Release ${candidateRelease.version} is pending status checks`
           );
           pendingReleases.unshift(candidateRelease);

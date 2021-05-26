@@ -29,28 +29,48 @@ describe(getName(), () => {
         'registry:5000/org/package',
         'https://index.docker.io'
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "org/package",
+          "registryHost": "https://registry:5000",
+        }
+      `);
     });
     it('supports registryUrls', () => {
       const res = dockerCommon.getRegistryRepository(
         'my.local.registry/prefix/image',
         'https://my.local.registry/prefix'
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "https://my.local.registry",
+        }
+      `);
     });
     it('supports http registryUrls', () => {
       const res = dockerCommon.getRegistryRepository(
         'my.local.registry/prefix/image',
         'http://my.local.registry/prefix'
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "http://my.local.registry",
+        }
+      `);
     });
     it('supports schemeless registryUrls', () => {
       const res = dockerCommon.getRegistryRepository(
         'my.local.registry/prefix/image',
         'my.local.registry/prefix'
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "https://my.local.registry",
+        }
+      `);
     });
   });
 });

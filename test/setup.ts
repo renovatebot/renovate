@@ -1,6 +1,3 @@
-import nock from 'nock';
-import 'jest-extended';
-
 jest.mock('../lib/platform', () => ({
   platform: jest.createMockFromModule('../lib/platform/github'),
   initPlatform: jest
@@ -9,7 +6,3 @@ jest.mock('../lib/platform', () => ({
   getPlatformList: jest.fn(),
 }));
 jest.mock('../lib/logger');
-
-beforeAll(() => {
-  nock.disableNetConnect();
-});

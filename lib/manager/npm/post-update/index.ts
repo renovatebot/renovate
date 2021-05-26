@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
 import { parseSyml } from '@yarnpkg/parsers';
+import deepmerge from 'deepmerge';
+import { dump, load } from 'js-yaml';
 import upath from 'upath';
 import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -10,20 +12,23 @@ import { getChildProcessEnv } from '../../../util/exec/env';
 import {
   deleteLocalFile,
   ensureDir,
+  getSiblingFileName,
   getSubDirectory,
   outputFile,
   readFile,
+  readLocalFile,
   remove,
   unlink,
   writeFile,
+  writeLocalFile,
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import { validateUrl } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
+import { processHostRules } from './rules';
 import type {
   AdditionalPackageFiles,
   ArtifactError,
@@ -427,25 +432,7 @@ export async function getAdditionalFiles(
   await writeExistingFiles(config, packageFiles);
   await writeUpdatedPackageFiles(config);
 
-  // Determine the additional npmrc content to add based on host rules
-  const additionalNpmrcContent = [];
-  const npmHostRules = hostRules.findAll({
-    hostType: 'npm',
-  });
-  for (const hostRule of npmHostRules) {
-    if (hostRule.resolvedHost) {
-      let uri = hostRule.matchHost;
-      uri = validateUrl(uri) ? uri.replace(/^https?:/, '') : `//${uri}/`;
-      if (hostRule.token) {
-        const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
-        additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);
-      } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
-        const password = Buffer.from(hostRule.password).toString('base64');
-        additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
-        additionalNpmrcContent.push(`${uri}:_password=${password}`);
-      }
-    }
-  }
+  const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
 
   const env = getChildProcessEnv([
     'NPM_CONFIG_CACHE',
@@ -549,6 +536,28 @@ export async function getAdditionalFiles(
       npmrcContent,
       additionalNpmrcContent
     );
+    let yarnRcYmlFilename: string;
+    let existingYarnrcYmlContent: string;
+    if (additionalYarnRcYml) {
+      yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
+      existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
+      if (existingYarnrcYmlContent) {
+        try {
+          const existingYarnrRcYml = load(existingYarnrcYmlContent) as Record<
+            string,
+            unknown
+          >;
+          const updatedYarnYrcYml = deepmerge(
+            existingYarnrRcYml,
+            additionalYarnRcYml
+          );
+          await writeLocalFile(yarnRcYmlFilename, dump(updatedYarnYrcYml));
+          logger.debug('Added authentication to .yarnrc.yml');
+        } catch (err) {
+          logger.warn({ err }, 'Error appending .yarnrc.yml content');
+        }
+      }
+    }
     logger.debug(`Generating yarn.lock for ${lockFileDir}`);
     const lockFileName = upath.join(lockFileDir, 'yarn.lock');
     const upgrades = config.upgrades.filter(
@@ -605,6 +614,9 @@ export async function getAdditionalFiles(
       }
     }
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
+    if (existingYarnrcYmlContent) {
+      await writeLocalFile(yarnRcYmlFilename, existingYarnrcYmlContent);
+    }
   }
 
   for (const pnpmShrinkwrap of dirs.pnpmShrinkwrapDirs) {

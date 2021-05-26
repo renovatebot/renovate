@@ -122,6 +122,7 @@ jobs:
           yarn ls-lint
           yarn eslint
           yarn prettier
+          yarn markdown-lint
 
       - name: Test schema
         run: yarn test-schema
