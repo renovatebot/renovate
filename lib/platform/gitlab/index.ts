@@ -227,11 +227,11 @@ export async function initRepo({
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
       const { protocol, host, pathname } = parseUrl(defaults.endpoint);
       const newPathname = pathname.slice(0, pathname.indexOf('/api'));
-      url = git.getUrl({
-        protocol: protocol.slice(0, -1) as any,
+      url = URL.format({
+        protocol: protocol.slice(0, -1) || 'https',
         auth: 'oauth2:' + opts.token,
         host,
-        repository: newPathname + '/' + repository,
+        pathname: newPathname + '/' + repository + '.git',
       });
       logger.debug({ url }, 'using URL based on configured endpoint');
     } else {

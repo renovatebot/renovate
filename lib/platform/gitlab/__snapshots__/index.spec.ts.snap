@@ -2050,7 +2050,7 @@ Array [
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",
       "repository": "some%2Frepo%2Fproject",
-      "url": undefined,
+      "url": "http://oauth2:abc123@mycompany.com/gitlab/some/repo/project.git",
     },
   ],
 ]
