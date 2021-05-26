@@ -6,7 +6,7 @@ const sample = loadFixture('mix.exs');
 
 describe(getName(), () => {
   beforeEach(() => {
-    setAdminConfig({ localDir: '' });
+    setAdminConfig({ cloneDir: '' });
   });
 
   describe('extractPackageFile()', () => {

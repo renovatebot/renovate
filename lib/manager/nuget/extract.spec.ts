@@ -8,7 +8,7 @@ import { extractPackageFile } from './extract';
 const config: ExtractConfig = {};
 
 const adminConfig: RepoAdminConfig = {
-  localDir: upath.resolve('lib/manager/nuget/__fixtures__'),
+  cloneDir: upath.resolve('lib/manager/nuget/__fixtures__'),
 };
 
 describe(getName(), () => {

@@ -63,7 +63,7 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-const adminConfig: RepoAdminConfig = { localDir: '', cacheDir: '' };
+const adminConfig: RepoAdminConfig = { cloneDir: '', cacheDir: '' };
 
 describe(getName(), () => {
   describe('processBranch', () => {
@@ -781,7 +781,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
-        localDir: '/localDir',
+        cloneDir: '/cloneDir',
       });
 
       const result = await branchWorker.processBranch({
@@ -806,7 +806,7 @@ describe(getName(), () => {
 
       expect(result).toMatchSnapshot();
       expect(exec.exec).toHaveBeenCalledWith('echo semver', {
-        cwd: '/localDir',
+        cwd: '/cloneDir',
       });
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
@@ -861,7 +861,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
-        localDir: '/localDir',
+        cloneDir: '/cloneDir',
       });
 
       exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
@@ -930,7 +930,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
         exposeAllEnv: true,
-        localDir: '/localDir',
+        cloneDir: '/cloneDir',
       });
       const result = await branchWorker.processBranch({
         ...config,
@@ -954,7 +954,7 @@ describe(getName(), () => {
 
       expect(result).toMatchSnapshot();
       expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
-        cwd: '/localDir',
+        cwd: '/cloneDir',
       });
     });
 
@@ -1010,7 +1010,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
         exposeAllEnv: true,
-        localDir: '/localDir',
+        cloneDir: '/cloneDir',
       });
 
       const inconfig: BranchConfig = {
@@ -1061,10 +1061,10 @@ describe(getName(), () => {
 
       expect(result).toMatchSnapshot();
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
-        cwd: '/localDir',
+        cwd: '/cloneDir',
       });
       expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
-        cwd: '/localDir',
+        cwd: '/cloneDir',
       });
       expect(exec.exec).toHaveBeenCalledTimes(2);
       expect(
@@ -1144,7 +1144,7 @@ describe(getName(), () => {
         allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
         allowPostUpgradeCommandTemplating: true,
         trustLevel: 'high',
-        localDir: '/localDir',
+        cloneDir: '/cloneDir',
       });
 
       const inconfig: BranchConfig = {
@@ -1194,7 +1194,7 @@ describe(getName(), () => {
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toMatchSnapshot();
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
-        cwd: '/localDir',
+        cwd: '/cloneDir',
       });
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(

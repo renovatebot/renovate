@@ -29,7 +29,7 @@ jest.mock('../../util/exec/env');
 const env = mocked(_env);
 
 const adminConfig: RepoAdminConfig = {
-  localDir: join('/foo/bar'),
+  cloneDir: join('/foo/bar'),
 };
 
 const dockerAdminConfig = {

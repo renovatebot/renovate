@@ -8,9 +8,9 @@ export default async function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
-  const { localDir } = getAdminConfig();
-  const git = Git(localDir);
-  const submoduleGit = Git(upath.join(localDir, upgrade.depName));
+  const { cloneDir } = getAdminConfig();
+  const git = Git(cloneDir);
+  const submoduleGit = Git(upath.join(cloneDir, upgrade.depName));
 
   try {
     await git.submoduleUpdate(['--init', upgrade.depName]);

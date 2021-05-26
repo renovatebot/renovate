@@ -98,14 +98,14 @@ export interface RepoAdminConfig {
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string | Buffer;
-  localDir?: string;
+  cloneDir?: string;
   cacheDir?: string;
 }
 
 export interface LegacyAdminConfig {
   endpoint?: string;
 
-  localDir?: string;
+  cloneDir?: string;
 
   logContext?: string;
 
