@@ -31,7 +31,7 @@ export async function getRepositoryConfig(
   );
   repoConfig.cloneDir = upath.join(
     repoConfig.baseDir,
-    `./clone/${repoConfig.platform}/${repoConfig.repository}`
+    `./repos/${repoConfig.platform}/${repoConfig.repository}`
   );
   await fs.ensureDir(repoConfig.cloneDir);
   delete repoConfig.baseDir;
