@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageFile } from '../types';
@@ -35,7 +35,7 @@ export function extractPackageFile(
   let config: DockerComposeConfig;
   try {
     // TODO: fix me (#9610)
-    config = safeLoad(content, { json: true }) as DockerComposeConfig;
+    config = load(content, { json: true }) as DockerComposeConfig;
     if (!config) {
       logger.debug(
         { fileName },
