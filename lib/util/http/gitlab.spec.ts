@@ -18,12 +18,10 @@ describe(getName(), () => {
   beforeEach(() => {
     gitlabApi = new GitlabHttp();
     setBaseUrl(`${gitlabApiHost}/api/v4/`);
-    httpMock.setup();
   });
 
   afterEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
   });
 
   it('paginates', async () => {

@@ -34,17 +34,12 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 describe(getName(), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      httpMock.setup();
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
         matchHost: 'https://api.github.com/',
         token: 'abc',
       });
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('returns null if @types', async () => {
