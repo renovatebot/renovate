@@ -29,7 +29,7 @@ const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
 const adminConfig: RepoAdminConfig = {
-  localDir: join('/tmp/github/some/repo'),
+  cloneDir: join('/tmp/github/some/repo'),
 };
 
 const config: UpdateArtifactsConfig = {};

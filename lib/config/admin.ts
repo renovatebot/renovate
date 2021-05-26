@@ -16,7 +16,7 @@ const repoAdminOptions = [
   'exposeAllEnv',
   'migratePresets',
   'privateKey',
-  'localDir',
+  'cloneDir',
   'cacheDir',
 ];
 

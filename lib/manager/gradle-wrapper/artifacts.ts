@@ -55,7 +55,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const { localDir: projectDir } = getAdminConfig();
+    const { cloneDir: projectDir } = getAdminConfig();
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
     const gradlew = gradleWrapperFileName(config);
     const gradlewPath = resolve(projectDir, `./${gradlew}`);

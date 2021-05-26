@@ -18,7 +18,7 @@ describe(getName(), () => {
     let config: RenovateConfig;
     beforeEach(() => {
       config = getConfig();
-      setAdminConfig({ localDir: '' });
+      setAdminConfig({ cloneDir: '' });
     });
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());

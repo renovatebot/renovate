@@ -32,7 +32,7 @@ describe(getName(), () => {
   describe('writeUpdatedPackageFiles', () => {
     beforeEach(() => {
       setAdminConfig({
-        localDir: 'some-tmp-dir',
+        cloneDir: 'some-tmp-dir',
       });
       fs.outputFile = jest.fn();
     });
@@ -71,7 +71,7 @@ describe(getName(), () => {
   describe('getAdditionalFiles', () => {
     beforeEach(() => {
       setAdminConfig({
-        localDir: 'some-tmp-dir',
+        cloneDir: 'some-tmp-dir',
       });
       git.getFile.mockResolvedValueOnce('some lock file contents');
       npm.generateLockFile = jest.fn();

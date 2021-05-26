@@ -32,12 +32,12 @@ export function getDefaultRegistries(): Registry[] {
 
 export async function getConfiguredRegistries(
   packageFile: string,
-  localDir: string
+  cloneDir: string
 ): Promise<Registry[] | undefined> {
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
-  const normalizedLocalDir = upath.normalizeSafe(localDir);
+  const normalizedLocalDir = upath.normalizeSafe(cloneDir);
   const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
     cwd: upath.dirname(upath.join(normalizedLocalDir, packageFile)),
     type: 'file',

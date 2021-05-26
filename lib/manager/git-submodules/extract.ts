@@ -88,9 +88,9 @@ export default async function extractPackageFile(
   fileName: string,
   config: ManagerConfig
 ): Promise<PackageFile | null> {
-  const { localDir } = getAdminConfig();
-  const git = Git(localDir);
-  const gitModulesPath = upath.join(localDir, fileName);
+  const { cloneDir } = getAdminConfig();
+  const git = Git(cloneDir);
+  const gitModulesPath = upath.join(cloneDir, fileName);
 
   const depNames = await getModules(git, gitModulesPath);
 

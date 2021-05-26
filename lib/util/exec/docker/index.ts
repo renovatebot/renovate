@@ -197,7 +197,7 @@ export async function generateDockerCommand(
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
   const {
-    localDir,
+    cloneDir,
     cacheDir,
     dockerUser,
     dockerChildPrefix,
@@ -212,7 +212,7 @@ export async function generateDockerCommand(
     result.push(`--user=${dockerUser}`);
   }
 
-  result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
+  result.push(...prepareVolumes([cloneDir, cacheDir, ...volumes]));
 
   if (envVars) {
     result.push(

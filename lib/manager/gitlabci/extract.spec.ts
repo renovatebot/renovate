@@ -6,7 +6,7 @@ import { extractAllPackageFiles } from './extract';
 
 const config: ExtractConfig = {};
 
-const adminConfig: RepoAdminConfig = { localDir: '' };
+const adminConfig: RepoAdminConfig = { cloneDir: '' };
 
 describe(getName(), () => {
   beforeEach(() => {

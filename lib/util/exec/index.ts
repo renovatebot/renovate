@@ -97,11 +97,11 @@ export async function exec(
   const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
   // istanbul ignore if
-  const { localDir } = getAdminConfig();
+  const { cloneDir } = getAdminConfig();
   if (cwdFile) {
-    cwd = join(localDir, dirname(cwdFile));
+    cwd = join(cloneDir, dirname(cwdFile));
   }
-  cwd = cwd || opts.cwd || localDir;
+  cwd = cwd || opts.cwd || cloneDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };

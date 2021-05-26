@@ -7,7 +7,7 @@
     "@jest/test-result": "26.6.2",
     "commander": "6.2.1",
     "eslint": "7.26.0",
-    "fs-extra": "9.1.0",
+    "fs-extra": "10.0.0",
     "got": "11.8.2",
     "lodash": "4.17.21",
     "shelljs": "0.8.4",
