@@ -15,7 +15,7 @@ jest.mock('../../util/fs');
 
 const adminConfig: RepoAdminConfig = {
   // `join` fixes Windows CI
-  cloneDir: join('/tmp/github/some/repo'),
+  localDir: join('/tmp/github/some/repo'),
 };
 
 const config: UpdateArtifactsConfig = {};

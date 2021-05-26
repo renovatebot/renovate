@@ -175,8 +175,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  const { cloneDir } = getAdminConfig();
-  git = Git(cloneDir);
+  const { localDir } = getAdminConfig();
+  git = Git(localDir);
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -257,9 +257,9 @@ export async function syncGit(): Promise<void> {
     return;
   }
   gitInitialized = true;
-  const { cloneDir } = getAdminConfig();
-  logger.debug('Initializing git repository into ' + cloneDir);
-  const gitHead = join(cloneDir, '.git/HEAD');
+  const { localDir } = getAdminConfig();
+  logger.debug('Initializing git repository into ' + localDir);
+  const gitHead = join(localDir, '.git/HEAD');
   let clone = true;
 
   if (await fs.exists(gitHead)) {
@@ -283,7 +283,7 @@ export async function syncGit(): Promise<void> {
     }
   }
   if (clone) {
-    await fs.emptyDir(cloneDir);
+    await fs.emptyDir(localDir);
     const cloneStart = Date.now();
     try {
       // clone only the default branch
@@ -696,8 +696,8 @@ export async function commitFiles({
     await writePrivateKey();
     privateKeySet = true;
   }
-  const { cloneDir } = getAdminConfig();
-  await configSigningKey(cloneDir);
+  const { localDir } = getAdminConfig();
+  await configSigningKey(localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
@@ -708,7 +708,7 @@ export async function commitFiles({
       // istanbul ignore if
       if (file.name === '|delete|') {
         deleted.push(file.contents as string);
-      } else if (await isDirectory(join(cloneDir, file.name))) {
+      } else if (await isDirectory(join(localDir, file.name))) {
         fileNames.push(file.name);
         await gitAdd(file.name);
       } else {
@@ -720,7 +720,7 @@ export async function commitFiles({
         } else {
           contents = file.contents;
         }
-        await fs.outputFile(join(cloneDir, file.name), contents);
+        await fs.outputFile(join(localDir, file.name), contents);
       }
     }
     // istanbul ignore if

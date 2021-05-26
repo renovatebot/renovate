@@ -93,11 +93,11 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   let rootBuildGradle: string | undefined;
   let gradlew: Stats | null;
-  const { cloneDir } = getAdminConfig();
+  const { localDir } = getAdminConfig();
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
     const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
-    gradlew = await stat(upath.join(cloneDir, gradlewPath)).catch(() => null);
+    gradlew = await stat(upath.join(localDir, gradlewPath)).catch(() => null);
 
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
       rootBuildGradle = packageFile;
@@ -116,7 +116,7 @@ export async function extractAllPackageFiles(
   }
   logger.debug('Extracting dependencies from all gradle files');
 
-  const cwd = upath.join(cloneDir, upath.dirname(rootBuildGradle));
+  const cwd = upath.join(localDir, upath.dirname(rootBuildGradle));
 
   await createRenovateGradlePlugin(cwd);
   await executeGradle(config, cwd, gradlew);

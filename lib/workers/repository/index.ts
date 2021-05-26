@@ -34,10 +34,10 @@ export async function renovateRepository(
   logger.trace({ config });
   let repoResult: ProcessResult;
   queue.clear();
-  const { cloneDir } = getAdminConfig();
+  const { localDir } = getAdminConfig();
   try {
-    await fs.ensureDir(cloneDir);
-    logger.debug('Using cloneDir: ' + cloneDir);
+    await fs.ensureDir(localDir);
+    logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
     const { branches, branchList, packageFiles } = await extractDependencies(
@@ -57,11 +57,11 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (cloneDir && !config.persistRepoData) {
+  if (localDir && !config.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {
-      logger.warn({ err }, 'cloneDir deletion error');
+      logger.warn({ err }, 'localDir deletion error');
     }
   }
   try {

@@ -20,7 +20,7 @@ const content = loadFixture(packageFile);
 const jsonContent = loadFixture('setup.py.json');
 
 const adminConfig: RepoAdminConfig = {
-  cloneDir: '/tmp/github/some/repo',
+  localDir: '/tmp/github/some/repo',
   cacheDir: '/tmp/renovate/cache',
 };
 

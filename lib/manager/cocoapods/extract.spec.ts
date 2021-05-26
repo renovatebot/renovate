@@ -7,7 +7,7 @@ const simplePodfile = loadFixture('Podfile.simple');
 const complexPodfile = loadFixture('Podfile.complex');
 
 const adminConfig: RepoAdminConfig = {
-  cloneDir: '',
+  localDir: '',
 };
 
 describe(getName(), () => {

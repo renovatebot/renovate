@@ -29,9 +29,9 @@ async function addSourceCmds(
   config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
-  const { cloneDir } = getAdminConfig();
+  const { localDir } = getAdminConfig();
   const registries =
-    (await getConfiguredRegistries(packageFileName, cloneDir)) ||
+    (await getConfiguredRegistries(packageFileName, localDir)) ||
     getDefaultRegistries();
   const result = [];
   for (const registry of registries) {

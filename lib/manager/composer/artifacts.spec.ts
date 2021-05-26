@@ -35,7 +35,7 @@ const config: UpdateArtifactsConfig = {
 const adminConfig: RepoAdminConfig = {
   allowScripts: false,
   // `join` fixes Windows CI
-  cloneDir: join('/tmp/github/some/repo'),
+  localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
 };
 

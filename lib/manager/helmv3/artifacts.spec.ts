@@ -23,7 +23,7 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
 const adminConfig: RepoAdminConfig = {
-  cloneDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
+  localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
 };
 
 const config: UpdateArtifactsConfig = {};

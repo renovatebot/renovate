@@ -24,7 +24,7 @@ const secrets = mocked(_secrets);
 
 describe(getName(), () => {
   beforeEach(() => {
-    setAdminConfig({ cloneDir: '', cacheDir: '' });
+    setAdminConfig({ localDir: '', cacheDir: '' });
   });
   afterEach(() => {
     setAdminConfig();

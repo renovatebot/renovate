@@ -28,7 +28,7 @@ function createGitDependency(repo: string, version: string): PackageDependency {
 }
 
 const adminConfig: RepoAdminConfig = {
-  cloneDir: '',
+  localDir: '',
 };
 
 const config: ExtractConfig = {};

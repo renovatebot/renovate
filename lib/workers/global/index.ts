@@ -29,11 +29,11 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  repoConfig.cloneDir = upath.join(
+  repoConfig.localDir = upath.join(
     repoConfig.baseDir,
     `./repos/${repoConfig.platform}/${repoConfig.repository}`
   );
-  await fs.ensureDir(repoConfig.cloneDir);
+  await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
   return configParser.filterConfig(repoConfig, 'repository');
 }

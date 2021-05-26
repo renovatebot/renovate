@@ -71,8 +71,8 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
 
-  const { cloneDir } = getAdminConfig();
-  const registries = await getConfiguredRegistries(packageFile, cloneDir);
+  const { localDir } = getAdminConfig();
+  const registries = await getConfiguredRegistries(packageFile, localDir);
   const registryUrls = registries
     ? registries.map((registry) => registry.url)
     : undefined;
