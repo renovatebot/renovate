@@ -1,7 +1,7 @@
 import { Command } from 'commander';
-import { version } from '../../package.json';
-import { getOptions } from './definitions';
-import type { AllConfig, RenovateCliConfig, RenovateOptions } from './types';
+import { version } from '../../../../../package.json';
+import { getOptions } from '../../../../config/definitions';
+import type { AllConfig, RenovateOptions } from '../../../../config/types';
 
 export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
@@ -27,7 +27,7 @@ export function getConfig(input: string[]): AllConfig {
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
 
-  const config: RenovateCliConfig = {};
+  const config: Record<string, any> = {};
 
   const coersions: Record<string, (arg: string) => unknown> = {
     boolean: (val: string): boolean => {

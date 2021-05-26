@@ -370,10 +370,6 @@ export interface ManagerConfig extends RenovateConfig {
   manager: string;
 }
 
-export interface RenovateCliConfig extends Record<string, any> {
-  repositories?: string[];
-}
-
 export interface MigratedConfig {
   isMigrated: boolean;
   migratedConfig: RenovateConfig;

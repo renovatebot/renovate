@@ -1,8 +1,8 @@
-import { getName } from '../../test/util';
-import * as datasourceDocker from '../datasource/docker';
+import { getName } from '../../../../../test/util';
+import type { RenovateOptions } from '../../../../config/types';
+import * as datasourceDocker from '../../../../datasource/docker';
+import getArgv from './__fixtures__/argv';
 import * as cli from './cli';
-import getArgv from './config/__fixtures__/argv';
-import type { RenovateOptions } from './types';
 
 describe(getName(), () => {
   let argv: string[];

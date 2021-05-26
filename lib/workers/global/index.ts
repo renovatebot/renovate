@@ -17,6 +17,7 @@ import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
+import { parseConfigs } from './config/parse';
 import { globalFinalize, globalInitialize } from './initialize';
 import { Limit, isLimitReached } from './limits';
 
@@ -38,7 +39,7 @@ export async function getRepositoryConfig(
 }
 
 function getGlobalConfig(): Promise<RenovateConfig> {
-  return configParser.parseConfigs(process.env, process.argv);
+  return parseConfigs(process.env, process.argv);
 }
 
 function haveReachedLimits(): boolean {

@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 
-import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { getDatasourceList } from '../datasource';
-import { logger } from '../logger';
-import type { HostRule } from '../types';
-import { getOptions } from './definitions';
-import type { AllConfig, RenovateOptions } from './types';
+import { getOptions } from '../../../../config/definitions';
+import type { AllConfig, RenovateOptions } from '../../../../config/types';
+import { PLATFORM_TYPE_GITHUB } from '../../../../constants/platforms';
+import { getDatasourceList } from '../../../../datasource';
+import { logger } from '../../../../logger';
+import type { HostRule } from '../../../../types';
 
 // istanbul ignore if
 if (process.env.ENV_PREFIX) {
