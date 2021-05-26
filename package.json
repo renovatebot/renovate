@@ -158,7 +158,7 @@
     "ini": "2.0.0",
     "js-yaml": "3.14.1",
     "json-dup-key-validator": "1.0.3",
-    "json-stringify-pretty-compact": "2.0.0",
+    "json-stringify-pretty-compact": "3.0.0",
     "json5": "2.2.0",
     "luxon": "1.27.0",
     "markdown-it": "12.0.6",
