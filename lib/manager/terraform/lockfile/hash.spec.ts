@@ -4,16 +4,11 @@ import { getName, loadFixture } from '../../../../test/util';
 import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
 import createHashes from './hash';
 
-jest.setTimeout(15000);
-
 const releaseBackendUrl = defaultRegistryUrls[1];
 const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
 
 describe(getName(), () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     httpMock.setup();
   });
 
