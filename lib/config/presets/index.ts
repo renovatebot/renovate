@@ -17,7 +17,7 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
-import type { PresetApi } from './types';
+import type { ParsedPreset, PresetApi } from './types';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -175,13 +175,8 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const {
-    presetSource,
-    packageName,
-    presetPath,
-    presetName,
-    params,
-  } = parsePreset(preset);
+  const { presetSource, packageName, presetPath, presetName, params } =
+    parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
     packageName,
     presetPath,
@@ -344,12 +339,4 @@ export async function resolveConfigPresets(
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
   return config;
-}
-
-export interface ParsedPreset {
-  presetSource: string;
-  packageName: string;
-  presetPath?: string;
-  presetName: string;
-  params?: string[];
 }

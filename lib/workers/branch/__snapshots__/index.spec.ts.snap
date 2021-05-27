@@ -119,6 +119,13 @@ Object {
 }
 `;
 
+exports[`workers/branch/index processBranch returns if pending checks 1`] = `
+Object {
+  "branchExists": false,
+  "result": "pending",
+}
+`;
+
 exports[`workers/branch/index processBranch returns if pr creation limit exceeded and branch exists 1`] = `
 Object {
   "branchExists": true,

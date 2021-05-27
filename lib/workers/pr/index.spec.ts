@@ -81,12 +81,10 @@ function setupGitlabChangelogMock() {
           },
         ],
         releaseNotes: {
-          url:
-            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+          url: 'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
         },
         compare: {
-          url:
-            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+          url: 'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
         },
       },
     ],
@@ -176,8 +174,7 @@ describe(getName(), () => {
     const existingPr: Pr = {
       displayNumber: 'Existing PR',
       title: 'Update dependency dummy to v1.1.0',
-      body:
-        'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
+      body: 'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     } as never;
     beforeEach(() => {
       jest.resetAllMocks();
@@ -411,14 +408,15 @@ describe(getName(), () => {
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
     it('should filter assignees and reviewers based on their availability', async () => {
-      config.assignees = ['foo', 'bar'];
-      config.reviewers = ['foo', 'bar'];
+      config.assignees = ['@foo', 'bar'];
+      config.reviewers = ['foo', '@bar', 'foo@bar.com'];
       config.filterUnavailableUsers = true;
       platform.filterUnavailableUsers = jest.fn();
       platform.filterUnavailableUsers.mockResolvedValue(['foo']);
       await prWorker.ensurePr(config);
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+      expect(platform.filterUnavailableUsers.mock.calls).toMatchSnapshot();
     });
     it('should determine assignees from code owners', async () => {
       config.assigneesFromCodeOwners = true;

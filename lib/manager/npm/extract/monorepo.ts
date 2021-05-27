@@ -1,28 +1,23 @@
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import { getSiblingFileName, getSubDirectory } from '../../../util/fs';
 import type { PackageFile } from '../../types';
+import { detectPnpmWorkspaces } from './pnpm';
+import { matchesAnyPattern } from './utils';
 
-function matchesAnyPattern(val: string, patterns: string[]): boolean {
-  const res = patterns.some(
-    (pattern) => pattern === val + '/' || minimatch(val, pattern, { dot: true })
-  );
-  logger.trace({ val, patterns, res }, `matchesAnyPattern`);
-  return res;
-}
-
-export function detectMonorepos(
+export async function detectMonorepos(
   packageFiles: Partial<PackageFile>[],
   updateInternalDeps: boolean
-): void {
+): Promise<void> {
+  await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
     const {
       packageFile,
       npmLock,
       yarnLock,
+      npmrc,
       managerData = {},
       lernaClient,
       lernaPackages,
@@ -31,9 +26,8 @@ export function detectMonorepos(
     const { lernaJsonFile } = managerData;
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
-      const internalPackagePatterns = (is.array(packages)
-        ? packages
-        : [packages]
+      const internalPackagePatterns = (
+        is.array(packages) ? packages : [packages]
       ).map((pattern) => getSiblingFileName(packageFile, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
@@ -59,6 +53,7 @@ export function detectMonorepos(
         subPackage.npmLock = subPackage.npmLock || npmLock;
         if (subPackage.yarnLock) {
           subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
+          subPackage.npmrc = subPackage.npmrc || npmrc;
         }
         if (!updateInternalDeps) {
           subPackage.deps?.forEach((dep) => {

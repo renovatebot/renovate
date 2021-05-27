@@ -1,15 +1,12 @@
 import URL from 'url';
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
+import { getAdminConfig } from '../../config/admin';
 import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
 import type { ManagerConfig, PackageFile } from '../types';
-
-type GitModule = {
-  name: string;
-  path: string;
-};
+import { GitModule } from './types';
 
 async function getUrl(
   git: SimpleGit,
@@ -69,7 +66,7 @@ async function getModules(
         '--file',
         gitModulesPath,
         '--get-regexp',
-        'path',
+        '\\.path',
       ])) ?? /* istanbul ignore next: should never happen */ ''
     )
       .trim()
@@ -91,8 +88,9 @@ export default async function extractPackageFile(
   fileName: string,
   config: ManagerConfig
 ): Promise<PackageFile | null> {
-  const git = Git(config.localDir);
-  const gitModulesPath = upath.join(config.localDir, fileName);
+  const { localDir } = getAdminConfig();
+  const git = Git(localDir);
+  const gitModulesPath = upath.join(localDir, fileName);
 
   const depNames = await getModules(git, gitModulesPath);
 

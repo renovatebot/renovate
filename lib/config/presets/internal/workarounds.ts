@@ -9,6 +9,8 @@ export const presets: Record<string, Preset> = {
       'workarounds:mavenCommonsAncientVersion',
       'workarounds:ignoreSpringCloudNumeric',
       'workarounds:ignoreHttp4sDigestMilestones',
+      'workarounds:typesNodeVersioning',
+      'workarounds:reduceRepologyServerLoad',
     ],
   },
   mavenCommonsAncientVersion: {
@@ -39,6 +41,26 @@ export const presets: Record<string, Preset> = {
         matchManagers: ['sbt'],
         matchPackagePrefixes: ['org.http4s:'],
         allowedVersions: `!/^1\\.0-\\d+-[a-fA-F0-9]{7}$/`,
+      },
+    ],
+  },
+  typesNodeVersioning: {
+    description: 'Use node versioning for @types/node',
+    packageRules: [
+      {
+        matchManagers: ['npm'],
+        matchPackageNames: ['@types/node'],
+        versioning: `node`,
+      },
+    ],
+  },
+  reduceRepologyServerLoad: {
+    description:
+      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue 10133',
+    hostRules: [
+      {
+        matchHost: 'repology.org',
+        concurrentRequestLimit: 1,
       },
     ],
   },

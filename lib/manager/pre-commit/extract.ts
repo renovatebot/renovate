@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import {
   PLATFORM_TYPE_GITEA,
   PLATFORM_TYPE_GITHUB,
@@ -92,6 +92,8 @@ function extractDependency(
     regEx('^https?:\\/\\/(?<hostname>[^\\/]+)\\/(?<depName>\\S*)'),
     // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
+    // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
+    /^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/,
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
@@ -153,9 +155,10 @@ export function extractPackageFile(
   content: string,
   filename: string
 ): PackageFile | null {
-  let parsedContent: Record<string, unknown> | PreCommitConfig;
+  type ParsedContent = Record<string, unknown> | PreCommitConfig;
+  let parsedContent: ParsedContent;
   try {
-    parsedContent = yaml.safeLoad(content, { json: true }) as any;
+    parsedContent = load(content, { json: true }) as ParsedContent;
   } catch (err) {
     logger.debug({ filename, err }, 'Failed to parse pre-commit config YAML');
     return null;

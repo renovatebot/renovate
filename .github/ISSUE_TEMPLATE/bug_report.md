@@ -9,13 +9,31 @@ labels: 'type:bug, status:requirements, priority-5-triage'
       Email renovate-disclosure@whitesourcesoftware.com instead.
 -->
 
-**What Renovate type, platform and version are you using?**
+**How are you running Renovate?**
 
-<!-- Tell us if you're using the hosted App, or if you are self-hosted Renovate yourself. Platform too (GitHub, GitLab, etc) plus which version of Renovate if you're self-hosted. -->
+- [ ] WhiteSource Renovate hosted app on github.com
+- [ ] Self hosted
+
+If using the hosted app, please skip to the next section.
+Otherwise, if self-hosted, please complete the following:
+
+Please select which platform you are using:
+
+- [ ] Azure DevOps (dev.azure.com)
+- [ ] Azure DevOps Server
+- [ ] Bitbucket Cloud (bitbucket.org)
+- [ ] Bitbucket Server
+- [ ] Gitea
+- [ ] github.com
+- [ ] GitHub Enterprise Server
+- [ ] gitlab.com
+- [ ] GitLab self-hosted
+
+Renovate version: ...
 
 **Describe the bug**
 
-<!-- A clear and concise description of what the bug is. -->
+...
 
 **Relevant debug logs**
 
@@ -47,3 +65,5 @@ Please read the [minimal reproductions documentation](https://github.com/renovat
 **Additional context**
 
 <!-- Add any other context about the problem here, including your own debugging or ideas on what went wrong. -->
+
+...

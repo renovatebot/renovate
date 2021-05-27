@@ -149,6 +149,17 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'migratePresets',
+    description:
+      'Define presets here which have been removed or renamed and should be migrated automatically.',
+    type: 'object',
+    admin: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'description',
     description: 'Plain text description for a config or preset.',
     type: 'array',
@@ -252,7 +263,7 @@ const options: RenovateOptions[] = [
       'Custom environment variables for child processes and sidecar Docker containers.',
     admin: true,
     type: 'object',
-    default: false,
+    default: {},
   },
   {
     name: 'dockerChildPrefix',
@@ -351,7 +362,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'requireConfig',
-    description: 'Set to true if repositories must have a config to activate.',
+    description:
+      'Set to false if it is optional for repositories to contain a config.',
     stage: 'repository',
     type: 'boolean',
     default: true,
@@ -1186,6 +1198,13 @@ const options: RenovateOptions[] = [
     default: 0,
   },
   {
+    name: 'internalChecksFilter',
+    description: 'When/how to filter based on internal checks.',
+    type: 'string',
+    allowedValues: ['strict', 'flexible', 'none'],
+    default: 'none',
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
@@ -1309,7 +1328,7 @@ const options: RenovateOptions[] = [
     description: 'Branch topic.',
     type: 'string',
     default:
-      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
     cli: false,
   },
   {
@@ -1702,26 +1721,8 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'domainName',
-    description: 'Domain name for a host rule. e.g. "docker.io".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'hostName',
-    description: 'Hostname for a host rule. e.g. "index.docker.io".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'baseUrl',
-    description: 'baseUrl for a host rule. e.g. "https://api.github.com/".',
+    name: 'matchHost',
+    description: 'A domain name, host name or base URL to match against',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -1967,6 +1968,18 @@ const options: RenovateOptions[] = [
       'Set to true to fetch the entire list of PRs instead of only those authored by the Renovate user.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'gitNoVerify',
+    description:
+      'Which git commands will be run with the `--no-verify` option.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    allowedValues: ['commit', 'push'],
+    default: ['commit', 'push'],
+    stage: 'global',
+    admin: true,
   },
 ];
 

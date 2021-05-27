@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { version } from '../../package.json';
 import { getOptions } from './definitions';
-import type { GlobalConfig, RenovateOptions } from './types';
+import type { GlobalConfig, RenovateCliConfig, RenovateOptions } from './types';
 
 export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
@@ -9,10 +9,6 @@ export function getCliName(option: Partial<RenovateOptions>): string {
   }
   const nameWithHyphens = option.name.replace(/([A-Z])/g, '-$1');
   return `--${nameWithHyphens.toLowerCase()}`;
-}
-
-export interface RenovateCliConfig extends Record<string, any> {
-  repositories?: string[];
 }
 
 export function getConfig(input: string[]): GlobalConfig {
@@ -25,8 +21,8 @@ export function getConfig(input: string[]): GlobalConfig {
         .replace('--expose-env', '--trust-level=high')
         .replace('--renovate-fork', '--include-forks')
         .replace('"platform":"', '"hostType":"')
-        .replace('"endpoint":"', '"baseUrl":"')
-        .replace('"host":"', '"hostName":"')
+        .replace('"endpoint":"', '"matchHost":"')
+        .replace('"host":"', '"matchHost":"')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
@@ -71,10 +67,7 @@ export function getConfig(input: string[]): GlobalConfig {
     integer: parseInt,
   };
 
-  let program = new Command()
-    .storeOptionsAsProperties(false)
-    .passCommandToAction(false)
-    .arguments('[repositories...]');
+  let program = new Command().arguments('[repositories...]');
 
   options.forEach((option) => {
     if (option.cli !== false) {

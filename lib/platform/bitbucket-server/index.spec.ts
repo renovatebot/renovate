@@ -195,7 +195,6 @@ describe(getName(), () => {
         await bitbucket.initRepo({
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
-          localDir: '',
           ...config,
         });
         return scope;
@@ -294,7 +293,6 @@ describe(getName(), () => {
             await bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-              localDir: '',
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -318,7 +316,6 @@ describe(getName(), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({ url: sshLink('SOME', 'repo') })
@@ -345,7 +342,6 @@ describe(getName(), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -379,7 +375,6 @@ describe(getName(), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -404,7 +399,6 @@ describe(getName(), () => {
             bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-              localDir: '',
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);
           expect(httpMock.getTrace()).toMatchSnapshot();

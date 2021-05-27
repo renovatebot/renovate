@@ -5,6 +5,7 @@ import {
 } from '../constants/error-messages';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
+import { Datasource } from './datasource';
 import * as datasourceDocker from './docker';
 import * as datasourceGalaxy from './galaxy';
 import * as datasourceGithubTags from './github-tags';
@@ -34,19 +35,29 @@ describe(getName(), () => {
     expect(datasource.getDatasources()).toBeDefined();
     expect(datasource.getDatasourceList()).toBeDefined();
   });
-  it('validates dataource', () => {
+  it('validates datasource', () => {
     function validateDatasource(module: DatasourceApi, name: string): boolean {
       if (!module.getReleases) {
         return false;
       }
-      if (module.id !== name) {
-        return false;
-      }
-      return true;
+      return module.id === name;
     }
-    const dss = datasource.getDatasources();
+    function filterClassBasedDatasources(name: string): boolean {
+      return !(datasource.getDatasources().get(name) instanceof Datasource);
+    }
+    const dss = new Map(datasource.getDatasources());
 
-    const loadedDs = loadModules(__dirname, validateDatasource);
+    for (const ds of dss.values()) {
+      if (ds instanceof Datasource) {
+        dss.delete(ds.id);
+      }
+    }
+
+    const loadedDs = loadModules(
+      __dirname,
+      validateDatasource,
+      filterClassBasedDatasources
+    );
     expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
 
     for (const dsName of dss.keys()) {
@@ -80,6 +91,14 @@ describe(getName(), () => {
       await datasource.getPkgReleases({
         datasource: 'gitbucket',
         depName: 'some/dep',
+      })
+    ).toBeNull();
+  });
+  it('returns class datasource', async () => {
+    expect(
+      await datasource.getPkgReleases({
+        datasource: 'cdnjs',
+        depName: null,
       })
     ).toBeNull();
   });

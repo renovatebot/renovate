@@ -82,7 +82,7 @@ describe(getName(), () => {
   beforeEach(() => {
     hostRules.add({
       hostType: datasource,
-      hostName: 'custom.registry.renovatebot.com',
+      matchHost: 'custom.registry.renovatebot.com',
       token: 'abc123',
     });
     jest.resetAllMocks();
@@ -281,7 +281,7 @@ describe(getName(), () => {
 
     hostRules.add({
       hostType: datasource,
-      hostName: frontendHost,
+      matchHost: frontendHost,
       username: 'username',
       password: 'password',
       timeout: 20000,

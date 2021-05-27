@@ -8,7 +8,7 @@ import {
   isBranchModified,
   isBranchStale,
 } from '../../../../util/git';
-import { getOnboardingConfig } from './config';
+import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = (config: RenovateConfig): string =>
   configFileNames.includes(config.onboardingConfigFileName)
@@ -42,7 +42,7 @@ export async function rebaseOnboardingBranch(
   }
   const configFile = defaultConfigFile(config);
   const existingContents = await getFile(configFile, config.onboardingBranch);
-  const contents = await getOnboardingConfig(config);
+  const contents = await getOnboardingConfigContents(config);
   if (
     contents === existingContents &&
     !(await isBranchStale(config.onboardingBranch))

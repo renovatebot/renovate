@@ -1,4 +1,5 @@
 import { getName, git, mocked } from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
 import { getConfig } from '../../../config/defaults';
 import * as _lockFiles from '../../../manager/npm/post-update';
 import * as _lerna from '../../../manager/npm/post-update/lerna';
@@ -9,7 +10,7 @@ import type { PostUpdateConfig } from '../../../manager/types';
 import * as _fs from '../../../util/fs/proxies';
 import * as _hostRules from '../../../util/host-rules';
 
-const defaultConfig = getConfig();
+const config: PostUpdateConfig = getConfig();
 
 const fs = mocked(_fs);
 const lockFiles = mocked(_lockFiles);
@@ -29,12 +30,10 @@ const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
 describe(getName(), () => {
   describe('writeUpdatedPackageFiles', () => {
-    let config: PostUpdateConfig;
     beforeEach(() => {
-      config = {
-        ...defaultConfig,
+      setAdminConfig({
         localDir: 'some-tmp-dir',
-      };
+      });
       fs.outputFile = jest.fn();
     });
     it('returns if no updated packageFiles', async () => {
@@ -70,12 +69,10 @@ describe(getName(), () => {
     });
   });
   describe('getAdditionalFiles', () => {
-    let config: PostUpdateConfig;
     beforeEach(() => {
-      config = {
-        ...defaultConfig,
+      setAdminConfig({
         localDir: 'some-tmp-dir',
-      };
+      });
       git.getFile.mockResolvedValueOnce('some lock file contents');
       npm.generateLockFile = jest.fn();
       npm.generateLockFile.mockResolvedValueOnce({
