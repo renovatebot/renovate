@@ -77,7 +77,7 @@ module.exports = {
 };
 ```
 
-**NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL, like this: `https://artifactory.my-company.com/artifactory/api/npm/npm/`.
+**NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
 
 **NOTE:** Do not use `NPM_TOKEN` as an environment variable.
 
