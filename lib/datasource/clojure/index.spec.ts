@@ -1,14 +1,10 @@
-import _fs from 'fs-extra';
 import upath from 'upath';
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture, mocked } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { ClojureDatasource } from '.';
-
-jest.mock('fs-extra');
-const fs = mocked(_fs);
 
 const baseUrl = 'https://clojars.org/repo';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';
