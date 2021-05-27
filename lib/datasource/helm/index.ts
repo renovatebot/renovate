@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
-
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
@@ -56,7 +55,7 @@ export async function getRepositoryData(
     throw err;
   }
   try {
-    const doc = yaml.safeLoad(res.body, {
+    const doc = load(res.body, {
       json: true,
     }) as HelmRepository;
     if (!is.plainObject<HelmRepository>(doc)) {

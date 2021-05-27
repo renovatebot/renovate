@@ -70,7 +70,7 @@ The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/inte
 
 ## Fork and Clone
 
-If you want to contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
+If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.
 The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
