@@ -541,13 +541,15 @@ function autoExtendMavenRange(
     interval.leftValue = coerceRangeValue(leftValue, newValue);
   }
 
-  if (interval.leftValue && interval.rightValue) {
-    const correctRepresentation =
-      compare(interval.leftValue, interval.rightValue) === 1
-        ? null
-        : rangeToStr(range);
-    return correctRepresentation || currentRepresentation;
+  // istanbul ignore if
+  if (
+    interval.leftValue &&
+    interval.rightValue &&
+    compare(interval.leftValue, interval.rightValue) === 1
+  ) {
+    return currentRepresentation;
   }
+
   return rangeToStr(range);
 }
 
