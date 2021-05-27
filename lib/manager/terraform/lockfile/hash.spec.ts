@@ -8,14 +8,6 @@ const releaseBackendUrl = defaultRegistryUrls[1];
 const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
 
 describe(getName(), () => {
-  beforeEach(() => {
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
-  });
-
   it('returns null if a non hashicorp release is found ', async () => {
     const result = await createHashes(
       'test/gitlab',
