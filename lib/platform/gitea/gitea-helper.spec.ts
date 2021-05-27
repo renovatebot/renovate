@@ -140,12 +140,7 @@ describe(getName(), () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
-    httpMock.setup();
     setBaseUrl(baseUrl);
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('getCurrentUser', () => {

@@ -43,8 +43,6 @@ describe(getName(), () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    httpMock.reset();
-    httpMock.setup();
     jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
     jest.mock('../../logger');
@@ -62,9 +60,6 @@ describe(getName(), () => {
     });
 
     setBaseUrl(baseUrl);
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   async function initRepoMock(

@@ -13,11 +13,8 @@ const basePath = '/repos/some/repo/contents';
 
 describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });
   });
-
-  afterEach(() => httpMock.reset());
 
   describe('fetchJSONFile()', () => {
     it('returns JSON', async () => {

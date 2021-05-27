@@ -1,4 +1,3 @@
-import * as httpMock from '../../../test/http-mock';
 import { getName, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as dockerCommon from './common';
@@ -10,7 +9,6 @@ jest.mock('../../util/host-rules');
 
 describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
@@ -20,7 +18,6 @@ describe(getName(), () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
   });
 
   describe('getRegistryRepository', () => {
