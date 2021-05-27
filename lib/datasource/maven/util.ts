@@ -227,23 +227,26 @@ export async function getDependencyInfo(
   if (recursionLimit > 0 && parent && (!result.sourceUrl || !result.homepage)) {
     // if we found a parent and are missing some information
     // trying to get the scm/homepage information from it
-    const parentGroupId = parent.valueWithPath('groupId').replace(/\s/g, '');
-    const parentArtifactId = parent.valueWithPath('artifactId').replace(/\s/g, ''); // prettier-ignore
-    const parentVersion = parent.valueWithPath('version').replace(/\s/g, '');
-    const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
-    const parentDependency = getDependencyParts(parentDisplayId);
-
-    const parentInformation = await getDependencyInfo(
-      parentDependency,
-      repoUrl,
-      parentVersion,
-      recursionLimit - 1
-    );
-    if (!result.sourceUrl && parentInformation.sourceUrl) {
-      result.sourceUrl = parentInformation.sourceUrl;
-    }
-    if (!result.homepage && parentInformation.homepage) {
-      result.homepage = parentInformation.homepage;
+    const [parentGroupId, parentArtifactId, parentVersion] = [
+      'groupId',
+      'artifactId',
+      'version',
+    ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+    if (parentGroupId && parentArtifactId && parentVersion) {
+      const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
+      const parentDependency = getDependencyParts(parentDisplayId);
+      const parentInformation = await getDependencyInfo(
+        parentDependency,
+        repoUrl,
+        parentVersion,
+        recursionLimit - 1
+      );
+      if (!result.sourceUrl && parentInformation.sourceUrl) {
+        result.sourceUrl = parentInformation.sourceUrl;
+      }
+      if (!result.homepage && parentInformation.homepage) {
+        result.homepage = parentInformation.homepage;
+      }
     }
   }
 
