@@ -9223,10 +9223,10 @@ ts-essentials@^4.0.0:
   resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-4.0.0.tgz#506c42b270bbd0465574b90416533175b09205ab"
   integrity sha512-uQJX+SRY9mtbKU+g9kl5Fi7AEMofPCvHfJkQlaygpPmHPZrtgaBqbWFOYyiA47RhnSwwnXdepUJrgqUYxoUyhQ==
 
-ts-jest@27.0.0:
-  version "27.0.0"
-  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-27.0.0.tgz#b94dbad8f39276b583edc7712e6b3c29e16c8863"
-  integrity sha512-YhuEjDZz9ZjxKbUlgT3XtJb9lyditEjctlo1nLcn983my3Xz4BE3c2ogHhonmGlAdUUiGlz/Dq2KOMXmf1WHfA==
+ts-jest@27.0.1:
+  version "27.0.1"
+  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-27.0.1.tgz#3cd174561c4bb311e0187a5837543fb858c60d16"
+  integrity sha512-03qAt77QjhxyM5Bt2KrrT1WbdumiwLz989sD3IUznSp3GIFQrx76kQqSMLF7ynnxrF3/1ipzABnHxMlU8PD4Vw==
   dependencies:
     bs-logger "0.x"
     buffer-from "1.x"
