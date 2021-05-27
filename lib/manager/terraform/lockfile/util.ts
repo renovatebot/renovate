@@ -1,5 +1,4 @@
-import * as fs from '../../../util/fs';
-import { readLocalFile } from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
 import type {
@@ -22,7 +21,7 @@ const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/;
 const lockFile = '.terraform.lock.hcl';
 
 export function readLockFile(packageFilePath: string): Promise<string> {
-  const lockFilePath = fs.getSiblingFileName(packageFilePath, lockFile);
+  const lockFilePath = getSiblingFileName(packageFilePath, lockFile);
   return readLocalFile(lockFilePath, 'utf8');
 }
 
