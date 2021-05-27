@@ -54,12 +54,6 @@ const fixtureJdk = loadFixture(`openjdk.json`);
 
 describe(getName(), () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => httpMock.reset());
-
     it('returns null for empty result', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {
         status: 200,

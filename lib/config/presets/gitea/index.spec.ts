@@ -14,12 +14,9 @@ const basePath = '/repos/some/repo/contents';
 
 describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });
     setBaseUrl(giteaApiHost);
   });
-
-  afterEach(() => httpMock.reset());
 
   describe('fetchJSONFile()', () => {
     it('returns JSON', async () => {

@@ -38,13 +38,11 @@ const gitlabTreeResponse = [
 
 describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);
   });
 
   afterEach(() => {
-    httpMock.reset();
     jest.resetAllMocks();
   });
 

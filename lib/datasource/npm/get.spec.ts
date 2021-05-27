@@ -15,12 +15,7 @@ describe(getName(), () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetMemCache();
-    httpMock.setup();
     hostRules.clear();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('has bearer auth', () => {

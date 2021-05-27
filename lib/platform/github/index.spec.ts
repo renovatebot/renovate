@@ -34,11 +34,6 @@ describe(getName(), () => {
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   const graphqlOpenPullRequests = loadFixture('graphql/pullrequest-1.json');

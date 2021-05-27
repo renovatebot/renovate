@@ -44,7 +44,6 @@ function mockEcrAuthReject(msg: string) {
 
 describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
@@ -54,7 +53,6 @@ describe(getName(), () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
   });
 
   describe('getDigest', () => {
