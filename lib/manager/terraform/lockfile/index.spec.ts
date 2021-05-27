@@ -1,5 +1,6 @@
 import { join } from 'upath';
 import { fs, getName, loadFixture } from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import hash from './hash';
@@ -11,10 +12,13 @@ jest.mock('./hash');
 jest.mock('../../../datasource');
 
 const config = {
+  constraints: {},
+};
+
+const adminConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
-  constraints: {},
 };
 
 const validLockfile = loadFixture('validLockfile.hcl');
@@ -28,6 +32,11 @@ describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
+    setAdminConfig(adminConfig);
+  });
+
+  afterEach(() => {
+    setAdminConfig();
   });
 
   it('returns null if no .terraform.lock.hcl found', async () => {

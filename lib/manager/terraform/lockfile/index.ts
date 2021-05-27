@@ -1,4 +1,5 @@
 import pMap from 'p-map';
+import { getAdminConfig } from '../../../config/admin';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import { get as getVersioning } from '../../../versioning';
@@ -20,6 +21,8 @@ async function updateAllLocks(
   locks: ProviderLock[],
   config: UpdateArtifactsConfig
 ): Promise<ProviderLockUpdate[]> {
+  const { cacheDir } = getAdminConfig();
+
   const updates = await pMap(
     locks,
     async (lock) => {
@@ -43,7 +46,7 @@ async function updateAllLocks(
       const update: ProviderLockUpdate = {
         newVersion,
         newConstraint: lock.constraints,
-        newHashes: await hash(lock.lookupName, newVersion, config.cacheDir),
+        newHashes: await hash(lock.lookupName, newVersion, cacheDir),
         ...lock,
       };
       return update;
@@ -60,6 +63,8 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`terraform.updateArtifacts(${packageFileName})`);
+
+  const { cacheDir } = getAdminConfig();
 
   const lockFileContent = await readLockFile(packageFileName);
   if (!lockFileContent) {
@@ -90,7 +95,7 @@ export async function updateArtifacts({
     const update: ProviderLockUpdate = {
       newVersion: config.newVersion,
       newConstraint,
-      newHashes: await hash(repository, config.newVersion, config.cacheDir),
+      newHashes: await hash(repository, config.newVersion, cacheDir),
       ...updateLock,
     };
     updates.push(update);

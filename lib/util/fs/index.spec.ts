@@ -106,10 +106,9 @@ describe(getName(), () => {
     it('returns dir content', async () => {
       await withDir(
         async (localDir) => {
-          setFsConfig({
+          setAdminConfig({
             localDir: localDir.path,
           });
-
           await writeLocalFile('test/Cargo.toml', '');
           await writeLocalFile('test/Cargo.lock', '');
 
@@ -135,10 +134,9 @@ describe(getName(), () => {
     it('return empty array for non existing directory', async () => {
       await withDir(
         async (localDir) => {
-          setFsConfig({
+          setAdminConfig({
             localDir: localDir.path,
           });
-
           await expect(readLocalDirectory('somedir')).rejects.toThrow();
         },
         {

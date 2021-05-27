@@ -1,6 +1,6 @@
-import is from '@sindresorhus/is';
 import stream from 'stream';
 import util from 'util';
+import is from '@sindresorhus/is';
 import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
 import { getAdminConfig } from '../../config/admin';

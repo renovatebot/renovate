@@ -76,12 +76,7 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes(
-      'hashicorp/azurerm',
-      '2.56.0',
-      //      '/tmp/renovate/cache',
-      '/tmp'
-    );
+    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(2);
     expect(result).toMatchSnapshot();

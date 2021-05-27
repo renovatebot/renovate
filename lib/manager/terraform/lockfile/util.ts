@@ -11,9 +11,12 @@ import type {
 
 export const repositoryRegex = /^hashicorp\/(?<lookupName>\S+)$/;
 
-const providerStartLineRegex = /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/;
-const versionLineRegex = /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/;
-const constraintLineRegex = /^(?<prefix>[\s]*constraints[\s]*=[\s]*")(?<constraint>[^"']+)(?<suffix>".*)$/;
+const providerStartLineRegex =
+  /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/;
+const versionLineRegex =
+  /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/;
+const constraintLineRegex =
+  /^(?<prefix>[\s]*constraints[\s]*=[\s]*")(?<constraint>[^"']+)(?<suffix>".*)$/;
 const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/;
 
 const lockFile = '.terraform.lock.hcl';
