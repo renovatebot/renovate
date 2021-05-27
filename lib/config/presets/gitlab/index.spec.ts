@@ -10,11 +10,6 @@ const basePath = '/api/v4/projects/some%2Frepo/repository';
 describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('getPreset()', () => {

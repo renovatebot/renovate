@@ -18,7 +18,6 @@ let npmResponse: any;
 describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    httpMock.setup();
     setAdminConfig();
     hostRules.clear();
     resetCache();
@@ -52,7 +51,6 @@ describe(getName(), () => {
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
     mockDate.reset();
-    httpMock.reset();
   });
 
   it('should return null for no versions', async () => {

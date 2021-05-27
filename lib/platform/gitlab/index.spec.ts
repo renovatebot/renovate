@@ -43,11 +43,7 @@ describe(getName(), () => {
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
-    httpMock.reset();
-    httpMock.setup();
-  });
-  afterEach(() => {
-    httpMock.reset();
+    delete process.env.GITLAB_IGNORE_REPO_URL;
   });
 
   async function initFakePlatform(version: string) {
@@ -288,6 +284,38 @@ describe(getName(), () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
       });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
+      process.env.GITLAB_IGNORE_REPO_URL = 'true';
+      const selfHostedUrl = 'http://mycompany.com/gitlab';
+      httpMock
+        .scope(selfHostedUrl)
+        .get('/api/v4/user')
+        .reply(200, {
+          email: 'a@b.com',
+          name: 'Renovate Bot',
+        })
+        .get('/api/v4/version')
+        .reply(200, {
+          version: '13.8.0',
+        });
+      await gitlab.initPlatform({
+        endpoint: `${selfHostedUrl}/api/v4`,
+        token: 'mytoken',
+      });
+      httpMock
+        .scope(selfHostedUrl)
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `http://other.host.com/gitlab/some/repo/project.git`,
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo/project',
+      });
+      expect(git.initRepo.mock.calls).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

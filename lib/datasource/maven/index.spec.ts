@@ -82,12 +82,10 @@ describe(getName(), () => {
       token: 'abc123',
     });
     jest.resetAllMocks();
-    httpMock.setup();
   });
 
   afterEach(() => {
     hostRules.clear();
-    httpMock.reset();
     delete process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK;
   });
 

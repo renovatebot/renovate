@@ -11,13 +11,7 @@ describe(getName(), () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    httpMock.reset();
-    httpMock.setup();
-
     setBaseUrl(baseUrl);
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('ensureComment()', () => {
