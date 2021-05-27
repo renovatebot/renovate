@@ -10,6 +10,7 @@ import type {
   RenovateConfig,
   RenovateOptions,
   ValidationMessage,
+  ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
 
@@ -18,18 +19,68 @@ const options = getOptions();
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, RenovateOptions['parent']>;
 
-export interface ValidationResult {
-  errors: ValidationMessage[];
-  warnings: ValidationMessage[];
-}
-
 const managerList = getManagerList();
+
+const topLevelObjects = getLanguageList().concat(getManagerList());
+
+const ignoredNodes = [
+  '$schema',
+  'depType',
+  'npmToken',
+  'packageFile',
+  'forkToken',
+  'repository',
+  'vulnerabilityAlertsOnly',
+  'vulnerabilityAlert',
+  'isVulnerabilityAlert',
+  'copyLocalLibs', // deprecated - functionality is now enabled by default
+  'prBody', // deprecated
+];
 
 function isManagerPath(parentPath: string): boolean {
   return (
     /^regexManagers\[[0-9]+]$/.test(parentPath) ||
     managerList.includes(parentPath)
   );
+}
+
+function isIgnored(key: string): boolean {
+  return ignoredNodes.includes(key);
+}
+
+function validateAliasObject(val: Record<string, unknown>): true | string {
+  for (const [key, value] of Object.entries(val)) {
+    if (!is.urlString(value)) {
+      return key;
+    }
+  }
+  return true;
+}
+
+function validatePlainObject(val: Record<string, unknown>): true | string {
+  for (const [key, value] of Object.entries(val)) {
+    if (!is.string(value)) {
+      return key;
+    }
+  }
+  return true;
+}
+
+function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
+  return enabledManagers.filter(
+    (manager) => !getManagerList().includes(manager)
+  );
+}
+
+function getDeprecationMessage(option: string): string {
+  const deprecatedOptions = {
+    branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
+    commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
+    prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
+    yarnrc:
+      'Use of `yarnrc` in config is deprecated. Please commit it to your repository instead.',
+  };
+  return deprecatedOptions[option];
 }
 
 export function getParentName(parentPath: string): string {
@@ -41,8 +92,6 @@ export function getParentName(parentPath: string): string {
         .pop()
     : '.';
 }
-
-const topLevelObjects = getLanguageList().concat(getManagerList());
 
 export async function validateConfig(
   config: RenovateConfig,
@@ -65,54 +114,6 @@ export async function validateConfig(
   }
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
-
-  function getDeprecationMessage(option: string): string {
-    const deprecatedOptions = {
-      branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
-      commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
-      prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
-      yarnrc:
-        'Use of `yarnrc` in config is deprecated. Please commit it to your repository instead.',
-    };
-    return deprecatedOptions[option];
-  }
-
-  function isIgnored(key: string): boolean {
-    const ignoredNodes = [
-      '$schema',
-      'depType',
-      'npmToken',
-      'packageFile',
-      'forkToken',
-      'repository',
-      'vulnerabilityAlertsOnly',
-      'vulnerabilityAlert',
-      'isVulnerabilityAlert',
-      'copyLocalLibs', // deprecated - functionality is now enabled by default
-      'prBody', // deprecated
-    ];
-    return ignoredNodes.includes(key);
-  }
-
-  function validateAliasObject(
-    key: string,
-    val: Record<string, unknown>
-  ): boolean {
-    if (key === 'aliases') {
-      for (const value of Object.values(val)) {
-        if (!is.urlString(value)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
-    return enabledManagers.filter(
-      (manager) => !getManagerList().includes(manager)
-    );
-  }
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
@@ -267,9 +268,8 @@ export async function validateConfig(
                   }
                   if (tzRe.test(subval)) {
                     const [, timezone] = tzRe.exec(subval);
-                    const [validTimezone, errorMessage] = hasValidTimezone(
-                      timezone
-                    );
+                    const [validTimezone, errorMessage] =
+                      hasValidTimezone(timezone);
                     if (!validTimezone) {
                       errors.push({
                         topic: 'Configuration Error',
@@ -318,9 +318,9 @@ export async function validateConfig(
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
-                  const selectorLength = Object.keys(
-                    resolvedRule
-                  ).filter((ruleKey) => selectors.includes(ruleKey)).length;
+                  const selectorLength = Object.keys(resolvedRule).filter(
+                    (ruleKey) => selectors.includes(ruleKey)
+                  ).length;
                   if (!selectorLength) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
                       packageRule
@@ -507,10 +507,19 @@ export async function validateConfig(
         ) {
           if (is.plainObject(val)) {
             if (key === 'aliases') {
-              if (!validateAliasObject(key, val)) {
+              const res = validateAliasObject(val);
+              if (res !== true) {
                 errors.push({
                   topic: 'Configuration Error',
-                  message: `Invalid alias object configuration`,
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
+                });
+              }
+            } else if (['customEnvVariables', 'migratePresets'].includes(key)) {
+              const res = validatePlainObject(val);
+              if (res !== true) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
             } else {

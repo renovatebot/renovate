@@ -1,5 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/migration it migrates hostRules fields 1`] = `
+Object {
+  "hostRules": Array [
+    Object {
+      "matchHost": "https://some.domain.com",
+      "token": "abc123",
+    },
+    Object {
+      "matchHost": "domain.com",
+      "token": "abc123",
+    },
+    Object {
+      "matchHost": "some.domain.com",
+      "token": "abc123",
+    },
+  ],
+}
+`;
+
 exports[`config/migration it migrates nested packageRules 1`] = `
 Object {
   "packageRules": Array [
@@ -28,6 +47,14 @@ Object {
         "dependencies",
       ],
     },
+  ],
+}
+`;
+
+exports[`config/migration it migrates presets 1`] = `
+Object {
+  "extends": Array [
+    "local>org/renovate-config",
   ],
 }
 `;

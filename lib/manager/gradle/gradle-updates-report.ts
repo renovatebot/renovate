@@ -2,30 +2,13 @@ import { exists, readFile, writeFile } from 'fs-extra';
 import { join } from 'upath';
 import * as datasourceSbtPackage from '../../datasource/sbt-package';
 import { logger } from '../../logger';
+import type {
+  BuildDependency,
+  GradleDependencyWithRepos,
+  GradleProject,
+} from './types';
 
 export const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
-
-interface GradleProject {
-  project: string;
-  repositories: string[];
-  dependencies: GradleDependency[];
-}
-
-interface GradleDependency {
-  name: string;
-  group: string;
-  version: string;
-}
-
-type GradleDependencyWithRepos = GradleDependency & { repos: string[] };
-
-export interface BuildDependency {
-  name: string;
-  depGroup: string;
-  depName?: string;
-  currentValue?: string;
-  registryUrls?: string[];
-}
 
 export async function createRenovateGradlePlugin(
   localDir: string

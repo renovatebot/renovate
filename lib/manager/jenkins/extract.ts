@@ -1,4 +1,4 @@
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import * as datasourceJenkins from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -53,7 +53,7 @@ function extractYaml(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   try {
-    const doc = yaml.safeLoad(content, { json: true }) as JenkinsPlugins;
+    const doc = load(content, { json: true }) as JenkinsPlugins;
     if (doc?.plugins) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
@@ -70,7 +70,8 @@ function extractYaml(content: string): PackageDependency[] {
 
 function extractText(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  const regex = /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/;
+  const regex =
+    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/;
 
   for (const line of content.split('\n')) {
     const match = regex.exec(line);

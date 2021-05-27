@@ -53,7 +53,7 @@ function getCallerFileName(): string | null {
   try {
     const err = new Error();
 
-    const stack = (err.stack as unknown) as NodeJS.CallSite[];
+    const stack = err.stack as unknown as NodeJS.CallSite[];
 
     let currentFile = null;
     for (const frame of stack) {
@@ -81,14 +81,13 @@ export function getName(): string {
   return name;
 }
 
-export function loadFixture(fixtureFile: string, fixtureRoot = '.'): string {
+export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   const callerDir = upath.dirname(getCallerFileName());
-  const fixtureAbsFile = upath.join(
-    callerDir,
-    fixtureRoot,
-    '__fixtures__',
-    fixtureFile
-  );
+  return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
+}
+
+export function loadFixture(fixtureFile: string, fixtureRoot = '.'): string {
+  const fixtureAbsFile = getFixturePath(fixtureFile, fixtureRoot);
   return readFileSync(fixtureAbsFile, { encoding: 'utf8' });
 }
 
