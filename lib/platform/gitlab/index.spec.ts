@@ -43,12 +43,7 @@ describe(getName(), () => {
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
-    httpMock.reset();
-    httpMock.setup();
     delete process.env.GITLAB_IGNORE_REPO_URL;
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   async function initFakePlatform(version: string) {

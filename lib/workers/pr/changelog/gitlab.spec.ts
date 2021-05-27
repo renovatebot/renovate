@@ -34,7 +34,6 @@ const matchHost = 'https://gitlab.com/';
 describe(getName(), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      httpMock.setup();
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITLAB,
@@ -42,9 +41,7 @@ describe(getName(), () => {
         token: 'abc',
       });
     });
-    afterEach(() => {
-      httpMock.reset();
-    });
+
     it('returns null if @types', async () => {
       httpMock.scope(matchHost);
       expect(

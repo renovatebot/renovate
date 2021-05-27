@@ -19,13 +19,11 @@ describe(getName(), () => {
   beforeEach(() => {
     gitlabApi = new GitlabHttp();
     setBaseUrl(`${gitlabApiHost}/api/v4/`);
-    httpMock.setup();
     delete process.env.GITLAB_IGNORE_REPO_URL;
   });
 
   afterEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
   });
 
   it('paginates', async () => {

@@ -67,10 +67,7 @@ export function getConfig(input: string[]): GlobalConfig {
     integer: parseInt,
   };
 
-  let program = new Command()
-    .storeOptionsAsProperties(false)
-    .passCommandToAction(false)
-    .arguments('[repositories...]');
+  let program = new Command().arguments('[repositories...]');
 
   options.forEach((option) => {
     if (option.cli !== false) {
