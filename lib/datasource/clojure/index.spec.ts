@@ -243,23 +243,4 @@ describe(getName(), () => {
 
     expect(sourceUrl).toEqual('https://github.com/example/test');
   });
-
-  it('supports file protocol', async () => {
-    fs.exists.mockResolvedValueOnce(false);
-
-    fs.exists.mockResolvedValueOnce(true);
-    fs.readFile.mockResolvedValueOnce(
-      Buffer.from(loadFixture('metadata.xml', upath.join('..', 'maven')))
-    );
-
-    fs.exists.mockResolvedValueOnce(true);
-    fs.readFile.mockResolvedValueOnce(
-      Buffer.from(loadFixture('pom.xml', upath.join('..', 'maven')))
-    );
-
-    const res = await get('org.example:package', 'file:///foo', 'file:///bar');
-
-    expect(res).toMatchSnapshot();
-    expect(fs.readFile.mock.calls).toMatchSnapshot();
-  });
 });
