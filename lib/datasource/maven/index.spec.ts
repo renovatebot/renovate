@@ -354,6 +354,26 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('should deal with missing parent fields', async () => {
+      mockGenericPackage({
+        meta: loadFixture('child-empty/meta.xml'),
+        pom: loadFixture('child-empty/pom.xml'),
+        latest: '2.0.0',
+        jars: { '2.0.0': 200 },
+      });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        display: 'org.example:package',
+        group: 'org.example',
+        name: 'package',
+      });
+      expect(res).not.toHaveProperty('homepage');
+      expect(res).not.toHaveProperty('sourceUrl');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('should deal with circular hierarchy', async () => {
       const parentPom = loadFixture('child-parent-cycle/parent.pom.xml');
       const parentPomMock = {
