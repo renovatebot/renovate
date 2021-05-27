@@ -48,6 +48,7 @@ const staticGroups = {
     extends: [
       'group:nodeJs',
       'group:allApollographql',
+      'group:fontsource',
       'group:fortawesome',
       'group:fusionjs',
       'group:glimmer',
@@ -114,6 +115,15 @@ const staticGroups = {
         matchDatasources: ['docker'],
         matchPackagePrefixes: ['mcr.microsoft.com/dotnet/core/'],
         groupName: '.NET Core Docker containers',
+      },
+    ],
+  },
+  fontsource: {
+    description: 'Group all packages by Fontsource together',
+    packageRules: [
+      {
+        groupName: 'Fontsource',
+        matchPackagePrefixes: ['@fontsource/'],
       },
     ],
   },
