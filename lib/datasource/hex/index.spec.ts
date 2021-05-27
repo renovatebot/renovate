@@ -17,12 +17,10 @@ describe(getName(), () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({});
-    httpMock.setup();
   });
 
   afterEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
   });
 
   describe('getReleases', () => {

@@ -78,8 +78,6 @@ describe(getName(), () => {
     let adminConfig: RepoAdminConfig;
 
     beforeEach(async () => {
-      httpMock.setup();
-
       tmpDir = await dir();
 
       adminConfig = {
@@ -96,8 +94,6 @@ describe(getName(), () => {
       fs.rmdirSync(tmpDir.path, { recursive: true });
       tmpDir = null;
       setAdminConfig();
-
-      httpMock.reset();
     });
 
     it('returns null for missing registry url', async () => {

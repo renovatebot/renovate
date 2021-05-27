@@ -551,6 +551,36 @@ describe('semverRuby', () => {
         }
       );
     });
+
+    it('falls back to "replace" from "auto" and "widen" strategies', () => {
+      [
+        ['< 1.2.5', '< 1.0.3', 'auto', '1.0.3', '1.2.4'],
+        ['< 1.2.5', '< 1.0.3', 'widen', '1.0.3', '1.2.4'],
+      ].forEach(
+        ([
+          expected,
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        ]) => {
+          const res = semverRuby.getNewValue({
+            currentValue,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          const fallbackRes = semverRuby.getNewValue({
+            currentValue,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          });
+          expect(res).toEqual(expected);
+          expect(res).toEqual(fallbackRes);
+        }
+      );
+    });
     it('returns correct version for update-lockfile strategy', () => {
       [
         ['~> 6.0.0', '~> 6.0.0', 'update-lockfile', '6.0.2', '6.0.3'],

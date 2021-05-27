@@ -8,14 +8,6 @@ const body = loadJsonFixture('shared_preferences.json');
 const baseUrl = 'https://pub.dartlang.org/api/packages/';
 
 describe(getName(), () => {
-  beforeEach(() => {
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
-  });
-
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/non_sense').reply(200, null);

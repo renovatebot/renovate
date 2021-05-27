@@ -14,11 +14,6 @@ describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('returns null for empty result', async () => {
@@ -127,7 +122,7 @@ describe(getName(), () => {
     it('simulate failing secondary release source', async () => {
       httpMock
         .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/google-beta')
+        .get('/v1/providers/hashicorp/datadog')
         .reply(404, {
           errors: ['Not Found'],
         })
@@ -141,6 +136,7 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for error in service discovery', async () => {
       httpMock.scope(primaryUrl).get('/.well-known/terraform.json').reply(404);
