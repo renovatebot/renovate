@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { ensureTrailingSlash, parseUrl } from '../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { downloadHttpProtocol } from '../maven/util';
@@ -17,8 +18,6 @@ export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
-const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
-
 async function resolvePluginReleases(
   rootUrl: string,
   artifact: string,
@@ -28,7 +27,7 @@ async function resolvePluginReleases(
   const parse = (content: string): string[] =>
     parseIndexDir(content, (x) => !/^\.+$/.test(x));
   const { body: indexContent } = await downloadHttpProtocol(
-    ensureTrailingSlash(searchRoot),
+    parseUrl(ensureTrailingSlash(searchRoot)),
     'sbt'
   );
   if (indexContent) {
@@ -43,7 +42,7 @@ async function resolvePluginReleases(
     for (const searchVersion of searchVersions) {
       const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
       const { body: subRootContent } = await downloadHttpProtocol(
-        ensureTrailingSlash(searchSubRoot),
+        parseUrl(ensureTrailingSlash(searchSubRoot)),
         'sbt'
       );
       if (subRootContent) {
@@ -51,7 +50,7 @@ async function resolvePluginReleases(
         for (const sbtItem of sbtVersionItems) {
           const releasesRoot = `${searchSubRoot}/${sbtItem}`;
           const { body: releasesIndexContent } = await downloadHttpProtocol(
-            ensureTrailingSlash(releasesRoot),
+            parseUrl(ensureTrailingSlash(releasesRoot)),
             'sbt'
           );
           if (releasesIndexContent) {

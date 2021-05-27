@@ -1,11 +1,10 @@
-import url from 'url';
 import fs from 'fs-extra';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
-
+import { parseUrl } from '../../util/url';
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
 import type { MavenDependency, MavenXml } from './types';
@@ -19,11 +18,10 @@ function httpByHostType(hostType: string): Http {
   return http[hostType];
 }
 
-const getHost = (x: string): string => new url.URL(x).host;
+const getHost = (x: string): string => parseUrl(x)?.host;
 
-function isMavenCentral(pkgUrl: url.URL | string): boolean {
-  const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
-  return getHost(MAVEN_REPO) === host;
+function isMavenCentral(pkgUrl: URL): boolean {
+  return getHost(MAVEN_REPO) === pkgUrl.host;
 }
 
 function isTemporalError(err: { code: string; statusCode: number }): boolean {
@@ -59,16 +57,21 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 }
 
 export async function downloadHttpProtocol(
-  pkgUrl: url.URL | string,
+  pkgUrl: URL | null,
   hostType = id
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
+    /* istanbul ignore if */
+    if (!pkgUrl) {
+      logger.debug('Dependency lookup faild. Missing pkgUrl');
+      return {};
+    }
     const httpClient = httpByHostType(hostType);
-    raw = await httpClient.get(pkgUrl.toString());
+    raw = await httpClient.get(pkgUrl.href);
     return raw;
   } catch (err) {
-    const failedUrl = pkgUrl.toString();
+    const failedUrl = pkgUrl.href;
     if (err.message === HOST_DISABLED) {
       // istanbul ignore next
       logger.trace({ failedUrl }, 'Host disabled');
@@ -100,8 +103,8 @@ export async function downloadHttpProtocol(
   }
 }
 
-async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
-  const pkgPath = pkgUrl.toString().replace('file://', '');
+async function downloadFileProtocol(pkgUrl: URL): Promise<string | null> {
+  const pkgPath = pkgUrl.href.replace('file://', '');
   if (!(await fs.exists(pkgPath))) {
     return null;
   }
@@ -109,12 +112,12 @@ async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
 }
 
 export async function isHttpResourceExists(
-  pkgUrl: url.URL | string,
+  pkgUrl: URL,
   hostType = id
 ): Promise<boolean | string | null> {
   try {
     const httpClient = httpByHostType(hostType);
-    const res = await httpClient.head(pkgUrl.toString());
+    const res = await httpClient.head(pkgUrl.href);
     const timestamp = res?.headers?.['last-modified'] as string;
     return timestamp || true;
   } catch (err) {
@@ -122,8 +125,10 @@ export async function isHttpResourceExists(
       return false;
     }
 
-    const failedUrl = pkgUrl.toString();
-    logger.debug({ failedUrl }, `Can't check HTTP resource existence`);
+    logger.debug(
+      { failedUrl: pkgUrl.href },
+      `Can't check HTTP resource existence`
+    );
     return null;
   }
 }
@@ -136,12 +141,12 @@ export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
   path: string
-): url.URL | null {
-  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+): URL | null {
+  return parseUrl(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export async function downloadMavenXml(
-  pkgUrl: url.URL | null
+  pkgUrl: URL | null
 ): Promise<MavenXml | null> {
   /* istanbul ignore if */
   if (!pkgUrl) {
@@ -163,12 +168,12 @@ export async function downloadMavenXml(
       logger.debug('Skipping s3 dependency');
       return {};
     default:
-      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
+      logger.debug({ url: pkgUrl.href }, `Unsupported Maven protocol`);
       return {};
   }
 
   if (!rawContent) {
-    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
+    logger.debug(`Content is not found for Maven url: ${pkgUrl.href}`);
     return {};
   }
 

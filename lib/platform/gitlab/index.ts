@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import pAll from 'p-all';
@@ -22,7 +21,7 @@ import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash, getQueryString } from '../../util/url';
+import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -222,10 +221,10 @@ export async function initRepo({
     let url: string;
     if (
       process.env.GITLAB_IGNORE_REPO_URL ||
-      res.body.http_url_to_repo === null
+      !is.string(res.body.http_url_to_repo)
     ) {
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
-      const { host, protocol } = URL.parse(defaults.endpoint);
+      const { host, protocol } = parseUrl(defaults.endpoint);
       url = git.getUrl({
         protocol: protocol.slice(0, -1) as any,
         auth: 'oauth2:' + opts.token,
@@ -234,9 +233,10 @@ export async function initRepo({
       });
     } else {
       logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
-      const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-      repoUrl.auth = 'oauth2:' + opts.token;
-      url = URL.format(repoUrl);
+      const repoUrl = parseUrl(res.body.http_url_to_repo);
+      repoUrl.username = 'oauth2';
+      repoUrl.password = opts.token;
+      url = repoUrl.href;
     }
     await git.initRepo({
       ...config,

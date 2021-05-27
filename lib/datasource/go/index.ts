@@ -1,10 +1,9 @@
-import URL from 'url';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
-import { trimTrailingSlash } from '../../util/url';
+import { parseUrl, trimTrailingSlash } from '../../util/url';
 import * as bitbucket from '../bitbucket-tags';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
@@ -81,7 +80,13 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     });
     if (opts.token) {
       // get server base url from import url
-      const parsedUrl = URL.parse(goSourceUrl);
+      const parsedUrl = parseUrl(goSourceUrl);
+
+      /* istanbul ignore if: should not happen */
+      if (!parseUrl) {
+        logger.debug({ goModule, goSourceUrl }, 'Invalid go source url');
+        return null;
+      }
 
       // split the go module from the URL: host/go/module -> go/module
       const split = goModule.split('/');
@@ -109,7 +114,13 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       logger.debug({ goModule, goImportURL }, 'Go lookup import url');
 
       // get server base url from import url
-      const parsedUrl = URL.parse(goImportURL);
+      const parsedUrl = parseUrl(goImportURL);
+
+      /* istanbul ignore if: should not happen */
+      if (!parseUrl) {
+        logger.debug({ goModule, goImportURL }, 'Invalid go import url');
+        return null;
+      }
 
       // split the go module from the URL: host/go/module -> go/module
       const lookupName = trimTrailingSlash(parsedUrl.pathname)

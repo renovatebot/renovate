@@ -2,6 +2,7 @@ import { getName } from '../../test/util';
 import {
   parseUrl,
   resolveBaseUrl,
+  resolveUrl,
   trimTrailingSlash,
   validateUrl,
 } from './url';
@@ -57,6 +58,7 @@ describe(getName(), () => {
     expect(validateUrl(null)).toBe(false);
     expect(validateUrl('foo')).toBe(false);
     expect(validateUrl('ssh://github.com')).toBe(false);
+    expect(validateUrl('ssh://github.com', false)).toBe(true);
     expect(validateUrl('http://github.com')).toBe(true);
     expect(validateUrl('https://github.com')).toBe(true);
   });
@@ -76,5 +78,21 @@ describe(getName(), () => {
     expect(trimTrailingSlash('/foo/bar')).toBe('/foo/bar');
     expect(trimTrailingSlash('foo/')).toBe('foo');
     expect(trimTrailingSlash('foo//////')).toBe('foo');
+  });
+
+  it('resolveUrl', () => {
+    expect(resolveUrl('/one/two/three', 'four')).toBe('/one/two/four');
+    expect(resolveUrl('http://example.com/', '/one')).toBe(
+      'http://example.com/one'
+    );
+    expect(resolveUrl('http://example.com/one', '/two')).toBe(
+      'http://example.com/two'
+    );
+    expect(resolveUrl('http://example.com/one/three', 'two')).toBe(
+      'http://example.com/one/two'
+    );
+    expect(resolveUrl('http://example.com/one/', 'two')).toBe(
+      'http://example.com/one/two'
+    );
   });
 });

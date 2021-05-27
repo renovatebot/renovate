@@ -1,4 +1,3 @@
-import url from 'url';
 import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
@@ -97,7 +96,7 @@ function isValidArtifactsInfo(
 
 async function getArtifactInfo(
   version: string,
-  artifactUrl: url.URL
+  artifactUrl: URL
 ): Promise<ArtifactInfoResult> {
   const proto = artifactUrl.protocol;
   if (proto === 'http:' || proto === 'https:') {
@@ -119,7 +118,7 @@ async function filterMissingArtifacts(
 
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
     const queue = versions
-      .map((version): [string, url.URL | null] => {
+      .map((version): [string, URL | null] => {
         const artifactUrl = getMavenUrl(
           dependency,
           repoUrl,

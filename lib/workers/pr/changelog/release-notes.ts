@@ -1,4 +1,3 @@
-import * as URL from 'url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
@@ -8,6 +7,7 @@ import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import { linkify } from '../../../util/markdown';
+import { validateUrl } from '../../../util/url';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './types';
@@ -160,17 +160,6 @@ function sectionize(text: string, level: number): string[] {
   return result;
 }
 
-function isUrl(url: string): boolean {
-  try {
-    return !!URL.parse(url).hostname;
-  } catch (err) {
-    // istanbul ignore next
-    logger.debug({ err }, `Error parsing ${url} in URL.parse`);
-  }
-  // istanbul ignore next
-  return false;
-}
-
 export async function getReleaseNotesMdFileInner(
   repository: string,
   apiBaseUrl: string
@@ -249,7 +238,7 @@ export async function getReleaseNotesMd(
             .filter(Boolean);
           let body = section.replace(/.*?\n(-{3,}\n)?/, '').trim();
           for (const word of title) {
-            if (word.includes(version) && !isUrl(word)) {
+            if (word.includes(version) && !validateUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
               let url = `${baseUrl}${repository}/blob/master/${changelogFile}#`;

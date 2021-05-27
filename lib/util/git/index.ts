@@ -1,4 +1,3 @@
-import URL from 'url';
 import fs from 'fs-extra';
 import Git, {
   DiffResult as DiffResult_,
@@ -24,6 +23,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { formatUrl } from '../url';
 import { GitNoVerifyOption, getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
@@ -851,7 +851,7 @@ export function getUrl({
   if (protocol === 'ssh') {
     return `git@${hostname}:${repository}.git`;
   }
-  return URL.format({
+  return formatUrl({
     protocol: protocol || 'https',
     auth,
     hostname,

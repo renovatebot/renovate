@@ -1,4 +1,3 @@
-import URL from 'url';
 import addrs from 'email-addresses';
 import type { GlobalConfig } from '../config/types';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
@@ -6,6 +5,7 @@ import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { setNoVerify, setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
+import { parseUrl } from '../util/url';
 import platforms from './api';
 import type { Platform } from './types';
 
@@ -116,7 +116,7 @@ export async function initPlatform(
 
   const platformRule: HostRule = {
     hostType: returnConfig.platform,
-    matchHost: URL.parse(returnConfig.endpoint).hostname,
+    matchHost: parseUrl(returnConfig.endpoint).hostname,
   };
   ['token', 'username', 'password'].forEach((field) => {
     if (config[field]) {

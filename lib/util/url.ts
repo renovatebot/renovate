@@ -1,4 +1,8 @@
+// eslint-disable-next-line no-restricted-imports
+import { format as formatUrl, parse as parseUrlLegacy } from 'url';
 import urlJoin from 'url-join';
+
+export { formatUrl, parseUrlLegacy };
 
 export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
@@ -11,8 +15,8 @@ export function trimTrailingSlash(url: string): string {
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   const inputString = input.toString();
 
-  let host;
-  let pathname;
+  let host: string | undefined;
+  let pathname: string;
   try {
     ({ host, pathname } = new URL(inputString));
   } catch (e) {
@@ -49,10 +53,26 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
   }
 }
 
-export function parseUrl(url: string): URL | null {
+export function parseUrl(url: string, base?: string | URL): URL | null {
   try {
-    return new URL(url);
+    return new URL(url, base);
   } catch (err) {
     return null;
   }
+}
+
+/**
+ * works like resolve from `url` module
+ * https://nodejs.org/api/url.html#url_url_resolve_from_to
+ *
+ * TODO: This throws for invalid urls, maybe catch and return null?
+ */
+export function resolveUrl(from: string, to: string): string {
+  const resolvedUrl = new URL(to, new URL(from, 'resolve://'));
+  if (resolvedUrl.protocol === 'resolve:') {
+    // `from` is a relative URL.
+    const { pathname, search, hash } = resolvedUrl;
+    return pathname + search + hash;
+  }
+  return resolvedUrl.href;
 }

@@ -1,10 +1,10 @@
-import URL from 'url';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
+import { parseUrl } from '../../../util/url';
 import * as allVersioning from '../../../versioning';
 import type { BranchUpgradeConfig } from '../../types';
 import { getTags } from './github';
@@ -40,7 +40,7 @@ export async function getChangeLogJSON({
     return null;
   }
   const version = allVersioning.get(versioning);
-  const { protocol, host, pathname } = URL.parse(sourceUrl);
+  const { protocol, host, pathname } = parseUrl(sourceUrl);
   const baseUrl = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'

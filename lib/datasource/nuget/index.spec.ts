@@ -119,11 +119,11 @@ describe(getName(), () => {
 
     it('returns null for unparseable', () => {
       const parsed = parseRegistryUrl(
-        'https://test:malfor%5Med@test.example.com'
+        'https://test:malfor%5Med@test.example.com:abc'
       );
 
       expect(parsed.feedUrl).toEqual(
-        'https://test:malfor%5Med@test.example.com'
+        'https://test:malfor%5Med@test.example.com:abc'
       );
       expect(parsed.protocolVersion).toBeNull();
     });

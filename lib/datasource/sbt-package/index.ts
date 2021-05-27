@@ -1,5 +1,6 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import { ensureTrailingSlash, parseUrl } from '../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
@@ -13,15 +14,13 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
-const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
-
 export async function getArtifactSubdirs(
   searchRoot: string,
   artifact: string,
   scalaVersion: string
 ): Promise<string[]> {
   const { body: indexContent } = await downloadHttpProtocol(
-    ensureTrailingSlash(searchRoot),
+    parseUrl(ensureTrailingSlash(searchRoot)),
     'sbt'
   );
   if (indexContent) {
@@ -61,7 +60,7 @@ export async function getPackageReleases(
       parseIndexDir(content, (x) => !/^\.+$/.test(x));
     for (const searchSubdir of artifactSubdirs) {
       const { body: content } = await downloadHttpProtocol(
-        ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
+        parseUrl(ensureTrailingSlash(`${searchRoot}/${searchSubdir}`)),
         'sbt'
       );
       if (content) {
@@ -110,7 +109,10 @@ export async function getUrls(
 
     for (const pomFileName of pomFileNames) {
       const pomUrl = `${searchRoot}/${artifactDir}/${version}/${pomFileName}`;
-      const { body: content } = await downloadHttpProtocol(pomUrl, 'sbt');
+      const { body: content } = await downloadHttpProtocol(
+        parseUrl(pomUrl),
+        'sbt'
+      );
 
       if (content) {
         const pomXml = new XmlDocument(content);

@@ -1,4 +1,3 @@
-import { Url } from 'url';
 import is from '@sindresorhus/is';
 import { parse as parseGraphqlQuery } from 'graphql/language';
 import nock from 'nock';
@@ -13,7 +12,7 @@ interface RequestLogItem {
   graphql?: any;
 }
 
-type BasePath = string | RegExp | Url;
+type BasePath = string | RegExp;
 
 let requestLog: RequestLogItem[] = [];
 let missingLog: string[] = [];

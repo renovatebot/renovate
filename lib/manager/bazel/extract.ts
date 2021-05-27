@@ -1,5 +1,4 @@
 /* eslint no-plusplus: 0  */
-import { parse as _parse } from 'url';
 import parse from 'github-url-from-git';
 import moo from 'moo';
 import * as datasourceDocker from '../../datasource/docker';
@@ -8,6 +7,7 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { parseUrl as _parse } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 import type { UrlParsedResult } from './types';
@@ -18,10 +18,10 @@ function parseUrl(urlString: string): UrlParsedResult | null {
     return null;
   }
   const url = _parse(urlString);
-  if (url.host !== 'github.com') {
+  if (url?.host !== 'github.com') {
     return null;
   }
-  const path = url.path.split('/').slice(1);
+  const path = url.pathname.split('/').slice(1);
   const repo = path[0] + '/' + path[1];
   let datasource: string;
   let currentValue: string = null;

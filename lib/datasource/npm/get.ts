@@ -1,9 +1,9 @@
-import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http, HttpOptions } from '../../util/http';
+import { parseUrl } from '../../util/url';
 import { id } from './common';
 import { resolvePackage } from './npmrc';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
@@ -45,9 +45,9 @@ export async function getDependency(
     return cachedResult;
   }
 
-  const uri = url.parse(packageUrl);
+  const uri = parseUrl(packageUrl);
 
-  if (uri.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
+  if (uri?.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
     // Delete the authorization header for non-scoped public packages to improve http caching
     // Otherwise, authenticated requests are not cacheable until the registry adds "public" to Cache-Control
     // Ref: https://greenbytes.de/tech/webdav/rfc7234.html#caching.authenticated.responses

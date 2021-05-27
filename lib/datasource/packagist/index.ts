@@ -1,4 +1,3 @@
-import URL from 'url';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -6,6 +5,7 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
+import { ensureTrailingSlash, resolveUrl } from '../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
@@ -38,7 +38,7 @@ function getHostOpts(url: string): HttpOptions {
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-  const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
+  const url = resolveUrl(ensureTrailingSlash(regUrl), 'packages.json');
   const opts = getHostOpts(url);
   const res = (await http.getJson<PackageMeta>(url, opts)).body;
   const meta: RegistryMeta = {
@@ -199,7 +199,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   }
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
-  const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
+  const pkgUrl = resolveUrl(regUrl, `/p/${name}.json`);
   // TODO: fix types (#9610)
   const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
@@ -235,16 +235,16 @@ async function packageLookup(
     if (includesPackages?.[name]) {
       return includesPackages[name];
     }
-    let pkgUrl;
+    let pkgUrl: string;
     if (providerPackages?.[name]) {
-      pkgUrl = URL.resolve(
+      pkgUrl = resolveUrl(
         regUrl,
         providersUrl
           .replace('%package%', name)
           .replace('%hash%', providerPackages[name])
       );
     } else if (providersLazyUrl) {
-      pkgUrl = URL.resolve(regUrl, providersLazyUrl.replace('%package%', name));
+      pkgUrl = resolveUrl(regUrl, providersLazyUrl.replace('%package%', name));
     } else {
       return null;
     }

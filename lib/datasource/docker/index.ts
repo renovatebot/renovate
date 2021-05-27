@@ -1,8 +1,8 @@
-import URL from 'url';
 import parseLinkHeader from 'parse-link-header';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
+import { resolveUrl } from '../../util/url';
 import * as dockerVersioning from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
@@ -73,7 +73,7 @@ async function getDockerApiTags(
     const res = await http.getJson<{ tags: string[] }>(url, { headers });
     tags = tags.concat(res.body.tags);
     const linkHeader = parseLinkHeader(res.headers.link as string);
-    url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+    url = linkHeader?.next ? resolveUrl(url, linkHeader.next.url) : null;
     page += 1;
   } while (url && page < 20);
   return tags;

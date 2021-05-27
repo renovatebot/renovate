@@ -1,10 +1,10 @@
-import URL from 'url';
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
+import { ensureTrailingSlash, resolveUrl } from '../../util/url';
 import type { ManagerConfig, PackageFile } from '../types';
 import { GitModule } from './types';
 
@@ -28,7 +28,7 @@ async function getUrl(
   const remoteUrl = (
     await git.raw(['config', '--get', 'remote.origin.url'])
   ).trim();
-  return URL.resolve(`${remoteUrl}/`, path);
+  return resolveUrl(ensureTrailingSlash(remoteUrl), path);
 }
 
 const headRefRe = /ref: refs\/heads\/(?<branch>\w+)\s/;
