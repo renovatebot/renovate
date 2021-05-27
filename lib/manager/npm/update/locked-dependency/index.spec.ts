@@ -17,7 +17,6 @@ describe(getName(), () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
     beforeEach(() => {
-      httpMock.setup();
       config = {
         packageFile: 'package.json',
         packageFileContent,
@@ -28,9 +27,7 @@ describe(getName(), () => {
         newVersion: '1.0.1',
       };
     });
-    afterEach(() => {
-      httpMock.reset();
-    });
+
     it('validates filename', async () => {
       expect(
         await updateLockedDependency({ ...config, lockFile: 'yarn.lock' })
@@ -116,14 +113,6 @@ describe(getName(), () => {
       config.newVersion = '1.4.1';
       httpMock
         .scope('https://registry.npmjs.org')
-        .get('/accepts')
-        .reply(200, acceptsJson);
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
-      httpMock
-        .scope('https://registry.npmjs.org')
         .get('/mime')
         .reply(200, mimeJson);
       httpMock
@@ -142,6 +131,7 @@ describe(getName(), () => {
       const packageLock = JSON.parse(res['package-lock.json']);
       expect(packageLock.dependencies.mime.version).toEqual('1.4.1');
       expect(packageLock.dependencies.express.version).toEqual('4.16.0');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

@@ -1,4 +1,5 @@
 import { Url } from 'url';
+import { afterAll, afterEach, beforeAll } from '@jest/globals';
 import is from '@sindresorhus/is';
 import { parse as parseGraphqlQuery } from 'graphql/language';
 import nock from 'nock';
@@ -95,28 +96,24 @@ function onMissing(req: TestRequest, opts?: TestRequest): void {
   }
 }
 
-export function setup(): void {
-  if (!nock.isActive()) {
-    nock.activate();
-  }
-  nock.disableNetConnect();
-  nock.emitter.on('no match', onMissing);
+export function allUsed(): boolean {
+  return nock.isDone();
 }
 
-export function reset(): void {
-  nock.emitter.removeListener('no match', onMissing);
+/**
+ *  Clear nock state. Will be called in `afterEach`
+ *  @argument throwOnPending Use `false` to simply clear mocks.
+ */
+export function clear(throwOnPending = true): void {
+  const isDone = nock.isDone();
+  const pending = nock.pendingMocks();
   nock.abortPendingRequests();
-  if (nock.isActive()) {
-    nock.restore();
-  }
   nock.cleanAll();
   requestLog = [];
   missingLog = [];
-  nock.enableNetConnect();
-}
-
-export function allUsed(): boolean {
-  return nock.isDone();
+  if (!isDone && throwOnPending) {
+    throw new Error(`Pending mocks!\n * ${pending.join('\n * ')}`);
+  }
 }
 
 export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
@@ -162,3 +159,20 @@ export function getTrace(): RequestLogItem[] /* istanbul ignore next */ {
   }
   return requestLog;
 }
+
+// init nock
+beforeAll(() => {
+  nock.emitter.on('no match', onMissing);
+  nock.disableNetConnect();
+});
+
+// clean nock to clear memory leack from http module patching
+afterAll(() => {
+  nock.emitter.removeListener('no match', onMissing);
+  nock.restore();
+});
+
+// clear nock state
+afterEach(() => {
+  clear();
+});

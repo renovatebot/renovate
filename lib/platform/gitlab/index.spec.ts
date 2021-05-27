@@ -43,11 +43,6 @@ describe(getName(), () => {
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
-    httpMock.reset();
-    httpMock.setup();
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   async function initFakePlatform(version: string) {
