@@ -118,7 +118,7 @@ async function filterMissingArtifacts(
       .filter(([_, artifactUrl]) => Boolean(artifactUrl))
       .map(
         ([version, artifactUrl]) =>
-          async () =>
+          async (): Promise<ArtifactInfoResult> =>
             [version, await isHttpResourceExists(artifactUrl)]
       );
     const results = await pAll(queue, { concurrency: 5 });
