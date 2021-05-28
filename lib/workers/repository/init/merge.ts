@@ -23,8 +23,8 @@ import type { RepoFileConfig } from './types';
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
-    for (const configFileName of configFileNames) {
-      if (configFileName === 'package.json') {
+    for (const fileName of configFileNames) {
+      if (fileName === 'package.json') {
         try {
           const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
           if (pJson.renovate) {
@@ -34,8 +34,8 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         } catch (err) {
           // Do nothing
         }
-      } else if (fileList.includes(configFileName)) {
-        return configFileName;
+      } else if (fileList.includes(fileName)) {
+        return fileName;
       }
     }
     return null;
