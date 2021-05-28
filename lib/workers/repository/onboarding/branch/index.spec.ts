@@ -14,7 +14,7 @@ import {
 } from '../../../../constants/error-messages';
 import { Pr } from '../../../../platform';
 import { PrState } from '../../../../types';
-import * as cache_ from '../../../../util/cache/repository';
+import * as _cache from '../../../../util/cache/repository';
 import * as _config from './config';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
@@ -28,7 +28,7 @@ jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('./config');
 
-const cache = mocked(cache_);
+const cache = mocked(_cache);
 
 describe(getName(), () => {
   describe('checkOnboardingBranch', () => {
@@ -116,18 +116,21 @@ describe(getName(), () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
+
     it('handles removed cached file name', async () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
+
     it('handles cached file name', async () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
+
     it('detects repo is onboarded via package.json config', async () => {
       git.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');

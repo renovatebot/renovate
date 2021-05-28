@@ -38,6 +38,7 @@ describe(getName(), () => {
     beforeEach(async () => {
       await initialize({});
     });
+
     it('returns config if not found', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
