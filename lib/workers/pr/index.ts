@@ -128,13 +128,11 @@ export function getPlatformPrOptions(
 
 export type ResultWithPr = {
   pr: Pr;
-  prAction?: 'created' | 'updated';
   prBlockedBy?: never;
 };
 
 export type ResultWithoutPr = {
   pr?: never;
-  prAction?: never;
   prBlockedBy: PrBlockedBy;
 };
 
@@ -393,7 +391,6 @@ export async function ensurePr(
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
       return {
-        prAction: 'updated',
         pr: existingPr,
       };
     }
@@ -492,7 +489,7 @@ export async function ensurePr(
       await addAssigneesReviewers(config, pr);
     }
     logger.debug(`Created ${pr.displayNumber}`);
-    return { prAction: 'created', pr };
+    return { pr };
   } catch (err) {
     // istanbul ignore if
     if (
