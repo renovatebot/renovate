@@ -5,9 +5,11 @@ import {
   getName,
   git,
   mocked,
+  platform,
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
+import { initialize } from '../../../util/cache/repository';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
@@ -33,6 +35,9 @@ jest.mock('../../../config/migrate-validate');
 
 describe(getName(), () => {
   describe('detectRepoFileConfig()', () => {
+    beforeEach(async () => {
+      await initialize({});
+    });
     it('returns config if not found', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
@@ -87,6 +92,8 @@ describe(getName(), () => {
     it('finds .renovaterc.json', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
+      platform.getJsonFile.mockResolvedValueOnce('{"something":"new"}');
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
       expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
   });

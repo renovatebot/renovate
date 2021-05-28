@@ -5,6 +5,7 @@ import {
   getConfig,
   getName,
   git,
+  mocked,
   platform,
 } from '../../../../../test/util';
 import {
@@ -13,6 +14,7 @@ import {
 } from '../../../../constants/error-messages';
 import { Pr } from '../../../../platform';
 import { PrState } from '../../../../types';
+import * as cache_ from '../../../../util/cache/repository';
 import * as _config from './config';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
@@ -21,9 +23,12 @@ const rebase: any = _rebase;
 const configModule: any = _config;
 
 jest.mock('../../../../workers/repository/onboarding/branch/rebase');
+jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('./config');
+
+const cache = mocked(cache_);
 
 describe(getName(), () => {
   describe('checkOnboardingBranch', () => {
@@ -33,6 +38,7 @@ describe(getName(), () => {
       config = getConfig();
       config.repository = 'some/repo';
       git.getFileList.mockResolvedValue([]);
+      cache.getCache.mockReturnValue({});
     });
     it('throws if no package files', async () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow(
@@ -107,6 +113,18 @@ describe(getName(), () => {
     });
     it('detects repo is onboarded via file', async () => {
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
+    it('handles removed cached file name', async () => {
+      cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
+      git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
+    it('handles cached file name', async () => {
+      cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
+      platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
