@@ -506,5 +506,6 @@ export async function ensurePr(
   if (existingPr) {
     return { pr: existingPr };
   }
+  // istanbul ignore next
   return { prBlockedBy: PrBlockedBy.Error };
 }
