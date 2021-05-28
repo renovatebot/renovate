@@ -30,7 +30,7 @@ import {
 import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
-import { BranchConfig, BranchResult, PrResult } from '../types';
+import { BranchConfig, BranchResult, PrBlockedBy } from '../types';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
@@ -482,18 +482,21 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prResult: result, pr } = await ensurePr(config);
-    if (result === PrResult.LimitReached && !config.isVulnerabilityAlert) {
+    const { prBlockedBy, pr } = await ensurePr(config);
+    if (
+      prBlockedBy === PrBlockedBy.RateLimited &&
+      !config.isVulnerabilityAlert
+    ) {
       logger.debug('Reached PR limit - skipping PR creation');
       return { branchExists, result: BranchResult.PrLimitReached };
     }
     // TODO: ensurePr should check for automerge itself (#9719)
-    if (result === PrResult.AwaitingApproval) {
+    if (prBlockedBy === PrBlockedBy.NeedsPrApproval) {
       return { branchExists, result: BranchResult.NeedsPrApproval };
     }
     if (
-      result === PrResult.AwaitingGreenBranch ||
-      result === PrResult.AwaitingNotPending
+      prBlockedBy === PrBlockedBy.AwaitingPassingTests ||
+      prBlockedBy === PrBlockedBy.AwaitingTestCompletion
     ) {
       return { branchExists, result: BranchResult.Pending };
     }

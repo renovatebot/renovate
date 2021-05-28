@@ -24,7 +24,7 @@ import type { EnsurePrResult } from '../pr';
 import * as _prAutomerge from '../pr/automerge';
 import type { Pr } from '../repository/onboarding/branch/check';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import { PrResult } from '../types';
+import { PrBlockedBy } from '../types';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
@@ -89,7 +89,6 @@ describe(getName(), () => {
 
       platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
-        prResult: PrResult.Created,
         pr: {
           title: '',
           sourceBranch: '',
@@ -297,7 +296,7 @@ describe(getName(), () => {
       });
       git.branchExists.mockReturnValue(true);
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.LimitReached,
+        prBlockedBy: PrBlockedBy.RateLimited,
       });
       limits.isLimitReached.mockReturnValue(false);
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
@@ -403,7 +402,7 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.AwaitingApproval,
+        prBlockedBy: PrBlockedBy.NeedsPrApproval,
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
@@ -420,7 +419,7 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.AwaitingNotPending,
+        prBlockedBy: PrBlockedBy.AwaitingTestCompletion,
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
@@ -455,7 +454,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -476,7 +474,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
@@ -501,7 +498,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -522,7 +518,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -544,7 +539,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -566,7 +560,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -587,7 +580,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -698,7 +690,6 @@ describe(getName(), () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);

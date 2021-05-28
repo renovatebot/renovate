@@ -66,17 +66,13 @@ export interface BranchUpgradeConfig
   sourceUrl?: string;
 }
 
-export enum PrResult {
-  AwaitingApproval = 'AwaitingApproval',
-  AwaitingGreenBranch = 'AwaitingGreenBranch',
-  AwaitingNotPending = 'AwaitingNotPending',
-  BlockedByBranchAutomerge = 'BlockedByBranchAutomerge',
-  Created = 'Created',
-  Error = 'Error',
-  ErrorAlreadyExists = 'ErrorAlreadyExists',
-  NotUpdated = 'NotUpdated',
-  Updated = 'Updated',
-  LimitReached = 'LimitReached',
+export enum PrBlockedBy {
+  PendingBranchAutomerge = 'Pending Branch Automerge',
+  NeedsPrApproval = 'Needs Dashboard Approval for PR Creation',
+  AwaitingPassingTests = 'Awaiting Passing Tests Before PR Creation',
+  AwaitingTestCompletion = 'Awaiting Test Completion Before PR Creation',
+  RateLimited = 'PR Creation Blocked by Rate Limits',
+  Error = 'Error Creating PR',
 }
 
 export enum BranchResult {
