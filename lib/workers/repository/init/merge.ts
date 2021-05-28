@@ -15,12 +15,24 @@ import {
 } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { RepoFileConfig } from './types';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
+  const cache = getCache();
+  let { configFileName } = cache;
+  if (configFileName) {
+    const configFileParsed = await platform.getJsonFile(configFileName);
+    if (configFileParsed) {
+      logger.debug('Existing config file confirmed');
+      return { configFileName, configFileParsed };
+    }
+    logger.debug('Existing config file no longer exists');
+  }
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
@@ -40,11 +52,12 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     return null;
   }
-  const configFileName = await detectConfigFile();
+  configFileName = await detectConfigFile();
   if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
   }
+  cache.configFileName = configFileName;
   logger.debug(`Found ${configFileName} config file`);
   let configFileParsed;
   if (configFileName === 'package.json') {
