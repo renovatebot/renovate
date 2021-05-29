@@ -23,9 +23,12 @@ try {
   logger.debug({ err }, 'Error getting renovate version');
 }
 
+const MAX_AUTOMERGE_RETRIES = 5;
+
 // istanbul ignore next
 export async function renovateRepository(
-  repoConfig: RenovateConfig
+  repoConfig: RenovateConfig,
+  remaining = MAX_AUTOMERGE_RETRIES
 ): Promise<ProcessResult> {
   splitInit();
   let config = setAdminConfig(repoConfig);
@@ -47,7 +50,17 @@ export async function renovateRepository(
     const res = await updateRepo(config, branches);
     addSplit('update');
     await setBranchCache(branches);
-    if (res !== 'automerged') {
+    if (res === 'automerged') {
+      if (remaining > 0) {
+        logger.info('Renovating repository again after automerge result');
+        const recursiveRes = await renovateRepository(
+          repoConfig,
+          remaining - 1
+        );
+        return recursiveRes;
+      }
+      logger.debug(`Used up ${MAX_AUTOMERGE_RETRIES} automerge runs`);
+    } else {
       await ensureMasterIssue(config, branches);
     }
     await finaliseRepo(config, branchList);
