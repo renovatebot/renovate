@@ -541,15 +541,6 @@ function autoExtendMavenRange(
     interval.leftValue = coerceRangeValue(leftValue, newValue);
   }
 
-  // istanbul ignore if
-  if (
-    interval.leftValue &&
-    interval.rightValue &&
-    compare(interval.leftValue, interval.rightValue) === 1
-  ) {
-    return currentRepresentation;
-  }
-
   return rangeToStr(range);
 }
 
