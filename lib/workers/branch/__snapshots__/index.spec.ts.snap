@@ -88,7 +88,7 @@ Object {
 exports[`workers/branch/index processBranch returns if PR creation failed 1`] = `
 Object {
   "branchExists": true,
-  "prBlockedBy": "Error Creating PR",
+  "prBlockedBy": "Error",
   "result": "error",
 }
 `;
@@ -96,7 +96,7 @@ Object {
 exports[`workers/branch/index processBranch returns if branch automerge is pending 1`] = `
 Object {
   "branchExists": true,
-  "prBlockedBy": "Pending Branch Automerge",
+  "prBlockedBy": "BranchAutomerge",
   "result": "done",
 }
 `;
@@ -111,7 +111,7 @@ Object {
 exports[`workers/branch/index processBranch returns if branch exists and prCreation set to approval 1`] = `
 Object {
   "branchExists": true,
-  "prBlockedBy": "Needs Dashboard Approval",
+  "prBlockedBy": "NeedsApproval",
   "result": "needs-pr-approval",
 }
 `;
@@ -119,7 +119,7 @@ Object {
 exports[`workers/branch/index processBranch returns if branch exists but pending 1`] = `
 Object {
   "branchExists": true,
-  "prBlockedBy": "Awaiting Tests",
+  "prBlockedBy": "AwaitingTests",
   "result": "pending",
 }
 `;
@@ -155,7 +155,7 @@ Object {
 exports[`workers/branch/index processBranch returns if pr creation limit exceeded and branch exists 1`] = `
 Object {
   "branchExists": true,
-  "prBlockedBy": "Rate Limits",
+  "prBlockedBy": "RateLimited",
   "result": "pr-limit-reached",
 }
 `;

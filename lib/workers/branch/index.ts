@@ -485,10 +485,7 @@ export async function processBranch(
     );
     const { prBlockedBy, pr } = await ensurePr(config);
     if (prBlockedBy) {
-      if (
-        prBlockedBy === PrBlockedBy.RateLimited &&
-        !config.isVulnerabilityAlert
-      ) {
+      if (prBlockedBy === 'RateLimited' && !config.isVulnerabilityAlert) {
         logger.debug('Reached PR limit - skipping PR creation');
         return {
           branchExists,
@@ -497,24 +494,24 @@ export async function processBranch(
         };
       }
       // TODO: ensurePr should check for automerge itself (#9719)
-      if (prBlockedBy === PrBlockedBy.NeedsApproval) {
+      if (prBlockedBy === 'NeedsApproval') {
         return {
           branchExists,
           prBlockedBy,
           result: BranchResult.NeedsPrApproval,
         };
       }
-      if (prBlockedBy === PrBlockedBy.AwaitingTests) {
+      if (prBlockedBy === 'AwaitingTests') {
         return { branchExists, prBlockedBy, result: BranchResult.Pending };
       }
-      if (prBlockedBy === PrBlockedBy.BranchAutomerge) {
+      if (prBlockedBy === 'BranchAutomerge') {
         return {
           branchExists,
           prBlockedBy,
           result: BranchResult.Done,
         };
       }
-      if (prBlockedBy === PrBlockedBy.Error) {
+      if (prBlockedBy === 'Error') {
         return { branchExists, prBlockedBy, result: BranchResult.Error };
       }
       logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');

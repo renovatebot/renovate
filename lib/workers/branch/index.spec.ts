@@ -24,7 +24,6 @@ import type { EnsurePrResult } from '../pr';
 import * as _prAutomerge from '../pr/automerge';
 import type { Pr } from '../repository/onboarding/branch/check';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import { PrBlockedBy } from '../types';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
@@ -296,7 +295,7 @@ describe(getName(), () => {
       });
       git.branchExists.mockReturnValue(true);
       prWorker.ensurePr.mockResolvedValueOnce({
-        prBlockedBy: PrBlockedBy.RateLimited,
+        prBlockedBy: 'RateLimited',
       });
       limits.isLimitReached.mockReturnValue(false);
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
@@ -402,7 +401,7 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prBlockedBy: PrBlockedBy.NeedsApproval,
+        prBlockedBy: 'NeedsApproval',
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
@@ -419,7 +418,7 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prBlockedBy: PrBlockedBy.AwaitingTests,
+        prBlockedBy: 'AwaitingTests',
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
@@ -436,7 +435,7 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('no automerge');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prBlockedBy: PrBlockedBy.BranchAutomerge,
+        prBlockedBy: 'BranchAutomerge',
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
@@ -453,7 +452,7 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prBlockedBy: PrBlockedBy.Error,
+        prBlockedBy: 'Error',
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });

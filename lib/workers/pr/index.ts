@@ -203,7 +203,7 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { prBlockedBy: PrBlockedBy.BranchAutomerge };
+      return { prBlockedBy: 'BranchAutomerge' };
     }
   }
   if (config.prCreation === 'status-success') {
@@ -212,7 +212,7 @@ export async function ensurePr(
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return { prBlockedBy: PrBlockedBy.AwaitingTests };
+      return { prBlockedBy: 'AwaitingTests' };
     }
     logger.debug('Branch status success');
   } else if (
@@ -220,7 +220,7 @@ export async function ensurePr(
     !existingPr &&
     dependencyDashboardCheck !== 'approvePr'
   ) {
-    return { prBlockedBy: PrBlockedBy.NeedsApproval };
+    return { prBlockedBy: 'NeedsApproval' };
   } else if (
     config.prCreation === 'not-pending' &&
     !existingPr &&
@@ -247,7 +247,7 @@ export async function ensurePr(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
         return {
-          prBlockedBy: PrBlockedBy.AwaitingTests,
+          prBlockedBy: 'AwaitingTests',
         };
       }
       const prNotPendingHours = String(config.prNotPendingHours);
@@ -412,7 +412,7 @@ export async function ensurePr(
           !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
-          return { prBlockedBy: PrBlockedBy.RateLimited };
+          return { prBlockedBy: 'RateLimited' };
         }
         pr = await platform.createPr({
           sourceBranch: branchName,
@@ -438,7 +438,7 @@ export async function ensurePr(
         )
       ) {
         logger.warn('A pull requests already exists');
-        return { prBlockedBy: PrBlockedBy.Error };
+        return { prBlockedBy: 'Error' };
       }
       if (err.statusCode === 502) {
         logger.warn(
@@ -451,7 +451,7 @@ export async function ensurePr(
           await deleteBranch(branchName);
         }
       }
-      return { prBlockedBy: PrBlockedBy.Error };
+      return { prBlockedBy: 'Error' };
     }
     if (
       config.branchAutomergeFailureMessage &&
@@ -507,5 +507,5 @@ export async function ensurePr(
     return { pr: existingPr };
   }
   // istanbul ignore next
-  return { prBlockedBy: PrBlockedBy.Error };
+  return { prBlockedBy: 'Error' };
 }

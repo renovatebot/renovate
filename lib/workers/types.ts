@@ -66,13 +66,12 @@ export interface BranchUpgradeConfig
   sourceUrl?: string;
 }
 
-export enum PrBlockedBy {
-  BranchAutomerge = 'Pending Branch Automerge',
-  NeedsApproval = 'Needs Dashboard Approval',
-  AwaitingTests = 'Awaiting Tests',
-  RateLimited = 'Rate Limits',
-  Error = 'Error Creating PR',
-}
+export type PrBlockedBy =
+  | 'BranchAutomerge'
+  | 'NeedsApproval'
+  | 'AwaitingTests'
+  | 'RateLimited'
+  | 'Error';
 
 export enum BranchResult {
   AlreadyExisted = 'already-existed',
