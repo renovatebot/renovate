@@ -53,6 +53,8 @@ describe(getName(), () => {
         },
       });
       fs.readLocalFile.mockResolvedValue(pJson);
+      platform.getJsonFile.mockResolvedValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
       expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
     it('returns error if cannot parse', async () => {

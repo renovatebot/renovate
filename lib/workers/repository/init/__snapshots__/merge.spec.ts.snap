@@ -66,4 +66,11 @@ Object {
 }
 `;
 
+exports[`workers/repository/init/merge detectRepoFileConfig() uses package.json config if found 2`] = `
+Object {
+  "configFileName": "package.json",
+  "configFileParsed": undefined,
+}
+`;
+
 exports[`workers/repository/init/merge mergeRenovateConfig() throws error if misconfigured 1`] = `[Error: config-validation]`;
