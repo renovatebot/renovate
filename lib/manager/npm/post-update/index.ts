@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { parseSyml } from '@yarnpkg/parsers';
 import deepmerge from 'deepmerge';
-import { safeDump, safeLoad } from 'js-yaml';
+import { dump, load } from 'js-yaml';
 import upath from 'upath';
 import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -543,12 +543,15 @@ export async function getAdditionalFiles(
       existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
       if (existingYarnrcYmlContent) {
         try {
-          const existingYarnrRcYml = safeLoad(existingYarnrcYmlContent);
+          const existingYarnrRcYml = load(existingYarnrcYmlContent) as Record<
+            string,
+            unknown
+          >;
           const updatedYarnYrcYml = deepmerge(
             existingYarnrRcYml,
             additionalYarnRcYml
           );
-          await writeLocalFile(yarnRcYmlFilename, safeDump(updatedYarnYrcYml));
+          await writeLocalFile(yarnRcYmlFilename, dump(updatedYarnYrcYml));
           logger.debug('Added authentication to .yarnrc.yml');
         } catch (err) {
           logger.warn({ err }, 'Error appending .yarnrc.yml content');

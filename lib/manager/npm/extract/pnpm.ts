@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import {
   findLocalSiblingOrParent,
@@ -15,7 +15,7 @@ export async function extractPnpmFilters(
   fileName: string
 ): Promise<string[] | null> {
   try {
-    const contents = safeLoad(await readLocalFile(fileName, 'utf8'), {
+    const contents = load(await readLocalFile(fileName, 'utf8'), {
       json: true,
     }) as PnpmWorkspaceFile;
     if (

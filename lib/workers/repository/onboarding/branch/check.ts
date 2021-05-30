@@ -7,6 +7,7 @@ import {
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
 import { PrState } from '../../../../types';
+import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 
@@ -56,6 +57,28 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   if (config.requireConfig === false && config.onboarding === false) {
     // Return early and avoid checking for config files
     return true;
+  }
+  const cache = getCache();
+  if (cache.configFileName) {
+    logger.debug('Checking cached config file name');
+    try {
+      const configFileContent = await platform.getJsonFile(
+        cache.configFileName
+      );
+      if (configFileContent) {
+        if (
+          cache.configFileName !== 'package.json' ||
+          configFileContent.renovate
+        ) {
+          logger.debug('Existing config file confirmed');
+          return true;
+        }
+      }
+    } catch (err) {
+      // probably file doesn't exist
+    }
+    logger.debug('Existing config file no longer exists');
+    delete cache.configFileName;
   }
   if (await configFileExists()) {
     await platform.ensureIssueClosing(title);

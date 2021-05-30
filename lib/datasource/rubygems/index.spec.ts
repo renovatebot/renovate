@@ -25,13 +25,11 @@ describe(getName(), () => {
 
     beforeEach(() => {
       resetCache();
-      httpMock.setup();
       process.env.RENOVATE_SKIP_CACHE = 'true';
       jest.resetAllMocks();
     });
 
     afterEach(() => {
-      httpMock.reset();
       process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 

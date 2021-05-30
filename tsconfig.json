@@ -12,7 +12,7 @@
     "resolveJsonModule": false,
     "noUnusedLocals": true,
     "lib": ["es2018"],
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "jest-extended"],
     "allowJs": true,
     "checkJs": true
   },

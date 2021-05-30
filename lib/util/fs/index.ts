@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
 import { getAdminConfig } from '../../config/admin';
@@ -65,7 +66,9 @@ export async function renameLocalFile(
 
 // istanbul ignore next
 export async function ensureDir(dirName: string): Promise<void> {
-  await fs.ensureDir(dirName);
+  if (is.nonEmptyString(dirName)) {
+    await fs.ensureDir(dirName);
+  }
 }
 
 // istanbul ignore next
