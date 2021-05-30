@@ -131,6 +131,14 @@ describe(getName(), () => {
       expect(res.repoIsOnboarded).toBe(true);
     });
 
+    it('handles cached package.json', async () => {
+      cache.getCache.mockReturnValue({ configFileName: 'package.json' });
+      platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
+
     it('detects repo is onboarded via package.json config', async () => {
       git.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');
