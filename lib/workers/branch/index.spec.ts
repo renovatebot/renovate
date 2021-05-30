@@ -402,7 +402,7 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prBlockedBy: PrBlockedBy.NeedsPrApproval,
+        prBlockedBy: PrBlockedBy.NeedsApproval,
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
@@ -419,7 +419,7 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prBlockedBy: PrBlockedBy.AwaitingTestCompletion,
+        prBlockedBy: PrBlockedBy.AwaitingTests,
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });

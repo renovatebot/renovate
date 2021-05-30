@@ -491,13 +491,10 @@ export async function processBranch(
       return { branchExists, result: BranchResult.PrLimitReached };
     }
     // TODO: ensurePr should check for automerge itself (#9719)
-    if (prBlockedBy === PrBlockedBy.NeedsPrApproval) {
+    if (prBlockedBy === PrBlockedBy.NeedsApproval) {
       return { branchExists, result: BranchResult.NeedsPrApproval };
     }
-    if (
-      prBlockedBy === PrBlockedBy.AwaitingPassingTests ||
-      prBlockedBy === PrBlockedBy.AwaitingTestCompletion
-    ) {
+    if (prBlockedBy === PrBlockedBy.AwaitingTests) {
       return { branchExists, result: BranchResult.Pending };
     }
     if (pr) {

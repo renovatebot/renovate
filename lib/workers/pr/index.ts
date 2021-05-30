@@ -203,7 +203,7 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { prBlockedBy: PrBlockedBy.PendingBranchAutomerge };
+      return { prBlockedBy: PrBlockedBy.BranchAutomerge };
     }
   }
   if (config.prCreation === 'status-success') {
@@ -212,7 +212,7 @@ export async function ensurePr(
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return { prBlockedBy: PrBlockedBy.AwaitingPassingTests };
+      return { prBlockedBy: PrBlockedBy.AwaitingTests };
     }
     logger.debug('Branch status success');
   } else if (
@@ -220,7 +220,7 @@ export async function ensurePr(
     !existingPr &&
     dependencyDashboardCheck !== 'approvePr'
   ) {
-    return { prBlockedBy: PrBlockedBy.NeedsPrApproval };
+    return { prBlockedBy: PrBlockedBy.NeedsApproval };
   } else if (
     config.prCreation === 'not-pending' &&
     !existingPr &&
@@ -247,7 +247,7 @@ export async function ensurePr(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
         return {
-          prBlockedBy: PrBlockedBy.AwaitingTestCompletion,
+          prBlockedBy: PrBlockedBy.AwaitingTests,
         };
       }
       const prNotPendingHours = String(config.prNotPendingHours);

@@ -67,11 +67,10 @@ export interface BranchUpgradeConfig
 }
 
 export enum PrBlockedBy {
-  PendingBranchAutomerge = 'Pending Branch Automerge',
-  NeedsPrApproval = 'Needs Dashboard Approval for PR Creation',
-  AwaitingPassingTests = 'Awaiting Passing Tests Before PR Creation',
-  AwaitingTestCompletion = 'Awaiting Test Completion Before PR Creation',
-  RateLimited = 'PR Creation Blocked by Rate Limits',
+  BranchAutomerge = 'Pending Branch Automerge',
+  NeedsApproval = 'Needs Dashboard Approval',
+  AwaitingTests = 'Awaiting Tests',
+  RateLimited = 'Rate Limits',
   Error = 'Error Creating PR',
 }
 
