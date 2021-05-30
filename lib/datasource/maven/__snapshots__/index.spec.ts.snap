@@ -810,43 +810,6 @@ Array [
 ]
 `;
 
-exports[`datasource/maven/index supports file protocol 1`] = `
-Object {
-  "display": "org.example:package",
-  "group": "org.example",
-  "homepage": "https://package.example.org/about",
-  "name": "package",
-  "registryUrl": "file:///bar",
-  "releases": Array [
-    Object {
-      "version": "1.0.0",
-    },
-    Object {
-      "version": "1.0.1",
-    },
-    Object {
-      "version": "1.0.2",
-    },
-    Object {
-      "version": "2.0.0",
-    },
-  ],
-}
-`;
-
-exports[`datasource/maven/index supports file protocol 2`] = `
-Array [
-  Array [
-    "/bar/org/example/package/maven-metadata.xml",
-    "utf8",
-  ],
-  Array [
-    "/bar/org/example/package/2.0.0/package-2.0.0.pom",
-    "utf8",
-  ],
-]
-`;
-
 exports[`datasource/maven/index throws EXTERNAL_HOST_ERROR for 50x 1`] = `
 Array [
   Object {
