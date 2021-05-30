@@ -423,6 +423,57 @@ describe(getName(), () => {
       });
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
+    it('returns if branch automerge is pending', async () => {
+      expect.assertions(1);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('no automerge');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prBlockedBy: PrBlockedBy.BranchAutomerge,
+      });
+      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+    });
+    it('returns if PR creation failed', async () => {
+      expect.assertions(1);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prBlockedBy: PrBlockedBy.Error,
+      });
+      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+    });
+    it('handles unknown PrBlockedBy', async () => {
+      expect.assertions(1);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prBlockedBy: 'whoops' as any,
+      });
+      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+    });
     it('returns if branch exists but updated', async () => {
       expect.assertions(3);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({

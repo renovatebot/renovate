@@ -63,6 +63,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 
 export interface ProcessBranchResult {
   branchExists: boolean;
+  prBlockedBy?: PrBlockedBy;
   result: BranchResult;
 }
 
@@ -483,19 +484,41 @@ export async function processBranch(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
     const { prBlockedBy, pr } = await ensurePr(config);
-    if (
-      prBlockedBy === PrBlockedBy.RateLimited &&
-      !config.isVulnerabilityAlert
-    ) {
-      logger.debug('Reached PR limit - skipping PR creation');
-      return { branchExists, result: BranchResult.PrLimitReached };
-    }
-    // TODO: ensurePr should check for automerge itself (#9719)
-    if (prBlockedBy === PrBlockedBy.NeedsApproval) {
-      return { branchExists, result: BranchResult.NeedsPrApproval };
-    }
-    if (prBlockedBy === PrBlockedBy.AwaitingTests) {
-      return { branchExists, result: BranchResult.Pending };
+    if (prBlockedBy) {
+      if (
+        prBlockedBy === PrBlockedBy.RateLimited &&
+        !config.isVulnerabilityAlert
+      ) {
+        logger.debug('Reached PR limit - skipping PR creation');
+        return {
+          branchExists,
+          prBlockedBy,
+          result: BranchResult.PrLimitReached,
+        };
+      }
+      // TODO: ensurePr should check for automerge itself (#9719)
+      if (prBlockedBy === PrBlockedBy.NeedsApproval) {
+        return {
+          branchExists,
+          prBlockedBy,
+          result: BranchResult.NeedsPrApproval,
+        };
+      }
+      if (prBlockedBy === PrBlockedBy.AwaitingTests) {
+        return { branchExists, prBlockedBy, result: BranchResult.Pending };
+      }
+      if (prBlockedBy === PrBlockedBy.BranchAutomerge) {
+        return {
+          branchExists,
+          prBlockedBy,
+          result: BranchResult.Done,
+        };
+      }
+      if (prBlockedBy === PrBlockedBy.Error) {
+        return { branchExists, prBlockedBy, result: BranchResult.Error };
+      }
+      logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
+      return { branchExists, prBlockedBy, result: BranchResult.Error };
     }
     if (pr) {
       if (config.artifactErrors?.length) {
