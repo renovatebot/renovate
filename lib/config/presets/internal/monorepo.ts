@@ -3,12 +3,12 @@ import type { Preset } from '../types';
 
 const repoGroups = {
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
-  'arcus event-grid': 'https://github.com/arcus-azure/arcus.eventgrid',
-  'arcus security': 'https://github.com/arcus-azure/arcus.security',
-  'arcus messaging': 'https://github.com/arcus-azure/arcus.messaging',
-  'arcus observability': 'https://github.com/arcus-azure/arcus.observability',
-  'arcus webapi': 'https://github.com/arcus-azure/arcus.webapi',
-  'arcus background-jobs':
+  'arcus.event-grid': 'https://github.com/arcus-azure/arcus.eventgrid',
+  'arcus.security': 'https://github.com/arcus-azure/arcus.security',
+  'arcus.messaging': 'https://github.com/arcus-azure/arcus.messaging',
+  'arcus.observability': 'https://github.com/arcus-azure/arcus.observability',
+  'arcus.webapi': 'https://github.com/arcus-azure/arcus.webapi',
+  'arcus.background-jobs':
     'https://github.com/arcus-azure/arcus.backgroundjobs',
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
