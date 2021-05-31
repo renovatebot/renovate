@@ -203,8 +203,6 @@ describe(getName(), () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        httpMock.reset();
-        httpMock.setup();
         jest.mock('delay');
         jest.mock('../../util/git');
         jest.mock('../../util/host-rules');
@@ -229,9 +227,6 @@ describe(getName(), () => {
           username,
           password,
         });
-      });
-      afterEach(() => {
-        httpMock.reset();
       });
 
       describe('initPlatform()', () => {

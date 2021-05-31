@@ -11,14 +11,6 @@ const baseUrl = 'https://galaxy.ansible.com/';
 
 describe(getName(), () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
-    });
-
     it('returns null for empty result', async () => {
       httpMock
         .scope(baseUrl)

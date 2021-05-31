@@ -7,14 +7,6 @@ const rubyReleasesHtml = loadFixture('releases.html');
 
 describe(getName(), () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
-    });
-
     it('parses real data', async () => {
       httpMock
         .scope('https://www.ruby-lang.org')

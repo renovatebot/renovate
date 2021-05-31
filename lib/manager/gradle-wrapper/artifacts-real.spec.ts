@@ -43,12 +43,10 @@ describe(getName(), () => {
     beforeEach(() => {
       jest.resetAllMocks();
       setAdminConfig(adminConfig);
-      httpMock.setup();
     });
 
     afterEach(async () => {
       await Git(fixtures).checkout(['HEAD', '--', '.']);
-      httpMock.reset();
       setAdminConfig();
     });
 

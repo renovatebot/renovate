@@ -47,7 +47,6 @@ function readString(...paths: string[]): Promise<string> {
 describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    httpMock.setup();
 
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
@@ -62,7 +61,6 @@ describe(getName(), () => {
   });
 
   afterEach(() => {
-    httpMock.reset();
     setAdminConfig();
   });
 

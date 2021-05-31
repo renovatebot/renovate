@@ -11,6 +11,7 @@ hostRules.add({
 });
 
 const gitlabApiHost = 'https://gitlab.com';
+const selfHostedUrl = 'http://mycompany.com/gitlab';
 
 describe(getName(), () => {
   let gitlabApi: GitlabHttp;
@@ -18,12 +19,11 @@ describe(getName(), () => {
   beforeEach(() => {
     gitlabApi = new GitlabHttp();
     setBaseUrl(`${gitlabApiHost}/api/v4/`);
-    httpMock.setup();
+    delete process.env.GITLAB_IGNORE_REPO_URL;
   });
 
   afterEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
   });
 
   it('paginates', async () => {
@@ -36,6 +36,29 @@ describe(getName(), () => {
       .get('/api/v4/some-url&page=2')
       .reply(200, ['b', 'c'], {
         link: '<https://gitlab.com/api/v4/some-url&page=3>; rel="next", <https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+      })
+      .get('/api/v4/some-url&page=3')
+      .reply(200, ['d']);
+    const res = await gitlabApi.getJson('some-url', { paginate: true });
+    expect(res.body).toHaveLength(4);
+
+    const trace = httpMock.getTrace();
+    expect(trace).toHaveLength(3);
+    expect(trace).toMatchSnapshot();
+  });
+  it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
+    process.env.GITLAB_IGNORE_REPO_URL = 'true';
+    setBaseUrl(`${selfHostedUrl}/api/v4/`);
+
+    httpMock
+      .scope(selfHostedUrl)
+      .get('/api/v4/some-url')
+      .reply(200, ['a'], {
+        link: '<https://other.host.com/gitlab/api/v4/some-url&page=2>; rel="next", <https://other.host.com/gitlab/api/v4/some-url&page=3>; rel="last"',
+      })
+      .get('/api/v4/some-url&page=2')
+      .reply(200, ['b', 'c'], {
+        link: '<https://other.host.com/gitlab/api/v4/some-url&page=3>; rel="next", <https://other.host.com/gitlab/api/v4/some-url&page=3>; rel="last"',
       })
       .get('/api/v4/some-url&page=3')
       .reply(200, ['d']);
@@ -65,9 +88,7 @@ describe(getName(), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('sets baseUrl', () => {
-    expect(() =>
-      setBaseUrl('https://gitlab.renovatebot.com/api/v4/')
-    ).not.toThrow();
+    expect(() => setBaseUrl(`${selfHostedUrl}/api/v4/`)).not.toThrow();
   });
 
   describe('fails with', () => {

@@ -19,11 +19,9 @@ describe(getName(), () => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
-    httpMock.setup();
   });
 
   afterEach(() => {
-    httpMock.reset();
     hostRules.clear();
   });
 
