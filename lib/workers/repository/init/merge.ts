@@ -15,16 +15,30 @@ import {
 } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { RepoFileConfig } from './types';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
+  const cache = getCache();
+  let { configFileName } = cache;
+  if (configFileName) {
+    let configFileParsed = await platform.getJsonFile(configFileName);
+    if (configFileParsed) {
+      if (configFileName === 'package.json') {
+        configFileParsed = configFileParsed.renovate;
+      }
+      return { configFileName, configFileParsed };
+    }
+    logger.debug('Existing config file no longer exists');
+  }
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
-    for (const configFileName of configFileNames) {
-      if (configFileName === 'package.json') {
+    for (const fileName of configFileNames) {
+      if (fileName === 'package.json') {
         try {
           const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
           if (pJson.renovate) {
@@ -34,17 +48,18 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         } catch (err) {
           // Do nothing
         }
-      } else if (fileList.includes(configFileName)) {
-        return configFileName;
+      } else if (fileList.includes(fileName)) {
+        return fileName;
       }
     }
     return null;
   }
-  const configFileName = await detectConfigFile();
+  configFileName = await detectConfigFile();
   if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
   }
+  cache.configFileName = configFileName;
   logger.debug(`Found ${configFileName} config file`);
   let configFileParsed;
   if (configFileName === 'package.json') {

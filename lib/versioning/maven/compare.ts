@@ -295,7 +295,7 @@ function isVersion(version: string): boolean {
 const INCLUDING_POINT = 'INCLUDING_POINT';
 const EXCLUDING_POINT = 'EXCLUDING_POINT';
 
-function parseRange(rangeStr: string): any {
+function parseRange(rangeStr: string): Range[] {
   function emptyInterval(): Range {
     return {
       leftType: null,
@@ -499,24 +499,20 @@ function autoExtendMavenRange(
   if (isPoint(range)) {
     return `[${newValue}]`;
   }
-  let nearestIntervalIdx = 0;
-  const len = range.length;
-  for (let idx = len - 1; idx >= 0; idx = -1) {
-    const { leftValue, rightValue } = range[idx];
-    if (rightValue === null) {
-      nearestIntervalIdx = idx;
-      break;
-    }
-    if (compare(rightValue, newValue) === -1) {
-      nearestIntervalIdx = idx;
-      break;
-    }
-    if (leftValue && compare(leftValue, newValue) !== 1) {
-      return currentRepresentation;
-    }
+
+  const interval = [...range].reverse().find((elem) => {
+    const { rightType, rightValue } = elem;
+    return (
+      rightValue === null ||
+      (rightType === INCLUDING_POINT && compare(rightValue, newValue) === -1) ||
+      (rightType === EXCLUDING_POINT && compare(rightValue, newValue) !== 1)
+    );
+  });
+
+  if (!interval) {
+    return currentRepresentation;
   }
 
-  const interval = range[nearestIntervalIdx];
   const { leftValue, rightValue } = interval;
   if (
     leftValue !== null &&
@@ -545,13 +541,6 @@ function autoExtendMavenRange(
     interval.leftValue = coerceRangeValue(leftValue, newValue);
   }
 
-  if (interval.leftValue && interval.rightValue) {
-    const correctRepresentation =
-      compare(interval.leftValue, interval.rightValue) === 1
-        ? null
-        : rangeToStr(range);
-    return correctRepresentation || currentRepresentation;
-  }
   return rangeToStr(range);
 }
 
