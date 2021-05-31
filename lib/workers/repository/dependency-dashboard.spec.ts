@@ -10,7 +10,7 @@ import {
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { Platform } from '../../platform';
+import type { Platform } from '../../platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 

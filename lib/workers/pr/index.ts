@@ -13,7 +13,7 @@ import { sampleSize } from '../../util';
 import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import * as template from '../../util/template';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
-import { BranchConfig, PrBlockedBy } from '../types';
+import type { BranchConfig, PrBlockedBy } from '../types';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
