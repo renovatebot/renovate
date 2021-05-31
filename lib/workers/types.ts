@@ -107,4 +107,6 @@ export interface BranchConfig
   result?: BranchResult;
   upgrades: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;
+  prBlockedBy?: PrBlockedBy;
+  prNo?: number;
 }
