@@ -4,7 +4,7 @@ import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import * as _limits from '../global/limits';
-import { BranchConfig } from '../types';
+import type { BranchConfig } from '../types';
 import * as prAutomerge from './automerge';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
