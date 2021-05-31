@@ -1,4 +1,4 @@
-import { safeLoadAll } from 'js-yaml';
+import { loadAll } from 'js-yaml';
 import * as gitTags from '../../datasource/git-tags';
 import * as helm from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -40,7 +40,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitions: ApplicationDefinition[] = safeLoadAll(content);
+  const definitions: ApplicationDefinition[] = loadAll(content);
 
   const deps = definitions
     .map((definition) => createDependency(definition))

@@ -12,14 +12,7 @@ describe(getName(), () => {
 
     jest.resetAllMocks();
 
-    httpMock.reset();
-    httpMock.setup();
-
     setBaseUrl(baseUrl);
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   it('supports responses without pagination when enabled', async () => {

@@ -14,14 +14,6 @@ describe(getName(), () => {
     setPlatformApi('bitbucket');
   });
 
-  beforeEach(() => {
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
-  });
-
   describe('fetchJSONFile()', () => {
     it('returns JSON', async () => {
       const data = { foo: 'bar' };

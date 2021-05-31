@@ -1,4 +1,4 @@
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
@@ -54,7 +54,7 @@ export function parseAzurePipelines(
 ): AzurePipelines | null {
   let pkg = null;
   try {
-    pkg = safeLoad(content, { json: true });
+    pkg = load(content, { json: true });
   } catch (err) /* istanbul ignore next */ {
     logger.info({ filename, err }, 'Error parsing azure-pipelines content');
     return null;

@@ -63,7 +63,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Unit tests
-        run: yarn jest --logHeapUsage --maxWorkers=2 --ci
+        run: yarn jest --maxWorkers=2 --ci
 
       - name: Codecov
         uses: codecov/codecov-action@v1.5.0
