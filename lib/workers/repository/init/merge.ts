@@ -26,9 +26,11 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    const configFileParsed = await platform.getJsonFile(configFileName);
+    let configFileParsed = await platform.getJsonFile(configFileName);
     if (configFileParsed) {
-      logger.debug('Existing config file confirmed');
+      if (configFileName === 'package.json') {
+        configFileParsed = configFileParsed.renovate;
+      }
       return { configFileName, configFileParsed };
     }
     logger.debug('Existing config file no longer exists');

@@ -66,8 +66,13 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
         cache.configFileName
       );
       if (configFileContent) {
-        logger.debug('Existing config file confirmed');
-        return true;
+        if (
+          cache.configFileName !== 'package.json' ||
+          configFileContent.renovate
+        ) {
+          logger.debug('Existing config file confirmed');
+          return true;
+        }
       }
     } catch (err) {
       // probably file doesn't exist
