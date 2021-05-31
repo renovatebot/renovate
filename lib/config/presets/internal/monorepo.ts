@@ -35,25 +35,25 @@ const repoGroups = {
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   'reach-ui': 'https://github.com/reach/reach-ui',
-  'react-apollo': 'https://github.com/apollographql/react-apollo',
+  'react-apollo': 'https://github.com/apollographql/react-apollo', // Deprecated by authors, do we want to keep it?
   'react-dnd': 'https://github.com/react-dnd/react-dnd',
   'react-navigation': 'https://github.com/react-navigation/react-navigation',
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
-  'System.IO.Abstractions':
+  'system.io.abstractions':
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
-  'telus-tds': 'https://github.com/telusdigital/tds',
+  'telus-tds-core': 'https://github.com/telus/tds-core', // Original URL redirects to tds-core
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   accounts: 'https://github.com/accounts-js/accounts',
-  angular1: 'https://github.com/angular/angular.js',
+  angularjs: 'https://github.com/angular/angular.js', // why not use Angular JS as name here?
   angular: 'https://github.com/angular/angular',
-  angularcli: 'https://github.com/angular/angular-cli',
+  'angular-cli': 'https://github.com/angular/angular-cli', // This was missing a hyphen
   angularfire: 'https://github.com/angular/angularfire',
   apolloclient: 'https://github.com/apollographql/apollo-client',
-  apollolink: 'https://github.com/apollographql/apollo-link',
+  apollolink: 'https://github.com/apollographql/apollo-link', // Repo archived, read-only now, want to keep/delete?
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
   babel: 'https://github.com/babel/babel',
   baset: 'https://github.com/igmat/baset',
@@ -75,7 +75,7 @@ const repoGroups = {
   feathers: 'https://github.com/feathersjs/feathers',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
-  Fontsource: 'https://github.com/fontsource/fontsource',
+  fontsource: 'https://github.com/fontsource/fontsource',
   formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
@@ -84,31 +84,32 @@ const repoGroups = {
     'https://github.com/dotansimha/graphql-codegen',
   ],
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
-  'graphql-toolkit': 'https://github.com/ardatan/graphql-toolkit',
+  'graphql-toolkit': 'https://github.com/ardatan/graphql-toolkit', // Deprecated, merged into GraphQL Tools.
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
-  hamcrest: 'https://github.com/hamcrest/JavaHamcrest',
+  javahamcrest: 'https://github.com/hamcrest/JavaHamcrest', // use proper name?
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
-  HotChocolate: 'https://github.com/ChilliCream/hotchocolate',
-  infrastructure: 'https://github.com/instructure/instructure-ui',
+  hotchocolate: 'https://github.com/ChilliCream/hotchocolate',
+  'infrastructure-ui': 'https://github.com/instructure/instructure-ui', // use proper name?
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
   junit5: 'https://github.com/junit-team/junit5',
   lerna: 'https://github.com/lerna/lerna',
-  lingui: 'https://github.com/lingui/js-lingui',
+  linguijs: 'https://github.com/lingui/js-lingui', // Offical name is Linguijs with js in subscript...
   lodash: 'https://github.com/lodash/',
-  loopback: 'https://github.com/strongloop/loopback-next',
+  loopback: 'https://github.com/strongloop/loopback-next', // Seems they use just LoopBack as brandname without the next part
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
-  MassTransit: 'https://github.com/MassTransit/MassTransit',
-  material: 'https://github.com/material-components/material-components-web',
+  masstransit: 'https://github.com/MassTransit/MassTransit',
+  'material-components-web':
+    'https://github.com/material-components/material-components-web', // Might just as well use the repo name here
   mdx: 'https://github.com/mdx-js/mdx',
-  mui: 'https://github.com/mui-org/material-ui',
+  'material-ui': 'https://github.com/mui-org/material-ui', // They use Material-UI as brandname.
   nest: 'https://github.com/nestjs/nest',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
-    'https://github.com/mozilla-neutrino/neutrino-dev',
+    'https://github.com/mozilla-neutrino/neutrino-dev', // neutrino-dev URL redirects to neutrinojs/neutrino repo, keep/delete?
   ],
   nextjs: [
     'https://github.com/zeit/next.js', // old repo
@@ -118,32 +119,34 @@ const repoGroups = {
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
-  openfeign: 'https://github.com/OpenFeign/feign',
-  opentelemetry: 'https://github.com/open-telemetry/opentelemetry-js',
-  OpenTelemetryDotnet: 'https://github.com/open-telemetry/opentelemetry-dotnet',
-  picasso: 'https://github.com/qlik-oss/picasso.js',
+  feign: 'https://github.com/OpenFeign/feign', // Project uses Feign as brandname, not openfeign
+  'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
+  'opentelemetry-dotnet':
+    'https://github.com/open-telemetry/opentelemetry-dotnet', // Let's just use the reponame here, brandname is OpenTelemetry .NET
+  picassojs: 'https://github.com/qlik-oss/picasso.js', // Brandname: picasso.js
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
   react: 'https://github.com/facebook/react',
-  reactrouter: 'https://github.com/ReactTraining/react-router',
+  'react-router': 'https://github.com/ReactTraining/react-router', // Might as well put a hyphen in to clarify
   reakit: 'https://github.com/reakit/reakit',
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
-  sentry: 'https://github.com/getsentry/sentry-javascript',
+  'sentry-javascript': 'https://github.com/getsentry/sentry-javascript', // Brandname Sentry, have variants Java/JavaScript/dotnet/unity/etc.
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
-  Steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
+  steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
   strapi: 'https://github.com/strapi/strapi',
-  stryker: 'https://github.com/stryker-mutator/stryker',
+  'stryker-js': 'https://github.com/stryker-mutator/stryker-js', // Old link redirects to stryker-mutator/stryker-js
   surveyjs: 'https://github.com/surveyjs/surveyjs',
-  Swashbuckle: 'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
+  'swashbuckle-aspnetcore':
+    'https://github.com/domaindrivendev/Swashbuckle.AspNetCore', // Might want to specify this is the aspnetcore repo??
   treat: 'https://github.com/seek-oss/treat',
-  typefaces: 'https://github.com/KyleAMathews/typefaces',
+  typefaces: 'https://github.com/KyleAMathews/typefaces', // Project deprecated in README, project recommends fontsource. Do we want to keep this entry?
   uppy: 'https://github.com/transloadit/uppy',
   vue: 'https://github.com/vuejs/vue',
   vuepress: 'https://github.com/vuejs/vuepress',
@@ -153,7 +156,7 @@ const repoGroups = {
 
 const patternGroups = {
   babel6: '^babel6$',
-  clarity: ['^@cds/', '^@clr/'], // https://github.com/vmware/clarity/issues/5235
+  clarity: ['^@cds/', '^@clr/'], // This issue is resolved upstream (vmware/clarity), what to do with this entry now??? https://github.com/vmware/clarity/issues/5235
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
