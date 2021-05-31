@@ -205,7 +205,11 @@ export async function ensureMasterIssue(
     issueBody += `These updates are pending. To force PRs open, check the box below.\n\n`;
     for (const branch of otherBranches) {
       logger.info(
-        { prBlockedBy: branch.prBlockedBy, result: branch.result },
+        {
+          prBlockedBy: branch.prBlockedBy,
+          prNo: branch.prNo,
+          result: branch.result,
+        },
         'Blocked PR'
       );
       issueBody += getListItem(branch, 'other');
