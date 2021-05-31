@@ -196,21 +196,25 @@ export async function ensureMasterIssue(
   let inProgress = branches.filter(
     (branch) => !otherRes.includes(branch.result)
   );
-  const blockedPrs = inProgress.filter((branch) => branch.prBlockedBy);
+  const otherBranches = inProgress.filter(
+    (branch) => branch.prBlockedBy || !branch.prNo
+  );
   // istanbul ignore if
-  if (blockedPrs.length) {
-    issueBody += '## Awaiting PR Creation\n\n';
-    issueBody += `These updates have PRs pending. To force PRs open, check the box below.\n\n`;
-    for (const branch of blockedPrs) {
+  if (otherBranches.length) {
+    issueBody += '## Other Branches\n\n';
+    issueBody += `These updates are pending. To force PRs open, check the box below.\n\n`;
+    for (const branch of otherBranches) {
       logger.info(
         { prBlockedBy: branch.prBlockedBy, result: branch.result },
         'Blocked PR'
       );
-      issueBody += getListItem(branch, 'force-open');
+      issueBody += getListItem(branch, 'other');
     }
     issueBody += '\n';
   }
-  inProgress = inProgress.filter((branch) => !branch.prBlockedBy);
+  inProgress = inProgress.filter(
+    (branch) => branch.prNo && !branch.prBlockedBy
+  );
   if (inProgress.length) {
     issueBody += '## Open\n\n';
     issueBody +=
