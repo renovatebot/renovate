@@ -28,7 +28,6 @@ const repoGroups = {
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
-  'feathers-databases': 'https://github.com/feathersjs/databases',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
