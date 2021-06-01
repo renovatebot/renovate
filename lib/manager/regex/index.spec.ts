@@ -6,6 +6,7 @@ import { defaultConfig, extractPackageFile } from '.';
 const dockerfileContent = loadFixture(`Dockerfile`);
 const ansibleYamlContent = loadFixture(`ansible.yml`);
 const exampleJsonContent = loadFixture(`example.json`);
+const exampleGitlabCiYml = loadFixture(`gitlab-ci.yml`);
 
 describe(getName(), () => {
   it('has default config', () => {
@@ -194,6 +195,24 @@ describe(getName(), () => {
     const res = await extractPackageFile(
       ansibleYamlContent,
       'ansible.yml',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+  });
+  it('extracts with combination strategy and registry url', async () => {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
+      matchStrings: [
+        'CHART_VERSION: (?<currentValue>.*?)\n',
+        'CHART_REPOSITORY_URL: "(?<registryUrl>.*?)"',
+        'CHART_NAME: "(?<depName>.*?)"',
+      ],
+      datasourceTemplate: 'helm',
+    };
+    const res = await extractPackageFile(
+      exampleGitlabCiYml,
+      '.gitlab-ci.yml',
       config
     );
     expect(res).toMatchSnapshot();

@@ -37,7 +37,7 @@ async function dryRun(
 ) {
   jest.clearAllMocks();
   setAdminConfig({ dryRun: true });
-  await dependencyDashboard.ensureMasterIssue(config, branches);
+  await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
   );
@@ -53,7 +53,7 @@ describe(getName(), () => {
     });
     it('do nothing if masterissue is disable', async () => {
       const branches: BranchConfig[] = [];
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
@@ -75,7 +75,7 @@ describe(getName(), () => {
           dependencyDashboardApproval: false,
         },
       ];
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
@@ -89,7 +89,7 @@ describe(getName(), () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
       config.dependencyDashboardAutoclose = true;
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
         config.dependencyDashboardTitle
@@ -118,7 +118,7 @@ describe(getName(), () => {
       ];
       config.dependencyDashboard = true;
       config.dependencyDashboardAutoclose = true;
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
         config.dependencyDashboardTitle
@@ -135,7 +135,7 @@ describe(getName(), () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
       config.dependencyDashboardFooter = 'And this is a footer';
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -158,7 +158,7 @@ describe(getName(), () => {
         {},
       ];
       config.dependencyDashboardFooter = 'And this is a footer';
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -232,7 +232,7 @@ describe(getName(), () => {
         },
       ];
       config.dependencyDashboard = true;
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -272,7 +272,7 @@ describe(getName(), () => {
       platform.getBranchPr
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
         .mockResolvedValueOnce(undefined);
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -322,7 +322,7 @@ describe(getName(), () => {
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 3 });
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -366,7 +366,7 @@ describe(getName(), () => {
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 3 });
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -424,7 +424,7 @@ describe(getName(), () => {
       ];
       config.dependencyDashboard = true;
       config.dependencyDashboardPrApproval = true;
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -483,7 +483,7 @@ describe(getName(), () => {
         },
       ]);
       config.dependencyDashboard = true;
-      await dependencyDashboard.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
