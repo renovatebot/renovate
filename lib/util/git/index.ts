@@ -266,7 +266,10 @@ export async function syncGit(): Promise<void> {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
-      await git.raw(['config', '--unset-all', 'remote.origin.fetch']);
+      // istanbul ignore if
+      if (process.env.NODE_ENV !== 'test') {
+        await git.raw(['config', '--unset-all', 'remote.origin.fetch']);
+      }
       const fetchStart = Date.now();
       await git.fetch(['--depth=10']);
       config.currentBranch =
