@@ -662,7 +662,7 @@ export async function getAdditionalFiles(
       }
       artifactErrors.push({
         lockFile: pnpmShrinkwrap,
-        stderr: res.stderr,
+        stderr: res.stderr || res.stdout,
       });
     } else {
       const existingContent = await getFile(
