@@ -48,7 +48,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   return newIssueBody;
 }
 
-export async function ensureMasterIssue(
+export async function ensureDependencyDashboard(
   config: RenovateConfig,
   branches: BranchConfig[]
 ): Promise<void> {
