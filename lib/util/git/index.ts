@@ -372,7 +372,7 @@ async function syncBranch(branchName: string): Promise<void> {
   // fetch the branch only if it's not part of the existing branchPrefix
   try {
     await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
-    await git.fetch(['origin', branchName, '--depth=2']);
+    await git.fetch(['origin', branchName, '--depth=5']);
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
   }
@@ -784,7 +784,7 @@ export async function commitFiles({
     logger.debug({ result: pushRes }, 'git push');
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await git.fetch(['origin', ref, '--depth=2', '--force']);
+    await git.fetch(['origin', ref, '--depth=5', '--force']);
     config.branchCommits[branchName] = (
       await git.revparse([branchName])
     ).trim();
