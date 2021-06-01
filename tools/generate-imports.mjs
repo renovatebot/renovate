@@ -28,7 +28,10 @@ async function updateFile(file, code) {
   newFiles.add(file);
 }
 
-const dataPaths = ['data'];
+const dataPaths = [
+  'data',
+  'node_modules/emojibase-data/en/shortcodes/github.json',
+];
 
 /**
  *
