@@ -6,7 +6,7 @@ import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
-import { ensureMasterIssue } from './dependency-dashboard';
+import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
@@ -25,7 +25,8 @@ try {
 
 // istanbul ignore next
 export async function renovateRepository(
-  repoConfig: RenovateConfig
+  repoConfig: RenovateConfig,
+  canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
   let config = setAdminConfig(repoConfig);
@@ -47,8 +48,15 @@ export async function renovateRepository(
     const res = await updateRepo(config, branches);
     addSplit('update');
     await setBranchCache(branches);
-    if (res !== 'automerged') {
-      await ensureMasterIssue(config, branches);
+    if (res === 'automerged') {
+      if (canRetry) {
+        logger.info('Renovating repository again after automerge result');
+        const recursiveRes = await renovateRepository(repoConfig, false);
+        return recursiveRes;
+      }
+      logger.debug(`Automerged but already retried once`);
+    } else {
+      await ensureDependencyDashboard(config, branches);
     }
     await finaliseRepo(config, branchList);
     repoResult = processResult(config, res);
