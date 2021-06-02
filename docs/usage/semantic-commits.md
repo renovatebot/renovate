@@ -16,7 +16,7 @@ When Renovate finds Angular-style commits, Renovate will create commit messages 
 - fix(deps): update express to v4.16.2
 
 Renovate uses the `chore` prefix by default.
-If you extend `config:base`, Renovate still defaults to `chore`, but will use the `fix` prefix for dependencies.
+When you extend `config:base`, Renovate still defaults to `chore`, but will use the `fix` prefix for npm production dependencies (`devDependencies` still use `chore`).
 
 ## Manually enabling or disabling semantic commits
 
