@@ -42,7 +42,7 @@ const repoGroups = {
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
-  'shopify app-bridge': 'https://github.com/Shopify/app-bridge',
+  'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'System.IO.Abstractions':
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
   'telus-tds': 'https://github.com/telusdigital/tds',
