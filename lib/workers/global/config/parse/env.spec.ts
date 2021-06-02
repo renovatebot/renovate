@@ -1,10 +1,10 @@
-import { getName } from '../../test/util';
+import { getName } from '../../../../../test/util';
+import type { RenovateOptions } from '../../../../config/types';
 import {
   PLATFORM_TYPE_BITBUCKET,
   PLATFORM_TYPE_GITLAB,
-} from '../constants/platforms';
+} from '../../../../constants/platforms';
 import * as env from './env';
-import type { RenovateOptions } from './types';
 
 describe(getName(), () => {
   describe('.getConfig(env)', () => {

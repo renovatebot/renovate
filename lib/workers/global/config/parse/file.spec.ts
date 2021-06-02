@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
-import { getName } from '../../test/util';
-import customConfig from './config/__fixtures__/file';
+import { getName } from '../../../../../test/util';
+import customConfig from './__fixtures__/file';
 import * as file from './file';
 
 describe(getName(), () => {
@@ -23,19 +23,13 @@ describe(getName(), () => {
       );
     });
     it('parses custom config file', () => {
-      const configFile = upath.resolve(
-        __dirname,
-        './config/__fixtures__/file.js'
-      );
+      const configFile = upath.resolve(__dirname, './__fixtures__/file.js');
       expect(file.getConfig({ RENOVATE_CONFIG_FILE: configFile })).toEqual(
         customConfig
       );
     });
     it('migrates', () => {
-      const configFile = upath.resolve(
-        __dirname,
-        './config/__fixtures__/file2.js'
-      );
+      const configFile = upath.resolve(__dirname, './__fixtures__/file2.js');
       const res = file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toEqual('bump');
