@@ -3,8 +3,6 @@ import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
@@ -21,12 +19,11 @@ const adminConfig: RepoAdminConfig = {
 const config: UpdateArtifactsConfig = {};
 
 describe(getName(), () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
   });
 
@@ -84,7 +81,7 @@ describe(getName(), () => {
 
   it('returns updated mix.lock', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');

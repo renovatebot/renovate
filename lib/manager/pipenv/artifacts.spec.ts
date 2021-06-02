@@ -5,8 +5,6 @@ import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -29,14 +27,14 @@ const adminConfig: RepoAdminConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
 };
-const dockerAdminConfig = { ...adminConfig, binarySource: BinarySource.Docker };
+const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('.updateArtifacts()', () => {
   let pipFileLock;
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
@@ -44,7 +42,6 @@ describe('.updateArtifacts()', () => {
       LC_ALL: 'en_US',
     });
 
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
     pipFileLock = {
@@ -111,8 +108,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig(dockerAdminConfig);
+    setAdminConfig(dockerAdminConfig);
     pipFileLock._meta.requires.python_version = '3.7';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
@@ -125,7 +121,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, ...dockerAdminConfig },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -162,8 +158,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses pipenv version from Pipfile', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig(dockerAdminConfig);
+    setAdminConfig(dockerAdminConfig);
     pipFileLock.default.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
@@ -176,14 +171,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, ...dockerAdminConfig },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses pipenv version from Pipfile dev packages', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig(dockerAdminConfig);
+    setAdminConfig(dockerAdminConfig);
     pipFileLock.develop.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
@@ -196,14 +190,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, ...dockerAdminConfig },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses pipenv version from config', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig(dockerAdminConfig);
+    setAdminConfig(dockerAdminConfig);
     pipFileLock.default.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
@@ -216,7 +209,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...dockerAdminConfig, constraints: { pipenv: '==2020.1.1' } },
+        config: { ...config, constraints: { pipenv: '==2020.1.1' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
