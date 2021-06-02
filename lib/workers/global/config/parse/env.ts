@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 
-import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { getDatasourceList } from '../datasource';
-import { logger } from '../logger';
-import type { HostRule } from '../types';
-import { getOptions } from './definitions';
-import type { GlobalConfig, RenovateOptions } from './types';
+import { getOptions } from '../../../../config/definitions';
+import type { AllConfig, RenovateOptions } from '../../../../config/types';
+import { PLATFORM_TYPE_GITHUB } from '../../../../constants/platforms';
+import { getDatasourceList } from '../../../../datasource';
+import { logger } from '../../../../logger';
+import type { HostRule } from '../../../../types';
 
 // istanbul ignore if
 if (process.env.ENV_PREFIX) {
@@ -27,10 +27,10 @@ export function getEnvName(option: Partial<RenovateOptions>): string {
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }
 
-export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
+export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   const options = getOptions();
 
-  let config: GlobalConfig = {};
+  let config: AllConfig = {};
 
   if (env.RENOVATE_CONFIG) {
     try {
