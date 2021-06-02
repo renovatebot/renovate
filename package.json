@@ -237,7 +237,7 @@
     "@typescript-eslint/parser": "4.25.0",
     "conventional-changelog-conventionalcommits": "4.6.0",
     "cross-env": "7.0.3",
-    "emojibase-data": "6.1.2",
+    "emojibase-data": "6.2.0",
     "eslint": "7.27.0",
     "eslint-config-airbnb-typescript": "12.3.1",
     "eslint-config-prettier": "8.3.0",
