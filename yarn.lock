@@ -3711,10 +3711,10 @@ emojibase-data@6.1.2:
   resolved "https://registry.yarnpkg.com/emojibase-data/-/emojibase-data-6.1.2.tgz#c30331602419239579c0d7a032fa1232d8dc298f"
   integrity sha512-1fYgpAYkAJq7bmGO3XboP0dQHrtRiyWrAluCmv5NHSK1nruz0x8kXhpLiz48rAJGDQOWYUpLGaPASTNXVZX87Q==
 
-emojibase-regex@5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/emojibase-regex/-/emojibase-regex-5.1.2.tgz#96cc95e26b186866de1c42a16782d3242cc29c11"
-  integrity sha512-/n1k9npdzvJecnTy7qu324btGxWSi4GC4Uk9R4DLDc8CIuNx+a2RQLrDSL/0kOi0dIg4lP4h65wKICYGjyIDbw==
+emojibase-regex@5.1.3:
+  version "5.1.3"
+  resolved "https://registry.yarnpkg.com/emojibase-regex/-/emojibase-regex-5.1.3.tgz#f0ef621ed6ec624becd2326f999fd4ea01b94554"
+  integrity sha512-gT8T9LxLA8VJdI+8KQtyykB9qKzd7WuUL3M2yw6y9tplFeufOUANg3UKVaKUvkMcRNvZsSElWhxcJrx8WPE12g==
 
 emojibase@5.2.0:
   version "5.2.0"

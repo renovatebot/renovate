@@ -146,7 +146,7 @@
     "email-addresses": "4.0.0",
     "emoji-regex": "9.2.2",
     "emojibase": "5.2.0",
-    "emojibase-regex": "5.1.2",
+    "emojibase-regex": "5.1.3",
     "fast-safe-stringify": "2.0.7",
     "find-up": "5.0.0",
     "fs-extra": "10.0.0",
