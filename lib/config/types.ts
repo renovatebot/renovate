@@ -90,6 +90,7 @@ export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
+  binarySource?: 'docker' | 'global';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
