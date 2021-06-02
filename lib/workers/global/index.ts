@@ -8,7 +8,7 @@ import * as configParser from '../../config';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
 import type {
-  GlobalConfig,
+  AllConfig,
   RenovateConfig,
   RenovateRepository,
 } from '../../config/types';
@@ -71,7 +71,7 @@ function checkEnv(): void {
   }
 }
 
-export async function validatePresets(config: GlobalConfig): Promise<void> {
+export async function validatePresets(config: AllConfig): Promise<void> {
   try {
     await resolveConfigPresets(config);
   } catch (err) /* istanbul ignore next */ {
@@ -80,7 +80,7 @@ export async function validatePresets(config: GlobalConfig): Promise<void> {
 }
 
 export async function start(): Promise<number> {
-  let config: GlobalConfig;
+  let config: AllConfig;
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();

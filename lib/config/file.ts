@@ -1,15 +1,15 @@
 import upath from 'upath';
 import { logger } from '../logger';
 import { migrateConfig } from './migration';
-import type { GlobalConfig } from './types';
+import type { AllConfig } from './types';
 
-export function getConfig(env: NodeJS.ProcessEnv): GlobalConfig {
+export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config';
   if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
     logger.debug('Checking for config file in ' + configFile);
   }
-  let config: GlobalConfig = {};
+  let config: AllConfig = {};
   try {
     // eslint-disable-next-line global-require,import/no-dynamic-require
     config = require(configFile);
