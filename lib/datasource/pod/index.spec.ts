@@ -19,11 +19,6 @@ describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('returns null for invalid inputs', async () => {

@@ -8,7 +8,7 @@ env:
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: 3.9
   SKIP_JAVA_TESTS: true
 
 jobs:
@@ -63,7 +63,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Unit tests
-        run: yarn jest --logHeapUsage --maxWorkers=2 --ci
+        run: yarn jest --maxWorkers=2 --ci
 
       - name: Codecov
         uses: codecov/codecov-action@v1.5.0

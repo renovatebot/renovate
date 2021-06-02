@@ -134,11 +134,6 @@ describe(getName(), () => {
       jest.resetAllMocks();
       hostRules.hosts.mockReturnValue([]);
       hostRules.find.mockReturnValue({});
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it(`can't detect nuget feed version`, async () => {

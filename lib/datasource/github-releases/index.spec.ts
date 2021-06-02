@@ -29,11 +29,6 @@ describe(getName(), () => {
     hostRules.find.mockReturnValue({
       token: 'some-token',
     });
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('getReleases', () => {

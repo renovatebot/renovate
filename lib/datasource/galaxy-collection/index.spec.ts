@@ -22,14 +22,6 @@ const baseUrl = 'https://galaxy.ansible.com';
 
 describe(getName(), () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
-    });
-
     it('returns null for 404 result', async () => {
       httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(404);
       expect(

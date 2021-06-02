@@ -54,6 +54,44 @@ Array [
 ]
 `;
 
+exports[`util/http/gitlab paginates with GITLAB_IGNORE_REPO_URL set 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "mycompany.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "http://mycompany.com/gitlab/api/v4/some-url",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "mycompany.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "http://mycompany.com/gitlab/api/v4/some-url&page=2",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "mycompany.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "http://mycompany.com/gitlab/api/v4/some-url&page=3",
+  },
+]
+`;
+
 exports[`util/http/gitlab posts 1`] = `
 Array [
   Object {

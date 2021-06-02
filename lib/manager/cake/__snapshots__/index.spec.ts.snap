@@ -27,6 +27,16 @@ Object {
       "depName": "Baz.Baz",
       "skipReason": "unsupported-url",
     },
+    Object {
+      "currentValue": "1.0.3",
+      "datasource": "nuget",
+      "depName": "Cake.7zip",
+    },
+    Object {
+      "currentValue": "1.0.0",
+      "datasource": "nuget",
+      "depName": "Cake.asciidoctorj",
+    },
   ],
 }
 `;

@@ -1,14 +1,10 @@
-import _fs from 'fs-extra';
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture, mocked } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { id as datasource } from '.';
-
-jest.mock('fs-extra');
-const fs = mocked(_fs);
 
 const baseUrl = 'https://repo.maven.apache.org/maven2';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';
@@ -86,12 +82,10 @@ describe(getName(), () => {
       token: 'abc123',
     });
     jest.resetAllMocks();
-    httpMock.setup();
   });
 
   afterEach(() => {
     hostRules.clear();
-    httpMock.reset();
     delete process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK;
   });
 
@@ -310,20 +304,5 @@ describe(getName(), () => {
 
     expect(res).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
-  });
-
-  it('supports file protocol', async () => {
-    fs.exists.mockResolvedValueOnce(false);
-
-    fs.exists.mockResolvedValueOnce(true);
-    fs.readFile.mockResolvedValueOnce(Buffer.from(loadFixture('metadata.xml')));
-
-    fs.exists.mockResolvedValueOnce(true);
-    fs.readFile.mockResolvedValueOnce(Buffer.from(loadFixture('pom.xml')));
-
-    const res = await get('org.example:package', 'file:///foo', 'file:///bar');
-
-    expect(res).toMatchSnapshot();
-    expect(fs.readFile.mock.calls).toMatchSnapshot();
   });
 });

@@ -6,7 +6,6 @@
   "dockerfile": {
     "semanticCommitType": "build"
   },
-  "stabilityDays": 3,
   "packageRules": [
     {
       "matchPackageNames": [

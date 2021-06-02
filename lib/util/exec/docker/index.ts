@@ -7,7 +7,6 @@ import * as versioning from '../../../versioning';
 import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
-  ExecConfig,
   Opt,
   VolumeOption,
   VolumesPair,
@@ -152,9 +151,14 @@ export async function removeDockerContainer(
 }
 
 // istanbul ignore next
-export async function removeDanglingContainers(prefix: string): Promise<void> {
+export async function removeDanglingContainers(): Promise<void> {
+  const { binarySource, dockerChildPrefix } = getAdminConfig();
+  if (binarySource !== 'docker') {
+    return;
+  }
+
   try {
-    const containerLabel = getContainerLabel(prefix);
+    const containerLabel = getContainerLabel(dockerChildPrefix);
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
       {
@@ -188,8 +192,7 @@ export async function removeDanglingContainers(prefix: string): Promise<void> {
 
 export async function generateDockerCommand(
   commands: string[],
-  options: DockerOptions,
-  config: ExecConfig
+  options: DockerOptions
 ): Promise<string> {
   const { envVars, cwd, tagScheme, tagConstraint } = options;
   let image = options.image;

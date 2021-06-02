@@ -1,12 +1,13 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
-  let doc;
+  // TODO: fix type
+  let doc: any;
   try {
-    doc = yaml.safeLoad(content, { json: true });
+    doc = load(content, { json: true });
   } catch (err) {
     logger.warn({ err, content }, 'Failed to parse .travis.yml file.');
     return null;

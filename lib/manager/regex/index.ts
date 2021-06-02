@@ -24,6 +24,8 @@ const validMatchFields = [
   'registryUrl',
 ];
 
+const mergeFields = ['registryUrls', ...validMatchFields];
+
 function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
   let matchResult;
@@ -85,7 +87,7 @@ function createDependency(
 function mergeDependency(deps: PackageDependency[]): PackageDependency {
   const result: PackageDependency = {};
   deps.forEach((dep) => {
-    validMatchFields.forEach((field) => {
+    mergeFields.forEach((field) => {
       if (dep[field]) {
         result[field] = dep[field];
         // save the line replaceString of the section which contains the current Value for a speed up lookup during the replace phase

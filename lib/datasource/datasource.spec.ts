@@ -24,14 +24,6 @@ class TestDatasource extends Datasource {
 }
 
 describe(getName(), () => {
-  beforeEach(() => {
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
-  });
-
   it('should throw on 429', async () => {
     const testDatasource = new TestDatasource();
 
