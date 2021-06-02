@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { version } from '../../package.json';
 import { getOptions } from './definitions';
-import type { GlobalConfig, RenovateCliConfig, RenovateOptions } from './types';
+import type { AllConfig, RenovateCliConfig, RenovateOptions } from './types';
 
 export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
@@ -11,7 +11,7 @@ export function getCliName(option: Partial<RenovateOptions>): string {
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
-export function getConfig(input: string[]): GlobalConfig {
+export function getConfig(input: string[]): AllConfig {
   // massage migrated configuration keys
   const argv = input
     .map((a) =>
