@@ -7,7 +7,7 @@ import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
-import { ensureMasterIssue } from './dependency-dashboard';
+import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
@@ -58,7 +58,7 @@ export async function renovateRepository(
       }
       logger.debug(`Automerged but already retried once`);
     } else {
-      await ensureMasterIssue(config, branches);
+      await ensureDependencyDashboard(config, branches);
     }
     await finaliseRepo(config, branchList);
     repoResult = processResult(config, res);
