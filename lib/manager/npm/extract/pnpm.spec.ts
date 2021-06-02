@@ -17,7 +17,7 @@ describe(getName(), () => {
     it('detects errors in pnpm-workspace.yml file structure', async () => {
       jest
         .spyOn(fs, 'readLocalFile')
-        .mockResolvedValueOnce('p!!!ckages:\n\t- "packages/*"');
+        .mockResolvedValueOnce('p!!!ckages:\n - "packages/*"');
 
       const workSpaceFilePath = getFixturePath(
         'pnpm-monorepo/pnpm-workspace.yml',
@@ -35,7 +35,7 @@ describe(getName(), () => {
     });
 
     it('detects errors when opening pnpm-workspace.yml file', async () => {
-      jest.spyOn(yaml, 'safeLoad').mockImplementationOnce(() => {
+      jest.spyOn(yaml, 'load').mockImplementationOnce(() => {
         throw new Error();
       });
 

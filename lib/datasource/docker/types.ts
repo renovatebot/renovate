@@ -42,6 +42,6 @@ export interface Image extends MediaObject {
 }
 
 export interface RegistryRepository {
-  registry: string;
-  repository: string;
+  registryHost: string;
+  dockerRepository: string;
 }

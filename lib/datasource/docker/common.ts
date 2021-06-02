@@ -9,14 +9,19 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
-import { ensureTrailingSlash, trimTrailingSlash } from '../../util/url';
+import {
+  ensureTrailingSlash,
+  parseUrl,
+  trimTrailingSlash,
+} from '../../util/url';
 import { MediaType, RegistryRepository } from './types';
 
 export const id = 'docker';
 export const http = new Http(id);
 
 export const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
-export const defaultRegistryUrls = ['https://index.docker.io'];
+const DOCKER_HUB = 'https://index.docker.io';
+export const defaultRegistryUrls = [DOCKER_HUB];
 
 async function getECRAuthToken(
   region: string,
@@ -47,11 +52,11 @@ async function getECRAuthToken(
 }
 
 export async function getAuthHeaders(
-  registry: string,
+  registryHost: string,
   dockerRepository: string
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    const apiCheckUrl = `${registry}/v2/`;
+    const apiCheckUrl = `${registryHost}/v2/`;
     const apiCheckResponse = await http.get(apiCheckUrl, {
       throwHttpErrors: false,
     });
@@ -65,8 +70,8 @@ export async function getAuthHeaders(
     const opts: HostRule & {
       headers?: Record<string, string>;
     } = hostRules.find({ hostType: id, url: apiCheckUrl });
-    if (ecrRegex.test(registry)) {
-      const [, region] = ecrRegex.exec(registry);
+    if (ecrRegex.test(registryHost)) {
+      const [, region] = ecrRegex.exec(registryHost);
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
@@ -114,7 +119,7 @@ export async function getAuthHeaders(
     }
     if (err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository },
+        { registryHost, dockerRepository },
         'Unauthorized docker lookup'
       );
       logger.debug({ err });
@@ -122,29 +127,29 @@ export async function getAuthHeaders(
     }
     if (err.statusCode === 403) {
       logger.debug(
-        { registry, dockerRepository },
+        { registryHost, dockerRepository },
         'Not allowed to access docker registry'
       );
       logger.debug({ err });
       return null;
     }
     // prettier-ignore
-    if (err.name === 'RequestError' && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (err.name === 'RequestError' && registryHost.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
         throw new ExternalHostError(err);
       }
     // prettier-ignore
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (err.statusCode === 429 && registryHost.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
         throw new ExternalHostError(err);
       }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
     }
     if (err.message === HOST_DISABLED) {
-      logger.trace({ registry, dockerRepository, err }, 'Host disabled');
+      logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
       return null;
     }
     logger.warn(
-      { registry, dockerRepository, err },
+      { registryHost, dockerRepository, err },
       'Error obtaining docker token'
     );
     return null;
@@ -155,47 +160,52 @@ export function getRegistryRepository(
   lookupName: string,
   registryUrl: string
 ): RegistryRepository {
-  if (registryUrl !== defaultRegistryUrls[0]) {
+  if (registryUrl !== DOCKER_HUB) {
     const registryEndingWithSlash = ensureTrailingSlash(
       registryUrl.replace(/^https?:\/\//, '')
     );
     if (lookupName.startsWith(registryEndingWithSlash)) {
-      let registry = trimTrailingSlash(registryUrl);
-      if (!/^https?:\/\//.test(registry)) {
-        registry = `https://${registry}`;
+      let registryHost = trimTrailingSlash(registryUrl);
+      if (!/^https?:\/\//.test(registryHost)) {
+        registryHost = `https://${registryHost}`;
       }
+      let dockerRepository = lookupName.replace(registryEndingWithSlash, '');
+      const fullUrl = `${registryHost}/${dockerRepository}`;
+      const { origin, pathname } = parseUrl(fullUrl);
+      registryHost = origin;
+      dockerRepository = pathname.substring(1);
       return {
-        registry,
-        repository: lookupName.replace(registryEndingWithSlash, ''),
+        registryHost,
+        dockerRepository,
       };
     }
   }
-  let registry: string;
+  let registryHost: string;
   const split = lookupName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
-    [registry] = split;
+    [registryHost] = split;
     split.shift();
   }
-  let repository = split.join('/');
-  if (!registry) {
-    registry = registryUrl;
+  let dockerRepository = split.join('/');
+  if (!registryHost) {
+    registryHost = registryUrl;
   }
-  if (registry === 'docker.io') {
-    registry = 'index.docker.io';
+  if (registryHost === 'docker.io') {
+    registryHost = 'index.docker.io';
   }
-  if (!/^https?:\/\//.exec(registry)) {
-    registry = `https://${registry}`;
+  if (!/^https?:\/\//.exec(registryHost)) {
+    registryHost = `https://${registryHost}`;
   }
-  const opts = hostRules.find({ hostType: id, url: registry });
+  const opts = hostRules.find({ hostType: id, url: registryHost });
   if (opts?.insecureRegistry) {
-    registry = registry.replace('https', 'http');
+    registryHost = registryHost.replace('https', 'http');
   }
-  if (registry.endsWith('.docker.io') && !repository.includes('/')) {
-    repository = 'library/' + repository;
+  if (registryHost.endsWith('.docker.io') && !dockerRepository.includes('/')) {
+    dockerRepository = 'library/' + dockerRepository;
   }
   return {
-    registry,
-    repository,
+    registryHost,
+    dockerRepository,
   };
 }
 
@@ -214,20 +224,22 @@ export function extractDigestFromResponse(
 
 // TODO: debug why quay throws errors (#9612)
 export async function getManifestResponse(
-  registry: string,
+  registryHost: string,
   dockerRepository: string,
   tag: string
 ): Promise<HttpResponse> {
-  logger.debug(`getManifestResponse(${registry}, ${dockerRepository}, ${tag})`);
+  logger.debug(
+    `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag})`
+  );
   try {
-    const headers = await getAuthHeaders(registry, dockerRepository);
+    const headers = await getAuthHeaders(registryHost, dockerRepository);
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return null;
     }
     headers.accept =
       'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
-    const url = `${registry}/v2/${dockerRepository}/manifests/${tag}`;
+    const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
     const manifestResponse = await http.get(url, {
       headers,
     });
@@ -238,7 +250,7 @@ export async function getManifestResponse(
     }
     if (err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository },
+        { registryHost, dockerRepository },
         'Unauthorized docker lookup'
       );
       logger.debug({ err });
@@ -248,7 +260,7 @@ export async function getManifestResponse(
       logger.debug(
         {
           err,
-          registry,
+          registryHost,
           dockerRepository,
           tag,
         },
@@ -257,7 +269,7 @@ export async function getManifestResponse(
       return null;
     }
     // prettier-ignore
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (err.statusCode === 429 && registryHost.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
@@ -265,7 +277,7 @@ export async function getManifestResponse(
     }
     if (err.code === 'ETIMEDOUT') {
       logger.debug(
-        { registry },
+        { registryHost },
         'Timeout when attempting to connect to docker registry'
       );
       logger.debug({ err });
@@ -274,7 +286,7 @@ export async function getManifestResponse(
     logger.debug(
       {
         err,
-        registry,
+        registryHost,
         dockerRepository,
         tag,
       },
@@ -341,13 +353,13 @@ async function getConfigDigest(
  */
 
 export async function getLabels(
-  registry: string,
+  registryHost: string,
   dockerRepository: string,
   tag: string
 ): Promise<Record<string, string>> {
-  logger.debug(`getLabels(${registry}, ${dockerRepository}, ${tag})`);
+  logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
   const cacheNamespace = 'datasource-docker-labels';
-  const cacheKey = `${registry}:${dockerRepository}:${tag}`;
+  const cacheKey = `${registryHost}:${dockerRepository}:${tag}`;
   const cachedResult = await packageCache.get<Record<string, string>>(
     cacheNamespace,
     cacheKey
@@ -358,18 +370,22 @@ export async function getLabels(
   }
   try {
     let labels: Record<string, string> = {};
-    const configDigest = await getConfigDigest(registry, dockerRepository, tag);
+    const configDigest = await getConfigDigest(
+      registryHost,
+      dockerRepository,
+      tag
+    );
     if (!configDigest) {
       return {};
     }
 
-    const headers = await getAuthHeaders(registry, dockerRepository);
+    const headers = await getAuthHeaders(registryHost, dockerRepository);
     // istanbul ignore if: Should never be happen
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return {};
     }
-    const url = `${registry}/v2/${dockerRepository}/blobs/${configDigest}`;
+    const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
     const configResponse = await http.get(url, {
       headers,
     });
@@ -392,14 +408,14 @@ export async function getLabels(
     }
     if (err.statusCode === 400 || err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository, err },
+        { registryHost, dockerRepository, err },
         'Unauthorized docker lookup'
       );
     } else if (err.statusCode === 404) {
       logger.warn(
         {
           err,
-          registry,
+          registryHost,
           dockerRepository,
           tag,
         },
@@ -407,14 +423,14 @@ export async function getLabels(
       );
     } else if (
       err.statusCode === 429 &&
-      registry.endsWith('docker.io') // lgtm [js/incomplete-url-substring-sanitization]
+      registryHost.endsWith('docker.io') // lgtm [js/incomplete-url-substring-sanitization]
     ) {
       logger.warn({ err }, 'docker registry failure: too many requests');
     } else if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.debug(
         {
           err,
-          registry,
+          registryHost,
           dockerRepository,
           tag,
         },
@@ -424,15 +440,18 @@ export async function getLabels(
       err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
       err.code === 'ETIMEDOUT'
     ) {
-      logger.debug({ registry, err }, 'Error connecting to docker registry');
-    } else if (registry === 'https://quay.io') {
+      logger.debug(
+        { registryHost, err },
+        'Error connecting to docker registry'
+      );
+    } else if (registryHost === 'https://quay.io') {
       // istanbul ignore next
       logger.debug(
         'Ignoring quay.io errors until they fully support v2 schema'
       );
     } else {
       logger.info(
-        { registry, dockerRepository, tag, err },
+        { registryHost, dockerRepository, tag, err },
         'Unknown error getting Docker labels'
       );
     }

@@ -18,11 +18,6 @@ describe(getName(), () => {
         depName: 'abc',
       };
       jest.clearAllMocks();
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('processes real data', async () => {

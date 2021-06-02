@@ -141,7 +141,6 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     logs:problem
     reproduction:needed
     reproduction:provided
-    reproduction:confirmed
     duplicate
 
 </details>
@@ -159,7 +158,6 @@ Add a label `logs:problem` to indicate that there's a problem with the logs, and
 
 Add a label `reproduction:needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduction:provided` once there is a public reproduction.
-A developer will add the `reproduction:confirmed` once they have checked and confirmed the reproduction.
 
 Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 
