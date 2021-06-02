@@ -201,7 +201,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 }
 
-export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
+export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;

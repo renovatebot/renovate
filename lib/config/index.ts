@@ -8,7 +8,7 @@ import * as definitions from './definitions';
 import * as envParser from './env';
 import * as fileParser from './file';
 import type {
-  GlobalConfig,
+  AllConfig,
   ManagerConfig,
   RenovateConfig,
   RenovateConfigStage,
@@ -42,7 +42,7 @@ export function getManagerConfig(
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
   argv: string[]
-): Promise<GlobalConfig> {
+): Promise<AllConfig> {
   logger.debug('Parsing configs');
 
   // Get configs
@@ -51,7 +51,7 @@ export async function parseConfigs(
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = envParser.getConfig(env);
 
-  let config: GlobalConfig = mergeChildConfig(fileConfig, envConfig);
+  let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
   const combinedConfig = config;
@@ -119,9 +119,9 @@ export async function parseConfigs(
 }
 
 export function filterConfig(
-  inputConfig: GlobalConfig,
+  inputConfig: AllConfig,
   targetStage: RenovateConfigStage
-): GlobalConfig {
+): AllConfig {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
   const outputConfig: RenovateConfig = { ...inputConfig };
   const stages = ['global', 'repository', 'package', 'branch', 'pr'];
