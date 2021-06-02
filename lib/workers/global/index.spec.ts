@@ -1,6 +1,5 @@
 import { ERROR, WARN } from 'bunyan';
 import { getName, logger } from '../../../test/util';
-import * as _configParser from '../../config';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
@@ -8,6 +7,7 @@ import {
 import * as datasourceDocker from '../../datasource/docker';
 import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';
+import * as _configParser from './config/parse';
 import * as _limits from './limits';
 import * as globalWorker from '.';
 

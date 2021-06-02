@@ -8,6 +8,7 @@ const repoAdminOptions = [
   'allowPostUpgradeCommandTemplating',
   'allowScripts',
   'allowedPostUpgradeCommands',
+  'binarySource',
   'customEnvVariables',
   'dockerChildPrefix',
   'dockerImagePrefix',

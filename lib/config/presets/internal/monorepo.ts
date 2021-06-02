@@ -44,6 +44,8 @@ const repoGroups = {
   'system.io.abstractions':
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
   'telus-tds-core': 'https://github.com/telus/tds-core', // Original URL redirects to tds-core
+  'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
+  'theme-ui': 'https://github.com/system-ui/theme-ui',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   'vue-cli': 'https://github.com/vuejs/vue-cli',

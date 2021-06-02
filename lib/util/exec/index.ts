@@ -1,40 +1,17 @@
 import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
-import type { RenovateConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import {
-  BinarySource,
   DockerOptions,
-  ExecConfig,
   ExecResult,
   Opt,
   RawExecOptions,
   rawExec,
 } from './common';
-import {
-  generateDockerCommand,
-  removeDanglingContainers,
-  removeDockerContainer,
-} from './docker';
+import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
-
-const execConfig: ExecConfig = {
-  binarySource: null,
-};
-
-export async function setExecConfig(
-  config: Partial<RenovateConfig>
-): Promise<void> {
-  for (const key of Object.keys(execConfig)) {
-    const value = config[key];
-    execConfig[key] = value || null;
-  }
-  if (execConfig.binarySource === 'docker') {
-    await removeDanglingContainers(getAdminConfig().dockerChildPrefix);
-  }
-}
 
 type ExtraEnv<T = unknown> = Record<string, T>;
 
@@ -93,11 +70,11 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { env, docker, cwdFile } = opts;
-  const { dockerChildPrefix, customEnvVariables } = getAdminConfig();
+  const { binarySource, dockerChildPrefix, customEnvVariables, localDir } =
+    getAdminConfig();
   const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
   // istanbul ignore if
-  const { localDir } = getAdminConfig();
   if (cwdFile) {
     cwd = join(localDir, dirname(cwdFile));
   }
@@ -121,7 +98,7 @@ export async function exec(
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
-  const useDocker = execConfig.binarySource === BinarySource.Docker && docker;
+  const useDocker = binarySource === 'docker' && docker;
   if (useDocker) {
     logger.debug('Using docker to execute');
     const dockerOptions = {
@@ -130,11 +107,7 @@ export async function exec(
       envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    const dockerCommand = await generateDockerCommand(
-      commands,
-      dockerOptions,
-      execConfig
-    );
+    const dockerCommand = await generateDockerCommand(commands, dockerOptions);
     commands = [dockerCommand];
   }
 

@@ -10,7 +10,6 @@ import type { File } from '../util/git';
 export type Result<T> = T | Promise<T>;
 
 export interface ManagerConfig {
-  binarySource?: string;
   registryUrls?: string[];
 }
 
@@ -19,7 +18,6 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig {
-  binarySource?: string;
   registryUrls?: string[];
   endpoint?: string;
   gradle?: { timeout?: number };

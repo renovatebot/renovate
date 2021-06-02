@@ -90,6 +90,7 @@ export interface RepoAdminConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
+  binarySource?: 'docker' | 'global';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
@@ -200,7 +201,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 }
 
-export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
+export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
@@ -367,10 +368,6 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
 export interface ManagerConfig extends RenovateConfig {
   language: string;
   manager: string;
-}
-
-export interface RenovateCliConfig extends Record<string, any> {
-  repositories?: string[];
 }
 
 export interface MigratedConfig {
