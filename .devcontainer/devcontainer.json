@@ -1,5 +1,5 @@
 {
-  "name": "Node.js 14",
+  "name": "Renovate",
   "dockerFile": "Dockerfile",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
