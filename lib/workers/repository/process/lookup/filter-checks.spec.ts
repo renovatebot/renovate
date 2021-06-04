@@ -55,7 +55,7 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toHaveLength(0);
+      expect(res.pendingChecks).toBe(false);
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release.version).toEqual('1.0.4');
     });
@@ -70,7 +70,7 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toHaveLength(0);
+      expect(res.pendingChecks).toBe(false);
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release.version).toEqual('1.0.4');
     });
@@ -85,7 +85,7 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toHaveLength(1);
+      expect(res.pendingChecks).toBe(true);
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release.version).toEqual('1.0.4');
     });
@@ -100,7 +100,7 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toHaveLength(0);
+      expect(res.pendingChecks).toBe(false);
       expect(res.pendingReleases).toHaveLength(2);
       expect(res.release.version).toEqual('1.0.2');
     });
@@ -115,7 +115,7 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toHaveLength(0);
+      expect(res.pendingChecks).toBe(false);
       expect(res.pendingReleases).toHaveLength(2);
       expect(res.release.version).toEqual('1.0.2');
     });
@@ -131,7 +131,7 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toHaveLength(0);
+      expect(res.pendingChecks).toBe(false);
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release.version).toEqual('1.0.4');
     });
@@ -146,7 +146,7 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toHaveLength(0);
+      expect(res.pendingChecks).toBe(false);
       expect(res.pendingReleases).toHaveLength(1);
       expect(res.release.version).toEqual('1.0.3');
     });
