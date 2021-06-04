@@ -161,6 +161,13 @@ Object {
 }
 `;
 
+exports[`workers/branch/index processBranch skips branch if minimumConfidence not met 1`] = `
+Object {
+  "branchExists": false,
+  "result": "error",
+}
+`;
+
 exports[`workers/branch/index processBranch skips branch if not scheduled and branch does not exist 1`] = `
 Object {
   "branchExists": false,

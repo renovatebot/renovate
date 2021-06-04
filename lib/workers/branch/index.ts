@@ -27,6 +27,11 @@ import {
   branchExists as gitBranchExists,
   isBranchModified,
 } from '../../util/git';
+import {
+  getMergeConfidenceLevel,
+  isActiveConfidenceLevel,
+  satisfiesConfidenceLevel,
+} from '../../util/merge-confidence';
 import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -214,7 +219,9 @@ export async function processBranch(
 
     if (
       config.upgrades.some(
-        (upgrade) => upgrade.stabilityDays && upgrade.releaseTimestamp
+        (upgrade) =>
+          (upgrade.stabilityDays && upgrade.releaseTimestamp) ||
+          isActiveConfidenceLevel(upgrade.minimumConfidence)
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
@@ -234,6 +241,32 @@ export async function processBranch(
               'Update has not passed stability days'
             );
             config.stabilityStatus = BranchStatus.yellow;
+            continue; // eslint-disable-line no-continue
+          }
+        }
+        const {
+          datasource,
+          depName,
+          minimumConfidence,
+          updateType,
+          currentVersion,
+          newVersion,
+        } = upgrade;
+        if (isActiveConfidenceLevel(minimumConfidence)) {
+          const confidence = await getMergeConfidenceLevel(
+            datasource,
+            depName,
+            currentVersion,
+            newVersion,
+            updateType
+          );
+          if (!satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+            logger.debug(
+              { depName, confidence, minimumConfidence },
+              'Update does not meet minimum confidence scores'
+            );
+            config.confidenceStatus = BranchStatus.yellow;
+            continue; // eslint-disable-line no-continue
           }
         }
       }
@@ -244,7 +277,9 @@ export async function processBranch(
         config.stabilityStatus === BranchStatus.yellow &&
         ['not-pending', 'status-success'].includes(config.prCreation)
       ) {
-        logger.debug('Skipping branch creation due to stability days not met');
+        logger.debug(
+          'Skipping branch creation due to internal status checks not met'
+        );
         return { branchExists, result: BranchResult.Pending };
       }
     }

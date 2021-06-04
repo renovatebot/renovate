@@ -1197,6 +1197,17 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  /*
+   * Undocumented experimental feature
+  {
+    name: 'minimumConfidence',
+    description:
+      'Minimum Merge confidence level to filter by. Requires authentication to work.',
+    type: 'string',
+    allowedValues: ['low', 'neutral', 'low', 'high', 'very high'],
+    default: 'low',
+  },
+  */
   {
     name: 'internalChecksFilter',
     description: 'When/how to filter based on internal checks.',

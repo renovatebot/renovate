@@ -39,6 +39,7 @@ export interface LookupUpdateConfig
   separateMultipleMajor?: boolean;
   datasource: string;
   depName: string;
+  minimumConfidence?: string;
 }
 
 export interface UpdateResult {

@@ -35,6 +35,7 @@ const ignoredNodes = [
   'isVulnerabilityAlert',
   'copyLocalLibs', // deprecated - functionality is now enabled by default
   'prBody', // deprecated
+  'minimumConfidence', // undocumented feature flag
 ];
 
 function isManagerPath(parentPath: string): boolean {

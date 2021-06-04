@@ -3,6 +3,11 @@ import { mergeChildConfig } from '../../../../config';
 import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import { getElapsedDays } from '../../../../util/date';
+import {
+  getMergeConfidenceLevel,
+  isActiveConfidenceLevel,
+  satisfiesConfidenceLevel,
+} from '../../../../util/merge-confidence';
 import { applyPackageRules } from '../../../../util/package-rules';
 import type { VersioningApi } from '../../../../versioning';
 import type { LookupUpdateConfig, UpdateResult } from './types';
@@ -14,18 +19,18 @@ export interface InternalChecksResult {
   pendingReleases?: Release[];
 }
 
-export function filterInternalChecks(
+export async function filterInternalChecks(
   config: Partial<LookupUpdateConfig & UpdateResult>,
   versioning: VersioningApi,
   bucket: string,
   sortedReleases: Release[]
-): InternalChecksResult {
-  const { currentVersion, depName, internalChecksFilter } = config;
+): Promise<InternalChecksResult> {
+  const { currentVersion, datasource, depName, internalChecksFilter } = config;
   let release: Release;
   let pendingChecks = false;
   let pendingReleases: Release[] = [];
   if (internalChecksFilter === 'none') {
-    // Don't care if stabilityDays are unmet
+    // Don't care if stabilityDays or minimumConfidence are unmet
     release = sortedReleases.pop();
   } else {
     // iterate through releases from highest to lowest, looking for the first which will pass checks if present
@@ -46,12 +51,35 @@ export function filterInternalChecks(
       // Apply packageRules in case any apply to updateType
       releaseConfig = applyPackageRules(releaseConfig);
       // Now check for a stabilityDays config
-      const { stabilityDays, releaseTimestamp } = releaseConfig;
+      const {
+        minimumConfidence,
+        stabilityDays,
+        releaseTimestamp,
+        version: newVersion,
+        updateType,
+      } = releaseConfig;
       if (is.integer(stabilityDays) && releaseTimestamp) {
         if (getElapsedDays(releaseTimestamp) < stabilityDays) {
           // Skip it if it doesn't pass checks
           logger.debug(
-            { depName },
+            { depName, check: 'stabilityDays' },
+            `Release ${candidateRelease.version} is pending status checks`
+          );
+          pendingReleases.unshift(candidateRelease);
+          continue; // eslint-disable-line no-continue
+        }
+      }
+      if (isActiveConfidenceLevel(minimumConfidence)) {
+        const confidence = await getMergeConfidenceLevel(
+          datasource,
+          depName,
+          currentVersion,
+          newVersion,
+          updateType
+        );
+        if (!satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+          logger.debug(
+            { depName, check: 'minimumConfidence' },
             `Release ${candidateRelease.version} is pending status checks`
           );
           pendingReleases.unshift(candidateRelease);
