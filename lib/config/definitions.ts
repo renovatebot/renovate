@@ -1204,7 +1204,7 @@ const options: RenovateOptions[] = [
     description:
       'Minimum Merge confidence level to filter by. Requires authentication to work.',
     type: 'string',
-    allowedValues: ['low', 'neutral', 'low', 'high', 'very high'],
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
     default: 'low',
   },
   */
