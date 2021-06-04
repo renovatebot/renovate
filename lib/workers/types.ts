@@ -15,7 +15,7 @@ import type {
 } from '../manager/types';
 import type { PlatformPrOptions } from '../platform/types';
 import type { File } from '../util/git';
-import { MergeConfidence } from '../util/merge-confidence';
+import type { MergeConfidence } from '../util/merge-confidence';
 import type { ChangeLogResult } from './pr/changelog/types';
 
 export interface BranchUpgradeConfig

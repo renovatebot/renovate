@@ -1,4 +1,4 @@
-import { UpdateType } from '../../config/types';
+import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
