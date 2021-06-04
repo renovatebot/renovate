@@ -1,4 +1,4 @@
-import nock from 'nock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import * as hostRules from '../host-rules';
 import {
@@ -36,7 +36,6 @@ describe(getName(), () => {
   describe('getMergeConfidenceLevel()', () => {
     beforeEach(() => {
       hostRules.clear();
-      nock.disableNetConnect();
     });
     it('returns neutral if undefined updateType', async () => {
       expect(
@@ -88,7 +87,8 @@ describe(getName(), () => {
       const depName = 'renovate';
       const currentVersion = '24.0.0';
       const newVersion = '25.0.0';
-      nock('https://badges.renovateapi.com')
+      httpMock
+        .scope('https://badges.renovateapi.com')
         .get(
           `/packages/${datasource}/${depName}/${newVersion}/confidence.api/${currentVersion}`
         )
@@ -109,7 +109,8 @@ describe(getName(), () => {
       const depName = 'renovate';
       const currentVersion = '25.0.0';
       const newVersion = '25.1.0';
-      nock('https://badges.renovateapi.com')
+      httpMock
+        .scope('https://badges.renovateapi.com')
         .get(
           `/packages/${datasource}/${depName}/${newVersion}/confidence.api/${currentVersion}`
         )
@@ -130,7 +131,8 @@ describe(getName(), () => {
       const depName = 'renovate';
       const currentVersion = '25.0.0';
       const newVersion = '25.1.0';
-      nock('https://badges.renovateapi.com')
+      httpMock
+        .scope('https://badges.renovateapi.com')
         .get(
           `/packages/${datasource}/${depName}/${newVersion}/confidence.api/${currentVersion}`
         )
