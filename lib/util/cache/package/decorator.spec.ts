@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file */
-/* eslint-disable class-methods-use-this */
 import os from 'os';
 import { mock } from 'jest-mock-extended';
 import { getName } from '../../../../test/util';
@@ -40,7 +38,7 @@ describe(getName(), () => {
     class MyClass {
       @cache({
         namespace: (arg: GetReleasesConfig) => arg.registryUrl,
-        key: 'key',
+        key: () => 'key',
       })
       public async getNumber(_: GetReleasesConfig): Promise<number> {
         await spy();

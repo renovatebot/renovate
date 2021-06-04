@@ -3,10 +3,10 @@ import { logger } from '../../../logger';
 import * as packageCache from '.';
 
 type Handler<T> = (parameters: DecoratorParameters<T>) => Promise<unknown>;
-type Method<T> = (this: T, ...args: any[]) => any;
+type Method<T> = (this: T, ...args: any[]) => Promise<any>;
 type Decorator<T> = <U extends T>(
   target: U,
-  key: keyof any,
+  key: keyof U,
   descriptor: TypedPropertyDescriptor<Method<T>>
 ) => TypedPropertyDescriptor<Method<T>>;
 
