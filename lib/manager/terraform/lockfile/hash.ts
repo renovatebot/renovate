@@ -89,7 +89,6 @@ export async function calculateHashes(
       );
       const readStream = http.stream(build.url);
       const writeStream = fs.createWriteStream(downloadFileName);
-      readStream.pipe(writeStream);
 
       let hash = null;
       try {
