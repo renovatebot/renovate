@@ -334,7 +334,7 @@ describe(getName(), () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-      config.pendingChecks = ['stabilityDays'];
+      config.pendingChecks = true;
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 

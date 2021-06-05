@@ -5,8 +5,6 @@ import { fs, git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -37,7 +35,7 @@ const adminConfig: RepoAdminConfig = {
 const config: UpdateArtifactsConfig = {};
 
 describe('bundler.updateArtifacts()', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
@@ -47,7 +45,6 @@ describe('bundler.updateArtifacts()', () => {
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     docker.resetPrefetchedImages();
 
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
   });
   afterEach(() => {
@@ -101,6 +98,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
     fs.readLocalFile.mockResolvedValueOnce(null);
@@ -114,20 +112,16 @@ describe('bundler.updateArtifacts()', () => {
         packageFileName: 'Gemfile',
         updatedDeps: ['foo', 'bar'],
         newPackageFileContent: 'Updated Gemfile content',
-        config: {
-          ...config,
-          binarySource: BinarySource.Global,
-        },
+        config,
       })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
   describe('Docker', () => {
-    beforeEach(async () => {
-      jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-      await setExecConfig({
+    beforeEach(() => {
+      setAdminConfig({
         ...adminConfig,
-        binarySource: BinarySource.Docker,
+        binarySource: 'docker',
       });
     });
     it('.ruby-version', async () => {
@@ -151,15 +145,13 @@ describe('bundler.updateArtifacts()', () => {
           packageFileName: 'Gemfile',
           updatedDeps: ['foo', 'bar'],
           newPackageFileContent: 'Updated Gemfile content',
-          config: {
-            ...config,
-            binarySource: BinarySource.Docker,
-          },
+          config,
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
     it('constraints options', async () => {
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -181,7 +173,6 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
-            binarySource: BinarySource.Docker,
             constraints: {
               ruby: '1.2.5',
               bundler: '3.2.1',
@@ -192,6 +183,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid constraints options', async () => {
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -213,7 +205,6 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
-            binarySource: BinarySource.Docker,
             constraints: {
               ruby: 'foo',
               bundler: 'bar',
@@ -225,6 +216,7 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration environment variables', async () => {
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -257,16 +249,14 @@ describe('bundler.updateArtifacts()', () => {
           packageFileName: 'Gemfile',
           updatedDeps: ['foo', 'bar'],
           newPackageFileContent: 'Updated Gemfile content',
-          config: {
-            ...config,
-            binarySource: BinarySource.Docker,
-          },
+          config,
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('injects bundler host configuration as command with bundler < 2', async () => {
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -301,7 +291,6 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
-            binarySource: BinarySource.Docker,
             constraints: {
               bundler: '1.2',
             },
@@ -312,6 +301,7 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration as command with bundler >= 2', async () => {
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -346,7 +336,6 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
-            binarySource: BinarySource.Docker,
             constraints: {
               bundler: '2.1',
             },
@@ -357,6 +346,7 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration as command with bundler == latest', async () => {
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -389,10 +379,7 @@ describe('bundler.updateArtifacts()', () => {
           packageFileName: 'Gemfile',
           updatedDeps: ['foo', 'bar'],
           newPackageFileContent: 'Updated Gemfile content',
-          config: {
-            ...config,
-            binarySource: BinarySource.Docker,
-          },
+          config,
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();

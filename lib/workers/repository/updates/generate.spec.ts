@@ -553,18 +553,18 @@ describe(getName(), () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          pendingChecks: ['check'],
+          pendingChecks: true,
         },
         {
           depName: 'some-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          pendingChecks: ['check'],
+          pendingChecks: true,
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.pendingChecks).toHaveLength(1);
+      expect(res.pendingChecks).toBe(true);
       expect(res.upgrades).toHaveLength(2);
     });
     it('filters pendingChecks', () => {
@@ -574,7 +574,7 @@ describe(getName(), () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          pendingChecks: ['check'],
+          pendingChecks: true,
         },
         {
           depName: 'some-dep',
