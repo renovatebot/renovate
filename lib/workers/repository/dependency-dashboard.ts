@@ -3,15 +3,14 @@ import { nameFromLevel } from 'bunyan';
 import { getAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
-import { Pr, platform } from '../../platform';
-import { PrState } from '../../types';
+import { platform } from '../../platform';
 import { BranchConfig, BranchResult } from '../types';
 
-function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
+function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
-  if (pr) {
-    item += `[${branch.prTitle}](../pull/${pr.number})`;
+  if (branch.prNo) {
+    item += `[${branch.prTitle}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
@@ -166,8 +165,7 @@ export async function ensureDependencyDashboard(
     issueBody += '## Edited/Blocked\n\n';
     issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, check the box below.\n\n`;
     for (const branch of prEdited) {
-      const pr = await platform.getBranchPr(branch.branchName);
-      issueBody += getListItem(branch, 'rebase', pr);
+      issueBody += getListItem(branch, 'rebase');
     }
     issueBody += '\n';
   }
@@ -195,16 +193,38 @@ export async function ensureDependencyDashboard(
     BranchResult.Automerged,
     BranchResult.PrEdited,
   ];
-  const inProgress = branches.filter(
+  let inProgress = branches.filter(
     (branch) => !otherRes.includes(branch.result)
+  );
+  const otherBranches = inProgress.filter(
+    (branch) => branch.prBlockedBy || !branch.prNo
+  );
+  // istanbul ignore if
+  if (otherBranches.length) {
+    issueBody += '## Other Branches\n\n';
+    issueBody += `These updates are pending. To force PRs open, check the box below.\n\n`;
+    for (const branch of otherBranches) {
+      logger.info(
+        {
+          prBlockedBy: branch.prBlockedBy,
+          prNo: branch.prNo,
+          result: branch.result,
+        },
+        'Blocked PR'
+      );
+      issueBody += getListItem(branch, 'other');
+    }
+    issueBody += '\n';
+  }
+  inProgress = inProgress.filter(
+    (branch) => branch.prNo && !branch.prBlockedBy
   );
   if (inProgress.length) {
     issueBody += '## Open\n\n';
     issueBody +=
       'These updates have all been created already. Click a checkbox below to force a retry/rebase of any.\n\n';
     for (const branch of inProgress) {
-      const pr = await platform.getBranchPr(branch.branchName);
-      issueBody += getListItem(branch, 'rebase', pr);
+      issueBody += getListItem(branch, 'rebase');
     }
     if (inProgress.length > 2) {
       issueBody += ' - [ ] ';
@@ -223,12 +243,7 @@ export async function ensureDependencyDashboard(
     issueBody +=
       'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
-      const pr = await platform.findPr({
-        branchName: branch.branchName,
-        prTitle: branch.prTitle,
-        state: PrState.NotOpen,
-      });
-      issueBody += getListItem(branch, 'recreate', pr);
+      issueBody += getListItem(branch, 'recreate');
     }
     issueBody += '\n';
   }
