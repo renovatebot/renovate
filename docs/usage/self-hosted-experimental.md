@@ -35,6 +35,10 @@ If set to any value, Renovate will always paginate requests to GitHub fully, ins
 
 If set to "false" (string), Renovate will remove any existing `package-lock.json` before attempting to update it.
 
+## RENOVATE_TERRAFORM_LOCK_FILE
+
+If set to any value, Renovate will update Terraform lock files and allow lockfile maintenance.
+
 ## RENOVATE_USER_AGENT
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.

@@ -37,10 +37,14 @@ describe(getName(), () => {
 
   afterEach(() => {
     setAdminConfig();
+    delete process.env.RENOVATE_TERRAFORM_LOCK_FILE;
   });
 
   it('returns null if no .terraform.lock.hcl found', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
+
+    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+
     expect(
       await updateArtifacts({
         packageFileName: 'main.tf',
@@ -53,6 +57,9 @@ describe(getName(), () => {
 
   it('returns null if .terraform.lock.hcl is empty', async () => {
     fs.readLocalFile.mockResolvedValueOnce('empty' as any);
+
+    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+
     expect(
       await updateArtifacts({
         packageFileName: 'main.tf',
@@ -77,6 +84,9 @@ describe(getName(), () => {
       newValue: '3.36.0',
       ...config,
     };
+
+    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: ['hashicorp/aws'],
@@ -106,6 +116,9 @@ describe(getName(), () => {
       newValue: '~> 2.50',
       ...config,
     };
+
+    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: ['azurerm'],
@@ -135,6 +148,9 @@ describe(getName(), () => {
       newValue: '~> 3.0',
       ...config,
     };
+
+    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: ['random'],
@@ -217,6 +233,9 @@ describe(getName(), () => {
       updateType: 'lockFileMaintenance',
       ...config,
     };
+
+    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+
     const result = await updateArtifacts({
       packageFileName: '',
       updatedDeps: [],
@@ -295,5 +314,19 @@ describe(getName(), () => {
 
     expect(mockHash.mock.calls).toBeArrayOfSize(0);
     expect(mockHash.mock.calls).toMatchSnapshot();
+  });
+
+  it('return null if experimental flag is not set', async () => {
+    const localConfig: UpdateArtifactsConfig = {
+      updateType: 'lockFileMaintenance',
+      ...config,
+    };
+    const result = await updateArtifacts({
+      packageFileName: '',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: localConfig,
+    });
+    expect(result).toBeNull();
   });
 });
