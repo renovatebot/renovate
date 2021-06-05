@@ -14,7 +14,7 @@ import { stripEmojis } from '../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import * as template from '../../util/template';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
-import { BranchConfig, PrResult } from '../types';
+import type { BranchConfig, PrBlockedBy } from '../types';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
@@ -126,10 +126,18 @@ export function getPlatformPrOptions(
       config.gitLabAutomerge,
   };
 }
-export type EnsurePrResult = {
-  prResult: PrResult;
-  pr?: Pr;
+
+export type ResultWithPr = {
+  pr: Pr;
+  prBlockedBy?: never;
 };
+
+export type ResultWithoutPr = {
+  pr?: never;
+  prBlockedBy: PrBlockedBy;
+};
+
+export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
@@ -196,7 +204,7 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { prResult: PrResult.BlockedByBranchAutomerge };
+      return { prBlockedBy: 'BranchAutomerge' };
     }
   }
   if (config.prCreation === 'status-success') {
@@ -205,7 +213,7 @@ export async function ensurePr(
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return { prResult: PrResult.AwaitingGreenBranch };
+      return { prBlockedBy: 'AwaitingTests' };
     }
     logger.debug('Branch status success');
   } else if (
@@ -213,7 +221,7 @@ export async function ensurePr(
     !existingPr &&
     dependencyDashboardCheck !== 'approvePr'
   ) {
-    return { prResult: PrResult.AwaitingApproval };
+    return { prBlockedBy: 'NeedsApproval' };
   } else if (
     config.prCreation === 'not-pending' &&
     !existingPr &&
@@ -239,7 +247,9 @@ export async function ensurePr(
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
-        return { prResult: PrResult.AwaitingNotPending };
+        return {
+          prBlockedBy: 'AwaitingTests',
+        };
       }
       const prNotPendingHours = String(config.prNotPendingHours);
       logger.debug(
@@ -351,7 +361,7 @@ export async function ensurePr(
           noWhitespaceOrHeadings(stripEmojis(prBody))
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
-        return { prResult: PrResult.NotUpdated, pr: existingPr };
+        return { pr: existingPr };
       }
       // PR must need updating
       if (existingPrTitle !== newPrTitle) {
@@ -383,7 +393,9 @@ export async function ensurePr(
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
-      return { prResult: PrResult.Updated, pr: existingPr };
+      return {
+        pr: existingPr,
+      };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     // istanbul ignore if
@@ -403,7 +415,7 @@ export async function ensurePr(
           !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
-          return { prResult: PrResult.LimitReached };
+          return { prBlockedBy: 'RateLimited' };
         }
         pr = await platform.createPr({
           sourceBranch: branchName,
@@ -429,7 +441,7 @@ export async function ensurePr(
         )
       ) {
         logger.warn('A pull requests already exists');
-        return { prResult: PrResult.ErrorAlreadyExists };
+        return { prBlockedBy: 'Error' };
       }
       if (err.statusCode === 502) {
         logger.warn(
@@ -442,7 +454,7 @@ export async function ensurePr(
           await deleteBranch(branchName);
         }
       }
-      return { prResult: PrResult.Error };
+      return { prBlockedBy: 'Error' };
     }
     if (
       config.branchAutomergeFailureMessage &&
@@ -480,7 +492,7 @@ export async function ensurePr(
       await addAssigneesReviewers(config, pr);
     }
     logger.debug(`Created ${pr.displayNumber}`);
-    return { prResult: PrResult.Created, pr };
+    return { pr };
   } catch (err) {
     // istanbul ignore if
     if (
@@ -494,5 +506,9 @@ export async function ensurePr(
     }
     logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
   }
-  return { prResult: PrResult.Error };
+  if (existingPr) {
+    return { pr: existingPr };
+  }
+  // istanbul ignore next
+  return { prBlockedBy: 'Error' };
 }
