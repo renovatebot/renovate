@@ -110,8 +110,7 @@ export async function calculateHashes(
     },
     { concurrency: 4 } // allow to look up 4 builds for this version in parallel
   );
-  // filter out null values and push to record
-  return hashes.filter((value) => value);
+  return hashes;
 }
 
 export default async function createHashes(
@@ -153,6 +152,12 @@ export default async function createHashes(
 
   const builds = versionReleaseBackend.builds;
   const hashes = await calculateHashes(builds, cacheDir);
+
+  // if a hash could not be produced skip caching and return null
+  if (hashes.some((value) => value == null)) {
+    return null;
+  }
+
   // sorting the hash alphabetically as terraform does this as well
   const sortedHashes = hashes.sort().map((hash) => `h1:${hash}`);
   // save to cache

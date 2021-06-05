@@ -109,7 +109,11 @@ export async function updateArtifacts({
     updates.push(update);
   }
 
-  if (updates.length === 0) {
+  // if no updates have been found or there are failed hashes abort
+  if (
+    updates.length === 0 ||
+    updates.some((value) => value.newHashes == null)
+  ) {
     return null;
   }
 

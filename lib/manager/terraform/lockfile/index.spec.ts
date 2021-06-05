@@ -316,6 +316,85 @@ describe(getName(), () => {
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
+  it('return null if hashing fails', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+
+    mockGetPkgReleases
+      .mockResolvedValueOnce(
+        new Promise((resolve) =>
+          resolve({
+            // aws
+            releases: [
+              {
+                version: '2.30.0',
+              },
+              {
+                version: '3.0.0',
+              },
+              {
+                version: '3.36.0',
+              },
+            ],
+          })
+        )
+      )
+      .mockResolvedValueOnce(
+        new Promise((resolve) =>
+          resolve({
+            // azurerm
+            releases: [
+              {
+                version: '2.50.0',
+              },
+              {
+                version: '2.55.0',
+              },
+              {
+                version: '2.56.0',
+              },
+            ],
+          })
+        )
+      )
+      .mockResolvedValueOnce(
+        new Promise((resolve) =>
+          resolve({
+            // random
+            releases: [
+              {
+                version: '2.2.1',
+              },
+              {
+                version: '2.2.2',
+              },
+              {
+                version: '3.0.0',
+              },
+            ],
+          })
+        )
+      );
+    mockHash.mockResolvedValue(null);
+
+    const localConfig: UpdateArtifactsConfig = {
+      updateType: 'lockFileMaintenance',
+      ...config,
+    };
+
+    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+
+    const result = await updateArtifacts({
+      packageFileName: '',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: localConfig,
+    });
+    expect(result).toBeNull();
+
+    expect(mockHash.mock.calls).toBeArrayOfSize(2);
+    expect(mockHash.mock.calls).toMatchSnapshot();
+  });
+
   it('return null if experimental flag is not set', async () => {
     const localConfig: UpdateArtifactsConfig = {
       updateType: 'lockFileMaintenance',

@@ -1,6 +1,6 @@
 import { createReadStream } from 'fs';
 import * as httpMock from '../../../../test/http-mock';
-import { getName, loadFixture } from '../../../../test/util';
+import { getFixturePath, getName, loadFixture } from '../../../../test/util';
 import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
 import createHashes from './hash';
 
@@ -37,6 +37,31 @@ describe(getName(), () => {
       .scope(releaseBackendUrl)
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .replyWithError('');
+
+    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
+    expect(result).toBeNull();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('fail to create hashes', async () => {
+    const readStreamLinux = createReadStream(
+      getFixturePath('releaseBackendAzurerm_2_56_0.json')
+    );
+    const readStreamDarwin = createReadStream(
+      getFixturePath('releaseBackendAzurerm_2_56_0.json')
+    );
+    httpMock
+      .scope(releaseBackendUrl)
+      .get('/terraform-provider-azurerm/2.56.0/index.json')
+      .reply(200, releaseBackendAzurerm)
+      .get(
+        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
+      )
+      .reply(200, readStreamLinux)
+      .get(
+        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip'
+      )
+      .reply(200, readStreamDarwin);
 
     const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
     expect(result).toBeNull();

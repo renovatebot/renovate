@@ -62,6 +62,21 @@ Array [
 
 exports[`manager/terraform/lockfile/index do full lock file maintenance without necessary changes 1`] = `Array []`;
 
+exports[`manager/terraform/lockfile/index return null if hashing fails 1`] = `
+Array [
+  Array [
+    "hashicorp/azurerm",
+    "2.56.0",
+    "/tmp/renovate/cache",
+  ],
+  Array [
+    "hashicorp/random",
+    "2.2.2",
+    "/tmp/renovate/cache",
+  ],
+]
+`;
+
 exports[`manager/terraform/lockfile/index update single dependency with exact constraint 1`] = `
 Object {
   "contents": "# This file is maintained automatically by \\"terraform init\\".
