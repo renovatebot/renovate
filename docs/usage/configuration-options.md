@@ -1990,6 +1990,11 @@ In the above example, each regex manager will match a single dependency each.
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### extractVersionTemplate
+
+If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
 ### lookupNameTemplate
 
 `lookupName` is used for looking up dependency versions.
