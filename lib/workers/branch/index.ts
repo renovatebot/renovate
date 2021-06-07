@@ -241,7 +241,7 @@ export async function processBranch(
         return {
           branchExists,
           prNo: branchPr?.number,
-          result: BranchResult.NotScheduled,
+          result: BranchResult.UpdateNotScheduled,
         };
       }
       // istanbul ignore if
