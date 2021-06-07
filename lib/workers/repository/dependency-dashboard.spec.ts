@@ -213,6 +213,14 @@ describe(getName(), () => {
           result: BranchResult.Error,
           branchName: 'branchName8',
         },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr9',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
+          result: BranchResult.Done,
+          prBlockedBy: 'BranchAutomerge',
+          branchName: 'branchName9',
+        },
       ];
       config.dependencyDashboard = true;
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
