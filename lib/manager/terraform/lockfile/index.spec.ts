@@ -37,13 +37,13 @@ describe(getName(), () => {
 
   afterEach(() => {
     setAdminConfig();
-    delete process.env.RENOVATE_TERRAFORM_LOCK_FILE;
+    delete process.env.RENOVATE_X_TERRAFORM_LOCK_FILE;
   });
 
   it('returns null if no .terraform.lock.hcl found', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
 
-    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     expect(
       await updateArtifacts({
@@ -58,7 +58,7 @@ describe(getName(), () => {
   it('returns null if .terraform.lock.hcl is empty', async () => {
     fs.readLocalFile.mockResolvedValueOnce('empty' as any);
 
-    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     expect(
       await updateArtifacts({
@@ -85,7 +85,7 @@ describe(getName(), () => {
       ...config,
     };
 
-    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
@@ -117,7 +117,7 @@ describe(getName(), () => {
       ...config,
     };
 
-    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
@@ -149,7 +149,7 @@ describe(getName(), () => {
       ...config,
     };
 
-    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
@@ -234,7 +234,7 @@ describe(getName(), () => {
       ...config,
     };
 
-    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: '',
@@ -381,7 +381,7 @@ describe(getName(), () => {
       ...config,
     };
 
-    process.env.RENOVATE_TERRAFORM_LOCK_FILE = 'test';
+    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: '',

@@ -65,7 +65,7 @@ export async function updateArtifacts({
   logger.debug(`terraform.updateArtifacts(${packageFileName})`);
 
   // TODO remove experimental flag, if functionality is confirmed
-  if (!process.env.RENOVATE_TERRAFORM_LOCK_FILE) {
+  if (!process.env.RENOVATE_X_TERRAFORM_LOCK_FILE) {
     logger.debug(
       `terraform.updateArtifacts: skipping updates. Experimental feature not activated`
     );
