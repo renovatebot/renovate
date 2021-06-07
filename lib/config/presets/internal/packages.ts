@@ -51,13 +51,8 @@ export const presets: Record<string, Preset> = {
     matchPackageNames: ['postcss'],
     matchPackagePrefixes: ['postcss-'],
   },
-  testingLibrary: {
-    description: 'All testing-library packages',
-    matchPackagePrefixes: ['@testing-library'],
-  },
   jsUnitTest: {
     description: 'Unit test packages for javascript',
-    extends: ['packages:testingLibrary'],
     matchPackageNames: [
       'coveralls',
       'ember-exam',
@@ -71,7 +66,15 @@ export const presets: Record<string, Preset> = {
       'proxyquire',
       'supertest',
     ],
-    matchPackagePrefixes: ['chai', 'jest', 'mocha', 'qunit', 'sinon', 'should'],
+    matchPackagePrefixes: [
+      '@testing-library',
+      'chai',
+      'jest',
+      'mocha',
+      'qunit',
+      'sinon',
+      'should',
+    ],
   },
   unitTest: {
     description: 'All unit test packages',
