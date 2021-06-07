@@ -72,8 +72,8 @@ export const presets: Record<string, Preset> = {
       'jest',
       'mocha',
       'qunit',
-      'sinon',
       'should',
+      'sinon',
     ],
   },
   unitTest: {
