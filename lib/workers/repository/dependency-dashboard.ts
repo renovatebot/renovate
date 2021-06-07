@@ -180,6 +180,17 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
+  const prPendingBranchAutomerge = branches.filter(
+    (branch) => branch.prBlockedBy === 'BranchAutomerge'
+  );
+  if (prPendingBranchAutomerge.length) {
+    issueBody += '## Pending Branch Automerge\n\n';
+    issueBody += `These updates await pending status checks before automerging.\n\n`;
+    for (const branch of prPendingBranchAutomerge) {
+      issueBody += getListItem(branch, 'approvePr');
+    }
+    issueBody += '\n';
+  }
   const otherRes = [
     BranchResult.Pending,
     BranchResult.NeedsApproval,
@@ -194,7 +205,9 @@ export async function ensureDependencyDashboard(
     BranchResult.PrEdited,
   ];
   let inProgress = branches.filter(
-    (branch) => !otherRes.includes(branch.result)
+    (branch) =>
+      !otherRes.includes(branch.result) &&
+      branch.prBlockedBy !== 'BranchAutomerge'
   );
   const otherBranches = inProgress.filter(
     (branch) => branch.prBlockedBy || !branch.prNo
