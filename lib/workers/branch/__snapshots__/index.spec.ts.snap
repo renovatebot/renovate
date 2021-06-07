@@ -220,7 +220,7 @@ exports[`workers/branch/index processBranch skips branch if not scheduled and no
 Object {
   "branchExists": true,
   "prNo": undefined,
-  "result": "not-scheduled",
+  "result": "update-not-scheduled",
 }
 `;
 
