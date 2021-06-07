@@ -36,6 +36,8 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     const res = await processBranch(branch);
+    branch.prBlockedBy = res?.prBlockedBy;
+    branch.prNo = res?.prNo;
     branch.result = res?.result;
     if (
       branch.result === BranchResult.Automerged &&
