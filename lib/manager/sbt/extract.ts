@@ -86,6 +86,16 @@ const isVarDef = (str: string): boolean =>
     str
   );
 
+const isVarSeqSingleLine = (str: string): boolean =>
+  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*Seq\(.*\).*\s*$/.test(
+    str
+  );
+
+const isVarSeqMultipleLine = (str: string): boolean =>
+  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*Seq\(.*[^)]*.*$/.test(
+    str
+  );
+
 const getVarName = (str: string): string =>
   str
     .replace(/^\s*(private\s*)?(lazy\s*)?val\s+/, '')
@@ -231,6 +241,18 @@ function parseSbtLine(
       isMultiDeps = false;
       const url = getResolverUrl(line);
       registryUrls.push(url);
+    } else if (isVarSeqSingleLine(line)) {
+      isMultiDeps = false;
+      const depExpr = line.replace(/^.*Seq\(\s*/, '').replace(/\).*$/, '');
+      dep = parseDepExpr(depExpr, {
+        ...ctx,
+      });
+    } else if (isVarSeqMultipleLine(line)) {
+      isMultiDeps = true;
+      const depExpr = line.replace(/^.*Seq\(\s*/, '');
+      dep = parseDepExpr(depExpr, {
+        ...ctx,
+      });
     } else if (isVarDef(line)) {
       variables[getVarName(line)] = getVarInfo(line, ctx);
     } else if (isVarDependency(line)) {
