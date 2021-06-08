@@ -2,6 +2,10 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import {
+  isActiveConfidenceLevel,
+  MergeConfidence,
+} from '../../util/merge-confidence';
 
 async function setStatusCheck(
   branchName: string,
@@ -47,6 +51,30 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     context,
     description,
     config.stabilityStatus,
+    config.productLinks.documentation
+  );
+}
+
+export type ConfidenceConfig = RenovateConfig & {
+  confidenceStatus?: BranchStatus;
+  minimumConfidence?: MergeConfidence;
+};
+
+export async function setConfidence(config: ConfidenceConfig): Promise<void> {
+  debugger;
+  if (!isActiveConfidenceLevel(config.minimumConfidence)) {
+    return;
+  }
+  const context = `renovate/merge-confidence`;
+  const description =
+    config.confidenceStatus === BranchStatus.green
+      ? 'Updates have met Merge Confidence requirement'
+      : 'Updates have not met Merge Confidence requirement';
+  await setStatusCheck(
+    config.branchName,
+    context,
+    description,
+    config.confidenceStatus,
     config.productLinks.documentation
   );
 }

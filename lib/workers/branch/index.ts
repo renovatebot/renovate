@@ -44,7 +44,7 @@ import { getUpdatedPackageFiles } from './get-updated';
 import { handlepr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
-import { setStability } from './status-checks';
+import { setConfidence, setStability } from './status-checks';
 
 function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   const titleRebase = branchPr.title?.startsWith('rebase!');
@@ -306,7 +306,9 @@ export async function processBranch(
             newVersion,
             updateType
           );
-          if (!satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+          if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+            config.confidenceStatus = BranchStatus.green;
+          } else {
             logger.debug(
               { depName, confidence, minimumConfidence },
               'Update does not meet minimum confidence scores'
@@ -448,6 +450,7 @@ export async function processBranch(
     }
     // Set branch statuses
     await setStability(config);
+    await setConfidence(config);
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
