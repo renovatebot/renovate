@@ -29,7 +29,7 @@ import * as rubygems from './rubygems';
 import * as sbtPackage from './sbt-package';
 import * as sbtPlugin from './sbt-plugin';
 import * as terraformModule from './terraform-module';
-import * as terraformProvider from './terraform-provider';
+import { TerraformProviderDatasource } from './terraform-provider';
 import type { DatasourceApi } from './types';
 
 const api = new Map<string, DatasourceApi>();
@@ -66,4 +66,4 @@ api.set('rubygems', rubygems);
 api.set('sbt-package', sbtPackage);
 api.set('sbt-plugin', sbtPlugin);
 api.set('terraform-module', terraformModule);
-api.set('terraform-provider', terraformProvider);
+api.set('terraform-provider', new TerraformProviderDatasource());
