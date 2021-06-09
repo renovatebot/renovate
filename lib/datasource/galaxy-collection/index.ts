@@ -1,7 +1,7 @@
 import pMap from 'p-map';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
-import { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -23,7 +23,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: (getReleasesConfig: GetReleasesConfig) => getReleasesConfig.lookupName,
+    key: ({ lookupName }: GetReleasesConfig) => lookupName,
   })
   async getReleases({
     lookupName,
