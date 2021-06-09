@@ -1,5 +1,6 @@
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
+import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
 import {
   getMergeConfidenceLevel,
@@ -43,6 +44,7 @@ describe(getName(), () => {
   describe('getMergeConfidenceLevel()', () => {
     beforeEach(() => {
       hostRules.clear();
+      memCache.reset();
     });
 
     it('returns neutral if undefined updateType', async () => {
@@ -116,23 +118,6 @@ describe(getName(), () => {
       ).toBe('high');
     });
 
-    it('returns from cachel', async () => {
-      hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
-      const datasource = 'npm';
-      const depName = 'renovate';
-      const currentVersion = '24.3.0';
-      const newVersion = '25.0.0';
-      expect(
-        await getMergeConfidenceLevel(
-          datasource,
-          depName,
-          currentVersion,
-          newVersion,
-          'major'
-        )
-      ).toBe('high');
-    });
-
     it('returns neutral if invalid confidence level', async () => {
       hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
       const datasource = 'npm';
@@ -172,6 +157,16 @@ describe(getName(), () => {
         await getMergeConfidenceLevel(
           datasource,
           depName,
+          currentVersion,
+          newVersion,
+          'minor'
+        )
+      ).toBe('neutral');
+      // memory cache
+      expect(
+        await getMergeConfidenceLevel(
+          datasource,
+          depName + '-new',
           currentVersion,
           newVersion,
           'minor'

@@ -1,8 +1,9 @@
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
+import * as memCache from '../cache/memory';
+import * as packageCache from '../cache/package';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
-import * as cache from './cache';
 
 const http = new Http('merge-confidence');
 
@@ -62,8 +63,12 @@ export async function getMergeConfidenceLevel(
     logger.warn('No Merge Confidence API token found');
     return 'neutral';
   }
+  if (memCache.get('merge-confidence-invalid-token')) {
+    return 'neutral';
+  }
   const url = `https://badges.renovateapi.com/packages/${datasource}/${depName}/${newVersion}/confidence.api/${currentVersion}`;
-  const cachedResult = cache.get(token, url);
+  const cachedResult = await packageCache.get('merge-confidence', token + url);
+  // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
@@ -76,9 +81,10 @@ export async function getMergeConfidenceLevel(
   } catch (err) {
     logger.debug({ err }, 'Error fetching merge confidence');
     if (err.statusCode === 403) {
+      memCache.set('merge-confidence-invalid-token', true);
       logger.warn('Merge Confidence API token rejected');
     }
   }
-  cache.set(token, url, confidence);
+  await packageCache.set('merge-confidence', token + url, confidence, 60);
   return confidence;
 }
