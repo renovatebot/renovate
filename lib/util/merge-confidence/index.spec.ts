@@ -25,6 +25,7 @@ describe(getName(), () => {
       expect(isActiveConfidenceLevel('high')).toBe(true);
     });
   });
+
   describe('satisfiesConfidenceLevel()', () => {
     it('returns false if less', () => {
       expect(satisfiesConfidenceLevel('low', 'high')).toBe(false);
@@ -38,6 +39,7 @@ describe(getName(), () => {
       expect(satisfiesConfidenceLevel('very high', 'high')).toBe(true);
     });
   });
+
   describe('getMergeConfidenceLevel()', () => {
     beforeEach(() => {
       hostRules.clear();
