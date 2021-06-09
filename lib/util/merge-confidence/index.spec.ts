@@ -72,8 +72,8 @@ describe(getName(), () => {
         await getMergeConfidenceLevel(
           'npm',
           'renovate',
-          '25.0.0',
-          '25.0.0',
+          '25.0.1',
+          '25.0.1',
           'pin'
         )
       ).toBe('high');
@@ -84,7 +84,7 @@ describe(getName(), () => {
         await getMergeConfidenceLevel(
           'npm',
           'renovate',
-          '24.0.0',
+          '24.2.0',
           '25.0.0',
           'major'
         )
@@ -95,7 +95,7 @@ describe(getName(), () => {
       hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
       const datasource = 'npm';
       const depName = 'renovate';
-      const currentVersion = '24.0.0';
+      const currentVersion = '24.3.0';
       const newVersion = '25.0.0';
       httpMock
         .scope('https://badges.renovateapi.com')
@@ -103,6 +103,23 @@ describe(getName(), () => {
           `/packages/${datasource}/${depName}/${newVersion}/confidence.api/${currentVersion}`
         )
         .reply(200, { confidence: 'high' });
+      expect(
+        await getMergeConfidenceLevel(
+          datasource,
+          depName,
+          currentVersion,
+          newVersion,
+          'major'
+        )
+      ).toBe('high');
+    });
+
+    it('returns from cachel', async () => {
+      hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
+      const datasource = 'npm';
+      const depName = 'renovate';
+      const currentVersion = '24.3.0';
+      const newVersion = '25.0.0';
       expect(
         await getMergeConfidenceLevel(
           datasource,
@@ -142,7 +159,7 @@ describe(getName(), () => {
       const datasource = 'npm';
       const depName = 'renovate';
       const currentVersion = '25.0.0';
-      const newVersion = '25.1.0';
+      const newVersion = '25.4.0';
       httpMock
         .scope('https://badges.renovateapi.com')
         .get(

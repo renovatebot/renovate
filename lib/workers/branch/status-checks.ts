@@ -3,8 +3,8 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import {
-  isActiveConfidenceLevel,
   MergeConfidence,
+  isActiveConfidenceLevel,
 } from '../../util/merge-confidence';
 
 async function setStatusCheck(
@@ -61,7 +61,6 @@ export type ConfidenceConfig = RenovateConfig & {
 };
 
 export async function setConfidence(config: ConfidenceConfig): Promise<void> {
-  debugger;
   if (!isActiveConfidenceLevel(config.minimumConfidence)) {
     return;
   }
