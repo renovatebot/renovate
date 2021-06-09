@@ -12,12 +12,15 @@ describe(getName(), () => {
     it('returns false if null', () => {
       expect(isActiveConfidenceLevel(null)).toBe(false);
     });
+
     it('returns false if low', () => {
       expect(isActiveConfidenceLevel('low')).toBe(false);
     });
+
     it('returns false if nonsense', () => {
       expect(isActiveConfidenceLevel('nonsense')).toBe(false);
     });
+
     it('returns true if valid value (high)', () => {
       expect(isActiveConfidenceLevel('high')).toBe(true);
     });
@@ -26,9 +29,11 @@ describe(getName(), () => {
     it('returns false if less', () => {
       expect(satisfiesConfidenceLevel('low', 'high')).toBe(false);
     });
+
     it('returns true if equal', () => {
       expect(satisfiesConfidenceLevel('high', 'high')).toBe(true);
     });
+
     it('returns true if more', () => {
       expect(satisfiesConfidenceLevel('very high', 'high')).toBe(true);
     });
@@ -37,6 +42,7 @@ describe(getName(), () => {
     beforeEach(() => {
       hostRules.clear();
     });
+
     it('returns neutral if undefined updateType', async () => {
       expect(
         await getMergeConfidenceLevel(
@@ -48,6 +54,7 @@ describe(getName(), () => {
         )
       ).toBe('neutral');
     });
+
     it('returns neutral if irrelevant updateType', async () => {
       expect(
         await getMergeConfidenceLevel(
@@ -59,6 +66,7 @@ describe(getName(), () => {
         )
       ).toBe('neutral');
     });
+
     it('returns high if pinning', async () => {
       expect(
         await getMergeConfidenceLevel(
@@ -70,6 +78,7 @@ describe(getName(), () => {
         )
       ).toBe('high');
     });
+
     it('returns neutral if no token', async () => {
       expect(
         await getMergeConfidenceLevel(
@@ -81,6 +90,7 @@ describe(getName(), () => {
         )
       ).toBe('neutral');
     });
+
     it('returns valid confidence level', async () => {
       hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
       const datasource = 'npm';
@@ -103,6 +113,7 @@ describe(getName(), () => {
         )
       ).toBe('high');
     });
+
     it('returns neutral if invalid confidence level', async () => {
       hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
       const datasource = 'npm';
@@ -125,6 +136,7 @@ describe(getName(), () => {
         )
       ).toBe('neutral');
     });
+
     it('returns neutral if exception from API', async () => {
       hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
       const datasource = 'npm';
