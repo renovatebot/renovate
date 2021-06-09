@@ -2,6 +2,7 @@ import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
+import * as cache from './cache';
 
 const http = new Http('merge-confidence');
 
@@ -60,14 +61,16 @@ export async function getMergeConfidenceLevel(
     logger.warn('No Merge Confidence API token found');
     return 'neutral';
   }
+  const url = `https://badges.renovateapi.com/packages/${datasource}/${depName}/${newVersion}/confidence.api/${currentVersion}`;
+  const cachedResult = cache.get(token, url);
+  if (cachedResult) {
+    return cachedResult;
+  }
+  let confidence = 'neutral';
   try {
-    const { confidence } = (
-      await http.getJson<{ confidence: MergeConfidence }>(
-        `https://badges.renovateapi.com/packages/${datasource}/${depName}/${newVersion}/confidence.api/${currentVersion}`
-      )
-    ).body;
-    if (MERGE_CONFIDENCE.includes(confidence)) {
-      return confidence;
+    const res = (await http.getJson<{ confidence: MergeConfidence }>(url)).body;
+    if (MERGE_CONFIDENCE.includes(res.confidence)) {
+      confidence = res.confidence;
     }
   } catch (err) {
     logger.debug({ err }, 'Error fetching merge confidence');
@@ -75,5 +78,6 @@ export async function getMergeConfidenceLevel(
       logger.warn('Merge Confidence API token rejected');
     }
   }
-  return 'neutral';
+  cache.set(token, url, confidence);
+  return confidence;
 }

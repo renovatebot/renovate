@@ -70,14 +70,14 @@ export async function filterInternalChecks(
         }
       }
       if (isActiveConfidenceLevel(minimumConfidence)) {
-        const confidence = await getMergeConfidenceLevel(
+        const confidenceLevel = await getMergeConfidenceLevel(
           datasource,
           depName,
           currentVersion,
           newVersion,
           updateType
         );
-        if (!satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+        if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence)) {
           logger.debug(
             { depName, check: 'minimumConfidence' },
             `Release ${candidateRelease.version} is pending status checks`
