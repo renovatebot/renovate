@@ -45,11 +45,6 @@ Array [
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
   Object {
-    "packageFile": "solo-package/package.json",
-    "packageJsonName": "@demo/solo",
-    "pnpmShrinkwrap": "pnpm-lock.yaml",
-  },
-  Object {
     "packageFile": "non-nested-packages/a/package.json",
     "packageJsonName": "@demo/non-nested-a",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
@@ -57,6 +52,11 @@ Array [
   Object {
     "packageFile": "non-nested-packages/b/package.json",
     "packageJsonName": "@demo/non-nested-b",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "solo-package/package.json",
+    "packageJsonName": "@demo/solo",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
 ]
