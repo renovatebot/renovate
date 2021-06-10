@@ -54,6 +54,7 @@ describe('.updateArtifacts()', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if unchanged', async () => {
     fs.readFile.mockResolvedValueOnce('content' as any);
     const execSnapshots = mockExecAll(exec);
@@ -68,6 +69,7 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated requirements.txt', async () => {
     fs.readFile.mockResolvedValueOnce('current requirements.txt' as any);
     const execSnapshots = mockExecAll(exec);
@@ -85,6 +87,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode', async () => {
     setAdminConfig(dockerAdminConfig);
     const execSnapshots = mockExecAll(exec);
@@ -102,6 +105,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
     fs.outputFile.mockImplementationOnce(() => {
@@ -116,6 +120,7 @@ describe('.updateArtifacts()', () => {
       })
     ).toMatchSnapshot();
   });
+
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
     const execSnapshots = mockExecAll(exec);
@@ -133,6 +138,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('uses pipenv version from config', async () => {
     setAdminConfig(dockerAdminConfig);
     const execSnapshots = mockExecAll(exec);
