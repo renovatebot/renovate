@@ -17,7 +17,7 @@ describe(getName(), () => {
 
     it('matches package in non-nested directory', () => {
       const packageFile = 'non-nested-packages/a/package.json';
-      const packageFilters = ['non-nested-packages/*'];
+      const packageFilters = ['non-nested-packages/*/*'];
 
       const isPackageInWorkspace = matchesAnyPattern(
         packageFile,
@@ -29,19 +29,7 @@ describe(getName(), () => {
 
     it('matches package in explicitly defined directory', () => {
       const packageFile = 'solo-package/package.json';
-      const packageFilters = ['solo-package'];
-
-      const isPackageInWorkspace = matchesAnyPattern(
-        packageFile,
-        packageFilters
-      );
-
-      expect(isPackageInWorkspace).toBeTrue();
-    });
-
-    it('matches package in explicitly defined directory with trailing slash', () => {
-      const packageFile = 'solo-package/package.json';
-      const packageFilters = ['solo-package/'];
+      const packageFilters = ['solo-package/*'];
 
       const isPackageInWorkspace = matchesAnyPattern(
         packageFile,
