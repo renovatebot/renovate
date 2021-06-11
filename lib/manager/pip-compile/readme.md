@@ -1,5 +1,4 @@
-The `pip-compile` manager is in "alpha" release, this means it's not ready for production use.
-Try at your own risk.
+Due to limited functionality, the `pip-compile` manager should be considered in an "alpha" stage, which means it's not ready for production use for the majority of end users.
 We welcome feedback and bug reports!
 
 The current implementation has some limitations.
@@ -24,6 +23,10 @@ If Renovate matches/extracts a file, it assumes that the corresponding output fi
 e.g. `requirements.in` => `requirements.txt`
 
 Therefore it will not work if files are in separate directories, including `input/requirements.in` and `output/requirements.txt`.
+
+If no `.in` suffix is found, then a `.txt` suffix is appended for the output file, e.g. `foo.file` would look for a corresponding `foo.file.txt`.
+
+In future iterations it is intended to make the mapping configurable.
 
 ### Configuration of Python version
 

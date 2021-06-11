@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { quote as pipCompile } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -24,11 +25,11 @@ function getPythonConstraint(
   return undefined;
 }
 
-function getPipToolsConstraint(config: UpdateArtifactsConfig): string | null {
+function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
   const { constraints = {} } = config;
   const { pipTools } = constraints;
 
-  if (pipTools) {
+  if (is.string(pipTools)) {
     logger.debug('Using pipTools constraint from config');
     return pipTools;
   }
