@@ -234,7 +234,6 @@ In the `renovate.json` you can instruct Renovate to use a secret as the token to
     {
       "matchHost": "eu.gcr.io",
       "token": "{{ secrets.GOOGLE_ACCESS_TOKEN }}",
-      "authType": "Bearer"
     }
   ]
 }
