@@ -26,7 +26,7 @@ Therefore it will not work if files are in separate directories, including `inpu
 
 If no `.in` suffix is found, then a `.txt` suffix is appended for the output file, e.g. `foo.file` would look for a corresponding `foo.file.txt`.
 
-In future iterations it is intended to make the mapping configurable.
+We intend to make the mapping configurable in future iterations.
 
 ### Configuration of Python version
 
