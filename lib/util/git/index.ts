@@ -266,6 +266,7 @@ export async function syncGit(): Promise<void> {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
+      await git.pull();
       // istanbul ignore if
       if (process.env.NODE_ENV !== 'test') {
         await git.raw(['config', '--unset-all', 'remote.origin.fetch']);
