@@ -206,6 +206,49 @@ module.exports = {
 };
 ```
 
+#### Google Container Registry
+
+Assume you are running Google cloud a personal Gitlab CI and storing the Docker images in the Google Container Registry (GCR).
+In this scenario the GCR requires token based authentication for everything and thus you must make two additional things happen:
+
+1. Get access to your token
+2. Make sure renovate gets the token to read the docker registry.
+
+_This documentation only gives **a few hints** on **a possible way** to achieve this in this scenario_
+
+You need a renovate docker image that includes the google cloud SDK which you have to build yourself.
+A rough sketch of what the Dockerfile to build such a custom renovate image can look like.
+
+```Dockerfile
+FROM renovate/renovate:12.34.56
+# Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
+# under "Installation" for "Debian/Ubuntu"
+RUN ...
+```
+
+In the `renovate.json` you can instruct Renovate to use a secret as the token to use when connecting the specified docker registry:
+
+```js
+{
+  "hostRules": [
+    {
+      "matchHost": "eu.gcr.io",
+      "token": "{{ secrets.GOOGLE_ACCESS_TOKEN }}",
+      "authType": "Bearer"
+    }
+  ]
+}
+```
+
+You do not want to persist this token anywhere.
+One way to provide this token to Renovate is by creating a temporary file with the token from within the .gitlab-ci.yml using something like this:
+
+```yaml
+script:
+  - 'echo "module.exports = { secrets: { GOOGLE_ACCESS_TOKEN: ''"$(gcloud auth print-access-token)"'' } };" > config.js'
+  - renovate $RENOVATE_EXTRA_FLAGS
+```
+
 #### ChartMuseum
 
 Maybe you're running your own ChartMuseum server to host your private Helm Charts.

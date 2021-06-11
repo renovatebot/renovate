@@ -81,12 +81,20 @@ export async function getAuthHeaders(
         'base64'
       );
       opts.headers = { authorization: `Basic ${auth}` };
+    } else if (opts.token) {
+      const authType = opts.authType ? opts.authType : 'Bearer';
+      logger.debug(
+        `Using ${authType} token for docker registry ${registryHost}`
+      );
+      opts.headers = { authorization: `${authType} ${opts.token}` };
+      return opts.headers;
     }
     delete opts.username;
     delete opts.password;
+    delete opts.token;
 
     if (authenticateHeader.scheme.toUpperCase() === 'BASIC') {
-      logger.debug(`Using Basic auth for docker registry ${dockerRepository}`);
+      logger.debug(`Using Basic auth for docker registry ${registryHost}`);
       await http.get(apiCheckUrl, opts);
       return opts.headers;
     }
