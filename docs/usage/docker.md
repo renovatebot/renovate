@@ -212,7 +212,7 @@ Assume you are running Google Cloud a personal GitLab CI and storing the Docker 
 In this scenario the GCR requires token based authentication for everything and thus you must make two additional things happen:
 
 1. Get access to your token
-2. Make sure renovate gets the token to read the docker registry.
+1. Make sure Renovate gets the token to read the Docker registry.
 
 _This documentation only gives **a few hints** on **a possible way** to achieve this in this scenario_
 
