@@ -113,6 +113,11 @@ describe(getName(), () => {
           packageJsonName: '@demo/solo',
           pnpmShrinkwrap: undefined as undefined | string,
         },
+        {
+          packageFile: 'solo-package-trailing-slash/package.json',
+          packageJsonName: '@demo/solo-trailing-slash',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
       ];
 
       await detectPnpmWorkspaces(packageFiles);

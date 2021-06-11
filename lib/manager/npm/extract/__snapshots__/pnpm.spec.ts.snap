@@ -59,6 +59,11 @@ Array [
     "packageJsonName": "@demo/solo",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
+  Object {
+    "packageFile": "solo-package-trailing-slash/package.json",
+    "packageJsonName": "@demo/solo-trailing-slash",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
 ]
 `;
 
