@@ -208,7 +208,7 @@ module.exports = {
 
 #### Google Container Registry
 
-Assume you are running Google cloud a personal Gitlab CI and storing the Docker images in the Google Container Registry (GCR).
+Assume you are running Google Cloud a personal GitLab CI and storing the Docker images in the Google Container Registry (GCR).
 In this scenario the GCR requires token based authentication for everything and thus you must make two additional things happen:
 
 1. Get access to your token
