@@ -84,7 +84,7 @@ export async function getAuthHeaders(
     } else if (opts.token) {
       const authType = opts.authType ? opts.authType : 'Bearer';
       logger.debug(
-        `Using ${authType} token for docker registry ${registryHost}`
+        `Using ${authType} token for Docker registry ${registryHost}`
       );
       opts.headers = { authorization: `${authType} ${opts.token}` };
       return opts.headers;
