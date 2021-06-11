@@ -240,7 +240,7 @@ In the `renovate.json` you can instruct Renovate to use a secret as the token to
 ```
 
 You do not want to persist this token anywhere.
-One way to provide this token to Renovate is by creating a temporary file with the token from within the .gitlab-ci.yml using something like this:
+One way to provide this token to Renovate is by creating a temporary file with the token from within the `.gitlab-ci.yml` using something like this:
 
 ```yaml
 script:
