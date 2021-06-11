@@ -233,7 +233,7 @@ In the `renovate.json` you can instruct Renovate to use a secret as the token to
   "hostRules": [
     {
       "matchHost": "eu.gcr.io",
-      "token": "{{ secrets.GOOGLE_ACCESS_TOKEN }}",
+      "token": "{{ secrets.GOOGLE_ACCESS_TOKEN }}"
     }
   ]
 }
