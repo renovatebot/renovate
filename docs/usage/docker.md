@@ -219,7 +219,9 @@ When running Renovate in this context the Google access token must be retrieved 
 
 _This documentation gives **a few hints** on **a possible way** to achieve this end result._
 
-The basic approach documented here is that you create a custom image and then run Renovate as one of the stages of your project. To make this run independent of any user you should use a `Project Access Token` for the project and use this as the `RENOVATE_TOKEN` variable for Gitlab CI. See also: https://gitlab.com/renovate-bot/renovate-runner
+The basic approach documented here is that you create a custom image and then run Renovate as one of the stages of your project.
+To make this run independent of any user you should use a `Project Access Token` for the project and use this as the `RENOVATE_TOKEN` variable for Gitlab CI.
+See also the [renovate-runner repository on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
 
 To get access to the token a custom Renovate Docker image is needed that includes the Google Cloud SDK.
 The Dockerfile to create such an image can look like this:
