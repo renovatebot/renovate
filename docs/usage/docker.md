@@ -210,7 +210,8 @@ module.exports = {
 
 Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
 
-Access to the GCR uses a Bearer token based authentication. This token can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
+Access to the GCR uses Bearer token based authentication.
+This token can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
 
 It is also very important to note that this is a short-lived token ([60 minutes](https://stackoverflow.com/questions/50370714/google-cloud-bearer-token-expiry)) and thus storing it for subsequent builds in a variable (like you can do with the `RENOVATE_TOKEN`) is not an option.
 
