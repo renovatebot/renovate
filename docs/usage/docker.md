@@ -208,18 +208,20 @@ module.exports = {
 
 #### Google Container Registry
 
-Assume you are running GitLab CI in the Google Cloud and are storing the Docker images in the Google Container Registry (GCR).
-Access to the GCR uses a Bearer token based authentication.
-The token for the build can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
+Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
 
-It is also very important to note that this is a short-lived token ([60 minutes](https://stackoverflow.com/questions/50370714/google-cloud-bearer-token-expiry)) and thus storing it repeated builds is useless.
+Access to the GCR uses a Bearer token based authentication. This token can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
 
-When applying this to Renovate this all means the access token must be injected into the `hostRules` configuration just before Renovate is started.
+It is also very important to note that this is a short-lived token ([60 minutes](https://stackoverflow.com/questions/50370714/google-cloud-bearer-token-expiry)) and thus storing it for subsequent builds in a variable (like you can do with the `RENOVATE_TOKEN`) is not an option.
 
-_This documentation only gives **a few hints** on **a possible way** to achieve this in this scenario_
+When running Renovate in this context the Google access token must be retrieved and injected into the `hostRules` configuration just before Renovate is started.
+
+_This documentation gives **a few hints** on **a possible way** to achieve this end result._
+
+The basic approach documented here is that you create a custom image and then run Renovate as one of the stages of your project. To make this run independent of any user you should use a `Project Access Token` for the project and use this as the `RENOVATE_TOKEN` variable for Gitlab CI. See also: https://gitlab.com/renovate-bot/renovate-runner
 
 To get access to the token a custom Renovate Docker image is needed that includes the Google Cloud SDK.
-The Dockerfile can look like this:
+The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
 FROM renovate/renovate:25.40.1
@@ -228,12 +230,11 @@ FROM renovate/renovate:25.40.1
 RUN ...
 ```
 
-One way to provide this token to Renovate is by generating a `config.js` file from within the `.gitlab-ci.yml`:
+One way to provide this token using the `hostRules` to Renovate is by generating a `config.js` file from within the `.gitlab-ci.yml`:
 
 ```yaml
 script:
-  - gcloud auth list
-  - 'echo "module.exports = { hostRules: [ { matchHost: ''eu.gcr.io'', token: ''"$(gcloud auth print-access-token)"'' }] };" > config.js'
+  - 'echo "module.exports = { hostRules: [ { matchHost: ''eu.gcr.io'', token: ''"$(gcloud auth print-access-token)"'' } ] };" > config.js'
   - renovate $RENOVATE_EXTRA_FLAGS
 ```
 
