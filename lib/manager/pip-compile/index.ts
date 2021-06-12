@@ -1,7 +1,9 @@
 import { LANGUAGE_PYTHON } from '../../constants/languages';
+import { extract } from '../pip_requirements/extract';
 
-export { extractPackageFile } from '../pip_requirements/extract';
 export { updateArtifacts } from './artifacts';
+
+export const extractPackageFile = extract;
 
 export const language = LANGUAGE_PYTHON;
 export const supportsLockFileMaintenance = true;

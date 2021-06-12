@@ -9,6 +9,7 @@ const requirements4 = loadFixture('requirements4.txt');
 const requirements5 = loadFixture('requirements5.txt');
 const requirements6 = loadFixture('requirements6.txt');
 const requirements7 = loadFixture('requirements7.txt');
+const requirements8 = loadFixture('requirements8.txt');
 
 describe(getName(), () => {
   beforeEach(() => {
@@ -132,6 +133,11 @@ describe(getName(), () => {
         'http://its-a-secret:example.com/private-pypi/',
         'http://its-a-secret:example.com/private-pypi/',
       ]);
+    });
+    it('returns null for pip-compile files', () => {
+      expect(
+        extractPackageFile(requirements8, 'requirements.txt', config)
+      ).toBeNull();
     });
   });
 });
