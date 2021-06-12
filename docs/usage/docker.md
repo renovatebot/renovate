@@ -208,15 +208,17 @@ module.exports = {
 
 #### Google Container Registry
 
-Assume you are running Google Cloud plus GitLab CI and are storing the Docker images in the Google Container Registry (GCR).
-In this scenario the GCR requires token based authentication for everything and thus you must make two additional things happen:
+Assume you are running GitLab CI in the Google Cloud and are storing the Docker images in the Google Container Registry (GCR).
+Access to the GCR uses a Bearer token based authentication.
+The token for the build can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
 
-1. Get access to your token
-1. Make sure Renovate gets the token to read the Docker registry.
+It is also very important to note that this is a short-lived token ([60 minutes](https://stackoverflow.com/questions/50370714/google-cloud-bearer-token-expiry)) and thus storing it repeated builds is useless.
+
+When applying this to Renovate this all means the access token must be injected into the `hostRules` configuration just before Renovate is started.
 
 _This documentation only gives **a few hints** on **a possible way** to achieve this in this scenario_
 
-You need a custom Renovate Docker image that includes the Google Cloud SDK.
+To get access to the token a custom Renovate Docker image is needed that includes the Google Cloud SDK.
 The Dockerfile can look like this:
 
 ```Dockerfile
@@ -226,25 +228,12 @@ FROM renovate/renovate:25.40.1
 RUN ...
 ```
 
-In your `renovate.json` file, tell Renovate which secret to use as the token when connecting to the specified Docker registry:
-
-```js
-{
-  "hostRules": [
-    {
-      "matchHost": "eu.gcr.io",
-      "token": "{{ secrets.GOOGLE_ACCESS_TOKEN }}"
-    }
-  ]
-}
-```
-
-You do not want to persist this token anywhere.
-One way to provide this token to Renovate is by creating a temporary file with the token from within the `.gitlab-ci.yml` using something like this:
+One way to provide this token to Renovate is by generating a `config.js` file from within the `.gitlab-ci.yml`:
 
 ```yaml
 script:
-  - 'echo "module.exports = { secrets: { GOOGLE_ACCESS_TOKEN: ''"$(gcloud auth print-access-token)"'' } };" > config.js'
+  - gcloud auth list
+  - 'echo "module.exports = { hostRules: [ { matchHost: ''eu.gcr.io'', token: ''"$(gcloud auth print-access-token)"'' }] };" > config.js'
   - renovate $RENOVATE_EXTRA_FLAGS
 ```
 
