@@ -220,7 +220,7 @@ You need a custom Renovate Docker image that includes the Google Cloud SDK.
 The Dockerfile can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:12.34.56
+FROM renovate/renovate:25.40.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
