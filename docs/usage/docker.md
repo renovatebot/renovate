@@ -226,7 +226,7 @@ FROM renovate/renovate:12.34.56
 RUN ...
 ```
 
-In the `renovate.json` you can instruct Renovate to use a secret as the token to use when connecting the specified docker registry:
+In your `renovate.json` file, tell Renovate which secret to use as the token when connecting to the specified Docker registry:
 
 ```js
 {
