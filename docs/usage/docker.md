@@ -216,8 +216,8 @@ In this scenario the GCR requires token based authentication for everything and 
 
 _This documentation only gives **a few hints** on **a possible way** to achieve this in this scenario_
 
-You need a Renovate Docker image that includes the Google Cloud SDK which you have to build yourself.
-A rough sketch of what the Dockerfile to build such a custom Renovate image can look like.
+You need a custom Renovate Docker image that includes the Google Cloud SDK.
+The Dockerfile can look like this:
 
 ```Dockerfile
 FROM renovate/renovate:12.34.56
