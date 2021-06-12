@@ -114,6 +114,7 @@ function replaceSecretsinObject(
 }
 
 export function applySecretsToConfig(config: RenovateConfig): RenovateConfig {
+  logger.debug({ config }, 'applySecretsToConfig()');
   // Add all secrets to be sanitized
   if (is.plainObject(config.secrets)) {
     for (const secret of Object.values(config.secrets)) {
