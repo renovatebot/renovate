@@ -1,9 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
-
-import { GalaxyCollectionDatasource } from '.';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import { GalaxyCollectionDatasource } from '.';
 
 const communityKubernetesBase = loadFixture('community_kubernetes_base.json');
 const communityKubernetesVersions = loadFixture(
