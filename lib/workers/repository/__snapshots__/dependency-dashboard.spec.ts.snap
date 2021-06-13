@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/dependency-dashboard ensureMasterIssue() contains logged problems 1`] = `
-"This issue contains a list of Renovate updates and their statuses.
+"This issue contains a list of Renovate updates and their statuses. Click one checkbox at a time, as Renovate will skip any you clicked too slowly.
 
 ## Repository problems
 
@@ -23,7 +23,7 @@ These updates await pending status checks. To force their creation now, check th
 `;
 
 exports[`workers/repository/dependency-dashboard ensureMasterIssue() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
-"This issue contains a list of Renovate updates and their statuses.
+"This issue contains a list of Renovate updates and their statuses. Click one checkbox at a time, as Renovate will skip any you clicked too slowly.
 
 This repository currently has no open or pending branches.
 
@@ -33,7 +33,7 @@ And this is a footer
 `;
 
 exports[`workers/repository/dependency-dashboard ensureMasterIssue() open or update Dependency Dashboard when rules contain approvals 1`] = `
-"This issue contains a list of Renovate updates and their statuses.
+"This issue contains a list of Renovate updates and their statuses. Click one checkbox at a time, as Renovate will skip any you clicked too slowly.
 
 This repository currently has no open or pending branches.
 

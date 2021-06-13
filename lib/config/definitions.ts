@@ -412,7 +412,7 @@ const options: RenovateOptions[] = [
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
     default:
-      'This issue contains a list of Renovate updates and their statuses.',
+      'This issue contains a list of Renovate updates and their statuses. Click one checkbox at a time, as Renovate will skip any you clicked too slowly.',
   },
   {
     name: 'dependencyDashboardFooter',
