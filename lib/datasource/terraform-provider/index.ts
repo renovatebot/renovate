@@ -29,30 +29,31 @@ export class TerraformProviderDatasource extends Datasource {
   @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}`,
     key: (getReleasesConfig: GetReleasesConfig) =>
-      `${getReleasesConfig.registryUrl}/${
-        getReleasesConfig.lookupName.includes('/')
-          ? getReleasesConfig.lookupName
-          : `hashicorp/${getReleasesConfig.lookupName}`
-      }`,
+      `${
+        getReleasesConfig.registryUrl
+      }/${TerraformProviderDatasource.getRepository(getReleasesConfig)}`,
   })
   async getReleases({
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const repository = lookupName.includes('/')
-      ? lookupName
-      : `hashicorp/${lookupName}`;
-
     logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
     let dep: ReleaseResult = null;
     const registryHost = parseUrl(registryUrl).host;
     if (registryHost === 'releases.hashicorp.com') {
       dep = await this.queryReleaseBackend(lookupName, registryUrl);
     } else {
+      const repository = TerraformProviderDatasource.getRepository({
+        lookupName,
+      });
       dep = await this.queryRegistry(registryUrl, repository);
     }
 
     return dep;
+  }
+
+  private static getRepository({ lookupName }: GetReleasesConfig): string {
+    return lookupName.includes('/') ? lookupName : `hashicorp/${lookupName}`;
   }
 
   private async queryRegistry(
