@@ -391,6 +391,14 @@ export async function processBranch(
         });
       }
     }
+    if (config.rebaseWhen === 'never') {
+      logger.debug(`Skipping commit (rebaseWhen=never)`);
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: BranchResult.NoWork,
+      };
+    }
     config.forceCommit =
       !!dependencyDashboardCheck ||
       config.rebaseRequested ||
@@ -442,10 +450,7 @@ export async function processBranch(
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
       }
-      if (
-        mergeStatus === 'stale' &&
-        ['conflicted', 'never'].includes(config.rebaseWhen)
-      ) {
+      if (mergeStatus === 'stale' && config.rebaseWhen === 'conflicted') {
         logger.warn(
           'Branch cannot automerge because it is stale and rebaseWhen setting disallows rebasing - raising a PR instead'
         );
