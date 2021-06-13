@@ -2191,10 +2191,6 @@ Renovate does not wait until the package has seen no releases for x `stabilityDa
 If you want to slow down PRs for a specific package, setup a custom schedule for that package.
 Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
 
-One usecase of `stabilityDays` is to prevent holding a broken package, in cases where the package registry allows maintainers to unpublish versions within a certain timeframe.
-As an example: npm packages less than 72 hours old can be unpublished, which could result in a service impact if you have already updated to it.
-To prevent this you can configure Renovate to wait for 3 `stabilityDays` before upgrading npm packages.
-
 If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
 If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
 
@@ -2210,6 +2206,22 @@ There are a couple of uses for `stabilityDays`:
 
 If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
 It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
+
+#### Prevent holding broken npm packages
+
+npm packages less than 72 hours (3 days) old can be unpublished, which could result in a service impact if you have already updated to it.
+Set `stabilityDays` to 3 for npm packages to prevent relying on a package that can be removed from the registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "stabilityDays": 3
+    }
+  ]
+}
+```
 
 #### Await X days before Automerging
 
