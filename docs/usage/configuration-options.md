@@ -2185,6 +2185,12 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
+Note: Renovate will wait for the set amount of `stabilityDays` to pass for each **separate** version.
+Renovate does not wait until the package has seen no releases for x `stabilityDays`.
+`stabilityDays` is not intended to help with slowing down fast releasing project updates.
+If you want to slow down PRs for a specific package, setup a custom schedule for that package.
+Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
+
 If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
 If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
 
