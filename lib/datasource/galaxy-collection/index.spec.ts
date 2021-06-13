@@ -3,6 +3,7 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
 
 import { GalaxyCollectionDatasource } from '.';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 
 const communityKubernetesBase = loadFixture('community_kubernetes_base.json');
 const communityKubernetesVersions = loadFixture(
@@ -33,19 +34,14 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('returns null for remote host error', async () => {
+    it('throws for remote host error', async () => {
       httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(500);
-      let e;
-      try {
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: GalaxyCollectionDatasource.id,
           depName: 'foo.bar',
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-      expect(e).toMatchSnapshot();
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -76,6 +72,22 @@ describe(getName(), () => {
           depName: 'community.kubernetes',
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('throws error for remote host versions error', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v2/collections/community/kubernetes/')
+        .reply(200, communityKubernetesBase)
+        .get('/api/v2/collections/community/kubernetes/versions/')
+        .reply(500);
+      await expect(
+        getPkgReleases({
+          datasource: GalaxyCollectionDatasource.id,
+          depName: 'community.kubernetes',
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
