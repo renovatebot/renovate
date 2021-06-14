@@ -391,7 +391,8 @@ export async function processBranch(
         });
       }
     }
-    if (config.rebaseWhen === 'never') {
+    const forcedManually = !!dependencyDashboardCheck || config.rebaseRequested;
+    if (!forcedManually && config.rebaseWhen === 'never') {
       logger.debug(`Skipping commit (rebaseWhen=never)`);
       return {
         branchExists,
@@ -399,10 +400,7 @@ export async function processBranch(
         result: BranchResult.NoWork,
       };
     }
-    config.forceCommit =
-      !!dependencyDashboardCheck ||
-      config.rebaseRequested ||
-      branchPr?.isConflicted;
+    config.forceCommit = forcedManually || branchPr?.isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
