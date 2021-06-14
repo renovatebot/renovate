@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
-import * as datasourceHelm from '../../datasource/helm';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -88,5 +88,5 @@ export function extractPackageFile(
     return null;
   }
 
-  return { deps, datasource: datasourceHelm.id } as PackageFile;
+  return { deps, datasource: HelmDatasource.id } as PackageFile;
 }
