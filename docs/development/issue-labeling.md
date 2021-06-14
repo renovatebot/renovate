@@ -115,7 +115,7 @@ Keep in mind that an issue can be both affecting a platform and a self hosted in
 
 </details>
 
-Use these to .... (@rarkins, please write out how we should use these labels)
+The purpose of these labels is to allow browsing of open issues by the most commonly-used functionality, such as automerging or Dependency Dashboard.
 
 ### Manager
 
