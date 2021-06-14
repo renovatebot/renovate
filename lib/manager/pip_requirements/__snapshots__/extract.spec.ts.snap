@@ -63,6 +63,37 @@ Array [
 ]
 `;
 
+exports[`manager/pip_requirements/extract extractPackageFile() extracts using extractAllPackageFiles 1`] = `
+Array [
+  Object {
+    "deps": Array [
+      Object {
+        "currentValue": "==0.3.1",
+        "currentVersion": "0.3.1",
+        "datasource": "pypi",
+        "depName": "some-package",
+      },
+      Object {
+        "currentValue": "==1.0.0",
+        "currentVersion": "1.0.0",
+        "datasource": "pypi",
+        "depName": "some-other-package",
+      },
+      Object {
+        "currentValue": "==1.9",
+        "currentVersion": "1.9",
+        "datasource": "pypi",
+        "depName": "not_semver",
+      },
+    ],
+    "packageFile": "unused_file_name",
+    "registryUrls": Array [
+      "http://example.com/private-pypi/",
+    ],
+  },
+]
+`;
+
 exports[`manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
 Array [
   Object {
