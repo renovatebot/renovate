@@ -12,7 +12,7 @@ The general idea is that we have:
 - core functionality (`core:`)
 
 The majority of issues should have at least one of those labels.
-These labels should also map approximately to our semantic commit scopes.
+These labels should also map approximately to our Conventional Commit scopes.
 
 ## Basic knowledge about Renovate
 
