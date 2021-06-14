@@ -1,10 +1,11 @@
 import { createReadStream } from 'fs';
 import * as httpMock from '../../../../test/http-mock';
 import { getFixturePath, getName, loadFixture } from '../../../../test/util';
-import { defaultRegistryUrls } from '../../../datasource/terraform-provider';
+import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import createHashes from './hash';
 
-const releaseBackendUrl = defaultRegistryUrls[1];
+const terraformProviderDatasource = new TerraformProviderDatasource();
+const releaseBackendUrl = terraformProviderDatasource.defaultRegistryUrls[1];
 const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
 
 describe(getName(), () => {

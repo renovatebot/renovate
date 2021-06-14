@@ -1,10 +1,7 @@
 import crypto from 'crypto';
 import extract from 'extract-zip';
 import pMap from 'p-map';
-import {
-  defaultRegistryUrls,
-  id,
-} from '../../../datasource/terraform-provider';
+import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import type {
   TerraformBuild,
   VersionDetailResponse,
@@ -15,8 +12,9 @@ import * as fs from '../../../util/fs';
 import { Http } from '../../../util/http';
 import { repositoryRegex } from './util';
 
-const http = new Http(id);
+const http = new Http(TerraformProviderDatasource.id);
 const hashCacheTTL = 10080; // in seconds == 1 week
+const terraformProviderDatasource = new TerraformProviderDatasource();
 
 export async function hashFiles(files: string[]): Promise<string> {
   const rootHash = crypto.createHash('sha256');
@@ -69,7 +67,7 @@ async function getReleaseBackendIndex(
 ): Promise<VersionDetailResponse> {
   return (
     await http.getJson<VersionDetailResponse>(
-      `${defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`
+      `${terraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`
     )
   ).body;
 }
@@ -127,7 +125,7 @@ export default async function createHashes(
   const lookupName = repositoryRegexResult.groups.lookupName;
   const backendLookUpName = `terraform-provider-${lookupName}`;
 
-  const cacheKey = `${defaultRegistryUrls[1]}/${repository}/${lookupName}-${version}`;
+  const cacheKey = `${terraformProviderDatasource.defaultRegistryUrls[1]}/${repository}/${lookupName}-${version}`;
   const cachedRelease = await packageCache.get<string[]>(
     'terraform-provider-release',
     cacheKey
