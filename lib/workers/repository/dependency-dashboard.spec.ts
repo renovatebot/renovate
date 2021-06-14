@@ -42,11 +42,11 @@ async function dryRun(
 }
 
 describe(getName(), () => {
-  describe('ensureMasterIssue()', () => {
+  describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
       setAdminConfig();
     });
-    it('do nothing if masterissue is disable', async () => {
+    it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
@@ -56,7 +56,7 @@ describe(getName(), () => {
       await dryRun(branches, platform);
     });
 
-    it('do nothing if it has no masterissueapproval branches', async () => {
+    it('do nothing if it has no dependencyDashboardApproval branches', async () => {
       const branches = [
         {
           ...mock<BranchConfig>(),
@@ -212,6 +212,14 @@ describe(getName(), () => {
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
           result: BranchResult.Error,
           branchName: 'branchName8',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr9',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
+          result: BranchResult.Done,
+          prBlockedBy: 'BranchAutomerge',
+          branchName: 'branchName9',
         },
       ];
       config.dependencyDashboard = true;

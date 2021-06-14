@@ -1,4 +1,4 @@
-import * as datasourceGalaxy from '../../datasource/galaxy';
+import { GalaxyDatasource } from '../../datasource/galaxy';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
@@ -58,11 +58,11 @@ function finalize(dependency: PackageDependency): boolean {
     // remove leading `git+` from URLs like `git+https://...`
     dep.lookupName = source.replace(/git\+/, '');
   } else if (galaxyDepRegex.exec(source)) {
-    dep.datasource = datasourceGalaxy.id;
+    dep.datasource = GalaxyDatasource.id;
     dep.depName = dep.managerData.src;
     dep.lookupName = dep.managerData.src;
   } else if (galaxyDepRegex.exec(dep.managerData.name)) {
-    dep.datasource = datasourceGalaxy.id;
+    dep.datasource = GalaxyDatasource.id;
     dep.depName = dep.managerData.name;
     dep.lookupName = dep.managerData.name;
   } else {

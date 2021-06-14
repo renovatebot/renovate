@@ -122,7 +122,7 @@ export async function exec(
     try {
       res = await rawExec(rawExecCommand, rawExecOptions);
     } catch (err) {
-      logger.trace({ err }, 'rawExec err');
+      logger.debug({ err }, 'rawExec err');
       if (useDocker) {
         await removeDockerContainer(docker.image, dockerChildPrefix).catch(
           (removeErr: Error) => {

@@ -89,6 +89,7 @@ export enum BranchResult {
   CommitLimitReached = 'commit-limit-reached',
   BranchLimitReached = 'branch-limit-reached',
   Rebase = 'rebase',
+  UpdateNotScheduled = 'update-not-scheduled',
 }
 
 export interface BranchConfig

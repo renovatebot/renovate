@@ -27,12 +27,16 @@ function extractFromSection(
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     let registryUrls: string[] | undefined;
+    let lookupName: string | undefined;
 
     if (typeof currentValue !== 'string') {
       const version = currentValue.version;
       const path = currentValue.path;
       const git = currentValue.git;
       const registryName = currentValue.registry;
+
+      lookupName = currentValue.package;
+
       if (version) {
         currentValue = version;
         nestedVersion = true;
@@ -76,6 +80,9 @@ function extractFromSection(
     }
     if (target) {
       dep.target = target;
+    }
+    if (lookupName) {
+      dep.lookupName = lookupName;
     }
     deps.push(dep);
   });

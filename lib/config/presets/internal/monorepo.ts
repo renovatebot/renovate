@@ -124,6 +124,7 @@ const repoGroups = {
   openfeign: 'https://github.com/OpenFeign/feign',
   opentelemetry: 'https://github.com/open-telemetry/opentelemetry-js',
   OpenTelemetryDotnet: 'https://github.com/open-telemetry/opentelemetry-dotnet',
+  orleans: 'https://github.com/dotnet/orleans',
   picasso: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
