@@ -30,18 +30,18 @@ When Renovate processes your project's repository it will look for the files lis
 
 ## Configuring Support Policy
 
-Renovate supports a [`supportPolicy`](./configuration-options.md#supportpolicy) option that can be passed the following values and associated versions (current as of April 2021):
+Renovate supports a [`supportPolicy`](./configuration-options.md#supportpolicy) option that can be passed the following values and associated versions (current as of June 2021):
 
 **Default:** `lts`
 
-| supportPolicy | versions       | description                                              |
-| ------------- | -------------- | -------------------------------------------------------- |
-| all           | 12, 14, 15, 16 | All releases that have not passed their end date         |
-| lts           | 12, 14         | All releases classified as LTS, including in maintenance |
-| active        | 14, 16         | All releases not in maintenance                          |
-| lts_active    | 14             | All releases both LTS and active                         |
-| lts_latest    | 14             | The latest LTS release                                   |
-| current       | 16             | The latest release from "all"                            |
+| supportPolicy | versions   | description                                              |
+| ------------- | ---------- | -------------------------------------------------------- |
+| all           | 12, 14, 16 | All releases that have not passed their end date         |
+| lts           | 12, 14     | All releases classified as LTS, including in maintenance |
+| active        | 14, 16     | All releases not in maintenance                          |
+| lts_active    | 14         | All releases both LTS and active                         |
+| lts_latest    | 14         | The latest LTS release                                   |
+| current       | 16         | The latest release from "all"                            |
 
 The version numbers associated with each support policy will be updated as new versions of Node.js are released, moved to LTS or maintenance, etc.
 

@@ -394,7 +394,7 @@ describe(getName(), () => {
   });
   describe('getPreset', () => {
     it('handles removed presets with a migration', async () => {
-      const res = await presets.getPreset(':masterIssue', {});
+      const res = await presets.getPreset(':base', {});
       expect(res).toMatchSnapshot();
     });
     it('handles removed presets with no migration', async () => {

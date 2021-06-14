@@ -67,9 +67,21 @@ exports[`config/presets/index getPreset handles preset not found 3`] = `undefine
 
 exports[`config/presets/index getPreset handles removed presets with a migration 1`] = `
 Object {
-  "dependencyDashboard": true,
-  "description": Array [
-    "Enable Renovate Dependency Dashboard creation",
+  "extends": Array [
+    ":separateMajorReleases",
+    ":combinePatchMinorReleases",
+    ":ignoreUnstable",
+    ":prImmediately",
+    ":semanticPrefixFixDepsChoreOthers",
+    ":updateNotScheduled",
+    ":automergeDisabled",
+    ":ignoreModulesAndTests",
+    ":autodetectPinVersions",
+    ":prHourlyLimit2",
+    ":prConcurrentLimit20",
+    "group:monorepos",
+    "group:recommended",
+    "workarounds:all",
   ],
 }
 `;
