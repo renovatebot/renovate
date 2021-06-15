@@ -16,7 +16,7 @@ export const getVersionings = (): Map<
 
 export function get(versioning: string): VersioningApi {
   if (!versioning) {
-    logger.debug('Missing versioning');
+    logger.trace('Missing versioning');
     return versionings.get('semver') as VersioningApi;
   }
   let versioningName: string;
