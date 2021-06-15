@@ -7,13 +7,13 @@ Array [
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
   Object {
-    "packageFile": "packages/a/package.json",
-    "packageJsonName": "@org/a",
+    "packageFile": "nested-packages/group/a/package.json",
+    "packageJsonName": "@demo/nested-group-a",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
   Object {
     "packageFile": "not-matching/b/package.json",
-    "packageJsonName": "@org/b",
+    "packageJsonName": "@not-matching/b",
     "pnpmShrinkwrap": undefined,
   },
 ]
@@ -35,13 +35,33 @@ Array [
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
   Object {
-    "packageFile": "packages/a/package.json",
-    "packageJsonName": "@org/a",
+    "packageFile": "nested-packages/group/a/package.json",
+    "packageJsonName": "@demo/nested-group-a",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
   Object {
-    "packageFile": "packages/b/package.json",
-    "packageJsonName": "@org/b",
+    "packageFile": "nested-packages/group/b/package.json",
+    "packageJsonName": "@demo/nested-group-b",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "non-nested-packages/a/package.json",
+    "packageJsonName": "@demo/non-nested-a",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "non-nested-packages/b/package.json",
+    "packageJsonName": "@demo/non-nested-b",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "solo-package/package.json",
+    "packageJsonName": "@demo/solo",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "solo-package-trailing-slash/package.json",
+    "packageJsonName": "@demo/solo-trailing-slash",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
 ]

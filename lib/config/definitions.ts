@@ -1930,6 +1930,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'currentValueTemplate',
+    description:
+      'Optional currentValue for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioningTemplate',
     description:
       'Optional versioning for extracted dependencies. Valid only within a `regexManagers` object.',

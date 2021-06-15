@@ -123,6 +123,8 @@ module.exports = {
         '@typescript-eslint/unbound-method': 0,
 
         'jest/valid-title': [0, { ignoreTypeOfDescribeName: true }],
+        'max-classes-per-file': 0,
+        'class-methods-use-this': 0,
       },
     },
     {

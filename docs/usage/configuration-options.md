@@ -2001,6 +2001,11 @@ It will be compiled using Handlebars and the regex `groups` result.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
+### currentValueTemplate
+
+If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
 ### datasourceTemplate
 
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -2185,6 +2190,12 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
+Note: Renovate will wait for the set amount of `stabilityDays` to pass for each **separate** version.
+Renovate does not wait until the package has seen no releases for x `stabilityDays`.
+`stabilityDays` is not intended to help with slowing down fast releasing project updates.
+If you want to slow down PRs for a specific package, setup a custom schedule for that package.
+Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
+
 If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
 If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
 
@@ -2200,6 +2211,22 @@ There are a couple of uses for `stabilityDays`:
 
 If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
 It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
+
+#### Prevent holding broken npm packages
+
+npm packages less than 72 hours (3 days) old can be unpublished, which could result in a service impact if you have already updated to it.
+Set `stabilityDays` to 3 for npm packages to prevent relying on a package that can be removed from the registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "stabilityDays": 3
+    }
+  ]
+}
+```
 
 #### Await X days before Automerging
 
@@ -2255,7 +2282,7 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseStale=true and the base branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseWhen=behind-base-branch and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.

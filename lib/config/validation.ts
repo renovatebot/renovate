@@ -387,6 +387,7 @@ export async function validateConfig(
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',
+                'currentValueTemplate',
                 'extractVersionTemplate',
               ];
               // TODO: fix types
