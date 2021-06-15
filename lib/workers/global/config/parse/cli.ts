@@ -88,7 +88,7 @@ export function getConfig(input: string[]): AllConfig {
     console.log('');
     console.log('    $ renovate --token abc123 singapore/lint-condo');
     console.log(
-      '    $ renovate --labels=renovate,dependency --ignore-unstable=false --log-level debug singapore/lint-condo'
+      '    $ LOG_LEVEL=debug renovate --labels=renovate,dependency --ignore-unstable=false singapore/lint-condo'
     );
     console.log('    $ renovate singapore/lint-condo singapore/package-test');
     console.log(
