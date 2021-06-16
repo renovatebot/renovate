@@ -508,6 +508,19 @@ describe(getName(), () => {
     });
   });
 
+  describe('getIssue', () => {
+    it('should call /api/v1/repos/[repo]/issues/[issue] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
+        .reply(200, mockIssue);
+
+      const res = await ght.getIssue(mockRepo.full_name, mockIssue.number);
+      expect(res).toEqual(mockIssue);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
   describe('getRepoLabels', () => {
     it('should call /api/v1/repos/[repo]/labels endpoint', async () => {
       httpMock
