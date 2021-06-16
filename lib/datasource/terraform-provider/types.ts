@@ -1,18 +1,3 @@
-export interface VersionDetailResponse {
-  name: string;
-  version: string;
-  builds: TerraformBuild[];
-}
-
-export interface TerraformBuild {
-  name: string;
-  version: string;
-  os: string;
-  arch: string;
-  filename: string;
-  url: string;
-}
-
 export interface TerraformProvider {
   namespace: string;
   name: string;
@@ -23,12 +8,13 @@ export interface TerraformProvider {
   published_at: string;
 }
 
-export type TerraformProviderReleaseBackend = Record<
-  string,
-  {
+export interface TerraformProviderReleaseBackend {
+  [key: string]: {
     name: string;
     versions: VersionsReleaseBackend;
-  }
->;
+  };
+}
 
-export type VersionsReleaseBackend = Record<string, VersionDetailResponse>;
+interface VersionsReleaseBackend {
+  [key: string]: Record<string, any>;
+}

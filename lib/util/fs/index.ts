@@ -1,5 +1,3 @@
-import stream from 'stream';
-import util from 'util';
 import is from '@sindresorhus/is';
 import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
@@ -7,8 +5,6 @@ import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 
 export * from './proxies';
-
-export const pipeline = util.promisify(stream.pipeline);
 
 export function getSubDirectory(fileName: string): string {
   return parse(fileName).dir;
@@ -139,18 +135,4 @@ export async function findLocalSiblingOrParent(
   }
 
   return null;
-}
-
-/**
- * Get files by name from directory
- */
-export async function readLocalDirectory(path: string): Promise<string[]> {
-  const { localDir } = getAdminConfig();
-  const localPath = join(localDir, path);
-  const fileList = await fs.readdir(localPath);
-  return fileList;
-}
-
-export function createWriteStream(path: string): fs.WriteStream {
-  return fs.createWriteStream(path);
 }

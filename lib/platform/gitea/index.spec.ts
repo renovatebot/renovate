@@ -908,7 +908,7 @@ describe(getName(), () => {
   describe('getIssue', () => {
     it('should return the issue', async () => {
       const mockIssue = mockIssues.find((i) => i.number === 1);
-      helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
 
       expect(await gitea.getIssue(mockIssue.number)).toHaveProperty(
@@ -922,6 +922,7 @@ describe(getName(), () => {
     it('should return existing open issue', async () => {
       const mockIssue = mockIssues.find((i) => i.title === 'open-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
 
       expect(await gitea.findIssue(mockIssue.title)).toHaveProperty(
