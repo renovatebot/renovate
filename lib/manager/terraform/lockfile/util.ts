@@ -1,4 +1,7 @@
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { join } from 'upath';
+import { getAdminConfig } from '../../../config/admin';
+import { logger } from '../../../logger';
+import { ensureDir, getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
 import type {
@@ -206,4 +209,11 @@ export function writeLockUpdates(
       contents: newContent,
     },
   };
+}
+
+export async function getCacheDir(): Promise<string> {
+  const cacheDir = join(getAdminConfig().cacheDir, './others/terraform');
+  await ensureDir(cacheDir);
+  logger.debug(`Using terraform cache: ${cacheDir}`);
+  return cacheDir;
 }
