@@ -119,7 +119,7 @@ export function cache<T>({
       await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
       return result;
     } catch (err) /* istanbul ignore next */ {
-      logger.error(err);
+      logger.error({ err }, 'cache decorate error');
       throw err;
     }
   });
