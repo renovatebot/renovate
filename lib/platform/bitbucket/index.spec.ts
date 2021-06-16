@@ -1,4 +1,3 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
@@ -65,8 +64,8 @@ describe(getName(), () => {
   async function initRepoMock(
     config?: Partial<RepoParams>,
     repoResp?: any,
-    existingScope?: nock.Scope
-  ): Promise<nock.Scope> {
+    existingScope?: httpMock.Scope
+  ): Promise<httpMock.Scope> {
     const repository = config?.repository || 'some/repo';
 
     const scope = existingScope || httpMock.scope(baseUrl);

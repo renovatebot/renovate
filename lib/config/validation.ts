@@ -388,6 +388,7 @@ export async function validateConfig(
                 'versioningTemplate',
                 'registryUrlTemplate',
                 'currentValueTemplate',
+                'extractVersionTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {

@@ -1,6 +1,6 @@
 import { loadAll } from 'js-yaml';
 import * as gitTags from '../../datasource/git-tags';
-import * as helm from '../../datasource/helm';
+import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { ApplicationDefinition } from './types';
 import { fileTestRegex } from './util';
@@ -20,7 +20,7 @@ function createDependency(
       depName: source.chart,
       registryUrls: [source.repoURL],
       currentValue: source.targetRevision,
-      datasource: helm.id,
+      datasource: HelmDatasource.id,
     };
   }
   return {

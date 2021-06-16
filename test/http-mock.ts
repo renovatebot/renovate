@@ -2,9 +2,11 @@ import { Url } from 'url';
 import { afterAll, afterEach, beforeAll } from '@jest/globals';
 import is from '@sindresorhus/is';
 import { parse as parseGraphqlQuery } from 'graphql/language';
+// eslint-disable-next-line no-restricted-imports
 import nock from 'nock';
 
-export type { Scope } from 'nock';
+// eslint-disable-next-line no-restricted-imports
+export type { Scope, ReplyHeaders } from 'nock';
 
 interface RequestLogItem {
   headers: Record<string, string>;
