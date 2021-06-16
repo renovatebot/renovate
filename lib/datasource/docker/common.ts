@@ -83,7 +83,7 @@ export async function getAuthHeaders(
       opts.headers = { authorization: `Basic ${auth}` };
     } else if (opts.token) {
       const authType = opts.authType ?? 'Bearer';
-      logger.debug(
+      logger.trace(
         `Using ${authType} token for Docker registry ${registryHost}`
       );
       opts.headers = { authorization: `${authType} ${opts.token}` };
@@ -94,7 +94,7 @@ export async function getAuthHeaders(
     delete opts.token;
 
     if (authenticateHeader.scheme.toUpperCase() === 'BASIC') {
-      logger.debug(`Using Basic auth for docker registry ${registryHost}`);
+      logger.trace(`Using Basic auth for docker registry ${registryHost}`);
       await http.get(apiCheckUrl, opts);
       return opts.headers;
     }
