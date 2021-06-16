@@ -165,6 +165,8 @@ describe(getName(), () => {
         registryUrl: 'https://dl.bintray.com/sbt/sbt-plugin-releases',
         releases: [{ version: '0.5.5' }],
       });
+    });
+    it('fetches sbt plugins 2', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,

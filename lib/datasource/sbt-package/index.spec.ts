@@ -194,6 +194,9 @@ describe(getName(), () => {
         registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '1.2.0' }, { version: '1.2.3' }],
       });
+    });
+
+    it('fetches releases from Maven 2', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
