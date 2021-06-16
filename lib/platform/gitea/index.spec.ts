@@ -905,6 +905,19 @@ describe(getName(), () => {
     });
   });
 
+  describe('getIssue', () => {
+    it('should return the issue', async () => {
+      const mockIssue = mockIssues.find((i) => i.number === 1);
+      helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      await initFakeRepo();
+
+      expect(await gitea.getIssue(mockIssue.number)).toHaveProperty(
+        'number',
+        mockIssue.number
+      );
+    });
+  });
+
   describe('findIssue', () => {
     it('should return existing open issue', async () => {
       const mockIssue = mockIssues.find((i) => i.title === 'open-issue');
