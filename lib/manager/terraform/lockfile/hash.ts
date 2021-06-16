@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import path from 'path';
+import { join } from 'upath';
 import extract from 'extract-zip';
 import pMap from 'p-map';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
