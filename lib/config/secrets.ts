@@ -113,12 +113,15 @@ function replaceSecretsinObject(
   return config;
 }
 
-export function applySecretsToConfig(config: RenovateConfig): RenovateConfig {
+export function applySecretsToConfig(
+  config: RenovateConfig,
+  secrets = config.secrets
+): RenovateConfig {
   // Add all secrets to be sanitized
-  if (is.plainObject(config.secrets)) {
-    for (const secret of Object.values(config.secrets)) {
+  if (is.plainObject(secrets)) {
+    for (const secret of Object.values(secrets)) {
       add(String(secret));
     }
   }
-  return replaceSecretsinObject(config, config.secrets);
+  return replaceSecretsinObject(config, secrets);
 }

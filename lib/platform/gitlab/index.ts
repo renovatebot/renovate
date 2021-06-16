@@ -753,6 +753,27 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
   return config.issueList;
 }
 
+export async function getIssue(
+  number: number,
+  useCache = true
+): Promise<Issue | null> {
+  try {
+    const issueBody = (
+      await gitlabApi.getJson<{ description: string }>(
+        `projects/${config.repository}/issues/${number}`,
+        { useCache }
+      )
+    ).body.description;
+    return {
+      number,
+      body: issueBody,
+    };
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, number }, 'Error getting issue');
+    return null;
+  }
+}
+
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   try {
@@ -761,15 +782,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    const issueBody = (
-      await gitlabApi.getJson<{ description: string }>(
-        `projects/${config.repository}/issues/${issue.iid}`
-      )
-    ).body.description;
-    return {
-      number: issue.iid,
-      body: issueBody,
-    };
+    return getIssue(issue.iid);
   } catch (err) /* istanbul ignore next */ {
     logger.warn('Error finding issue');
     return null;

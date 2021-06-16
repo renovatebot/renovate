@@ -1896,6 +1896,13 @@
   dependencies:
     "@types/yargs-parser" "*"
 
+"@types/yauzl@^2.9.1":
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/@types/yauzl/-/yauzl-2.9.1.tgz#d10f69f9f522eef3cf98e30afb684a1e1ec923af"
+  integrity sha512-A1b8SU4D10uoPjwb0lnHmmu8wZhR9d+9o2PKBQT2jU5YPTKsxac6M2qGAdY7VcL+dHHhARVUDmeg0rOrcd9EjA==
+  dependencies:
+    "@types/node" "*"
+
 "@typescript-eslint/eslint-plugin@4.26.1":
   version "4.26.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-4.26.1.tgz#b9c7313321cb837e2bf8bebe7acc2220659e67d3"
@@ -8364,10 +8371,10 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@2.39.0:
-  version "2.39.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.39.0.tgz#6320e01675c6ee5272aec00727549a5d2617e35e"
-  integrity sha512-VOsrmc3fpp1lGVIpo+1SKNqJzrdVJeSGZCeenPKnJPNo5UouAlSkWFc037pfm9wRYtfxBdwp2deVJGCG8J6C8A==
+simple-git@2.39.1:
+  version "2.39.1"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.39.1.tgz#1d297eb154d30cbfc6edf1133742651838cc5680"
+  integrity sha512-+kEAkyQHsWejYxQNCzTrjvCxJOcijpB49RSs7HV+TK9B9prUq7YBNpFstQvjfGBn4Hecywp4tm+breGGGHlHwA==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
