@@ -1,4 +1,4 @@
-import nock from 'nock';
+import * as httpMock from '../../../test/http-mock';
 import { getName, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as dockerCommon from './common';
