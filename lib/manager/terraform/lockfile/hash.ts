@@ -81,8 +81,8 @@ export async function calculateHashes(
   const hashes = await pMap(
     builds,
     async (build) => {
-      const downloadFileName = path.join(cacheDir, build.filename);
-      const extractPath = path.join(cacheDir, 'extract', build.filename);
+      const downloadFileName = join(cacheDir, build.filename);
+      const extractPath = join(cacheDir, 'extract', build.filename);
       logger.trace(
         `Downloading archive and generating hash for ${build.name}-${build.version}...`
       );
