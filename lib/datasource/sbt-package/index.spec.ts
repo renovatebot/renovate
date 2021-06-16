@@ -4,7 +4,7 @@ import { getName, loadFixture } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-plugin/util';
-import * as sbtPlugin from '.';
+import * as sbtPackage from '.';
 
 const mavenIndexHtml = loadFixture(`maven-index.html`);
 const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
@@ -13,6 +13,7 @@ describe(getName(), () => {
   it('parses Maven index directory', () => {
     expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
   });
+
   it('parses sbt index directory', () => {
     expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
   });
@@ -155,31 +156,36 @@ describe(getName(), () => {
         );
     });
 
+    // TODO: fix mocks
+    afterEach(() => httpMock.clear(false));
+
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toBeNull();
     });
+
     it('returns null if there is no version', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'com.example:empty',
           registryUrls: [],
         })
       ).toBeNull();
     });
+
     it('fetches releases from Maven', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven', MAVEN_REPO],
         })
@@ -191,7 +197,7 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest_2.12',
           registryUrls: [],
         })
@@ -206,7 +212,7 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest-app_2.12',
           registryUrls: [],
         })
@@ -220,7 +226,7 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest-flatspec_2.12',
           registryUrls: [],
         })
@@ -233,7 +239,7 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest-matchers-core_2.12',
           registryUrls: [],
         })

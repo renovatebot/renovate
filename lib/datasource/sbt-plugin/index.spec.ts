@@ -13,6 +13,7 @@ describe(getName(), () => {
   it('parses Maven index directory', () => {
     expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
   });
+
   it('parses sbt index directory', () => {
     expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
   });
@@ -128,6 +129,9 @@ describe(getName(), () => {
         );
     });
 
+    // TODO: fix mocks
+    afterEach(() => httpMock.clear(false));
+
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
@@ -146,6 +150,7 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('fetches sbt plugins', async () => {
       expect(
         await getPkgReleases({

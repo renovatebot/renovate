@@ -59,6 +59,9 @@ describe(getName(), () => {
     jest.resetAllMocks();
   });
 
+  // TODO: fix mocks
+  afterEach(() => httpMock.clear(false));
+
   describe('.lookupUpdates()', () => {
     it('returns null if unknown datasource', async () => {
       config.depName = 'some-dep';
