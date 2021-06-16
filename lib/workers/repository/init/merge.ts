@@ -8,6 +8,7 @@ import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
+import { applySecretsToConfig } from '../../../config/secrets';
 import { RenovateConfig } from '../../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -218,6 +219,10 @@ export async function mergeRenovateConfig(
     );
     npmApi.setNpmrc(resolvedConfig.npmrc);
   }
+  resolvedConfig = applySecretsToConfig(
+    resolvedConfig,
+    mergeChildConfig(config.secrets || {}, resolvedConfig.secrets || {})
+  );
   // istanbul ignore if
   if (resolvedConfig.hostRules) {
     logger.debug('Setting hostRules from config');
