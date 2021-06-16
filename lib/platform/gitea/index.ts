@@ -588,13 +588,20 @@ const platform: Platform = {
   },
 
   async getIssue(number: number, useCache = true): Promise<Issue> {
-    // istanbul ignore if
-    if (!useCache) {
-      delete config.issueList;
+    try {
+      const body = (
+        await helper.getIssue(config.repository, number, {
+          useCache,
+        })
+      ).body;
+      return {
+        number,
+        body,
+      };
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err, number }, 'Error getting issue');
+      return null;
     }
-    const issueList = await platform.getIssueList();
-    const issue = issueList.find((i) => i.number === number);
-    return issue || null;
   },
 
   async findIssue(title: string): Promise<Issue> {
@@ -603,10 +610,11 @@ const platform: Platform = {
       (i) => i.state === 'open' && i.title === title
     );
 
-    if (issue) {
-      logger.debug(`Found Issue #${issue.number}`);
+    if (!issue) {
+      return null;
     }
-    return issue ?? null;
+    logger.debug(`Found Issue #${issue.number}`);
+    return platform.getIssue(issue.number);
   },
 
   async ensureIssue({
