@@ -1,5 +1,4 @@
 // TODO fix mocks
-import nock from 'nock';
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
@@ -163,7 +162,7 @@ describe(getName(), () => {
     },
     repoResp = null,
     scope = httpMock.scope(gitlabApiHost)
-  ): Promise<nock.Scope> {
+  ): Promise<httpMock.Scope> {
     const repo = repoParams.repository;
     const justRepo = repo.split('/').slice(0, 2).join('/');
     scope.get(`/api/v4/projects/${encodeURIComponent(repo)}`).reply(
