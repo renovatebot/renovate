@@ -79,10 +79,6 @@ describe(getName(), () => {
       hostRules.hosts.mockReturnValue([]);
     });
 
-    afterEach(() => {
-      nock.cleanAll();
-    });
-
     it('returns "authType token" if both provided', async () => {
       hostRules.find.mockReturnValue({
         authType: 'some-authType',
