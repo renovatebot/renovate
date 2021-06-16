@@ -1,4 +1,5 @@
 import { createReadStream } from 'fs';
+import { join } from 'upath';
 import * as httpMock from '../../../../test/http-mock';
 import { getFixturePath, getName, loadFixture } from '../../../../test/util';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
@@ -7,14 +8,11 @@ import createHashes from './hash';
 const terraformProviderDatasource = new TerraformProviderDatasource();
 const releaseBackendUrl = terraformProviderDatasource.defaultRegistryUrls[1];
 const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
+const cacheDir = join('/tmp/renovate/cache');
 
 describe(getName(), () => {
   it('returns null if a non hashicorp release is found ', async () => {
-    const result = await createHashes(
-      'test/gitlab',
-      '2.56.0',
-      '/tmp/renovate/cache'
-    );
+    const result = await createHashes('test/gitlab', '2.56.0', cacheDir);
     expect(result).toBeNull();
   });
 
@@ -24,11 +22,7 @@ describe(getName(), () => {
       .get('/terraform-provider-azurerm/2.59.0/index.json')
       .reply(403, '');
 
-    const result = await createHashes(
-      'hashicorp/azurerm',
-      '2.59.0',
-      '/tmp/renovate/cache'
-    );
+    const result = await createHashes('hashicorp/azurerm', '2.59.0', cacheDir);
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -39,7 +33,7 @@ describe(getName(), () => {
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .replyWithError('');
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
+    const result = await createHashes('hashicorp/azurerm', '2.56.0', cacheDir);
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -64,7 +58,7 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
+    const result = await createHashes('hashicorp/azurerm', '2.56.0', cacheDir);
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -89,7 +83,7 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
+    const result = await createHashes('hashicorp/azurerm', '2.56.0', cacheDir);
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(2);
     expect(result).toMatchSnapshot();
