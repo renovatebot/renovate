@@ -73,7 +73,7 @@ describe(getName(), () => {
   });
   describe('getAuthHeaders', () => {
     beforeEach(() => {
-      nock('https://my.local.registry')
+      httpMock.scope('https://my.local.registry')
         .get('/v2/')
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
       hostRules.hosts.mockReturnValue([]);
