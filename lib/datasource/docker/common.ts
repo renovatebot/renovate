@@ -82,7 +82,7 @@ export async function getAuthHeaders(
       );
       opts.headers = { authorization: `Basic ${auth}` };
     } else if (opts.token) {
-      const authType = opts.authType ? opts.authType : 'Bearer';
+      const authType = opts.authType ?? 'Bearer';
       logger.debug(
         `Using ${authType} token for Docker registry ${registryHost}`
       );
