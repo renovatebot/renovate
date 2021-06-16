@@ -36,7 +36,6 @@ describe(getName(), () => {
   });
 
   afterEach(() => {
-    setAdminConfig();
     delete process.env.RENOVATE_X_TERRAFORM_LOCK_FILE;
   });
 
@@ -170,60 +169,48 @@ describe(getName(), () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // aws
-            releases: [
-              {
-                version: '2.30.0',
-              },
-              {
-                version: '3.0.0',
-              },
-              {
-                version: '3.36.0',
-              },
-            ],
-          })
-        )
-      )
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // azurerm
-            releases: [
-              {
-                version: '2.50.0',
-              },
-              {
-                version: '2.55.0',
-              },
-              {
-                version: '2.56.0',
-              },
-            ],
-          })
-        )
-      )
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // random
-            releases: [
-              {
-                version: '2.2.1',
-              },
-              {
-                version: '2.2.2',
-              },
-              {
-                version: '3.0.0',
-              },
-            ],
-          })
-        )
-      );
+      .mockResolvedValueOnce({
+        // aws
+        releases: [
+          {
+            version: '2.30.0',
+          },
+          {
+            version: '3.0.0',
+          },
+          {
+            version: '3.36.0',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        // azurerm
+        releases: [
+          {
+            version: '2.50.0',
+          },
+          {
+            version: '2.55.0',
+          },
+          {
+            version: '2.56.0',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        // random
+        releases: [
+          {
+            version: '2.2.1',
+          },
+          {
+            version: '2.2.2',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      });
     mockHash.mockResolvedValue([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
@@ -256,45 +243,33 @@ describe(getName(), () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // aws
-            releases: [
-              {
-                version: '2.30.0',
-              },
-              {
-                version: '3.0.0',
-              },
-            ],
-          })
-        )
-      )
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // azurerm
-            releases: [
-              {
-                version: '2.50.0',
-              },
-            ],
-          })
-        )
-      )
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // random
-            releases: [
-              {
-                version: '2.2.1',
-              },
-            ],
-          })
-        )
-      );
+      .mockResolvedValueOnce({
+        // aws
+        releases: [
+          {
+            version: '2.30.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        // azurerm
+        releases: [
+          {
+            version: '2.50.0',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        // random
+        releases: [
+          {
+            version: '2.2.1',
+          },
+        ],
+      });
     mockHash.mockResolvedValue([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
@@ -320,60 +295,48 @@ describe(getName(), () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockGetPkgReleases
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // aws
-            releases: [
-              {
-                version: '2.30.0',
-              },
-              {
-                version: '3.0.0',
-              },
-              {
-                version: '3.36.0',
-              },
-            ],
-          })
-        )
-      )
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // azurerm
-            releases: [
-              {
-                version: '2.50.0',
-              },
-              {
-                version: '2.55.0',
-              },
-              {
-                version: '2.56.0',
-              },
-            ],
-          })
-        )
-      )
-      .mockResolvedValueOnce(
-        new Promise((resolve) =>
-          resolve({
-            // random
-            releases: [
-              {
-                version: '2.2.1',
-              },
-              {
-                version: '2.2.2',
-              },
-              {
-                version: '3.0.0',
-              },
-            ],
-          })
-        )
-      );
+      .mockResolvedValueOnce({
+        // aws
+        releases: [
+          {
+            version: '2.30.0',
+          },
+          {
+            version: '3.0.0',
+          },
+          {
+            version: '3.36.0',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        // azurerm
+        releases: [
+          {
+            version: '2.50.0',
+          },
+          {
+            version: '2.55.0',
+          },
+          {
+            version: '2.56.0',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        // random
+        releases: [
+          {
+            version: '2.2.1',
+          },
+          {
+            version: '2.2.2',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      });
     mockHash.mockResolvedValue(null);
 
     const localConfig: UpdateArtifactsConfig = {
