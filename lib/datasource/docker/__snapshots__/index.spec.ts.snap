@@ -773,7 +773,20 @@ Array [
 exports[`datasource/docker/index getReleases supports labels 1`] = `
 Object {
   "registryUrl": "https://index.docker.io",
-  "releases": Array [],
+  "releases": Array [
+    Object {
+      "version": "1.0.0",
+    },
+    Object {
+      "version": "1.2.3-alpine",
+    },
+    Object {
+      "version": "1.2.3",
+    },
+    Object {
+      "version": "1-alpine",
+    },
+  ],
   "sourceUrl": "https://github.com/renovatebot/renovate",
 }
 `;
@@ -820,7 +833,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://registry.company.com/v2/node/manifests/latest",
+    "url": "https://registry.company.com/v2/node/manifests/1-alpine",
   },
   Object {
     "headers": Object {
@@ -895,7 +908,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://registry.company.com/v2/node/manifests/latest",
+    "url": "https://registry.company.com/v2/node/manifests/abc",
   },
   Object {
     "headers": Object {
