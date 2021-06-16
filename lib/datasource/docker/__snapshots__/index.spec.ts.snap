@@ -786,6 +786,12 @@ Object {
     Object {
       "version": "1-alpine",
     },
+    Object {
+      "version": "2.0.0",
+    },
+    Object {
+      "version": "2-alpine",
+    },
   ],
   "sourceUrl": "https://github.com/renovatebot/renovate",
 }
@@ -833,7 +839,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://registry.company.com/v2/node/manifests/1-alpine",
+    "url": "https://registry.company.com/v2/node/manifests/2-alpine",
   },
   Object {
     "headers": Object {

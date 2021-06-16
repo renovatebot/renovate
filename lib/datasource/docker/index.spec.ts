@@ -624,9 +624,17 @@ describe(getName(), () => {
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, {
-          tags: ['1-alpine', '1.0.0', '1.2.3', '1.2.3-alpine', 'abc'],
+          tags: [
+            '2.0.0',
+            '2-alpine',
+            '1-alpine',
+            '1.0.0',
+            '1.2.3',
+            '1.2.3-alpine',
+            'abc',
+          ],
         })
-        .get('/node/manifests/1-alpine')
+        .get('/node/manifests/2-alpine')
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestV2,
