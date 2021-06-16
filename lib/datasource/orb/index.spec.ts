@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
-import { id as datasource } from '.';
+import { OrbDatasource } from '.';
 
 const orbData = {
   data: {
@@ -36,7 +36,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, {});
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: OrbDatasource.id,
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -49,7 +49,7 @@ describe(getName(), () => {
         .reply(200, { data: {} });
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: OrbDatasource.id,
           depName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
@@ -59,7 +59,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(404);
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: OrbDatasource.id,
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -69,7 +69,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').replyWithError('');
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: OrbDatasource.id,
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -78,7 +78,7 @@ describe(getName(), () => {
     it('processes real data', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);
       const res = await getPkgReleases({
-        datasource,
+        datasource: OrbDatasource.id,
         depName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
@@ -89,7 +89,7 @@ describe(getName(), () => {
       orbData.data.orb.homeUrl = 'https://google.com';
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);
       const res = await getPkgReleases({
-        datasource,
+        datasource: OrbDatasource.id,
         depName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
