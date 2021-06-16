@@ -1,9 +1,9 @@
 import { join } from 'upath';
-import { fs, getName, loadFixture } from '../../../../test/util';
+import { fs, getName, loadFixture, mocked } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
-import hash from './hash';
+import * as hash from './hash';
 import { updateArtifacts } from './index';
 
 // auto-mock fs
@@ -23,7 +23,7 @@ const adminConfig = {
 
 const validLockfile = loadFixture('validLockfile.hcl');
 
-const mockHash = hash as jest.MockedFunction<typeof hash>;
+const mockHash = mocked(hash).createHashes;
 const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
   typeof getPkgReleases
 >;
