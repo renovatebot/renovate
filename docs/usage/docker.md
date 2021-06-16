@@ -220,8 +220,8 @@ When running Renovate in this context the Google access token must be retrieved 
 _This documentation gives **a few hints** on **a possible way** to achieve this end result._
 
 The basic approach is that you create a custom image and then run Renovate as one of the stages of your project.
-To make this run independent of any user you should use a `Project Access Token` for the project and use this as the `RENOVATE_TOKEN` variable for Gitlab CI.
-See also the [renovate-runner repository on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
+To make this run independent of any user you should use a [`Project Access Token`](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) (with Scopes: `api`, `read_api` and `write_repository`) for the project and use this as the `RENOVATE_TOKEN` variable for Gitlab CI.
+See also the [renovate-runner repository on GitLab](https://gitlab.com/renovate-bot/renovate-runner) where `.gitlab-ci.yml` configuration examples can be found.
 
 To get access to the token a custom Renovate Docker image is needed that includes the Google Cloud SDK.
 The Dockerfile to create such an image can look like this:
@@ -233,7 +233,19 @@ FROM renovate/renovate:25.40.1
 RUN ...
 ```
 
-One way to provide this token using the `hostRules` to Renovate is by generating a `config.js` file from within the `.gitlab-ci.yml`:
+For Renovate to access the Google Container Registry (GCR) it needs the current Google Access Token.
+The configuration fragment to do that looks something like this:
+
+```js
+hostRules: [
+  {
+    matchHost: 'eu.gcr.io',
+    token: 'MyReallySecretTokenThatExpiresAfter60Minutes',
+  },
+];
+```
+
+One way to provide the short-lived Google Access Token to Renovate is by generating these settings into a `config.js` file from within the `.gitlab-ci.yml` right before starting Renovate:
 
 ```yaml
 script:
