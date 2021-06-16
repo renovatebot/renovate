@@ -400,6 +400,16 @@ export async function searchIssues(
   return res.body;
 }
 
+export async function getIssue(
+  repoPath: string,
+  idx: number,
+  options?: GiteaHttpOptions
+): Promise<Issue> {
+  const url = `repos/${repoPath}/issues/${idx}`;
+  const res = await giteaHttp.getJson<Issue>(url, options);
+  return res.body;
+}
+
 export async function getRepoLabels(
   repoPath: string,
   options?: GiteaHttpOptions
