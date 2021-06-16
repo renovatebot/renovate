@@ -587,6 +587,16 @@ const platform: Platform = {
     return config.issueList;
   },
 
+  async getIssue(number: number, useCache = true): Promise<Issue> {
+    // istanbul ignore if
+    if (!useCache) {
+      delete config.issueList;
+    }
+    const issueList = await platform.getIssueList();
+    const issue = issueList.find((i) => i.number === number);
+    return issue || null;
+  },
+
   async findIssue(title: string): Promise<Issue> {
     const issueList = await platform.getIssueList();
     const issue = issueList.find(
@@ -836,6 +846,7 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
+  getIssue,
   getRawFile,
   getJsonFile,
   getIssueList,
