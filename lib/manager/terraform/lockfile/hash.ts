@@ -113,7 +113,7 @@ export async function calculateHashes(
   return hashes;
 }
 
-export default async function createHashes(
+export async function createHashes(
   repository: string,
   version: string
 ): Promise<string[]> {

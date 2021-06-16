@@ -4,7 +4,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { getFixturePath, getName, loadFixture } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
-import createHashes from './hash';
+import { createHashes } from './hash';
 
 const terraformProviderDatasource = new TerraformProviderDatasource();
 const releaseBackendUrl = terraformProviderDatasource.defaultRegistryUrls[1];
