@@ -50,10 +50,12 @@ Array [
   Array [
     "hashicorp/azurerm",
     "2.56.0",
+    "/tmp/renovate/cache",
   ],
   Array [
     "hashicorp/random",
     "2.2.2",
+    "/tmp/renovate/cache",
   ],
 ]
 `;
@@ -65,10 +67,12 @@ Array [
   Array [
     "hashicorp/azurerm",
     "2.56.0",
+    "/tmp/renovate/cache",
   ],
   Array [
     "hashicorp/random",
     "2.2.2",
+    "/tmp/renovate/cache",
   ],
 ]
 `;
@@ -135,6 +139,7 @@ Array [
   Array [
     "hashicorp/aws",
     "3.36.0",
+    "/tmp/renovate/cache",
   ],
 ]
 `;
@@ -199,6 +204,7 @@ Array [
   Array [
     "hashicorp/random",
     "3.1.0",
+    "/tmp/renovate/cache",
   ],
 ]
 `;
@@ -264,6 +270,7 @@ Array [
   Array [
     "hashicorp/azurerm",
     "2.56.0",
+    "/tmp/renovate/cache",
   ],
 ]
 `;

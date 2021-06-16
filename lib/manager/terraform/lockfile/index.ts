@@ -1,9 +1,14 @@
 import pMap from 'p-map';
+import { getAdminConfig } from '../../../config/admin';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import { get as getVersioning } from '../../../versioning';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../../types';
-import { createHashes } from './hash';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../../types';
+import hash from './hash';
 import type { ProviderLock, ProviderLockUpdate } from './types';
 import {
   extractLocks,
@@ -13,8 +18,11 @@ import {
 } from './util';
 
 async function updateAllLocks(
-  locks: ProviderLock[]
+  locks: ProviderLock[],
+  config: UpdateArtifactsConfig
 ): Promise<ProviderLockUpdate[]> {
+  const { cacheDir } = getAdminConfig();
+
   const updates = await pMap(
     locks,
     async (lock) => {
@@ -38,7 +46,7 @@ async function updateAllLocks(
       const update: ProviderLockUpdate = {
         newVersion,
         newConstraint: lock.constraints,
-        newHashes: await createHashes(lock.lookupName, newVersion),
+        newHashes: await hash(lock.lookupName, newVersion, cacheDir),
         ...lock,
       };
       return update;
@@ -64,6 +72,8 @@ export async function updateArtifacts({
     return null;
   }
 
+  const { cacheDir } = getAdminConfig();
+
   const lockFileContent = await readLockFile(packageFileName);
   if (!lockFileContent) {
     logger.debug('No .terraform.lock.hcl found');
@@ -78,7 +88,7 @@ export async function updateArtifacts({
   const updates: ProviderLockUpdate[] = [];
   if (config.updateType === 'lockFileMaintenance') {
     // update all locks in the file during maintenance --> only update version in constraints
-    const maintenanceUpdates = await updateAllLocks(locks);
+    const maintenanceUpdates = await updateAllLocks(locks, config);
     updates.push(...maintenanceUpdates);
   } else {
     // update only specific locks but with constrain updates
@@ -93,7 +103,7 @@ export async function updateArtifacts({
     const update: ProviderLockUpdate = {
       newVersion: config.newVersion,
       newConstraint,
-      newHashes: await createHashes(repository, config.newVersion),
+      newHashes: await hash(repository, config.newVersion, cacheDir),
       ...updateLock,
     };
     updates.push(update);
