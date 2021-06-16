@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import path from 'path';
 import extract from 'extract-zip';
 import pMap from 'p-map';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
@@ -80,8 +81,8 @@ export async function calculateHashes(
   const hashes = await pMap(
     builds,
     async (build) => {
-      const downloadFileName = `${cacheDir}/${build.filename}`;
-      const extractPath = `${cacheDir}/extract/${build.filename}`;
+      const downloadFileName = path.join(cacheDir, build.filename);
+      const extractPath = path.join(cacheDir, 'extract', build.filename);
       logger.trace(
         `Downloading archive and generating hash for ${build.name}-${build.version}...`
       );
