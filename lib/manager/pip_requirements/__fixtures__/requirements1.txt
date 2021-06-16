@@ -3,4 +3,4 @@
 some-package==0.3.1
 some-other-package==1.0.0
 not_semver==1.9
-
+unconstrained

@@ -20,8 +20,8 @@
 I have verified these changes via:
 
 - [ ] Code inspection only, or
-- [ ] Newly added unit tests, or
-- [ ] No new tests but ran on a real repository, or
+- [ ] Newly added/modified unit tests, or
+- [ ] No unit tests but ran on a real repository, or
 - [ ] Both unit tests + ran on a real repository
 
 <!-- Do you have any suggestions about this PR template? Edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->

@@ -266,12 +266,8 @@ export async function syncGit(): Promise<void> {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
-      await git.pull();
-      // istanbul ignore if
-      if (process.env.NODE_ENV !== 'test') {
-        await git.raw(['config', '--unset-all', 'remote.origin.fetch']);
-      }
       const fetchStart = Date.now();
+      await git.pull();
       await git.fetch(['--depth=10']);
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
@@ -279,13 +275,13 @@ export async function syncGit(): Promise<void> {
       await cleanLocalBranches();
       await git.raw(['remote', 'prune', 'origin']);
       const durationMs = Math.round(Date.now() - fetchStart);
-      logger.debug({ durationMs }, 'git fetch completed');
+      logger.info({ durationMs }, 'git fetch completed');
       clone = false;
     } catch (err) /* istanbul ignore next */ {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
-      logger.warn({ err }, 'git fetch error');
+      logger.info({ err }, 'git fetch error');
     }
   }
   if (clone) {

@@ -48,6 +48,7 @@ export async function renovateRepository(
     );
     await ensureOnboardingPr(config, packageFiles, branches);
     const res = await updateRepo(config, branches);
+    setMeta({ repository: config.repository });
     addSplit('update');
     await setBranchCache(branches);
     if (res === 'automerged') {

@@ -20,7 +20,6 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
-import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -1635,8 +1634,6 @@ export async function mergePr(
     { automergeResult: automergeResult.body, pr: prNo },
     'PR merged'
   );
-  // Delete branch
-  await deleteBranch(branchName);
   return true;
 }
 
