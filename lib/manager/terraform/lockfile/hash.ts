@@ -11,7 +11,7 @@ import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import * as fs from '../../../util/fs';
 import { Http } from '../../../util/http';
-import { repositoryRegex } from './util';
+import { getCacheDir, repositoryRegex } from './util';
 
 const http = new Http(TerraformProviderDatasource.id);
 const hashCacheTTL = 10080; // in seconds == 1 week
@@ -74,9 +74,10 @@ async function getReleaseBackendIndex(
 }
 
 export async function calculateHashes(
-  builds: TerraformBuild[],
-  cacheDir: string
+  builds: TerraformBuild[]
 ): Promise<string[]> {
+  const cacheDir = await getCacheDir();
+
   // for each build download ZIP, extract content and generate hash for all containing files
   const hashes = await pMap(
     builds,
@@ -112,10 +113,9 @@ export async function calculateHashes(
   return hashes;
 }
 
-export default async function createHashes(
+export async function createHashes(
   repository: string,
-  version: string,
-  cacheDir: string
+  version: string
 ): Promise<string[]> {
   // check cache for hashes
   const repositoryRegexResult = repositoryRegex.exec(repository);
@@ -135,7 +135,7 @@ export default async function createHashes(
   if (cachedRelease) {
     return cachedRelease;
   }
-  let versionReleaseBackend;
+  let versionReleaseBackend: VersionDetailResponse;
   try {
     versionReleaseBackend = await getReleaseBackendIndex(
       backendLookUpName,
@@ -150,7 +150,7 @@ export default async function createHashes(
   }
 
   const builds = versionReleaseBackend.builds;
-  const hashes = await calculateHashes(builds, cacheDir);
+  const hashes = await calculateHashes(builds);
 
   // if a hash could not be produced skip caching and return null
   if (hashes.some((value) => value == null)) {
