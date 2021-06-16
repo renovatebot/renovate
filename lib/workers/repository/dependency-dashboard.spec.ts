@@ -57,6 +57,7 @@ describe(getName(), () => {
       expect(conf).toMatchSnapshot();
     });
   });
+
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
       setAdminConfig();

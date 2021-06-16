@@ -6,12 +6,12 @@ import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchConfig, BranchResult } from '../types';
 
-export interface DependencyDashboard {
+interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
   dependencyDashboardRebaseAllOpen: boolean;
 }
 
-export function parseDashboardIssue(issueBody: string): DependencyDashboard {
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
   const checked = issueBody.match(new RegExp(checkMatch, 'g'));
   const dependencyDashboardChecks: Record<string, string> = {};
