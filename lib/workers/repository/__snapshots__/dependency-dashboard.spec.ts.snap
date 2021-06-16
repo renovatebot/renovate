@@ -66,7 +66,7 @@ Object {
     "branchName1": "approve",
   },
   "dependencyDashboardIssue": 1,
-  "dependencyDashboardRebaseAllOpen": false,
+  "dependencyDashboardRebaseAllOpen": true,
   "dependencyDashboardTitle": "Dependency Dashboard",
   "prCreation": "approval",
 }

@@ -6,12 +6,12 @@ import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchConfig, BranchResult } from '../types';
 
-export interface DependencyDashboard {
+interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
   dependencyDashboardRebaseAllOpen: boolean;
 }
 
-export function parseDashboardIssue(issueBody: string): DependencyDashboard {
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
   const checked = issueBody.match(new RegExp(checkMatch, 'g'));
   const dependencyDashboardChecks: Record<string, string> = {};
@@ -37,7 +37,6 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
   /* eslint-disable no-param-reassign */
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
-  // istanbul ignore next
   if (
     config.dependencyDashboard ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||

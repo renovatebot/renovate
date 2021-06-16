@@ -49,15 +49,15 @@ describe(getName(), () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: loadFixture('master-issue_with_8_PR.txt').replace(
-          '- [ ]',
-          '- [x]'
-        ),
+        body:
+          loadFixture('master-issue_with_8_PR.txt').replace('- [ ]', '- [x]') +
+          '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toMatchSnapshot();
     });
   });
+
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
       setAdminConfig();
