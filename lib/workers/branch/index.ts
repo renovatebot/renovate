@@ -448,7 +448,10 @@ export async function processBranch(
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
       }
-      if (mergeStatus === 'stale' && config.rebaseWhen === 'conflicted') {
+      if (
+        mergeStatus === 'stale' &&
+        ['conflicted', 'never'].includes(config.rebaseWhen)
+      ) {
         logger.warn(
           'Branch cannot automerge because it is stale and rebaseWhen setting disallows rebasing - raising a PR instead'
         );
