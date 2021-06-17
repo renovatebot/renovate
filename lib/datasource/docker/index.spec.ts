@@ -623,8 +623,18 @@ describe(getName(), () => {
         .times(3)
         .reply(200)
         .get('/node/tags/list?n=10000')
-        .reply(200, { tags: ['latest'] })
-        .get('/node/manifests/latest')
+        .reply(200, {
+          tags: [
+            '2.0.0',
+            '2-alpine',
+            '1-alpine',
+            '1.0.0',
+            '1.2.3',
+            '1.2.3-alpine',
+            'abc',
+          ],
+        })
+        .get('/node/manifests/2-alpine')
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestV2,
@@ -655,8 +665,8 @@ describe(getName(), () => {
         .times(4)
         .reply(200)
         .get('/node/tags/list?n=10000')
-        .reply(200, { tags: ['latest'] })
-        .get('/node/manifests/latest')
+        .reply(200, { tags: ['abc'] })
+        .get('/node/manifests/abc')
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestListV2,
