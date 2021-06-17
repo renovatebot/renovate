@@ -54,7 +54,7 @@ export async function hashOfZipContent(
   const sortedFiles = files.sort((a, b) => a.localeCompare(b));
   const filesWithPath = sortedFiles.map((file) => `${extractPath}/${file}`);
 
-  const result = hashFiles(filesWithPath);
+  const result = await hashFiles(filesWithPath);
 
   // delete extracted files
   await fs.rm(extractPath, { recursive: true });
