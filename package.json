@@ -144,6 +144,7 @@
     "dequal": "2.0.2",
     "detect-indent": "6.1.0",
     "email-addresses": "4.0.0",
+    "extract-zip": "2.0.1",
     "emoji-regex": "9.2.2",
     "emojibase": "5.2.0",
     "emojibase-regex": "5.1.3",
