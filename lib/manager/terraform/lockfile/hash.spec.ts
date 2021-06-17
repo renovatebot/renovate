@@ -12,8 +12,7 @@ import { TerraformProviderDatasource } from '../../../datasource/terraform-provi
 import { Logger } from '../../../logger/types';
 import { createHashes } from './hash';
 
-const terraformProviderDatasource = new TerraformProviderDatasource();
-const releaseBackendUrl = terraformProviderDatasource.defaultRegistryUrls[1];
+const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
 
 const log = logger.logger as jest.Mocked<Logger>;
