@@ -1,7 +1,9 @@
 name: build
 
 on:
-  pull_request:
+  push:
+    branches:
+      - implement-terraform-lock-files
 
 env:
   # Currently no way to detect automatically (#8153)
