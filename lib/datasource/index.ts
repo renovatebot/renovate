@@ -188,7 +188,7 @@ function resolveRegistryUrls(
     if (is.nonEmptyArray(extractedUrls)) {
       logger.warn(
         { datasource: datasource.id, registryUrls: extractedUrls },
-        'Custom datasources are not allowed for this datasource and will be ignored'
+        'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
     return defaultRegistryUrls;
