@@ -101,7 +101,7 @@ export async function calculateHashes(
         );
       } catch (err) {
         /* istanbul ignore next */
-        logger.error({ err }, 'write stream error');
+        logger.error({ err, build }, 'write stream error');
       } finally {
         // delete zip file
         await fs.unlink(downloadFileName);

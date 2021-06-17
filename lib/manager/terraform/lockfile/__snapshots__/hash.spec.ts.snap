@@ -48,14 +48,16 @@ Array [
 ]
 `;
 
-exports[`manager/terraform/lockfile/hash full walkthrough 1`] = `
+exports[`manager/terraform/lockfile/hash full walkthrough 1`] = `Array []`;
+
+exports[`manager/terraform/lockfile/hash full walkthrough 2`] = `
 Array [
   "h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=",
   "h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=",
 ]
 `;
 
-exports[`manager/terraform/lockfile/hash full walkthrough 2`] = `
+exports[`manager/terraform/lockfile/hash full walkthrough 3`] = `
 Array [
   Object {
     "headers": Object {
