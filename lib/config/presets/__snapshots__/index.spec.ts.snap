@@ -396,6 +396,7 @@ Object {
 exports[`config/presets/index resolvePreset combines two package alls 1`] = `
 Object {
   "matchPackageNames": Array [
+    "@types/eslint",
     "babel-eslint",
   ],
   "matchPackagePrefixes": Array [
@@ -485,6 +486,7 @@ Object {
 exports[`config/presets/index resolvePreset resolves eslint 1`] = `
 Object {
   "matchPackageNames": Array [
+    "@types/eslint",
     "babel-eslint",
   ],
   "matchPackagePrefixes": Array [
@@ -500,6 +502,7 @@ Object {
     "All lint-related packages",
   ],
   "matchPackageNames": Array [
+    "@types/eslint",
     "babel-eslint",
     "codelyzer",
     "remark-lint",
@@ -528,6 +531,7 @@ Object {
         "All lint-related packages",
       ],
       "matchPackageNames": Array [
+        "@types/eslint",
         "babel-eslint",
         "codelyzer",
         "remark-lint",
@@ -552,6 +556,7 @@ Object {
     Object {
       "groupName": "eslint",
       "matchPackageNames": Array [
+        "@types/eslint",
         "babel-eslint",
       ],
       "matchPackagePrefixes": Array [

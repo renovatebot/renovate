@@ -1,4 +1,3 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
@@ -181,7 +180,7 @@ describe(getName(), () => {
       const username = 'abc';
       const password = '123';
 
-      async function initRepo(config = {}): Promise<nock.Scope> {
+      async function initRepo(config = {}): Promise<httpMock.Scope> {
         const scope = httpMock
           .scope(urlHost)
           .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
