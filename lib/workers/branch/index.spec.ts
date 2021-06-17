@@ -846,9 +846,6 @@ describe(getName(), () => {
       });
 
       expect(result).toMatchSnapshot();
-      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
-        cwd: '/localDir',
-      });
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
       );
