@@ -6,6 +6,53 @@ import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchConfig, BranchResult } from '../types';
 
+interface DependencyDashboard {
+  dependencyDashboardChecks: Record<string, string>;
+  dependencyDashboardRebaseAllOpen: boolean;
+}
+
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
+  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+  const checked = issueBody.match(new RegExp(checkMatch, 'g'));
+  const dependencyDashboardChecks: Record<string, string> = {};
+  if (checked?.length) {
+    const re = new RegExp(checkMatch);
+    checked.forEach((check) => {
+      const [, type, branchName] = re.exec(check);
+      dependencyDashboardChecks[branchName] = type;
+    });
+  }
+  const checkedRebaseAll = issueBody.includes(
+    ' - [x] <!-- rebase-all-open-prs -->'
+  );
+  let dependencyDashboardRebaseAllOpen = false;
+  if (checkedRebaseAll) {
+    dependencyDashboardRebaseAllOpen = true;
+    /* eslint-enable no-param-reassign */
+  }
+  return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
+}
+
+export async function readDashboardBody(config: RenovateConfig): Promise<void> {
+  /* eslint-disable no-param-reassign */
+  config.dependencyDashboardChecks = {};
+  const stringifiedConfig = JSON.stringify(config);
+  if (
+    config.dependencyDashboard ||
+    stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
+    stringifiedConfig.includes('"prCreation":"approval"')
+  ) {
+    config.dependencyDashboardTitle =
+      config.dependencyDashboardTitle || `Dependency Dashboard`;
+    const issue = await platform.findIssue(config.dependencyDashboardTitle);
+    if (issue) {
+      config.dependencyDashboardIssue = issue.number;
+      Object.assign(config, parseDashboardIssue(issue.body));
+    }
+  }
+  /* eslint-enable no-param-reassign */
+}
+
 function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
