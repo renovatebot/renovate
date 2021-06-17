@@ -20,13 +20,15 @@ const communityKubernetesDetails0111 = loadFixture(
 
 const baseUrl = 'https://galaxy.ansible.com';
 
+const datasource = GalaxyCollectionDatasource.id;
+
 describe(getName(), () => {
   describe('getReleases', () => {
     it('returns null for 404 result', async () => {
       httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(404);
       expect(
         await getPkgReleases({
-          datasource: GalaxyCollectionDatasource.id,
+          datasource,
           depName: 'foo.bar',
         })
       ).toBeNull();
@@ -37,7 +39,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(500);
       await expect(
         getPkgReleases({
-          datasource: GalaxyCollectionDatasource.id,
+          datasource,
           depName: 'foo.bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -51,7 +53,7 @@ describe(getName(), () => {
         .reply(200, '');
       expect(
         await getPkgReleases({
-          datasource: GalaxyCollectionDatasource.id,
+          datasource,
           depName: 'community.kubernetes',
         })
       ).toBeNull();
@@ -67,7 +69,7 @@ describe(getName(), () => {
         .reply(200, '');
       expect(
         await getPkgReleases({
-          datasource: GalaxyCollectionDatasource.id,
+          datasource,
           depName: 'community.kubernetes',
         })
       ).toBeNull();
@@ -83,7 +85,7 @@ describe(getName(), () => {
         .reply(500);
       await expect(
         getPkgReleases({
-          datasource: GalaxyCollectionDatasource.id,
+          datasource,
           depName: 'community.kubernetes',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -105,7 +107,7 @@ describe(getName(), () => {
         .reply(200, communityKubernetesDetails0111);
 
       const res = await getPkgReleases({
-        datasource: GalaxyCollectionDatasource.id,
+        datasource,
         depName: 'community.kubernetes',
       });
       expect(res).toMatchSnapshot();
@@ -118,7 +120,7 @@ describe(getName(), () => {
     it('returns null for empty lookup', async () => {
       expect(
         await getPkgReleases({
-          datasource: GalaxyCollectionDatasource.id,
+          datasource,
           depName: '',
         })
       ).toBeNull();
@@ -128,7 +130,7 @@ describe(getName(), () => {
     it('returns null for null lookupName ', async () => {
       expect(
         await getPkgReleases({
-          datasource: GalaxyCollectionDatasource.id,
+          datasource,
           depName: null,
         })
       ).toBeNull();
@@ -142,7 +144,7 @@ describe(getName(), () => {
         .replyWithError('some unknown error');
       expect(
         await getPkgReleases({
-          datasource: GalaxyCollectionDatasource.id,
+          datasource,
           depName: 'foo.bar',
         })
       ).toBeNull();
@@ -163,7 +165,7 @@ describe(getName(), () => {
         .get('/api/v2/collections/community/kubernetes/versions/0.11.1/')
         .reply(200, communityKubernetesDetails0111);
       const res = await getPkgReleases({
-        datasource: GalaxyCollectionDatasource.id,
+        datasource,
         depName: 'community.kubernetes',
       });
       expect(res).toMatchSnapshot();
