@@ -17,6 +17,7 @@ export interface ReleasesConfigBase {
 export interface GetReleasesConfig extends ReleasesConfigBase {
   lookupName: string;
   registryUrl?: string;
+  versioning?: string;
 }
 
 export interface GetPkgReleasesConfig extends ReleasesConfigBase {

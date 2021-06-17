@@ -3,10 +3,8 @@ import parseLinkHeader from 'parse-link-header';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import {
-  api as dockerVersioning,
-  id as dockerVersioningId,
-} from '../../versioning/docker';
+import * as allVersioning from '../../versioning';
+import { id as dockerVersioningId } from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
   defaultRegistryUrls,
@@ -145,10 +143,11 @@ async function getTags(
   }
 }
 
-function findLatestStable(tags: string[]): string {
+function findLatestStable(tags: string[], versioning: string): string {
+  const versioningApi = allVersioning.get(versioning || defaultVersioning);
   const versions = tags
-    .filter((v) => dockerVersioning.isValid(v) && dockerVersioning.isStable(v))
-    .sort((a, b) => dockerVersioning.sortVersions(a, b));
+    .filter((v) => versioningApi.isValid(v) && versioningApi.isStable(v))
+    .sort((a, b) => versioningApi.sortVersions(a, b));
 
   return versions.pop() ?? tags.slice(-1).pop();
 }
@@ -225,6 +224,7 @@ export async function getDigest(
 export async function getReleases({
   lookupName,
   registryUrl,
+  versioning,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const { registryHost, dockerRepository } = getRegistryRepository(
     lookupName,
@@ -239,7 +239,9 @@ export async function getReleases({
     releases,
   };
 
-  const latestTag = tags.includes('latest') ? 'latest' : findLatestStable(tags);
+  const latestTag = tags.includes('latest')
+    ? 'latest'
+    : findLatestStable(tags, versioning);
   const labels = await getLabels(registryHost, dockerRepository, latestTag);
   if (labels && 'org.opencontainers.image.source' in labels) {
     ret.sourceUrl = labels['org.opencontainers.image.source'];
