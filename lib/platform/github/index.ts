@@ -1105,6 +1105,27 @@ export async function getIssueList(): Promise<Issue[]> {
   return config.issueList;
 }
 
+export async function getIssue(
+  number: number,
+  useCache = true
+): Promise<Issue | null> {
+  try {
+    const issueBody = (
+      await githubApi.getJson<{ body: string }>(
+        `repos/${config.parentRepo || config.repository}/issues/${number}`,
+        { useCache }
+      )
+    ).body.body;
+    return {
+      number,
+      body: issueBody,
+    };
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, number }, 'Error getting issue');
+    return null;
+  }
+}
+
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   const [issue] = (await getIssueList()).filter(
@@ -1114,15 +1135,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  const issueBody = (
-    await githubApi.getJson<{ body: string }>(
-      `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
-    )
-  ).body.body;
-  return {
-    number: issue.number,
-    body: issueBody,
-  };
+  return getIssue(issue.number);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
