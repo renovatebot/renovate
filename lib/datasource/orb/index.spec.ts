@@ -26,6 +26,8 @@ const orbData = {
 
 const baseUrl = 'https://circleci.com';
 
+const datasource = OrbDatasource.id;
+
 describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
@@ -36,7 +38,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, {});
       expect(
         await getPkgReleases({
-          datasource: OrbDatasource.id,
+          datasource,
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -49,7 +51,7 @@ describe(getName(), () => {
         .reply(200, { data: {} });
       expect(
         await getPkgReleases({
-          datasource: OrbDatasource.id,
+          datasource,
           depName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
@@ -59,7 +61,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(404);
       expect(
         await getPkgReleases({
-          datasource: OrbDatasource.id,
+          datasource,
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -69,7 +71,7 @@ describe(getName(), () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').replyWithError('');
       expect(
         await getPkgReleases({
-          datasource: OrbDatasource.id,
+          datasource,
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -78,7 +80,7 @@ describe(getName(), () => {
     it('processes real data', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);
       const res = await getPkgReleases({
-        datasource: OrbDatasource.id,
+        datasource,
         depName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
@@ -89,7 +91,7 @@ describe(getName(), () => {
       orbData.data.orb.homeUrl = 'https://google.com';
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);
       const res = await getPkgReleases({
-        datasource: OrbDatasource.id,
+        datasource,
         depName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
