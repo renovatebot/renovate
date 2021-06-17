@@ -18,7 +18,6 @@ export class OrbDatasource extends Datasource {
   @cache({
     namespace: `datasource-${OrbDatasource.id}`,
     key: ({ lookupName }: GetReleasesConfig) => lookupName,
-    ttlMinutes: 15,
   })
   async getReleases({
     lookupName,
