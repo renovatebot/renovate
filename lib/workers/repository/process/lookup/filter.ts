@@ -50,7 +50,7 @@ export function filterVersions(
         (release) => release.version === v.version
       );
       if (versionRelease.isDeprecated) {
-        logger.debug(
+        logger.trace(
           `Skipping ${config.depName}@${v.version} because it is deprecated`
         );
         return false;
