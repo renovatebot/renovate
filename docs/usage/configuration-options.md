@@ -1214,7 +1214,7 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
 
 This field also supports Regular Expressions if they begin and end with `/`.
-For example, the following will enforce that only 3 or 4-section versions are supported, without any prefixes:
+For example, the following will enforce that only 3 or 4-part versions are supported, without any prefixes:
 
 ```json
 {
