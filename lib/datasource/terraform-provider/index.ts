@@ -13,14 +13,17 @@ import type {
 export class TerraformProviderDatasource extends Datasource {
   static readonly id = 'terraform-provider';
 
+  static readonly defaultRegistryUrls = [
+    'https://registry.terraform.io',
+    'https://releases.hashicorp.com',
+  ];
+
   constructor() {
     super(TerraformProviderDatasource.id);
   }
 
-  readonly defaultRegistryUrls = [
-    'https://registry.terraform.io',
-    'https://releases.hashicorp.com',
-  ];
+  readonly defaultRegistryUrls =
+    TerraformProviderDatasource.defaultRegistryUrls;
 
   readonly defaultVersioning = hashicorpVersioning.id;
 

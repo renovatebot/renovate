@@ -1,3 +1,4 @@
+import * as httpMock from '../../../test/http-mock';
 import { getName, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as dockerCommon from './common';
@@ -66,6 +67,50 @@ describe(getName(), () => {
         Object {
           "dockerRepository": "prefix/image",
           "registryHost": "https://my.local.registry",
+        }
+      `);
+    });
+  });
+  describe('getAuthHeaders', () => {
+    beforeEach(() => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/')
+        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
+      hostRules.hosts.mockReturnValue([]);
+    });
+
+    it('returns "authType token" if both provided', async () => {
+      hostRules.find.mockReturnValue({
+        authType: 'some-authType',
+        token: 'some-token',
+      });
+
+      const headers = await dockerCommon.getAuthHeaders(
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toMatchInlineSnapshot(`
+        Object {
+          "authorization": "some-authType some-token",
+        }
+      `);
+    });
+
+    it('returns "Bearer token" if only token provided', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'some-token',
+      });
+
+      const headers = await dockerCommon.getAuthHeaders(
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toMatchInlineSnapshot(`
+        Object {
+          "authorization": "Bearer some-token",
         }
       `);
     });
