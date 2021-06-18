@@ -1,8 +1,9 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { cache } from '../../util/cache/package/decorator';
+import { HttpError } from '../../util/http/types';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
+import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   RegistryRepository,
@@ -10,103 +11,56 @@ import type {
   TerraformRelease,
 } from './types';
 
-export const id = 'terraform-module';
-export const customRegistrySupport = true;
-export const defaultRegistryUrls = ['https://registry.terraform.io'];
-export const defaultVersioning = hashicorpVersioning.id;
-export const registryStrategy = 'first';
+export class TerraformModuleDatasource extends Datasource {
+  static readonly id = 'terraform-module';
 
-const http = new Http(id);
-
-function getRegistryRepository(
-  lookupName: string,
-  registryUrl: string
-): RegistryRepository {
-  let registry: string;
-  const split = lookupName.split('/');
-  if (split.length > 3 && split[0].includes('.')) {
-    [registry] = split;
-    split.shift();
-  } else {
-    registry = registryUrl;
+  constructor() {
+    super(TerraformModuleDatasource.id);
   }
-  if (!/^https?:\/\//.test(registry)) {
-    registry = `https://${registry}`;
-  }
-  const repository = split.join('/');
-  return {
-    registry,
-    repository,
-  };
-}
 
-export async function getTerraformServiceDiscoveryResult(
-  registryUrl: string
-): Promise<ServiceDiscoveryResult> {
-  const discoveryURL = `${registryUrl}/.well-known/terraform.json`;
-  const cacheNamespace = 'terraform-service-discovery';
-  const cachedResult = await packageCache.get<ServiceDiscoveryResult>(
-    cacheNamespace,
-    registryUrl
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-  const serviceDiscovery = (
-    await http.getJson<ServiceDiscoveryResult>(discoveryURL)
-  ).body;
+  readonly defaultRegistryUrls = ['https://registry.terraform.io'];
 
-  const cacheMinutes = 1440; // 24h
-  await packageCache.set(
-    cacheNamespace,
-    registryUrl,
-    serviceDiscovery,
-    cacheMinutes
-  );
+  readonly defaultVersioning = hashicorpVersioning.id;
 
-  return serviceDiscovery;
-}
-/**
- * terraform.getReleases
- *
- * This function will fetch a package from the specified Terraform registry and return all semver versions.
- *  - `sourceUrl` is supported of "source" field is set
- *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
- */
-export async function getReleases({
-  lookupName,
-  registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const { registry, repository } = getRegistryRepository(
+  /**
+   * This function will fetch a package from the specified Terraform registry and return all semver versions.
+   *  - `sourceUrl` is supported of "source" field is set
+   *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
+   */
+  @cache({
+    namespace: `datasource-${TerraformModuleDatasource.id}`,
+    key: (getReleasesConfig: GetReleasesConfig) =>
+      TerraformModuleDatasource.getCacheKey(getReleasesConfig),
+  })
+  async getReleases({
     lookupName,
-    registryUrl
-  );
-  logger.debug(
-    { registry, terraformRepository: repository },
-    'terraform.getDependencies()'
-  );
-  const cacheNamespace = 'terraform-module';
-  const cacheURL = `${registry}/${repository}`;
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    cacheURL
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-  try {
-    const serviceDiscovery = await getTerraformServiceDiscoveryResult(
-      registryUrl
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const { registry, repository } =
+      TerraformModuleDatasource.getRegistryRepository(lookupName, registryUrl);
+    logger.debug(
+      { registry, terraformRepository: repository },
+      'terraform-module.getReleases()'
     );
-    const pkgUrl = `${registry}${serviceDiscovery['modules.v1']}${repository}`;
-    const res = (await http.getJson<TerraformRelease>(pkgUrl)).body;
-    const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
-    if (returnedName !== repository) {
-      logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
-      return null;
+
+    let res: TerraformRelease;
+    let pkgUrl: string;
+
+    try {
+      const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
+        registryUrl
+      );
+      pkgUrl = `${registry}${serviceDiscovery['modules.v1']}${repository}`;
+      res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
+      const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
+      if (returnedName !== repository) {
+        logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
+        return null;
+      }
+    } catch (err) {
+      this.handleGenericErrors(err);
     }
+
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       releases: null,
@@ -127,16 +81,63 @@ export async function getReleases({
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
     }
+
     logger.trace({ dep }, 'dep');
-    const cacheMinutes = 30;
-    await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
-  } catch (err) {
+  }
+
+  @cache({
+    namespace: 'terraform-service-discovery',
+    key: (registryUrl: string) => `${registryUrl}/.well-known/terraform.json`,
+    ttlMinutes: 1440,
+  })
+  async getTerraformServiceDiscoveryResult(
+    registryUrl: string
+  ): Promise<ServiceDiscoveryResult> {
+    const discoveryURL = `${registryUrl}/.well-known/terraform.json`;
+    const serviceDiscovery = (
+      await this.http.getJson<ServiceDiscoveryResult>(discoveryURL)
+    ).body;
+    return serviceDiscovery;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  override handleSpecificErrors(err: HttpError): void {
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {
       throw new ExternalHostError(err);
     }
-    throw err;
+  }
+
+  private static getRegistryRepository(
+    lookupName: string,
+    registryUrl: string
+  ): RegistryRepository {
+    let registry: string;
+    const split = lookupName.split('/');
+    if (split.length > 3 && split[0].includes('.')) {
+      [registry] = split;
+      split.shift();
+    } else {
+      registry = registryUrl;
+    }
+    if (!/^https?:\/\//.test(registry)) {
+      registry = `https://${registry}`;
+    }
+    const repository = split.join('/');
+    return {
+      registry,
+      repository,
+    };
+  }
+
+  private static getCacheKey({
+    lookupName,
+    registryUrl,
+  }: GetReleasesConfig): string {
+    const { registry, repository } =
+      TerraformModuleDatasource.getRegistryRepository(lookupName, registryUrl);
+    return `${registry}/${repository}`;
   }
 }

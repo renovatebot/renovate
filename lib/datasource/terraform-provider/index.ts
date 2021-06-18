@@ -3,7 +3,7 @@ import { cache } from '../../util/cache/package/decorator';
 import { parseUrl } from '../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { Datasource } from '../datasource';
-import { getTerraformServiceDiscoveryResult } from '../terraform-module';
+import { TerraformModuleDatasource } from '../terraform-module';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   TerraformProvider,
@@ -63,9 +63,10 @@ export class TerraformProviderDatasource extends Datasource {
     registryURL: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const serviceDiscovery = await getTerraformServiceDiscoveryResult(
-      registryURL
-    );
+    const serviceDiscovery =
+      await new TerraformModuleDatasource().getTerraformServiceDiscoveryResult(
+        registryURL
+      );
     const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
     const res = (await this.http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
