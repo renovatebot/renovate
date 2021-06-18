@@ -1,3 +1,4 @@
+import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
 import * as gradleVersioning from '../../versioning/gradle';
 import { Datasource } from '../datasource';
@@ -21,6 +22,10 @@ export class GradleVersionDatasource extends Datasource {
     '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'
   );
 
+  @cache({
+    namespace: `datasource-${GradleVersionDatasource.id}`,
+    key: ({ registryUrl }: GetReleasesConfig) => registryUrl,
+  })
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult> {
