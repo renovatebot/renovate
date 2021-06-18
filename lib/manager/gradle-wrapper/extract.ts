@@ -1,4 +1,4 @@
-import * as datasourceGradleVersion from '../../datasource/gradle-version';
+import { GradleVersionDatasource } from '../../datasource/gradle-version';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import * as gradleVersioning from '../../versioning/gradle';
@@ -19,7 +19,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
       const dependency: PackageDependency = {
         depName: 'gradle',
         currentValue: distributionUrlMatch.groups.version,
-        datasource: datasourceGradleVersion.id,
+        datasource: GradleVersionDatasource.id,
         versioning: gradleVersioning.id,
       };
       logger.debug(dependency, 'Gradle Wrapper');
