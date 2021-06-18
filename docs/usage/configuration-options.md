@@ -2297,7 +2297,8 @@ Renovate also uses custom versioning, like `"docker"` to address the most common
 By exposing `versioning` to config, you can override the default versioning for a package manager if needed.
 We do not recommend overriding the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
-We do not support 4 part versions for .... (HELP NEEDED: list what's not supported here).
+Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
+Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, any leading parts are sorted alphanumerically.
 
 ## vulnerabilityAlerts
 
