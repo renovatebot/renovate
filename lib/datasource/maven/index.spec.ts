@@ -1,5 +1,6 @@
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
