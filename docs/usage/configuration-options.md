@@ -2289,11 +2289,15 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 ## versioning
 
-Usually, each language or package manager has a specific type of "versioning". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc.
-At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
+Usually, each language or package manager has a specific type of "versioning":
+JavaScript uses npm's SemVer implementation, Python uses pep440, etc.
 
-By exposing `versioning` to config, it allows you to override the default versioning for a package manager if you really need.
-In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+Renovate also uses custom versioning, like `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries SemVer first but otherwise just does its best to sort and compare.
+
+By exposing `versioning` to config, you can override the default versioning for a package manager if needed.
+We do not recommend overriding the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+
+We do not support 4 part versions for .... (HELP NEEDED: list what's not supported here).
 
 ## vulnerabilityAlerts
 
