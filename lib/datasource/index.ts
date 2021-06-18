@@ -15,7 +15,6 @@ import type {
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
-  Release,
   ReleaseResult,
 } from './types';
 
@@ -33,7 +32,8 @@ function getDatasourceFor(datasource: string): DatasourceApi {
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
-function logError(datasource, lookupName, err): void {
+// TODO: fix error Type
+function logError(datasource: string, lookupName: string, err: any): void {
   const { statusCode, code: errCode, url } = err;
   if (statusCode === 404) {
     logger.debug({ datasource, lookupName, url }, 'Datasource 404');
@@ -100,7 +100,7 @@ async function huntRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let res: ReleaseResult;
-  let caughtError;
+  let caughtError: Error;
   for (const registryUrl of registryUrls) {
     try {
       res = await getRegistryReleases(datasource, config, registryUrl);
@@ -131,7 +131,7 @@ async function mergeRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let combinedRes: ReleaseResult;
-  let caughtError;
+  let caughtError: Error;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -313,15 +313,12 @@ export async function getPkgReleases(
   const versioning =
     config.versioning || getDefaultVersioning(config.datasource);
   const version = allVersioning.get(versioning);
-  // Return a sorted list of valid Versions
-  function sortReleases(release1: Release, release2: Release): number {
-    return version.sortVersions(release1.version, release2.version);
-  }
-  if (res.releases) {
-    res.releases = res.releases
-      .filter((release) => version.isVersion(release.version))
-      .sort(sortReleases);
-  }
+
+  // Filter and sort valid versions
+  res.releases = res.releases
+    .filter((release) => version.isVersion(release.version))
+    .sort((a, b) => version.sortVersions(a.version, b.version));
+
   // Filter versions for uniqueness
   res.releases = res.releases.filter(
     (filterRelease, filterIndex) =>
