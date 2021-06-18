@@ -3,7 +3,7 @@ import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
 import { configRegexPredicate, isConfigRegex } from '../../../../util/regex';
-import * as allVersioning from '../../../../versioning';
+import type { VersioningApi } from '../../../../versioning';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440 from '../../../../versioning/pep440';
 import * as poetryVersioning from '../../../../versioning/poetry';
@@ -13,11 +13,11 @@ export function filterVersions(
   config: FilterConfig,
   currentVersion: string,
   latestVersion: string,
-  releases: Release[]
+  releases: Release[],
+  versioning: VersioningApi
 ): Release[] {
   const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
     config;
-  let versioning;
   function isVersionStable(version: string): boolean {
     if (!versioning.isStable(version)) {
       return false;
@@ -29,7 +29,6 @@ export function filterVersions(
     }
     return true;
   }
-  versioning = allVersioning.get(config.versioning);
   if (!currentVersion) {
     return [];
   }
