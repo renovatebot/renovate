@@ -1,4 +1,4 @@
-import * as datasourceGalaxyCollection from '../../datasource/galaxy-collection';
+import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
 import type { PackageDependency } from '../types';
 import { dependencyRegex, galaxyRegEx } from './util';
 
@@ -19,7 +19,7 @@ export function extractCollectionsMetaDataFile(
       if (galaxyRegExResult) {
         const dep: PackageDependency = {
           depType: 'galaxy-collection',
-          datasource: datasourceGalaxyCollection.id,
+          datasource: GalaxyCollectionDatasource.id,
           depName: galaxyRegExResult.groups.lookupName,
           currentValue: galaxyRegExResult.groups.version,
         };
