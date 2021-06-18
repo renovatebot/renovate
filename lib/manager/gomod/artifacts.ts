@@ -37,7 +37,7 @@ function getUpdateImportPathCmds(
 ): string[] {
   const updateImportCommands = updatedDeps
     .filter((x) => !x.startsWith('gopkg.in'))
-    .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
+    .map((depName) => `go mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
