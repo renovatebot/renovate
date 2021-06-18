@@ -21,7 +21,6 @@ describe(getName(), () => {
 
     beforeEach(() => {
       resetCache();
-      httpMock.setup();
       process.env.RENOVATE_SKIP_CACHE = 'true';
       jest.resetAllMocks();
     });
@@ -30,7 +29,6 @@ describe(getName(), () => {
       if (!httpMock.allUsed()) {
         throw new Error('Not all http mocks have been used!');
       }
-      httpMock.reset();
       process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 

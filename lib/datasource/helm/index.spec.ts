@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
-import { id as datasource } from '.';
+import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
 const indexYaml = loadFixture('index.yaml');
@@ -10,17 +10,12 @@ describe(getName(), () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('returns null if lookupName was not provided', async () => {
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: HelmDatasource.id,
           depName: undefined,
           registryUrls: ['https://example-repository.com'],
         })
@@ -29,7 +24,7 @@ describe(getName(), () => {
     it('returns null if repository was not provided', async () => {
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: HelmDatasource.id,
           depName: 'some_chart',
           registryUrls: [],
         })
@@ -42,7 +37,7 @@ describe(getName(), () => {
         .reply(200, null);
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: HelmDatasource.id,
           depName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
         })
@@ -56,7 +51,7 @@ describe(getName(), () => {
         .reply(200, undefined);
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: HelmDatasource.id,
           depName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
         })
@@ -70,7 +65,7 @@ describe(getName(), () => {
         .reply(404);
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: HelmDatasource.id,
           depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         })
@@ -85,7 +80,7 @@ describe(getName(), () => {
       let e;
       try {
         await getPkgReleases({
-          datasource,
+          datasource: HelmDatasource.id,
           depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         });
@@ -103,7 +98,7 @@ describe(getName(), () => {
         .replyWithError('');
       expect(
         await getPkgReleases({
-          datasource,
+          datasource: HelmDatasource.id,
           depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         })
@@ -116,7 +111,7 @@ describe(getName(), () => {
         .get('/index.yaml')
         .reply(200, '# A comment');
       const releases = await getPkgReleases({
-        datasource,
+        datasource: HelmDatasource.id,
         depName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
@@ -135,7 +130,7 @@ describe(getName(), () => {
         .get('/index.yaml')
         .reply(200, res);
       const releases = await getPkgReleases({
-        datasource,
+        datasource: HelmDatasource.id,
         depName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
@@ -148,7 +143,7 @@ describe(getName(), () => {
         .get('/index.yaml')
         .reply(200, indexYaml);
       const releases = await getPkgReleases({
-        datasource,
+        datasource: HelmDatasource.id,
         depName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
@@ -161,7 +156,7 @@ describe(getName(), () => {
         .get('/index.yaml')
         .reply(200, indexYaml);
       const releases = await getPkgReleases({
-        datasource,
+        datasource: HelmDatasource.id,
         depName: 'ambassador',
         registryUrls: ['https://example-repository.com'],
       });
@@ -175,7 +170,7 @@ describe(getName(), () => {
         .get('/subdir/index.yaml')
         .reply(200, indexYaml);
       await getPkgReleases({
-        datasource,
+        datasource: HelmDatasource.id,
         depName: 'ambassador',
         registryUrls: ['https://example-repository.com/subdir'],
       });

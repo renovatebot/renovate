@@ -8,12 +8,7 @@ const baseUrl = 'https://api.bitbucket.org';
 
 describe('accumulateValues()', () => {
   beforeEach(() => {
-    httpMock.setup();
     setBaseUrl(baseUrl);
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   it('paginates', async () => {

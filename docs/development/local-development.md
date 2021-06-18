@@ -14,7 +14,7 @@ You need the following dependencies for local development:
 - Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
-- Python `^3.8`
+- Python `^3.9`
 - Java between `8` and `12`
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).

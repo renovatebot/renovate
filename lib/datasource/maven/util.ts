@@ -1,5 +1,4 @@
 import url from 'url';
-import fs from 'fs-extra';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -100,14 +99,6 @@ export async function downloadHttpProtocol(
   }
 }
 
-async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
-  const pkgPath = pkgUrl.toString().replace('file://', '');
-  if (!(await fs.exists(pkgPath))) {
-    return null;
-  }
-  return fs.readFile(pkgPath, 'utf8');
-}
-
 export async function isHttpResourceExists(
   pkgUrl: url.URL | string,
   hostType = id
@@ -150,9 +141,6 @@ export async function downloadMavenXml(
   let rawContent: string;
   let authorization: boolean;
   switch (pkgUrl.protocol) {
-    case 'file:':
-      rawContent = await downloadFileProtocol(pkgUrl);
-      break;
     case 'http:':
     case 'https:':
       ({ authorization, body: rawContent } = await downloadHttpProtocol(

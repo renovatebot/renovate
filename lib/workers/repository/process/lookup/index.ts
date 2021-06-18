@@ -231,7 +231,7 @@ export async function lookupUpdates(
         bucket,
         release
       );
-      if (pendingChecks.length) {
+      if (pendingChecks) {
         update.pendingChecks = pendingChecks;
       }
       if (pendingReleases.length) {

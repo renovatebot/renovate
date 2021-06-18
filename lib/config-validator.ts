@@ -4,12 +4,12 @@ import { dequal } from 'dequal';
 import { readFileSync } from 'fs-extra';
 import JSON5 from 'json5';
 import { configFileNames } from './config/app-strings';
-import { getConfig as getFileConfig } from './config/file';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
 import { validateConfig } from './config/validation';
 import { logger } from './logger';
+import { getConfig as getFileConfig } from './workers/global/config/parse/file';
 
 /* eslint-disable no-console */
 

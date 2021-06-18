@@ -3,7 +3,7 @@ import { setAdminConfig } from './admin';
 import { decryptConfig } from './decrypt';
 import type { RenovateConfig } from './types';
 
-const privateKey = loadFixture('private.pem', 'keys');
+const privateKey = loadFixture('private.pem', '.');
 
 describe(getName(), () => {
   describe('decryptConfig()', () => {

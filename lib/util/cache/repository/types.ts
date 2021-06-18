@@ -32,6 +32,8 @@ export interface BranchCache {
 }
 
 export interface Cache {
+  configFileName?: string;
+  semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
   repository?: string;
   revision?: number;
