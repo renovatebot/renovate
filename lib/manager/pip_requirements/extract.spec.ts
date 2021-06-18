@@ -1,8 +1,6 @@
-import { fs, getName, loadFixture } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import { extractAllPackageFiles, extractPackageFile } from './extract';
-
-jest.mock('../../util/fs');
+import { extractPackageFile } from './extract';
 
 const requirements1 = loadFixture('requirements1.txt');
 const requirements2 = loadFixture('requirements2.txt');
@@ -40,16 +38,6 @@ describe(getName(), () => {
     it('extracts dependencies', () => {
       const res = extractPackageFile(requirements1, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
-      expect(res.registryUrls).toEqual(['http://example.com/private-pypi/']);
-      expect(res.deps).toHaveLength(3);
-    });
-    it('extracts using extractAllPackageFiles', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(requirements1);
-      const outerRes = await extractAllPackageFiles(config, [
-        'unused_file_name',
-      ]);
-      expect(outerRes).toMatchSnapshot();
-      const [res] = outerRes;
       expect(res.registryUrls).toEqual(['http://example.com/private-pypi/']);
       expect(res.deps).toHaveLength(3);
     });

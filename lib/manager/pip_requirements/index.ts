@@ -1,7 +1,7 @@
 import { LANGUAGE_PYTHON } from '../../constants/languages';
 
 export { updateArtifacts } from './artifacts';
-export { extractAllPackageFiles } from './extract';
+export { extractPackageFile } from './extract';
 export { getRangeStrategy } from './range';
 
 export const language = LANGUAGE_PYTHON;
