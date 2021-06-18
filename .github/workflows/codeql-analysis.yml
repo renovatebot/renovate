@@ -12,7 +12,6 @@ on:
 jobs:
   CodeQL-Build:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
 
     steps:
       - name: Checkout repository
