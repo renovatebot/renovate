@@ -43,6 +43,7 @@ describe(getName(), () => {
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
     });
   });
+
   describe('setConfidence', () => {
     let config: ConfidenceConfig;
     beforeEach(() => {
@@ -54,10 +55,12 @@ describe(getName(), () => {
     afterEach(() => {
       jest.resetAllMocks();
     });
+
     it('returns if not configured', async () => {
       await setConfidence(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
     });
+
     it('sets status yellow', async () => {
       config.minimumConfidence = 'high';
       config.confidenceStatus = BranchStatus.yellow;
@@ -65,6 +68,7 @@ describe(getName(), () => {
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
+
     it('sets status green', async () => {
       config.minimumConfidence = 'high';
       config.confidenceStatus = BranchStatus.green;
@@ -72,6 +76,7 @@ describe(getName(), () => {
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
+
     it('skips status if already set', async () => {
       config.minimumConfidence = 'high';
       config.confidenceStatus = BranchStatus.green;

@@ -157,6 +157,7 @@ describe(getName(), () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toMatchSnapshot();
     });
+
     it('skips branch if minimumConfidence not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
@@ -170,6 +171,7 @@ describe(getName(), () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toMatchSnapshot();
     });
+
     it('processes branch if minimumConfidence is met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
@@ -183,6 +185,7 @@ describe(getName(), () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toMatchSnapshot();
     });
+
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
