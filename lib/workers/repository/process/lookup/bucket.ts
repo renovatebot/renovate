@@ -1,4 +1,4 @@
-import * as allVersioning from '../../../../versioning';
+import type { VersioningApi } from '../../../../versioning/types';
 
 export interface BucketConfig {
   separateMajorMinor?: boolean;
@@ -10,7 +10,7 @@ export function getBucket(
   config: BucketConfig,
   currentVersion: string,
   newVersion: string,
-  versioning: allVersioning.VersioningApi
+  versioning: VersioningApi
 ): string {
   const { separateMajorMinor, separateMultipleMajor, separateMinorPatch } =
     config;

@@ -1,20 +1,36 @@
 import { createReadStream } from 'fs';
+import { DirectoryResult, dir } from 'tmp-promise';
 import * as httpMock from '../../../../test/http-mock';
-import { getFixturePath, getName, loadFixture } from '../../../../test/util';
+import {
+  getFixturePath,
+  getName,
+  loadFixture,
+  logger,
+} from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
-import createHashes from './hash';
+import { Logger } from '../../../logger/types';
+import { createHashes } from './hash';
 
-const terraformProviderDatasource = new TerraformProviderDatasource();
-const releaseBackendUrl = terraformProviderDatasource.defaultRegistryUrls[1];
+const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
 
+const log = logger.logger as jest.Mocked<Logger>;
+
 describe(getName(), () => {
+  let cacheDir: DirectoryResult;
+
+  beforeAll(async () => {
+    cacheDir = await dir({ unsafeCleanup: true });
+    setAdminConfig({ cacheDir: cacheDir.path });
+  });
+
+  beforeEach(() => jest.resetAllMocks());
+
+  afterAll(() => cacheDir.cleanup());
+
   it('returns null if a non hashicorp release is found ', async () => {
-    const result = await createHashes(
-      'test/gitlab',
-      '2.56.0',
-      '/tmp/renovate/cache'
-    );
+    const result = await createHashes('test/gitlab', '2.56.0');
     expect(result).toBeNull();
   });
 
@@ -24,11 +40,7 @@ describe(getName(), () => {
       .get('/terraform-provider-azurerm/2.59.0/index.json')
       .reply(403, '');
 
-    const result = await createHashes(
-      'hashicorp/azurerm',
-      '2.59.0',
-      '/tmp/renovate/cache'
-    );
+    const result = await createHashes('hashicorp/azurerm', '2.59.0');
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -39,7 +51,7 @@ describe(getName(), () => {
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .replyWithError('');
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
+    const result = await createHashes('hashicorp/azurerm', '2.56.0');
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -64,7 +76,7 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
+    const result = await createHashes('hashicorp/azurerm', '2.56.0');
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -89,7 +101,8 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0', '/tmp');
+    const result = await createHashes('hashicorp/azurerm', '2.56.0');
+    expect(log.error.mock.calls).toMatchSnapshot();
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(2);
     expect(result).toMatchSnapshot();

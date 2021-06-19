@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import extract from 'extract-zip';
 import pMap from 'p-map';
+import { join } from 'upath';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import type {
   TerraformBuild,
@@ -10,11 +11,10 @@ import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import * as fs from '../../../util/fs';
 import { Http } from '../../../util/http';
-import { repositoryRegex } from './util';
+import { getCacheDir, repositoryRegex } from './util';
 
 const http = new Http(TerraformProviderDatasource.id);
 const hashCacheTTL = 10080; // in seconds == 1 week
-const terraformProviderDatasource = new TerraformProviderDatasource();
 
 export async function hashFiles(files: string[]): Promise<string> {
   const rootHash = crypto.createHash('sha256');
@@ -53,7 +53,7 @@ export async function hashOfZipContent(
   const sortedFiles = files.sort((a, b) => a.localeCompare(b));
   const filesWithPath = sortedFiles.map((file) => `${extractPath}/${file}`);
 
-  const result = hashFiles(filesWithPath);
+  const result = await hashFiles(filesWithPath);
 
   // delete extracted files
   await fs.rm(extractPath, { recursive: true });
@@ -67,21 +67,22 @@ async function getReleaseBackendIndex(
 ): Promise<VersionDetailResponse> {
   return (
     await http.getJson<VersionDetailResponse>(
-      `${terraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`
+      `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`
     )
   ).body;
 }
 
 export async function calculateHashes(
-  builds: TerraformBuild[],
-  cacheDir: string
+  builds: TerraformBuild[]
 ): Promise<string[]> {
+  const cacheDir = await getCacheDir();
+
   // for each build download ZIP, extract content and generate hash for all containing files
   const hashes = await pMap(
     builds,
     async (build) => {
-      const downloadFileName = `${cacheDir}/${build.filename}`;
-      const extractPath = `${cacheDir}/extract/${build.filename}`;
+      const downloadFileName = join(cacheDir, build.filename);
+      const extractPath = join(cacheDir, 'extract', build.filename);
       logger.trace(
         `Downloading archive and generating hash for ${build.name}-${build.version}...`
       );
@@ -99,7 +100,7 @@ export async function calculateHashes(
         );
       } catch (err) {
         /* istanbul ignore next */
-        logger.error({ err }, 'write stream error');
+        logger.error({ err, build }, 'write stream error');
       } finally {
         // delete zip file
         await fs.unlink(downloadFileName);
@@ -111,10 +112,9 @@ export async function calculateHashes(
   return hashes;
 }
 
-export default async function createHashes(
+export async function createHashes(
   repository: string,
-  version: string,
-  cacheDir: string
+  version: string
 ): Promise<string[]> {
   // check cache for hashes
   const repositoryRegexResult = repositoryRegex.exec(repository);
@@ -125,7 +125,7 @@ export default async function createHashes(
   const lookupName = repositoryRegexResult.groups.lookupName;
   const backendLookUpName = `terraform-provider-${lookupName}`;
 
-  const cacheKey = `${terraformProviderDatasource.defaultRegistryUrls[1]}/${repository}/${lookupName}-${version}`;
+  const cacheKey = `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${repository}/${lookupName}-${version}`;
   const cachedRelease = await packageCache.get<string[]>(
     'terraform-provider-release',
     cacheKey
@@ -134,7 +134,7 @@ export default async function createHashes(
   if (cachedRelease) {
     return cachedRelease;
   }
-  let versionReleaseBackend;
+  let versionReleaseBackend: VersionDetailResponse;
   try {
     versionReleaseBackend = await getReleaseBackendIndex(
       backendLookUpName,
@@ -149,7 +149,7 @@ export default async function createHashes(
   }
 
   const builds = versionReleaseBackend.builds;
-  const hashes = await calculateHashes(builds, cacheDir);
+  const hashes = await calculateHashes(builds);
 
   // if a hash could not be produced skip caching and return null
   if (hashes.some((value) => value == null)) {

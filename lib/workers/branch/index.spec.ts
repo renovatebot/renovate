@@ -24,6 +24,7 @@ import type { EnsurePrResult } from '../pr';
 import * as _prAutomerge from '../pr/automerge';
 import type { Pr } from '../repository/onboarding/branch/check';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { BranchResult } from '../types';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
@@ -846,9 +847,6 @@ describe(getName(), () => {
       });
 
       expect(result).toMatchSnapshot();
-      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
-        cwd: '/localDir',
-      });
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
       );
@@ -1245,6 +1243,21 @@ describe(getName(), () => {
           ).contents as Buffer
         ).toString()
       ).toBe('modified file content');
+    });
+    it('returns when rebaseWhen=never', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({ ...config, rebaseWhen: 'never' })
+      ).toMatchObject({ result: BranchResult.NoWork });
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
   });
 });
