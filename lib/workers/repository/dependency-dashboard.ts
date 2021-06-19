@@ -317,6 +317,28 @@ export async function ensureDependencyDashboard(
     issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 
+  if (config.dependencyDashboardIssue) {
+    const updatedIssue = await platform.getIssue(
+      config.dependencyDashboardIssue,
+      false
+    );
+    if (updatedIssue) {
+      const { dependencyDashboardChecks } = parseDashboardIssue(
+        updatedIssue.body
+      );
+      for (const branchName of Object.keys(config.dependencyDashboardChecks)) {
+        delete dependencyDashboardChecks[branchName];
+      }
+      for (const branchName of Object.keys(dependencyDashboardChecks)) {
+        const checkText = `- [ ] <!-- ${dependencyDashboardChecks[branchName]}-branch=${branchName} -->`;
+        issueBody = issueBody.replace(
+          checkText,
+          checkText.replace('[ ]', '[x]')
+        );
+      }
+    }
+  }
+
   if (getAdminConfig().dryRun) {
     logger.info(
       'DRY-RUN: Would ensure Dependency Dashboard ' +
