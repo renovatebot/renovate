@@ -7,7 +7,7 @@ import {
 } from '../constants/languages';
 
 import * as datasourceDocker from '../datasource/docker';
-import * as datasourceOrb from '../datasource/orb';
+import { OrbDatasource } from '../datasource/orb';
 import { applyPackageRules } from './package-rules';
 
 type TestConfig = PackageRuleInputConfig & {
@@ -318,14 +318,14 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [datasourceOrb.id, datasourceDocker.id],
+          matchDatasources: [OrbDatasource.id, datasourceDocker.id],
           x: 1,
         },
       ],
     };
     const dep = {
       depType: 'dependencies',
-      datasource: datasourceOrb.id,
+      datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -342,7 +342,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      datasource: datasourceOrb.id,
+      datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -352,7 +352,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [datasourceOrb.id],
+          matchDatasources: [OrbDatasource.id],
           x: 1,
         },
       ],

@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
 import * as packageCache from '.';
 
 type Handler<T> = (parameters: DecoratorParameters<T>) => Promise<unknown>;
@@ -90,37 +89,32 @@ export function cache<T>({
   ttlMinutes = 30,
 }: CacheParameters): Decorator<T> {
   return decorate(async ({ args, instance, callback }) => {
-    try {
-      let finalNamespace: string;
-      if (is.string(namespace)) {
-        finalNamespace = namespace;
-      } else if (is.function_(namespace)) {
-        finalNamespace = namespace.apply(instance, args);
-      }
-
-      let finalKey: string;
-      if (is.string(key)) {
-        finalKey = key;
-      } else if (is.function_(key)) {
-        finalKey = key.apply(instance, args);
-      }
-
-      const cachedResult = await packageCache.get<unknown>(
-        finalNamespace,
-        finalKey
-      );
-
-      if (cachedResult !== undefined) {
-        return cachedResult;
-      }
-
-      const result = await callback();
-
-      await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
-      return result;
-    } catch (err) /* istanbul ignore next */ {
-      logger.error(err);
-      throw err;
+    let finalNamespace: string;
+    if (is.string(namespace)) {
+      finalNamespace = namespace;
+    } else if (is.function_(namespace)) {
+      finalNamespace = namespace.apply(instance, args);
     }
+
+    let finalKey: string;
+    if (is.string(key)) {
+      finalKey = key;
+    } else if (is.function_(key)) {
+      finalKey = key.apply(instance, args);
+    }
+
+    const cachedResult = await packageCache.get<unknown>(
+      finalNamespace,
+      finalKey
+    );
+
+    if (cachedResult !== undefined) {
+      return cachedResult;
+    }
+
+    const result = await callback();
+
+    await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
+    return result;
   });
 }

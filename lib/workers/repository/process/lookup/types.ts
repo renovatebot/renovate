@@ -56,4 +56,6 @@ export interface UpdateResult {
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
+
+  versioning: string;
 }

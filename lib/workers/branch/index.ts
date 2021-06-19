@@ -428,10 +428,16 @@ export async function processBranch(
         });
       }
     }
-    config.forceCommit =
-      !!dependencyDashboardCheck ||
-      config.rebaseRequested ||
-      branchPr?.isConflicted;
+    const forcedManually = !!dependencyDashboardCheck || config.rebaseRequested;
+    if (!forcedManually && config.rebaseWhen === 'never') {
+      logger.debug(`Skipping commit (rebaseWhen=never)`);
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: BranchResult.NoWork,
+      };
+    }
+    config.forceCommit = forcedManually || branchPr?.isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
