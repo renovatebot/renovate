@@ -17,7 +17,7 @@ describe(getName(), () => {
     it('detects errors in pnpm-workspace.yml file structure', async () => {
       jest
         .spyOn(fs, 'readLocalFile')
-        .mockResolvedValueOnce('p!!!ckages:\n\t- "packages/*"');
+        .mockResolvedValueOnce('p!!!ckages:\n - "packages/*"');
 
       const workSpaceFilePath = getFixturePath(
         'pnpm-monorepo/pnpm-workspace.yml',
@@ -35,7 +35,7 @@ describe(getName(), () => {
     });
 
     it('detects errors when opening pnpm-workspace.yml file', async () => {
-      jest.spyOn(yaml, 'safeLoad').mockImplementationOnce(() => {
+      jest.spyOn(yaml, 'load').mockImplementationOnce(() => {
         throw new Error();
       });
 
@@ -89,13 +89,33 @@ describe(getName(), () => {
           pnpmShrinkwrap: 'pnpm-lock.yaml',
         },
         {
-          packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          packageFile: 'nested-packages/group/a/package.json',
+          packageJsonName: '@demo/nested-group-a',
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
-          packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          packageFile: 'nested-packages/group/b/package.json',
+          packageJsonName: '@demo/nested-group-b',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
+          packageFile: 'non-nested-packages/a/package.json',
+          packageJsonName: '@demo/non-nested-a',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
+          packageFile: 'non-nested-packages/b/package.json',
+          packageJsonName: '@demo/non-nested-b',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
+          packageFile: 'solo-package/package.json',
+          packageJsonName: '@demo/solo',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
+          packageFile: 'solo-package-trailing-slash/package.json',
+          packageJsonName: '@demo/solo-trailing-slash',
           pnpmShrinkwrap: undefined as undefined | string,
         },
       ];
@@ -126,13 +146,13 @@ describe(getName(), () => {
           pnpmShrinkwrap: 'pnpm-lock.yaml',
         },
         {
-          packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          packageFile: 'nested-packages/group/a/package.json',
+          packageJsonName: '@demo/nested-group-a',
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'not-matching/b/package.json',
-          packageJsonName: '@org/b',
+          packageJsonName: '@not-matching/b',
           pnpmShrinkwrap: undefined as undefined | string,
         },
       ];

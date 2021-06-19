@@ -387,6 +387,8 @@ export async function validateConfig(
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',
+                'currentValueTemplate',
+                'extractVersionTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
@@ -514,7 +516,9 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
                 });
               }
-            } else if (key === 'customEnvVariables') {
+            } else if (
+              ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)
+            ) {
               const res = validatePlainObject(val);
               if (res !== true) {
                 errors.push({

@@ -5,18 +5,30 @@ import {
   getConfig,
   getName,
   git,
+  mocked,
   platform,
 } from '../../../../../test/util';
+import {
+  REPOSITORY_FORKED,
+  REPOSITORY_NO_PACKAGE_FILES,
+} from '../../../../constants/error-messages';
 import { Pr } from '../../../../platform';
 import { PrState } from '../../../../types';
+import * as _cache from '../../../../util/cache/repository';
+import * as _config from './config';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
 
 const rebase: any = _rebase;
+const configModule: any = _config;
 
 jest.mock('../../../../workers/repository/onboarding/branch/rebase');
+jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
+jest.mock('./config');
+
+const cache = mocked(_cache);
 
 describe(getName(), () => {
   describe('checkOnboardingBranch', () => {
@@ -26,18 +38,54 @@ describe(getName(), () => {
       config = getConfig();
       config.repository = 'some/repo';
       git.getFileList.mockResolvedValue([]);
+      cache.getCache.mockReturnValue({});
     });
     it('throws if no package files', async () => {
-      await expect(checkOnboardingBranch(config)).rejects.toThrow();
+      await expect(checkOnboardingBranch(config)).rejects.toThrow(
+        REPOSITORY_NO_PACKAGE_FILES
+      );
     });
     it('throws if fork', async () => {
       config.isFork = true;
-      await expect(checkOnboardingBranch(config)).rejects.toThrow();
+      await expect(checkOnboardingBranch(config)).rejects.toThrow(
+        REPOSITORY_FORKED
+      );
     });
     it('has default onboarding config', async () => {
+      configModule.getOnboardingConfig.mockResolvedValue(
+        config.onboardingConfig
+      );
+      configModule.getOnboardingConfigContents.mockResolvedValue(
+        '{\n' +
+          '  "$schema": "https://docs.renovatebot.com/renovate-schema.json"\n' +
+          '}\n'
+      );
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
+      expect(
+        git.commitFiles.mock.calls[0][0].files[0].contents
+      ).toMatchSnapshot();
+    });
+    it('uses discovered onboarding config', async () => {
+      configModule.getOnboardingConfig.mockResolvedValue({
+        onboardingBranch: 'test',
+      });
+      configModule.getOnboardingConfigContents.mockResolvedValue(
+        '{\n' +
+          '  "$schema": "https://docs.renovatebot.com/renovate-schema.json",\n' +
+          '  "extends: ["some/renovate-config"]\n' +
+          '}\n'
+      );
+      git.getFileList.mockResolvedValue(['package.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      await checkOnboardingBranch(config);
+      expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith({
+        ...config,
+        onboardingBranch: 'test',
+        renovateJsonPresent: true,
+        warnings: [],
+      });
       expect(
         git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();
@@ -68,6 +116,29 @@ describe(getName(), () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
+
+    it('handles removed cached file name', async () => {
+      cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
+      git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
+
+    it('handles cached file name', async () => {
+      cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
+      platform.getJsonFile.mockResolvedValueOnce({});
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
+
+    it('handles cached package.json', async () => {
+      cache.getCache.mockReturnValue({ configFileName: 'package.json' });
+      platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
+
     it('detects repo is onboarded via package.json config', async () => {
       git.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');

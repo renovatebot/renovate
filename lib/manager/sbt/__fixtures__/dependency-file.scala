@@ -10,4 +10,11 @@ object Dependencies {
   val ujson = "com.example" %% "foo" % "0.7.1"
 
   lazy val abc = "com.abc" % "abc" % abcVersion
+
+  val relatedDeps = Seq(
+    "com.abc" % "abc-a" % abcVersion,
+    "com.abc" % "abc-b" % abcVersion
+  )
+
+  val aloneDepInSeq = Seq("com.abc" % "abc-c" % abcVersion)
 }

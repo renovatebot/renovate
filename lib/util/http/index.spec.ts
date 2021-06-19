@@ -1,4 +1,4 @@
-import nock from 'nock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
@@ -15,29 +15,28 @@ describe(getName(), () => {
 
   beforeEach(() => {
     http = new Http('dummy');
-    nock.cleanAll();
     hostRules.clear();
     queue.clear();
   });
   it('get', async () => {
-    nock(baseUrl).get('/test').reply(200);
+    httpMock.scope(baseUrl).get('/test').reply(200);
     expect(await http.get('http://renovate.com/test')).toMatchSnapshot();
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
   it('returns 429 error', async () => {
-    nock(baseUrl).get('/test').reply(429);
+    httpMock.scope(baseUrl).get('/test').reply(429);
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
       'Response code 429 (Too Many Requests)'
     );
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
   it('converts 404 error to ExternalHostError', async () => {
-    nock(baseUrl).get('/test').reply(404);
+    httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
       EXTERNAL_HOST_ERROR
     );
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
   it('disables hosts', async () => {
     hostRules.add({ matchHost: 'renovate.com', enabled: false });
@@ -46,55 +45,55 @@ describe(getName(), () => {
     );
   });
   it('ignores 404 error and does not throw ExternalHostError', async () => {
-    nock(baseUrl).get('/test').reply(404);
+    httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true, abortIgnoreStatusCodes: [404] });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
       'Response code 404 (Not Found)'
     );
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
   it('getJson', async () => {
-    nock(baseUrl).get('/').reply(200, '{ "test": true }');
+    httpMock.scope(baseUrl).get('/').reply(200, '{ "test": true }');
     expect(await http.getJson('http://renovate.com')).toMatchSnapshot();
   });
   it('postJson', async () => {
-    nock(baseUrl).post('/').reply(200, {});
+    httpMock.scope(baseUrl).post('/').reply(200, {});
     expect(
       await http.postJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
   it('putJson', async () => {
-    nock(baseUrl).put('/').reply(200, {});
+    httpMock.scope(baseUrl).put('/').reply(200, {});
     expect(
       await http.putJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
   it('patchJson', async () => {
-    nock(baseUrl).patch('/').reply(200, {});
+    httpMock.scope(baseUrl).patch('/').reply(200, {});
     expect(
       await http.patchJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
   it('deleteJson', async () => {
-    nock(baseUrl).delete('/').reply(200, {});
+    httpMock.scope(baseUrl).delete('/').reply(200, {});
     expect(
       await http.deleteJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
   it('headJson', async () => {
-    nock(baseUrl).head('/').reply(200, {});
+    httpMock.scope(baseUrl).head('/').reply(200, {});
     expect(
       await http.headJson('http://renovate.com', { baseUrl })
     ).toMatchSnapshot();
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
 
   it('stream', async () => {
-    nock(baseUrl).get('/some').reply(200, {});
+    httpMock.scope(baseUrl).get('/some').reply(200, {});
 
     const stream = http.stream('/some', {
       baseUrl,
@@ -115,20 +114,21 @@ describe(getName(), () => {
     await done;
 
     expect(data).toBe('{}');
-    expect(nock.isDone()).toBe(true);
+    expect(httpMock.allUsed()).toBe(true);
   });
 
   it('retries', async () => {
     const NODE_ENV = process.env.NODE_ENV;
     try {
       delete process.env.NODE_ENV;
-      nock(baseUrl)
+      httpMock
+        .scope(baseUrl)
         .head('/')
         .reply(500)
         .head('/')
         .reply(200, undefined, { 'x-some-header': 'abc' });
       expect(await http.head('http://renovate.com')).toMatchSnapshot();
-      expect(nock.isDone()).toBe(true);
+      expect(httpMock.allUsed()).toBe(true);
     } finally {
       process.env.NODE_ENV = NODE_ENV;
     }
@@ -158,7 +158,8 @@ describe(getName(), () => {
     const [fooReq, fooStart, fooResp, fooFinish] = mockRequestResponse();
     const [barReq, barStart, barResp, barFinish] = mockRequestResponse();
 
-    nock(baseUrl)
+    httpMock
+      .scope(baseUrl)
       .get('/foo')
       .reply(200, () => {
         foo = true;

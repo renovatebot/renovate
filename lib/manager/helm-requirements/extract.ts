@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
-import * as datasourceHelm from '../../datasource/helm';
+import { load } from 'js-yaml';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -11,9 +11,10 @@ export function extractPackageFile(
   config: ExtractConfig
 ): PackageFile {
   let deps = [];
-  let doc;
+  // TODO: fix type
+  let doc: any;
   try {
-    doc = yaml.safeLoad(content, { json: true });
+    doc = load(content, { json: true });
   } catch (err) {
     logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
     return null;
@@ -70,7 +71,7 @@ export function extractPackageFile(
   });
   const res = {
     deps,
-    datasource: datasourceHelm.id,
+    datasource: HelmDatasource.id,
   };
   return res;
 }

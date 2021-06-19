@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
+import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { find } from '../../util/host-rules';
@@ -37,7 +37,7 @@ function getUpdateImportPathCmds(
 ): string[] {
   const updateImportCommands = updatedDeps
     .filter((x) => !x.startsWith('gopkg.in'))
-    .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
+    .map((depName) => `go mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
@@ -123,7 +123,7 @@ export async function updateArtifacts({
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
-        CGO_ENABLED: config.binarySource === BinarySource.Docker ? '0' : null,
+        CGO_ENABLED: getAdminConfig().binarySource === 'docker' ? '0' : null,
       },
       docker: {
         image: 'go',

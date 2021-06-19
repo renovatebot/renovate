@@ -3,6 +3,17 @@
 We try to keep issues well-classified through use of labels.
 Any repository collaborator can apply labels according to the below guidelines.
 
+The general idea is that we have:
+
+- manager (`manager:`)
+- versioning (`versioning:`)
+- datasource (`datasource:`)
+- platform (`platform:`)
+- core functionality (`core:`)
+
+The majority of issues should have at least one of those labels.
+These labels should also map approximately to our Conventional Commit scopes.
+
 ## Basic knowledge about Renovate
 
 You should know about platforms, package managers, datasources and versioning to label issues effectively.
@@ -92,6 +103,20 @@ Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is
 Use these to mark the platform that is affected by this issue.
 Keep in mind that an issue can be both affecting a platform and a self hosted instance.
 
+### Core
+
+<details>
+    <summary>Core labels</summary>
+
+    core:automerge
+    core:dashboard
+    core:onboarding
+    core:schedule
+
+</details>
+
+The purpose of these labels is to allow browsing of open issues by the most commonly-used functionality, such as automerging or Dependency Dashboard.
+
 ### Manager
 
 "manager" is short for "package manager".
@@ -141,7 +166,6 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     logs:problem
     reproduction:needed
     reproduction:provided
-    reproduction:confirmed
     duplicate
 
 </details>
@@ -159,7 +183,6 @@ Add a label `logs:problem` to indicate that there's a problem with the logs, and
 
 Add a label `reproduction:needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduction:provided` once there is a public reproduction.
-A developer will add the `reproduction:confirmed` once they have checked and confirmed the reproduction.
 
 Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 

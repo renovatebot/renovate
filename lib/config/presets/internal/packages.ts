@@ -24,7 +24,7 @@ export const presets: Record<string, Preset> = {
   },
   eslint: {
     description: 'All eslint packages',
-    matchPackageNames: ['babel-eslint'],
+    matchPackageNames: ['@types/eslint', 'babel-eslint'],
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   stylelint: {
@@ -58,6 +58,7 @@ export const presets: Record<string, Preset> = {
       'ember-exam',
       'ember-mocha',
       'ember-qunit',
+      'enzyme',
       'istanbul',
       'mock-fs',
       'nock',
@@ -65,7 +66,15 @@ export const presets: Record<string, Preset> = {
       'proxyquire',
       'supertest',
     ],
-    matchPackagePrefixes: ['chai', 'jest', 'mocha', 'qunit', 'sinon', 'should'],
+    matchPackagePrefixes: [
+      '@testing-library',
+      'chai',
+      'jest',
+      'mocha',
+      'qunit',
+      'should',
+      'sinon',
+    ],
   },
   unitTest: {
     description: 'All unit test packages',

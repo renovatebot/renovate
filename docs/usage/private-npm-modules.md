@@ -69,13 +69,15 @@ module.exports = {
       // https://www.jfrog.com/confluence/display/JFROG/npm+Registry
       // Will be passed as `//artifactory.my-company.com/artifactory/api/npm/npm:_auth=<TOKEN>` to `.npmrc`
       hostType: 'npm',
-      matchHost: 'https://artifactory.my-company.com/artifactory/api/npm/npm',
+      matchHost: 'https://artifactory.my-company.com/artifactory/api/npm/npm/',
       token: process.env.ARTIFACTORY_NPM_TOKEN,
       authType: 'Basic',
     },
   ],
 };
 ```
+
+**NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
 
 **NOTE:** Do not use `NPM_TOKEN` as an environment variable.
 

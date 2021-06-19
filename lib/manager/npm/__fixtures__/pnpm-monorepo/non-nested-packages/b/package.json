@@ -1,0 +1,12 @@
+{
+  "name": "@demo/non-nested-b",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1"
+  }
+}

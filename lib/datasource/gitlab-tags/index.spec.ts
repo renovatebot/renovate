@@ -4,13 +4,6 @@ import { getName } from '../../../test/util';
 import { id as datasource } from '.';
 
 describe(getName(), () => {
-  beforeEach(() => {
-    httpMock.reset();
-    httpMock.setup();
-  });
-  afterEach(() => {
-    httpMock.reset();
-  });
   describe('getReleases', () => {
     it('returns tags from custom registry', async () => {
       const body = [

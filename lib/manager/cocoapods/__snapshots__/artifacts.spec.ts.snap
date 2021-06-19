@@ -16,12 +16,6 @@ exports[`.updateArtifacts() catches write error 2`] = `Array []`;
 exports[`.updateArtifacts() dynamically selects Docker image tag 1`] = `
 Array [
   Object {
-    "cmd": "docker ps --filter label=renovate_child -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
     "cmd": "docker pull renovate/cocoapods:1.2.4",
     "options": Object {
       "encoding": "utf-8",
@@ -57,12 +51,6 @@ Array [
 
 exports[`.updateArtifacts() falls back to the \`latest\` Docker image tag 1`] = `
 Array [
-  Object {
-    "cmd": "docker ps --filter label=renovate_child -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
   Object {
     "cmd": "docker pull renovate/cocoapods:latest",
     "options": Object {
@@ -178,12 +166,6 @@ Array [
 exports[`.updateArtifacts() returns updated Podfile 2`] = `
 Array [
   Object {
-    "cmd": "docker ps --filter label=renovate_child -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
     "cmd": "docker pull renovate/cocoapods",
     "options": Object {
       "encoding": "utf-8",
@@ -248,12 +230,6 @@ Array [
 
 exports[`.updateArtifacts() returns updated Podfile and Pods files 2`] = `
 Array [
-  Object {
-    "cmd": "docker ps --filter label=renovate_child -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
   Object {
     "cmd": "docker ps --filter name=renovate_cocoapods -aq",
     "options": Object {

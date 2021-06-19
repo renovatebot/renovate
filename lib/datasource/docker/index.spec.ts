@@ -44,7 +44,6 @@ function mockEcrAuthReject(msg: string) {
 
 describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
@@ -54,7 +53,6 @@ describe(getName(), () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
   });
 
   describe('getDigest', () => {
@@ -447,6 +445,43 @@ describe(getName(), () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('uses quay api', async () => {
+      const tags = [{ name: '5.0.12' }];
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
+        )
+        .reply(200, { tags, has_additional: false })
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/bitnami/redis/manifests/5.0.12')
+        .reply(200, '', {});
+      const config = {
+        datasource: id,
+        depName: 'bitnami/redis',
+        registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res.releases).toHaveLength(1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('uses quay api and test error', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
+        )
+        .reply(500);
+      const config = {
+        datasource: id,
+        depName: 'bitnami/redis',
+        registryUrls: ['https://quay.io'],
+      };
+      await expect(getPkgReleases(config)).rejects.toThrow(
+        'external-host-error'
+      );
+    });
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
         .scope(amazonUrl)
@@ -588,8 +623,18 @@ describe(getName(), () => {
         .times(3)
         .reply(200)
         .get('/node/tags/list?n=10000')
-        .reply(200, { tags: ['latest'] })
-        .get('/node/manifests/latest')
+        .reply(200, {
+          tags: [
+            '2.0.0',
+            '2-alpine',
+            '1-alpine',
+            '1.0.0',
+            '1.2.3',
+            '1.2.3-alpine',
+            'abc',
+          ],
+        })
+        .get('/node/manifests/2-alpine')
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestV2,
@@ -620,8 +665,8 @@ describe(getName(), () => {
         .times(4)
         .reply(200)
         .get('/node/tags/list?n=10000')
-        .reply(200, { tags: ['latest'] })
-        .get('/node/manifests/latest')
+        .reply(200, { tags: ['abc'] })
+        .get('/node/manifests/abc')
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestListV2,

@@ -1,10 +1,10 @@
 import { logger } from '../../../../logger';
-import * as allVersioning from '../../../../versioning';
+import type { VersioningApi } from '../../../../versioning/types';
 import type { LookupUpdateConfig } from './types';
 
 export function getCurrentVersion(
   config: LookupUpdateConfig,
-  versioning: allVersioning.VersioningApi,
+  versioning: VersioningApi,
   rangeStrategy: string,
   latestVersion: string,
   allVersions: string[]
