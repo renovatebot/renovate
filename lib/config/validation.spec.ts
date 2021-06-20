@@ -352,6 +352,7 @@ describe(getName(), () => {
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             registryUrlTemplate: 'foobar',
+            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
           },
         ],
       };

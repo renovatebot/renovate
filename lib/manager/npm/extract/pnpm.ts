@@ -102,7 +102,11 @@ export async function detectPnpmWorkspaces(
     }
     const packageFilters = packageFilterCache.get(workspaceYamlPath);
     const isPackageInWorkspace =
-      packageFilters !== null && matchesAnyPattern(packageFile, packageFilters);
+      packageFilters !== null &&
+      matchesAnyPattern(
+        packageFile,
+        packageFilters.map((filter) => filter.replace(/\/?$/, '/package.json'))
+      );
     if (isPackageInWorkspace) {
       p.pnpmShrinkwrap = lockFilePath;
     } else {

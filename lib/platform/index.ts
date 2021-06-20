@@ -1,6 +1,6 @@
 import URL from 'url';
 import addrs from 'email-addresses';
-import type { GlobalConfig } from '../config/types';
+import type { AllConfig } from '../config/types';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
@@ -81,9 +81,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
   return null;
 }
 
-export async function initPlatform(
-  config: GlobalConfig
-): Promise<GlobalConfig> {
+export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPrivateKey(config.gitPrivateKey);
   setNoVerify(config.gitNoVerify ?? []);
   setPlatformApi(config.platform);

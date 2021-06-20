@@ -8,17 +8,41 @@ importers:
     dependencies:
       chalk: 2.4.2
 
-  packages/a:
+  nested-packages/group/a:
     specifiers:
       dotenv: ^9.0.2
     dependencies:
       dotenv: 9.0.2
 
-  packages/b:
+  nested-packages/group/b:
     specifiers:
       chalk: ^2.4.1
     dependencies:
       chalk: 2.4.2
+
+  non-nested-packages/a:
+    specifiers:
+      dotenv: ^9.0.2
+    dependencies:
+      dotenv: 9.0.2
+
+  non-nested-packages/b:
+    specifiers:
+      chalk: ^2.4.1
+    dependencies:
+      chalk: 2.4.2
+
+  solo-package:
+    specifiers:
+      dotenv: ^9.0.2
+    dependencies:
+      dotenv: 9.0.2
+
+  solo-package-trailing-slash:
+    specifiers:
+      dotenv: ^9.0.2
+    dependencies:
+      dotenv: 9.0.2
 
 packages:
 

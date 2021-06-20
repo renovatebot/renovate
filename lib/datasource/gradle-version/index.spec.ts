@@ -3,11 +3,13 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadJsonFixture, partial } from '../../../test/util';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { id as versioning } from '../../versioning/gradle';
-import { id as datasource, getReleases } from '.';
+import { GradleVersionDatasource } from '.';
 
 const allResponse: any = loadJsonFixture('all.json');
 
 let config: GetPkgReleasesConfig;
+
+const datasource = GradleVersionDatasource.id;
 
 describe(getName(), () => {
   describe('getReleases', () => {
@@ -71,12 +73,14 @@ describe(getName(), () => {
       httpMock
         .scope('https://services.gradle.org/')
         .get('/versions/all')
-        .reply(404);
+        .reply(500);
 
-      httpMock.scope('http://baz.qux').get('/').reply(404);
+      httpMock.scope('http://baz.qux').get('/').reply(429);
+
+      const gradleVersionDatasource = new GradleVersionDatasource();
 
       await expect(
-        getReleases(
+        gradleVersionDatasource.getReleases(
           partial<GetReleasesConfig>({
             registryUrl: 'https://services.gradle.org/versions/all',
           })
@@ -84,12 +88,12 @@ describe(getName(), () => {
       ).rejects.toThrow(ExternalHostError);
 
       await expect(
-        getReleases(
+        gradleVersionDatasource.getReleases(
           partial<GetReleasesConfig>({
             registryUrl: 'http://baz.qux',
           })
         )
-      ).rejects.toThrow('Response code 404 (Not Found)');
+      ).rejects.toThrow(ExternalHostError);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

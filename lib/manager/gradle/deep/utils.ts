@@ -2,7 +2,7 @@ import type { Stats } from 'fs';
 import os from 'os';
 import { chmod } from 'fs-extra';
 import upath from 'upath';
-import { BinarySource } from '../../../util/exec/common';
+import { getAdminConfig } from '../../../config/admin';
 import type { ExtractConfig } from '../../types';
 
 export const extraEnv = {
@@ -13,7 +13,7 @@ export const extraEnv = {
 export function gradleWrapperFileName(config: ExtractConfig): string {
   if (
     os.platform() === 'win32' &&
-    config?.binarySource !== BinarySource.Docker
+    getAdminConfig()?.binarySource !== 'docker'
   ) {
     return 'gradlew.bat';
   }

@@ -9,6 +9,7 @@ Object {
     "depName": "@renovate/no",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
+    "sourceDirectory": undefined,
   },
   "versions": Array [
     Object {
@@ -164,6 +165,7 @@ Object {
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github-enterprise.example.com/chalk/chalk",
+    "sourceDirectory": undefined,
   },
   "versions": Array [
     Object {
@@ -363,6 +365,7 @@ Object {
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
+    "sourceDirectory": undefined,
   },
   "versions": Array [
     Object {
@@ -562,6 +565,7 @@ Object {
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github-enterprise.example.com/chalk/chalk",
+    "sourceDirectory": undefined,
   },
   "versions": Array [
     Object {
@@ -761,6 +765,7 @@ Object {
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
+    "sourceDirectory": undefined,
   },
   "versions": Array [
     Object {
@@ -812,6 +817,7 @@ Object {
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
+    "sourceDirectory": undefined,
   },
   "versions": Array [
     Object {
@@ -1015,6 +1021,7 @@ Object {
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
+    "sourceDirectory": undefined,
   },
   "versions": Array [
     Object {

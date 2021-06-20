@@ -1,8 +1,8 @@
+import { getAdminConfig } from '../../config/admin';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { exec } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -49,7 +49,7 @@ export async function extractSetupFile(
   let cmd = 'python';
   const extractPy = await getExtractFile();
   const args = [`"${extractPy}"`, `"${packageFile}"`];
-  if (config.binarySource !== BinarySource.Docker) {
+  if (getAdminConfig().binarySource !== 'docker') {
     logger.debug('Running python via global command');
     cmd = await getPythonAlias();
   }

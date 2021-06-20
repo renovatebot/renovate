@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import * as datasourceHelm from '../../datasource/helm';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
@@ -90,7 +90,7 @@ export async function extractPackageFile(
   });
   const res: PackageFile = {
     deps,
-    datasource: datasourceHelm.id,
+    datasource: HelmDatasource.id,
     packageFileVersion,
   };
   const lockFileName = getSiblingFileName(fileName, 'Chart.lock');

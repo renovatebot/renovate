@@ -11,6 +11,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": false,
     "noUnusedLocals": true,
+    "experimentalDecorators": true,
     "lib": ["es2018"],
     "types": ["node", "jest", "jest-extended"],
     "allowJs": true,

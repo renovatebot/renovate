@@ -10,7 +10,7 @@ import { getUpdateType } from './update-type';
 
 export interface InternalChecksResult {
   release: Release;
-  pendingChecks?: string[];
+  pendingChecks: boolean;
   pendingReleases?: Release[];
 }
 
@@ -22,7 +22,7 @@ export function filterInternalChecks(
 ): InternalChecksResult {
   const { currentVersion, depName, internalChecksFilter } = config;
   let release: Release;
-  const pendingChecks: string[] = [];
+  let pendingChecks = false;
   let pendingReleases: Release[] = [];
   if (internalChecksFilter === 'none') {
     // Don't care if stabilityDays are unmet
@@ -73,7 +73,7 @@ export function filterInternalChecks(
         // None are pending anymore because we took the latest, so empty the array
         pendingReleases = [];
         if (internalChecksFilter === 'strict') {
-          pendingChecks.push('stabilityDays');
+          pendingChecks = true;
         }
       }
     }
