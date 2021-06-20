@@ -3,15 +3,11 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import type { HttpError } from '../../util/http/types';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
-import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type {
-  RegistryRepository,
-  ServiceDiscoveryResult,
-  TerraformRelease,
-} from './types';
+import { TerraformDatasource } from './base';
+import type { RegistryRepository, TerraformRelease } from './types';
 
-export class TerraformModuleDatasource extends Datasource {
+export class TerraformModuleDatasource extends TerraformDatasource {
   static readonly id = 'terraform-module';
 
   constructor() {
@@ -84,21 +80,6 @@ export class TerraformModuleDatasource extends Datasource {
 
     logger.trace({ dep }, 'dep');
     return dep;
-  }
-
-  @cache({
-    namespace: 'terraform-service-discovery',
-    key: (registryUrl: string) => `${registryUrl}/.well-known/terraform.json`,
-    ttlMinutes: 1440,
-  })
-  async getTerraformServiceDiscoveryResult(
-    registryUrl: string
-  ): Promise<ServiceDiscoveryResult> {
-    const discoveryURL = `${registryUrl}/.well-known/terraform.json`;
-    const serviceDiscovery = (
-      await this.http.getJson<ServiceDiscoveryResult>(discoveryURL)
-    ).body;
-    return serviceDiscovery;
   }
 
   // eslint-disable-next-line class-methods-use-this
