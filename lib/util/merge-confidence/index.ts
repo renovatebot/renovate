@@ -63,6 +63,7 @@ export async function getMergeConfidenceLevel(
     logger.warn('No Merge Confidence API token found');
     return 'neutral';
   }
+  // istanbul ignore if
   if (memCache.get('merge-confidence-invalid-token')) {
     return 'neutral';
   }
