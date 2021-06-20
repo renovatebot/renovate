@@ -15,7 +15,8 @@ When Renovate finds Angular-style commits, Renovate will create commit messages 
 - chore(deps): update eslint to v4.2.0
 - fix(deps): update express to v4.16.2
 
-Renovate uses `chore` by default, but uses `fix` for updates to your production dependencies in your `package.json` file.
+Renovate uses the `chore` prefix by default.
+When you extend `config:base`, Renovate still defaults to `chore`, but will use the `fix` prefix for npm production dependencies (`devDependencies` still use `chore`).
 
 ## Manually enabling or disabling semantic commits
 

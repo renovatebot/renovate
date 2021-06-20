@@ -1,15 +1,15 @@
 import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
 import type { LookupUpdate } from '../../../../manager/types';
-import * as allVersioning from '../../../../versioning';
+import type { VersioningApi } from '../../../../versioning';
 import type { RollbackConfig } from './types';
 
 export function getRollbackUpdate(
   config: RollbackConfig,
-  versions: Release[]
+  versions: Release[],
+  version: VersioningApi
 ): LookupUpdate {
   const { packageFile, versioning, depName, currentValue } = config;
-  const version = allVersioning.get(versioning);
   // istanbul ignore if
   if (!('isLessThanRange' in version)) {
     logger.debug(

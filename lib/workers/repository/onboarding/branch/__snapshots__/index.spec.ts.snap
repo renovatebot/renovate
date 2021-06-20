@@ -6,3 +6,11 @@ exports[`workers/repository/onboarding/branch/index checkOnboardingBranch has de
 }
 "
 `;
+
+exports[`workers/repository/onboarding/branch/index checkOnboardingBranch uses discovered onboarding config 1`] = `
+"{
+  \\"$schema\\": \\"https://docs.renovatebot.com/renovate-schema.json\\",
+  \\"extends: [\\"some/renovate-config\\"]
+}
+"
+`;

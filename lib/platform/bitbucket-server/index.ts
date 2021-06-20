@@ -990,8 +990,6 @@ export async function mergePr(
   }
 
   logger.debug({ pr: prNo }, 'PR merged');
-  // Delete branch
-  await deleteBranch(branchName);
   return true;
 }
 

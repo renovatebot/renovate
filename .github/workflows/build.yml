@@ -32,7 +32,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [14]
-        python-version: [3.8]
+        python-version: [3.9]
         java-version: [11]
 
     env:
@@ -83,7 +83,7 @@ jobs:
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -99,10 +99,10 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Unit tests
-        run: yarn jest --logHeapUsage --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@v1.5.0
+        uses: codecov/codecov-action@v1.5.2
         if: always() && env.coverage == 'true'
 
       # build after tests to exclude build files from tests
@@ -139,7 +139,7 @@ jobs:
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -204,7 +204,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache Yarn packages
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}

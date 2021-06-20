@@ -5,8 +5,6 @@ import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { UpdateArtifactsConfig } from '../types';
@@ -30,12 +28,11 @@ const adminConfig: RepoAdminConfig = {
 };
 
 describe('.updateArtifacts()', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
@@ -136,8 +133,7 @@ describe('.updateArtifacts()', () => {
 
   it('returns updated Cargo.lock with docker', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);

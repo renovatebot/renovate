@@ -1,4 +1,3 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
@@ -181,7 +180,7 @@ describe(getName(), () => {
       const username = 'abc';
       const password = '123';
 
-      async function initRepo(config = {}): Promise<nock.Scope> {
+      async function initRepo(config = {}): Promise<httpMock.Scope> {
         const scope = httpMock
           .scope(urlHost)
           .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
@@ -203,8 +202,6 @@ describe(getName(), () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        httpMock.reset();
-        httpMock.setup();
         jest.mock('delay');
         jest.mock('../../util/git');
         jest.mock('../../util/host-rules');
@@ -229,9 +226,6 @@ describe(getName(), () => {
           username,
           password,
         });
-      });
-      afterEach(() => {
-        httpMock.reset();
       });
 
       describe('initPlatform()', () => {

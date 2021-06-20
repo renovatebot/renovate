@@ -22,13 +22,11 @@ describe(getName(), () => {
     beforeEach(() => {
       process.env = { ...OLD_ENV };
       delete process.env.PIP_INDEX_URL;
-      httpMock.setup();
       jest.resetAllMocks();
     });
 
     afterEach(() => {
       process.env = OLD_ENV;
-      httpMock.reset();
     });
 
     it('returns null for empty result', async () => {

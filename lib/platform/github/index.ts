@@ -20,7 +20,6 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
-import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -1106,6 +1105,27 @@ export async function getIssueList(): Promise<Issue[]> {
   return config.issueList;
 }
 
+export async function getIssue(
+  number: number,
+  useCache = true
+): Promise<Issue | null> {
+  try {
+    const issueBody = (
+      await githubApi.getJson<{ body: string }>(
+        `repos/${config.parentRepo || config.repository}/issues/${number}`,
+        { useCache }
+      )
+    ).body.body;
+    return {
+      number,
+      body: issueBody,
+    };
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, number }, 'Error getting issue');
+    return null;
+  }
+}
+
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   const [issue] = (await getIssueList()).filter(
@@ -1115,15 +1135,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  const issueBody = (
-    await githubApi.getJson<{ body: string }>(
-      `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
-    )
-  ).body.body;
-  return {
-    number: issue.number,
-    body: issueBody,
-  };
+  return getIssue(issue.number);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
@@ -1584,12 +1596,13 @@ export async function mergePr(
     options.token = config.forkToken;
   }
   let automerged = false;
+  let automergeResult: any;
   if (config.mergeMethod) {
     // This path is taken if we have auto-detected the allowed merge types from the repo
     options.body.merge_method = config.mergeMethod;
     try {
       logger.debug({ options, url }, `mergePr`);
-      await githubApi.putJson(url, options);
+      automergeResult = await githubApi.putJson(url, options);
       automerged = true;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 405) {
@@ -1609,19 +1622,19 @@ export async function mergePr(
     options.body.merge_method = 'rebase';
     try {
       logger.debug({ options, url }, `mergePr`);
-      await githubApi.putJson(url, options);
+      automergeResult = await githubApi.putJson(url, options);
     } catch (err1) {
       logger.debug({ err: err1 }, `Failed to rebase merge PR`);
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
-        await githubApi.putJson(url, options);
+        automergeResult = await githubApi.putJson(url, options);
       } catch (err2) {
         logger.debug({ err: err2 }, `Failed to merge squash PR`);
         try {
           options.body.merge_method = 'merge';
           logger.debug({ options, url }, `mergePr`);
-          await githubApi.putJson(url, options);
+          automergeResult = await githubApi.putJson(url, options);
         } catch (err3) {
           logger.debug({ err: err3 }, `Failed to merge commit PR`);
           logger.info({ pr: prNo }, 'All merge attempts failed');
@@ -1630,9 +1643,10 @@ export async function mergePr(
       }
     }
   }
-  logger.debug({ pr: prNo }, 'PR merged');
-  // Delete branch
-  await deleteBranch(branchName);
+  logger.debug(
+    { automergeResult: automergeResult.body, pr: prNo },
+    'PR merged'
+  );
   return true;
 }
 

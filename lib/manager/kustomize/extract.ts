@@ -1,4 +1,4 @@
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
@@ -62,7 +62,7 @@ export function extractImage(image: Image): PackageDependency | null {
 export function parseKustomize(content: string): Kustomize | null {
   let pkg = null;
   try {
-    pkg = safeLoad(content, { json: true });
+    pkg = load(content, { json: true });
   } catch (e) /* istanbul ignore next */ {
     return null;
   }

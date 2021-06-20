@@ -20,11 +20,6 @@ describe(getName(), () => {
   describe('updateDependency', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('updates tag', async () => {
