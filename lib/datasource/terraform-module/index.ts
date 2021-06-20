@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
-import { HttpError } from '../../util/http/types';
+import type { HttpError } from '../../util/http/types';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -38,7 +38,7 @@ export class TerraformModuleDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registry, repository } =
       TerraformModuleDatasource.getRegistryRepository(lookupName, registryUrl);
-    logger.debug(
+    logger.trace(
       { registry, terraformRepository: repository },
       'terraform-module.getReleases()'
     );
