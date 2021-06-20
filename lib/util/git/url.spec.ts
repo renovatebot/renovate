@@ -1,11 +1,23 @@
 import { getName, mocked } from '../../../test/util';
 import * as hostRules_ from '../host-rules';
-import { getRemoteUrlWithToken } from './url';
+import { getHttpUrl, getRemoteUrlWithToken } from './url';
 
 jest.mock('../host-rules');
 const hostRules = mocked(hostRules_);
 
 describe(getName(), () => {
+  describe('getHttpUrl()', () => {
+    it('returns https url for git url', () => {
+      expect(getHttpUrl('git://foo.bar/')).toBe('https://foo.bar/');
+    });
+    it('returns https url for https url', () => {
+      expect(getHttpUrl('https://foo.bar/')).toBe('https://foo.bar/');
+    });
+    it('returns http url for http url', () => {
+      expect(getHttpUrl('http://foo.bar/')).toBe('http://foo.bar/');
+    });
+  });
+
   describe('getRemoteUrlWithToken()', () => {
     it('returns original url if no host rule is found', () => {
       expect(getRemoteUrlWithToken('https://foo.bar/')).toBe(
