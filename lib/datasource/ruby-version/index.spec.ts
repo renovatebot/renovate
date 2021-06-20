@@ -21,21 +21,25 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null empty result', async () => {
+    it('throws for empty result', async () => {
       httpMock
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(200, {});
-      expect(await getPkgReleases({ datasource, depName: 'ruby' })).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, depName: 'ruby' })
+      ).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('returns null for 404', async () => {
+    it('throws for 404', async () => {
       httpMock
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(404);
-      expect(await getPkgReleases({ datasource, depName: 'ruby' })).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, depName: 'ruby' })
+      ).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

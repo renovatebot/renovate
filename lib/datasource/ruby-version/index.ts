@@ -1,6 +1,8 @@
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import { parse } from '../../util/html';
 import type { HttpResponse } from '../../util/http';
+import { HttpError } from '../../util/http/types';
 import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -28,30 +30,35 @@ export class RubyVersionDatasource extends Datasource {
       releases: [],
     };
     const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
-    let response: HttpResponse<string>;
     try {
-      response = await this.http.get(rubyVersionsUrl);
+      const response = await this.http.get(rubyVersionsUrl);
+
+      const root = parse(response.body);
+      const rows = root.querySelector('.release-list').querySelectorAll('tr');
+      rows.forEach((row) => {
+        const tds = row.querySelectorAll('td');
+        const columns: string[] = [];
+        tds.forEach((td) => columns.push(td.innerHTML));
+        if (columns.length) {
+          const version = columns[0].replace('Ruby ', '');
+          if (isVersion(version)) {
+            const releaseTimestamp = columns[1];
+            const changelogUrl = columns[2]
+              .replace('<a href="', 'https://www.ruby-lang.org')
+              .replace('">more...</a>', '');
+            res.releases.push({ version, releaseTimestamp, changelogUrl });
+          }
+        }
+      });
     } catch (err) {
       this.handleGenericErrors(err);
     }
-    const root = parse(response.body);
-    const rows = root.querySelector('.release-list').querySelectorAll('tr');
-    rows.forEach((row) => {
-      const tds = row.querySelectorAll('td');
-      const columns: string[] = [];
-      tds.forEach((td) => columns.push(td.innerHTML));
-      if (columns.length) {
-        const version = columns[0].replace('Ruby ', '');
-        if (isVersion(version)) {
-          const releaseTimestamp = columns[1];
-          const changelogUrl = columns[2]
-            .replace('<a href="', 'https://www.ruby-lang.org')
-            .replace('">more...</a>', '');
-          res.releases.push({ version, releaseTimestamp, changelogUrl });
-        }
-      }
-    });
 
     return res;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  override handleSpecificErrors(err: HttpError): never | void {
+    throw new ExternalHostError(err);
   }
 }

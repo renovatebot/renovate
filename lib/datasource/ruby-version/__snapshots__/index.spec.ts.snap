@@ -689,7 +689,7 @@ Array [
 ]
 `;
 
-exports[`datasource/ruby-version/index getReleases returns null empty result 1`] = `
+exports[`datasource/ruby-version/index getReleases throws for 404 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -703,7 +703,7 @@ Array [
 ]
 `;
 
-exports[`datasource/ruby-version/index getReleases returns null for 404 1`] = `
+exports[`datasource/ruby-version/index getReleases throws for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
