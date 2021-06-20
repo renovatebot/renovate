@@ -4,26 +4,13 @@ import * as hostRules from '../host-rules';
 
 export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = GitUrlParse(url);
+
   parsedUrl.token = token;
-  return parsedUrl.toString('https');
-}
 
-export function getBasicAuthHttpUrl(
-  url: string,
-  username: string,
-  password: string
-): string {
-  const parsedUrl = GitUrlParse(url);
-
-  const encodedUsername = encodeURIComponent(username);
-  const encodedPassword = encodeURIComponent(password);
-  parsedUrl.user = `${encodedUsername}:${encodedPassword}`;
-
-  const type = /^https?$/.exec(parsedUrl.protocol)
+  const protocol = /^https?$/.exec(parsedUrl.protocol)
     ? parsedUrl.protocol
     : 'https';
-
-  return parsedUrl.toString(type);
+  return parsedUrl.toString(protocol);
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {
@@ -31,12 +18,16 @@ export function getRemoteUrlWithToken(url: string, hostType?: string): string {
 
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);
-    return getHttpUrl(url, hostRule.token);
+
+    return getHttpUrl(url, encodeURIComponent(hostRule.token));
   }
 
   if (hostRule?.username && hostRule?.password) {
     logger.debug(`Found hostRules username and password for url ${url}`);
-    return getBasicAuthHttpUrl(url, hostRule.username, hostRule.password);
+    const encodedUsername = encodeURIComponent(hostRule.username);
+    const encodedPassword = encodeURIComponent(hostRule.password);
+
+    return getHttpUrl(url, `${encodedUsername}:${encodedPassword}`);
   }
 
   return url;
