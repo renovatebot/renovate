@@ -285,6 +285,10 @@ Make sure that version is a pinned version of course, as otherwise it won't be v
 
 ## cloneSubmodules
 
+Enabling this option will mean that any detected git submodules will be cloned at time of repository clone.
+
+Important: private submodules aren't yet supported by Renovate, unless the underlying `ssh` layer already has the appropriate permissions.
+
 ## commitBody
 
 Configure this if you wish Renovate to add a commit body, otherwise Renovate just uses a regular single-line commit.

@@ -1974,9 +1974,9 @@ const options: RenovateOptions[] = [
   {
     name: 'cloneSubmodules',
     description:
-      'Set to false to disable initialization of submodules during repository clone.',
+      'Set to true to enable initialization of submodules during repository clone.',
     type: 'boolean',
-    default: true,
+    default: false,
   },
   {
     name: 'ignorePrAuthor',
