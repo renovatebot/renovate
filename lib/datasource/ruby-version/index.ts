@@ -1,38 +1,39 @@
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../../util/cache/package';
+import { cache } from '../../util/cache/package/decorator';
 import { parse } from '../../util/html';
-import { Http } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
+import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-export const id = 'ruby-version';
-export const defaultRegistryUrls = ['https://www.ruby-lang.org/'];
-export const customRegistrySupport = false;
-export const defaultVersioning = rubyVersioningId;
+export class RubyVersionDatasource extends Datasource {
+  static readonly id = 'ruby-version';
 
-const http = new Http(id);
-
-export async function getReleases({
-  registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  // First check the persistent cache
-  const cacheNamespace = 'datasource-ruby-version';
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    'all'
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
+  constructor() {
+    super(RubyVersionDatasource.id);
   }
-  try {
+
+  readonly defaultRegistryUrls = ['https://www.ruby-lang.org/'];
+
+  readonly customRegistrySupport = false;
+
+  readonly defaultVersioning = rubyVersioningId;
+
+  @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
+  async getReleases({
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
       homepage: 'https://www.ruby-lang.org',
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
     };
     const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
-    const response = await http.get(rubyVersionsUrl);
+    let response: HttpResponse<string>;
+    try {
+      response = await this.http.get(rubyVersionsUrl);
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
     const root = parse(response.body);
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
     rows.forEach((row) => {
@@ -50,9 +51,7 @@ export async function getReleases({
         }
       }
     });
-    await packageCache.set(cacheNamespace, 'all', res, 15);
+
     return res;
-  } catch (err) {
-    throw new ExternalHostError(err);
   }
 }
