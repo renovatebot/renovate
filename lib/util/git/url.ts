@@ -8,14 +8,36 @@ export function getHttpUrl(url: string, token?: string): string {
   return parsedUrl.toString('https');
 }
 
-export function getRemoteUrlWithToken(url: string): string {
-  let remote = url;
+export function getBasicAuthHttpUrl(
+  url: string,
+  username: string,
+  password: string
+): string {
+  const parsedUrl = GitUrlParse(url);
 
-  const hostRule = hostRules.find({ url });
+  const encodedUsername = encodeURIComponent(username);
+  const encodedPassword = encodeURIComponent(password);
+  parsedUrl.user = `${encodedUsername}:${encodedPassword}`;
+
+  const type = /^https?$/.exec(parsedUrl.protocol)
+    ? parsedUrl.protocol
+    : 'https';
+
+  return parsedUrl.toString(type);
+}
+
+export function getRemoteUrlWithToken(url: string, hostType?: string): string {
+  const hostRule = hostRules.find({ url, hostType });
+
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);
-    remote = getHttpUrl(url, hostRule.token);
+    return getHttpUrl(url, hostRule.token);
   }
 
-  return remote;
+  if (hostRule?.username && hostRule?.password) {
+    logger.debug(`Found hostRules username and password for url ${url}`);
+    return getBasicAuthHttpUrl(url, hostRule.username, hostRule.password);
+  }
+
+  return url;
 }
