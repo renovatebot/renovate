@@ -56,7 +56,6 @@ Some major platform features are not supported by Renovate.
 | ------------ | --------------------- | --------------------- |
 | Jira issues  | BitBucket             | #3796                 |
 | Merge trains | GitLab                | #5573                 |
-| Configurable required status checks | All platforms                | #1853, #4822,#6645                 |
 
 ## What if I need to .. ?
 
