@@ -160,7 +160,7 @@ export async function ensureDependencyDashboard(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to ignore the schedule.\n';
+      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -318,7 +318,7 @@ export async function ensureDependencyDashboard(
   }
 
   if (config.dependencyDashboardIssue) {
-    const updatedIssue = await platform.getIssue(
+    const updatedIssue = await platform?.getIssue(
       config.dependencyDashboardIssue,
       false
     );
