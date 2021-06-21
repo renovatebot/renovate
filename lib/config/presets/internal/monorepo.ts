@@ -19,6 +19,7 @@ const repoGroups = {
   'aspnet Extensions': 'https://github.com/aspnet/Extensions',
   'aws-cdk': 'https://github.com/aws/aws-cdk',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
+  'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'azure azure-libraries-for-net':
     'https://github.com/Azure/azure-libraries-for-net',
   'azure azure-sdk-for-net': 'https://github.com/Azure/azure-sdk-for-net',
