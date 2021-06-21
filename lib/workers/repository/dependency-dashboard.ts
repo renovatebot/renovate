@@ -318,7 +318,7 @@ export async function ensureDependencyDashboard(
   }
 
   if (config.dependencyDashboardIssue) {
-    const updatedIssue = await platform.getIssue(
+    const updatedIssue = await platform?.getIssue(
       config.dependencyDashboardIssue,
       false
     );
