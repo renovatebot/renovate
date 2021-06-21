@@ -122,7 +122,7 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ecr": "3.5.0",
+    "@aws-sdk/client-ecr": "3.18.0",
     "@breejs/later": "4.0.2",
     "@iarna/toml": "2.2.5",
     "@renovate/pep440": "1.0.0",
