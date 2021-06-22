@@ -1,7 +1,7 @@
 import _simpleGit from 'simple-git';
 import { getPkgReleases } from '..';
 import { loadFixture } from '../../../test/util';
-import { id as datasource, getDigest } from '.';
+import { GitTagsDatasource } from '.';
 
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
@@ -9,6 +9,8 @@ const simpleGit: any = _simpleGit;
 const depName = 'https://github.com/example/example.git';
 
 const lsRemote1 = loadFixture('ls-remote-1.txt', '../git-refs');
+
+const datasource = GitTagsDatasource.id;
 
 describe('datasource/git-tags/index', () => {
   describe('getReleases', () => {
@@ -51,7 +53,7 @@ describe('datasource/git-tags/index', () => {
           return Promise.resolve(lsRemote1);
         },
       });
-      const digest = await getDigest(
+      const digest = await new GitTagsDatasource().getDigest(
         { datasource, depName: 'a tag to look up' },
         'notfound'
       );
@@ -63,7 +65,7 @@ describe('datasource/git-tags/index', () => {
           return Promise.resolve(lsRemote1);
         },
       });
-      const digest = await getDigest(
+      const digest = await new GitTagsDatasource().getDigest(
         { datasource, depName: 'a tag to look up' },
         'v1.0.2'
       );
@@ -75,7 +77,7 @@ describe('datasource/git-tags/index', () => {
           return Promise.resolve(lsRemote1);
         },
       });
-      const digest = await getDigest(
+      const digest = await new GitTagsDatasource().getDigest(
         { datasource, depName: 'another tag to look up' },
         undefined
       );
