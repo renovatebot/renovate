@@ -3,6 +3,7 @@ import { ensureTrailingSlash } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { ServiceDiscoveryResult } from './types';
 
+// TODO: extract to a separate directory structure (#10532)
 export abstract class TerraformDatasource extends Datasource {
   static id = 'terraform';
 
