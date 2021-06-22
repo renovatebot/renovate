@@ -54,7 +54,7 @@ These branches will be created by Renovate only once you click their checkbox be
 
 ## Awaiting Schedule
 
-These updates are awaiting their schedule. Click on a checkbox to ignore the schedule.
+These updates are awaiting their schedule. Click on a checkbox to get an update now.
  - [x] <!-- unschedule-branch=branchName3 -->pr3
 
 "

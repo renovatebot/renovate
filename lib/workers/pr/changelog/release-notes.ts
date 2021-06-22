@@ -173,11 +173,16 @@ function isUrl(url: string): boolean {
 
 export async function getReleaseNotesMdFileInner(
   repository: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  sourceDirectory?: string
 ): Promise<ChangeLogFile> | null {
   try {
     if (apiBaseUrl.includes('gitlab')) {
-      return await gitlab.getReleaseNotesMd(repository, apiBaseUrl);
+      return await gitlab.getReleaseNotesMd(
+        repository,
+        apiBaseUrl,
+        sourceDirectory
+      );
     }
 
     const opts = hostRules.find({
@@ -185,10 +190,18 @@ export async function getReleaseNotesMdFileInner(
       url: apiBaseUrl,
     });
     if (opts.token) {
-      return await gitlab.getReleaseNotesMd(repository, apiBaseUrl);
+      return await gitlab.getReleaseNotesMd(
+        repository,
+        apiBaseUrl,
+        sourceDirectory
+      );
     }
 
-    return await github.getReleaseNotesMd(repository, apiBaseUrl);
+    return await github.getReleaseNotesMd(
+      repository,
+      apiBaseUrl,
+      sourceDirectory
+    );
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('Error 404 getting changelog md');
@@ -201,7 +214,8 @@ export async function getReleaseNotesMdFileInner(
 
 export function getReleaseNotesMdFile(
   repository: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  sourceDirectory?: string
 ): Promise<ChangeLogFile | null> {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
@@ -209,7 +223,11 @@ export function getReleaseNotesMdFile(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseNotesMdFileInner(repository, apiBaseUrl);
+  const promisedRes = getReleaseNotesMdFileInner(
+    repository,
+    apiBaseUrl,
+    sourceDirectory
+  );
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -218,7 +236,8 @@ export async function getReleaseNotesMd(
   repository: string,
   version: string,
   baseUrl: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  sourceDirectory?: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
@@ -226,7 +245,11 @@ export async function getReleaseNotesMd(
   if (skippedRepos.includes(repository)) {
     return null;
   }
-  const changelog = await getReleaseNotesMdFile(repository, apiBaseUrl);
+  const changelog = await getReleaseNotesMdFile(
+    repository,
+    apiBaseUrl,
+    sourceDirectory
+  );
   if (!changelog) {
     return null;
   }
@@ -332,11 +355,13 @@ export async function addReleaseNotes(
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
     if (!releaseNotes) {
+      const { sourceDirectory } = input.project;
       releaseNotes = await getReleaseNotesMd(
         repository,
         v.version,
         input.project.baseUrl,
-        input.project.apiBaseUrl
+        input.project.apiBaseUrl,
+        sourceDirectory
       );
       // istanbul ignore else: should be tested
       if (!releaseNotes) {
