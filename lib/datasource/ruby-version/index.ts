@@ -1,7 +1,6 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import { parse } from '../../util/html';
-import type { HttpResponse } from '../../util/http';
 import { HttpError } from '../../util/http/types';
 import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
 import { Datasource } from '../datasource';
