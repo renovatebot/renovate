@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/global/config/parse/home-dir readHomeDirFiles() parses .npmrc 1`] = `
+Object {
+  "config": Object {
+    "hostRules": Array [
+      Object {
+        "hostType": "npm",
+        "token": "def456",
+      },
+      Object {
+        "authType": "Basic",
+        "hostType": "npm",
+        "token": "abc123",
+      },
+      Object {
+        "matchHost": "https://registry.npmjs.org/",
+        "token": "aaaaaa111111-bbbbbb222222",
+      },
+      Object {
+        "authType": "Basic",
+        "matchHost": "https://registry.npmjs.org/",
+        "token": "afafafaf==",
+      },
+    ],
+    "packageRules": Array [
+      Object {
+        "matchDatasources": Array [
+          "npm",
+        ],
+        "registryUrls": Array [
+          "https://registry.npmjs.org/",
+        ],
+      },
+      Object {
+        "matchDatasources": Array [
+          "npm",
+        ],
+        "matchPackagePrefixes": Array [
+          "@renovate",
+        ],
+        "registryUrls": Array [
+          "https://registry.renovatebot.com/",
+        ],
+      },
+    ],
+  },
+  "fileList": Array [
+    "/Users/rhys/.npmrc",
+  ],
+}
+`;

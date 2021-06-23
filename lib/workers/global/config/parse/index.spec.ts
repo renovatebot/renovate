@@ -1,14 +1,18 @@
+import _fs from 'fs-extra';
 import upath from 'upath';
-import { getName } from '../../../../../test/util';
+import { getName, mocked } from '../../../../../test/util';
 import { readFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 
+jest.mock('fs-extra');
 jest.mock('../../../../datasource/npm');
 try {
   jest.mock('../../config.js');
 } catch (err) {
   // file does not exist
 }
+
+const fs = mocked(_fs);
 
 describe(getName(), () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -17,6 +21,7 @@ describe(getName(), () => {
     let defaultEnv: NodeJS.ProcessEnv;
     beforeEach(async () => {
       jest.resetModules();
+      jest.resetAllMocks();
       configParser = await import('./index');
       defaultArgv = getArgv();
       defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
@@ -108,6 +113,26 @@ describe(getName(), () => {
       ]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
+    });
+    it('reads home dir configs', async () => {
+      defaultArgv = defaultArgv.concat(['--read-home-dir-files=true']);
+      fs.readFile.mockResolvedValueOnce(
+        Buffer.from('registry=https://registry.npmjs.org/')
+      );
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.packageRules).toHaveLength(1);
+    });
+    it('logs if no home dir configs', async () => {
+      defaultArgv = defaultArgv.concat(['--read-home-dir-files=true']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.packageRules).toHaveLength(0);
+    });
+    it('logs if home dir configs but not reading them', async () => {
+      fs.readFile.mockResolvedValueOnce(
+        Buffer.from('registry=https://registry.npmjs.org/')
+      );
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.packageRules).toHaveLength(0);
     });
   });
 });

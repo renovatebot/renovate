@@ -338,6 +338,12 @@ Used as an alternative to `privateKey`, if you wish for the key to be read from 
 
 Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+## readHomeDirFiles
+
+Enable this if you wish for Renovate to read from config or credentials stored in home directory files.
+
+Currently supports `~/.npmrc` only.
+
 ## redisUrl
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
