@@ -391,7 +391,8 @@ export async function processBranch(
         });
       }
     }
-    const forcedManually = !!dependencyDashboardCheck || config.rebaseRequested;
+    const forcedManually =
+      !!dependencyDashboardCheck || config.rebaseRequested || !branchExists;
     if (!forcedManually && config.rebaseWhen === 'never') {
       logger.debug(`Skipping commit (rebaseWhen=never)`);
       return {
