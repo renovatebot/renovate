@@ -24,7 +24,7 @@ describe(getName(), () => {
         '@renovate:registry=https://registry.renovatebot.com/',
       ];
       fs.readFile.mockResolvedValueOnce(content.join('\n') as any);
-      expect(await readHomeDirFiles()).toMatchSnapshot();
+      expect((await readHomeDirFiles()).config).toMatchSnapshot();
     });
   });
 });
