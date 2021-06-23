@@ -212,6 +212,8 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
 
+Note: Encrypted values can't be used in the "AdminBot config".
+
 ### hostRules configuration using environment variables
 
 Self-hosted users can use environment variables to configure the most common types of `hostRules` for authentication.
