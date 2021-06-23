@@ -631,7 +631,7 @@ Array [
     },
   },
   Object {
-    "cmd": "go mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
+    "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -784,7 +784,7 @@ Array [
     },
   },
   Object {
-    "cmd": "go mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
+    "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -937,7 +937,7 @@ Array [
     },
   },
   Object {
-    "cmd": "go mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
+    "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
