@@ -1551,13 +1551,26 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('truncates description if too low API version', async () => {
-      jest.mock('../utils/pr-body');
-      const { smartTruncate } = require('../utils/pr-body');
+      const prBodyUtil = require('../utils/pr-body');
+      prBodyUtil.smartTruncate = jest.fn().mockReturnValue(prBody);
 
       await initFakePlatform('13.3.0');
       gitlab.massageMarkdown(prBody);
-      expect(smartTruncate).toHaveBeenCalledTimes(1);
-      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 25000);
+      expect(prBodyUtil.smartTruncate).toHaveBeenCalledTimes(1);
+      expect(prBodyUtil.smartTruncate).toHaveBeenCalledWith(
+        expect.any(String),
+        25000
+      );
+    });
+    it('sanitizes body content', () => {
+      const issueBody = '@Test';
+
+      const prBodyUtil = require('../utils/pr-body');
+      prBodyUtil.smartTruncate = jest.fn().mockReturnValue(issueBody);
+
+      const sanitizedBody = gitlab.massageMarkdown(issueBody);
+      expect(sanitizedBody).not.toBe(issueBody);
+      expect(sanitizedBody).toBe('@&#8203;Test');
     });
   });
 

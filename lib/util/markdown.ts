@@ -3,6 +3,9 @@ import github from 'remark-github';
 
 // Generic replacements/link-breakers
 export function sanitizeMarkdown(markdown: string): string {
+  if (!markdown) {
+    return markdown;
+  }
   let res = markdown;
   // Put a zero width space after every # followed by a digit
   res = res.replace(/#(\d)/gi, '#&#8203;$1');

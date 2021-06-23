@@ -1997,6 +1997,12 @@ describe(getName(), () => {
       expect(github.massageMarkdown(input)).toEqual(input);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('sanitizes body content', () => {
+      const issueBody = '@Test';
+      const sanitizedBody = github.massageMarkdown(issueBody);
+      expect(sanitizedBody).not.toBe(issueBody);
+      expect(sanitizedBody).toBe('@&#8203;Test');
+    });
   });
   describe('mergePr(prNo) - autodetection', () => {
     it('should try rebase first', async () => {

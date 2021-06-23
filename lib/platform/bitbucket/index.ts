@@ -8,6 +8,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
+import { sanitizeMarkdown } from '../../util/markdown';
 import { sanitize } from '../../util/sanitize';
 import type {
   BranchStatusConfig,
@@ -467,15 +468,17 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, 50000)
-    .replace(
-      'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"'
-    )
-    .replace(/<\/?summary>/g, '**')
-    .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
+  return sanitizeMarkdown(
+    smartTruncate(input, 50000)
+      .replace(
+        'you tick the rebase/retry checkbox',
+        'rename PR to start with "rebase!"'
+      )
+      .replace(/<\/?summary>/g, '**')
+      .replace(/<\/?details>/g, '')
+      .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+      .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/')
+  );
 }
 
 export async function ensureIssue({
@@ -484,6 +487,7 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
+
   const description = massageMarkdown(sanitize(body));
 
   /* istanbul ignore if */

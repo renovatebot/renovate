@@ -773,6 +773,12 @@ describe(getName(), () => {
         )
       ).toMatchSnapshot();
     });
+    it('sanitizes body content', () => {
+      const issueBody = '@Test';
+      const sanitizedBody = bitbucket.massageMarkdown(issueBody);
+      expect(sanitizedBody).not.toBe(issueBody);
+      expect(sanitizedBody).toBe('@&#8203;Test');
+    });
   });
 
   describe('updatePr()', () => {

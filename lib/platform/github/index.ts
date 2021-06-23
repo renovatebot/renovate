@@ -22,6 +22,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
+import { sanitizeMarkdown } from '../../util/markdown';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
@@ -1148,6 +1149,18 @@ async function closeIssue(issueNumber: number): Promise<void> {
   );
 }
 
+export function massageMarkdown(input: string): string {
+  if (config.isGhe) {
+    return smartTruncate(sanitizeMarkdown(input), 60000);
+  }
+  const massagedInput = input
+    // to be safe, replace all github.com links with renovatebot redirector
+    .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
+    .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
+    .replace(/]: https:\/\/github\.com\//g, ']: https://togithub.com/');
+  return smartTruncate(sanitizeMarkdown(massagedInput), 60000);
+}
+
 export async function ensureIssue({
   title,
   reuseTitle,
@@ -1156,7 +1169,7 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
-  const body = sanitize(rawBody);
+  const body = massageMarkdown(sanitize(rawBody));
   try {
     const issueList = await getIssueList();
     let issues = issueList.filter((i) => i.title === title);
@@ -1648,18 +1661,6 @@ export async function mergePr(
     'PR merged'
   );
   return true;
-}
-
-export function massageMarkdown(input: string): string {
-  if (config.isGhe) {
-    return smartTruncate(input, 60000);
-  }
-  const massagedInput = input
-    // to be safe, replace all github.com links with renovatebot redirector
-    .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
-    .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
-    .replace(/]: https:\/\/github\.com\//g, ']: https://togithub.com/');
-  return smartTruncate(massagedInput, 60000);
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

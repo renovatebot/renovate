@@ -21,6 +21,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
+import { sanitizeMarkdown } from '../../util/markdown';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
 import type {
@@ -620,8 +621,7 @@ export function massageMarkdown(input: string): string {
 
     desc = smartTruncate(desc, 25000);
   }
-
-  return desc;
+  return sanitizeMarkdown(desc);
 }
 
 // Branch
@@ -795,6 +795,7 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
+
   const description = massageMarkdown(sanitize(body));
   try {
     const issueList = await getIssueList();
