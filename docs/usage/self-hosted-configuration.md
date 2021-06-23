@@ -332,7 +332,7 @@ To create the key pair with OpenSSL use the following commands:
 
 To encrypt a secret with OpenSSL use the following command:
 
-- `echo 'your-secret' | openssl rsautl -encrypt -pubin -inkey rsa_pub.pem | base64`, replacing `your-secret` with your actual secret
+- `echo 'actual-secret' | openssl rsautl -encrypt -pubin -inkey rsa_pub.pem | base64` for encrypting `actual-secret` with the public key
 
 ## privateKeyPath
 
