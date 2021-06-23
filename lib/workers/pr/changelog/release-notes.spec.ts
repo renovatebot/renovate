@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { getName, loadFixture, mocked } from '../../../../test/util';
+import { clone } from '../../../util/clone';
 import * as _hostRules from '../../../util/host-rules';
 import {
   addReleaseNotes,
@@ -385,6 +386,33 @@ describe(getName(), () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
+    it('handles github sourceDirectory', async () => {
+      const sourceDirectory = 'packages/foo';
+      const subdirTree = clone(githubTreeResponse);
+      for (const file of subdirTree.tree) {
+        file.path = `${sourceDirectory}/${file.path}`;
+      }
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/nodeca/js-yaml')
+        .reply(200)
+        .get('/repos/nodeca/js-yaml/git/trees/master?recursive=1')
+        .reply(200, subdirTree)
+        .get('/repos/nodeca/js-yaml/git/blobs/abcd')
+        .reply(200, {
+          content: Buffer.from(jsYamlChangelogMd).toString('base64'),
+        });
+      const res = await getReleaseNotesMd(
+        'nodeca/js-yaml',
+        '3.10.0',
+        'https://github.com/',
+        'https://api.github.com/',
+        sourceDirectory
+      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
     it('parses js-yaml', async () => {
       httpMock
         .scope('https://api.github.com')
@@ -469,6 +497,34 @@ describe(getName(), () => {
           '4.33.0',
           'https://gitlab.com/',
           'https://gitlab.com/api/v4/'
+        );
+        versionTwoNotes = res;
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res).not.toBeNull();
+        expect(res).toMatchSnapshot();
+      });
+      it('handles gitlab sourceDirectory', async () => {
+        const sourceDirectory = 'packages/foo';
+        const response = clone(gitlabTreeResponse).map((file) => ({
+          ...file,
+          path: `${sourceDirectory}/${file.path}`,
+        }));
+        httpMock
+          .scope('https://gitlab.com/')
+          .get(
+            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100'
+          )
+          .reply(200, response)
+          .get(
+            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/blobs/abcd/raw'
+          )
+          .reply(200, adapterutilsChangelogMd);
+        const res = await getReleaseNotesMd(
+          'itentialopensource/adapter-utils',
+          '4.33.0',
+          'https://gitlab.com/',
+          'https://gitlab.com/api/v4/',
+          sourceDirectory
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();

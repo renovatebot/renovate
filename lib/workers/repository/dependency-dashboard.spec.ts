@@ -468,5 +468,54 @@ describe(getName(), () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
+    it('rechecks branches', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: BranchResult.NeedsApproval,
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: BranchResult.NeedsApproval,
+          branchName: 'branchName2',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr3',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
+          result: BranchResult.NotScheduled,
+          branchName: 'branchName3',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
+      config.dependencyDashboardIssue = 1;
+      platform.getIssue.mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue contains a list of Renovate updates and their statuses.
+
+        ## Pending Approval
+
+        These branches will be created by Renovate only once you click their checkbox below.
+
+         - [ ] <!-- approve-branch=branchName1 -->pr1
+         - [x] <!-- approve-branch=branchName2 -->pr2
+
+        ## Awaiting Schedule
+
+        These updates are awaiting their schedule. Click on a checkbox to get an update now.
+         - [x] <!-- unschedule-branch=branchName3 -->pr3
+
+         - [x] <!-- rebase-all-open-prs -->'
+        `,
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+    });
   });
 });
