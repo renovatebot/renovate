@@ -153,3 +153,20 @@ The end-result looks like this:
 ```
 
 However be aware that if your `.npmrc` is too long to encrypt then the above command will fail.
+
+### Automatically authenticate for npm package stored in private GitHub npm repository
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://npm.pkg.github.com/",
+      "hostType": "npm",
+      "encrypted": {
+        "token": "<Encrypted PAT Token>"
+      }
+    }
+  ],
+  "npmrc": "@organizationName:registry=https://npm.pkg.github.com/"
+}
+```
