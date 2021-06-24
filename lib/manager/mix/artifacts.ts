@@ -41,7 +41,11 @@ export async function updateArtifacts({
     cwdFile: packageFileName,
     docker: { image: 'elixir' },
   };
-  const command = ['mix', 'deps.update', ...updatedDeps.map(quote)].join(' ');
+  const command = [
+    'mix',
+    'deps.update',
+    ...updatedDeps.map((dep) => quote(dep.depName)),
+  ].join(' ');
 
   try {
     await exec(command, execOptions);

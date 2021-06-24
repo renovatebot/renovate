@@ -11,6 +11,7 @@ import { getRepoStatus } from '../../util/git';
 import { find } from '../../util/host-rules';
 import { isValid } from '../../versioning/semver';
 import type {
+  PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
@@ -32,10 +33,11 @@ function getPreCommands(): string[] | null {
 }
 
 function getUpdateImportPathCmds(
-  updatedDeps: string[],
+  updatedDeps: PackageDependency[],
   { constraints, newMajor }: UpdateArtifactsConfig
 ): string[] {
   const updateImportCommands = updatedDeps
+    .map((dep) => dep.depName)
     .filter((x) => !x.startsWith('gopkg.in'))
     .map((depName) => `go mod upgrade --mod-name=${depName} -t=${newMajor}`);
 

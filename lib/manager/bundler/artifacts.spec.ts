@@ -54,7 +54,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: '',
-        updatedDeps: ['foo', 'bar'],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '',
         config,
       })
@@ -71,7 +71,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
-        updatedDeps: ['foo', 'bar'],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
@@ -90,7 +90,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
-        updatedDeps: ['foo', 'bar'],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
@@ -110,7 +110,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
-        updatedDeps: ['foo', 'bar'],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
@@ -143,7 +143,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: ['foo', 'bar'],
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
@@ -169,7 +169,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: ['foo', 'bar'],
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
@@ -201,7 +201,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: ['foo', 'bar'],
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
@@ -247,7 +247,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: ['foo', 'bar'],
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
@@ -287,7 +287,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: ['foo', 'bar'],
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
@@ -332,7 +332,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: ['foo', 'bar'],
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
@@ -377,7 +377,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: ['foo', 'bar'],
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
