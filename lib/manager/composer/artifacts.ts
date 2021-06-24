@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import upath from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -16,7 +15,6 @@ import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
   ensureCacheDir,
-  ensureDir,
   ensureLocalDir,
   getSiblingFileName,
   localPathExists,
