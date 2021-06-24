@@ -1,6 +1,6 @@
 import type { Merge } from 'type-fest';
 import type {
-  GroupConfig,
+  GroupRollupConfig,
   LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
@@ -35,10 +35,12 @@ export interface BranchUpgradeConfig
   endpoint?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
-  group?: GroupConfig;
+  group?: GroupRollupConfig;
   constraints?: Record<string, string>;
   groupName?: string;
   groupSlug?: string;
+  rollup?: GroupRollupConfig;
+  rollupName?: string;
   language?: string;
   manager?: string;
   packageFile?: string;

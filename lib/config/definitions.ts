@@ -1486,6 +1486,24 @@ const options: RenovateOptions[] = [
     env: false,
     mergeable: true,
   },
+  {
+    name: 'rollupName',
+    description: 'Rollup name.',
+    type: 'string',
+    default: null,
+  },
+  {
+    name: 'rollup',
+    description: 'Config if rollupName is enabled.',
+    type: 'object',
+    default: {
+      branchTopic: '{{{rollupSlug}}}',
+      commitMessageTopic: '{{{rollupName}}}',
+    },
+    cli: false,
+    env: false,
+    mergeable: true,
+  },
   // Pull Request options
   {
     name: 'labels',
