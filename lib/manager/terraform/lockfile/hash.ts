@@ -12,7 +12,7 @@ import * as packageCache from '../../../util/cache/package';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import { Http } from '../../../util/http';
-import { getCacheDir, repositoryRegex } from './util';
+import { repositoryRegex } from './util';
 
 const http = new Http(TerraformProviderDatasource.id);
 const hashCacheTTL = 10080; // in seconds == 1 week

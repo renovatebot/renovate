@@ -1,7 +1,4 @@
-import { join } from 'upath';
-import { getAdminConfig } from '../../../config/admin';
-import { logger } from '../../../logger';
-import { ensureDir, getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
 import type {
