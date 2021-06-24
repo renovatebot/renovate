@@ -35,6 +35,7 @@ const ignoredNodes = [
   'isVulnerabilityAlert',
   'copyLocalLibs', // deprecated - functionality is now enabled by default
   'prBody', // deprecated
+  'minimumConfidence', // undocumented feature flag
 ];
 
 function isManagerPath(parentPath: string): boolean {
@@ -387,6 +388,8 @@ export async function validateConfig(
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',
+                'currentValueTemplate',
+                'extractVersionTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
@@ -514,7 +517,9 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
                 });
               }
-            } else if (key === 'customEnvVariables') {
+            } else if (
+              ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)
+            ) {
               const res = validatePlainObject(val);
               if (res !== true) {
                 errors.push({

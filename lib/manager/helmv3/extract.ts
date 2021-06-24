@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
-import * as datasourceHelm from '../../datasource/helm';
+import { load } from 'js-yaml';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
@@ -19,7 +19,7 @@ export async function extractPackageFile(
   };
   try {
     // TODO: fix me (#9610)
-    chart = yaml.safeLoad(content, { json: true }) as any;
+    chart = load(content, { json: true }) as any;
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { fileName },
@@ -90,7 +90,7 @@ export async function extractPackageFile(
   });
   const res: PackageFile = {
     deps,
-    datasource: datasourceHelm.id,
+    datasource: HelmDatasource.id,
     packageFileVersion,
   };
   const lockFileName = getSiblingFileName(fileName, 'Chart.lock');

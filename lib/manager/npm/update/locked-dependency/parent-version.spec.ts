@@ -6,13 +6,6 @@ const expressJson = loadJsonFixture('express.json');
 
 describe(getName(), () => {
   describe('getLockedDependencies()', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
-    });
     it('finds indirect dependency', async () => {
       httpMock
         .scope('https://registry.npmjs.org')
@@ -32,10 +25,13 @@ describe(getName(), () => {
         .scope('https://registry.npmjs.org')
         .get('/express')
         .reply(200, expressJson);
+
       expect(
         await findFirstParentVersion('express', '4.0.0', 'send', '0.11.1')
       ).toEqual('4.11.1');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('finds removed dependencies', async () => {
       httpMock
         .scope('https://registry.npmjs.org')
@@ -48,10 +44,7 @@ describe(getName(), () => {
           },
           'dist-tags': { latest: '10.0.0' },
         });
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
+
       expect(
         await findFirstParentVersion(
           'express',
@@ -60,7 +53,9 @@ describe(getName(), () => {
           '10.0.0'
         )
       ).toEqual('4.9.1');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('finds when a greater version is needed', async () => {
       httpMock
         .scope('https://registry.npmjs.org')
@@ -75,14 +70,13 @@ describe(getName(), () => {
           },
           'dist-tags': { latest: '6.2.0' },
         });
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
+
       expect(
         await findFirstParentVersion('express', '4.0.0', 'qs', '6.0.4')
       ).toEqual('4.14.0');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('finds when a range matches greater versions', async () => {
       httpMock
         .scope('https://registry.npmjs.org')
@@ -96,14 +90,13 @@ describe(getName(), () => {
           },
           'dist-tags': { latest: '1.6.15' },
         });
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
+
       expect(
         await findFirstParentVersion('express', '4.16.1', 'type-is', '1.2.1')
       ).toEqual('4.16.1');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null if no matching', async () => {
       httpMock
         .scope('https://registry.npmjs.org')
@@ -116,13 +109,11 @@ describe(getName(), () => {
           },
           'dist-tags': { latest: '10.0.0' },
         });
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
+
       expect(
         await findFirstParentVersion('express', '4.16.1', 'debug', '9.0.0')
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

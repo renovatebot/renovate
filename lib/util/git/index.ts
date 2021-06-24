@@ -240,7 +240,7 @@ export async function getSubmodules(): Promise<string[]> {
         '--file',
         '.gitmodules',
         '--get-regexp',
-        'path',
+        '\\.path',
       ])) || ''
     )
       .trim()
@@ -265,7 +265,9 @@ export async function syncGit(): Promise<void> {
   if (await fs.exists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
+      await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
+      await git.pull();
       await git.fetch(['--depth=10']);
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
@@ -273,13 +275,13 @@ export async function syncGit(): Promise<void> {
       await cleanLocalBranches();
       await git.raw(['remote', 'prune', 'origin']);
       const durationMs = Math.round(Date.now() - fetchStart);
-      logger.debug({ durationMs }, 'git fetch completed');
+      logger.info({ durationMs }, 'git fetch completed');
       clone = false;
     } catch (err) /* istanbul ignore next */ {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
-      logger.warn({ err }, 'git fetch error');
+      logger.info({ err }, 'git fetch error');
     }
   }
   if (clone) {
@@ -371,7 +373,7 @@ async function syncBranch(branchName: string): Promise<void> {
   // fetch the branch only if it's not part of the existing branchPrefix
   try {
     await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
-    await git.fetch(['origin', branchName, '--depth=2']);
+    await git.fetch(['origin', branchName, '--depth=5']);
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
   }
@@ -783,7 +785,7 @@ export async function commitFiles({
     logger.debug({ result: pushRes }, 'git push');
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await git.fetch(['origin', ref, '--depth=2', '--force']);
+    await git.fetch(['origin', ref, '--depth=5', '--force']);
     config.branchCommits[branchName] = (
       await git.revparse([branchName])
     ).trim();

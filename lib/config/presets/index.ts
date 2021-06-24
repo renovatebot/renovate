@@ -8,7 +8,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
 import * as migration from '../migration';
-import type { GlobalConfig, RenovateConfig } from '../types';
+import type { AllConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
 import { removedPresets } from './common';
 import * as gitea from './gitea';
@@ -222,11 +222,11 @@ export async function getPreset(
 }
 
 export async function resolveConfigPresets(
-  inputConfig: GlobalConfig,
+  inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
   ignorePresets?: string[],
   existingPresets: string[] = []
-): Promise<GlobalConfig> {
+): Promise<AllConfig> {
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets || []; // eslint-disable-line
   }
@@ -234,7 +234,7 @@ export async function resolveConfigPresets(
     { config: inputConfig, existingPresets },
     'resolveConfigPresets'
   );
-  let config: GlobalConfig = {};
+  let config: AllConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {

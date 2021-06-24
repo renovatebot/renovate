@@ -168,6 +168,8 @@ Array [
 exports[`manager/npm/extract/monorepo .extractPackageFile() uses yarn workspaces package settings without lerna 1`] = `
 Array [
   Object {
+    "npmrc": "@org:registry=//registry.some.org
+",
     "packageFile": "package.json",
     "yarnWorkspacesPackages": "packages/*",
   },
@@ -178,6 +180,8 @@ Array [
       "lernaJsonFile": undefined,
     },
     "npmLock": undefined,
+    "npmrc": "@org:registry=//registry.some.org
+",
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
     "yarnLock": "yarn.lock",

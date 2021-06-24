@@ -229,6 +229,31 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts with combination strategy and registry url 1`] = `
+Object {
+  "datasourceTemplate": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "0.19.2",
+      "datasource": "helm",
+      "depName": "descheduler",
+      "registryUrls": Array [
+        "https://kubernetes-sigs.github.io/descheduler/",
+      ],
+      "replaceString": "CHART_VERSION: 0.19.2
+",
+    },
+  ],
+  "matchStrings": Array [
+    "CHART_VERSION: (?<currentValue>.*?)
+",
+    "CHART_REPOSITORY_URL: \\"(?<registryUrl>.*?)\\"",
+    "CHART_NAME: \\"(?<depName>.*?)\\"",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
 exports[`manager/regex/index extracts with recursive strategy and fail because of not sufficient regexes 1`] = `null`;
 
 exports[`manager/regex/index extracts with recursive strategy and fail because there is no match 1`] = `null`;

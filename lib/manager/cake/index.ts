@@ -15,10 +15,10 @@ const lexer = moo.states({
     lineComment: { match: /\/\/.*?$/ },
     multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true },
     dependency: {
-      match: /^#(?:addin|tool|module)\s+(?:nuget|dotnet):.*$/,
+      match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/,
     },
     dependencyQuoted: {
-      match: /^#(?:addin|tool|module)\s+"(?:nuget|dotnet):[^"]+"\s*$/,
+      match: /^#(?:addin|tool|module|load|l)\s+"(?:nuget|dotnet):[^"]+"\s*$/,
       value: (s: string) => s.trim().slice(1, -1),
     },
     unknown: moo.fallback,

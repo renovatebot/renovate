@@ -1,4 +1,3 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
@@ -19,11 +18,9 @@ describe(getName(), () => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
-    httpMock.setup();
   });
 
   afterEach(() => {
-    httpMock.reset();
     hostRules.clear();
   });
 
@@ -107,7 +104,7 @@ describe(getName(), () => {
       async function fail(
         code: number,
         body: any = undefined,
-        headers: nock.ReplyHeaders = undefined
+        headers: httpMock.ReplyHeaders = undefined
       ) {
         const url = '/some-url';
         httpMock

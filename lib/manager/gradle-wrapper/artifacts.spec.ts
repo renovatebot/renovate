@@ -14,8 +14,6 @@ import {
 } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git';
 import type { UpdateArtifactsConfig } from '../types';
@@ -33,7 +31,7 @@ const adminConfig: RepoAdminConfig = {
   localDir: resolve(fixtures, './testFiles'),
 };
 
-const dockerAdminConfig = { ...adminConfig, binarySource: BinarySource.Docker };
+const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 
 const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
@@ -47,9 +45,8 @@ function readString(...paths: string[]): Promise<string> {
 }
 
 describe(getName(), () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
-    httpMock.setup();
 
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
@@ -57,7 +54,6 @@ describe(getName(), () => {
       LC_ALL: 'en_US',
     });
 
-    await setExecConfig(adminConfig as never);
     setAdminConfig(adminConfig);
     resetPrefetchedImages();
 
@@ -65,7 +61,6 @@ describe(getName(), () => {
   });
 
   afterEach(() => {
-    httpMock.reset();
     setAdminConfig();
   });
 

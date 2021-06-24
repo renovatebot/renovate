@@ -198,7 +198,7 @@ The WhiteSource Renovate App does not run using GitHub Actions, but such secrets
 
 ## Admin/Bot config vs User/Repository config for Self-hosted users
 
-"AdminBot config" refers to the config which the Renovate Bot administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
+"Admin/Bot config" refers to the config which the Renovate Bot administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
 User/Repository config refers to the in-repository config file which defaults to `renovate.json` but has a large number of alternative filenames supported.
 
 If there is a need to supply custom rules for certain repository, it can still be done using the `config.js` file and the `repositories` array.
@@ -212,11 +212,13 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
 
+Note: Encrypted values can't be used in the "Admin/Bot config".
+
 ### hostRules configuration using environment variables
 
 Self-hosted users can use environment variables to configure the most common types of `hostRules` for authentication.
 
-The format of the environment variables must be all upper-case and follow:
+The format of the environment variables must follow:
 
 - Datasource name (e.g. `NPM`, `PYPI`)
 - Underscore (`_`)
@@ -226,6 +228,8 @@ The format of the environment variables must be all upper-case and follow:
 
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
+
+Note: the following prefixes cannot be supported for this functionality: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
 
 #### npmjs registry token example
 

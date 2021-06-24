@@ -51,6 +51,14 @@ Object {
 }
 `;
 
+exports[`config/migration it migrates presets 1`] = `
+Object {
+  "extends": Array [
+    "local>org/renovate-config",
+  ],
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
 Object {
   "schedule": "after 5:00pm on wednesday and thursday",

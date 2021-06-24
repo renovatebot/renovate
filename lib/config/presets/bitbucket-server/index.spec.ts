@@ -13,11 +13,8 @@ const basePath = '/rest/api/1.0/projects/some/repos/repo/browse';
 
 describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });
   });
-
-  afterEach(() => httpMock.reset());
 
   describe('fetchJSONFile()', () => {
     it('returns JSON', async () => {

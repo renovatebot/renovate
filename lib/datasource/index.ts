@@ -15,7 +15,6 @@ import type {
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
-  Release,
   ReleaseResult,
 } from './types';
 
@@ -27,13 +26,14 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function load(datasource: string): DatasourceApi {
+function getDatasourceFor(datasource: string): DatasourceApi {
   return datasources.get(datasource);
 }
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
-function logError(datasource, lookupName, err): void {
+// TODO: fix error Type
+function logError(datasource: string, lookupName: string, err: any): void {
   const { statusCode, code: errCode, url } = err;
   if (statusCode === 404) {
     logger.debug({ datasource, lookupName, url }, 'Datasource 404');
@@ -100,7 +100,7 @@ async function huntRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let res: ReleaseResult;
-  let caughtError;
+  let caughtError: Error;
   for (const registryUrl of registryUrls) {
     try {
       res = await getRegistryReleases(datasource, config, registryUrl);
@@ -131,7 +131,7 @@ async function mergeRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let combinedRes: ReleaseResult;
-  let caughtError;
+  let caughtError: Error;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -188,7 +188,7 @@ function resolveRegistryUrls(
     if (is.nonEmptyArray(extractedUrls)) {
       logger.warn(
         { datasource: datasource.id, registryUrls: extractedUrls },
-        'Custom datasources are not allowed for this datasource and will be ignored'
+        'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
     return defaultRegistryUrls;
@@ -204,7 +204,7 @@ function resolveRegistryUrls(
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
-  const datasource = load(datasourceName);
+  const datasource = getDatasourceFor(datasourceName);
   return datasource.defaultVersioning || 'semver';
 }
 
@@ -212,11 +212,11 @@ async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const { datasource: datasourceName } = config;
-  if (!datasourceName || !datasources.has(datasourceName)) {
+  if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
     logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
-  const datasource = load(datasourceName);
+  const datasource = getDatasourceFor(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult = null;
   const registryStrategy = datasource.registryStrategy || 'hunt';
@@ -313,15 +313,12 @@ export async function getPkgReleases(
   const versioning =
     config.versioning || getDefaultVersioning(config.datasource);
   const version = allVersioning.get(versioning);
-  // Return a sorted list of valid Versions
-  function sortReleases(release1: Release, release2: Release): number {
-    return version.sortVersions(release1.version, release2.version);
-  }
-  if (res.releases) {
-    res.releases = res.releases
-      .filter((release) => version.isVersion(release.version))
-      .sort(sortReleases);
-  }
+
+  // Filter and sort valid versions
+  res.releases = res.releases
+    .filter((release) => version.isVersion(release.version))
+    .sort((a, b) => version.sortVersions(a.version, b.version));
+
   // Filter versions for uniqueness
   res.releases = res.releases.filter(
     (filterRelease, filterIndex) =>
@@ -358,14 +355,14 @@ export async function getPkgReleases(
 }
 
 export function supportsDigests(config: DigestConfig): boolean {
-  return 'getDigest' in load(config.datasource);
+  return 'getDigest' in getDatasourceFor(config.datasource);
 }
 
 export function getDigest(
   config: DigestConfig,
   value?: string
 ): Promise<string | null> {
-  const datasource = load(config.datasource);
+  const datasource = getDatasourceFor(config.datasource);
   const lookupName = config.lookupName || config.depName;
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   return datasource.getDigest(
@@ -377,7 +374,7 @@ export function getDigest(
 export function getDefaultConfig(
   datasource: string
 ): Promise<Record<string, unknown>> {
-  const loadedDatasource = load(datasource);
+  const loadedDatasource = getDatasourceFor(datasource);
   return Promise.resolve<Record<string, unknown>>(
     loadedDatasource?.defaultConfig || Object.create({})
   );

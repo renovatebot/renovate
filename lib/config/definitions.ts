@@ -4,7 +4,6 @@ import { getPlatformList } from '../platform';
 import { getVersioningList } from '../versioning';
 import * as dockerVersioning from '../versioning/docker';
 import * as pep440Versioning from '../versioning/pep440';
-import * as semverVersioning from '../versioning/semver';
 import type { RenovateOptions } from './types';
 
 const options: RenovateOptions[] = [
@@ -149,6 +148,17 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'migratePresets',
+    description:
+      'Define presets here which have been removed or renamed and should be migrated automatically.',
+    type: 'object',
+    admin: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'description',
     description: 'Plain text description for a config or preset.',
     type: 'array',
@@ -257,7 +267,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dockerChildPrefix',
     description:
-      'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
+      'Change this value in order to add a prefix to the Renovate Docker sidecar container names and labels.',
     type: 'string',
     admin: true,
     default: 'renovate_',
@@ -699,7 +709,6 @@ const options: RenovateOptions[] = [
     description: 'Versioning to use for filtering and comparisons.',
     type: 'string',
     allowedValues: getVersioningList(),
-    default: semverVersioning.id,
     cli: false,
     env: false,
   },
@@ -1186,6 +1195,17 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  /*
+   * Undocumented experimental feature
+  {
+    name: 'minimumConfidence',
+    description:
+      'Minimum Merge confidence level to filter by. Requires authentication to work.',
+    type: 'string',
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
+    default: 'low',
+  },
+  */
   {
     name: 'internalChecksFilter',
     description: 'When/how to filter based on internal checks.',
@@ -1919,6 +1939,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'currentValueTemplate',
+    description:
+      'Optional currentValue for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioningTemplate',
     description:
       'Optional versioning for extracted dependencies. Valid only within a `regexManagers` object.',
@@ -1931,6 +1960,15 @@ const options: RenovateOptions[] = [
     name: 'registryUrlTemplate',
     description:
       'Optional registry URL for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'extractVersionTemplate',
+    description:
+      'Optional extractVersion for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
