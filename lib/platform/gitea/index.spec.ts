@@ -94,6 +94,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'some-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 2,
@@ -101,6 +102,7 @@ describe(getName(), () => {
       state: 'closed',
       body: 'other-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 3,
@@ -108,6 +110,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 4,
@@ -115,6 +118,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 5,
@@ -122,6 +126,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
   ];
 

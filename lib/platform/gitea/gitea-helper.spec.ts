@@ -85,6 +85,7 @@ describe(getName(), () => {
     title: 'Some Issue',
     body: 'just some issue',
     assignees: [mockUser],
+    labels: [],
   };
 
   const mockComment: ght.Comment = {

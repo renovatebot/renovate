@@ -137,7 +137,7 @@ export type RepoSearchParams = {
 };
 
 export type IssueCreateParams = {
-  labels: number[];
+  labels?: number[];
 } & IssueUpdateParams;
 
 export type IssueUpdateParams = {
