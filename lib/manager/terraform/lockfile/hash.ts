@@ -77,7 +77,6 @@ export async function calculateHashes(
   builds: TerraformBuild[]
 ): Promise<string[]> {
   const cacheDir = await ensureCacheDir('./others/terraform');
-  logger.debug(`Using terraform cache: ${cacheDir}`);
 
   // for each build download ZIP, extract content and generate hash for all containing files
   const hashes = await pMap(
