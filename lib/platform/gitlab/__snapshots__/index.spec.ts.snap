@@ -700,6 +700,36 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab/index ensureIssue() sets issue labels 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
+  },
+  Object {
+    "body": "{\\"title\\":\\"new-title\\",\\"description\\":\\"new-content\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "content-length": "85",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues",
+  },
+]
+`;
+
 exports[`platform/gitlab/index ensureIssue() skips update if unchanged 1`] = `
 Array [
   Object {
@@ -758,6 +788,47 @@ Array [
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc123",
       "content-length": "49",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
+  },
+]
+`;
+
+exports[`platform/gitlab/index ensureIssue() updates issue with labels 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
+  },
+  Object {
+    "body": "{\\"title\\":\\"title-2\\",\\"description\\":\\"newer-content\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "content-length": "85",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",

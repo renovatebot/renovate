@@ -742,6 +742,23 @@ describe(getName(), () => {
       expect(res).toEqual('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('sets issue labels', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/issues')
+        .reply(200);
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+        labels: ['Renovate', 'Maintenance'],
+      });
+      expect(res).toEqual('created');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('updates issue', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -765,6 +782,34 @@ describe(getName(), () => {
       const res = await gitlab.ensureIssue({
         title: 'title-2',
         body: 'newer-content',
+      });
+      expect(res).toEqual('updated');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('updates issue with labels', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            title: 'title-1',
+          },
+          {
+            iid: 2,
+            title: 'title-2',
+          },
+        ])
+        .get('/api/v4/projects/undefined/issues/2')
+        .reply(200, { description: 'new-content' })
+        .put('/api/v4/projects/undefined/issues/2')
+        .reply(200);
+      const res = await gitlab.ensureIssue({
+        title: 'title-2',
+        body: 'newer-content',
+        labels: ['Renovate', 'Maintenance'],
       });
       expect(res).toEqual('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
