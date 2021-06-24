@@ -10,6 +10,7 @@ import type {
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import * as fs from '../../../util/fs';
+import { ensureCacheDir } from '../../../util/fs';
 import { Http } from '../../../util/http';
 import { getCacheDir, repositoryRegex } from './util';
 
@@ -75,7 +76,8 @@ async function getReleaseBackendIndex(
 export async function calculateHashes(
   builds: TerraformBuild[]
 ): Promise<string[]> {
-  const cacheDir = await getCacheDir();
+  const cacheDir = await ensureCacheDir('./others/terraform');
+  logger.debug(`Using terraform cache: ${cacheDir}`);
 
   // for each build download ZIP, extract content and generate hash for all containing files
   const hashes = await pMap(

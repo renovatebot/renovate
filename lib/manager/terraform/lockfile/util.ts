@@ -210,10 +210,3 @@ export function writeLockUpdates(
     },
   };
 }
-
-export async function getCacheDir(): Promise<string> {
-  const cacheDir = join(getAdminConfig().cacheDir, './others/terraform');
-  await ensureDir(cacheDir);
-  logger.debug(`Using terraform cache: ${cacheDir}`);
-  return cacheDir;
-}
