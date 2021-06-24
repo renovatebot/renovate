@@ -572,7 +572,7 @@ const staticGroups = {
       },
     ],
   },
-  TSJestAndJest: {
+  JestPlusTSJest: {
     description: 'Group major updates for jest and ts-jest together',
     packageRules: [
       {
@@ -581,7 +581,7 @@ const staticGroups = {
           'https://github.com/kulshekhar/ts-jest',
         ],
         matchUpdateTypes: ['major'],
-        groupName: 'TS-jest and Jest',
+        groupName: 'ts-jest and jest',
       },
     ],
   },
