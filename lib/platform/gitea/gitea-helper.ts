@@ -388,7 +388,7 @@ export async function updateIssueLabels(
   options?: GiteaHttpOptions
 ): Promise<Label[]> {
   const url = `repos/${repoPath}/issues/${idx}/labels`;
-  const res = await giteaHttp.patchJson<Label[]>(url, {
+  const res = await giteaHttp.putJson<Label[]>(url, {
     ...options,
     body: params,
   });

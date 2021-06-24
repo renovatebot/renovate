@@ -765,6 +765,24 @@ Array [
 ]
 `;
 
+exports[`platform/gitea/gitea-helper updateIssueLabels should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint 1`] = `
+Array [
+  Object {
+    "body": "{\\"labels\\":[1,3]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "16",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7/labels",
+  },
+]
+`;
+
 exports[`platform/gitea/gitea-helper updatePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
 Array [
   Object {
