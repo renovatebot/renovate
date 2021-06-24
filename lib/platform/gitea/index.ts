@@ -637,7 +637,7 @@ const platform: Platform = {
 
       const labels = Array.isArray(labelNames)
         ? await Promise.all(labelNames.map(lookupLabelByName))
-        : [];
+        : undefined;
 
       // Update any matching issues which currently exist
       if (issues.length) {
@@ -692,10 +692,15 @@ const platform: Platform = {
         );
 
         // Test whether the issues need to be updated
-        const existingLabelIds = existingIssue.labels.map((label) => label.id);
+        const existingLabelIds = (existingIssue.labels ?? []).map(
+          (label) => label.id
+        );
         if (
-          labels.filter((labelId) => !existingLabelIds.includes(labelId))
-            .length !== 0
+          labels !== undefined &&
+          labels.length !== 0 &&
+          (labels.length !== existingLabelIds.length ||
+            labels.filter((labelId) => !existingLabelIds.includes(labelId))
+              .length !== 0)
         ) {
           await helper.updateIssueLabels(
             config.repository,
