@@ -1180,6 +1180,34 @@ describe(getName(), () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('creates issue with labels', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/repos/undefined/issues')
+        .reply(200);
+      const res = await github.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+        labels: ['Renovate', 'Maintenance'],
+      });
+      expect(res).toEqual('created');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('closes others if ensuring only once', async () => {
       httpMock
         .scope(githubApiHost)
@@ -1262,6 +1290,48 @@ describe(getName(), () => {
         title: 'title-3',
         reuseTitle: 'title-2',
         body: 'newer-content',
+      });
+      expect(res).toEqual('updated');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('updates issue with labels', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .get('/repos/undefined/issues/2')
+        .reply(200, { body: 'new-content' })
+        .patch('/repos/undefined/issues/2')
+        .reply(200);
+      const res = await github.ensureIssue({
+        title: 'title-3',
+        reuseTitle: 'title-2',
+        body: 'newer-content',
+        labels: ['Renovate', 'Maintenance'],
       });
       expect(res).toEqual('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
