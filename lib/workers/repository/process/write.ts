@@ -90,6 +90,7 @@ export async function writeUpdates(
       logger.debug(`Rollup branch ${rollupBranchName} has no passing branches`);
       branch = statuses[BranchStatus.yellow].pop();
       delete branch.upgrades;
+      // TODO: PR body
     } else if (statuses[BranchStatus.red]?.length) {
       logger.debug(
         `Rollup branch ${rollupBranchName} has only failing branches`
@@ -106,7 +107,6 @@ export async function writeUpdates(
   }
 
   for (const branch of rollupBranches) {
-    debugger;
     const res = await processBranch(branch);
     logger.debug({ res });
   }
