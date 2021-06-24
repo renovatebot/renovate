@@ -572,6 +572,19 @@ const staticGroups = {
       },
     ],
   },
+  TSJestAndJest: {
+    description: 'Group major updates for jest and ts-jest together',
+    packageRules: [
+      {
+        matchSourceUrlPrefixes: [
+          'https://github.com/facebook/jest',
+          'https://github.com/kulshekhar/ts-jest',
+        ],
+        matchUpdateTypes: ['major'],
+        groupName: 'TS-jest and Jest',
+      },
+    ],
+  },
 };
 
 const config: any = { ...staticGroups };
