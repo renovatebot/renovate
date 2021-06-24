@@ -64,10 +64,9 @@ async function runDotnetRestore(
     },
   };
 
-  const nugetConfigDir = await ensureCacheDir(
-    `./others/nuget/${getRandomString()}`
-  );
-  const nugetConfigFile = join(nugetConfigDir, 'nuget.config');
+  const nugetCacheDir = await ensureCacheDir('nuget');
+  const nugetConfigDir = join(nugetCacheDir, `${getRandomString()}`);
+  const nugetConfigFile = join(nugetConfigDir, `nuget.config`);
   await outputFile(
     nugetConfigFile,
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`

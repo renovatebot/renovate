@@ -46,7 +46,7 @@ describe('updateArtifacts', () => {
     getDefaultRegistries.mockReturnValue([] as any);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.ensureCacheDir.mockImplementation((dirName: string) =>
-      Promise.resolve(dirName)
+      Promise.resolve(`others/${dirName}`)
     );
     getRandomString.mockReturnValue('not-so-random' as any);
     setAdminConfig(adminConfig);

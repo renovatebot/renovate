@@ -10,6 +10,7 @@ import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -22,7 +23,6 @@ import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
 } from './host-rules';
-import { getGemHome } from './utils';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
@@ -173,7 +173,7 @@ export async function updateArtifacts(
       cwdFile: packageFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,
-        GEM_HOME: await getGemHome(config),
+        GEM_HOME: await ensureCacheDir('bundler'),
       },
       docker: {
         image: 'ruby',
