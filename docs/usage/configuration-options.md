@@ -441,6 +441,8 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 
 ## dependencyDashboardTitle
 
+## dependencyDashboardLabels
+
 Configure this option if you prefer a different title for the Dependency Dashboard.
 
 ## description
