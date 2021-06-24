@@ -51,6 +51,9 @@ describe('.updateArtifacts()', () => {
     docker.resetPrefetchedImages();
     hostRules.clear();
     setAdminConfig(adminConfig);
+    fs.ensureCacheDir.mockResolvedValue(
+      join(adminConfig.cacheDir, './others/composer')
+    );
   });
   afterEach(() => {
     setAdminConfig();
