@@ -15,6 +15,7 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   ensureDir,
   ensureLocalDir,
   getSiblingFileName,
@@ -77,11 +78,10 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const { allowScripts, cacheDir: adminCacheDir } = getAdminConfig();
-  const cacheDir =
-    process.env.COMPOSER_CACHE_DIR ||
-    upath.join(adminCacheDir, './others/composer');
-  await ensureDir(cacheDir);
+  const cacheDir = await ensureCacheDir(
+    './others/composer',
+    'COMPOSER_CACHE_DIR'
+  );
   logger.debug(`Using composer cache ${cacheDir}`);
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
@@ -125,7 +125,7 @@ export async function updateArtifacts({
       args += ' --ignore-platform-reqs';
     }
     args += ' --no-ansi --no-interaction';
-    if (!allowScripts || config.ignoreScripts) {
+    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');
