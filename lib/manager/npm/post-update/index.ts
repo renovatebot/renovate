@@ -435,11 +435,7 @@ export async function getAdditionalFiles(
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
 
   const env = {
-    ...getChildProcessEnv([
-      'NPM_CONFIG_CACHE',
-      'YARN_CACHE_FOLDER',
-      'npm_config_store',
-    ]),
+    ...getChildProcessEnv(),
     NPM_CONFIG_CACHE: await ensureCacheDir('./others/npm', 'NPM_CONFIG_CACHE'),
     YARN_CACHE_FOLDER: await ensureCacheDir(
       './others/yarn',
