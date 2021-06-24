@@ -572,7 +572,7 @@ const staticGroups = {
       },
     ],
   },
-  JestPlusTSJest: {
+  jestPlusTSJest: {
     description: 'Group major updates for jest and ts-jest together',
     packageRules: [
       {
