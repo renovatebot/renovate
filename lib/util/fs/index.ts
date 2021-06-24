@@ -5,6 +5,7 @@ import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
+import { getChildProcessEnv } from '../exec/env';
 
 export * from './proxies';
 
@@ -87,7 +88,11 @@ export async function ensureCacheDir(
   envPathVar?: string
 ): Promise<string> {
   const { cacheDir } = getAdminConfig();
-  const envCacheDirName = envPathVar ? process.env[envPathVar] : null;
+  let envCacheDirName = null;
+  if (envPathVar) {
+    const env = getChildProcessEnv([envPathVar]);
+    envCacheDirName = env[envPathVar];
+  }
   const cacheDirName = envCacheDirName || join(cacheDir, dirName);
   await fs.ensureDir(cacheDirName);
   return cacheDirName;
