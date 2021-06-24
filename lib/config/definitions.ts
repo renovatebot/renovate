@@ -1217,8 +1217,14 @@ const options: RenovateOptions[] = [
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
-    allowedValues: ['immediate', 'not-pending', 'status-success', 'approval'],
-    default: 'immediate',
+    allowedValues: [
+      'auto',
+      'immediate',
+      'not-pending',
+      'status-success',
+      'approval',
+    ],
+    default: 'auto',
   },
   {
     name: 'prNotPendingHours',

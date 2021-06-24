@@ -48,7 +48,12 @@ export interface RenovateSharedConfig {
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
-  prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
+  prCreation?:
+    | 'auto'
+    | 'immediate'
+    | 'not-pending'
+    | 'status-success'
+    | 'approval';
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;

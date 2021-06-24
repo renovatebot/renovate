@@ -297,6 +297,11 @@ export function generateBranchConfig(
     }
     config.rollupName = rollupName;
     config.rollup = rollup;
+    if (config.prCreation === 'auto') {
+      config.prCreation = 'approval';
+    }
+  } else if (config.prCreation === 'auto') {
+    config.prCreation = 'immediate';
   }
   // combine all labels
   config.labels = [
