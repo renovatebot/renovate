@@ -85,15 +85,15 @@ export async function ensureLocalDir(dirName: string): Promise<void> {
 
 export async function ensureCacheDir(
   dirName: string,
-  envPathVar?: string
+  envCacheDirVariable?: string
 ): Promise<string> {
   const { cacheDir: adminCacheDir } = getAdminConfig();
-  let envCacheDirName = null;
-  if (envPathVar) {
-    const env = getChildProcessEnv([envPathVar]);
-    envCacheDirName = env[envPathVar];
+  let envCacheDir = null;
+  if (envCacheDirVariable) {
+    const env = getChildProcessEnv([envCacheDirVariable]);
+    envCacheDir = env[envCacheDirVariable];
   }
-  const cacheDirName = envCacheDirName || join(adminCacheDir, dirName);
+  const cacheDirName = envCacheDir || join(adminCacheDir, dirName);
   await fs.ensureDir(cacheDirName);
   return cacheDirName;
 }
