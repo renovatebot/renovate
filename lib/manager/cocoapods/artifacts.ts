@@ -4,13 +4,13 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { getCocoaPodsHome } from './utils';
 
 const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;
 
@@ -67,11 +67,14 @@ export async function updateArtifacts({
   );
   const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
 
+  const cacheDir = await ensureCacheDir('./others/cocoapods', 'CP_HOME_DIR');
+  logger.debug(`Using cocoapods home ${cacheDir}`);
+
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
-      CP_HOME_DIR: await getCocoaPodsHome(config),
+      CP_HOME_DIR: cacheDir,
     },
     docker: {
       image: 'cocoapods',
