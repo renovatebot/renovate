@@ -581,7 +581,7 @@ const staticGroups = {
           'https://github.com/kulshekhar/ts-jest',
         ],
         matchUpdateTypes: ['major'],
-        groupName: 'ts-jest and jest',
+        groupName: 'jest monorepo,
       },
     ],
   },
