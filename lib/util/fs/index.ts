@@ -5,6 +5,7 @@ import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
+import { getChildProcessEnv } from '../exec/env';
 
 export * from './proxies';
 
@@ -83,14 +84,29 @@ export async function ensureLocalDir(dirName: string): Promise<void> {
 }
 
 export async function ensureCacheDir(
-  dirName: string,
-  envPathVar?: string
+  adminCacheSubdir: string,
+  envCacheVar?: string
 ): Promise<string> {
-  const { cacheDir } = getAdminConfig();
-  const envCacheDirName = envPathVar ? process.env[envPathVar] : null;
-  const cacheDirName = envCacheDirName || join(cacheDir, dirName);
-  await fs.ensureDir(cacheDirName);
-  return cacheDirName;
+  let cacheDir: string;
+  if (envCacheVar) {
+    const env = getChildProcessEnv([envCacheVar]);
+    if (env[envCacheVar]) {
+      cacheDir = env[envCacheVar];
+      logger.debug(
+        { cacheDir },
+        `Using cache directory from environment: ${envCacheVar}`
+      );
+    }
+  }
+
+  if (!cacheDir) {
+    const { cacheDir: adminCacheDir } = getAdminConfig();
+    cacheDir = join(adminCacheDir, adminCacheSubdir);
+    logger.debug({ cacheDir }, `Using cache directory from admin config`);
+  }
+
+  await fs.ensureDir(cacheDir);
+  return cacheDir;
 }
 
 /**

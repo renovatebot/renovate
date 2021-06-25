@@ -330,6 +330,14 @@ To create the key pair with OpenSSL use the following commands:
 - `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
 - `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
 
+To encrypt a secret with OpenSSL use the following command:
+
+```bash
+echo 'actual-secret' | openssl rsautl -encrypt -pubin -inkey rsa_pub.pem | base64
+```
+
+Replace `actual-secret` with the secret to encrypt.
+
 ## privateKeyPath
 
 Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.

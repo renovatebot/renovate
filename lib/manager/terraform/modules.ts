@@ -1,6 +1,6 @@
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceTerraformModule from '../../datasource/terraform-module';
+import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
@@ -61,7 +61,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
       }
       dep.depType = 'module';
       dep.depName = moduleParts.join('/');
-      dep.datasource = datasourceTerraformModule.id;
+      dep.datasource = TerraformModuleDatasource.id;
     }
   } else {
     logger.debug({ dep }, 'terraform dep has no source');
