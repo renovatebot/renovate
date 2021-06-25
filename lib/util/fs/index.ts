@@ -87,8 +87,6 @@ export async function ensureCacheDir(
   adminCacheSubdir: string,
   envCacheVar?: string
 ): Promise<string> {
-  const { cacheDir: adminCacheDir } = getAdminConfig();
-
   let cacheDir: string;
   if (envCacheVar) {
     const env = getChildProcessEnv([envCacheVar]);
@@ -99,6 +97,7 @@ export async function ensureCacheDir(
   }
 
   if (!cacheDir) {
+    const { cacheDir: adminCacheDir } = getAdminConfig();
     cacheDir = join(adminCacheDir, adminCacheSubdir);
     logger.trace(`Using cache directory ${cacheDir} (default)`);
   }

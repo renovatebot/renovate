@@ -1,7 +1,12 @@
+import _fs from 'fs-extra';
 import { withDir } from 'tmp-promise';
-import { getName } from '../../../test/util';
+import { join } from 'upath';
+import { envMock } from '../../../test/exec-util';
+import { getName, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import * as _env from '../exec/env';
 import {
+  ensureCacheDir,
   ensureLocalDir,
   findLocalSiblingOrParent,
   getSubDirectory,
@@ -10,6 +15,12 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '.';
+
+jest.mock('fs-extra');
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+
+jest.mock('../../util/exec/env');
+const env = mocked(_env);
 
 describe(getName(), () => {
   describe('readLocalFile', () => {
@@ -150,6 +161,45 @@ describe(getName(), () => {
       const result = await readLocalDirectory('somedir');
       expect(result).not.toBeNull();
       expect(result).toBeArrayOfSize(0);
+    });
+  });
+
+  describe('ensureCacheDir', () => {
+    const dirFromEnv = join('/foo');
+    const dirFromConfig = join('/bar');
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      env.getChildProcessEnv.mockReturnValueOnce({
+        ...envMock.basic,
+        CUSTOM_CACHE_DIR: dirFromEnv,
+      });
+      setAdminConfig({
+        cacheDir: join(dirFromConfig),
+      });
+    });
+
+    it('prefers environment variables over admin config', async () => {
+      fs.ensureDir.mockImplementationOnce(() => {});
+      const res = await ensureCacheDir('./deeply/nested', 'CUSTOM_CACHE_DIR');
+      expect(res).toEqual(dirFromEnv);
+      expect(fs.ensureDir).toHaveBeenCalledWith(dirFromEnv);
+    });
+
+    it('is optional to pass environment variable', async () => {
+      const expected = join(`${dirFromConfig}/deeply/nested`);
+      fs.ensureDir.mockImplementationOnce(() => {});
+      const res = await ensureCacheDir('./deeply/nested');
+      expect(res).toEqual(expected);
+      expect(fs.ensureDir).toHaveBeenCalledWith(expected);
+    });
+
+    it('falls back to admin config', async () => {
+      const expected = join(`${dirFromConfig}/deeply/nested`);
+      fs.ensureDir.mockImplementationOnce(() => {});
+      const res = await ensureCacheDir('./deeply/nested', 'NO_SUCH_VARIABLE');
+      expect(res).toEqual(expected);
+      expect(fs.ensureDir).toHaveBeenCalledWith(expected);
     });
   });
 });
