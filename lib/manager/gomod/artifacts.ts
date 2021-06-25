@@ -37,7 +37,7 @@ function getUpdateImportPathCmds(
 ): string[] {
   const updateImportCommands = updatedDeps
     .filter((x) => !x.startsWith('gopkg.in'))
-    .map((depName) => `go mod upgrade --mod-name=${depName} -t=${newMajor}`);
+    .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
@@ -93,7 +93,6 @@ export async function updateArtifacts({
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
   const goPath = await ensureCacheDir('./others/go', 'GOPATH');
-  logger.debug(`Using GOPATH: ${goPath}`);
 
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);

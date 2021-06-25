@@ -27,6 +27,11 @@ import {
   branchExists as gitBranchExists,
   isBranchModified,
 } from '../../util/git';
+import {
+  getMergeConfidenceLevel,
+  isActiveConfidenceLevel,
+  satisfiesConfidenceLevel,
+} from '../../util/merge-confidence';
 import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -39,7 +44,7 @@ import { getUpdatedPackageFiles } from './get-updated';
 import { handlepr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
-import { setStability } from './status-checks';
+import { setConfidence, setStability } from './status-checks';
 
 function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   const titleRebase = branchPr.title?.startsWith('rebase!');
@@ -260,7 +265,9 @@ export async function processBranch(
 
     if (
       config.upgrades.some(
-        (upgrade) => upgrade.stabilityDays && upgrade.releaseTimestamp
+        (upgrade) =>
+          (upgrade.stabilityDays && upgrade.releaseTimestamp) ||
+          isActiveConfidenceLevel(upgrade.minimumConfidence)
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
@@ -280,6 +287,34 @@ export async function processBranch(
               'Update has not passed stability days'
             );
             config.stabilityStatus = BranchStatus.yellow;
+            continue; // eslint-disable-line no-continue
+          }
+        }
+        const {
+          datasource,
+          depName,
+          minimumConfidence,
+          updateType,
+          currentVersion,
+          newVersion,
+        } = upgrade;
+        if (isActiveConfidenceLevel(minimumConfidence)) {
+          const confidence = await getMergeConfidenceLevel(
+            datasource,
+            depName,
+            currentVersion,
+            newVersion,
+            updateType
+          );
+          if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+            config.confidenceStatus = BranchStatus.green;
+          } else {
+            logger.debug(
+              { depName, confidence, minimumConfidence },
+              'Update does not meet minimum confidence scores'
+            );
+            config.confidenceStatus = BranchStatus.yellow;
+            continue; // eslint-disable-line no-continue
           }
         }
       }
@@ -290,7 +325,9 @@ export async function processBranch(
         config.stabilityStatus === BranchStatus.yellow &&
         ['not-pending', 'status-success'].includes(config.prCreation)
       ) {
-        logger.debug('Skipping branch creation due to stability days not met');
+        logger.debug(
+          'Skipping branch creation due to internal status checks not met'
+        );
         return {
           branchExists,
           prNo: branchPr?.number,
@@ -391,7 +428,8 @@ export async function processBranch(
         });
       }
     }
-    const forcedManually = !!dependencyDashboardCheck || config.rebaseRequested;
+    const forcedManually =
+      !!dependencyDashboardCheck || config.rebaseRequested || !branchExists;
     if (!forcedManually && config.rebaseWhen === 'never') {
       logger.debug(`Skipping commit (rebaseWhen=never)`);
       return {
@@ -419,6 +457,7 @@ export async function processBranch(
     }
     // Set branch statuses
     await setStability(config);
+    await setConfidence(config);
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
