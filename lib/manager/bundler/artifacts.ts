@@ -170,7 +170,6 @@ export async function updateArtifacts(
     }
 
     const cacheDir = await ensureCacheDir('./others/gem', 'GEM_HOME');
-    logger.debug(`Using gem home ${cacheDir}`);
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,

@@ -80,7 +80,6 @@ export async function updateArtifacts({
     './others/composer',
     'COMPOSER_CACHE_DIR'
   );
-  logger.debug(`Using composer cache ${cacheDir}`);
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName);
