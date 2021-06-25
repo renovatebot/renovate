@@ -68,7 +68,6 @@ export async function updateArtifacts({
   const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
 
   const cacheDir = await ensureCacheDir('./others/cocoapods', 'CP_HOME_DIR');
-  logger.debug(`Using cocoapods home ${cacheDir}`);
 
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
