@@ -1,19 +1,14 @@
-import * as _fs from 'fs-extra';
-import { getName, mocked } from '../../../../../test/util';
+import { fs, getName } from '../../../../../test/util';
 import { readHomeDirFiles } from './home-dir';
 
-jest.mock('fs-extra');
-
-const fs = mocked(_fs);
+jest.mock('../../../../util/fs');
 
 describe(getName(), () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
   describe('readHomeDirFiles()', () => {
     it('returns null if no file', async () => {
       expect(await readHomeDirFiles()).toBeNull();
     });
+
     it('parses .npmrc', async () => {
       const content = [
         'registry=https://registry.npmjs.org/',
@@ -23,7 +18,7 @@ describe(getName(), () => {
         '//registry.npmjs.org/:_auth=afafafaf==',
         '@renovate:registry=https://registry.renovatebot.com/',
       ];
-      fs.readFile.mockResolvedValueOnce(content.join('\n') as any);
+      fs.readFile.mockResolvedValueOnce(content.join('\n'));
       expect((await readHomeDirFiles()).config).toMatchSnapshot();
     });
   });

@@ -1,9 +1,9 @@
 import os from 'os';
-import fs from 'fs-extra';
 import ini from 'ini';
 import { join } from 'upath';
-import { AllConfig } from '../../../../config/types';
+import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import { readFile } from '../../../../util/fs';
 
 export interface HomeDirConfig {
   fileList: string[];
@@ -17,7 +17,7 @@ export async function readHomeDirFiles(): Promise<HomeDirConfig | null> {
   const npmrcFileName = join(homeDir, '.npmrc');
   let npmrcContent: string;
   try {
-    npmrcContent = await fs.readFile(npmrcFileName, 'utf8');
+    npmrcContent = await readFile(npmrcFileName, 'utf8');
   } catch (err) {
     // Ignore
   }
