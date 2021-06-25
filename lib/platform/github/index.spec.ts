@@ -1180,6 +1180,7 @@ describe(getName(), () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('creates issue with labels', async () => {
       httpMock
         .scope(githubApiHost)
@@ -1208,6 +1209,7 @@ describe(getName(), () => {
       expect(res).toEqual('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('closes others if ensuring only once', async () => {
       httpMock
         .scope(githubApiHost)
@@ -1294,6 +1296,7 @@ describe(getName(), () => {
       expect(res).toEqual('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('updates issue with labels', async () => {
       httpMock
         .scope(githubApiHost)
@@ -1336,6 +1339,7 @@ describe(getName(), () => {
       expect(res).toEqual('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('skips update if unchanged', async () => {
       httpMock
         .scope(githubApiHost)
