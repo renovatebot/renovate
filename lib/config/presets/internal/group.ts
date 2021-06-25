@@ -573,7 +573,7 @@ const staticGroups = {
     ],
   },
   jestPlusTSJest: {
-    description: 'Group major updates for jest and ts-jest together',
+    description: 'Group major updates for ts-jest to jest monorepo',
     packageRules: [
       {
         matchSourceUrlPrefixes: [
