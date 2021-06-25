@@ -577,7 +577,6 @@ const staticGroups = {
     packageRules: [
       {
         matchSourceUrlPrefixes: [
-          'https://github.com/facebook/jest',
           'https://github.com/kulshekhar/ts-jest',
         ],
         matchUpdateTypes: ['major'],
