@@ -44,6 +44,8 @@ export async function getPrConfigDescription(
   prBody += emojify(':recycle: **Rebasing**: ');
   if (config.rebaseWhen === 'behind-base-branch') {
     prBody += 'Whenever PR is behind base branch';
+  } else if (config.rebaseWhen === 'newer-version') {
+    prBody += 'Whenever a newer dependency version has been found';
   } else if (config.rebaseWhen === 'never') {
     prBody += 'Never';
   } else {

@@ -50,7 +50,12 @@ export interface RenovateSharedConfig {
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
-  rebaseWhen?: string;
+  rebaseWhen?:
+    | 'auto'
+    | 'newer-version'
+    | 'never'
+    | 'conflicted'
+    | 'behind-base-branch';
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;

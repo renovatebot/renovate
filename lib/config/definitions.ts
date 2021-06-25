@@ -1179,7 +1179,13 @@ const options: RenovateOptions[] = [
     name: 'rebaseWhen',
     description: 'Control when Renovate decides to rebase an existing branch.',
     type: 'string',
-    allowedValues: ['auto', 'never', 'conflicted', 'behind-base-branch'],
+    allowedValues: [
+      'auto',
+      'never',
+      'newer-version',
+      'conflicted',
+      'behind-base-branch',
+    ],
     default: 'auto',
   },
   {

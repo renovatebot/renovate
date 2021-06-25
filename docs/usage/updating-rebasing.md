@@ -50,6 +50,11 @@ This way:
 - Each Renovate branch will always have 1 and only 1 commit
 - The newest version will be based off the latest base branch commit at the time
 
+When using the default configuration (`"rebaseWhen": "auto"`), this will happen automatically.
+However, if you only want Renovate to rebase when a newer version of the dependency "foo" is available, you can configure `"rebaseWhen": "newer-version"`.
+
+This behaviour is fully disabled by configuring `"rebaseWhen": "never"` (not recommended).
+
 ## Manual rebasing
 
 You can request that Renovate rebase a PR by ticking the rebase/retry checkbox on GitHub or Gitlab.
