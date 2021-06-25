@@ -283,6 +283,8 @@ For `npm` only you can also configure this field to `"mirror:x"` where `x` is th
 Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on.
 Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
+For `sbt` note that Renovate will update the version string only for packages that have the version string in their project's `built.sbt` file.
+
 ## cloneSubmodules
 
 ## commitBody

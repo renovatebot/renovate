@@ -93,7 +93,6 @@ export async function updateArtifacts({
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
   const goPath = await ensureCacheDir('./others/go', 'GOPATH');
-  logger.debug(`Using GOPATH: ${goPath}`);
 
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
