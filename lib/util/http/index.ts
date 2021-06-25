@@ -60,6 +60,7 @@ function applyDefaultHeaders(options: Options): void {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error getting renovate version');
   }
+  // eslint-disable-next-line no-param-reassign
   options.headers = {
     ...options.headers,
     'user-agent':
