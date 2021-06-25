@@ -136,7 +136,8 @@ export type RepoSearchParams = {
   archived?: boolean;
 };
 
-export type IssueCreateParams = Partial<IssueUpdateLabelsParams> & IssueUpdateParams;
+export type IssueCreateParams = Partial<IssueUpdateLabelsParams> &
+  IssueUpdateParams;
 
 export type IssueUpdateParams = {
   title?: string;
