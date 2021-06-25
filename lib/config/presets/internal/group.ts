@@ -573,14 +573,12 @@ const staticGroups = {
     ],
   },
   jestPlusTSJest: {
-    description: 'Group major updates for ts-jest to jest monorepo',
+    description: 'Add ts-jest major update to jest monorepo',
     packageRules: [
       {
-        matchSourceUrlPrefixes: [
-          'https://github.com/kulshekhar/ts-jest',
-        ],
+        matchSourceUrlPrefixes: ['https://github.com/kulshekhar/ts-jest'],
         matchUpdateTypes: ['major'],
-        groupName: 'jest monorepo,
+        groupName: 'jest monorepo',
       },
     ],
   },
