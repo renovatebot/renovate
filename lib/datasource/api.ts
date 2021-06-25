@@ -28,7 +28,7 @@ import * as rubyVersion from './ruby-version';
 import * as rubygems from './rubygems';
 import * as sbtPackage from './sbt-package';
 import * as sbtPlugin from './sbt-plugin';
-import * as terraformModule from './terraform-module';
+import { TerraformModuleDatasource } from './terraform-module';
 import { TerraformProviderDatasource } from './terraform-provider';
 import type { DatasourceApi } from './types';
 
@@ -65,5 +65,5 @@ api.set('ruby-version', rubyVersion);
 api.set('rubygems', rubygems);
 api.set('sbt-package', sbtPackage);
 api.set('sbt-plugin', sbtPlugin);
-api.set('terraform-module', terraformModule);
+api.set('terraform-module', new TerraformModuleDatasource());
 api.set('terraform-provider', new TerraformProviderDatasource());
