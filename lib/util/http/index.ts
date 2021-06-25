@@ -53,7 +53,6 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
 }
 
 function applyDefaultHeaders(options: Options): void {
-  // eslint-disable-next-line no-param-reassign
   let renovateVersion = 'unknown';
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
