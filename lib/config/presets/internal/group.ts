@@ -58,6 +58,7 @@ const staticGroups = {
       'group:hibernateCommons',
       'group:illuminate',
       'group:jekyllEcosystem',
+      'group:jestPlusTSJest',
       'group:polymer',
       'group:resilience4j',
       'group:rubyOmniauth',
