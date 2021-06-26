@@ -35,7 +35,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -57,7 +57,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -71,7 +71,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -88,7 +88,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -104,7 +104,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -119,7 +119,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })
