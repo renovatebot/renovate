@@ -464,12 +464,7 @@ describe(getName(), () => {
     describe('GOPROXY', () => {
       const baseUrl = 'https://proxy.golang.org';
 
-      beforeEach(() => {
-        httpMock.setup();
-      });
-
       afterEach(() => {
-        httpMock.reset();
         delete process.env.GOPROXY;
         delete process.env.GONOPROXY;
         delete process.env.GOPRIVATE;
