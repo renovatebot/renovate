@@ -41,7 +41,11 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if no Cargo.lock found', async () => {
     fs.stat.mockRejectedValue(new Error('not found!'));
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -67,7 +71,11 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
 
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -83,7 +91,11 @@ describe('.updateArtifacts()', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -103,7 +115,11 @@ describe('.updateArtifacts()', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'crates/one/Cargo.toml',
@@ -137,7 +153,11 @@ describe('.updateArtifacts()', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -154,7 +174,11 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',

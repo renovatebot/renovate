@@ -2,15 +2,14 @@ import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { parseUrl } from '../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
-import { Datasource } from '../datasource';
-import { getTerraformServiceDiscoveryResult } from '../terraform-module';
+import { TerraformDatasource } from '../terraform-module/base';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   TerraformProvider,
   TerraformProviderReleaseBackend,
 } from './types';
 
-export class TerraformProviderDatasource extends Datasource {
+export class TerraformProviderDatasource extends TerraformDatasource {
   static readonly id = 'terraform-provider';
 
   static readonly defaultRegistryUrls = [
@@ -63,7 +62,7 @@ export class TerraformProviderDatasource extends Datasource {
     registryURL: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const serviceDiscovery = await getTerraformServiceDiscoveryResult(
+    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
       registryURL
     );
     const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;

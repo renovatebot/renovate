@@ -80,7 +80,6 @@ export async function updateArtifacts({
     './others/composer',
     'COMPOSER_CACHE_DIR'
   );
-  logger.debug(`Using composer cache ${cacheDir}`);
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName);
@@ -116,8 +115,9 @@ export async function updateArtifacts({
       args = 'install';
     } else {
       args =
-        ('update ' + updatedDeps.map(quote).join(' ')).trim() +
-        ' --with-dependencies';
+        (
+          'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
+        ).trim() + ' --with-dependencies';
     }
     if (config.composerIgnorePlatformReqs) {
       args += ' --ignore-platform-reqs';

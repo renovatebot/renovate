@@ -101,7 +101,10 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundle lock';
     } else {
-      cmd = `bundle lock --update ${updatedDeps.map(quote).join(' ')}`;
+      cmd = `bundle lock --update ${updatedDeps
+        .map((dep) => dep.depName)
+        .map(quote)
+        .join(' ')}`;
     }
 
     let bundlerVersion = '';
@@ -170,7 +173,6 @@ export async function updateArtifacts(
     }
 
     const cacheDir = await ensureCacheDir('./others/gem', 'GEM_HOME');
-    logger.debug(`Using gem home ${cacheDir}`);
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,

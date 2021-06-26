@@ -87,15 +87,26 @@ export async function ensureCacheDir(
   adminCacheSubdir: string,
   envCacheVar?: string
 ): Promise<string> {
-  const { cacheDir: adminCacheDir } = getAdminConfig();
-  let envCacheDir = null;
+  let cacheDir: string;
   if (envCacheVar) {
     const env = getChildProcessEnv([envCacheVar]);
-    envCacheDir = env[envCacheVar];
+    if (env[envCacheVar]) {
+      cacheDir = env[envCacheVar];
+      logger.debug(
+        { cacheDir },
+        `Using cache directory from environment: ${envCacheVar}`
+      );
+    }
   }
-  const cacheDirName = envCacheDir || join(adminCacheDir, adminCacheSubdir);
-  await fs.ensureDir(cacheDirName);
-  return cacheDirName;
+
+  if (!cacheDir) {
+    const { cacheDir: adminCacheDir } = getAdminConfig();
+    cacheDir = join(adminCacheDir, adminCacheSubdir);
+    logger.debug({ cacheDir }, `Using cache directory from admin config`);
+  }
+
+  await fs.ensureDir(cacheDir);
+  return cacheDir;
 }
 
 /**
