@@ -122,6 +122,8 @@ RUN apt-get update && apt-get install -y php-cli php-mbstring && \
 
 ENV COMPOSER_VERSION=1.9.3 # github-releases/composer/composer
 
+ENV COMPOSER_MEMORY_LIMIT=-1 # See https://github.com/renovatebot/renovate/issues/10624
+
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 
 RUN chmod +x /usr/local/bin/composer
