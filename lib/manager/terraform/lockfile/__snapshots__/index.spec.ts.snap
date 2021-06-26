@@ -48,10 +48,12 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
 exports[`manager/terraform/lockfile/index do full lock file maintenance 2`] = `
 Array [
   Array [
+    "https://registry.terraform.io",
     "hashicorp/azurerm",
     "2.56.0",
   ],
   Array [
+    "https://registry.terraform.io",
     "hashicorp/random",
     "2.2.2",
   ],
@@ -63,10 +65,12 @@ exports[`manager/terraform/lockfile/index do full lock file maintenance without 
 exports[`manager/terraform/lockfile/index return null if hashing fails 1`] = `
 Array [
   Array [
+    "https://registry.terraform.io",
     "hashicorp/azurerm",
     "2.56.0",
   ],
   Array [
+    "https://registry.terraform.io",
     "hashicorp/random",
     "2.2.2",
   ],
@@ -133,6 +137,7 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
 exports[`manager/terraform/lockfile/index update single dependency with exact constraint 2`] = `
 Array [
   Array [
+    "https://registry.terraform.io",
     "hashicorp/aws",
     "3.36.0",
   ],
@@ -197,6 +202,7 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
 exports[`manager/terraform/lockfile/index update single dependency with range constraint and major update 2`] = `
 Array [
   Array [
+    "https://registry.terraform.io",
     "hashicorp/random",
     "3.1.0",
   ],
@@ -262,6 +268,7 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
 exports[`manager/terraform/lockfile/index update single dependency with range constraint and minor update 2`] = `
 Array [
   Array [
+    "https://registry.terraform.io",
     "hashicorp/azurerm",
     "2.56.0",
   ],

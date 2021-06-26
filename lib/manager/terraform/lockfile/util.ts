@@ -8,8 +8,6 @@ import type {
   ProviderSlice,
 } from './types';
 
-export const repositoryRegex = /^hashicorp\/(?<lookupName>\S+)$/;
-
 const providerStartLineRegex =
   /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/;
 const versionLineRegex =
@@ -104,7 +102,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
 
     const lock: ProviderLock = {
       lookupName,
-      registryUrl,
+      registryUrl: `https://${registryUrl}`,
       version,
       constraints,
       hashes,

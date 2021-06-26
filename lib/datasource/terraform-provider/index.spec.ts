@@ -6,6 +6,9 @@ import { TerraformProviderDatasource } from '.';
 const consulData: any = loadFixture('azurerm-provider.json');
 const hashicorpReleases: any = loadFixture('releaseBackendIndex.json');
 const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
+const telmateProxmocVersions: any = loadFixture(
+  'telmate-proxmox-versions-response.json'
+);
 
 const terraformProviderDatasource = new TerraformProviderDatasource();
 const primaryUrl = terraformProviderDatasource.defaultRegistryUrls[0];
@@ -148,6 +151,125 @@ describe(getName(), () => {
           depName: 'azurerm',
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+  describe('getBuilds', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns null for empty result', async () => {
+      httpMock
+        .scope(primaryUrl)
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(200, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+
+      const result = await terraformProviderDatasource.getBuilds(
+        terraformProviderDatasource.defaultRegistryUrls[0],
+        'hashicorp/azurerm',
+        '2.50.0'
+      );
+      expect(result).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null if a version is requested which is not available', async () => {
+      httpMock
+        .scope(primaryUrl)
+        .get('/v1/providers/Telmate/proxmox/versions')
+        .reply(200, telmateProxmocVersions)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const result = await terraformProviderDatasource.getBuilds(
+        terraformProviderDatasource.defaultRegistryUrls[0],
+        'Telmate/proxmox',
+        '2.8.0'
+      );
+      expect(result).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('processes real data', async () => {
+      httpMock
+        .scope(primaryUrl)
+        .get('/v1/providers/Telmate/proxmox/versions')
+        .reply(200, telmateProxmocVersions)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult)
+        .get('/v1/providers/Telmate/proxmox/2.6.1/download/darwin/arm64')
+        .reply(200, {
+          os: 'darwin',
+          arch: 'arm64',
+          filename: 'aFileName.zip',
+          download_url: 'https://downloads.example.com/proxmox',
+        })
+        .get('/v1/providers/Telmate/proxmox/2.6.1/download/linux/amd64')
+        .reply(200, {
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'aFileName.zip',
+          download_url: 'https://downloads.example.com/proxmox',
+        })
+        .get('/v1/providers/Telmate/proxmox/2.6.1/download/linux/arm')
+        .reply(200, {
+          os: 'linux',
+          arch: 'arm',
+          filename: 'aFileName.zip',
+          download_url: 'https://downloads.example.com/proxmox',
+        })
+        .get('/v1/providers/Telmate/proxmox/2.6.1/download/windows/amd64')
+        .reply(200, {
+          os: 'windows',
+          arch: 'amd64',
+          filename: 'aFileName.zip',
+          download_url: 'https://downloads.example.com/proxmox',
+        });
+      const res = await terraformProviderDatasource.getBuilds(
+        terraformProviderDatasource.defaultRegistryUrls[0],
+        'Telmate/proxmox',
+        '2.6.1'
+      );
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('return null if the retrieval of a single build fails', async () => {
+      httpMock
+        .scope(primaryUrl)
+        .get('/v1/providers/Telmate/proxmox/versions')
+        .reply(200, telmateProxmocVersions)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult)
+        .get('/v1/providers/Telmate/proxmox/2.6.1/download/darwin/arm64')
+        .reply(200, {
+          os: 'darwin',
+          arch: 'arm64',
+          filename: 'aFileName.zip',
+          download_url: 'https://downloads.example.com/proxmox',
+        })
+        .get('/v1/providers/Telmate/proxmox/2.6.1/download/linux/amd64')
+        .reply(200, {
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'aFileName.zip',
+          download_url: 'https://downloads.example.com/proxmox',
+        })
+        .get('/v1/providers/Telmate/proxmox/2.6.1/download/linux/arm')
+        .reply(200, {
+          os: 'linux',
+          arch: 'arm',
+          filename: 'aFileName.zip',
+          download_url: 'https://downloads.example.com/proxmox',
+        })
+        .get('/v1/providers/Telmate/proxmox/2.6.1/download/windows/amd64')
+        .reply(404);
+      const res = await terraformProviderDatasource.getBuilds(
+        terraformProviderDatasource.defaultRegistryUrls[0],
+        'Telmate/proxmox',
+        '2.6.1'
+      );
+      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

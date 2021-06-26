@@ -1,3 +1,4 @@
+import pMap from 'p-map';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { parseUrl } from '../../util/url';
@@ -5,9 +6,14 @@ import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
+  TerraformBuild,
   TerraformProvider,
   TerraformProviderReleaseBackend,
+  TerraformRegistryBuildResponse,
+  TerraformRegistryVersions,
+  VersionDetailResponse,
 } from './types';
+import { repositoryRegex } from './types';
 
 export class TerraformProviderDatasource extends TerraformDatasource {
   static readonly id = 'terraform-provider';
@@ -115,5 +121,104 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     );
     logger.trace({ dep }, 'dep');
     return dep;
+  }
+
+  async getBuilds(
+    registryURL: string,
+    repository: string,
+    version: string
+  ): Promise<TerraformBuild[]> {
+    if (registryURL === TerraformProviderDatasource.defaultRegistryUrls[1]) {
+      // check if registryURL === secondary backend
+      const repositoryRegexResult = repositoryRegex.exec(repository);
+      if (!repositoryRegexResult) {
+        // non hashicorp builds are not supported with releases.hashicorp.com
+        return null;
+      }
+      const lookupName = repositoryRegexResult.groups.lookupName;
+      const backendLookUpName = `terraform-provider-${lookupName}`;
+      let versionReleaseBackend: VersionDetailResponse;
+      try {
+        versionReleaseBackend = await this.getReleaseBackendIndex(
+          backendLookUpName,
+          version
+        );
+      } catch (err) {
+        logger.debug(
+          { err, backendLookUpName, version },
+          `Failed to retrieve builds for ${backendLookUpName} ${version}`
+        );
+        return null;
+      }
+      return versionReleaseBackend.builds;
+    }
+
+    // check public or private Terraform registry
+    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
+      registryURL
+    );
+    if (!serviceDiscovery) {
+      logger.trace(`Failed to retrieve service discovery from ${registryURL}`);
+      return null;
+    }
+    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
+    const versionsResponse = (
+      await this.http.getJson<TerraformRegistryVersions>(
+        `${backendURL}/versions`
+      )
+    ).body;
+    if (!versionsResponse.versions) {
+      logger.trace(`Failed to retrieve version list for ${backendURL}`);
+      return null;
+    }
+    const builds = versionsResponse.versions.find(
+      (value) => value.version === version
+    );
+    if (!builds) {
+      logger.trace(
+        `No builds found for ${repository}:${version} on ${registryURL}`
+      );
+      return null;
+    }
+    const result = await pMap(
+      builds.platforms,
+      async (platform) => {
+        try {
+          const buildURL = `${backendURL}/${version}/download/${platform.os}/${platform.arch}`;
+          const res = (
+            await this.http.getJson<TerraformRegistryBuildResponse>(buildURL)
+          ).body;
+          const newBuild: TerraformBuild = {
+            name: repository,
+            url: res.download_url,
+            version,
+            ...res,
+          };
+          return newBuild;
+        } catch (e) {
+          logger.trace(e);
+          return null;
+        }
+      },
+      { concurrency: 4 }
+    );
+
+    // if any of the requests to build details have failed, return null
+    if (result.some((value) => Boolean(value) === false)) {
+      return null;
+    }
+
+    return result;
+  }
+
+  async getReleaseBackendIndex(
+    backendLookUpName: string,
+    version: string
+  ): Promise<VersionDetailResponse> {
+    return (
+      await this.http.getJson<VersionDetailResponse>(
+        `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`
+      )
+    ).body;
   }
 }

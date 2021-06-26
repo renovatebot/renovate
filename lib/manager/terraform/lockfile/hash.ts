@@ -3,18 +3,16 @@ import extract from 'extract-zip';
 import pMap from 'p-map';
 import { join } from 'upath';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
-import type {
-  TerraformBuild,
-  VersionDetailResponse,
-} from '../../../datasource/terraform-provider/types';
+import type { TerraformBuild } from '../../../datasource/terraform-provider/types';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import { Http } from '../../../util/http';
-import { repositoryRegex } from './util';
 
 const http = new Http(TerraformProviderDatasource.id);
+const terraformDatasource = new TerraformProviderDatasource();
+
 const hashCacheTTL = 10080; // in seconds == 1 week
 
 export async function hashFiles(files: string[]): Promise<string> {
@@ -62,17 +60,6 @@ export async function hashOfZipContent(
   return result;
 }
 
-async function getReleaseBackendIndex(
-  backendLookUpName: string,
-  version: string
-): Promise<VersionDetailResponse> {
-  return (
-    await http.getJson<VersionDetailResponse>(
-      `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`
-    )
-  ).body;
-}
-
 export async function calculateHashes(
   builds: TerraformBuild[]
 ): Promise<string[]> {
@@ -114,19 +101,11 @@ export async function calculateHashes(
 }
 
 export async function createHashes(
+  registryURL: string,
   repository: string,
   version: string
 ): Promise<string[]> {
-  // check cache for hashes
-  const repositoryRegexResult = repositoryRegex.exec(repository);
-  if (!repositoryRegexResult) {
-    // non hashicorp builds are not supported at the moment
-    return null;
-  }
-  const lookupName = repositoryRegexResult.groups.lookupName;
-  const backendLookUpName = `terraform-provider-${lookupName}`;
-
-  const cacheKey = `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${repository}/${lookupName}-${version}`;
+  const cacheKey = `${registryURL}/${repository}-${version}`;
   const cachedRelease = await packageCache.get<string[]>(
     'terraform-provider-release',
     cacheKey
@@ -135,21 +114,15 @@ export async function createHashes(
   if (cachedRelease) {
     return cachedRelease;
   }
-  let versionReleaseBackend: VersionDetailResponse;
-  try {
-    versionReleaseBackend = await getReleaseBackendIndex(
-      backendLookUpName,
-      version
-    );
-  } catch (err) {
-    logger.debug(
-      { err, backendLookUpName, version },
-      `Failed to retrieve builds for ${backendLookUpName} ${version}`
-    );
+
+  const builds = await terraformDatasource.getBuilds(
+    registryURL,
+    repository,
+    version
+  );
+  if (!builds) {
     return null;
   }
-
-  const builds = versionReleaseBackend.builds;
   const hashes = await calculateHashes(builds);
 
   // if a hash could not be produced skip caching and return null

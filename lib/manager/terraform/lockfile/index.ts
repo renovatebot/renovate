@@ -1,5 +1,6 @@
 import pMap from 'p-map';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
+import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { logger } from '../../../logger';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../../types';
@@ -38,7 +39,11 @@ async function updateAllLocks(
       const update: ProviderLockUpdate = {
         newVersion,
         newConstraint: lock.constraints,
-        newHashes: await createHashes(lock.lookupName, newVersion),
+        newHashes: await createHashes(
+          lock.registryUrl,
+          lock.lookupName,
+          newVersion
+        ),
         ...lock,
       };
       return update;
@@ -82,10 +87,21 @@ export async function updateArtifacts({
     updates.push(...maintenanceUpdates);
   } else {
     // update only specific locks but with constrain updates
-    const lookupName = updatedDeps[0].lookupName;
-    const repository = lookupName.includes('/')
-      ? lookupName
-      : `hashicorp/${lookupName}`;
+    const dep = updatedDeps[0];
+
+    let lookupName = dep.depName;
+    if (dep.lookupName) {
+      lookupName = dep.lookupName;
+    }
+    // handle cases like `Telmate/proxmox`
+    const massagedLookupName = lookupName.toLowerCase();
+
+    const repository = massagedLookupName.includes('/')
+      ? massagedLookupName
+      : `hashicorp/${massagedLookupName}`;
+    const registryUrl = dep.registryUrls
+      ? dep.registryUrls[0]
+      : TerraformProviderDatasource.defaultRegistryUrls[0];
     const newConstraint = isPinnedVersion(config.newValue)
       ? config.newVersion
       : config.newValue;
@@ -93,7 +109,7 @@ export async function updateArtifacts({
     const update: ProviderLockUpdate = {
       newVersion: config.newVersion,
       newConstraint,
-      newHashes: await createHashes(repository, config.newVersion),
+      newHashes: await createHashes(registryUrl, repository, config.newVersion),
       ...updateLock,
     };
     updates.push(update);

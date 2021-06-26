@@ -29,8 +29,16 @@ describe(getName(), () => {
 
   afterAll(() => cacheDir.cleanup());
 
-  it('returns null if a non hashicorp release is found ', async () => {
-    const result = await createHashes('test/gitlab', '2.56.0');
+  it('returns null if getBuilds returns null', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/.well-known/terraform.json')
+      .reply(200, '');
+    const result = await createHashes(
+      'https://example.com',
+      'test/gitlab',
+      '2.56.0'
+    );
     expect(result).toBeNull();
   });
 
@@ -40,7 +48,11 @@ describe(getName(), () => {
       .get('/terraform-provider-azurerm/2.59.0/index.json')
       .reply(403, '');
 
-    const result = await createHashes('hashicorp/azurerm', '2.59.0');
+    const result = await createHashes(
+      'https://releases.hashicorp.com',
+      'hashicorp/azurerm',
+      '2.59.0'
+    );
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -51,7 +63,11 @@ describe(getName(), () => {
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .replyWithError('');
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0');
+    const result = await createHashes(
+      'https://releases.hashicorp.com',
+      'hashicorp/azurerm',
+      '2.56.0'
+    );
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -76,7 +92,11 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0');
+    const result = await createHashes(
+      'https://releases.hashicorp.com',
+      'hashicorp/azurerm',
+      '2.56.0'
+    );
     expect(result).toBeNull();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -101,7 +121,11 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes('hashicorp/azurerm', '2.56.0');
+    const result = await createHashes(
+      'https://releases.hashicorp.com',
+      'hashicorp/azurerm',
+      '2.56.0'
+    );
     expect(log.error.mock.calls).toMatchSnapshot();
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(2);
