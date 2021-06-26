@@ -21,7 +21,7 @@ export async function getUpdatedPackageFiles(
   logger.trace({ config });
   const { reuseExistingBranch } = config;
   logger.debug(
-    `manager.getUpdatedPackageFiles() reuseExistinbranch=${reuseExistingBranch}`
+    `manager.getUpdatedPackageFiles() reuseExistingBranch=${reuseExistingBranch}`
   );
   let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
