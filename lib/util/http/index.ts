@@ -53,12 +53,19 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
 }
 
 function applyDefaultHeaders(options: Options): void {
+  let renovateVersion = 'unknown';
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Error getting renovate version');
+  }
   // eslint-disable-next-line no-param-reassign
   options.headers = {
     ...options.headers,
     'user-agent':
       process.env.RENOVATE_USER_AGENT ||
-      'https://github.com/renovatebot/renovate',
+      `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
 

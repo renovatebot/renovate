@@ -96,6 +96,14 @@ Object {
 }
 `;
 
+exports[`workers/branch/index processBranch processes branch if minimumConfidence is met 1`] = `
+Object {
+  "branchExists": false,
+  "prNo": undefined,
+  "result": "error",
+}
+`;
+
 exports[`workers/branch/index processBranch returns if PR creation failed 1`] = `
 Object {
   "branchExists": true,
@@ -205,6 +213,14 @@ Object {
   "branchExists": true,
   "prNo": undefined,
   "result": "pr-edited",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if minimumConfidence not met 1`] = `
+Object {
+  "branchExists": false,
+  "prNo": undefined,
+  "result": "error",
 }
 `;
 

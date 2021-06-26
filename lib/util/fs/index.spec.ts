@@ -1,8 +1,13 @@
 import { withDir } from 'tmp-promise';
-import { getName } from '../../../test/util';
+import { join } from 'upath';
+import { envMock } from '../../../test/exec-util';
+import { getName, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
+import * as _env from '../exec/env';
 import {
+  ensureCacheDir,
   ensureLocalDir,
+  exists,
   findLocalSiblingOrParent,
   getSubDirectory,
   localPathExists,
@@ -10,6 +15,9 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '.';
+
+jest.mock('../../util/exec/env');
+const env = mocked(_env);
 
 describe(getName(), () => {
   describe('readLocalFile', () => {
@@ -150,6 +158,75 @@ describe(getName(), () => {
       const result = await readLocalDirectory('somedir');
       expect(result).not.toBeNull();
       expect(result).toBeArrayOfSize(0);
+    });
+  });
+
+  describe('ensureCacheDir', () => {
+    function setupMock(root: string): {
+      dirFromEnv: string;
+      dirFromConfig: string;
+    } {
+      const dirFromEnv = join(root, join('/foo'));
+      const dirFromConfig = join(root, join('/bar'));
+
+      jest.resetAllMocks();
+      env.getChildProcessEnv.mockReturnValueOnce({
+        ...envMock.basic,
+        CUSTOM_CACHE_DIR: dirFromEnv,
+      });
+
+      setAdminConfig({
+        cacheDir: join(dirFromConfig),
+      });
+
+      return { dirFromEnv, dirFromConfig };
+    }
+
+    it('prefers environment variables over admin config', async () => {
+      await withDir(
+        async (tmpDir) => {
+          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
+          const res = await ensureCacheDir(
+            './deeply/nested',
+            'CUSTOM_CACHE_DIR'
+          );
+          expect(res).toEqual(dirFromEnv);
+          expect(await exists(dirFromEnv)).toBeTrue();
+          expect(await exists(dirFromConfig)).toBeFalse();
+        },
+        { unsafeCleanup: true }
+      );
+    });
+
+    it('is optional to pass environment variable', async () => {
+      await withDir(
+        async (tmpDir) => {
+          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
+          const expected = join(`${dirFromConfig}/deeply/nested`);
+          const res = await ensureCacheDir('./deeply/nested');
+          expect(res).toEqual(expected);
+          expect(await exists(expected)).toBeTrue();
+          expect(await exists(dirFromEnv)).toBeFalse();
+        },
+        { unsafeCleanup: true }
+      );
+    });
+
+    it('falls back to admin config', async () => {
+      await withDir(
+        async (tmpDir) => {
+          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
+          const expected = join(`${dirFromConfig}/deeply/nested`);
+          const res = await ensureCacheDir(
+            './deeply/nested',
+            'NO_SUCH_VARIABLE'
+          );
+          expect(res).toEqual(expected);
+          expect(await exists(expected)).toBeTrue();
+          expect(await exists(dirFromEnv)).toBeFalse();
+        },
+        { unsafeCleanup: true }
+      );
     });
   });
 });
