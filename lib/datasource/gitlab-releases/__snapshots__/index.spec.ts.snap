@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/gitlab-releases/index getReleases returns releases from custom registry 1`] = `
+Object {
+  "registryUrl": "https://gitlab.company.com/api/v4/",
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": "2021-01-01T00:00:00.000Z",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "releaseTimestamp": "2021-03-01T00:00:00.000Z",
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.company.com/api/v4/some/dep2",
+}
+`;
+
+exports[`datasource/gitlab-releases/index getReleases returns releases from custom registry 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitlab.company.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.company.com/api/v4/projects/some%2Fdep2/releases?per_page=100",
+  },
+]
+`;
+
+exports[`datasource/gitlab-releases/index getReleases returns releases from default registry 1`] = `
+Object {
+  "registryUrl": "https://gitlab.com",
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": "2021-01-01T00:00:00.000Z",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "releaseTimestamp": "2021-03-01T00:00:00.000Z",
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/some/dep2",
+}
+`;
+
+exports[`datasource/gitlab-releases/index getReleases returns releases from default registry 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Fdep2/releases?per_page=100",
+  },
+]
+`;
