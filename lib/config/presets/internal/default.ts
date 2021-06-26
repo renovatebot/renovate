@@ -552,7 +552,8 @@ export const presets: Record<string, Preset> = {
     ],
   },
   githubComToken: {
-    description: 'Use provided token for github.com lookups',
+    description:
+      'Use provided token for github.com lookups. Do not configure this if you are already running on github.com',
     hostRules: [
       {
         matchHost: 'github.com',
