@@ -249,7 +249,6 @@
     "graphql": "15.5.0",
     "husky": "6.0.0",
     "jest": "27.0.4",
-    "jest-circus": "27.0.4",
     "jest-extended": "0.11.5",
     "jest-junit": "12.2.0",
     "jest-mock-extended": "1.0.16",
