@@ -714,4 +714,22 @@ describe('applyPackageRules()', () => {
       applyPackageRules({ ...config1, packageRules: null })
     ).toMatchSnapshot();
   });
+  it('creates groupSlug if necessary', () => {
+    const config: TestConfig = {
+      depName: 'foo',
+      packageRules: [
+        {
+          matchPackagePatterns: ['*'],
+          groupName: 'A',
+          groupSlug: 'a',
+        },
+        {
+          matchPackagePatterns: ['*'],
+          groupName: 'B',
+        },
+      ],
+    };
+    const res = applyPackageRules(config);
+    expect(res.groupSlug).toEqual('b');
+  });
 });
