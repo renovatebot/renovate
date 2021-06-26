@@ -6,7 +6,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "proxy.golang.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://proxy.golang.org/github.com/go-kit/kit/@v/list",
@@ -21,7 +21,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "proxy.golang.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://proxy.golang.org/github.com/go-kit/kit/@v/v0.5.0.info",
