@@ -12,6 +12,7 @@ export interface PackageFilesResult {
   reuseExistingBranch?: boolean;
   updatedPackageFiles: File[];
   updatedArtifacts: File[];
+  dependencyMismatch?: boolean;
 }
 
 export async function getUpdatedPackageFiles(
@@ -122,10 +123,13 @@ export async function getUpdatedPackageFiles(
           }
           continue; // eslint-disable-line no-continue
         } else if (reuseExistingBranch) {
-          return getUpdatedPackageFiles({
-            ...config,
-            reuseExistingBranch: false,
-          });
+          return {
+            ...(await getUpdatedPackageFiles({
+              ...config,
+              reuseExistingBranch: false,
+            })),
+            dependencyMismatch: true,
+          };
         }
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);

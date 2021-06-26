@@ -348,6 +348,7 @@ export async function processBranch(
     }
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
     const res = await getUpdatedPackageFiles(config);
+    const newVersionFound = res.dependencyMismatch;
     // istanbul ignore if
     if (res.artifactErrors && config.artifactErrors) {
       res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
@@ -438,6 +439,22 @@ export async function processBranch(
         result: BranchResult.NoWork,
       };
     }
+
+    if (
+      !forcedManually &&
+      !newVersionFound &&
+      config.rebaseWhen === 'newer-version'
+    ) {
+      logger.debug(
+        `Skipping commit as the dependency hasn't been updated (rebaseWhen=newer-version`
+      );
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: BranchResult.NoWork,
+      };
+    }
+
     config.forceCommit = forcedManually || branchPr?.isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
