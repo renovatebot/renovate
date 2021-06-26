@@ -62,6 +62,7 @@ describe(getName(), () => {
       const result = parseGoproxy('foo');
       expect(result).toMatchObject([{ url: 'foo' }]);
     });
+
     it('parses multiple urls', () => {
       const result = parseGoproxy('foo,bar|baz,qux');
       expect(result).toMatchObject([
@@ -71,6 +72,7 @@ describe(getName(), () => {
         { url: 'qux' },
       ]);
     });
+
     it('ignores everything starting from "direct" and "off" keywords', () => {
       expect(parseGoproxy(undefined)).toBeEmpty();
       expect(parseGoproxy(null)).toBeEmpty();

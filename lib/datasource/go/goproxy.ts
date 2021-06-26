@@ -4,8 +4,8 @@ import pAll from 'p-all';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { http } from './common';
-import { GoproxyFallback, GoproxyItem, VersionInfo } from './types';
+import { GoproxyFallback, http } from './common';
+import type { GoproxyItem, VersionInfo } from './types';
 
 /**
  * Parse `GOPROXY` to the sequence of url + fallback strategy tags.
