@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/presets/internal/index :labelUpdateTypes 1`] = `
+Object {
+  "description": Array [
+    "Apply label per update type, prefixed by <code>pre-</code> and suffixed by <code>-post</code> to PRs",
+    "Apply label per update type, prefixed by <code>justpre!</code> and suffixed by <code></code> to PRs",
+    "Apply label per update type, prefixed by <code></code> and suffixed by <code>*onlypost</code> to PRs",
+  ],
+  "packageRules": Array [
+    Object {
+      "labels": Array [
+        "pre-major-post",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "pre-minor-post",
+      ],
+      "matchUpdateTypes": Array [
+        "minor",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "pre-patch-post",
+      ],
+      "matchUpdateTypes": Array [
+        "patch",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "pre-pin-post",
+      ],
+      "matchUpdateTypes": Array [
+        "pin",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "pre-digest-post",
+      ],
+      "matchUpdateTypes": Array [
+        "digest",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "pre-lockFileMaintenance-post",
+      ],
+      "matchUpdateTypes": Array [
+        "lockFileMaintenance",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "pre-rollback-post",
+      ],
+      "matchUpdateTypes": Array [
+        "rollback",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "pre-bump-post",
+      ],
+      "matchUpdateTypes": Array [
+        "bump",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "justpre!major",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "justpre!minor",
+      ],
+      "matchUpdateTypes": Array [
+        "minor",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "justpre!patch",
+      ],
+      "matchUpdateTypes": Array [
+        "patch",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "justpre!pin",
+      ],
+      "matchUpdateTypes": Array [
+        "pin",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "justpre!digest",
+      ],
+      "matchUpdateTypes": Array [
+        "digest",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "justpre!lockFileMaintenance",
+      ],
+      "matchUpdateTypes": Array [
+        "lockFileMaintenance",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "justpre!rollback",
+      ],
+      "matchUpdateTypes": Array [
+        "rollback",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "justpre!bump",
+      ],
+      "matchUpdateTypes": Array [
+        "bump",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "major*onlypost",
+      ],
+      "matchUpdateTypes": Array [
+        "major",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "minor*onlypost",
+      ],
+      "matchUpdateTypes": Array [
+        "minor",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "patch*onlypost",
+      ],
+      "matchUpdateTypes": Array [
+        "patch",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "pin*onlypost",
+      ],
+      "matchUpdateTypes": Array [
+        "pin",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "digest*onlypost",
+      ],
+      "matchUpdateTypes": Array [
+        "digest",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "lockFileMaintenance*onlypost",
+      ],
+      "matchUpdateTypes": Array [
+        "lockFileMaintenance",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "rollback*onlypost",
+      ],
+      "matchUpdateTypes": Array [
+        "rollback",
+      ],
+    },
+    Object {
+      "labels": Array [
+        "bump*onlypost",
+      ],
+      "matchUpdateTypes": Array [
+        "bump",
+      ],
+    },
+  ],
+}
+`;
