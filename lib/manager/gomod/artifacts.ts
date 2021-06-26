@@ -136,6 +136,10 @@ export async function updateArtifacts({
         volumes: [goPath],
         preCommands: getPreCommands(),
       },
+      cacheDir: {
+        execWithEnv: 'GOPATH',
+        subPath: './others/go',
+      },
     };
 
     const execCommands = [];

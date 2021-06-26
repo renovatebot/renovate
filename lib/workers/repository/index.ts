@@ -2,7 +2,11 @@ import fs from 'fs-extra';
 import { getAdminConfig, setAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
-import { removeDanglingContainers } from '../../util/exec/docker';
+import {
+  createCacheVolume,
+  deleteCacheVolume,
+  removeDanglingContainers,
+} from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
@@ -31,6 +35,7 @@ export async function renovateRepository(
 ): Promise<ProcessResult> {
   splitInit();
   let config = setAdminConfig(repoConfig);
+  await createCacheVolume();
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
@@ -80,6 +85,7 @@ export async function renovateRepository(
   } catch (err) /* istanbul ignore if */ {
     logger.warn({ err }, 'privateCacheDir deletion error');
   }
+  await deleteCacheVolume();
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   printRequestStats();

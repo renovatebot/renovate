@@ -12,6 +12,7 @@ import {
   VolumesPair,
   rawExec,
 } from '../common';
+import { volumeCreate, volumePrune } from './volume';
 
 const prefetchedImages = new Set<string>();
 
@@ -257,4 +258,21 @@ export async function generateDockerCommand(
   result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');
+}
+
+export async function deleteCacheVolume(): Promise<void> {
+  const { dockerChildPrefix } = getAdminConfig();
+  const volumeNamespace = getContainerName('manager_cache', dockerChildPrefix);
+  const meta = { 'renovate-namespace': volumeNamespace };
+  logger.debug(`Deleting cache volume: ${volumeNamespace}`);
+  await volumePrune(meta);
+}
+
+export async function createCacheVolume(): Promise<void> {
+  const { dockerChildPrefix } = getAdminConfig();
+  const volumeNamespace = getContainerName('manager_cache', dockerChildPrefix);
+  const meta = { 'renovate-namespace': volumeNamespace };
+  logger.debug(`Creating cache volume: ${volumeNamespace}`);
+  await volumePrune(meta);
+  await volumeCreate(volumeNamespace, meta);
 }

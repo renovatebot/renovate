@@ -1,4 +1,5 @@
 import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import { join as unixJoin } from 'path';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
@@ -8,6 +9,7 @@ import {
   ExecResult,
   Opt,
   RawExecOptions,
+  VolumesPair,
   rawExec,
 } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
@@ -15,10 +17,16 @@ import { getChildProcessEnv } from './env';
 
 type ExtraEnv<T = unknown> = Record<string, T>;
 
+interface CacheDirOption {
+  subPath: string;
+  execWithEnv: string;
+}
+
 export interface ExecOptions extends ChildProcessExecOptions {
   cwdFile?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
+  cacheDir?: Opt<CacheDirOption>;
 }
 
 function createChildEnv(
@@ -69,7 +77,7 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, docker, cwdFile } = opts;
+  const { env, docker, cwdFile, cacheDir } = opts;
   const { binarySource, dockerChildPrefix, customEnvVariables, localDir } =
     getAdminConfig();
   const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
@@ -101,11 +109,24 @@ export async function exec(
   const useDocker = binarySource === 'docker' && docker;
   if (useDocker) {
     logger.debug('Using docker to execute');
-    const dockerOptions = {
-      ...docker,
-      cwd,
-      envVars: dockerEnvVars(extraEnv, childEnv),
-    };
+    const envVars = dockerEnvVars(extraEnv, childEnv);
+    const dockerOptions = { ...docker, cwd, envVars };
+
+    if (cacheDir) {
+      const cacheVolumePrefix = dockerChildPrefix || 'renovate_';
+      const cacheVolume = `${cacheVolumePrefix}manager_cache`;
+      const cacheVolumeRoot = `/home/ubuntu`;
+      const cacheVolumeSubdir = unixJoin(cacheVolumeRoot, cacheDir.subPath);
+
+      const mountPair: VolumesPair = [cacheVolume, cacheVolumeRoot];
+      dockerOptions.envVars[cacheDir.execWithEnv] = cacheVolumeSubdir;
+      rawExecOptions.env[cacheDir.execWithEnv] = cacheVolumeSubdir;
+      dockerOptions.volumes = [...dockerOptions.volumes, mountPair];
+      dockerOptions.preCommands = [
+        `mkdir -p ${cacheVolumeSubdir}`,
+        ...dockerOptions.preCommands,
+      ];
+    }
 
     const dockerCommand = await generateDockerCommand(commands, dockerOptions);
     commands = [dockerCommand];
