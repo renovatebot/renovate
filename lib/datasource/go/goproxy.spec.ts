@@ -25,14 +25,6 @@ describe(getName(), () => {
   });
 
   describe('requests', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
-    });
-
     const baseUrl = 'https://proxy.golang.org';
     const lookupName = 'github.com/go-kit/kit';
 
