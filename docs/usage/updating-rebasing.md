@@ -50,10 +50,10 @@ This way:
 - Each Renovate branch will always have 1 and only 1 commit
 - The newest version will be based off the latest base branch commit at the time
 
-When using the default configuration (`"rebaseWhen": "auto"`), this will happen automatically.
-However, if you only want Renovate to rebase when a newer version of the dependency "foo" is available, you can configure `"rebaseWhen": "newer-version"`.
+When you use the default configuration (`"rebaseWhen": "auto"`), this happens automatically.
+However, if you want Renovate to rebase only when a newer version of the dependency "foo" is available, you can configure `"rebaseWhen": "newer-version"`.
 
-This behaviour is fully disabled by configuring `"rebaseWhen": "never"` (not recommended).
+If you don't want Renovate to rebase branches, you can configure `"rebaseWhen": "never"` (not recommended).
 
 ## Manual rebasing
 

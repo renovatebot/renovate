@@ -1792,7 +1792,7 @@ Possible values and meanings:
 - It could result in a broken base branch if two updates are merged one after another without testing the new versions together
 - If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
-It is also recommended avoiding `rebaseWhen=never` as it can result in conflicted branches with outdated PR descriptions and/or status checks.
+We recommend you avoid setting `rebaseWhen` to `never` as you can end up with conflicted branches with outdated PR descriptions and/or status checks.
 
 ## recreateClosed
 
