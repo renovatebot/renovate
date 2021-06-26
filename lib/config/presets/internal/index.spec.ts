@@ -45,4 +45,16 @@ describe(getName(), () => {
       }
     }
   }
+
+  it(':labelUpdateTypes', async () => {
+    const config = {
+      extends: [
+        ':labelUpdateTypes(pre-, -post)',
+        ':labelUpdateTypes(justpre!,)',
+        ':labelUpdateTypes(,*onlypost)',
+      ],
+    };
+    const res = await resolveConfigPresets(massageConfig(config));
+    expect(res).toMatchSnapshot();
+  });
 });

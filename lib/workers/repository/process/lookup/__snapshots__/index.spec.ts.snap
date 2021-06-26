@@ -377,6 +377,14 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() reproduce discussion 10316 1`] = `
+Object {
+  "skipReason": "invalid-value",
+  "updates": Array [],
+  "warnings": Array [],
+}
+`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns additional update if grouping but separateMinorPatch=true 1`] = `
 Array [
   Object {
