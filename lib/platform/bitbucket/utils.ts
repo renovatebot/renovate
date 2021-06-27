@@ -1,5 +1,5 @@
 import url from 'url';
-import { MergeStrategy } from '../../config/types';
+import type { MergeStrategy } from '../../config/types';
 import { BranchStatus, PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';

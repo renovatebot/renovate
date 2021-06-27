@@ -1,7 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
-import { MergeStrategy } from '../../config/types';
+import type { MergeStrategy } from '../../config/types';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';

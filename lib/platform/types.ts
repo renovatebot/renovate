@@ -1,4 +1,4 @@
-import { MergeStrategy } from '../config/types';
+import type { MergeStrategy } from '../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../types';
 
 type VulnerabilityKey = string;

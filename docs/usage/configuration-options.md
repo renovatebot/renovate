@@ -175,23 +175,22 @@ Example use:
 
 ## automergeStrategy
 
-This setting is only applicable if you opt in to configure `automerge` to `true` and `automergeType` to `pr` for any of
-your dependencies
+This setting is only applicable if you opt-in by configuring `automerge` to `true` and `automergeType` to `pr` for any of your dependencies.
 
-The automerge strategy defaults to `auto`, in which Renovate will make its best guess as to how to pull requests. This
-generally results in Renovate respecting a strategy configured in the platform itself for the repository where possible.
+The automerge strategy defaults to `auto`, in which Renovate will make its best guess as to how to merge pull requests.
+This generally results in Renovate respecting the strategy configured in the platform itself for the repository if possible.
 Acceptable values are:
 
-- `auto`, in which the choice is left to Renovate.
-- `fast-forward`, which generally involves no new commits in the resultant tree, but "fast-forwarding" the main branch reference.
-- `merge-commit`, which generally involves synthesizing a new merge commit.
-- `rebase`, which generally involves rewriting history as part of the merge — but usually retaining the individual commits.
-- `squash`, which generally involves flattening the commits that are being merged into a new commit.
+- `auto`, in which the choice is left to Renovate
+- `fast-forward`, which generally involves no new commits in the resultant tree, but "fast-forwarding" the main branch reference
+- `merge-commit`, which generally involves synthesizing a new merge commit
+- `rebase`, which generally involves rewriting history as part of the merge — but usually retaining the individual commits
+- `squash`, which generally involves flattening the commits that are being merged into a single new commit
 
-Not all platforms support all pull request merge strategies. In the cases where a merge strategy is explicitly
-unsupported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
+Not all platforms support all pull request merge strategies.
+In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
 
-The only supported platform for this option at the moment is Bitbucket Cloud.
+The only platform that supports `automergeStrategy` is Bitbucket Cloud.
 
 ## automergeType
 
