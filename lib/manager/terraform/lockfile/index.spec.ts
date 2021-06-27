@@ -101,7 +101,7 @@ describe(getName(), () => {
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
-  it('update single dependency with range constraint and minor update', async () => {
+  it('update single dependency with range constraint and minor update from private registry', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
 
     mockHash.mockResolvedValueOnce([
@@ -120,7 +120,13 @@ describe(getName(), () => {
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
-      updatedDeps: [{ depName: 'azurerm', lookupName: 'azurerm' }],
+      updatedDeps: [
+        {
+          depName: 'azurerm',
+          lookupName: 'azurerm',
+          registryUrls: ['https://registry.example.com'],
+        },
+      ],
       newPackageFileContent: '',
       config: localConfig,
     });

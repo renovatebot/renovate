@@ -175,6 +175,16 @@ describe(getName(), () => {
       expect(result).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('returns null for non hashicorp dependency and releases.hashicorp.com registryUrl', async () => {
+      const result = await terraformProviderDatasource.getBuilds(
+        terraformProviderDatasource.defaultRegistryUrls[1],
+        'test/azurerm',
+        '2.50.0'
+      );
+      expect(result).toBeNull();
+    });
+
     it('returns null if a version is requested which is not available', async () => {
       httpMock
         .scope(primaryUrl)
@@ -190,6 +200,7 @@ describe(getName(), () => {
       expect(result).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(primaryUrl)
@@ -234,6 +245,7 @@ describe(getName(), () => {
       expect(res).not.toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('return null if the retrieval of a single build fails', async () => {
       httpMock
         .scope(primaryUrl)

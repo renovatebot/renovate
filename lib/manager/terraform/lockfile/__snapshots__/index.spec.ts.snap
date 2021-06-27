@@ -209,7 +209,7 @@ Array [
 ]
 `;
 
-exports[`manager/terraform/lockfile/index update single dependency with range constraint and minor update 1`] = `
+exports[`manager/terraform/lockfile/index update single dependency with range constraint and minor update from private registry 1`] = `
 Object {
   "contents": "# This file is maintained automatically by \\"terraform init\\".
 # Manual edits may be lost in future updates.
@@ -265,10 +265,10 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
 }
 `;
 
-exports[`manager/terraform/lockfile/index update single dependency with range constraint and minor update 2`] = `
+exports[`manager/terraform/lockfile/index update single dependency with range constraint and minor update from private registry 2`] = `
 Array [
   Array [
-    "https://registry.terraform.io",
+    "https://registry.example.com",
     "hashicorp/azurerm",
     "2.56.0",
   ],
