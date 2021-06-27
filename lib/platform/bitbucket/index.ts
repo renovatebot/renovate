@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
+import { MergeStrategy } from '../../config/types';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -29,7 +30,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody } from './utils';
+import { PrResponse, RepoInfoBody, mergeBodyTransformer } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -395,7 +396,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || /* istanbul ignore next */ 'http://bitbucket.org';
+  const url = targetUrl || /* istanbul ignore next */ 'https://bitbucket.org';
 
   const body = {
     name: context,
@@ -752,19 +753,22 @@ export async function updatePr({
 
 export async function mergePr(
   prNo: number,
-  branchName: string
+  branchName: string,
+  mergeStrategy: MergeStrategy
 ): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName})`);
+  logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
+
+  // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610
+  if (mergeStrategy === 'rebase') {
+    logger.warn('Bitbucket Cloud does not support a "rebase" strategy.');
+    return false;
+  }
 
   try {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/merge`,
       {
-        body: {
-          close_source_branch: true,
-          merge_strategy: 'merge_commit',
-          message: 'auto merged',
-        },
+        body: mergeBodyTransformer(mergeStrategy),
       }
     );
     logger.debug('Automerging succeeded');

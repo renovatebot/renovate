@@ -1,4 +1,5 @@
 import url from 'url';
+import { MergeStrategy } from '../../config/types';
 import { BranchStatus, PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
@@ -54,6 +55,36 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
     mergeMethod: 'merge',
     has_issues: repoInfoBody.has_issues,
   };
+}
+
+export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
+const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
+  new Map([
+    ['squash', 'squash'],
+    ['merge-commit', 'merge_commit'],
+    ['fast-forward', 'fast_forward'],
+  ]);
+
+export interface MergeRequestBody {
+  close_source_branch?: boolean;
+  message: string;
+  merge_strategy?: BitbucketMergeStrategy;
+}
+
+export function mergeBodyTransformer(
+  mergeStrategy: MergeStrategy
+): MergeRequestBody {
+  const body: MergeRequestBody = {
+    close_source_branch: true,
+    message: 'auto merged',
+  };
+
+  // The `auto` strategy will use the strategy configured inside Bitbucket.
+  if (mergeStrategy !== 'auto') {
+    body.merge_strategy = bitbucketMergeStrategies.get(mergeStrategy);
+  }
+
+  return body;
 }
 
 export const prStates = {

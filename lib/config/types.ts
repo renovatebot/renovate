@@ -21,6 +21,7 @@ export interface GroupConfig extends Record<string, unknown> {
 export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
+  automergeStrategy?: MergeStrategy;
   branchPrefix?: string;
   branchName?: string;
   manager?: string;
@@ -227,6 +228,13 @@ export type UpdateType =
   | 'bump';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
+
+export type MergeStrategy =
+  | 'auto'
+  | 'fast-forward'
+  | 'merge-commit'
+  | 'rebase'
+  | 'squash';
 
 // TODO: Proper typings
 export interface PackageRule
