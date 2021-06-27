@@ -714,6 +714,7 @@ describe('applyPackageRules()', () => {
       applyPackageRules({ ...config1, packageRules: null })
     ).toMatchSnapshot();
   });
+
   it('creates groupSlug if necessary', () => {
     const config: TestConfig = {
       depName: 'foo',
