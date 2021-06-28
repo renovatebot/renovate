@@ -10,6 +10,11 @@ export const presets: Record<string, Preset> = {
       'angular-sanitize',
     ],
   },
+  react: {
+    description: 'All react packages',
+    matchPackageNames: ['@types/react'],
+    matchPackagePrefixes: ['react'],
+  },
   apollographql: {
     description: 'All packages published by Apollo GraphQL',
     matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
