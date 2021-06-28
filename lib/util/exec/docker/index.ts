@@ -261,18 +261,30 @@ export async function generateDockerCommand(
 }
 
 export async function deleteCacheVolume(): Promise<void> {
-  const { dockerChildPrefix } = getAdminConfig();
-  const volumeNamespace = getContainerName('manager_cache', dockerChildPrefix);
-  const meta = { 'renovate-namespace': volumeNamespace };
-  logger.debug(`Deleting cache volume: ${volumeNamespace}`);
-  await volumePrune(meta);
+  const { binarySource, dockerChildPrefix, dockerCacheVolume } =
+    getAdminConfig();
+  if (binarySource === 'docker' && dockerCacheVolume) {
+    const volumeNamespace = getContainerName(
+      'manager_cache',
+      dockerChildPrefix
+    );
+    const meta = { 'renovate-namespace': volumeNamespace };
+    logger.debug(`Deleting cache volume: ${volumeNamespace}`);
+    await volumePrune(meta);
+  }
 }
 
 export async function createCacheVolume(): Promise<void> {
-  const { dockerChildPrefix } = getAdminConfig();
-  const volumeNamespace = getContainerName('manager_cache', dockerChildPrefix);
-  const meta = { 'renovate-namespace': volumeNamespace };
-  logger.debug(`Creating cache volume: ${volumeNamespace}`);
-  await volumePrune(meta);
-  await volumeCreate(volumeNamespace, meta);
+  const { binarySource, dockerChildPrefix, dockerCacheVolume } =
+    getAdminConfig();
+  if (binarySource === 'docker' && dockerCacheVolume) {
+    const volumeNamespace = getContainerName(
+      'manager_cache',
+      dockerChildPrefix
+    );
+    const meta = { 'renovate-namespace': volumeNamespace };
+    logger.debug(`Creating cache volume: ${volumeNamespace}`);
+    await volumePrune(meta);
+    await volumeCreate(volumeNamespace, meta);
+  }
 }

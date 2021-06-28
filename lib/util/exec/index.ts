@@ -4,6 +4,7 @@ import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { ensureCacheDir } from '../fs';
 import {
   DockerOptions,
   ExecResult,
@@ -78,8 +79,14 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { env, docker, cwdFile, cacheDir } = opts;
-  const { binarySource, dockerChildPrefix, customEnvVariables, localDir } =
-    getAdminConfig();
+  const {
+    binarySource,
+    dockerChildPrefix,
+    dockerCacheVolume,
+    customEnvVariables,
+    localDir,
+  } = getAdminConfig();
+
   const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
   // istanbul ignore if
@@ -110,22 +117,34 @@ export async function exec(
   if (useDocker) {
     logger.debug('Using docker to execute');
     const envVars = dockerEnvVars(extraEnv, childEnv);
-    const dockerOptions = { ...docker, cwd, envVars };
+    const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
     if (cacheDir) {
-      const cacheVolumePrefix = dockerChildPrefix || 'renovate_';
-      const cacheVolume = `${cacheVolumePrefix}manager_cache`;
-      const cacheVolumeRoot = `/home/ubuntu`;
-      const cacheVolumeSubdir = unixJoin(cacheVolumeRoot, cacheDir.subPath);
+      if (dockerCacheVolume) {
+        const cacheVolumePrefix = dockerChildPrefix || 'renovate_';
+        const cacheVolume = `${cacheVolumePrefix}manager_cache`;
+        const cacheVolumeRoot = `/home/ubuntu`;
+        const cacheVolumeSubdir = unixJoin(cacheVolumeRoot, cacheDir.subPath);
 
-      const mountPair: VolumesPair = [cacheVolume, cacheVolumeRoot];
-      dockerOptions.envVars[cacheDir.execWithEnv] = cacheVolumeSubdir;
-      rawExecOptions.env[cacheDir.execWithEnv] = cacheVolumeSubdir;
-      dockerOptions.volumes = [...dockerOptions.volumes, mountPair];
-      dockerOptions.preCommands = [
-        `mkdir -p ${cacheVolumeSubdir}`,
-        ...dockerOptions.preCommands,
-      ];
+        const mountPair: VolumesPair = [cacheVolume, cacheVolumeRoot];
+        dockerOptions.envVars.push(cacheDir.execWithEnv);
+        rawExecOptions.env[cacheDir.execWithEnv] = cacheVolumeSubdir;
+        dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
+        dockerOptions.preCommands = [
+          `mkdir -p ${cacheVolumeSubdir}`,
+          ...dockerOptions.preCommands,
+        ];
+      } else {
+        const cacheLocalPath = await ensureCacheDir(
+          cacheDir.subPath,
+          cacheDir.execWithEnv
+        );
+        dockerOptions.envVars.push(cacheDir.execWithEnv);
+        dockerOptions.volumes = [
+          ...(dockerOptions.volumes || []),
+          cacheLocalPath,
+        ];
+      }
     }
 
     const dockerCommand = await generateDockerCommand(commands, dockerOptions);

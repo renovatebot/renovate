@@ -10,6 +10,7 @@ const repoAdminOptions = [
   'allowedPostUpgradeCommands',
   'binarySource',
   'customEnvVariables',
+  'dockerCacheVolume',
   'dockerChildPrefix',
   'dockerImagePrefix',
   'dockerUser',
