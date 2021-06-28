@@ -1,0 +1,22 @@
+    "packageFile": ".gitmodules",
+[2021-06-28T03:37:31.349Z]              "deps": [
+[2021-06-28T03:37:31.349Z]                {
+[2021-06-28T03:37:31.349Z]                  "depName": "lib/external/rapidjson",
+[2021-06-28T03:37:31.349Z]                  "lookupName": "https://github.com/Tencent/rapidjson.git",
+[2021-06-28T03:37:31.349Z]                  "currentValue": "master",
+[2021-06-28T03:37:31.349Z]                  "currentDigest": "ce81bc9edfe773667a7a4454ba81dac72ed4364c",
+[2021-06-28T03:37:31.349Z]                  "depIndex": 0,
+[2021-06-28T03:37:31.349Z]                  "updates": [
+[2021-06-28T03:37:31.349Z]                    {
+[2021-06-28T03:37:31.349Z]                      "updateType": "digest",
+[2021-06-28T03:37:31.349Z]                      "newValue": "master",
+[2021-06-28T03:37:31.349Z]                      "newDigest": "b557259f8813bed2d79e83bd2f92eb673579a82c",
+[2021-06-28T03:37:31.349Z]                      "branchName": "renovate/lib-external-rapidjson-digest"
+[2021-06-28T03:37:31.349Z]                    }
+[2021-06-28T03:37:31.349Z]                  ],
+[2021-06-28T03:37:31.349Z]                  "warnings": [],
+[2021-06-28T03:37:31.349Z]                  "versioning": "git",
+[2021-06-28T03:37:31.349Z]                  "sourceUrl": "https://github.com/Tencent/rapidjson",
+[2021-06-28T03:37:31.349Z]                  "currentVersion": "master",
+[2021-06-28T03:37:31.349Z]                  "fixedVersion": "master"
+[2021-06-28T03:37:31.349Z]                },
