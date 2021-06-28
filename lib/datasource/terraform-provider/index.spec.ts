@@ -16,10 +16,6 @@ const secondaryUrl = terraformProviderDatasource.defaultRegistryUrls[1];
 
 describe(getName(), () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('returns null for empty result', async () => {
       httpMock
         .scope(primaryUrl)

@@ -50,5 +50,3 @@ export interface TerraformRegistryBuildResponse {
   filename: string;
   download_url: string;
 }
-
-export const repositoryRegex = /^hashicorp\/(?<lookupName>\S+)$/;

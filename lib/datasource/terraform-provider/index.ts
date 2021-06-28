@@ -13,7 +13,6 @@ import type {
   TerraformRegistryVersions,
   VersionDetailResponse,
 } from './types';
-import { repositoryRegex } from './types';
 
 export class TerraformProviderDatasource extends TerraformDatasource {
   static readonly id = 'terraform-provider';
@@ -22,6 +21,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     'https://registry.terraform.io',
     'https://releases.hashicorp.com',
   ];
+
+  static repositoryRegex = /^hashicorp\/(?<lookupName>\S+)$/;
 
   constructor() {
     super(TerraformProviderDatasource.id);
@@ -123,6 +124,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return dep;
   }
 
+  @cache({
+    namespace: `datasource-${TerraformProviderDatasource.id}-builds`,
+    key: (registryURL: string, repository: string, version: string) =>
+      `${registryURL}/${repository}/${version}`,
+  })
   async getBuilds(
     registryURL: string,
     repository: string,
@@ -130,7 +136,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<TerraformBuild[]> {
     if (registryURL === TerraformProviderDatasource.defaultRegistryUrls[1]) {
       // check if registryURL === secondary backend
-      const repositoryRegexResult = repositoryRegex.exec(repository);
+      const repositoryRegexResult =
+        TerraformProviderDatasource.repositoryRegex.exec(repository);
       if (!repositoryRegexResult) {
         // non hashicorp builds are not supported with releases.hashicorp.com
         return null;
@@ -183,8 +190,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const result = await pMap(
       builds.platforms,
       async (platform) => {
+        const buildURL = `${backendURL}/${version}/download/${platform.os}/${platform.arch}`;
         try {
-          const buildURL = `${backendURL}/${version}/download/${platform.os}/${platform.arch}`;
           const res = (
             await this.http.getJson<TerraformRegistryBuildResponse>(buildURL)
           ).body;
@@ -196,7 +203,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           };
           return newBuild;
         } catch (e) {
-          logger.trace(e);
+          logger.debug({ error: e, url: buildURL }, 'Failed to retrieve build');
           return null;
         }
       },
@@ -211,6 +218,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return result;
   }
 
+  @cache({
+    namespace: `datasource-${TerraformProviderDatasource.id}-releaseBackendIndex`,
+    key: (backendLookUpName: string, version: string) =>
+      `${backendLookUpName}/${version}`,
+  })
   async getReleaseBackendIndex(
     backendLookUpName: string,
     version: string

@@ -89,10 +89,8 @@ export async function updateArtifacts({
     // update only specific locks but with constrain updates
     const dep = updatedDeps[0];
 
-    let lookupName = dep.depName;
-    if (dep.lookupName) {
-      lookupName = dep.lookupName;
-    }
+    const lookupName = dep.lookupName ?? dep.depName;
+
     // handle cases like `Telmate/proxmox`
     const massagedLookupName = lookupName.toLowerCase();
 
