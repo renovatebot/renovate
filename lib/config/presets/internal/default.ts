@@ -1,5 +1,5 @@
 import { getOptions } from '../../definitions';
-import type { PackageRule } from '../../types';
+import type { UpdateType } from '../../types';
 import type { Preset } from '../types';
 
 const options = getOptions();
@@ -465,13 +465,11 @@ export const presets: Record<string, Preset> = {
       'Apply label per update type, prefixed by <code>{{arg0}}</code> and suffixed by <code>{{arg1}}</code> to PRs',
     packageRules: options
       .find((it) => it.name === 'matchUpdateTypes')
-      .allowedValues.map(
-        (t) =>
-          ({
-            matchUpdateTypes: [t],
-            labels: ['{{arg0}}' + t + '{{arg1}}'],
-          } as PackageRule)
-      ),
+      .allowedValues.map((t) => t as UpdateType)
+      .map((t) => ({
+        matchUpdateTypes: [t],
+        labels: ['{{arg0}}' + t + '{{arg1}}'],
+      })),
   },
   assignee: {
     description: 'Assign PRs to <code>{{arg0}}</code>',
