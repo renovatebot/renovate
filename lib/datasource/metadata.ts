@@ -12,6 +12,8 @@ const manualChangelogUrls = {
   npm: {
     'babel-preset-react-app':
       'https://github.com/facebook/create-react-app/releases',
+    'eslint-plugin-react-etc':
+      'https://github.com/cartant/eslint-plugin-react-etc/blob/main/CHANGELOG.md',
     firebase: 'https://firebase.google.com/support/release-notes/js',
     'flow-bin': 'https://github.com/facebook/flow/blob/master/Changelog.md',
     gatsby:
