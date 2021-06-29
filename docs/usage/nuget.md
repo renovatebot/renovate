@@ -1,9 +1,9 @@
 ---
-title: Nuget (.NET)
-description: Nuget (.NET) dependencies support in Renovate
+title: NuGet (.NET)
+description: NuGet (.NET) dependencies support in Renovate
 ---
 
-# Nuget
+# NuGet
 
 Renovate supports upgrading dependencies in `.csproj`, `.fsproj`, and `.vbproj` files.
 
