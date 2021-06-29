@@ -37,6 +37,6 @@ Feedback for this manager would be welcome as we would like to switch it to be t
   - In `gradle.properties`: `springBoot=2.5.1`
   - In `build.gradle`: `"org.springframework.boot:spring-boot-starter-web:$springBoot"`
 
-Variables defined in other custom locations are not currently supported.
+Variables defined in other custom locations are not supported.
 
 See the [Gradle documentation](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties) for details on defining variables.
