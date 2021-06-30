@@ -1,12 +1,8 @@
-import type { PackageDependency } from '../types';
+import type { PackageDependency } from '../../types';
+import type { GradleManagerData } from '../types';
 import type { TokenType } from './common';
 
-export interface ManagerData {
-  fileReplacePosition: number;
-  packageFile?: string;
-}
-
-export interface VariableData extends ManagerData {
+export interface VariableData extends GradleManagerData {
   key: string;
   value: string;
 }
@@ -44,7 +40,7 @@ export interface SyntaxHandlerInput {
 }
 
 export type SyntaxHandlerOutput = {
-  deps?: PackageDependency<ManagerData>[];
+  deps?: PackageDependency<GradleManagerData>[];
   vars?: PackageVariables;
   urls?: string[];
 } | null;
@@ -61,7 +57,7 @@ export interface MatchConfig {
 }
 
 export interface ParseGradleResult {
-  deps: PackageDependency<ManagerData>[];
+  deps: PackageDependency<GradleManagerData>[];
   urls: string[];
   vars: PackageVariables;
 }

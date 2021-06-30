@@ -1,5 +1,5 @@
-import { getName } from '../../../test/util';
-import { updateDependency } from './update';
+import { updateDependency } from '..';
+import { getName } from '../../../../test/util';
 
 describe(getName(), () => {
   it('replaces', () => {

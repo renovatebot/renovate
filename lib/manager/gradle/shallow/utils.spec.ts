@@ -1,4 +1,4 @@
-import { getName } from '../../../test/util';
+import { getName } from '../../../../test/util';
 import { TokenType } from './common';
 import {
   getVars,

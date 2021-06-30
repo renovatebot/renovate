@@ -1,8 +1,8 @@
 import * as fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as upath from 'upath';
-import { getName } from '../../../test/util';
-import { exec } from '../../util/exec';
+import { getName } from '../../../../test/util';
+import { exec } from '../../../util/exec';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import {
   GRADLE_DEPENDENCY_REPORT_FILENAME,

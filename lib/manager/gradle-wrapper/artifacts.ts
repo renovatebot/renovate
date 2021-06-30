@@ -11,7 +11,7 @@ import {
   extraEnv,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from '../gradle/utils';
+} from '../gradle/deep/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const http = new Http('gradle-wrapper');

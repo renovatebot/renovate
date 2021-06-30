@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/gradle/index extractPackageFile should execute gradle if gradlew is not available 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should execute gradle if gradlew is not available 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -93,7 +93,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should execute gradle if gradlew is not available 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should execute gradle if gradlew is not available 2`] = `
 Array [
   Object {
     "cmd": "gradle --init-script renovate-plugin.gradle renovate",
@@ -117,7 +117,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should execute gradlew when available 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should execute gradlew when available 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -210,7 +210,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should execute gradlew when available 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should execute gradlew when available 2`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
@@ -234,7 +234,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should execute gradlew.bat when available on Windows 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should execute gradlew.bat when available on Windows 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -327,7 +327,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should execute gradlew.bat when available on Windows 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should execute gradlew.bat when available on Windows 2`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
@@ -351,7 +351,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should return empty if renovate report is invalid 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should return empty if renovate report is invalid 1`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
@@ -375,7 +375,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should return empty if there are no dependencies 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should return empty if there are no dependencies 1`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
@@ -399,7 +399,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should return empty if there is no dependency report 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should return empty if there is no dependency report 1`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
@@ -423,7 +423,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -516,7 +516,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 2`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
@@ -540,7 +540,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should return gradle.kts dependencies 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should return gradle.kts dependencies 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -633,7 +633,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should return gradle.kts dependencies 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should return gradle.kts dependencies 2`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
@@ -657,7 +657,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should update an existing module dependency 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should update an existing module dependency 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -750,7 +750,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should update an existing module dependency 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should update an existing module dependency 2`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
@@ -774,7 +774,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should use docker even if gradlew is available 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -867,7 +867,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should use docker even if gradlew is available 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should use docker even if gradlew is available 2`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/gradle",
@@ -909,7 +909,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should use docker even if gradlew.bat is available on Windows 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should use docker even if gradlew.bat is available on Windows 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -1002,7 +1002,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should use docker even if gradlew.bat is available on Windows 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should use docker even if gradlew.bat is available on Windows 2`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/gradle",
@@ -1044,7 +1044,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should use docker if required 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should use docker if required 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -1137,7 +1137,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should use docker if required 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should use docker if required 2`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/gradle",
@@ -1179,7 +1179,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should use repositories only for current project 1`] = `
+exports[`manager/gradle/deep/index extractPackageFile should use repositories only for current project 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -1219,7 +1219,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle/index extractPackageFile should use repositories only for current project 2`] = `
+exports[`manager/gradle/deep/index extractPackageFile should use repositories only for current project 2`] = `
 Array [
   Object {
     "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
