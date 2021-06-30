@@ -79,8 +79,6 @@ module.exports = {
 
 **NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
 
-**NOTE:** Do not use `NPM_TOKEN` as an environment variable.
-
 ### Add npmrc string to Renovate config
 
 You can add an `.npmrc` authentication line to your Renovate config under the field `npmrc`. e.g. a `renovate.json` might look like this:
