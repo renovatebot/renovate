@@ -134,7 +134,7 @@ In such cases Renovate will simply look for a `default.json` file in the default
 To host your preset config on GitHub:
 
 - Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
-- Add configuration files to this new repo for any presets you want to share. For the default preset, only `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
+- Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
 - In other repos, reference it in an extends array like "github>owner/name", for example:
 
 ```json
@@ -217,9 +217,6 @@ In that case, you can choose between publishing your preset config package as `@
 Let's assume you choose `renovate-config-fastcore` as the package name.
 
 You then need to publish the `renovate-config-fastcore` package where the `package.json` contains the field `renovate-config` and then put your config under the field `default`.
-
-<!-- TODO: do we need to change the renovate-config-fastcore to use default.json as well? -->
-
 For example:
 
 ```json
