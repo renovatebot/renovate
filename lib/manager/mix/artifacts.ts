@@ -2,7 +2,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { getSiblingFileName, readLocalFile, writeLocalFile } from '../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
@@ -16,7 +16,7 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = [...packageFileName.split('/').slice(0, -1), 'mix.lock'].join('/');
+  const lockFileName = getSiblingFileName(packageFileName, 'mix.lock');
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {

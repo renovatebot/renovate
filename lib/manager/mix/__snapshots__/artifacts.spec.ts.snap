@@ -90,3 +90,5 @@ Array [
   },
 ]
 `;
+
+exports[`manager/mix/artifacts returns updated mix.lock in subdir 1`] = `null`;

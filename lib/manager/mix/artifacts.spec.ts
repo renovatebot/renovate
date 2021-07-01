@@ -83,6 +83,7 @@ describe(getName(), () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     expect(
@@ -96,8 +97,25 @@ describe(getName(), () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('returns updated mix.lock in subdir', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.writeLocalFile.mockResolvedValueOnce('New mix.exs');
+    fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
+    const execSnapshots = mockExecAll(exec);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'subdir/mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(fs.readLocalFile).toBeCalledWith('subdir/mix.lock', 'utf8');
+  });
+
   it('catches write errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -113,6 +131,7 @@ describe(getName(), () => {
 
   it('catches exec errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });
