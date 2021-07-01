@@ -101,7 +101,7 @@ describe(getName(), () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     fs.writeLocalFile.mockResolvedValueOnce('New mix.exs');
     fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
-    const execSnapshots = mockExecAll(exec);
+    mockExecAll(exec);
     expect(
       await updateArtifacts({
         packageFileName: 'subdir/mix.exs',
@@ -109,8 +109,8 @@ describe(getName(), () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
-    expect(fs.readLocalFile).toBeCalledWith('subdir/mix.lock', 'utf8');
+    ).toBeNull();
+    expect(fs.readLocalFile).toHaveBeenCalledWith('subdir/mix.lock', 'utf8');
   });
 
   it('catches write errors', async () => {
