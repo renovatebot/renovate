@@ -16,7 +16,7 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = 'mix.lock';
+  const lockFileName = [...packageFileName.split('/').slice(0, -1), 'mix.lock'].join('/');
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
