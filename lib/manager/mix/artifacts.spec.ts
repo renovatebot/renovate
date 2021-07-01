@@ -99,7 +99,6 @@ describe(getName(), () => {
 
   it('returns updated mix.lock in subdir', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
-    fs.writeLocalFile.mockResolvedValueOnce('New mix.exs');
     fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
     mockExecAll(exec);
     expect(
