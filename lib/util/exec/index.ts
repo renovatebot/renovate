@@ -149,6 +149,12 @@ export async function exec(
 
     const dockerCommand = await generateDockerCommand(commands, dockerOptions);
     commands = [dockerCommand];
+  } else if (cacheDir) {
+    const cacheLocalPath = await ensureCacheDir(
+      cacheDir.subPath,
+      cacheDir.execWithEnv
+    );
+    rawExecOptions.env[cacheDir.execWithEnv] = cacheLocalPath;
   }
 
   let res: ExecResult | null = null;
