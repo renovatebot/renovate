@@ -35,6 +35,9 @@ export async function fetchPreset({
         throw err;
       }
       logger.debug('default.json preset not found - trying renovate.json');
+      logger.info(
+        'Using a renovate.json file as a preset is deprecated, please use a default.json file instead.'
+      );
       jsonContent = await fetch(
         pkgName,
         buildFilePath('renovate.json'),
