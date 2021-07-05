@@ -4,7 +4,6 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
-  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -67,18 +66,17 @@ export async function updateArtifacts({
   );
   const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
 
-  const cacheDir = await ensureCacheDir('./others/cocoapods', 'CP_HOME_DIR');
-
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    extraEnv: {
-      CP_HOME_DIR: cacheDir,
-    },
     docker: {
       image: 'cocoapods',
       tagScheme: 'ruby',
       tagConstraint,
+    },
+    cacheDir: {
+      subPath: './others/cocoapods',
+      execWithEnv: 'CP_HOME_DIR',
     },
   };
 

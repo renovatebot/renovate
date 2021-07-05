@@ -14,7 +14,6 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
-  ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
   localPathExists,
@@ -76,11 +75,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const cacheDir = await ensureCacheDir(
-    './others/composer',
-    'COMPOSER_CACHE_DIR'
-  );
-
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
@@ -100,13 +94,16 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
-        COMPOSER_CACHE_DIR: cacheDir,
         COMPOSER_AUTH: getAuthJson(),
       },
       docker: {
         image: 'composer',
         tagConstraint: getConstraint(config),
         tagScheme: composerVersioningId,
+      },
+      cacheDir: {
+        subPath: './others/composer',
+        execWithEnv: 'COMPOSER_CACHE_DIR',
       },
     };
     const cmd = 'composer';

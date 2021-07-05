@@ -77,8 +77,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
-  const cacheDir = await ensureCacheDir('./others/pipenv', 'PIPENV_CACHE_DIR');
-
   const lockFileName = pipfileName + '.lock';
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
@@ -98,9 +96,6 @@ export async function updateArtifacts({
     );
     const execOptions: ExecOptions = {
       cwdFile: pipfileName,
-      extraEnv: {
-        PIPENV_CACHE_DIR: cacheDir,
-      },
       docker: {
         image: 'python',
         tagConstraint,
@@ -108,7 +103,10 @@ export async function updateArtifacts({
         preCommands: [
           `pip install --user ${quote(`pipenv${pipenvConstraint}`)}`,
         ],
-        volumes: [cacheDir],
+      },
+      cacheDir: {
+        execWithEnv: 'PIPENV_CACHE_DIR',
+        subPath: './others/pipenv',
       },
     };
     logger.debug({ cmd }, 'pipenv lock command');

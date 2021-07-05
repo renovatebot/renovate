@@ -10,7 +10,6 @@ import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
-  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -172,19 +171,20 @@ export async function updateArtifacts(
       );
     }
 
-    const cacheDir = await ensureCacheDir('./others/gem', 'GEM_HOME');
-
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,
-        GEM_HOME: cacheDir,
       },
       docker: {
         image: 'ruby',
         tagScheme: 'ruby',
         tagConstraint: await getRubyConstraint(updateArtifact),
         preCommands,
+      },
+      cacheDir: {
+        subPath: './others/gem',
+        execWithEnv: 'GEM_HOME',
       },
     };
     await exec(cmd, execOptions);
