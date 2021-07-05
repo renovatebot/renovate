@@ -7,14 +7,14 @@ on:
   workflow_dispatch:
     inputs:
       sha:
-        description: 'Git sha to checkout'
+        description: "Git sha to checkout"
         required: true
       version:
-        description: 'Version to release'
+        description: "Version to release"
         required: true
       tag:
-        description: 'Npm dist-tag'
-        default: 'latest'
+        description: "Npm dist-tag"
+        default: "latest"
 
 env:
   YARN_MODULES_CACHE_KEY: v1
@@ -33,6 +33,7 @@ jobs:
         uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
       - name: Init platform
         run: |
@@ -60,7 +61,8 @@ jobs:
         uses: actions/cache@v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{
+            hashFiles('**/yarn.lock') }}
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile

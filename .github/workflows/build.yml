@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
     inputs:
       dryRun:
-        description: 'Dry-Run'
-        default: 'true'
+        description: "Dry-Run"
+        default: "true"
 
 env:
   # Currently no way to detect automatically (#8153)
@@ -46,6 +46,7 @@ jobs:
         uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2.2.2
@@ -57,7 +58,7 @@ jobs:
         uses: actions/setup-java@v2.1.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'adopt'
+          distribution: "adopt"
           java-package: jre
           check-latest: false
 
@@ -86,7 +87,8 @@ jobs:
         uses: actions/cache@v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{
+            hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
@@ -124,6 +126,7 @@ jobs:
         uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
       - name: Init platform
         run: |
@@ -142,7 +145,8 @@ jobs:
         uses: actions/cache@v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{
+            hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
@@ -178,6 +182,7 @@ jobs:
         uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
       - name: Init platform
         run: |
@@ -207,7 +212,8 @@ jobs:
         uses: actions/cache@v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{
+            hashFiles('**/yarn.lock') }}
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
