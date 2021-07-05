@@ -30,6 +30,10 @@ Array [
   Object {
     "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "CP_HOME_DIR",
+        "subPath": "./others/cocoapods",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -66,6 +70,10 @@ Array [
   Object {
     "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "CP_HOME_DIR",
+        "subPath": "./others/cocoapods",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -96,6 +104,10 @@ Array [
   Object {
     "cmd": "pod install",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "CP_HOME_DIR",
+        "subPath": "./others/cocoapods",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -133,6 +145,10 @@ Array [
   Object {
     "cmd": "pod install",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "CP_HOME_DIR",
+        "subPath": "./others/cocoapods",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -180,6 +196,10 @@ Array [
   Object {
     "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"gem install cocoapods-acknowledgements && pod install\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "CP_HOME_DIR",
+        "subPath": "./others/cocoapods",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -239,6 +259,10 @@ Array [
   Object {
     "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "CP_HOME_DIR",
+        "subPath": "./others/cocoapods",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {

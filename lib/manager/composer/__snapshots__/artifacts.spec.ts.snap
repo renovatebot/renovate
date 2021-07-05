@@ -27,6 +27,10 @@ Array [
   Object {
     "cmd": "composer update --with-dependencies --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "COMPOSER_CACHE_DIR",
+        "subPath": "./others/composer",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -51,6 +55,10 @@ Array [
   Object {
     "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "COMPOSER_CACHE_DIR",
+        "subPath": "./others/composer",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -75,6 +83,10 @@ Array [
   Object {
     "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "COMPOSER_CACHE_DIR",
+        "subPath": "./others/composer",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -99,6 +111,10 @@ Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "COMPOSER_CACHE_DIR",
+        "subPath": "./others/composer",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -135,6 +151,10 @@ Array [
   Object {
     "cmd": "docker run --rm --name=renovate_composer --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/composer:1.10.17 bash -l -c \\"composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "COMPOSER_CACHE_DIR",
+        "subPath": "./others/composer",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -159,6 +179,10 @@ Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "COMPOSER_CACHE_DIR",
+        "subPath": "./others/composer",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -183,6 +207,10 @@ Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "COMPOSER_CACHE_DIR",
+        "subPath": "./others/composer",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -207,6 +235,10 @@ Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "COMPOSER_CACHE_DIR",
+        "subPath": "./others/composer",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {

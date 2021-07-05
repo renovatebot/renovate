@@ -20,6 +20,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -50,6 +54,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -97,6 +105,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -122,6 +134,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -147,6 +163,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -194,6 +214,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -219,6 +243,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -244,6 +272,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -284,8 +316,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -e GOPATH -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -326,8 +362,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./... && go mod tidy && go mod tidy\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -e GOPATH -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./... && go mod tidy && go mod tidy\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -368,8 +408,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./...\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -e GOPATH -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./...\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -400,6 +444,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -430,6 +478,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -455,6 +507,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -480,6 +536,10 @@ Array [
   Object {
     "cmd": "go mod vendor",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -505,6 +565,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -530,6 +594,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -583,6 +651,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -608,6 +680,10 @@ Array [
   Object {
     "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@latest",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -633,6 +709,10 @@ Array [
   Object {
     "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -658,6 +738,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -683,6 +767,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -736,6 +824,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -761,6 +853,10 @@ Array [
   Object {
     "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@latest",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -786,6 +882,10 @@ Array [
   Object {
     "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -811,6 +911,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -836,6 +940,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -889,6 +997,10 @@ Array [
   Object {
     "cmd": "go get -d ./...",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -914,6 +1026,10 @@ Array [
   Object {
     "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -939,6 +1055,10 @@ Array [
   Object {
     "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -964,6 +1084,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -989,6 +1113,10 @@ Array [
   Object {
     "cmd": "go mod tidy",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "GOPATH",
+        "subPath": "./others/go",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {

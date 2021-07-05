@@ -16,6 +16,10 @@ Array [
   Object {
     "cmd": "pipenv lock",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "PIPENV_CACHE_DIR",
+        "subPath": "./others/pipenv",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -40,6 +44,10 @@ Array [
   Object {
     "cmd": "pipenv lock",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "PIPENV_CACHE_DIR",
+        "subPath": "./others/pipenv",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -64,6 +72,10 @@ Array [
   Object {
     "cmd": "pipenv lock",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "PIPENV_CACHE_DIR",
+        "subPath": "./others/pipenv",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -88,6 +100,10 @@ Array [
   Object {
     "cmd": "pipenv lock",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "PIPENV_CACHE_DIR",
+        "subPath": "./others/pipenv",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -122,8 +138,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python:latest bash -l -c \\"pip install --user pipenv && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python:latest bash -l -c \\"pip install --user pipenv && pipenv lock\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "PIPENV_CACHE_DIR",
+        "subPath": "./others/pipenv",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -158,8 +178,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.8.13 && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.8.13 && pipenv lock\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "PIPENV_CACHE_DIR",
+        "subPath": "./others/pipenv",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -194,8 +218,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.8.13 && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.8.13 && pipenv lock\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "PIPENV_CACHE_DIR",
+        "subPath": "./others/pipenv",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
@@ -230,8 +258,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.1.1 && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.1.1 && pipenv lock\\"",
     "options": Object {
+      "cacheDir": Object {
+        "execWithEnv": "PIPENV_CACHE_DIR",
+        "subPath": "./others/pipenv",
+      },
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {

@@ -140,10 +140,7 @@ export async function exec(
           cacheDir.execWithEnv
         );
         dockerOptions.envVars.push(cacheDir.execWithEnv);
-        dockerOptions.volumes = [
-          ...(dockerOptions.volumes || []),
-          cacheLocalPath,
-        ];
+        rawExecOptions.env[cacheDir.execWithEnv] = cacheLocalPath;
       }
     }
 
