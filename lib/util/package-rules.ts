@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
+import slugify from 'slugify';
 import { mergeChildConfig } from '../config';
 import type { PackageRule, PackageRuleInputConfig } from '../config/types';
 import { logger } from '../logger';
@@ -262,7 +263,14 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
     // This rule is considered matched if there was at least one positive match and no negative matches
     if (matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
-      config = mergeChildConfig(config, packageRule);
+      const toApply = { ...packageRule };
+      if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
+        // Need to apply groupSlug otherwise the existing one will take precedence
+        toApply.groupSlug = slugify(packageRule.groupName, {
+          lower: true,
+        });
+      }
+      config = mergeChildConfig(config, toApply);
       delete config.matchPackageNames;
       delete config.matchPackagePatterns;
       delete config.matchPackagePrefixes;
