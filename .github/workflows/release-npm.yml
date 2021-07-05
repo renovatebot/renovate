@@ -15,11 +15,9 @@ on:
       tag:
         description: 'Npm dist-tag'
         default: 'latest'
+        required: false
 
 env:
-  YARN_MODULES_CACHE_KEY: v1
-  YARN_PACKAGE_CACHE_KEY: v1
-  YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   GIT_SHA: ${{ github.event.client_payload.sha }}
   NPM_VERSION: ${{ github.event.client_payload.version }}
@@ -29,20 +27,6 @@ jobs:
   release-npm:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.2.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Init platform
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.symlinks true
-          git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
-          yarn config set version-git-tag false
-          npm config set scripts-prepend-node-path true
-
       - name: Prepare env
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" ]]; then
@@ -55,12 +39,20 @@ jobs:
         with:
           ref: ${{ env.GIT_SHA }}
 
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v2.1.6
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2.2.0
         with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
