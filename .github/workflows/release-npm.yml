@@ -68,5 +68,6 @@ jobs:
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
           npm publish --tag ${{ env.NPM_TAG }}
+          git checkout -- .npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
