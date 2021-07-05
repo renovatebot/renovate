@@ -216,7 +216,7 @@ async function setBranchPrefix(branchPrefix: string): Promise<void> {
     logger.debug('Setting branchPrefix: ' + branchPrefix);
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
     try {
-      await git.fetch(['origin', ref, '--depth=2', '--force']);
+      await git.fetch(['origin', ref, '--depth=5', '--force']);
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       throw err;
