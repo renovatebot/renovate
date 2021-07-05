@@ -4,9 +4,6 @@ on:
   pull_request:
 
 env:
-  YARN_MODULES_CACHE_KEY: v1
-  YARN_PACKAGE_CACHE_KEY: v1
-  YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   PYTHON_VERSION: 3.9
   SKIP_JAVA_TESTS: true
@@ -19,10 +16,15 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 2
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2.2.2
@@ -40,24 +42,6 @@ jobs:
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
-
-      - uses: actions/checkout@v2.3.4
-        with:
-          fetch-depth: 2
-
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
-
-      # Clear caches on cache miss, otherwise they will grow indefinitely
-      - name: Clear yarn cache
-        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
-        run: yarn cache clean
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
@@ -83,10 +67,15 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 2
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Init platform
         run: |
@@ -97,22 +86,6 @@ jobs:
           npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
-
-      - uses: actions/checkout@v2.3.4
-
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
-
-      # Clear caches on cache miss, otherwise they will grow indefinitely
-      - name: Clear yarn cache
-        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
-        run: yarn cache clean
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile

@@ -51,6 +51,9 @@ describe('.updateArtifacts()', () => {
     docker.resetPrefetchedImages();
     hostRules.clear();
     setAdminConfig(adminConfig);
+    fs.ensureCacheDir.mockResolvedValue(
+      join(adminConfig.cacheDir, './others/composer')
+    );
   });
   afterEach(() => {
     setAdminConfig();
@@ -74,7 +77,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
       })
