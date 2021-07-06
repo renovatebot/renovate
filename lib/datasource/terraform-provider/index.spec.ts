@@ -151,10 +151,6 @@ describe(getName(), () => {
     });
   });
   describe('getBuilds', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('returns null for empty result', async () => {
       httpMock
         .scope(primaryUrl)
