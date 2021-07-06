@@ -129,7 +129,7 @@ export class TerraformProviderHash {
     const sortedHashes = hashes.sort().map((hash) => `h1:${hash}`);
     // save to cache
     await packageCache.set(
-      'terraform-provider-release',
+      `datasource-${TerraformProviderDatasource.id}-build-hashes`,
       `${registryURL}/${repository}/${version}`,
       sortedHashes,
       TerraformProviderHash.hashCacheTTL
