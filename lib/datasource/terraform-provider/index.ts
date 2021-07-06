@@ -202,8 +202,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
             ...res,
           };
           return newBuild;
-        } catch (e) {
-          logger.debug({ error: e, url: buildURL }, 'Failed to retrieve build');
+        } catch (err) {
+          logger.debug({ err, url: buildURL }, 'Failed to retrieve build');
           return null;
         }
       },

@@ -3,7 +3,7 @@ import { fs, getName, loadFixture, mocked } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
-import * as hash from './hash';
+import { TerraformProviderHash } from './hash';
 import { updateArtifacts } from './index';
 
 // auto-mock fs
@@ -23,7 +23,7 @@ const adminConfig = {
 
 const validLockfile = loadFixture('validLockfile.hcl');
 
-const mockHash = mocked(hash).createHashes;
+const mockHash = mocked(TerraformProviderHash).createHashes;
 const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
   typeof getPkgReleases
 >;

@@ -10,7 +10,7 @@ import {
 import { setAdminConfig } from '../../../config/admin';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { Logger } from '../../../logger/types';
-import { createHashes } from './hash';
+import { TerraformProviderHash } from './hash';
 
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
@@ -34,7 +34,7 @@ describe(getName(), () => {
       .scope('https://example.com')
       .get('/.well-known/terraform.json')
       .reply(200, '');
-    const result = await createHashes(
+    const result = await TerraformProviderHash.createHashes(
       'https://example.com',
       'test/gitlab',
       '2.56.0'
@@ -48,7 +48,7 @@ describe(getName(), () => {
       .get('/terraform-provider-azurerm/2.59.0/index.json')
       .reply(403, '');
 
-    const result = await createHashes(
+    const result = await TerraformProviderHash.createHashes(
       'https://releases.hashicorp.com',
       'hashicorp/azurerm',
       '2.59.0'
@@ -63,7 +63,7 @@ describe(getName(), () => {
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .replyWithError('');
 
-    const result = await createHashes(
+    const result = await TerraformProviderHash.createHashes(
       'https://releases.hashicorp.com',
       'hashicorp/azurerm',
       '2.56.0'
@@ -92,7 +92,7 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes(
+    const result = await TerraformProviderHash.createHashes(
       'https://releases.hashicorp.com',
       'hashicorp/azurerm',
       '2.56.0'
@@ -121,7 +121,7 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await createHashes(
+    const result = await TerraformProviderHash.createHashes(
       'https://releases.hashicorp.com',
       'hashicorp/azurerm',
       '2.56.0'

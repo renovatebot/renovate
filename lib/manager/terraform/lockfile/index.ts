@@ -4,7 +4,7 @@ import { TerraformProviderDatasource } from '../../../datasource/terraform-provi
 import { logger } from '../../../logger';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../../types';
-import { createHashes } from './hash';
+import { TerraformProviderHash } from './hash';
 import type { ProviderLock, ProviderLockUpdate } from './types';
 import {
   extractLocks,
@@ -39,7 +39,7 @@ async function updateAllLocks(
       const update: ProviderLockUpdate = {
         newVersion,
         newConstraint: lock.constraints,
-        newHashes: await createHashes(
+        newHashes: await TerraformProviderHash.createHashes(
           lock.registryUrl,
           lock.lookupName,
           newVersion
@@ -107,7 +107,11 @@ export async function updateArtifacts({
     const update: ProviderLockUpdate = {
       newVersion: config.newVersion,
       newConstraint,
-      newHashes: await createHashes(registryUrl, repository, config.newVersion),
+      newHashes: await TerraformProviderHash.createHashes(
+        registryUrl,
+        repository,
+        config.newVersion
+      ),
       ...updateLock,
     };
     updates.push(update);
