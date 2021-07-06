@@ -74,9 +74,7 @@ function checkForPlatformFailure(err: Error): void {
     'Failed to connect to',
     'Connection timed out',
     'malformed object name',
-    'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
     'Could not resolve host',
-    ' is not a member of team',
     'early EOF',
     'fatal: bad config', // .gitmodules problem
   ];
@@ -95,6 +93,14 @@ function checkForPlatformFailure(err: Error): void {
     [
       'GitLab: Commit message does not follow the pattern',
       "Cannot push because commit message does not follow project's push rules",
+    ],
+    [
+      ' is not a member of team',
+      '`Restrict commits to existing GitLab users` rule is blocking renovate push. Check renovate `gitAuthor` setting',
+    ],
+    [
+      'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
+      'You need the Git `GenericContribute` permission to perform this action',
     ],
   ];
   for (const [errorStr, validationError] of configErrorStrings) {
