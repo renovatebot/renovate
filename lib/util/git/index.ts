@@ -96,7 +96,7 @@ function checkForPlatformFailure(err: Error): void {
     ],
     [
       ' is not a member of team',
-      '`Restrict commits to existing GitLab users` rule is blocking renovate push. Check renovate `gitAuthor` setting',
+      'The `Restrict commits to existing GitLab users` rule is blocking Renovate push. Check the Renovate `gitAuthor` setting',
     ],
     [
       'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
