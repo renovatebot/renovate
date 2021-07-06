@@ -134,6 +134,10 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer pack
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
+## dockerCacheVolume
+
+Create and mount volume for manager cache files. Will be removed after repository processing.
+
 ## dockerChildPrefix
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
