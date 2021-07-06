@@ -41,15 +41,15 @@ If you're self hosting Renovate, use the latest release if possible.
 
 ## What if I need to .. ?
 
-### Tell Renovate to ask for approval before opening a PR
+### Tell Renovate to ask for approval before creating a Pull Request
 
-The normal behavior of Renovate is to open a PR right away whenever there's an update.
-But maybe you want Renovate to ask for approval first, before opening the PR.
-Use the "Dependency Dashboard approval" workflow to get updates for certain packages or certain types of updates only after you give approval via the Dependency Dashboard.
+The default behavior is that Renovate creates a pull request right away whenever there's an update.
+But maybe you want Renovate to ask for your approval _before_ it creates a pull request.
+Use the "Dependency Dashboard approval" workflow to get updates for certain packages - or certain types of updates - only after you give approval via the Dependency Dashboard.
 
-The basic idea is that you create a new `packageRule` and describe what kind of package, or type of updates you want to approve beforehand.
+The basic idea is that you create a new `packageRules` entry and describe what kind of package, or type of updates you want to approve beforehand.
 
-Say you want to manually approve all major `npm` type updates:
+Say you want to manually approve all major `npm` package manager updates:
 
 ```json
 {
@@ -63,7 +63,7 @@ Say you want to manually approve all major `npm` type updates:
 }
 ```
 
-Say you want to manually approve all major Jest updates:
+Or say you want to manually approve all major Jest updates:
 
 ```json
 {
@@ -74,6 +74,15 @@ Say you want to manually approve all major Jest updates:
       "dependencyDashboardApproval": true
     }
   ]
+}
+```
+
+You could even configure Renovate bot to ask for approval for _all_ updates.
+The `dependencyDashboardApproval` is not part of a `packageRules` array, and so applies to all updates:
+
+```json
+{
+  "dependencyDashboardApproval": true
 }
 ```
 
