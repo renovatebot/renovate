@@ -225,9 +225,9 @@ For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://
 
 #### Running as a GitHub App
 
-Instead of a bot account and a personal access token you can as well run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
+Instead of a bot account and a personal access token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
 
-When creating the GitHub App give it following permissions:
+When creating the GitHub App give it the following permissions:
 
 - Checks: Read & write
 - Contents: Read & write
@@ -240,7 +240,7 @@ When creating the GitHub App give it following permissions:
 
 Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
 
-Inside your `config.js` you need to set following values, assuming the name of your app is `self-hosted-renovate`:
+Inside your `config.js` you need to set the following values, assuming the name of your app is `self-hosted-renovate`:
 
 **`username:"self-hosted-renovate[bot]"`**
 
@@ -249,13 +249,13 @@ The slug name of your app with `[bot]` appended
 **`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`**
 
 The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
-Notice that it needs to contain the user id as well as the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
-A way to get the user id of an GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
+It needs to contain the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
+A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
 **`token:"x-access-token:${github-app-installation}"`**
 
 The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
-Notice that these installation tokens are valid for only 1h and need to be regenerated regularly.
+**Note** The installation tokens expire after 1 hour and need to be regenerated regularly.
 Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
