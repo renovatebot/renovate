@@ -109,6 +109,7 @@ const repoGroups = {
   MassTransit: 'https://github.com/MassTransit/MassTransit',
   material: 'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
+  mstest: 'https://github.com/microsoft/testfx',
   mui: 'https://github.com/mui-org/material-ui',
   nest: 'https://github.com/nestjs/nest',
   neutrino: [
