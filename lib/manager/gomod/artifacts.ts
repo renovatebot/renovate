@@ -43,9 +43,9 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
   if (credentials?.token) {
     const token = quote(credentials.token);
     // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
-    goEnvVariables[
-      `GIT_CONFIG_KEY_${gitEnvCounter}`
-    ] = `url.https://${token}@github.com/.insteadOf`;
+    // prettier-ignore
+    goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@github.com/.insteadOf`;
+    // prettier-ignore
     goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://github.com/`;
     gitEnvCounter += 1;
   }
@@ -61,12 +61,10 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
     if (goGitCredential.token && goGitCredential.matchHost) {
       const token = quote(goGitCredential.token);
       // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
-      goEnvVariables[
-        `GIT_CONFIG_KEY_${gitEnvCounter}`
-      ] = `url.https://${token}@${goGitCredential.matchHost}/.insteadOf`;
-      goEnvVariables[
-        `GIT_CONFIG_VALUE_${gitEnvCounter}`
-      ] = `https://${goGitCredential.matchHost}/`;
+      // prettier-ignore
+      goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@${goGitCredential.matchHost}/.insteadOf`;
+      // prettier-ignore
+      goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://${goGitCredential.matchHost}/`;
       gitEnvCounter += 1;
       // add list of matched Hosts to goPrivate variable
       goPrivate.push(goGitCredential.matchHost);
