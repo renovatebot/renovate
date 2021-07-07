@@ -242,12 +242,28 @@ Other values like Homepage URL, User authorization callback URL and webhooks can
 
 Inside your `config.js` you need to set following values, assuming the name of your app is `self-hosted-renovate`:
 
-- `username`: `self-hosted-renovate[bot]`, the slug name of your app with `[bot]` appended
-- `gitAuthor`: `Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>`, the [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot. Notice that it needs to contain the user id as well as the username followed by the `users.noreply` domain of either github.com or the GitHub Enterprise Server. A way to get the user id of an GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
-- `token` (or `RENOVATE_TOKEN` environment variable, or via CLI `--token=`): `x-access-token:${github-app-installation}`, the token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation). Notice that these installation tokens are valid for only 1h and need to be regenerated regularly.
-- `repositories` (or `RENOVATE_REPO`): List of repositories to run on. Auto discovery does not work with a GitHub App.
+**`username:"self-hosted-renovate[bot]"`**
 
-The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires different invocations of `renovate` with different `token` and `repositories` parameters.
+The slug name of your app with `[bot]` appended
+
+**`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`**
+
+The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
+Notice that it needs to contain the user id as well as the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
+A way to get the user id of an GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
+
+**`token:"x-access-token:${github-app-installation}"`**
+
+The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
+Notice that these installation tokens are valid for only 1h and need to be regenerated regularly.
+Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+
+**`repositories: ["orgname/repo-1","orgname/repo-2"]`**
+
+List of repositories to run on.
+Auto discovery does not work with a GitHub App.
+Alternatively as comma-seperated environment variable `RENOVATE_REPOSITORIES`.
+The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
 ### GitLab CE/EE
 
