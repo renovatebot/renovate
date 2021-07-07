@@ -59,6 +59,7 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
 
     delete process.env.GOPATH;
+    delete process.env.GIT_CONFIG_COUNT;
     process.env.GOPRIVATE = 'private.example.com/*';
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     setAdminConfig(adminConfig);
@@ -151,6 +152,46 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('supports docker mode passthrough of GIT_CONFIG_COUNT', async () => {
+    process.env.GIT_CONFIG_COUNT = '2';
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('ignore docker mode passthrough of invalid GIT_CONFIG_COUNT', async () => {
+    process.env.GIT_CONFIG_COUNT = 'not-a-number';
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
