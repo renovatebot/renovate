@@ -16,7 +16,7 @@ import { volumeCreate, volumePrune } from './volume';
 
 const prefetchedImages = new Set<string>();
 
-async function prefetchDockerImage(taggedImage: string): Promise<void> {
+export async function prefetchDockerImage(taggedImage: string): Promise<void> {
   if (prefetchedImages.has(taggedImage)) {
     logger.debug(`Docker image is already prefetched: ${taggedImage}`);
   } else {
@@ -68,7 +68,7 @@ function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter((command) => command && typeof command === 'string');
 }
 
-async function getDockerTag(
+export async function getDockerTag(
   depName: string,
   constraint: string,
   scheme: string
@@ -103,7 +103,7 @@ async function getDockerTag(
       );
       return version;
     }
-  } /* istanbul ignore next */ else {
+  } else {
     logger.error(`No ${depName} releases found`);
     return 'latest';
   }
@@ -133,7 +133,6 @@ export async function removeDockerContainer(
       encoding: 'utf-8',
     });
     const containerId = res?.stdout?.trim() || '';
-    // istanbul ignore if
     if (containerId.length) {
       logger.debug({ containerId }, 'Removing container');
       cmd = `docker rm -f ${containerId}`;
@@ -143,7 +142,7 @@ export async function removeDockerContainer(
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.warn(
       { image, containerName, cmd, err },
       'Could not remove Docker container'
@@ -151,7 +150,6 @@ export async function removeDockerContainer(
   }
 }
 
-// istanbul ignore next
 export async function removeDanglingContainers(): Promise<void> {
   const { binarySource, dockerChildPrefix } = getAdminConfig();
   if (binarySource !== 'docker') {
@@ -179,7 +177,7 @@ export async function removeDanglingContainers(): Promise<void> {
     } else {
       logger.debug('No dangling containers to remove');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     if (err.errno === 'ENOMEM') {
       throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
     }

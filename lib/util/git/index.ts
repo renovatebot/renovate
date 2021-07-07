@@ -74,9 +74,7 @@ function checkForPlatformFailure(err: Error): void {
     'Failed to connect to',
     'Connection timed out',
     'malformed object name',
-    'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
     'Could not resolve host',
-    ' is not a member of team',
     'early EOF',
     'fatal: bad config', // .gitmodules problem
   ];
@@ -88,22 +86,34 @@ function checkForPlatformFailure(err: Error): void {
   }
 
   const configErrorStrings = [
-    [
-      'GitLab: Branch name does not follow the pattern',
-      "Cannot push because branch name does not follow project's push rules",
-    ],
-    [
-      'GitLab: Commit message does not follow the pattern',
-      "Cannot push because commit message does not follow project's push rules",
-    ],
+    {
+      error: 'GitLab: Branch name does not follow the pattern',
+      message:
+        "Cannot push because branch name does not follow project's push rules",
+    },
+    {
+      error: 'GitLab: Commit message does not follow the pattern',
+      message:
+        "Cannot push because commit message does not follow project's push rules",
+    },
+    {
+      error: ' is not a member of team',
+      message:
+        'The `Restrict commits to existing GitLab users` rule is blocking Renovate push. Check the Renovate `gitAuthor` setting',
+    },
+    {
+      error: 'TF401027:',
+      message:
+        'You need the Git `GenericContribute` permission to perform this action',
+    },
   ];
-  for (const [errorStr, validationError] of configErrorStrings) {
-    if (err.message.includes(errorStr)) {
+  for (const { error, message } of configErrorStrings) {
+    if (err.message.includes(error)) {
       logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationError = validationError;
-      error.validationMessage = err.message;
-      throw error;
+      const res = new Error(CONFIG_VALIDATION);
+      res.validationError = message;
+      res.validationMessage = err.message;
+      throw res;
     }
   }
 }
