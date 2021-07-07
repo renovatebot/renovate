@@ -45,3 +45,20 @@ By default, Renovate will keep up with the very latest version of `go`.
 You can "pin" the `go` version that Renovate uses.
 Say you want Renovate to use Go version 1.14, you can do this by adding `go 1.14` to your `go.mod` file.
 We do not support pinning Go versions to a specific patch level, so you cannot use `go 1.14.12`, but you can use `go 1.14` in your `go.mod` file.
+
+### Custom registry support, and authentication
+
+This example shows how you can use a `config.js` file to configure Renovate for use with a custom private go module source using git to pull the modules.
+We're using environment variables to pass the git token to Renovate bot.
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      hostType: 'go-git',
+      matchHost: 'github.enterprise.com',
+      token: process.env.GO_GIT_TOKEN,
+    },
+  ],
+};
+```
