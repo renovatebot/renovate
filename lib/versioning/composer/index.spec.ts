@@ -312,6 +312,22 @@ describe('semver.getNewValue()', () => {
         newVersion: '3.1.0',
       })
     ).toEqual('~1.2 || ~2.0 || ~3.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.2',
+        rangeStrategy: 'widen',
+        currentVersion: '1.2.0',
+        newVersion: '2.0.0',
+      })
+    ).toEqual('^1.2 || ^2.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~1.2',
+        rangeStrategy: 'widen',
+        currentVersion: '1.2.0',
+        newVersion: '2.4.0',
+      })
+    ).toEqual('~1.2 || ~2.0');
   });
   it('returns newVersion if unsupported', () => {
     expect(

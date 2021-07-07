@@ -2,6 +2,7 @@ import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
+import { satisfies } from 'semver';
 
 export const id = 'composer';
 export const displayName = 'Composer';
@@ -176,7 +177,7 @@ function getNewValue({
     const lastValue = currentValue.split('||').pop().trim();
     const replacementValue = getNewValue({
       currentValue: lastValue,
-      rangeStrategy,
+      rangeStrategy: 'replace',
       currentVersion,
       newVersion,
     });
@@ -185,6 +186,14 @@ function getNewValue({
     } else if (rangeStrategy === 'widen') {
       newValue = currentValue + ' || ' + replacementValue;
     }
+  } else if (rangeStrategy === 'widen') {
+    const replacementValue = getNewValue({
+      currentValue: currentValue,
+      rangeStrategy: 'replace',
+      currentVersion,
+      newVersion,
+    });
+    newValue = currentValue + ' || ' + replacementValue;
   }
   if (!newValue) {
     logger.warn(
