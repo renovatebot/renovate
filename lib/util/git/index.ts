@@ -267,7 +267,7 @@ export async function syncGit(): Promise<void> {
     return;
   }
   gitInitialized = true;
-  const { localDir } = getAdminConfig();
+  const { localDir, allowGitLfs } = getAdminConfig();
   logger.debug('Initializing git repository into ' + localDir);
   const gitHead = join(localDir, '.git/HEAD');
   let clone = true;
@@ -299,11 +299,15 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       // clone only the default branch
-      const opts = ['--depth=10', '-c', 'lfs.fetchexclude=*'];
+      const opts = ['--depth=10'];
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
         );
+      }
+      // istanbul ignore if: Will be changed in future, see #6842
+      if (allowGitLfs) {
+        opts.push('-c', 'lfs.fetchexclude=*');
       }
       await git.clone(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {

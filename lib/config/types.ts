@@ -88,6 +88,7 @@ export interface GlobalOnlyConfig {
 // The below should contain config options where admin=true
 export interface RepoAdminConfig {
   allowCustomCrateRegistries?: boolean;
+  allowGitLfs?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];

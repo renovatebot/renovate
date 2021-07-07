@@ -11,6 +11,10 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowCustomCrateRegistries
 
+## allowGitLfs
+
+You need to also configure `gitNoVerify` to allow commit and push git lfs objects.
+
 ## allowPostUpgradeCommandTemplating
 
 Set to true to allow templating of dependency level post-upgrade commands.
