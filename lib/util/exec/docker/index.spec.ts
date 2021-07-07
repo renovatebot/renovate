@@ -1,6 +1,4 @@
 import {
-  ExecSnapshots,
-  envMock,
   exec,
   mockExecAll,
   mockExecSequence,
