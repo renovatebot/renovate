@@ -12,7 +12,6 @@ import {
   VolumesPair,
   rawExec,
 } from '../common';
-import { volumeCreate, volumePrune } from './volume';
 
 const prefetchedImages = new Set<string>();
 
@@ -256,6 +255,37 @@ export async function generateDockerCommand(
   result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');
+}
+
+export async function volumePrune(
+  meta?: Record<string, string>
+): Promise<void> {
+  const cmdParts = ['docker', 'volume', 'prune', '--force'];
+
+  const kvPairs = Object.entries(meta);
+  const filterOptions = kvPairs.map(([k, v]) => `--filter label=${k}=${v}`);
+  cmdParts.push(...filterOptions);
+
+  const cmd = cmdParts.join(' ');
+  await rawExec(cmd, { encoding: 'utf-8' });
+}
+
+export async function volumeCreate(
+  name: string,
+  meta?: Record<string, string>
+): Promise<void> {
+  const cmdParts = ['docker', 'volume', 'create'];
+
+  if (meta) {
+    const kvPairs = Object.entries(meta);
+    const labelOptions = kvPairs.map(([k, v]) => `--label ${k}=${v}`);
+    cmdParts.push(...labelOptions);
+  }
+
+  cmdParts.push(name);
+
+  const cmd = cmdParts.join(' ');
+  await rawExec(cmd, { encoding: 'utf-8' });
 }
 
 export async function deleteCacheVolume(): Promise<void> {

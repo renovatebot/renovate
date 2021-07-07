@@ -10,12 +10,16 @@ import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import { VolumeOption } from '../common';
 import {
+  createCacheVolume,
+  deleteCacheVolume,
   generateDockerCommand,
   getDockerTag,
   prefetchDockerImage,
   removeDanglingContainers,
   removeDockerContainer,
   resetPrefetchedImages,
+  volumeCreate,
+  volumePrune,
 } from '.';
 
 jest.mock('child_process');
@@ -274,6 +278,98 @@ describe(getName(), () => {
         tagConstraint: '^1.2.3',
       });
       expect(res).toBe(command(`${image}:1.2.4`));
+    });
+  });
+
+  describe('volume management', () => {
+    describe('volumePrune', () => {
+      it('prunes volumes', async () => {
+        const execSnapshots = mockExecAll(exec);
+        await volumePrune({ foo: 'foo', bar: 'bar' });
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'docker volume prune --force --filter label=foo=foo --filter label=bar=bar',
+          },
+        ]);
+      });
+    });
+
+    describe('volumeCreate', () => {
+      it('creates new volume', async () => {
+        const execSnapshots = mockExecAll(exec);
+        await volumeCreate('vol1', { foo: 'foo', bar: 'bar' });
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'docker volume create --label foo=foo --label bar=bar vol1' },
+        ]);
+      });
+    });
+
+    describe('deleteCacheVolume', () => {
+      it('short-circuits in non-Docker environment', async () => {
+        const execSnapshots = mockExecAll(exec);
+
+        setAdminConfig({ binarySource: 'global' });
+        await deleteCacheVolume();
+
+        expect(execSnapshots).toBeEmpty();
+      });
+
+      it('short-circuits when volume cache is not configured', async () => {
+        const execSnapshots = mockExecAll(exec);
+
+        setAdminConfig({ binarySource: 'docker' });
+        await deleteCacheVolume();
+
+        expect(execSnapshots).toBeEmpty();
+      });
+
+      it('removes volume cache', async () => {
+        const execSnapshots = mockExecAll(exec);
+
+        setAdminConfig({
+          binarySource: 'docker',
+          dockerCacheVolume: true,
+          dockerChildPrefix: 'my_namespace_',
+        });
+        await deleteCacheVolume();
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'docker volume prune --force --filter label=renovate-namespace=my_namespace_manager_cache',
+          },
+        ]);
+      });
+    });
+
+    describe('createCacheVolume', () => {
+      it('short-circuits in non-Docker environment', async () => {
+        const execSnapshots = mockExecAll(exec);
+
+        setAdminConfig({ binarySource: 'global' });
+        await createCacheVolume();
+
+        expect(execSnapshots).toBeEmpty();
+      });
+
+      it('short-circuits when volume cache is not configured', async () => {
+        const execSnapshots = mockExecAll(exec);
+
+        setAdminConfig({
+          binarySource: 'docker',
+          dockerCacheVolume: true,
+          dockerChildPrefix: 'my_namespace_',
+        });
+        await createCacheVolume();
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'docker volume prune --force --filter label=renovate-namespace=my_namespace_manager_cache',
+          },
+          {
+            cmd: 'docker volume create --label renovate-namespace=my_namespace_manager_cache my_namespace_manager_cache',
+          },
+        ]);
+      });
     });
   });
 });
