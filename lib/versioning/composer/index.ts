@@ -186,13 +186,17 @@ function getNewValue({
       newValue = currentValue + ' || ' + replacementValue;
     }
   } else if (rangeStrategy === 'widen') {
-    const replacementValue = getNewValue({
-      currentValue: currentValue,
-      rangeStrategy: 'replace',
-      currentVersion,
-      newVersion,
-    });
-    newValue = currentValue + ' || ' + replacementValue;
+    if (matches(newVersion, currentValue)) {
+      newValue = currentValue;
+    } else {
+      const replacementValue = getNewValue({
+        currentValue: currentValue,
+        rangeStrategy: 'replace',
+        currentVersion,
+        newVersion,
+      });
+      newValue = currentValue + ' || ' + replacementValue;
+    }
   }
   if (!newValue) {
     logger.warn(
