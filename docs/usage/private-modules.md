@@ -128,8 +128,10 @@ Any `hostRules` with `hostType=packagist` are also included.
 
 ### gomod
 
-If a `github.com` token is found in `hostRules`, then it is written out to local git config prior to running `go` commands.
-The command run is `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`.
+If a `github.com` token is found in `hostRules`, then it is passed to git via `GIT_CONFIG_KEY_x=url."https://${token}@github.com/".insteadOf` and `GIT_CONFIG_VALUE_x=https://github.com/` when running `go` commands.
+
+Credentials for other private go module sources can be set as `hostRules`. Any `hostRules` with `hostType=go-git` are included as well.
+Credentials are passed to git via `GIT_CONFIG_KEY_x=url."https://${token}@${matchHost}/".insteadOf` and `GIT_CONFIG_VALUE_x=https://${matchHost}/` and the value of `matchHost` is appended to `GOPRIVATE` when running `go` commands.
 
 ### npm
 
