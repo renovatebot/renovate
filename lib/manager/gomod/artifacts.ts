@@ -28,7 +28,7 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
 
   // passthrough the GIT_CONFIG_COUNT environment variable as start value of the index count
   let gitEnvCounter: number = parseInt(process.env.GIT_CONFIG_COUNT, 10);
-  if (isNaN(gitEnvCounter)) {
+  if (Number.isNaN(gitEnvCounter)) {
     logger.warn(
       `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}. Ignoring it.`
     );
