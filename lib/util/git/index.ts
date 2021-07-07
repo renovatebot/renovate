@@ -306,7 +306,7 @@ export async function syncGit(): Promise<void> {
         );
       }
       // istanbul ignore if: Will be changed in future, see #6842
-      if (allowGitLfs) {
+      if (!allowGitLfs) {
         opts.push('-c', 'lfs.fetchexclude=*');
       }
       await git.clone(config.url, '.', opts);
