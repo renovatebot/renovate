@@ -299,7 +299,7 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       // clone only the default branch
-      const opts = ['--depth=10'];
+      const opts = ['--depth=10', '-c', 'lfs.fetchexclude=*'];
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
