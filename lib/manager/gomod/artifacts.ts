@@ -18,9 +18,9 @@ import type {
 } from '../types';
 
 function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
-  let gitEnvCounter: number = 0;
-  let gitEnvVariables: NodeJS.ProcessEnv = {};
-  let goPrivate: string[] = [];
+  let gitEnvCounter = 0;
+  const gitEnvVariables: NodeJS.ProcessEnv = {};
+  const goPrivate: string[] = [];
 
   // passthrough the GOPRIVATE environment variable as the first element of the goPrivate array
   if (process.env.GOPRIVATE) {
@@ -30,7 +30,7 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
   // passthrough the GIT_CONFIG_COUNT environment variable as the first element of the goPrivate array
   if (process.env.GIT_CONFIG_COUNT) {
     try {
-      gitEnvCounter = parseInt(process.env.GIT_CONFIG_COUNT);
+      gitEnvCounter = parseInt(process.env.GIT_CONFIG_COUNT, 10);
     } catch (e) {
       logger.warn(
         `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}`
@@ -52,7 +52,7 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
     gitEnvVariables[
       `GIT_CONFIG_VALUE_${gitEnvCounter}`
     ] = `https://github.com/`;
-    gitEnvCounter++;
+    gitEnvCounter += 1;
   }
 
   // get all credentials we have for go using git
@@ -71,18 +71,18 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
       gitEnvVariables[
         `GIT_CONFIG_VALUE_${gitEnvCounter}`
       ] = `https://${goGitCredential.matchHost}/`;
-      gitEnvCounter++;
+      gitEnvCounter += 1;
       // add list of matched Hosts to goPrivate variable
       goPrivate.push(goGitCredential.matchHost);
     }
   }
 
   // set the GIT_CONFIG_COUNT to the number of KEY/Value pairs
-  gitEnvVariables['GIT_CONFIG_COUNT'] = gitEnvCounter.toString();
+  gitEnvVariables.GIT_CONFIG_COUNT = `gitEnvCounter`;
 
   // create and set GOPRIVATE environment variable to pull directly from source (in this case git)
   const goPrivateEnvVariable: string = goPrivate.join(',');
-  gitEnvVariables['GOPRIVATE'] = goPrivateEnvVariable;
+  gitEnvVariables.GOPRIVATE = goPrivateEnvVariable;
   return gitEnvVariables;
 }
 
