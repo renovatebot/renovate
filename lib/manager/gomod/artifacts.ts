@@ -8,7 +8,7 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { find } from '../../util/host-rules';
+import { find, findAll } from '../../util/host-rules';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -17,19 +17,73 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-function getPreCommands(): string[] | null {
+function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
+  let gitEnvCounter: number = 0;
+  let gitEnvVariables: NodeJS.ProcessEnv = {};
+  let goPrivate: string[] = [];
+
+  // passthrough the GOPRIVATE environment variable as the first element of the goPrivate array
+  if (process.env.GOPRIVATE) {
+    goPrivate.push(process.env.GOPRIVATE);
+  }
+
+  // passthrough the GIT_CONFIG_COUNT environment variable as the first element of the goPrivate array
+  if (process.env.GIT_CONFIG_COUNT) {
+    try {
+      gitEnvCounter = parseInt(process.env.GIT_CONFIG_COUNT);
+    } catch (e) {
+      logger.warn(
+        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}`
+      );
+    }
+  }
+
   const credentials = find({
     hostType: PLATFORM_TYPE_GITHUB,
     url: 'https://api.github.com/',
   });
-  let preCommands = null;
+
   if (credentials?.token) {
     const token = quote(credentials.token);
-    preCommands = [
-      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
-    ];
+    // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
+    gitEnvVariables[
+      `GIT_CONFIG_KEY_${gitEnvCounter}`
+    ] = `url.https://${token}@github.com/.insteadOf`;
+    gitEnvVariables[
+      `GIT_CONFIG_VALUE_${gitEnvCounter}`
+    ] = `https://github.com/`;
+    gitEnvCounter++;
   }
-  return preCommands;
+
+  // get all credentials we have for go using git
+  const goGitCredentials = findAll({
+    hostType: 'go-git',
+  });
+
+  for (const goGitCredential of goGitCredentials) {
+    // Check that both a token exists and a matchHost
+    if (goGitCredential.token && goGitCredential.matchHost) {
+      const token = quote(goGitCredential.token);
+      // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
+      gitEnvVariables[
+        `GIT_CONFIG_KEY_${gitEnvCounter}`
+      ] = `url.https://${token}@${goGitCredential.matchHost}/.insteadOf`;
+      gitEnvVariables[
+        `GIT_CONFIG_VALUE_${gitEnvCounter}`
+      ] = `https://${goGitCredential.matchHost}/`;
+      gitEnvCounter++;
+      // add list of matched Hosts to goPrivate variable
+      goPrivate.push(goGitCredential.matchHost);
+    }
+  }
+
+  // set the GIT_CONFIG_COUNT to the number of KEY/Value pairs
+  gitEnvVariables['GIT_CONFIG_COUNT'] = gitEnvCounter.toString();
+
+  // create and set GOPRIVATE environment variable to pull directly from source (in this case git)
+  const goPrivateEnvVariable: string = goPrivate.join(',');
+  gitEnvVariables['GOPRIVATE'] = goPrivateEnvVariable;
+  return gitEnvVariables;
 }
 
 function getUpdateImportPathCmds(
@@ -123,18 +177,17 @@ export async function updateArtifacts({
       extraEnv: {
         GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
-        GOPRIVATE: process.env.GOPRIVATE,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: getAdminConfig().binarySource === 'docker' ? '0' : null,
+        ...getGoEnvironmentVariables(),
       },
       docker: {
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
         volumes: [goPath],
-        preCommands: getPreCommands(),
       },
     };
 
