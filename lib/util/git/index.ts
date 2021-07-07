@@ -305,7 +305,8 @@ export async function syncGit(): Promise<void> {
           opts.push(e[0], `${e[1]}`)
         );
       }
-      // istanbul ignore if: Will be changed in future, see #6842
+      // will be changed in future, see #6842
+      // istanbul ignore if
       if (!allowGitLfs) {
         opts.push('-c', 'lfs.fetchexclude=*');
       }
