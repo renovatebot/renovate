@@ -19,7 +19,7 @@ import type {
 
 function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
   let gitEnvCounter = 0;
-  const gitEnvVariables: NodeJS.ProcessEnv = {};
+  const goEnvVariables: NodeJS.ProcessEnv = {};
   const goPrivate: string[] = [];
 
   // passthrough the GOPRIVATE environment variable as the first element of the goPrivate array
@@ -46,29 +46,28 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
   if (credentials?.token) {
     const token = quote(credentials.token);
     // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
-    gitEnvVariables[
+    goEnvVariables[
       `GIT_CONFIG_KEY_${gitEnvCounter}`
     ] = `url.https://${token}@github.com/.insteadOf`;
-    gitEnvVariables[
-      `GIT_CONFIG_VALUE_${gitEnvCounter}`
-    ] = `https://github.com/`;
+    goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://github.com/`;
     gitEnvCounter += 1;
   }
 
   // get all credentials we have for go using git
-  const goGitCredentials = findAll({
-    hostType: 'go-git',
-  });
+  const goGitCredentials =
+    findAll({
+      hostType: 'go-git',
+    }) || [];
 
   for (const goGitCredential of goGitCredentials) {
     // Check that both a token exists and a matchHost
     if (goGitCredential.token && goGitCredential.matchHost) {
       const token = quote(goGitCredential.token);
       // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
-      gitEnvVariables[
+      goEnvVariables[
         `GIT_CONFIG_KEY_${gitEnvCounter}`
       ] = `url.https://${token}@${goGitCredential.matchHost}/.insteadOf`;
-      gitEnvVariables[
+      goEnvVariables[
         `GIT_CONFIG_VALUE_${gitEnvCounter}`
       ] = `https://${goGitCredential.matchHost}/`;
       gitEnvCounter += 1;
@@ -77,13 +76,15 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
     }
   }
 
-  // set the GIT_CONFIG_COUNT to the number of KEY/Value pairs
-  gitEnvVariables.GIT_CONFIG_COUNT = `gitEnvCounter`;
+  // set the GIT_CONFIG_COUNT, if larger then 0, to the number of KEY/Value pairs
+  if (gitEnvCounter > 0) {
+    goEnvVariables.GIT_CONFIG_COUNT = gitEnvCounter.toString();
+  }
 
   // create and set GOPRIVATE environment variable to pull directly from source (in this case git)
   const goPrivateEnvVariable: string = goPrivate.join(',');
-  gitEnvVariables.GOPRIVATE = goPrivateEnvVariable;
-  return gitEnvVariables;
+  goEnvVariables.GOPRIVATE = goPrivateEnvVariable;
+  return goEnvVariables;
 }
 
 function getUpdateImportPathCmds(

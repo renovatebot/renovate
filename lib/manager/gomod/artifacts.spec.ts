@@ -49,7 +49,6 @@ const config: UpdateArtifactsConfig = {
 const goEnv = {
   GONOSUMDB: '1',
   GOPROXY: 'proxy.example.com',
-  GOPRIVATE: 'private.example.com/*',
   GONOPROXY: 'noproxy.example.com/*',
   CGO_ENABLED: '1',
 };
@@ -60,6 +59,7 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
 
     delete process.env.GOPATH;
+    process.env.GOPRIVATE = 'private.example.com/*';
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
@@ -193,6 +193,35 @@ describe('.updateArtifacts()', () => {
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('supports docker mode with custom credentials', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        token: 'some-github-enterprise-token',
+        matchHost: 'github.enterprise.com',
+      },
+      {
+        token: 'some-git-private-token',
+        matchHost: 'git.private.com',
+      },
+    ]);
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
