@@ -183,7 +183,11 @@ function getNewValue({
     if (rangeStrategy === 'replace') {
       newValue = replacementValue;
     } else if (rangeStrategy === 'widen') {
-      newValue = currentValue + ' || ' + replacementValue;
+      if (matches(newVersion, currentValue)) {
+        newValue = currentValue;
+      } else {
+        newValue = currentValue + ' || ' + replacementValue;
+      }
     }
   } else if (rangeStrategy === 'widen') {
     if (matches(newVersion, currentValue)) {

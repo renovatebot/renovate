@@ -344,6 +344,14 @@ describe('semver.getNewValue()', () => {
         newVersion: '1.9.0',
       })
     ).toEqual('^1.2');
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.0 || ^2.0',
+        rangeStrategy: 'widen',
+        currentVersion: '2.0.0',
+        newVersion: '2.1.0',
+      })
+    ).toEqual('^1.0 || ^2.0');
   });
   it('returns newVersion if unsupported', () => {
     expect(
