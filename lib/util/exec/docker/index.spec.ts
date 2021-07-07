@@ -1,9 +1,16 @@
+import {
+  ExecSnapshots,
+  envMock,
+  exec,
+  mockExecAll,
+  mockExecSequence,
+} from '../../../../test/exec-util';
 import { getName } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
-import { VolumeOption, rawExec as _rawExec } from '../common';
+import { VolumeOption } from '../common';
 import {
   generateDockerCommand,
   getDockerTag,
@@ -13,53 +20,40 @@ import {
   resetPrefetchedImages,
 } from '.';
 
-const rawExec: jest.Mock<typeof _rawExec> = _rawExec as any;
-jest.mock('../common');
+jest.mock('child_process');
 
 const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
   _getPkgReleases as any;
 jest.mock('../../../datasource');
 
 describe(getName(), () => {
-  const execOpts = { encoding: 'utf-8' };
-
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   describe('prefetchDockerImage', () => {
     beforeEach(() => {
-      rawExec.mockResolvedValue(null as never);
       resetPrefetchedImages();
     });
 
     it('runs prefetch command', async () => {
+      const execSnapshots = mockExecAll(exec);
       await prefetchDockerImage('foo:1.2.3');
-      expect(rawExec).toHaveBeenCalledWith('docker pull foo:1.2.3', execOpts);
+      expect(execSnapshots).toMatchObject([{ cmd: 'docker pull foo:1.2.3' }]);
     });
 
     it('performs prefetch once for each image', async () => {
+      const execSnapshots = mockExecAll(exec);
       await prefetchDockerImage('foo:1.0.0');
       await prefetchDockerImage('foo:2.0.0');
       await prefetchDockerImage('bar:3.0.0');
       await prefetchDockerImage('foo:1.0.0');
 
-      expect(rawExec).toHaveBeenNthCalledWith(
-        1,
-        'docker pull foo:1.0.0',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenNthCalledWith(
-        2,
-        'docker pull foo:2.0.0',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenNthCalledWith(
-        3,
-        'docker pull bar:3.0.0',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenCalledTimes(3);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull foo:1.0.0' },
+        { cmd: 'docker pull foo:2.0.0' },
+        { cmd: 'docker pull bar:3.0.0' },
+      ]);
     });
   });
 
@@ -108,35 +102,33 @@ describe(getName(), () => {
 
   describe('removeDockerContainer', () => {
     it('gracefully handles container list error', async () => {
-      rawExec.mockRejectedValueOnce('unknown' as never);
+      mockExecAll(exec, new Error('unknown'));
       await expect(removeDockerContainer('bar', 'foo_')).resolves.not.toThrow();
     });
 
     it('gracefully handles container removal error', async () => {
-      rawExec.mockResolvedValueOnce({ stdout: '12345' } as never);
-      rawExec.mockRejectedValueOnce('unknown' as never);
+      mockExecSequence(exec, [
+        { stdout: '12345', stderr: '' },
+        new Error('unknown'),
+      ]);
       await expect(removeDockerContainer('bar', 'foo_')).resolves.not.toThrow();
     });
 
     it('gracefully handles empty container list', async () => {
-      rawExec.mockResolvedValueOnce({ stdout: '\n' } as never);
+      mockExecAll(exec, { stdout: '\n', stderr: '' });
       await expect(removeDockerContainer('bar', 'foo_')).resolves.not.toThrow();
     });
 
     it('runs Docker commands for container removal', async () => {
-      rawExec.mockResolvedValueOnce({ stdout: '12345' } as never);
-      rawExec.mockResolvedValueOnce(null as never);
+      const execSnapshots = mockExecSequence(exec, [
+        { stdout: '12345', stderr: '' },
+        { stdout: '', stderr: '' },
+      ]);
       await removeDockerContainer('bar', 'foo_');
-      expect(rawExec).toHaveBeenNthCalledWith(
-        1,
-        'docker ps --filter name=foo_bar -aq',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenNthCalledWith(
-        2,
-        'docker rm -f 12345',
-        execOpts
-      );
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker ps --filter name=foo_bar -aq' },
+        { cmd: 'docker rm -f 12345' },
+      ]);
     });
   });
 
@@ -146,75 +138,64 @@ describe(getName(), () => {
     });
 
     it('short-circuits in non-Docker environment', async () => {
+      const execSnapshots = mockExecAll(exec);
       setAdminConfig({ binarySource: 'global' });
       await removeDanglingContainers();
-      expect(rawExec).not.toHaveBeenCalled();
+      expect(execSnapshots).toBeEmpty();
     });
 
     it('handles insufficient memory error', async () => {
-      rawExec.mockRejectedValueOnce({ errno: 'ENOMEM' } as never);
+      const err: Error & { errno: string } = new Error() as never;
+      err.errno = 'ENOMEM';
+      mockExecAll(exec, err);
       await expect(removeDanglingContainers).rejects.toThrow(
         SYSTEM_INSUFFICIENT_MEMORY
       );
     });
 
     it('handles missing Docker daemon', async () => {
-      rawExec.mockRejectedValueOnce({
-        stderr: 'Cannot connect to the Docker daemon',
-      } as never);
+      const err: Error & { stderr: string } = new Error() as never;
+      err.stderr = 'Cannot connect to the Docker daemon';
+      const execSnapshots = mockExecAll(exec, err);
       await removeDanglingContainers();
-      expect(rawExec).toHaveBeenNthCalledWith(
-        1,
-        'docker ps --filter label=renovate_child -aq',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenCalledTimes(1);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker ps --filter label=renovate_child -aq' },
+      ]);
       expect(logger.info).toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('handles unknown error', async () => {
-      rawExec.mockRejectedValueOnce('unknown' as never);
+      const execSnapshots = mockExecAll(exec, new Error('unknown'));
       await removeDanglingContainers();
-      expect(rawExec).toHaveBeenNthCalledWith(
-        1,
-        'docker ps --filter label=renovate_child -aq',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenCalledTimes(1);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker ps --filter label=renovate_child -aq' },
+      ]);
       expect(logger.info).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalled();
     });
 
     it('handles empty container list ', async () => {
-      rawExec.mockResolvedValueOnce({ stdout: '\n\n\n' } as never);
+      const execSnapshots = mockExecAll(exec, { stdout: '\n\n\n', stderr: '' });
       await removeDanglingContainers();
-      expect(rawExec).toHaveBeenNthCalledWith(
-        1,
-        'docker ps --filter label=renovate_child -aq',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenCalledTimes(1);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker ps --filter label=renovate_child -aq' },
+      ]);
       expect(logger.info).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalled();
     });
 
     it('removes containers', async () => {
-      rawExec.mockResolvedValueOnce({ stdout: '111\n222\n333' } as never);
-      rawExec.mockResolvedValueOnce(null as never);
+      const execSnapshots = mockExecSequence(exec, [
+        { stdout: '111\n222\n333', stderr: '' },
+        { stdout: '', stderr: '' },
+      ]);
       await removeDanglingContainers();
-      expect(rawExec).toHaveBeenNthCalledWith(
-        1,
-        'docker ps --filter label=renovate_child -aq',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenNthCalledWith(
-        2,
-        'docker rm -f 111 222 333',
-        execOpts
-      );
-      expect(rawExec).toHaveBeenCalledTimes(2);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker ps --filter label=renovate_child -aq' },
+        { cmd: 'docker rm -f 111 222 333' },
+      ]);
     });
   });
 
@@ -247,13 +228,13 @@ describe(getName(), () => {
     });
 
     it('returns executable command', async () => {
-      rawExec.mockResolvedValue(null as never);
+      mockExecAll(exec);
       const res = await generateDockerCommand(commands, dockerOptions);
       expect(res).toBe(command(image));
     });
 
     it('handles volumes', async () => {
-      rawExec.mockResolvedValue(null as never);
+      mockExecAll(exec);
       const volumes: VolumeOption[] = [
         '/tmp/foo',
         ['/tmp/bar', `/tmp/bar`],
@@ -272,7 +253,7 @@ describe(getName(), () => {
     });
 
     it('handles tag parameter', async () => {
-      rawExec.mockResolvedValue(null as never);
+      mockExecAll(exec);
       const res = await generateDockerCommand(commands, {
         ...dockerOptions,
         tag: '1.2.3',
@@ -281,7 +262,7 @@ describe(getName(), () => {
     });
 
     it('handles tag constraint', async () => {
-      rawExec.mockResolvedValue(null as never);
+      mockExecAll(exec);
       getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.2.3' },
