@@ -13,7 +13,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowGitLfs
 
-**Note** You need to also configure `gitNoVerify` to allow commit and push git lfs objects.
+**Note** You need to also set the Git commands that Renovate passes to the `gitNoVerify` option.
+This way Renovate can commit and push Git LFS objects.
 
 ## allowPostUpgradeCommandTemplating
 
