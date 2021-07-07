@@ -18,7 +18,6 @@ import type {
 } from '../types';
 
 function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
-  let gitEnvCounter = 0;
   const goEnvVariables: NodeJS.ProcessEnv = {};
   const goPrivate: string[] = [];
 
@@ -27,15 +26,13 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
     goPrivate.push(process.env.GOPRIVATE);
   }
 
-  // passthrough the GIT_CONFIG_COUNT environment variable as the first element of the goPrivate array
-  if (process.env.GIT_CONFIG_COUNT) {
-    try {
-      gitEnvCounter = parseInt(process.env.GIT_CONFIG_COUNT, 10);
-    } catch (e) {
-      logger.warn(
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}`
-      );
-    }
+  // passthrough the GIT_CONFIG_COUNT environment variable as start value of the index count
+  let gitEnvCounter: number = parseInt(process.env.GIT_CONFIG_COUNT, 10);
+  if (isNaN(gitEnvCounter)) {
+    logger.warn(
+      `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}. Ignoring it.`
+    );
+    gitEnvCounter = 0;
   }
 
   const credentials = find({
