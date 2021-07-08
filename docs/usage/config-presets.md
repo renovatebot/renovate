@@ -16,6 +16,8 @@ In short:
 
 Shareable config presets can only be used with the JSON format, other formats are not supported.
 
+To learn more about the onboarding behavior read **insert proper link here once the `docs/development/shareable-configs.md` file has the final `h2` that we can link to**.
+
 ## Goals of Preset Configs
 
 The main reason for supporting preset configs is to decrease duplication.
@@ -147,7 +149,7 @@ In such cases Renovate will simply look for a `renovate.json` file in the defaul
 To host your preset config on GitLab:
 
 - Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
-- Add a renovate.json to this new repo containing the preset config. No other files are necessary
+- Add a `renovate.json` to this new repo containing the preset config. No other files are necessary
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
 ## Gitea-hosted Presets

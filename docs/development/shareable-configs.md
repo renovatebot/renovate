@@ -20,6 +20,13 @@ In human-understandable form, the rules are:
 - If a package name is specified and has no preset name, then `default` is assumed, e.g. `@rarkins` expands in full to `@rarkins/renovate-config:default` and `rarkins` expands in full to `renovate-config-rarkins:default`
 - There is a special "default" namespace where no package name is necessary. e.g. `:webapp` (not the leading `:`) expands to `renovate-config-default:webapp`
 
+## Onboarding PR behavior
+
+When Renovate creates a onboarding PR, it tries to find any global Renovate configuration in the namespace of the onboarding repository.
+
+If the bot finds a global Renovate bot configuration, it will put a link to this repository in the `extends` array of the onboarding pull request.
+If the bot does not find a global configuration, it will create the default Renovate configuration.
+
 ## Supported config syntax
 
 ### Scoped
