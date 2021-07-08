@@ -655,6 +655,63 @@ describe(getName(), () => {
         },
       },
     ],
+
+    [
+      'Cache volume for Docker',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          docker,
+          cwd,
+          cacheDir: { subPath: './foo/bar', execWithEnv: 'FOO_BAR' },
+        },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_manager_cache":"/home/ubuntu" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /home/ubuntu/foo/bar && ${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: {
+              ...envMock.basic,
+              FOO_BAR: '/home/ubuntu/foo/bar',
+            },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { binarySource: 'docker', dockerCacheVolume: true },
+      },
+    ],
+
+    [
+      'Cache directory without Docker',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          cacheDir: { subPath: './foo/bar', execWithEnv: 'FOO_BAR' },
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: {
+              ...envMock.basic,
+              FOO_BAR: '/tmp/renovate/cache/foo/barl',
+            },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
   ];
 
   test.each(testInputs)('%s', async (_msg, testOpts) => {
