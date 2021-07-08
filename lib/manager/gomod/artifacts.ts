@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
-import { Url } from 'url';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
@@ -21,7 +20,7 @@ import type {
 function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
   const goEnvVariables: NodeJS.ProcessEnv = {};
   const goPrivate: string[] = [];
-  let gitEnvCounter: number = 0;
+  let gitEnvCounter = 0;
 
   // passthrough the GOPRIVATE environment variable as the first element of the goPrivate array
   if (process.env.GOPRIVATE) {
@@ -64,33 +63,30 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
     // Check that both a token exists and a matchHost
     if (goGitCredential.token && goGitCredential.matchHost) {
       // add dummy https protocol if matchHost doesn't include a protocol, so new URL() can parse it
-      if (!/^(?:f|ht)tps?\:\/\//.test(goGitCredential.matchHost)) {
+      if (!/^(?:f|ht)tps?:\/\//.test(goGitCredential.matchHost)) {
         goGitCredential.matchHost = 'https://' + goGitCredential.matchHost;
       }
 
-      let url: URL;
       try {
-        url = new URL(goGitCredential.matchHost);
+        const url: URL = new URL(goGitCredential.matchHost);
+        // For go we use a combined url out of the hostname and pathname
+        // For GitHub that would be something like github.enterprise.com/test-org/test-repo
+        // Allowing to specify different credentials for different paths (organizations/repositories)
+        const goHostUrl = url.hostname + url.pathname;
+
+        const token = quote(goGitCredential.token);
+        // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
+        // prettier-ignore
+        goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@${goHostUrl}.insteadOf`;
+        // prettier-ignore
+        goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://${goHostUrl}`;
+        gitEnvCounter += 1;
+        // add list of matched Hosts to goPrivate variable
+        goPrivate.push(goHostUrl);
       } catch (err) {
         // when URL is not parsable we skip it
         logger.debug({ err }, 'Error parsing url. Skipping.');
-        continue;
       }
-
-      // For go we use a combined url out of the hostname and pathname
-      // For GitHub that would be something like github.enterprise.com/test-org/test-repo
-      // Allowing to specify different credentials for different paths (organizations/repositories)
-      const goHostUrl = url.hostname + url.pathname;
-
-      const token = quote(goGitCredential.token);
-      // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
-      // prettier-ignore
-      goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@${goHostUrl}.insteadOf`;
-      // prettier-ignore
-      goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://${goHostUrl}`;
-      gitEnvCounter += 1;
-      // add list of matched Hosts to goPrivate variable
-      goPrivate.push(goHostUrl);
     }
   }
 
