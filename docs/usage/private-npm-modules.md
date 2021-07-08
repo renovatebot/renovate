@@ -61,7 +61,7 @@ module.exports = {
     {
       hostType: 'npm',
       matchHost:
-        'https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/npm/registry/',
+        'https://pkgs.dev.azure.com/{organization}/{project}/_packaging/{feed}/npm/registry/',
       username: 'VssSessionToken',
       password: process.env.AZURE_NPM_TOKEN,
     },
@@ -78,8 +78,6 @@ module.exports = {
 ```
 
 **NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
-
-**NOTE:** Do not use `NPM_TOKEN` as an environment variable.
 
 ### Add npmrc string to Renovate config
 
