@@ -262,6 +262,18 @@ describe('.updateArtifacts()', () => {
         token: 'some-git-private-token',
         matchHost: 'git.private.com',
       },
+      {
+        token: 'some-git2-private-token',
+        matchHost: 'https://git2.private.com',
+      },
+      {
+        token: 'some-git3-private-token',
+        matchHost: 'git3.private.com/test-org',
+      },
+      {
+        token: 'some-invalid-host',
+        matchHost: ':',
+      },
     ]);
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename

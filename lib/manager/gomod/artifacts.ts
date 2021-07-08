@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
+import { Url } from 'url';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
@@ -20,19 +21,22 @@ import type {
 function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
   const goEnvVariables: NodeJS.ProcessEnv = {};
   const goPrivate: string[] = [];
+  let gitEnvCounter: number = 0;
 
   // passthrough the GOPRIVATE environment variable as the first element of the goPrivate array
   if (process.env.GOPRIVATE) {
     goPrivate.push(process.env.GOPRIVATE);
   }
 
-  // passthrough the GIT_CONFIG_COUNT environment variable as start value of the index count
-  let gitEnvCounter: number = parseInt(process.env.GIT_CONFIG_COUNT, 10);
-  if (Number.isNaN(gitEnvCounter)) {
-    logger.warn(
-      `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}. Ignoring it.`
-    );
-    gitEnvCounter = 0;
+  if (process.env.GIT_CONFIG_COUNT) {
+    // passthrough the GIT_CONFIG_COUNT environment variable as start value of the index count
+    gitEnvCounter = parseInt(process.env.GIT_CONFIG_COUNT, 10);
+    if (Number.isNaN(gitEnvCounter)) {
+      logger.warn(
+        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}. Ignoring it.`
+      );
+      gitEnvCounter = 0;
+    }
   }
 
   const credentials = find({
@@ -44,9 +48,9 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
     const token = quote(credentials.token);
     // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
     // prettier-ignore
-    goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@github.com/.insteadOf`;
+    goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@github.com.insteadOf`;
     // prettier-ignore
-    goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://github.com/`;
+    goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://github.com`;
     gitEnvCounter += 1;
   }
 
@@ -59,15 +63,34 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
   for (const goGitCredential of goGitCredentials) {
     // Check that both a token exists and a matchHost
     if (goGitCredential.token && goGitCredential.matchHost) {
+      // add dummy https protocol if matchHost doesn't include a protocol, so new URL() can parse it
+      if (!/^(?:f|ht)tps?\:\/\//.test(goGitCredential.matchHost)) {
+        goGitCredential.matchHost = 'https://' + goGitCredential.matchHost;
+      }
+
+      let url: URL;
+      try {
+        url = new URL(goGitCredential.matchHost);
+      } catch (err) {
+        // when URL is not parsable we skip it
+        logger.debug({ err }, 'Error parsing url. Skipping.');
+        continue;
+      }
+
+      // For go we use a combined url out of the hostname and pathname
+      // For GitHub that would be something like github.enterprise.com/test-org/test-repo
+      // Allowing to specify different credentials for different paths (organizations/repositories)
+      const goHostUrl = url.hostname + url.pathname;
+
       const token = quote(goGitCredential.token);
       // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
       // prettier-ignore
-      goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@${goGitCredential.matchHost}/.insteadOf`;
+      goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@${goHostUrl}.insteadOf`;
       // prettier-ignore
-      goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://${goGitCredential.matchHost}/`;
+      goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://${goHostUrl}`;
       gitEnvCounter += 1;
       // add list of matched Hosts to goPrivate variable
-      goPrivate.push(goGitCredential.matchHost);
+      goPrivate.push(goHostUrl);
     }
   }
 
