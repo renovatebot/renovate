@@ -1,5 +1,6 @@
 import pMap from 'p-map';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import { parseUrl } from '../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
@@ -151,11 +152,15 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           version
         );
       } catch (err) {
+        /* istanbul ignore next */
+        if (err instanceof ExternalHostError) {
+          throw err;
+        }
         logger.debug(
           { err, backendLookUpName, version },
           `Failed to retrieve builds for ${backendLookUpName} ${version}`
         );
-        throw err;
+        return null;
       }
       return versionReleaseBackend.builds;
     }
@@ -203,8 +208,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           };
           return newBuild;
         } catch (err) {
+          /* istanbul ignore next */
+          if (err instanceof ExternalHostError) {
+            throw err;
+          }
           logger.debug({ err, url: buildURL }, 'Failed to retrieve build');
-          throw err;
+          return null;
         }
       },
       { concurrency: 4 }

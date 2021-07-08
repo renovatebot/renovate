@@ -5,7 +5,6 @@ import { join } from 'upath';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/types';
 import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
@@ -16,7 +15,7 @@ export class TerraformProviderHash {
 
   static terraformDatasource = new TerraformProviderDatasource();
 
-  static hashCacheTTL = 10080; // in seconds == 1 week
+  static hashCacheTTL = 10080; // in minutes == 1 week
 
   private static async hashFiles(files: string[]): Promise<string> {
     const rootHash = crypto.createHash('sha256');
@@ -104,6 +103,7 @@ export class TerraformProviderHash {
     namespace: `datasource-${TerraformProviderDatasource.id}-build-hashes`,
     key: (registryURL: string, repository: string, version: string) =>
       `${registryURL}/${repository}/${version}`,
+    ttlMinutes: TerraformProviderHash.hashCacheTTL,
   })
   static async createHashes(
     registryURL: string,
@@ -126,14 +126,6 @@ export class TerraformProviderHash {
     }
 
     // sorting the hash alphabetically as terraform does this as well
-    const sortedHashes = hashes.sort().map((hash) => `h1:${hash}`);
-    // save to cache
-    await packageCache.set(
-      `datasource-${TerraformProviderDatasource.id}-build-hashes`,
-      `${registryURL}/${repository}/${version}`,
-      sortedHashes,
-      TerraformProviderHash.hashCacheTTL
-    );
-    return sortedHashes;
+    return hashes.sort().map((hash) => `h1:${hash}`);
   }
 }
