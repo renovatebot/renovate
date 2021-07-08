@@ -61,7 +61,7 @@ module.exports = {
     {
       hostType: 'npm',
       matchHost:
-        'https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/npm/registry/',
+        'https://pkgs.dev.azure.com/{organization}/{project}/_packaging/{feed}/npm/registry/',
       username: 'VssSessionToken',
       password: process.env.AZURE_NPM_TOKEN,
     },
@@ -78,8 +78,6 @@ module.exports = {
 ```
 
 **NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
-
-**NOTE:** Do not use `NPM_TOKEN` as an environment variable.
 
 ### Add npmrc string to Renovate config
 
@@ -153,3 +151,20 @@ The end-result looks like this:
 ```
 
 However be aware that if your `.npmrc` is too long to encrypt then the above command will fail.
+
+### Automatically authenticate for npm package stored in private GitHub npm repository
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://npm.pkg.github.com/",
+      "hostType": "npm",
+      "encrypted": {
+        "token": "<Encrypted PAT Token>"
+      }
+    }
+  ],
+  "npmrc": "@organizationName:registry=https://npm.pkg.github.com/"
+}
+```
