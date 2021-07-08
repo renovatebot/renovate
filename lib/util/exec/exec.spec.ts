@@ -704,7 +704,7 @@ describe(getName(), () => {
             encoding,
             env: {
               ...envMock.basic,
-              FOO_BAR: '/tmp/renovate/cache/foo/barl',
+              FOO_BAR: '/tmp/renovate/cache/foo/bar',
             },
             timeout: 900000,
             maxBuffer: 10485760,
