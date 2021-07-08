@@ -8,7 +8,7 @@ import { setAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
-import { VolumeOption } from '../common';
+import type { VolumeOption } from '../common';
 import {
   createCacheVolume,
   deleteCacheVolume,

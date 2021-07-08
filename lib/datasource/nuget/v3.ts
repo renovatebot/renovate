@@ -87,6 +87,10 @@ export async function getResourceUrl(
     await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
     return serviceId;
   } catch (err) {
+    // istanbul ignore if: not easy testable with nock
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
     logger.debug(
       { err, url },
       `nuget registry failure: can't get ${resourceType}`
