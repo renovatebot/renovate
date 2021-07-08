@@ -155,7 +155,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           { err, backendLookUpName, version },
           `Failed to retrieve builds for ${backendLookUpName} ${version}`
         );
-        return null;
+        throw err;
       }
       return versionReleaseBackend.builds;
     }
@@ -204,7 +204,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           return newBuild;
         } catch (err) {
           logger.debug({ err, url: buildURL }, 'Failed to retrieve build');
-          return null;
+          throw err;
         }
       },
       { concurrency: 4 }
