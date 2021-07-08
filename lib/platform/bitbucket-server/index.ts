@@ -221,7 +221,7 @@ export async function initRepo({
     config.mergeMethod = 'merge';
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
-      isFork: !!info.parent,
+      isFork: !!info.origin,
     };
 
     return repoConfig;
