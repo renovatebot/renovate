@@ -6,7 +6,8 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
+import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
+import { getHttpUrl } from '../../util/git/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -18,18 +19,6 @@ import type {
 function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
   const goEnvVariables: NodeJS.ProcessEnv = {};
   let goPrivates: string[] = [];
-  let gitEnvCounter = 0;
-
-  if (process.env.GIT_CONFIG_COUNT) {
-    // passthrough the GIT_CONFIG_COUNT environment variable as start value of the index count
-    gitEnvCounter = parseInt(process.env.GIT_CONFIG_COUNT, 10);
-    if (Number.isNaN(gitEnvCounter)) {
-      logger.warn(
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}. Ignoring it.`
-      );
-      gitEnvCounter = 0;
-    }
-  }
 
   // if GOPRIVATE is not set, we don't need to check for authentication
   if (!process.env.GOPRIVATE) {
@@ -42,23 +31,10 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
 
   for (const goPrivate of goPrivates) {
     const goPrivateWithProtocol = getHttpUrl(`https://${goPrivate}`);
-
-    const gitUrlWithToken = getRemoteUrlWithToken(goPrivateWithProtocol, 'git');
-
-    // only if credentials got injected and thus the urls are no longer equal
-    if (gitUrlWithToken !== goPrivateWithProtocol) {
-      goEnvVariables[
-        `GIT_CONFIG_KEY_${gitEnvCounter}`
-      ] = `url.${gitUrlWithToken}.insteadOf`;
-      // prettier-ignore
-      goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = goPrivateWithProtocol;
-      gitEnvCounter += 1;
-    }
-  }
-
-  // set the GIT_CONFIG_COUNT, if larger then 0, to the number of KEY/Value pairs
-  if (gitEnvCounter > 0) {
-    goEnvVariables.GIT_CONFIG_COUNT = gitEnvCounter.toString();
+    getGitAuthenticatedEnvironmentVariables(
+      goPrivateWithProtocol,
+      goEnvVariables
+    );
   }
 
   return goEnvVariables;
