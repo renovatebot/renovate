@@ -676,7 +676,7 @@ Example:
 
 ## gitLabAutomerge
 
-If you are using automerge you can use this setting to use the gitlab native automerge function for MR's to speedup automerge.
+If you enabled automerge in the Renovate config, you can speed up the automerge process, by using GitLab's own automerge function.
 Attention: This is a top-level key.
 To activate automerging within a `packageRule`, you must set `automerge` to `true` in the same `packageRule`.
 
