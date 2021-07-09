@@ -136,7 +136,8 @@ This configuration will be applied after all other environment variables so that
 
 ## dockerCacheVolume
 
-Create and mount volume for manager cache files. Will be removed after repository processing.
+Creates and mounts a temporary Docker volume that is used as a cache for package manager files.
+This volume will be removed after repository processing.
 
 ## dockerChildPrefix
 
