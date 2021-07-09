@@ -678,7 +678,6 @@ Example:
 
 If you enabled automerge in the Renovate config, you can speed up the automerge process, by using GitLab's own automerge function.
 Attention: This is a top-level key.
-To activate automerging within a `packageRule`, you must set `automerge` to `true` in the same `packageRule`.
 
 
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
