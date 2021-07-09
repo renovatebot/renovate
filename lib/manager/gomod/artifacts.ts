@@ -17,7 +17,7 @@ import type {
 } from '../types';
 
 function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
-  const goEnvVariables: NodeJS.ProcessEnv = {};
+  let goEnvVariables: NodeJS.ProcessEnv = {};
   let goPrivates: string[] = [];
 
   // if GOPRIVATE is not set, we don't need to check for authentication
@@ -31,7 +31,7 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
 
   for (const goPrivate of goPrivates) {
     const goPrivateWithProtocol = getHttpUrl(`https://${goPrivate}`);
-    getGitAuthenticatedEnvironmentVariables(
+    goEnvVariables = getGitAuthenticatedEnvironmentVariables(
       goPrivateWithProtocol,
       goEnvVariables
     );
