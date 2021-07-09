@@ -6,10 +6,10 @@ export default function updateArtifacts({
 }: UpdateArtifact): UpdateArtifactsResult[] | null {
   const res: UpdateArtifactsResult[] = [];
   updatedDeps.forEach((dep) => {
-    logger.info('Updating submodule ' + dep);
+    logger.info('Updating submodule ' + dep.depName);
     res.push({
       file: {
-        name: dep,
+        name: dep.depName,
         contents: '',
       },
     });

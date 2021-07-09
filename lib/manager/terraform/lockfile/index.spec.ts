@@ -47,7 +47,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'main.tf',
-        updatedDeps: ['aws'],
+        updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
       })
@@ -62,7 +62,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'main.tf',
-        updatedDeps: ['aws'],
+        updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
       })
@@ -88,7 +88,7 @@ describe(getName(), () => {
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
-      updatedDeps: ['hashicorp/aws'],
+      updatedDeps: [{ depName: 'hashicorp/aws', lookupName: 'hashicorp/aws' }],
       newPackageFileContent: '',
       config: localConfig,
     });
@@ -120,7 +120,7 @@ describe(getName(), () => {
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
-      updatedDeps: ['azurerm'],
+      updatedDeps: [{ depName: 'azurerm', lookupName: 'azurerm' }],
       newPackageFileContent: '',
       config: localConfig,
     });
@@ -152,7 +152,7 @@ describe(getName(), () => {
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
-      updatedDeps: ['random'],
+      updatedDeps: [{ depName: 'random', lookupName: 'hashicorp/random' }],
       newPackageFileContent: '',
       config: localConfig,
     });

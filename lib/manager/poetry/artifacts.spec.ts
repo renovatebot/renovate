@@ -40,7 +40,7 @@ describe('.updateArtifacts()', () => {
     docker.resetPrefetchedImages();
   });
   it('returns null if no poetry.lock found', async () => {
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -64,7 +64,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -79,7 +79,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -101,7 +101,7 @@ describe('.updateArtifacts()', () => {
     });
     hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
     hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -118,7 +118,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -137,7 +137,7 @@ describe('.updateArtifacts()', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.4.2' }],
     });
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -164,7 +164,7 @@ describe('.updateArtifacts()', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
     });
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -183,7 +183,7 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',

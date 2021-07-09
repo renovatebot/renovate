@@ -58,7 +58,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
@@ -86,7 +86,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config: {},
       })
@@ -115,7 +115,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
@@ -133,7 +133,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       })
@@ -154,7 +154,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
@@ -170,7 +170,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
@@ -185,7 +185,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
@@ -207,7 +207,7 @@ describe('.updateArtifacts()', () => {
 
     await updateArtifacts({
       packageFileName: 'Podfile',
-      updatedDeps: ['foo'],
+      updatedDeps: [{ depName: 'foo' }],
       newPackageFileContent: '',
       config,
     });
@@ -231,7 +231,7 @@ describe('.updateArtifacts()', () => {
 
     await updateArtifacts({
       packageFileName: 'Podfile',
-      updatedDeps: ['foo'],
+      updatedDeps: [{ depName: 'foo' }],
       newPackageFileContent: '',
       config,
     });

@@ -22,7 +22,8 @@ export async function updateArtifacts({
     const lines = rewrittenContent.split('\n').map((line) => line.trim());
     for (const dep of updatedDeps) {
       const hashLine = lines.find(
-        (line) => line.startsWith(`${dep}==`) && line.includes('--hash=')
+        (line) =>
+          line.startsWith(`${dep.depName}==`) && line.includes('--hash=')
       );
       if (hashLine) {
         const depConstraint = hashLine.split(' ')[0];

@@ -77,7 +77,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
       })
