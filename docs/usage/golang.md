@@ -48,8 +48,8 @@ We do not support pinning Go versions to a specific patch level, so you cannot u
 
 ### Custom registry support, and authentication
 
-This example shows how you can use a `config.js` file to configure Renovate for use with a custom private go module source using git to pull the modules.
-We're using environment variables to pass the git token to Renovate bot.
+This example shows how you can use a `config.js` file to configure Renovate for use with a custom private Go module source using Git to pull the modules.
+We're using environment variables to pass the Git token to Renovate bot.
 
 ```js
 module.exports = {
