@@ -62,49 +62,53 @@ export class TerraformProviderHash {
     return result;
   }
 
+  @cache({
+    namespace: `datasource-${TerraformProviderDatasource.id}-build-hashes`,
+    key: (build: TerraformBuild) => build.url,
+    ttlMinutes: TerraformProviderHash.hashCacheTTL,
+  })
+  static async calculateSingleHash(
+    build: TerraformBuild,
+    cacheDir: string
+  ): Promise<string> {
+    const downloadFileName = join(cacheDir, build.filename);
+    const extractPath = join(cacheDir, 'extract', build.filename);
+    logger.trace(
+      `Downloading archive and generating hash for ${build.name}-${build.version}...`
+    );
+    const readStream = TerraformProviderHash.http.stream(build.url);
+    const writeStream = fs.createWriteStream(downloadFileName);
+
+    let hash = null;
+    try {
+      await fs.pipeline(readStream, writeStream);
+
+      hash = await this.hashOfZipContent(downloadFileName, extractPath);
+      logger.trace(
+        { hash },
+        `Generated hash for ${build.name}-${build.version}`
+      );
+    } catch (err) {
+      /* istanbul ignore next */
+      logger.error({ err, build }, 'write stream error');
+    } finally {
+      // delete zip file
+      await fs.unlink(downloadFileName);
+    }
+    return hash;
+  }
+
   static async calculateHashes(builds: TerraformBuild[]): Promise<string[]> {
     const cacheDir = await ensureCacheDir('./others/terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files
     return pMap(
       builds,
-      async (build) => {
-        const downloadFileName = join(cacheDir, build.filename);
-        const extractPath = join(cacheDir, 'extract', build.filename);
-        logger.trace(
-          `Downloading archive and generating hash for ${build.name}-${build.version}...`
-        );
-        const readStream = TerraformProviderHash.http.stream(build.url);
-        const writeStream = fs.createWriteStream(downloadFileName);
-
-        let hash = null;
-        try {
-          await fs.pipeline(readStream, writeStream);
-
-          hash = await this.hashOfZipContent(downloadFileName, extractPath);
-          logger.trace(
-            { hash },
-            `Generated hash for ${build.name}-${build.version}`
-          );
-        } catch (err) {
-          /* istanbul ignore next */
-          logger.error({ err, build }, 'write stream error');
-        } finally {
-          // delete zip file
-          await fs.unlink(downloadFileName);
-        }
-        return hash;
-      },
+      (build) => this.calculateSingleHash(build, cacheDir),
       { concurrency: 4 } // allow to look up 4 builds for this version in parallel
     );
   }
 
-  @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}-build-hashes`,
-    key: (registryURL: string, repository: string, version: string) =>
-      `${registryURL}/${repository}/${version}`,
-    ttlMinutes: TerraformProviderHash.hashCacheTTL,
-  })
   static async createHashes(
     registryURL: string,
     repository: string,
