@@ -85,6 +85,7 @@ describe(getName(), () => {
     title: 'Some Issue',
     body: 'just some issue',
     assignees: [mockUser],
+    labels: [],
   };
 
   const mockComment: ght.Comment = {
@@ -465,6 +466,30 @@ describe(getName(), () => {
         assignees: [otherMockUser.username],
       });
       expect(res).toEqual(updatedMockIssue);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('updateIssueLabels', () => {
+    it('should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint', async () => {
+      const updatedMockLabels: Partial<ght.Label>[] = [
+        { id: 1, name: 'Renovate' },
+        { id: 3, name: 'Maintenance' },
+      ];
+
+      httpMock
+        .scope(baseUrl)
+        .put(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}/labels`)
+        .reply(200, updatedMockLabels);
+
+      const res = await ght.updateIssueLabels(
+        mockRepo.full_name,
+        mockIssue.number,
+        {
+          labels: [1, 3],
+        }
+      );
+      expect(res).toEqual(updatedMockLabels);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
