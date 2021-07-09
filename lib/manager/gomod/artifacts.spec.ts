@@ -267,7 +267,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -292,7 +292,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/pkg/errors'],
+        updatedDeps: [{ depName: 'github.com/pkg/errors' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -318,7 +318,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -347,7 +347,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -375,7 +375,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['gopkg.in/yaml.v2'],
+        updatedDeps: [{ depName: 'gopkg.in/yaml.v2' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,

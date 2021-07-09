@@ -1220,7 +1220,7 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
 
 This field also supports Regular Expressions if they begin and end with `/`.
-For example, the following will enforce that only 3 or 4-section versions are supported, without any prefixes:
+For example, the following will enforce that only 3 or 4-part versions are supported, without any prefixes:
 
 ```json
 {
@@ -2297,11 +2297,16 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 ## versioning
 
-Usually, each language or package manager has a specific type of "versioning". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc.
-At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
+Usually, each language or package manager has a specific type of "versioning":
+JavaScript uses npm's SemVer implementation, Python uses pep440, etc.
 
-By exposing `versioning` to config, it allows you to override the default versioning for a package manager if you really need.
-In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+Renovate also uses custom versioning, like `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries SemVer first but otherwise just does its best to sort and compare.
+
+By exposing `versioning` to config, you can override the default versioning for a package manager if needed.
+We do not recommend overriding the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+
+Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
+Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, any leading parts are sorted alphanumerically.
 
 ## vulnerabilityAlerts
 

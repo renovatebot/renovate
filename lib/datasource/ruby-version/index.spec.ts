@@ -1,9 +1,11 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
-import { id as datasource } from '.';
+import { RubyVersionDatasource } from '.';
 
 const rubyReleasesHtml = loadFixture('releases.html');
+
+const datasource = RubyVersionDatasource.id;
 
 describe(getName(), () => {
   describe('getReleases', () => {

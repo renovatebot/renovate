@@ -3,6 +3,7 @@ import pAll from 'p-all';
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { HttpError } from '../../util/http/types';
@@ -86,6 +87,10 @@ export async function getResourceUrl(
     await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
     return serviceId;
   } catch (err) {
+    // istanbul ignore if: not easy testable with nock
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
     logger.debug(
       { err, url },
       `nuget registry failure: can't get ${resourceType}`
@@ -174,6 +179,10 @@ export async function getReleases(
       }
     }
   } catch (err) {
+    // istanbul ignore if: not easy testable with nock
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
     // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
     if (err instanceof HttpError && err.response?.statusCode === 404) {
       logger.debug(
