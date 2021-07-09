@@ -198,6 +198,27 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('supports docker mode without GORPIVATE', async () => {
+    delete process.env.GOPRIVATE;
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('ignore docker mode passthrough of invalid GIT_CONFIG_COUNT', async () => {
     process.env.GIT_CONFIG_COUNT = 'not-a-number';
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
@@ -241,6 +262,7 @@ describe('.updateArtifacts()', () => {
 
   it('supports docker mode with credentials', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    process.env.GOPRIVATE = 'github.com';
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -264,7 +286,7 @@ describe('.updateArtifacts()', () => {
 
   it('supports docker mode with custom credentials', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
-    hostRules.findAll.mockReturnValueOnce([
+    const mockValues = [
       {
         token: 'some-github-enterprise-token',
         matchHost: 'github.enterprise.com',
@@ -282,19 +304,20 @@ describe('.updateArtifacts()', () => {
         matchHost: 'git3.private.com/test-org',
       },
       {
-        token: 'some-invalid-host',
-        matchHost: ':',
-      },
-      {
         username: 'username',
         password: 'password',
         matchHost: 'git4.private.com',
       },
       {
         username: 'username-is-not-enough',
-        matchHost: 'git4.private.com',
+        matchHost: 'git5.private.com',
       },
-    ]);
+    ];
+    process.env.GOPRIVATE =
+      'github.enterprise.com,git.private.com,git2.private.com,git3.private.com/test-org,git4.private.com,git5.private.com';
+    for (const mockValue of mockValues) {
+      hostRules.find.mockReturnValueOnce(mockValue);
+    }
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
