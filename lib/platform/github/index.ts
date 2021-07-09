@@ -1152,6 +1152,7 @@ export async function ensureIssue({
   title,
   reuseTitle,
   body: rawBody,
+  labels,
   once = false,
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
@@ -1206,7 +1207,7 @@ export async function ensureIssue({
             issue.number
           }`,
           {
-            body: { body, state: 'open', title },
+            body: { body, state: 'open', title, labels },
           }
         );
         logger.debug('Issue updated');
@@ -1219,6 +1220,7 @@ export async function ensureIssue({
         body: {
           title,
           body,
+          labels,
         },
       }
     );

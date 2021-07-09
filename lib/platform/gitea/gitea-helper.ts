@@ -46,6 +46,7 @@ export interface Issue {
   title: string;
   body: string;
   assignees: User[];
+  labels: Label[];
 }
 
 export interface User {
@@ -135,13 +136,18 @@ export type RepoSearchParams = {
   archived?: boolean;
 };
 
-export type IssueCreateParams = IssueUpdateParams;
+export type IssueCreateParams = Partial<IssueUpdateLabelsParams> &
+  IssueUpdateParams;
 
 export type IssueUpdateParams = {
   title?: string;
   body?: string;
   state?: IssueState;
   assignees?: string[];
+};
+
+export type IssueUpdateLabelsParams = {
+  labels: number[];
 };
 
 export type IssueSearchParams = {
@@ -367,6 +373,21 @@ export async function updateIssue(
 ): Promise<Issue> {
   const url = `repos/${repoPath}/issues/${idx}`;
   const res = await giteaHttp.patchJson<Issue>(url, {
+    ...options,
+    body: params,
+  });
+
+  return res.body;
+}
+
+export async function updateIssueLabels(
+  repoPath: string,
+  idx: number,
+  params: IssueUpdateLabelsParams,
+  options?: GiteaHttpOptions
+): Promise<Label[]> {
+  const url = `repos/${repoPath}/issues/${idx}/labels`;
+  const res = await giteaHttp.putJson<Label[]>(url, {
     ...options,
     body: params,
   });
