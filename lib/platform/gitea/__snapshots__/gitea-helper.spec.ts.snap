@@ -775,7 +775,7 @@ Array [
       "content-length": "16",
       "content-type": "application/json",
       "host": "gitea.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "PUT",
     "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7/labels",
