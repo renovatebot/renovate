@@ -114,7 +114,10 @@ export function cache<T>({
 
     const result = await callback();
 
-    await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
+    // only cache if we got a valid result
+    if (result) {
+      await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
+    }
     return result;
   });
 }
