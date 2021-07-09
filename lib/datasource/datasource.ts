@@ -37,6 +37,10 @@ export abstract class Datasource implements DatasourceApi {
   handleSpecificErrors(err: HttpError): void {}
 
   protected handleGenericErrors(err: HttpError): never {
+    // istanbul ignore if: not easy testable with nock
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
     this.handleSpecificErrors(err);
     if (err.response?.statusCode !== undefined) {
       if (

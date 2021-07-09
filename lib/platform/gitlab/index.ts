@@ -793,6 +793,7 @@ export async function ensureIssue({
   title,
   reuseTitle,
   body,
+  labels,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
@@ -813,7 +814,7 @@ export async function ensureIssue({
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { title, description },
+            body: { title, description, labels },
           }
         );
         return 'updated';
@@ -823,6 +824,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
+          labels,
         },
       });
       logger.info('Issue created');
