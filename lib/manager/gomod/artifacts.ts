@@ -61,28 +61,44 @@ function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
 
   for (const goGitCredential of goGitCredentials) {
     // Check that both a token exists and a matchHost
-    if (goGitCredential.token && goGitCredential.matchHost) {
+    if (goGitCredential.matchHost) {
+      let matchHost = goGitCredential.matchHost;
       // add dummy https protocol if matchHost doesn't include a protocol, so new URL() can parse it
-      if (!/^(?:f|ht)tps?:\/\//.test(goGitCredential.matchHost)) {
-        goGitCredential.matchHost = 'https://' + goGitCredential.matchHost;
+      if (!/^(?:f|ht)tps?:\/\//.test(matchHost)) {
+        matchHost = 'https://' + matchHost;
       }
 
       try {
-        const url: URL = new URL(goGitCredential.matchHost);
+        const url: URL = new URL(matchHost);
         // For go we use a combined url out of the hostname and pathname
         // For GitHub that would be something like github.enterprise.com/test-org/test-repo
         // Allowing to specify different credentials for different paths (organizations/repositories)
         const goHostUrl = url.hostname + url.pathname;
 
-        const token = quote(goGitCredential.token);
-        // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
-        // prettier-ignore
-        goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${token}@${goHostUrl}.insteadOf`;
-        // prettier-ignore
-        goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://${goHostUrl}`;
-        gitEnvCounter += 1;
-        // add list of matched Hosts to goPrivate variable
-        goPrivate.push(goHostUrl);
+        // authentication is possible with either token or username/password
+        let authentication: string;
+        if (goGitCredential.token) {
+          authentication = quote(goGitCredential.token);
+        } else if (goGitCredential.username && goGitCredential.password) {
+          authentication = `${quote(goGitCredential.username)}:${quote(
+            goGitCredential.password
+          )}`;
+        }
+
+        if (authentication) {
+          // gitEnvCounter is zero indexed, thus we first create the variables and then increment the counter
+          // prettier-ignore
+          goEnvVariables[`GIT_CONFIG_KEY_${gitEnvCounter}`] = `url.https://${authentication}@${goHostUrl}.insteadOf`;
+          // prettier-ignore
+          goEnvVariables[`GIT_CONFIG_VALUE_${gitEnvCounter}`] = `https://${goHostUrl}`;
+          gitEnvCounter += 1;
+          // add list of matched Hosts to goPrivate variable
+          goPrivate.push(goHostUrl);
+        } else {
+          logger.warn(
+            `No token or username/password in hostRule ${goGitCredential.matchHost} specified`
+          );
+        }
       } catch (err) {
         // when URL is not parsable we skip it
         logger.debug({ err }, 'Error parsing url. Skipping.');

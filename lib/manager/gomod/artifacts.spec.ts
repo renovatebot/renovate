@@ -65,9 +65,11 @@ describe('.updateArtifacts()', () => {
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
+
   afterEach(() => {
     setAdminConfig();
   });
+
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
     expect(
@@ -80,6 +82,7 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns null if unchanged', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -97,6 +100,7 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated go.sum', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -115,6 +119,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports vendor directory update', async () => {
     const foo = join('vendor/github.com/foo/foo/go.mod');
     const bar = join('vendor/github.com/bar/bar/go.mod');
@@ -151,6 +156,7 @@ describe('.updateArtifacts()', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode without credentials', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
@@ -170,6 +176,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode passthrough of GIT_CONFIG_COUNT', async () => {
     process.env.GIT_CONFIG_COUNT = '2';
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
@@ -190,6 +197,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('ignore docker mode passthrough of invalid GIT_CONFIG_COUNT', async () => {
     process.env.GIT_CONFIG_COUNT = 'not-a-number';
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
@@ -210,6 +218,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports global mode', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'global' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
@@ -229,6 +238,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode with credentials', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
@@ -251,6 +261,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode with custom credentials', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.findAll.mockReturnValueOnce([
@@ -274,6 +285,15 @@ describe('.updateArtifacts()', () => {
         token: 'some-invalid-host',
         matchHost: ':',
       },
+      {
+        username: 'username',
+        password: 'password',
+        matchHost: 'git4.private.com',
+      },
+      {
+        username: 'username-is-not-enough',
+        matchHost: 'git4.private.com',
+      },
     ]);
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -292,6 +312,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode with goModTidy', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({});
@@ -318,6 +339,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
@@ -335,6 +357,7 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('updates import paths with gomodUpdateImportPaths', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -361,6 +384,7 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -386,6 +410,7 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('updates import paths with specific tool version from constraint', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -415,6 +440,7 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('updates import paths with latest tool version on invalid version constraint', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -444,6 +470,7 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('skips updating import paths for gopkg.in dependencies', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
