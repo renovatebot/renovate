@@ -55,10 +55,12 @@ We're using environment variables to pass the Git token to Renovate bot.
 module.exports = {
   hostRules: [
     {
-      hostType: 'go-git',
       matchHost: 'github.enterprise.com',
       token: process.env.GO_GIT_TOKEN,
     },
   ],
+  golang: {
+    registryUrls: ['github.enterprise.com'],
+  },
 };
 ```

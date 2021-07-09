@@ -128,11 +128,11 @@ Any `hostRules` with `hostType=packagist` are also included.
 
 ### gomod
 
-If a `github.com` token is found in `hostRules`, then it is passed to Git via `GIT_CONFIG_KEY_x=url."https://${token}@github.com/".insteadOf` and `GIT_CONFIG_VALUE_x=https://github.com/` when running `go` commands.
-
-Credentials for other private Go module sources can be set as `hostRules`.
-Any `hostRules` with `hostType=go-git` are included as well.
-Credentials are passed to Git via `GIT_CONFIG_KEY_x=url."https://${token}@${matchHost}/".insteadOf` and `GIT_CONFIG_VALUE_x=https://${matchHost}/` and the value of `matchHost` is appended to `GOPRIVATE` when running `go` commands.
+The `GOPRIVATE` environment variable is used to decide if a package should be fetched from the `GOPROXY` or directly from the source.
+Most private modules will need to be fetched from the source directly, `renovate` currently supports only Git for this.
+For each comma-separated module path in `GOPRIVATE` or `golang.registryUrls` renovate will look for credentials in `hostRules`.
+Credentials are passed to Git via `GIT_CONFIG_KEY_x=url."https://${token}@${GOPRIVATE}/".insteadOf` and `GIT_CONFIG_VALUE_x=https://${GOPRIVATE}/` when running `go` commands.
+Glob syntax for `GOPRIVATE` is not supported.
 
 ### npm
 

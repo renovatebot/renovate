@@ -16,21 +16,11 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-function getGoEnvironmentVariables(): NodeJS.ProcessEnv {
+function getGoEnvironmentVariables(registryUrls: string[]): NodeJS.ProcessEnv {
   let goEnvVariables: NodeJS.ProcessEnv = {};
-  let goPrivates: string[] = [];
 
-  // if GOPRIVATE is not set, we don't need to check for authentication
-  if (!process.env.GOPRIVATE) {
-    return goEnvVariables;
-  }
-
-  // GOPRIVATE is a list of comma-separated values
-  // Each one representing an individual host
-  goPrivates = process.env.GOPRIVATE.split(',');
-
-  for (const goPrivate of goPrivates) {
-    const goPrivateWithProtocol = getHttpUrl(`https://${goPrivate}`);
+  for (const registryUrl of registryUrls) {
+    const goPrivateWithProtocol = getHttpUrl(`https://${registryUrl}`);
     goEnvVariables = getGitAuthenticatedEnvironmentVariables(
       goPrivateWithProtocol,
       goEnvVariables
@@ -124,6 +114,24 @@ export async function updateArtifacts({
       logger.debug('Removed some relative replace statements from go.mod');
     }
     await writeLocalFile(goModFileName, massagedGoMod);
+    // array of GOMODULE registries which should be fetched from
+    // passed to go as GOPRIVATE
+    let registryUrls: string[] = [];
+
+    // add GOPRIVATE environment variables
+    if (process.env.GOPRIVATE) {
+      const goPrivates = process.env.GOPRIVATE.split(',');
+      registryUrls = registryUrls.concat(goPrivates);
+    }
+
+    // add explicit registryUrls
+    if (config.registryUrls) {
+      registryUrls = registryUrls.concat(config.registryUrls);
+    }
+
+    // create comma-separated GOPRIVATE environment variable if any registryUrls exist
+    const goPrivate =
+      registryUrls.length > 0 ? registryUrls.join(',') : undefined;
 
     const cmd = 'go';
     const execOptions: ExecOptions = {
@@ -131,12 +139,12 @@ export async function updateArtifacts({
       extraEnv: {
         GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
-        GOPRIVATE: process.env.GOPRIVATE,
+        GOPRIVATE: goPrivate,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: getAdminConfig().binarySource === 'docker' ? '0' : null,
-        ...getGoEnvironmentVariables(),
+        ...getGoEnvironmentVariables(registryUrls),
       },
       docker: {
         image: 'go',

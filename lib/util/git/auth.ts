@@ -23,7 +23,7 @@ export function getGitAuthenticatedEnvironmentVariables(
     }
   }
 
-  const gitUrlWithToken = getRemoteUrlWithToken(gitUrl, 'git');
+  const gitUrlWithToken = getRemoteUrlWithToken(gitUrl);
   const returnEnvironmentVariables = { ...environmentVariables };
 
   // only if credentials got injected and thus the urls are no longer equal
