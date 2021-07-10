@@ -3,9 +3,9 @@ import { getAdminConfig, setAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
 import {
-  createNewTmpVolume,
-  removeAllTmpVolumes,
+  ensureDockerTmpCache,
   removeDanglingContainers,
+  removeDockerTmpCaches,
 } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
@@ -35,8 +35,11 @@ export async function renovateRepository(
 ): Promise<ProcessResult> {
   splitInit();
   let config = setAdminConfig(repoConfig);
-  await createNewTmpVolume();
+
   await removeDanglingContainers();
+  await removeDockerTmpCaches();
+  await ensureDockerTmpCache();
+
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
@@ -81,11 +84,15 @@ export async function renovateRepository(
     }
   }
   try {
+    await removeDockerTmpCaches();
+  } catch (err) /* istanbul ignore if */ {
+    logger.warn({ err }, 'docker tmp caches deletion error');
+  }
+  try {
     await fs.remove(privateCacheDir());
   } catch (err) /* istanbul ignore if */ {
     logger.warn({ err }, 'privateCacheDir deletion error');
   }
-  await removeAllTmpVolumes();
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   printRequestStats();

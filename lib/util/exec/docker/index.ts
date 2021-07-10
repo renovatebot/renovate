@@ -1,10 +1,12 @@
 import is from '@sindresorhus/is';
 import cryptoRandomString from 'crypto-random-string';
+import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
+import { ensureDir, privateCacheDir, remove } from '../../fs';
 import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
@@ -289,45 +291,59 @@ export async function volumeCreate(
   await rawExec(cmd, { encoding: 'utf-8' });
 }
 
-let tmpVolumeName: string = null;
+let tmpId: string = null;
 
-function getTmpVolumeNamespace(): string {
+export function getTmpCacheId(): string {
+  if (!tmpId) {
+    tmpId = cryptoRandomString({ length: 16 });
+  }
+  return tmpId;
+}
+
+export function resetTmpCacheId(): void {
+  tmpId = null;
+}
+
+function getTmpCacheNs(): string {
   const { dockerChildPrefix } = getAdminConfig();
   return getContainerName('tmp', dockerChildPrefix);
 }
 
-export function getTmpVolumeName(): string {
-  if (!tmpVolumeName) {
-    const volumeId = cryptoRandomString({ length: 16 });
-    const volumeNamespace = getTmpVolumeNamespace();
-    tmpVolumeName = `${volumeNamespace}_${volumeId}`;
-  }
-  return tmpVolumeName;
+export function getTmpCacheName(): string {
+  const ns = getTmpCacheNs();
+  const id = getTmpCacheId();
+  return `${ns}_${id}`;
 }
 
-export function resetTmpVolumeName(): void {
-  tmpVolumeName = null;
-}
-
-export async function removeAllTmpVolumes(): Promise<void> {
+export async function removeDockerTmpCaches(): Promise<void> {
   const { binarySource, dockerCacheVolume } = getAdminConfig();
-  if (binarySource === 'docker' && dockerCacheVolume) {
-    resetTmpVolumeName();
-    const volumeNamespace = getTmpVolumeNamespace();
-    const meta = { renovate: volumeNamespace };
-    logger.debug(`Deleting volume cache: ${volumeNamespace}_*`);
-    await volumePrune(meta);
+  if (binarySource === 'docker') {
+    resetTmpCacheId();
+    if (dockerCacheVolume) {
+      const cacheNamespace = getTmpCacheNs();
+      logger.trace(`Deleting Docker cache volume: ${cacheNamespace}_*`);
+      await volumePrune({ renovate: cacheNamespace });
+    } else {
+      const cacheName = getTmpCacheName();
+      const cacheRoot = join(privateCacheDir(), cacheName);
+      logger.trace(`Deleting Docker private cache directory: ${cacheRoot}`);
+      await remove(cacheRoot);
+    }
   }
 }
 
-export async function createNewTmpVolume(): Promise<void> {
+export async function ensureDockerTmpCache(): Promise<void> {
   const { binarySource, dockerCacheVolume } = getAdminConfig();
-  if (binarySource === 'docker' && dockerCacheVolume) {
-    await removeAllTmpVolumes();
-    const volumeNamespace = getTmpVolumeNamespace();
-    const volumeName = getTmpVolumeName();
-    const meta = { renovate: volumeNamespace };
-    logger.debug(`Creating volume cache: ${volumeName}`);
-    await volumeCreate(volumeName, meta);
+  if (binarySource === 'docker') {
+    const cacheNamespace = getTmpCacheNs();
+    const cacheName = getTmpCacheName();
+    if (dockerCacheVolume) {
+      logger.trace(`Creating Docker cache volume: ${cacheName}`);
+      await volumeCreate(cacheName, { renovate: cacheNamespace });
+    } else {
+      const cacheRoot = join(privateCacheDir(), cacheName);
+      logger.trace(`Creating Docker private cache directory: ${cacheRoot}`);
+      await ensureDir(cacheRoot);
+    }
   }
 }

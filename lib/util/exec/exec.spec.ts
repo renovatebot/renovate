@@ -697,6 +697,39 @@ describe(getName(), () => {
     ],
 
     [
+      'Private cache directory for Docker',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          docker,
+          cwd,
+          cacheDir: { dir: './foo/bar', env: 'FOO_BAR' },
+        },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${cacheDir}__renovate-private-cache/renovate_tmp_${tmpVolumeId}":"/tmp/renovate_tmp_${tmpVolumeId}" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: {
+              ...envMock.basic,
+              FOO_BAR: '/tmp/renovate_tmp_0123456789abcdef/foo/bar',
+            },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { binarySource: 'docker', dockerCacheVolume: false },
+      },
+    ],
+
+    [
       'Cache directory without Docker',
       {
         processEnv,
