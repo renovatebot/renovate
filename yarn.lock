@@ -1896,10 +1896,10 @@
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.2.3.tgz#ef65165aea2924c9359205bf748865b8881753c0"
   integrity sha512-PijRCG/K3s3w1We6ynUKdxEc5AcuuH3NBmMDP8uvKVp6X43UY7NQlTzczakXP3DJR0F4dfNQIGjU2cUeRYs2AA==
 
-"@types/redis@^2.8.27":
-  version "2.8.29"
-  resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.29.tgz#f272dba985156e599e2523afb4f5f7e7586b56b5"
-  integrity sha512-/pjQ9lwnL/t1bEfRHQFEJB3kHCR65tpB19NEWmbqcgGgqrfeGo/9b4tUtHbClxQoy3+g6Esx2QRtV7fk7kBPYg==
+"@types/redis@^2.8.30":
+  version "2.8.31"
+  resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.31.tgz#c11c1b269fec132ac2ec9eb891edf72fc549149e"
+  integrity sha512-daWrrTDYaa5iSDFbgzZ9gOOzyp2AJmYK59OlG/2KGBgYWF3lfs8GDKm1c//tik5Uc93hDD36O+qLPvzDolChbA==
   dependencies:
     "@types/node" "*"
 
@@ -4651,12 +4651,12 @@ handlebars@4.7.7, handlebars@^4.7.6:
   optionalDependencies:
     uglify-js "^3.1.4"
 
-handy-redis@2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/handy-redis/-/handy-redis-2.2.1.tgz#33f4293dffba7e0c2b198c4a4ce7cd4a832b5ecc"
-  integrity sha512-Kmz9HhdAA9tGV1b1R6m3AJ8GcC+r/0uzyiTia39Q8tseJJc4kOwGGQr7cfPppD/xlO2ENE5IK+ToRahLuX1JVg==
+handy-redis@2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/handy-redis/-/handy-redis-2.2.2.tgz#12d1edae6e762076b10f173fab82d895ad252607"
+  integrity sha512-m+7d89zM/rUVvtvVV0/wQGY2SQOh2fgIgg2Fts9q/wQFom0h5sZTCYPHgzPtnJxDOilIMvxRbPHi7b+IKin7UA==
   dependencies:
-    "@types/redis" "^2.8.27"
+    "@types/redis" "^2.8.30"
 
 har-schema@^2.0.0:
   version "2.0.0"
