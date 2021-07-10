@@ -1349,6 +1349,63 @@ Array [
 ]
 `;
 
+exports[`platform/github/index ensureIssue() creates issue with labels 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "undefined",
+            "owner": "undefined",
+          },
+          "issues": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "425",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "body": "{\\"title\\":\\"new-title\\",\\"body\\":\\"new-content\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "78",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/repos/undefined/issues",
+  },
+]
+`;
+
 exports[`platform/github/index ensureIssue() deletes if duplicate 1`] = `
 Array [
   Object {
@@ -1626,6 +1683,74 @@ Array [
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
       "content-length": "57",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://api.github.com/repos/undefined/issues/2",
+  },
+]
+`;
+
+exports[`platform/github/index ensureIssue() updates issue with labels 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "undefined",
+            "owner": "undefined",
+          },
+          "issues": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "425",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/undefined/issues/2",
+  },
+  Object {
+    "body": "{\\"body\\":\\"newer-content\\",\\"state\\":\\"open\\",\\"title\\":\\"title-3\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "93",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

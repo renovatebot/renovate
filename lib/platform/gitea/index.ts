@@ -621,6 +621,7 @@ const platform: Platform = {
     title,
     reuseTitle,
     body: content,
+    labels: labelNames,
     shouldReOpen,
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
@@ -633,6 +634,11 @@ const platform: Platform = {
       if (!issues.length) {
         issues = issueList.filter((i) => i.title === reuseTitle);
       }
+
+      const labels = Array.isArray(labelNames)
+        ? await Promise.all(labelNames.map(lookupLabelByName))
+        : undefined;
+
       // Update any matching issues which currently exist
       if (issues.length) {
         let activeIssue = issues.find((i) => i.state === 'open');
@@ -673,13 +679,37 @@ const platform: Platform = {
 
         // Update issue body and re-open if enabled
         logger.debug(`Updating Issue #${activeIssue.number}`);
-        await helper.updateIssue(config.repository, activeIssue.number, {
-          body,
-          title,
-          state: shouldReOpen
-            ? 'open'
-            : (activeIssue.state as helper.IssueState),
-        });
+        const existingIssue = await helper.updateIssue(
+          config.repository,
+          activeIssue.number,
+          {
+            body,
+            title,
+            state: shouldReOpen
+              ? 'open'
+              : (activeIssue.state as helper.IssueState),
+          }
+        );
+
+        // Test whether the issues need to be updated
+        const existingLabelIds = (existingIssue.labels ?? []).map(
+          (label) => label.id
+        );
+        if (
+          labels !== undefined &&
+          labels.length !== 0 &&
+          (labels.length !== existingLabelIds.length ||
+            labels.filter((labelId) => !existingLabelIds.includes(labelId))
+              .length !== 0)
+        ) {
+          await helper.updateIssueLabels(
+            config.repository,
+            activeIssue.number,
+            {
+              labels,
+            }
+          );
+        }
 
         return 'updated';
       }
@@ -688,6 +718,7 @@ const platform: Platform = {
       const issue = await helper.createIssue(config.repository, {
         body,
         title,
+        labels,
       });
       logger.debug(`Created new Issue #${issue.number}`);
       config.issueList = null;

@@ -420,6 +420,13 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
+    name: 'dependencyDashboardLabels',
+    description:
+      'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
+    type: 'array',
+    subType: 'string',
+  },
+  {
     name: 'configWarningReuseIssue',
     description:
       'Set this to false and Renovate will open each config warning in a new issue instead of reopening/reusing an existing issue.',
