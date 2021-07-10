@@ -441,6 +441,11 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 
 ## dependencyDashboardHeader
 
+## dependencyDashboardLabels
+
+The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
+It is pointless to edit the labels, as Renovate bot restores the labels on each run.
+
 ## dependencyDashboardTitle
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
