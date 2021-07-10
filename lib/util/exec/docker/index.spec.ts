@@ -1,3 +1,4 @@
+import _cryptoRandomString from 'crypto-random-string';
 import {
   exec,
   mockExecAll,
@@ -10,14 +11,16 @@ import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import type { VolumeOption } from '../common';
 import {
-  createCacheVolume,
-  deleteCacheVolume,
+  createNewTmpVolume,
   generateDockerCommand,
   getDockerTag,
+  getTmpVolumeName,
   prefetchDockerImage,
+  removeAllTmpVolumes,
   removeDanglingContainers,
   removeDockerContainer,
   resetPrefetchedImages,
+  resetTmpVolumeName,
   volumeCreate,
   volumePrune,
 } from '.';
@@ -27,6 +30,10 @@ jest.mock('child_process');
 const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
   _getPkgReleases as any;
 jest.mock('../../../datasource');
+
+const cryptoRandomString: jest.Mock<typeof _cryptoRandomString> =
+  _cryptoRandomString as any;
+jest.mock('crypto-random-string');
 
 describe(getName(), () => {
   beforeEach(() => {
@@ -282,6 +289,35 @@ describe(getName(), () => {
   });
 
   describe('volume management', () => {
+    const tmpVolumeId = '0123456789abcdef';
+
+    beforeEach(() => {
+      cryptoRandomString.mockReturnValue(tmpVolumeId as never);
+    });
+
+    afterEach(() => {
+      resetTmpVolumeName();
+    });
+
+    describe('getTmpVolumeName', () => {
+      it('preserves same volume name until reset', () => {
+        cryptoRandomString.mockReturnValue('foo' as never);
+        const res1 = getTmpVolumeName();
+
+        cryptoRandomString.mockReturnValue('bar' as never);
+        const res2 = getTmpVolumeName();
+        const res3 = getTmpVolumeName();
+
+        resetTmpVolumeName();
+        const res4 = getTmpVolumeName();
+
+        expect(res1).toBe('renovate_tmp_foo');
+        expect(res2).toBe('renovate_tmp_foo');
+        expect(res3).toBe('renovate_tmp_foo');
+        expect(res4).toBe('renovate_tmp_bar');
+      });
+    });
+
     describe('volumePrune', () => {
       it('prunes volumes', async () => {
         const execSnapshots = mockExecAll(exec);
@@ -304,12 +340,12 @@ describe(getName(), () => {
       });
     });
 
-    describe('deleteCacheVolume', () => {
+    describe('removeAllTmpVolumes', () => {
       it('short-circuits in non-Docker environment', async () => {
         const execSnapshots = mockExecAll(exec);
 
         setAdminConfig({ binarySource: 'global' });
-        await deleteCacheVolume();
+        await removeAllTmpVolumes();
 
         expect(execSnapshots).toBeEmpty();
       });
@@ -318,7 +354,7 @@ describe(getName(), () => {
         const execSnapshots = mockExecAll(exec);
 
         setAdminConfig({ binarySource: 'docker' });
-        await deleteCacheVolume();
+        await removeAllTmpVolumes();
 
         expect(execSnapshots).toBeEmpty();
       });
@@ -329,44 +365,79 @@ describe(getName(), () => {
         setAdminConfig({
           binarySource: 'docker',
           dockerCacheVolume: true,
-          dockerChildPrefix: 'my_namespace_',
         });
-        await deleteCacheVolume();
+        await removeAllTmpVolumes();
 
         expect(execSnapshots).toMatchObject([
           {
-            cmd: 'docker volume prune --force --filter label=renovate-namespace=my_namespace_manager_cache',
+            cmd: 'docker volume prune --force --filter label=renovate=renovate_tmp',
           },
         ]);
       });
-    });
 
-    describe('createCacheVolume', () => {
-      it('short-circuits in non-Docker environment', async () => {
-        const execSnapshots = mockExecAll(exec);
-
-        setAdminConfig({ binarySource: 'global' });
-        await createCacheVolume();
-
-        expect(execSnapshots).toBeEmpty();
-      });
-
-      it('short-circuits when volume cache is not configured', async () => {
+      it('removes volumes from custom namespaces', async () => {
         const execSnapshots = mockExecAll(exec);
 
         setAdminConfig({
           binarySource: 'docker',
           dockerCacheVolume: true,
-          dockerChildPrefix: 'my_namespace_',
+          dockerChildPrefix: 'custom_prefix_',
         });
-        await createCacheVolume();
+        await removeAllTmpVolumes();
 
         expect(execSnapshots).toMatchObject([
           {
-            cmd: 'docker volume prune --force --filter label=renovate-namespace=my_namespace_manager_cache',
+            cmd: 'docker volume prune --force --filter label=renovate=custom_prefix_tmp',
+          },
+        ]);
+      });
+    });
+
+    describe('createNewTmpVolume', () => {
+      it('short-circuits in non-Docker environment', async () => {
+        const execSnapshots = mockExecAll(exec);
+
+        setAdminConfig({ binarySource: 'global' });
+        await createNewTmpVolume();
+
+        expect(execSnapshots).toBeEmpty();
+      });
+
+      it('creates new volume', async () => {
+        const execSnapshots = mockExecAll(exec);
+
+        setAdminConfig({
+          binarySource: 'docker',
+          dockerCacheVolume: true,
+        });
+        await createNewTmpVolume();
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'docker volume prune --force --filter label=renovate=renovate_tmp',
           },
           {
-            cmd: 'docker volume create --label renovate-namespace=my_namespace_manager_cache my_namespace_manager_cache',
+            cmd: 'docker volume create --label renovate=renovate_tmp renovate_tmp_0123456789abcdef',
+          },
+        ]);
+      });
+
+      it('creates volumes within custom namespace', async () => {
+        const execSnapshots = mockExecAll(exec);
+
+        setAdminConfig({
+          binarySource: 'docker',
+          dockerCacheVolume: true,
+          dockerChildPrefix: 'custom_prefix_',
+        });
+        await createNewTmpVolume();
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'docker volume prune --force --filter label=renovate=custom_prefix_tmp',
+          },
+          {
+            cmd: 'docker volume create --label renovate=custom_prefix_tmp custom_prefix_tmp_0123456789abcdef',
           },
         ]);
       });

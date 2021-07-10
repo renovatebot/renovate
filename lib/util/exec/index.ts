@@ -13,7 +13,11 @@ import {
   VolumesPair,
   rawExec,
 } from './common';
-import { generateDockerCommand, removeDockerContainer } from './docker';
+import {
+  generateDockerCommand,
+  getTmpVolumeName,
+  removeDockerContainer,
+} from './docker';
 import { getChildProcessEnv } from './env';
 
 type ExtraEnv<T = unknown> = Record<string, T>;
@@ -121,17 +125,16 @@ export async function exec(
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
     if (cacheDir && dockerCacheVolume) {
-      const cacheVolumePrefix = dockerChildPrefix || 'renovate_';
-      const cacheVolume = `${cacheVolumePrefix}manager_cache`;
-      const cacheVolumeRoot = `/tmp/${cacheVolume}`;
-      const cacheVolumeSubdir = unixJoin(cacheVolumeRoot, cacheDir.subPath);
+      const volumeName = getTmpVolumeName();
+      const volumeMountTarget = `/tmp`;
+      const cachePath = unixJoin(volumeMountTarget, cacheDir.subPath);
 
-      const mountPair: VolumesPair = [cacheVolume, cacheVolumeRoot];
+      const mountPair: VolumesPair = [volumeName, volumeMountTarget];
       dockerOptions.envVars.push(cacheDir.execWithEnv);
-      rawExecOptions.env[cacheDir.execWithEnv] = cacheVolumeSubdir;
+      rawExecOptions.env[cacheDir.execWithEnv] = cachePath;
       dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
       dockerOptions.preCommands = [
-        `mkdir -p ${cacheVolumeSubdir}`,
+        `mkdir -p ${cachePath}`,
         ...(dockerOptions.preCommands || []),
       ];
     }

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import cryptoRandomString from 'crypto-random-string';
 import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
@@ -288,31 +289,45 @@ export async function volumeCreate(
   await rawExec(cmd, { encoding: 'utf-8' });
 }
 
-export async function deleteCacheVolume(): Promise<void> {
-  const { binarySource, dockerChildPrefix, dockerCacheVolume } =
-    getAdminConfig();
+let tmpVolumeName: string = null;
+
+function getTmpVolumeNamespace(): string {
+  const { dockerChildPrefix } = getAdminConfig();
+  return getContainerName('tmp', dockerChildPrefix);
+}
+
+export function getTmpVolumeName(): string {
+  if (!tmpVolumeName) {
+    const volumeId = cryptoRandomString({ length: 16 });
+    const volumeNamespace = getTmpVolumeNamespace();
+    tmpVolumeName = `${volumeNamespace}_${volumeId}`;
+  }
+  return tmpVolumeName;
+}
+
+export function resetTmpVolumeName(): void {
+  tmpVolumeName = null;
+}
+
+export async function removeAllTmpVolumes(): Promise<void> {
+  const { binarySource, dockerCacheVolume } = getAdminConfig();
   if (binarySource === 'docker' && dockerCacheVolume) {
-    const volumeNamespace = getContainerName(
-      'manager_cache',
-      dockerChildPrefix
-    );
-    const meta = { 'renovate-namespace': volumeNamespace };
-    logger.debug(`Deleting cache volume: ${volumeNamespace}`);
+    resetTmpVolumeName();
+    const volumeNamespace = getTmpVolumeNamespace();
+    const meta = { renovate: volumeNamespace };
+    logger.debug(`Deleting volume cache: ${volumeNamespace}_*`);
     await volumePrune(meta);
   }
 }
 
-export async function createCacheVolume(): Promise<void> {
-  const { binarySource, dockerChildPrefix, dockerCacheVolume } =
-    getAdminConfig();
+export async function createNewTmpVolume(): Promise<void> {
+  const { binarySource, dockerCacheVolume } = getAdminConfig();
   if (binarySource === 'docker' && dockerCacheVolume) {
-    const volumeNamespace = getContainerName(
-      'manager_cache',
-      dockerChildPrefix
-    );
-    const meta = { 'renovate-namespace': volumeNamespace };
-    logger.debug(`Creating cache volume: ${volumeNamespace}`);
-    await volumePrune(meta);
-    await volumeCreate(volumeNamespace, meta);
+    await removeAllTmpVolumes();
+    const volumeNamespace = getTmpVolumeNamespace();
+    const volumeName = getTmpVolumeName();
+    const meta = { renovate: volumeNamespace };
+    logger.debug(`Creating volume cache: ${volumeName}`);
+    await volumeCreate(volumeName, meta);
   }
 }

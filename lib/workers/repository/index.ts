@@ -3,8 +3,8 @@ import { getAdminConfig, setAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
 import {
-  createCacheVolume,
-  deleteCacheVolume,
+  createNewTmpVolume,
+  removeAllTmpVolumes,
   removeDanglingContainers,
 } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
@@ -35,7 +35,7 @@ export async function renovateRepository(
 ): Promise<ProcessResult> {
   splitInit();
   let config = setAdminConfig(repoConfig);
-  await createCacheVolume();
+  await createNewTmpVolume();
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
@@ -85,7 +85,7 @@ export async function renovateRepository(
   } catch (err) /* istanbul ignore if */ {
     logger.warn({ err }, 'privateCacheDir deletion error');
   }
-  await deleteCacheVolume();
+  await removeAllTmpVolumes();
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   printRequestStats();

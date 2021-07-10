@@ -3,6 +3,7 @@ import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,
 } from 'child_process';
+import _cryptoRandomString from 'crypto-random-string';
 import { envMock } from '../../../test/exec-util';
 import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
@@ -13,8 +14,11 @@ import * as dockerModule from './docker';
 import { ExecOptions, exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
-
 jest.mock('child_process');
+
+const cryptoRandomString: jest.Mock<typeof _cryptoRandomString> =
+  _cryptoRandomString as any;
+jest.mock('crypto-random-string');
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -34,6 +38,8 @@ describe(getName(), () => {
   const defaultCwd = `-w "${cwd}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" -v "${cacheDir}":"${cacheDir}"`;
 
+  const tmpVolumeId = '0123456789abcdef';
+
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
     jest.resetAllMocks();
@@ -41,6 +47,7 @@ describe(getName(), () => {
     jest.resetModules();
     processEnvOrig = process.env;
     setAdminConfig();
+    cryptoRandomString.mockReturnValue(tmpVolumeId as never);
   });
 
   afterEach(() => {
@@ -669,7 +676,7 @@ describe(getName(), () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_manager_cache":"/tmp/renovate_manager_cache" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/renovate_manager_cache/foo/bar && ${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_tmp_${tmpVolumeId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/foo/bar && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -679,7 +686,7 @@ describe(getName(), () => {
             encoding,
             env: {
               ...envMock.basic,
-              FOO_BAR: '/tmp/renovate_manager_cache/foo/bar',
+              FOO_BAR: '/tmp/foo/bar',
             },
             timeout: 900000,
             maxBuffer: 10485760,
