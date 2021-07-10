@@ -436,12 +436,9 @@ export async function getAdditionalFiles(
 
   const env = {
     ...getChildProcessEnv(),
-    NPM_CONFIG_CACHE: await ensureCacheDir('./others/npm', 'NPM_CONFIG_CACHE'),
-    YARN_CACHE_FOLDER: await ensureCacheDir(
-      './others/yarn',
-      'YARN_CACHE_FOLDER'
-    ),
-    npm_config_store: await ensureCacheDir('./others/pnpm', 'npm_config_store'),
+    NPM_CONFIG_CACHE: await ensureCacheDir('./others/npm'),
+    YARN_CACHE_FOLDER: await ensureCacheDir('./others/yarn'),
+    npm_config_store: await ensureCacheDir('./others/pnpm'),
     NODE_ENV: 'dev',
   };
 
