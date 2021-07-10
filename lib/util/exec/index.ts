@@ -123,7 +123,7 @@ export async function exec(
     if (cacheDir && dockerCacheVolume) {
       const cacheVolumePrefix = dockerChildPrefix || 'renovate_';
       const cacheVolume = `${cacheVolumePrefix}manager_cache`;
-      const cacheVolumeRoot = `/home/ubuntu`;
+      const cacheVolumeRoot = `/tmp/${cacheVolume}`;
       const cacheVolumeSubdir = unixJoin(cacheVolumeRoot, cacheDir.subPath);
 
       const mountPair: VolumesPair = [cacheVolume, cacheVolumeRoot];
