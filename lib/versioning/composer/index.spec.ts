@@ -372,6 +372,14 @@ describe('semver.getNewValue()', () => {
     ).toEqual('>=1.0 <3.0');
     expect(
       semver.getNewValue({
+        currentValue: '>=1.0 <3.0',
+        rangeStrategy: 'widen',
+        currentVersion: '2.9.0',
+        newVersion: '3.0',
+      })
+    ).toEqual('>=1.0 <3.1');
+    expect(
+      semver.getNewValue({
         currentValue: '>=1.0.0 <=3.0.4',
         rangeStrategy: 'widen',
         currentVersion: '2.9.0',
