@@ -669,7 +669,7 @@ describe(getName(), () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_manager_cache":"/home/ubuntu" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /home/ubuntu/foo/bar && ${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_manager_cache":"/tmp/renovate_manager_cache" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/renovate_manager_cache/foo/bar && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -679,7 +679,7 @@ describe(getName(), () => {
             encoding,
             env: {
               ...envMock.basic,
-              FOO_BAR: '/home/ubuntu/foo/bar',
+              FOO_BAR: '/tmp/renovate_manager_cache/foo/bar',
             },
             timeout: 900000,
             maxBuffer: 10485760,
