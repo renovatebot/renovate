@@ -275,7 +275,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dockerCacheVolume',
     description:
-      'Change this to enable per-repository cache being mounted as Docker volume and cleaned up after each run.',
+      'Change this to enable per-repository cache being mounted as a Docker volume (will be cleaned up after each run).',
     type: 'boolean',
     admin: true,
     default: false,
