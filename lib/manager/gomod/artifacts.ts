@@ -133,8 +133,8 @@ export async function updateArtifacts({
         preCommands: getPreCommands(),
       },
       cacheDir: {
-        execWithEnv: 'GOPATH',
-        subPath: './others/go',
+        env: 'GOPATH',
+        dir: './others/go',
       },
     };
 

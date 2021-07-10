@@ -22,9 +22,9 @@ import { getChildProcessEnv } from './env';
 
 type ExtraEnv<T = unknown> = Record<string, T>;
 
-interface CacheDirOption {
-  subPath: string;
-  execWithEnv: string;
+export interface CacheDirOption {
+  dir: string;
+  env: string;
 }
 
 export interface ExecOptions extends ChildProcessExecOptions {
@@ -127,11 +127,11 @@ export async function exec(
     if (cacheDir && dockerCacheVolume) {
       const volumeName = getTmpVolumeName();
       const volumeMountTarget = `/tmp`;
-      const cachePath = unixJoin(volumeMountTarget, cacheDir.subPath);
+      const cachePath = unixJoin(volumeMountTarget, cacheDir.dir);
 
       const mountPair: VolumesPair = [volumeName, volumeMountTarget];
-      dockerOptions.envVars.push(cacheDir.execWithEnv);
-      rawExecOptions.env[cacheDir.execWithEnv] = cachePath;
+      dockerOptions.envVars.push(cacheDir.env);
+      rawExecOptions.env[cacheDir.env] = cachePath;
       dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
       dockerOptions.preCommands = [
         `mkdir -p ${cachePath}`,
@@ -142,11 +142,8 @@ export async function exec(
     const dockerCommand = await generateDockerCommand(commands, dockerOptions);
     commands = [dockerCommand];
   } else if (cacheDir) {
-    const cacheLocalPath = await ensureCacheDir(
-      cacheDir.subPath,
-      cacheDir.execWithEnv
-    );
-    rawExecOptions.env[cacheDir.execWithEnv] = cacheLocalPath;
+    const cacheLocalPath = await ensureCacheDir(cacheDir.dir, cacheDir.env);
+    rawExecOptions.env[cacheDir.env] = cacheLocalPath;
   }
 
   let res: ExecResult | null = null;

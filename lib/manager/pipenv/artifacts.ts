@@ -100,8 +100,8 @@ export async function updateArtifacts({
         ],
       },
       cacheDir: {
-        execWithEnv: 'PIPENV_CACHE_DIR',
-        subPath: './others/pipenv',
+        env: 'PIPENV_CACHE_DIR',
+        dir: './others/pipenv',
       },
     };
     logger.debug({ cmd }, 'pipenv lock command');

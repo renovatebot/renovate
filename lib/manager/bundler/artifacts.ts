@@ -183,8 +183,8 @@ export async function updateArtifacts(
         preCommands,
       },
       cacheDir: {
-        subPath: './others/gem',
-        execWithEnv: 'GEM_HOME',
+        dir: './others/gem',
+        env: 'GEM_HOME',
       },
     };
     await exec(cmd, execOptions);

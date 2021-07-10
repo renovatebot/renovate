@@ -102,8 +102,8 @@ export async function updateArtifacts({
         tagScheme: composerVersioningId,
       },
       cacheDir: {
-        subPath: './others/composer',
-        execWithEnv: 'COMPOSER_CACHE_DIR',
+        dir: './others/composer',
+        env: 'COMPOSER_CACHE_DIR',
       },
     };
     const cmd = 'composer';

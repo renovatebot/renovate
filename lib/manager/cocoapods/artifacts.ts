@@ -75,8 +75,8 @@ export async function updateArtifacts({
       tagConstraint,
     },
     cacheDir: {
-      subPath: './others/cocoapods',
-      execWithEnv: 'CP_HOME_DIR',
+      dir: './others/cocoapods',
+      env: 'CP_HOME_DIR',
     },
   };
 

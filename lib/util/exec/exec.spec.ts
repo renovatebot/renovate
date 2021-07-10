@@ -671,7 +671,7 @@ describe(getName(), () => {
         inOpts: {
           docker,
           cwd,
-          cacheDir: { subPath: './foo/bar', execWithEnv: 'FOO_BAR' },
+          cacheDir: { dir: './foo/bar', env: 'FOO_BAR' },
         },
         outCmd: [
           dockerPullCmd,
@@ -702,7 +702,7 @@ describe(getName(), () => {
         processEnv,
         inCmd,
         inOpts: {
-          cacheDir: { subPath: './foo/bar', execWithEnv: 'FOO_BAR' },
+          cacheDir: { dir: './foo/bar', env: 'FOO_BAR' },
         },
         outCmd,
         outOpts: [
