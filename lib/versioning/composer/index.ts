@@ -1,4 +1,5 @@
 import { coerce } from 'semver';
+import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -190,7 +191,15 @@ function getNewValue({
       if (rangeStrategy === 'replace') {
         newValue = replacementValue;
       } else {
-        newValue = currentValue + ' || ' + replacementValue;
+        const parsedRange = parseRange(replacementValue);
+        const element = parsedRange[parsedRange.length - 1];
+        if (element.operator?.startsWith('<')) {
+          const splitCurrent = currentValue.split(element.operator);
+          splitCurrent.pop();
+          newValue = splitCurrent.join(element.operator) + replacementValue;
+        } else {
+          newValue = currentValue + ' || ' + replacementValue;
+        }
       }
     }
   }
