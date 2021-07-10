@@ -378,6 +378,14 @@ describe('semver.getNewValue()', () => {
         newVersion: '3.0.5',
       })
     ).toEqual('>=1.0.0 <=3.0.5');
+    expect(
+      semver.getNewValue({
+        currentValue: '~1.0 || >=3.0 <=4.0',
+        rangeStrategy: 'widen',
+        currentVersion: '2.9.0',
+        newVersion: '5.0.0',
+      })
+    ).toEqual('~1.0 || >=3.0 <=5.0');
   });
   it('returns newVersion if unsupported', () => {
     expect(
