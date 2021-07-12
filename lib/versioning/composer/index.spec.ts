@@ -312,6 +312,8 @@ describe('semver.getNewValue()', () => {
         newVersion: '5.1.0',
       })
     ).toEqual('~1.2 || ~2.0 || ~3.0 || ~5.0');
+  });
+  it('handles widen strategy', () => {
     expect(
       semver.getNewValue({
         currentValue: '^1.2',
@@ -352,6 +354,46 @@ describe('semver.getNewValue()', () => {
         newVersion: '2.1.0',
       })
     ).toEqual('^1.0 || ^2.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '>=1.0 <3.0',
+        rangeStrategy: 'widen',
+        currentVersion: '2.9.0',
+        newVersion: '4.1.0',
+      })
+    ).toEqual('>=1.0 <4.2');
+    expect(
+      semver.getNewValue({
+        currentValue: '>=1.0 <3.0',
+        rangeStrategy: 'widen',
+        currentVersion: '2.9.0',
+        newVersion: '2.9.5',
+      })
+    ).toEqual('>=1.0 <3.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '>=1.0 <3.0',
+        rangeStrategy: 'widen',
+        currentVersion: '2.9.0',
+        newVersion: '3.0',
+      })
+    ).toEqual('>=1.0 <3.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '>=1.0.0 <=3.0.4',
+        rangeStrategy: 'widen',
+        currentVersion: '2.9.0',
+        newVersion: '3.0.5',
+      })
+    ).toEqual('>=1.0.0 <=3.0.5');
+    expect(
+      semver.getNewValue({
+        currentValue: '~1.0 || >=3.0 <=4.0',
+        rangeStrategy: 'widen',
+        currentVersion: '2.9.0',
+        newVersion: '5.0.0',
+      })
+    ).toEqual('~1.0 || >=3.0 <=5.0');
   });
   it('returns newVersion if unsupported', () => {
     expect(
