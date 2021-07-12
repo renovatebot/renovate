@@ -137,10 +137,10 @@ This configuration will be applied after all other environment variables so that
 ## dockerCache
 
 When set to 'volume', Renovate creates and mounts a temporary Docker volume that is used as a cache for package manager files.
+When set to 'mount', a temporary directory is created and mounted instead.
 
-When it's 'mount', temporary directory is created and mounted instead of volume.
-
-Cache will be removed after repository processing. To disable per-repo caching for Docker containers, use 'none' (default).
+The cache will be removed after repository processing.
+To disable per-repo caching for Docker containers, use 'none' (default).
 
 ## dockerChildPrefix
 
