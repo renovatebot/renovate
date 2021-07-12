@@ -6,7 +6,7 @@ import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
-import { ensureDir, privateCacheDir, remove } from '../../fs';
+import { chmod, ensureCacheDir, exists, readdir, remove, stat } from '../../fs';
 import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
@@ -304,31 +304,50 @@ export function resetTmpCacheId(): void {
   tmpId = null;
 }
 
-function getTmpCacheNs(): string {
+export function getTmpCacheNs(): string {
   const { dockerChildPrefix } = getAdminConfig();
-  return getContainerName('tmp', dockerChildPrefix);
+  return getContainerName('tmpdir_cache', dockerChildPrefix);
 }
 
-export function getTmpCacheName(): string {
-  const ns = getTmpCacheNs();
-  const id = getTmpCacheId();
-  return `${ns}_${id}`;
+async function fixPermissionsBeforeDelete(entry: string): Promise<void> {
+  try {
+    if (await exists(entry)) {
+      const stats = await stat(entry);
+      if (stats.isDirectory()) {
+        await chmod(entry, '755');
+        const children = await readdir(entry);
+        for (const child of children) {
+          await fixPermissionsBeforeDelete(join(entry, child));
+        }
+      } else if (stats.isFile()) {
+        await chmod(entry, '644');
+      }
+    }
+  } catch (err) {
+    logger.debug({ err }, 'Permissions fixing error');
+  }
 }
 
 export async function removeDockerTmpCaches(): Promise<void> {
   resetTmpCacheId();
 
-  const { binarySource, dockerCache } = getAdminConfig();
+  const { binarySource, cacheDir, dockerCache } = getAdminConfig();
   if (binarySource === 'docker') {
+    const cacheNamespace = getTmpCacheNs();
     if (dockerCache === 'volume') {
-      const cacheNamespace = getTmpCacheNs();
       logger.trace(`Deleting Docker cache volume: ${cacheNamespace}_*`);
       await volumePrune({ renovate: cacheNamespace });
     } else if (dockerCache === 'mount') {
-      const cacheName = getTmpCacheName();
-      const cacheRoot = join(privateCacheDir(), cacheName);
-      logger.trace(`Deleting Docker private cache directory: ${cacheRoot}`);
-      await remove(cacheRoot);
+      const cacheRoot = join(cacheDir, cacheNamespace);
+      if (await exists(cacheRoot)) {
+        logger.trace(`Deleting Docker cache directory: ${cacheRoot}`);
+        try {
+          await remove(cacheRoot);
+        } catch (err) {
+          await fixPermissionsBeforeDelete(cacheRoot);
+          await remove(cacheRoot);
+        }
+      }
     }
   }
 }
@@ -336,15 +355,16 @@ export async function removeDockerTmpCaches(): Promise<void> {
 export async function ensureDockerTmpCache(): Promise<void> {
   const { binarySource, dockerCache } = getAdminConfig();
   if (binarySource === 'docker') {
-    const cacheNamespace = getTmpCacheNs();
-    const cacheName = getTmpCacheName();
+    const cacheNs = getTmpCacheNs();
+    const cacheId = getTmpCacheId();
     if (dockerCache === 'volume') {
+      const cacheName = `${cacheNs}_${cacheId}`;
       logger.trace(`Creating Docker cache volume: ${cacheName}`);
-      await volumeCreate(cacheName, { renovate: cacheNamespace });
+      await volumeCreate(cacheName, { renovate: cacheNs });
     } else if (dockerCache === 'mount') {
-      const cacheRoot = join(privateCacheDir(), cacheName);
-      logger.trace(`Creating Docker private cache directory: ${cacheRoot}`);
-      await ensureDir(cacheRoot);
+      const cacheRoot = join(cacheNs, cacheId);
+      logger.trace(`Creating Docker cache directory: ${cacheRoot}`);
+      await ensureCacheDir(cacheRoot);
     }
   }
 }

@@ -76,17 +76,17 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
+  try {
+    await removeDockerTmpCaches();
+  } catch (err) /* istanbul ignore if */ {
+    logger.warn({ err }, 'Docker cache deletion error');
+  }
   if (localDir && !config.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {
       logger.warn({ err }, 'localDir deletion error');
     }
-  }
-  try {
-    await removeDockerTmpCaches();
-  } catch (err) /* istanbul ignore if */ {
-    logger.warn({ err }, 'docker tmp caches deletion error');
   }
   try {
     await fs.remove(privateCacheDir());

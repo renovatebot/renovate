@@ -363,7 +363,7 @@ describe(getName(), () => {
 
         expect(execSnapshots).toMatchObject([
           {
-            cmd: 'docker volume prune --force --filter label=renovate=renovate_tmp',
+            cmd: 'docker volume prune --force --filter label=renovate=renovate_tmpdir_cache',
           },
         ]);
       });
@@ -380,23 +380,100 @@ describe(getName(), () => {
 
         expect(execSnapshots).toMatchObject([
           {
-            cmd: 'docker volume prune --force --filter label=renovate=custom_prefix_tmp',
+            cmd: 'docker volume prune --force --filter label=renovate=custom_prefix_tmpdir_cache',
           },
         ]);
       });
 
-      it('removes private cache directory', async () => {
+      it('removes cache directory', async () => {
+        fs.exists.mockResolvedValue(true);
         const execSnapshots = mockExecAll(exec);
 
-        setAdminConfig({ binarySource: 'docker', dockerCache: 'mount' });
-        fs.privateCacheDir.mockReturnValueOnce('/foo/bar');
+        setAdminConfig({
+          binarySource: 'docker',
+          cacheDir: '/foo/bar',
+          dockerCache: 'mount',
+        });
         await removeDockerTmpCaches();
 
         expect(execSnapshots).toBeEmpty();
         expect(fs.remove).toHaveBeenCalledWith(
-          '/foo/bar/renovate_tmp_0123456789abcdef'
+          '/foo/bar/renovate_tmpdir_cache'
         );
       });
+    });
+
+    it('removes cache directory with custom namespace', async () => {
+      fs.exists.mockResolvedValue(true);
+      const execSnapshots = mockExecAll(exec);
+
+      setAdminConfig({
+        binarySource: 'docker',
+        cacheDir: '/foo/bar',
+        dockerCache: 'mount',
+        dockerChildPrefix: 'custom_prefix_',
+      });
+      await removeDockerTmpCaches();
+
+      expect(execSnapshots).toBeEmpty();
+      expect(fs.remove).toHaveBeenCalledWith(
+        '/foo/bar/custom_prefix_tmpdir_cache'
+      );
+    });
+
+    it('handles errors while removing cache directory', async () => {
+      fs.exists.mockResolvedValue(true);
+
+      fs.remove.mockRejectedValueOnce('unknown');
+
+      fs.stat.mockResolvedValueOnce({ isDirectory: () => true } as never);
+      fs.stat.mockResolvedValue({
+        isDirectory: () => false,
+        isFile: () => true,
+      } as never);
+
+      fs.readdir.mockResolvedValueOnce(['foo', 'bar']);
+
+      fs.chmod.mockResolvedValueOnce();
+      fs.chmod.mockResolvedValueOnce();
+      fs.chmod.mockRejectedValueOnce('unknown');
+
+      fs.remove.mockResolvedValueOnce();
+
+      const execSnapshots = mockExecAll(exec);
+
+      setAdminConfig({
+        binarySource: 'docker',
+        cacheDir: '/foo/bar',
+        dockerCache: 'mount',
+      });
+      await removeDockerTmpCaches();
+
+      expect(execSnapshots).toBeEmpty();
+      expect(fs.remove).toHaveBeenNthCalledWith(
+        1,
+        '/foo/bar/renovate_tmpdir_cache'
+      );
+      expect(fs.remove).toHaveBeenNthCalledWith(
+        2,
+        '/foo/bar/renovate_tmpdir_cache'
+      );
+
+      expect(fs.chmod).toHaveBeenNthCalledWith(
+        1,
+        '/foo/bar/renovate_tmpdir_cache',
+        '755'
+      );
+      expect(fs.chmod).toHaveBeenNthCalledWith(
+        2,
+        '/foo/bar/renovate_tmpdir_cache/foo',
+        '644'
+      );
+      expect(fs.chmod).toHaveBeenNthCalledWith(
+        3,
+        '/foo/bar/renovate_tmpdir_cache/bar',
+        '644'
+      );
     });
 
     describe('createNewTmpVolume', () => {
@@ -420,7 +497,7 @@ describe(getName(), () => {
 
         expect(execSnapshots).toMatchObject([
           {
-            cmd: 'docker volume create --label renovate=renovate_tmp renovate_tmp_0123456789abcdef',
+            cmd: 'docker volume create --label renovate=renovate_tmpdir_cache renovate_tmpdir_cache_0123456789abcdef',
           },
         ]);
       });
@@ -437,23 +514,28 @@ describe(getName(), () => {
 
         expect(execSnapshots).toMatchObject([
           {
-            cmd: 'docker volume create --label renovate=custom_prefix_tmp custom_prefix_tmp_0123456789abcdef',
+            cmd: 'docker volume create --label renovate=custom_prefix_tmpdir_cache custom_prefix_tmpdir_cache_0123456789abcdef',
           },
         ]);
       });
 
-      it('creates private cache directory', async () => {
+      it('creates cache directory', async () => {
+        const expected = `renovate_tmpdir_cache/${tmpVolumeId}`;
         const execSnapshots = mockExecAll(exec);
-        fs.privateCacheDir.mockReturnValueOnce('/foo/bar');
-        fs.ensureDir.mockReturnValueOnce(null as never);
-        setAdminConfig({ binarySource: 'docker', dockerCache: 'mount' });
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          `/foo/bar/${expected}` as never
+        );
+
+        setAdminConfig({
+          binarySource: 'docker',
+          cacheDir: '/foo/bar',
+          dockerCache: 'mount',
+        });
 
         await ensureDockerTmpCache();
 
         expect(execSnapshots).toBeEmpty();
-        expect(fs.ensureDir).toHaveBeenCalledWith(
-          `/foo/bar/renovate_tmp_${tmpVolumeId}`
-        );
+        expect(fs.ensureCacheDir).toHaveBeenCalledWith(expected);
       });
     });
   });

@@ -676,7 +676,7 @@ describe(getName(), () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_tmp_${tmpVolumeId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/foo/bar && ${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_tmpdir_cache_${tmpVolumeId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/foo/bar && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -697,7 +697,7 @@ describe(getName(), () => {
     ],
 
     [
-      'Private cache directory for Docker',
+      'Mount cache directory for Docker',
       {
         processEnv,
         inCmd,
@@ -709,7 +709,7 @@ describe(getName(), () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${cacheDir}__renovate-private-cache/renovate_tmp_${tmpVolumeId}":"/tmp/renovate_tmp_${tmpVolumeId}" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${cacheDir}renovate_tmpdir_cache/${tmpVolumeId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -719,7 +719,7 @@ describe(getName(), () => {
             encoding,
             env: {
               ...envMock.basic,
-              FOO_BAR: '/tmp/renovate_tmp_0123456789abcdef/foo/bar',
+              FOO_BAR: '/tmp/foo/bar',
             },
             timeout: 900000,
             maxBuffer: 10485760,

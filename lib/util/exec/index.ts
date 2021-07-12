@@ -14,7 +14,9 @@ import {
 } from './common';
 import {
   generateDockerCommand,
+  getTmpCacheId,
   getTmpCacheName,
+  getTmpCacheNs,
   removeDockerContainer,
 } from './docker';
 import { getChildProcessEnv } from './env';
@@ -124,9 +126,11 @@ export async function exec(
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
     if (cacheDir) {
-      const tmpCacheName = getTmpCacheName();
+      const tmpCacheNs = getTmpCacheNs();
+      const tmpCacheId = getTmpCacheId();
+      const tmpCacheName = `${tmpCacheNs}_${tmpCacheId}`;
+      const mountTarget = `/tmp`;
       if (dockerCache === 'volume') {
-        const mountTarget = `/tmp`;
         const mountedCachePath = join(mountTarget, cacheDir.dir);
         const mountPair: VolumesPair = [tmpCacheName, mountTarget];
 
@@ -137,9 +141,12 @@ export async function exec(
           ...(dockerOptions.preCommands || []),
         ];
       } else if (dockerCache === 'mount') {
-        const mountSource = join(privateCacheDir(), tmpCacheName);
+        const mountSource = join(
+          getAdminConfig().cacheDir,
+          tmpCacheNs,
+          tmpCacheId
+        );
         const sourceCachePath = join(mountSource, cacheDir.dir);
-        const mountTarget = join('/tmp/', tmpCacheName);
         const targetCachePath = join(mountTarget, cacheDir.dir);
         const mountPair: VolumesPair = [mountSource, mountTarget];
 
