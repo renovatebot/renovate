@@ -92,7 +92,7 @@ export interface RepoAdminConfig {
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global';
   customEnvVariables?: Record<string, string>;
-  dockerCacheVolume?: boolean;
+  dockerCache?: 'volume' | 'mount' | 'none';
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;

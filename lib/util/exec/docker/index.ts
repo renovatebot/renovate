@@ -316,14 +316,15 @@ export function getTmpCacheName(): string {
 }
 
 export async function removeDockerTmpCaches(): Promise<void> {
-  const { binarySource, dockerCacheVolume } = getAdminConfig();
+  resetTmpCacheId();
+
+  const { binarySource, dockerCache } = getAdminConfig();
   if (binarySource === 'docker') {
-    resetTmpCacheId();
-    if (dockerCacheVolume) {
+    if (dockerCache === 'volume') {
       const cacheNamespace = getTmpCacheNs();
       logger.trace(`Deleting Docker cache volume: ${cacheNamespace}_*`);
       await volumePrune({ renovate: cacheNamespace });
-    } else {
+    } else if (dockerCache === 'mount') {
       const cacheName = getTmpCacheName();
       const cacheRoot = join(privateCacheDir(), cacheName);
       logger.trace(`Deleting Docker private cache directory: ${cacheRoot}`);
@@ -333,14 +334,14 @@ export async function removeDockerTmpCaches(): Promise<void> {
 }
 
 export async function ensureDockerTmpCache(): Promise<void> {
-  const { binarySource, dockerCacheVolume } = getAdminConfig();
+  const { binarySource, dockerCache } = getAdminConfig();
   if (binarySource === 'docker') {
     const cacheNamespace = getTmpCacheNs();
     const cacheName = getTmpCacheName();
-    if (dockerCacheVolume) {
+    if (dockerCache === 'volume') {
       logger.trace(`Creating Docker cache volume: ${cacheName}`);
       await volumeCreate(cacheName, { renovate: cacheNamespace });
-    } else {
+    } else if (dockerCache === 'mount') {
       const cacheRoot = join(privateCacheDir(), cacheName);
       logger.trace(`Creating Docker private cache directory: ${cacheRoot}`);
       await ensureDir(cacheRoot);

@@ -357,7 +357,7 @@ describe(getName(), () => {
 
         setAdminConfig({
           binarySource: 'docker',
-          dockerCacheVolume: true,
+          dockerCache: 'volume',
         });
         await removeDockerTmpCaches();
 
@@ -373,7 +373,7 @@ describe(getName(), () => {
 
         setAdminConfig({
           binarySource: 'docker',
-          dockerCacheVolume: true,
+          dockerCache: 'volume',
           dockerChildPrefix: 'custom_prefix_',
         });
         await removeDockerTmpCaches();
@@ -388,7 +388,7 @@ describe(getName(), () => {
       it('removes private cache directory', async () => {
         const execSnapshots = mockExecAll(exec);
 
-        setAdminConfig({ binarySource: 'docker' });
+        setAdminConfig({ binarySource: 'docker', dockerCache: 'mount' });
         fs.privateCacheDir.mockReturnValueOnce('/foo/bar');
         await removeDockerTmpCaches();
 
@@ -414,7 +414,7 @@ describe(getName(), () => {
 
         setAdminConfig({
           binarySource: 'docker',
-          dockerCacheVolume: true,
+          dockerCache: 'volume',
         });
         await ensureDockerTmpCache();
 
@@ -430,7 +430,7 @@ describe(getName(), () => {
 
         setAdminConfig({
           binarySource: 'docker',
-          dockerCacheVolume: true,
+          dockerCache: 'volume',
           dockerChildPrefix: 'custom_prefix_',
         });
         await ensureDockerTmpCache();
@@ -446,7 +446,7 @@ describe(getName(), () => {
         const execSnapshots = mockExecAll(exec);
         fs.privateCacheDir.mockReturnValueOnce('/foo/bar');
         fs.ensureDir.mockReturnValueOnce(null as never);
-        setAdminConfig({ binarySource: 'docker' });
+        setAdminConfig({ binarySource: 'docker', dockerCache: 'mount' });
 
         await ensureDockerTmpCache();
 

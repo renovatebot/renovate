@@ -85,7 +85,7 @@ export async function exec(
   const {
     binarySource,
     dockerChildPrefix,
-    dockerCacheVolume,
+    dockerCache,
     customEnvVariables,
     localDir,
   } = getAdminConfig();
@@ -125,7 +125,7 @@ export async function exec(
 
     if (cacheDir) {
       const tmpCacheName = getTmpCacheName();
-      if (dockerCacheVolume) {
+      if (dockerCache === 'volume') {
         const mountTarget = `/tmp`;
         const mountedCachePath = join(mountTarget, cacheDir.dir);
         const mountPair: VolumesPair = [tmpCacheName, mountTarget];
@@ -136,7 +136,7 @@ export async function exec(
           `mkdir -p ${mountedCachePath}`,
           ...(dockerOptions.preCommands || []),
         ];
-      } else {
+      } else if (dockerCache === 'mount') {
         const mountSource = join(privateCacheDir(), tmpCacheName);
         const sourceCachePath = join(mountSource, cacheDir.dir);
         const mountTarget = join('/tmp/', tmpCacheName);

@@ -134,10 +134,13 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer pack
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
-## dockerCacheVolume
+## dockerCache
 
-Creates and mounts a temporary Docker volume that is used as a cache for package manager files.
-This volume will be removed after repository processing.
+When set to 'volume', Renovate creates and mounts a temporary Docker volume that is used as a cache for package manager files.
+
+When it's 'mount', temporary directory is created and mounted instead of volume.
+
+Cache will be removed after repository processing. To disable per-repo caching for Docker containers, use 'none' (default).
 
 ## dockerChildPrefix
 

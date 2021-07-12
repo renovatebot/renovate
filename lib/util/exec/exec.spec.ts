@@ -692,7 +692,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: 'docker', dockerCacheVolume: true },
+        adminConfig: { binarySource: 'docker', dockerCache: 'volume' },
       },
     ],
 
@@ -725,7 +725,7 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: 'docker', dockerCacheVolume: false },
+        adminConfig: { binarySource: 'docker', dockerCache: 'mount' },
       },
     ],
 
