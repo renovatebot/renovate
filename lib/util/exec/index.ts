@@ -3,7 +3,7 @@ import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ensureCacheDir, ensureDir, privateCacheDir } from '../fs';
+import { ensureCacheDir, ensureDir } from '../fs';
 import {
   DockerOptions,
   ExecResult,
@@ -15,7 +15,6 @@ import {
 import {
   generateDockerCommand,
   getTmpCacheId,
-  getTmpCacheName,
   getTmpCacheNs,
   removeDockerContainer,
 } from './docker';
