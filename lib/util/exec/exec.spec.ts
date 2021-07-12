@@ -671,7 +671,7 @@ describe(getName(), () => {
         inOpts: {
           docker,
           cwd,
-          cacheDir: { dir: './foo/bar', env: 'FOO_BAR' },
+          cacheTmpdir: { path: './foo/bar', env: 'FOO_BAR' },
         },
         outCmd: [
           dockerPullCmd,
@@ -704,7 +704,7 @@ describe(getName(), () => {
         inOpts: {
           docker,
           cwd,
-          cacheDir: { dir: './foo/bar', env: 'FOO_BAR' },
+          cacheTmpdir: { path: './foo/bar', env: 'FOO_BAR' },
         },
         outCmd: [
           dockerPullCmd,
@@ -735,7 +735,7 @@ describe(getName(), () => {
         processEnv,
         inCmd,
         inOpts: {
-          cacheDir: { dir: './foo/bar', env: 'FOO_BAR' },
+          cacheTmpdir: { path: './foo/bar', env: 'FOO_BAR' },
         },
         outCmd,
         outOpts: [

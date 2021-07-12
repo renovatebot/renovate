@@ -132,9 +132,9 @@ export async function updateArtifacts({
         tagScheme: 'npm',
         preCommands: getPreCommands(),
       },
-      cacheDir: {
+      cacheTmpdir: {
         env: 'GOPATH',
-        dir: './others/go',
+        path: 'gomod',
       },
     };
 

@@ -24,7 +24,7 @@ import { getChildProcessEnv } from './env';
 type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface CacheDirOption {
-  dir: string;
+  path: string;
   env: string;
 }
 
@@ -32,7 +32,7 @@ export interface ExecOptions extends ChildProcessExecOptions {
   cwdFile?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
-  cacheDir?: Opt<CacheDirOption>;
+  cacheTmpdir?: Opt<CacheDirOption>;
 }
 
 function createChildEnv(
@@ -83,7 +83,7 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, docker, cwdFile, cacheDir } = opts;
+  const { env, docker, cwdFile, cacheTmpdir } = opts;
   const {
     binarySource,
     dockerChildPrefix,
@@ -105,7 +105,7 @@ export async function exec(
   delete execOptions.extraEnv;
   delete execOptions.docker;
   delete execOptions.cwdFile;
-  delete execOptions.cacheDir;
+  delete execOptions.cacheTmpdir;
 
   const rawExecOptions: RawExecOptions = {
     encoding: 'utf-8',
@@ -125,17 +125,17 @@ export async function exec(
     const envVars = dockerEnvVars(extraEnv, childEnv);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
-    if (cacheDir) {
+    if (cacheTmpdir && dockerCache && dockerCache !== 'none') {
       const tmpCacheNs = getTmpCacheNs();
       const tmpCacheId = getTmpCacheId();
       const tmpCacheName = `${tmpCacheNs}_${tmpCacheId}`;
       const mountTarget = `/tmp`;
       if (dockerCache === 'volume') {
-        const mountedCachePath = join(mountTarget, cacheDir.dir);
+        const mountedCachePath = join(mountTarget, cacheTmpdir.path);
         const mountPair: VolumesPair = [tmpCacheName, mountTarget];
 
         dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
-        rawExecOptions.env[cacheDir.env] = mountedCachePath;
+        rawExecOptions.env[cacheTmpdir.env] = mountedCachePath;
         dockerOptions.preCommands = [
           `mkdir -p ${mountedCachePath}`,
           ...(dockerOptions.preCommands || []),
@@ -146,23 +146,23 @@ export async function exec(
           tmpCacheNs,
           tmpCacheId
         );
-        const sourceCachePath = join(mountSource, cacheDir.dir);
-        const targetCachePath = join(mountTarget, cacheDir.dir);
+        const sourceCachePath = join(mountSource, cacheTmpdir.path);
+        const targetCachePath = join(mountTarget, cacheTmpdir.path);
         const mountPair: VolumesPair = [mountSource, mountTarget];
 
         dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
-        rawExecOptions.env[cacheDir.env] = targetCachePath;
+        rawExecOptions.env[cacheTmpdir.env] = targetCachePath;
         await ensureDir(sourceCachePath);
       }
 
-      dockerOptions.envVars.push(cacheDir.env);
+      dockerOptions.envVars.push(cacheTmpdir.env);
     }
 
     const dockerCommand = await generateDockerCommand(commands, dockerOptions);
     commands = [dockerCommand];
-  } else if (cacheDir) {
-    const cacheLocalPath = await ensureCacheDir(cacheDir.dir);
-    rawExecOptions.env[cacheDir.env] = cacheLocalPath;
+  } else if (cacheTmpdir) {
+    const cacheLocalPath = await ensureCacheDir(cacheTmpdir.path);
+    rawExecOptions.env[cacheTmpdir.env] = cacheLocalPath;
   }
 
   let res: ExecResult | null = null;

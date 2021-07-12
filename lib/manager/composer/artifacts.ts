@@ -101,8 +101,8 @@ export async function updateArtifacts({
         tagConstraint: getConstraint(config),
         tagScheme: composerVersioningId,
       },
-      cacheDir: {
-        dir: './others/composer',
+      cacheTmpdir: {
+        path: 'composer',
         env: 'COMPOSER_CACHE_DIR',
       },
     };

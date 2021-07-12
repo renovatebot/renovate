@@ -74,8 +74,8 @@ export async function updateArtifacts({
       tagScheme: 'ruby',
       tagConstraint,
     },
-    cacheDir: {
-      dir: './others/cocoapods',
+    cacheTmpdir: {
+      path: 'cocoapods',
       env: 'CP_HOME_DIR',
     },
   };
