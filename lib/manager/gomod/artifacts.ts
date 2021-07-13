@@ -3,12 +3,15 @@ import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET, PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import {
+  PLATFORM_TYPE_BITBUCKET,
+  PLATFORM_TYPE_GITHUB,
+} from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { find, HostRuleSearch } from '../../util/host-rules';
+import { HostRuleSearch, find } from '../../util/host-rules';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -28,36 +31,39 @@ function getPreCommands(): string[] | null {
     },
   ];
 
-  let preCommands: string[] = [];
+  const preCommands: string[] = [];
 
-  for (let r of rules){
-    let credentials = find(r);
+  for (const r of rules) {
+    const credentials = find(r);
     switch (credentials?.hostType) {
       case PLATFORM_TYPE_BITBUCKET: {
         if (credentials?.authType === 'ssh') {
           preCommands.push(
-            `git config --global url.\"git@bitbucket.org:\".insteadOf \"https://bitbucket.org/\"`, // eslint-disable-line no-useless-escape
+            `git config --global url.\"git@bitbucket.org:\".insteadOf \"https://bitbucket.org/\"` // eslint-disable-line no-useless-escape
           );
         }
         break;
       }
       case PLATFORM_TYPE_GITHUB: {
         if (credentials?.token) {
+          const token = quote(credentials.token);
           preCommands.push(
-            `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
+            `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"` // eslint-disable-line no-useless-escape
           );
         }
         if (credentials?.authType === 'ssh') {
           preCommands.push(
-            `git config --global url.\"git@github.com:\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
+            `git config --global url.\"git@github.com:\".insteadOf \"https://github.com/\"` // eslint-disable-line no-useless-escape
           );
         }
         break;
       }
+      default:
+        break;
     }
   }
 
-  return preCommands?.length === 0? null: preCommands;
+  return preCommands?.length === 0 ? null : preCommands;
 }
 
 function getUpdateImportPathCmds(
