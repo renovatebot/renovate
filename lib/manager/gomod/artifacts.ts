@@ -3,12 +3,12 @@ import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { PLATFORM_TYPE_BITBUCKET, PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { find } from '../../util/host-rules';
+import { find, HostRuleSearch } from '../../util/host-rules';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -18,17 +18,45 @@ import type {
 } from '../types';
 
 function getPreCommands(): string[] | null {
-  const credentials = find({
-    hostType: PLATFORM_TYPE_GITHUB,
-    url: 'https://api.github.com/',
-  });
-  let preCommands = null;
-  if (credentials?.token) {
-    const token = quote(credentials.token);
-    preCommands = [
-      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
-    ];
+  const rules: Readonly<HostRuleSearch[]> = [
+    {
+      hostType: PLATFORM_TYPE_GITHUB,
+      url: 'https://api.github.com/',
+    },
+    {
+      hostType: PLATFORM_TYPE_BITBUCKET,
+    },
+  ];
+
+  let preCommands: string[] | null = null;
+
+  for (let r of rules){
+    let credentials = find(r);
+    switch (credentials?.hostType) {
+      case PLATFORM_TYPE_BITBUCKET: {
+        if (credentials?.authType === 'ssh') {
+          preCommands.push(
+            `git config --global url.\"git@bitbucket.org:\".insteadOf \"https://bitbucket.org/\"`, // eslint-disable-line no-useless-escape
+          );
+        }
+        break;
+      }
+      case PLATFORM_TYPE_GITHUB: {
+        if (credentials?.token) {
+          preCommands.push(
+            `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
+          );
+        }
+        if (credentials?.authType === 'ssh') {
+          preCommands.push(
+            `git config --global url.\"git@github.com:\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
+          );
+        }
+        break;
+      }
+    }
   }
+
   return preCommands;
 }
 
