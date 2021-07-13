@@ -79,7 +79,7 @@ export class TerraformProviderHash {
     const readStream = TerraformProviderHash.http.stream(build.url);
     const writeStream = fs.createWriteStream(downloadFileName);
 
-    let hash = null;
+    let hash;
     try {
       await fs.pipeline(readStream, writeStream);
 
