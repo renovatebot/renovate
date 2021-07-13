@@ -733,13 +733,12 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       author_id: `${authorId}`,
       state: 'opened',
     });
-    const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
-      `projects/${config.repository}/issues?${query}`,
-      {
-        useCache: false,
-        paginate: true,
-      }
-    );
+    const res = await gitlabApi.getJson<
+      { iid: number; title: string; labels: string[] }[]
+    >(`projects/${config.repository}/issues?${query}`, {
+      useCache: false,
+      paginate: true,
+    });
     // istanbul ignore if
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
@@ -748,6 +747,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     config.issueList = res.body.map((i) => ({
       iid: i.iid,
       title: i.title,
+      labels: i.labels,
     }));
   }
   return config.issueList;
@@ -814,7 +814,7 @@ export async function ensureIssue({
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { title, description, labels },
+            body: { title, description, labels: labels ?? issue.labels },
           }
         );
         return 'updated';
