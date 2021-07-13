@@ -28,7 +28,7 @@ function getPreCommands(): string[] | null {
     },
   ];
 
-  let preCommands: string[] | null = null;
+  let preCommands: string[] = [];
 
   for (let r of rules){
     let credentials = find(r);
@@ -57,7 +57,7 @@ function getPreCommands(): string[] | null {
     }
   }
 
-  return preCommands;
+  return preCommands?.length === 0? null: preCommands;
 }
 
 function getUpdateImportPathCmds(
