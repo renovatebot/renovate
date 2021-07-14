@@ -15,3 +15,11 @@ jobs:
 ```
 
 Renovate will update the commit SHA1 but follow the GitHub tag you specified.
+You can also use the following PackageRule to automatically pin action digests.
+
+```json
+{
+  "matchDepTypes": ["action"],
+  "pinDigests": true
+}
+```
