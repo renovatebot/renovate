@@ -696,8 +696,7 @@ const platform: Platform = {
           (label) => label.id
         );
         if (
-          labels !== undefined &&
-          labels.length !== 0 &&
+          labels &&
           (labels.length !== existingLabelIds.length ||
             labels.filter((labelId) => !existingLabelIds.includes(labelId))
               .length !== 0)

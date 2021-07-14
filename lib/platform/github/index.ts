@@ -1202,12 +1202,16 @@ export async function ensureIssue({
       }
       if (shouldReOpen) {
         logger.debug('Patching issue');
+        const data: Record<string, unknown> = { body, state: 'open', title };
+        if (labels) {
+          data.labels = labels;
+        }
         await githubApi.patchJson(
           `repos/${config.parentRepo || config.repository}/issues/${
             issue.number
           }`,
           {
-            body: { body, state: 'open', title, labels },
+            body: data,
           }
         );
         logger.debug('Issue updated');
