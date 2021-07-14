@@ -8,7 +8,9 @@ import type { PackageDependency, PackageFile } from '../types';
 const dockerRe = /^\s+uses: docker:\/\/([^"]+)\s*$/;
 const actionRe =
   /^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?\s*?$/;
-const sha1Re = /^[a-z0-9]{40}$/;
+
+// SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
+const shaRe = /^[a-z0-9]{40}|[a-z0-9]{64}$/;
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
@@ -31,7 +33,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const tagMatch = actionRe.exec(line);
     if (tagMatch?.groups) {
       const { depName, currentValue, tag } = tagMatch.groups;
-      if (sha1Re.test(currentValue)) {
+      if (shaRe.test(currentValue)) {
         const dep: PackageDependency = {
           depName,
           currentValue: tag,
