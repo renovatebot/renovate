@@ -19,7 +19,7 @@ describe(getName(), () => {
       expect(res.deps).toMatchSnapshot();
       expect(
         res.deps.filter((d) => d.datasource === 'github-tags')
-      ).toHaveLength(4);
+      ).toHaveLength(5);
     });
   });
 });

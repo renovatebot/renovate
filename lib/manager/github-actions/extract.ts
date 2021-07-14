@@ -5,8 +5,9 @@ import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
+const dockerRe = /^\s+uses: docker:\/\/([^"]+)\s*$/;
 const actionRe =
-  /^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/;
+  /^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?\s*?$/;
 const sha256Re = /^[a-z0-9]{40}$/;
 
 export function extractPackageFile(content: string): PackageFile | null {
@@ -17,7 +18,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue; // eslint-disable-line no-continue
     }
 
-    const dockerMatch = /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
+    const dockerMatch = dockerRe.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
@@ -29,12 +30,13 @@ export function extractPackageFile(content: string): PackageFile | null {
 
     const tagMatch = actionRe.exec(line);
     if (tagMatch?.groups) {
-      const { depName, currentValue } = tagMatch.groups;
+      const { depName, currentValue, tag } = tagMatch.groups;
       if (sha256Re.test(currentValue)) {
         const dep: PackageDependency = {
           depName,
+          currentValue: tag,
           currentDigest: currentValue,
-          commitMessageTopic: '{{{depName}}} action digest',
+          commitMessageTopic: '{{{depName}}} action',
           datasource: githubTagsDatasource.id,
           versioning: dockerVersioning.id,
           depType: 'action',
