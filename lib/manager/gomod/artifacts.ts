@@ -20,8 +20,8 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-function getPreCommands(): string[] | null {
-  const rules: Readonly<HostRuleSearch[]> = [
+export function getPreCommands(): string[] | null {
+  const rules: HostRuleSearch[] = [
     {
       hostType: PLATFORM_TYPE_GITHUB,
       url: 'https://api.github.com/',
@@ -35,7 +35,7 @@ function getPreCommands(): string[] | null {
 
   for (const r of rules) {
     const credentials = find(r);
-    switch (credentials?.hostType) {
+    switch (r.hostType) {
       case PLATFORM_TYPE_BITBUCKET: {
         if (credentials?.authType === 'ssh') {
           preCommands.push(

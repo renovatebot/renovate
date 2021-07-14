@@ -5,6 +5,10 @@ import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
+import {
+  PLATFORM_TYPE_BITBUCKET,
+  PLATFORM_TYPE_GITHUB,
+} from '../../constants/platforms';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -386,5 +390,55 @@ describe('.updateArtifacts()', () => {
       })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
+  });
+});
+
+describe('.preLoadCommands', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+  it('successfully sets the github token in the url', () => {
+    hostRules.add({
+      hostType: PLATFORM_TYPE_GITHUB,
+      token: 'token',
+    });
+
+    expect(
+      hostRules.find({
+        hostType: PLATFORM_TYPE_GITHUB,
+        url: 'https://api.github.com/',
+      })?.token
+    ).toEqual('token');
+
+    expect(gomod.getPreCommands()).toEqual([
+      `git config --global url.\"https://token@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
+    ]);
+  });
+  it('successfully sets the github ssh git configuration', () => {
+    hostRules.add({
+      hostType: PLATFORM_TYPE_GITHUB,
+      authType: 'ssh',
+    });
+
+    expect(gomod.getPreCommands()).toEqual([
+      `git config --global url.\"git@github.com:\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
+    ]);
+  });
+  it('successfully sets the bitbucket ssh git configuration', () => {
+    hostRules.add({
+      hostType: PLATFORM_TYPE_BITBUCKET,
+      authType: 'ssh',
+    });
+
+    expect(gomod.getPreCommands()).toEqual([
+      `git config --global url.\"git@bitbucket.org:\".insteadOf \"https://bitbucket.org/\"`, // eslint-disable-line no-useless-escape
+    ]);
+  });
+  it('returns no arguement if no host details are set', () => {
+    hostRules.add({
+      hostType: PLATFORM_TYPE_BITBUCKET,
+    });
+
+    expect(gomod.getPreCommands()).toBeNull();
   });
 });
