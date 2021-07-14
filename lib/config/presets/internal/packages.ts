@@ -54,6 +54,17 @@ export const presets: Record<string, Preset> = {
   jsUnitTest: {
     description: 'Unit test packages for javascript',
     matchPackageNames: [
+      '@types/chai',
+      '@types/ember-mocha',
+      '@types/ember-qunit',
+      '@types/enzyme',
+      '@types/istanbul',
+      '@types/jest',
+      '@types/mocha',
+      '@types/mock-fs',
+      '@types/proxyquire',
+      '@types/sinon',
+      '@types/supertest',
       'coveralls',
       'ember-exam',
       'ember-mocha',
