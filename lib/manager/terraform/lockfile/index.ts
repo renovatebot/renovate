@@ -8,6 +8,7 @@ import { TerraformProviderHash } from './hash';
 import type { ProviderLock, ProviderLockUpdate } from './types';
 import {
   extractLocks,
+  findLockFile,
   isPinnedVersion,
   readLockFile,
   writeLockUpdates,
@@ -69,62 +70,75 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileContent = await readLockFile(packageFileName);
-  if (!lockFileContent) {
-    logger.debug('No .terraform.lock.hcl found');
-    return null;
+  const lockFilePath = findLockFile(packageFileName);
+  try {
+    const lockFileContent = await readLockFile(lockFilePath);
+    if (!lockFileContent) {
+      logger.debug('No .terraform.lock.hcl found');
+      return null;
+    }
+    const locks = extractLocks(lockFileContent);
+    if (!locks) {
+      logger.debug('No Locks in .terraform.lock.hcl found');
+      return null;
+    }
+
+    const updates: ProviderLockUpdate[] = [];
+    if (config.updateType === 'lockFileMaintenance') {
+      // update all locks in the file during maintenance --> only update version in constraints
+      const maintenanceUpdates = await updateAllLocks(locks);
+      updates.push(...maintenanceUpdates);
+    } else {
+      // update only specific locks but with constrain updates
+      const dep = updatedDeps[0];
+
+      const lookupName = dep.lookupName ?? dep.depName;
+
+      // handle cases like `Telmate/proxmox`
+      const massagedLookupName = lookupName.toLowerCase();
+
+      const repository = massagedLookupName.includes('/')
+        ? massagedLookupName
+        : `hashicorp/${massagedLookupName}`;
+      const registryUrl = dep.registryUrls
+        ? dep.registryUrls[0]
+        : TerraformProviderDatasource.defaultRegistryUrls[0];
+      const newConstraint = isPinnedVersion(config.newValue)
+        ? config.newVersion
+        : config.newValue;
+      const updateLock = locks.find((value) => value.lookupName === repository);
+      const update: ProviderLockUpdate = {
+        newVersion: config.newVersion,
+        newConstraint,
+        newHashes: await TerraformProviderHash.createHashes(
+          registryUrl,
+          repository,
+          config.newVersion
+        ),
+        ...updateLock,
+      };
+      updates.push(update);
+    }
+
+    // if no updates have been found or there are failed hashes abort
+    if (
+      updates.length === 0 ||
+      updates.some((value) => value.newHashes == null)
+    ) {
+      return null;
+    }
+
+    const res = writeLockUpdates(updates, lockFilePath, lockFileContent);
+    return res ? [res] : null;
+    /* istanbul ignore next */
+  } catch (err) {
+    return [
+      {
+        artifactError: {
+          lockFile: lockFilePath,
+          stderr: err.message,
+        },
+      },
+    ];
   }
-  const locks = extractLocks(lockFileContent);
-  if (!locks) {
-    logger.debug('No Locks in .terraform.lock.hcl found');
-    return null;
-  }
-
-  const updates: ProviderLockUpdate[] = [];
-  if (config.updateType === 'lockFileMaintenance') {
-    // update all locks in the file during maintenance --> only update version in constraints
-    const maintenanceUpdates = await updateAllLocks(locks);
-    updates.push(...maintenanceUpdates);
-  } else {
-    // update only specific locks but with constrain updates
-    const dep = updatedDeps[0];
-
-    const lookupName = dep.lookupName ?? dep.depName;
-
-    // handle cases like `Telmate/proxmox`
-    const massagedLookupName = lookupName.toLowerCase();
-
-    const repository = massagedLookupName.includes('/')
-      ? massagedLookupName
-      : `hashicorp/${massagedLookupName}`;
-    const registryUrl = dep.registryUrls
-      ? dep.registryUrls[0]
-      : TerraformProviderDatasource.defaultRegistryUrls[0];
-    const newConstraint = isPinnedVersion(config.newValue)
-      ? config.newVersion
-      : config.newValue;
-    const updateLock = locks.find((value) => value.lookupName === repository);
-    const update: ProviderLockUpdate = {
-      newVersion: config.newVersion,
-      newConstraint,
-      newHashes: await TerraformProviderHash.createHashes(
-        registryUrl,
-        repository,
-        config.newVersion
-      ),
-      ...updateLock,
-    };
-    updates.push(update);
-  }
-
-  // if no updates have been found or there are failed hashes abort
-  if (
-    updates.length === 0 ||
-    updates.some((value) => value.newHashes == null)
-  ) {
-    return null;
-  }
-
-  const res = writeLockUpdates(updates, lockFileContent);
-  return res ? [res] : null;
 }

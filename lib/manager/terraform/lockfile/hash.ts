@@ -88,9 +88,6 @@ export class TerraformProviderHash {
         { hash },
         `Generated hash for ${build.name}-${build.version}`
       );
-    } catch (err) {
-      /* istanbul ignore next */
-      logger.error({ err, build }, 'write stream error');
     } finally {
       // delete zip file
       await fs.unlink(downloadFileName);
@@ -123,11 +120,6 @@ export class TerraformProviderHash {
       return null;
     }
     const hashes = await TerraformProviderHash.calculateHashes(builds);
-
-    // if a hash could not be produced skip caching and return null
-    if (hashes.some((value) => value == null)) {
-      return null;
-    }
 
     // sorting the hash alphabetically as terraform does this as well
     return hashes.sort().map((hash) => `h1:${hash}`);

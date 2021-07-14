@@ -71,6 +71,7 @@ describe(getName(), () => {
 
   it('update single dependency with exact constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -103,6 +104,7 @@ describe(getName(), () => {
 
   it('update single dependency with range constraint and minor update from private registry', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -141,6 +143,7 @@ describe(getName(), () => {
 
   it('update single dependency with range constraint and major update', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -173,6 +176,7 @@ describe(getName(), () => {
 
   it('do full lock file maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockGetPkgReleases
       .mockResolvedValueOnce({

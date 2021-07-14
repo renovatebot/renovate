@@ -92,12 +92,13 @@ describe(getName(), () => {
       )
       .reply(200, readStreamDarwin);
 
-    const result = await TerraformProviderHash.createHashes(
-      'https://releases.hashicorp.com',
-      'hashicorp/azurerm',
-      '2.56.0'
-    );
-    expect(result).toBeNull();
+    await expect(
+      TerraformProviderHash.createHashes(
+        'https://releases.hashicorp.com',
+        'hashicorp/azurerm',
+        '2.56.0'
+      )
+    ).rejects.toThrow();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
