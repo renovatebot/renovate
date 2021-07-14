@@ -3,7 +3,7 @@ import moo from 'moo';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-import { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GoproxyFallback, http } from './common';
 import type { GoproxyItem, VersionInfo } from './types';
 
