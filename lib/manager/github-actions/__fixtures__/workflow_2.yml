@@ -16,6 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@1.0.0
-#      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145
       - name: Build
         uses: docker/build-push-action@v2
