@@ -1,6 +1,5 @@
 import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
-import { JsxEmit } from 'typescript';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
