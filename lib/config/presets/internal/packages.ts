@@ -76,6 +76,7 @@ export const presets: Record<string, Preset> = {
       'nyc',
       'proxyquire',
       'supertest',
+      'ts-jest',
     ],
     matchPackagePrefixes: [
       '@testing-library',
