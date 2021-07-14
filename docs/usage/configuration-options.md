@@ -441,6 +441,11 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 
 ## dependencyDashboardHeader
 
+## dependencyDashboardLabels
+
+The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
+It is pointless to edit the labels, as Renovate bot restores the labels on each run.
+
 ## dependencyDashboardTitle
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
@@ -676,6 +681,7 @@ Example:
 
 ## gitLabAutomerge
 
+If you enabled `automerge` in the Renovate config, you can speed up the automerge process by using GitLab's own automerge function.
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 

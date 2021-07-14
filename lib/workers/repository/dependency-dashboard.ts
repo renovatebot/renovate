@@ -349,6 +349,7 @@ export async function ensureDependencyDashboard(
       title: config.dependencyDashboardTitle,
       reuseTitle,
       body: issueBody,
+      labels: config.dependencyDashboardLabels,
     });
   }
 }

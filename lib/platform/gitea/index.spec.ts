@@ -1,4 +1,10 @@
-import { BranchStatusConfig, Platform, RepoParams, RepoResult } from '..';
+import {
+  BranchStatusConfig,
+  EnsureIssueConfig,
+  Platform,
+  RepoParams,
+  RepoResult,
+} from '..';
 import { getName, partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -94,6 +100,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'some-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 2,
@@ -101,6 +108,7 @@ describe(getName(), () => {
       state: 'closed',
       body: 'other-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 3,
@@ -108,6 +116,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 4,
@@ -115,6 +124,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 5,
@@ -122,6 +132,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
   ];
 
@@ -972,9 +983,43 @@ describe(getName(), () => {
       });
     });
 
+    it('should create issue with the correct labels', async () => {
+      const mockIssue: EnsureIssueConfig = {
+        title: 'new-title',
+        body: 'new-body',
+        shouldReOpen: false,
+        once: false,
+        labels: ['Renovate', 'Maintenance'],
+      };
+      const mockLabels: ght.Label[] = [
+        partial<ght.Label>({ id: 1, name: 'Renovate' }),
+        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      ];
+
+      helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+
+      helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.createIssue.mockResolvedValueOnce(
+        partial<ght.Issue>({ number: 42 })
+      );
+
+      await initFakeRepo();
+      const res = await gitea.ensureIssue(mockIssue);
+
+      expect(res).toEqual('created');
+      expect(helper.createIssue).toHaveBeenCalledTimes(1);
+      expect(helper.createIssue).toHaveBeenCalledWith(mockRepo.full_name, {
+        body: mockIssue.body,
+        title: mockIssue.title,
+        labels: [1, 3],
+      });
+    });
+
     it('should not reopen closed issue by default', async () => {
       const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
       await initFakeRepo();
       const res = await gitea.ensureIssue({
@@ -997,9 +1042,118 @@ describe(getName(), () => {
       );
     });
 
+    it('should not update labels when not necessary', async () => {
+      const mockLabels: ght.Label[] = [
+        partial<ght.Label>({ id: 1, name: 'Renovate' }),
+        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      ];
+      const mockIssue: ght.Issue = {
+        number: 10,
+        title: 'label-issue',
+        body: 'label-body',
+        assignees: [],
+        labels: mockLabels,
+        state: 'open',
+      };
+
+      helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+      helper.searchIssues.mockResolvedValueOnce([mockIssue]);
+      helper.updateIssue.mockResolvedValueOnce(mockIssue);
+
+      await initFakeRepo();
+      const res = await gitea.ensureIssue({
+        title: mockIssue.title,
+        body: 'new-body',
+        labels: ['Renovate', 'Maintenance'],
+      });
+
+      expect(res).toEqual('updated');
+      expect(helper.updateIssue).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledTimes(0);
+    });
+
+    it('should update labels when missing', async () => {
+      const mockLabels: ght.Label[] = [
+        partial<ght.Label>({ id: 1, name: 'Renovate' }),
+        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      ];
+      const mockIssue: ght.Issue = {
+        number: 10,
+        title: 'label-issue',
+        body: 'label-body',
+        assignees: [],
+        labels: [mockLabels[0]],
+        state: 'open',
+      };
+
+      helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+      helper.searchIssues.mockResolvedValueOnce([mockIssue]);
+      helper.updateIssue.mockResolvedValueOnce(mockIssue);
+
+      await initFakeRepo();
+      const res = await gitea.ensureIssue({
+        title: mockIssue.title,
+        body: 'new-body',
+        labels: ['Renovate', 'Maintenance'],
+      });
+
+      expect(res).toEqual('updated');
+      expect(helper.updateIssue).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockIssue.number,
+        {
+          labels: [1, 3],
+        }
+      );
+    });
+
+    it('should reset labels when others have been set', async () => {
+      const mockLabels: ght.Label[] = [
+        partial<ght.Label>({ id: 1, name: 'Renovate' }),
+        partial<ght.Label>({ id: 2, name: 'Other label' }),
+        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      ];
+      const mockIssue: ght.Issue = {
+        number: 10,
+        title: 'label-issue',
+        body: 'label-body',
+        assignees: [],
+        labels: mockLabels,
+        state: 'open',
+      };
+
+      helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+      helper.searchIssues.mockResolvedValueOnce([mockIssue]);
+      helper.updateIssue.mockResolvedValueOnce(mockIssue);
+
+      await initFakeRepo();
+      const res = await gitea.ensureIssue({
+        title: mockIssue.title,
+        body: 'new-body',
+        labels: ['Renovate', 'Maintenance'],
+      });
+
+      expect(res).toEqual('updated');
+      expect(helper.updateIssue).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockIssue.number,
+        {
+          labels: [1, 3],
+        }
+      );
+    });
+
     it('should reopen closed issue if desired', async () => {
       const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
       await initFakeRepo();
       const res = await gitea.ensureIssue({
