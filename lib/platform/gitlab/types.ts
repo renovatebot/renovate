@@ -1,5 +1,8 @@
 export interface GitlabIssue {
   iid: number;
+
+  labels?: string[];
+
   title: string;
 }
 

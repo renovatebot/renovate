@@ -31,7 +31,7 @@ It therefore makes sense for Renovate to replace `master` with `main` where poss
 A branch name has no special meaning within the Git program, it's just a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
-## Which Renovate versions are officialy supported?
+## Which Renovate versions are officially supported?
 
 The Renovate maintainers only support the latest version of Renovate.
 The Renovate team will only create bugfixes for an older version if the hosted app needs to stay on an older major version for a short time or if some critical bug needs to be fixed and the new major is blocked.
