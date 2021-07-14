@@ -304,7 +304,12 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          registryUrls: ['github.com'],
+          registryUrls: [
+            'github.com',
+            'github.enterprise.com/test',
+            'https://github2.enterprise.com',
+            'ftp://this-is-invalid.git.enterprise.com',
+          ],
         },
       })
     ).not.toBeNull();

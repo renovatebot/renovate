@@ -8,6 +8,7 @@ import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
 import { getHttpUrl } from '../../util/git/url';
+import { parseUrl } from '../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -20,7 +21,7 @@ function getGoEnvironmentVariables(registryUrls: string[]): NodeJS.ProcessEnv {
   let goEnvVariables: NodeJS.ProcessEnv = {};
 
   for (const registryUrl of registryUrls) {
-    const goPrivateWithProtocol = getHttpUrl(`https://${registryUrl}`);
+    const goPrivateWithProtocol = getHttpUrl(registryUrl);
     goEnvVariables = getGitAuthenticatedEnvironmentVariables(
       goPrivateWithProtocol,
       goEnvVariables
@@ -117,21 +118,48 @@ export async function updateArtifacts({
     // array of GOMODULE registries which should be fetched from
     // passed to go as GOPRIVATE
     let registryUrls: string[] = [];
+    let goPrivates: string[] = [];
 
     // add GOPRIVATE environment variables
     if (process.env.GOPRIVATE) {
-      const goPrivates = process.env.GOPRIVATE.split(',');
-      registryUrls = registryUrls.concat(goPrivates);
+      goPrivates = process.env.GOPRIVATE.split(',');
+      // GOPRIVATE is without protocol so we add the https protocol before adding it to the registryUrls
+      const goPrivatesWithProtocol = goPrivates.map(
+        (goPrivate) => `https://${goPrivate}`
+      );
+      registryUrls = registryUrls.concat(goPrivatesWithProtocol);
     }
 
     // add explicit registryUrls
     if (config.registryUrls) {
-      registryUrls = registryUrls.concat(config.registryUrls);
+      for (const registryUrl of config.registryUrls) {
+        // if the registryUrl could not be parsed, retry with a protocol
+        const parsedRegistryUrl =
+          parseUrl(registryUrl) || parseUrl(`https://${registryUrl}`);
+
+        // Only allow http(s)
+        if (parsedRegistryUrl?.protocol?.startsWith('http')) {
+          // Add the full URL to the registryUrls
+          registryUrls.push(parsedRegistryUrl.toString());
+
+          // Add only the domain + path to the goPrivates
+          let goPrivate = parsedRegistryUrl.host;
+          // only add the pathname if it is not just the base path
+          if (parsedRegistryUrl.pathname !== '/') {
+            goPrivate += parsedRegistryUrl.pathname;
+          }
+          goPrivates.push(goPrivate);
+        } else {
+          // ignore if registryUrl could not be parsed
+          logger.warn(
+            `Could not parse registryUrl ${registryUrl} or not using http(s). Ignoring`
+          );
+        }
+      }
     }
 
-    // create comma-separated GOPRIVATE environment variable if any registryUrls exist
-    const goPrivate =
-      registryUrls.length > 0 ? registryUrls.join(',') : undefined;
+    // create comma-separated GOPRIVATE environment variable if any goPrivates exist
+    const goPrivate = goPrivates.length > 0 ? goPrivates.join(',') : undefined;
 
     const cmd = 'go';
     const execOptions: ExecOptions = {

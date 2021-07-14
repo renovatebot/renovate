@@ -427,7 +427,7 @@ Array [
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPRIVATE": "github.com",
+        "GOPRIVATE": "github.com,github.enterprise.com/test,github2.enterprise.com",
         "GOPROXY": "proxy.example.com",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
