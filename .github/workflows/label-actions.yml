@@ -4,6 +4,10 @@ on:
   issues:
     types: [labeled]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   reaction:
     runs-on: ubuntu-latest
