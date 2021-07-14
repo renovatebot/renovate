@@ -1,5 +1,4 @@
 // TODO fix mocks
-import nock from 'nock';
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
@@ -43,11 +42,7 @@ describe(getName(), () => {
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
-    httpMock.reset();
-    httpMock.setup();
-  });
-  afterEach(() => {
-    httpMock.reset();
+    delete process.env.GITLAB_IGNORE_REPO_URL;
   });
 
   async function initFakePlatform(version: string) {
@@ -164,11 +159,10 @@ describe(getName(), () => {
   async function initRepo(
     repoParams: RepoParams = {
       repository: 'some/repo',
-      localDir: '',
     },
     repoResp = null,
     scope = httpMock.scope(gitlabApiHost)
-  ): Promise<nock.Scope> {
+  ): Promise<httpMock.Scope> {
     const repo = repoParams.repository;
     const justRepo = repo.split('/').slice(0, 2).join('/');
     scope.get(`/api/v4/projects/${encodeURIComponent(repo)}`).reply(
@@ -191,7 +185,6 @@ describe(getName(), () => {
         .reply(200, okReturn);
       await gitlab.initRepo({
         repository: 'some/repo/project',
-        localDir: '',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -203,7 +196,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow('always error');
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -216,7 +208,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -229,7 +220,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -242,7 +232,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -255,7 +244,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -268,7 +256,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -281,7 +268,6 @@ describe(getName(), () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -296,8 +282,39 @@ describe(getName(), () => {
         });
       await gitlab.initRepo({
         repository: 'some/repo/project',
-        localDir: '',
       });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
+      process.env.GITLAB_IGNORE_REPO_URL = 'true';
+      const selfHostedUrl = 'http://mycompany.com/gitlab';
+      httpMock
+        .scope(selfHostedUrl)
+        .get('/api/v4/user')
+        .reply(200, {
+          email: 'a@b.com',
+          name: 'Renovate Bot',
+        })
+        .get('/api/v4/version')
+        .reply(200, {
+          version: '13.8.0',
+        });
+      await gitlab.initPlatform({
+        endpoint: `${selfHostedUrl}/api/v4`,
+        token: 'mytoken',
+      });
+      httpMock
+        .scope(selfHostedUrl)
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `http://other.host.com/gitlab/some/repo/project.git`,
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo/project',
+      });
+      expect(git.initRepo.mock.calls).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -306,7 +323,6 @@ describe(getName(), () => {
       await initRepo(
         {
           repository: 'some/repo/project',
-          localDir: '',
         },
         {
           default_branch: 'master',
@@ -322,7 +338,6 @@ describe(getName(), () => {
       await initRepo(
         {
           repository: 'some/repo/project',
-          localDir: '',
         },
         {
           default_branch: 'master',
@@ -727,6 +742,25 @@ describe(getName(), () => {
       expect(res).toEqual('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('sets issue labels', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/issues')
+        .reply(200);
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+        labels: ['Renovate', 'Maintenance'],
+      });
+      expect(res).toEqual('created');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('updates issue', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -754,6 +788,36 @@ describe(getName(), () => {
       expect(res).toEqual('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('updates issue with labels', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            title: 'title-1',
+          },
+          {
+            iid: 2,
+            title: 'title-2',
+          },
+        ])
+        .get('/api/v4/projects/undefined/issues/2')
+        .reply(200, { description: 'new-content' })
+        .put('/api/v4/projects/undefined/issues/2')
+        .reply(200);
+      const res = await gitlab.ensureIssue({
+        title: 'title-2',
+        body: 'newer-content',
+        labels: ['Renovate', 'Maintenance'],
+      });
+      expect(res).toEqual('updated');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('skips update if unchanged', async () => {
       httpMock
         .scope(gitlabApiHost)

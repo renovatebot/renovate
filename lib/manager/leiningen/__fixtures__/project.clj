@@ -1,3 +1,4 @@
+(def clj-stacktrace-version "0.2.4")
 ;; This is an annotated reference of the options that may be set in a
 ;; project.clj file. It is fairly contrived in order to cover lots of
 ;; different options; it shouldn't be considered a representative
@@ -184,7 +185,7 @@
              :1.5 {:dependencies [[org.clojure/clojure "1.5.0"]]}
              ;; activated by default
              :dev {:resource-paths ["dummy-data"]
-                   :dependencies [[clj-stacktrace "0.2.4"]]}
+                   :dependencies [[clj-stacktrace ~clj-stacktrace-version]]}
              ;; activated automatically during uberjar
              :uberjar {:aot :all}
              ;; activated automatically in repl task
@@ -359,9 +360,9 @@
 
 ;;; Repl
   ;; Options to change the way the REPL behaves.
-  :repl-options { ;; Specify the string to print when prompting for input.
+  :repl-options {;; Specify the string to print when prompting for input.
                  ;; defaults to something like (fn [ns] (str *ns* "=> "))
-                 :prompt (fn [ns] (str "your command for <" ns ">? " ))
+                 :prompt (fn [ns] (str "your command for <" ns ">? "))
                  ;; What to print when the repl session starts.
                  :welcome (println "Welcome to the magical world of the repl!")
                  ;; Specify the ns to start the REPL in (overrides :main in

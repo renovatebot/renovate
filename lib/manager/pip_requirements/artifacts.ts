@@ -22,12 +22,17 @@ export async function updateArtifacts({
     const lines = rewrittenContent.split('\n').map((line) => line.trim());
     for (const dep of updatedDeps) {
       const hashLine = lines.find(
-        (line) => line.startsWith(`${dep}==`) && line.includes('--hash=')
+        (line) =>
+          line.startsWith(`${dep.depName}==`) && line.includes('--hash=')
       );
       if (hashLine) {
         const depConstraint = hashLine.split(' ')[0];
         cmd.push(`hashin ${depConstraint} -r ${packageFileName}`);
       }
+    }
+    if (!cmd.length) {
+      logger.debug('No hashin commands to run - returning');
+      return null;
     }
     const execOptions: ExecOptions = {
       cwdFile: '.',

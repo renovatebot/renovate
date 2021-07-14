@@ -4,7 +4,6 @@ import { getPlatformList } from '../platform';
 import { getVersioningList } from '../versioning';
 import * as dockerVersioning from '../versioning/docker';
 import * as pep440Versioning from '../versioning/pep440';
-import * as semverVersioning from '../versioning/semver';
 import type { RenovateOptions } from './types';
 
 const options: RenovateOptions[] = [
@@ -149,6 +148,17 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'migratePresets',
+    description:
+      'Define presets here which have been removed or renamed and should be migrated automatically.',
+    type: 'object',
+    admin: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'description',
     description: 'Plain text description for a config or preset.',
     type: 'array',
@@ -252,12 +262,12 @@ const options: RenovateOptions[] = [
       'Custom environment variables for child processes and sidecar Docker containers.',
     admin: true,
     type: 'object',
-    default: false,
+    default: {},
   },
   {
     name: 'dockerChildPrefix',
     description:
-      'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
+      'Change this value in order to add a prefix to the Renovate Docker sidecar container names and labels.',
     type: 'string',
     admin: true,
     default: 'renovate_',
@@ -351,7 +361,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'requireConfig',
-    description: 'Set to true if repositories must have a config to activate.',
+    description:
+      'Set to false if it is optional for repositories to contain a config.',
     stage: 'repository',
     type: 'boolean',
     default: true,
@@ -407,6 +418,13 @@ const options: RenovateOptions[] = [
     description:
       'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
     type: 'string',
+  },
+  {
+    name: 'dependencyDashboardLabels',
+    description:
+      'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
+    type: 'array',
+    subType: 'string',
   },
   {
     name: 'configWarningReuseIssue',
@@ -698,7 +716,6 @@ const options: RenovateOptions[] = [
     description: 'Versioning to use for filtering and comparisons.',
     type: 'string',
     allowedValues: getVersioningList(),
-    default: semverVersioning.id,
     cli: false,
     env: false,
   },
@@ -1185,6 +1202,17 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  /*
+   * Undocumented experimental feature
+  {
+    name: 'minimumConfidence',
+    description:
+      'Minimum Merge confidence level to filter by. Requires authentication to work.',
+    type: 'string',
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
+    default: 'low',
+  },
+  */
   {
     name: 'internalChecksFilter',
     description: 'When/how to filter based on internal checks.',
@@ -1709,35 +1737,8 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'domainName',
-    description: 'Domain name for a host rule. e.g. "docker.io".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'hostName',
-    description: 'Hostname for a host rule. e.g. "index.docker.io".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'baseUrl',
-    description: 'baseUrl for a host rule. e.g. "https://api.github.com/".',
-    type: 'string',
-    stage: 'repository',
-    parent: 'hostRules',
-    cli: false,
-    env: false,
-  },
-  {
     name: 'matchHost',
-    description: 'A host name or base URL to match against',
+    description: 'A domain name, host name or base URL to match against',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -1945,6 +1946,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'currentValueTemplate',
+    description:
+      'Optional currentValue for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioningTemplate',
     description:
       'Optional versioning for extracted dependencies. Valid only within a `regexManagers` object.',
@@ -1957,6 +1967,15 @@ const options: RenovateOptions[] = [
     name: 'registryUrlTemplate',
     description:
       'Optional registry URL for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'extractVersionTemplate',
+    description:
+      'Optional extractVersion for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -1983,6 +2002,18 @@ const options: RenovateOptions[] = [
       'Set to true to fetch the entire list of PRs instead of only those authored by the Renovate user.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'gitNoVerify',
+    description:
+      'Which git commands will be run with the `--no-verify` option.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    allowedValues: ['commit', 'push'],
+    default: ['commit', 'push'],
+    stage: 'global',
+    admin: true,
   },
 ];
 

@@ -3,7 +3,7 @@ import * as httpMock from '../../../test/http-mock';
 import { getName, loadJsonFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
-import { id as datasource } from '.';
+import { HexDatasource } from '.';
 
 const hostRules: any = _hostRules;
 
@@ -12,17 +12,16 @@ const res1 = loadJsonFixture('certifi.json');
 jest.mock('../../util/host-rules');
 
 const baseUrl = 'https://hex.pm/api/packages/';
+const datasource = HexDatasource.id;
 
 describe(getName(), () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({});
-    httpMock.setup();
   });
 
   afterEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
   });
 
   describe('getReleases', () => {

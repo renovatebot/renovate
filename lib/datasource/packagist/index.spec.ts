@@ -21,7 +21,6 @@ describe(getName(), () => {
     let config: any;
     beforeEach(() => {
       jest.resetAllMocks();
-      httpMock.setup();
       hostRules.find = jest.fn((input) => input);
       hostRules.hosts = jest.fn(() => []);
       config = {
@@ -31,10 +30,6 @@ describe(getName(), () => {
           'https://packagist.org',
         ],
       };
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('supports custom registries', async () => {

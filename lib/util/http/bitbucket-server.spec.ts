@@ -18,18 +18,13 @@ describe(getName(), () => {
     hostRules.clear();
     hostRules.add({
       hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
-      baseUrl,
+      matchHost: baseUrl,
       token: 'token',
     });
 
-    httpMock.reset();
-    httpMock.setup();
-
     setBaseUrl(baseUrl);
   });
-  afterEach(() => {
-    httpMock.reset();
-  });
+
   it('posts', async () => {
     const body = ['a', 'b'];
     httpMock.scope(baseUrl).post('/some-url').reply(200, body);

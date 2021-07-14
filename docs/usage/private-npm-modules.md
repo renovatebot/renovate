@@ -40,7 +40,7 @@ It's therefore better to provide Renovate with all the credentials it needs to l
 
 The recommended approaches in order of preference are:
 
-1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `hostName` and `token` specified
+1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `matchHost` and `token` specified
 1. **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
 1. **Renovate App with a private registry**: Add an unencrypted `npmrc` plus an encrypted `npmToken` in config
 
@@ -55,13 +55,13 @@ module.exports = {
   hostRules: [
     {
       hostType: 'npm',
-      hostName: 'registry.npmjs.org',
+      matchHost: 'registry.npmjs.org',
       token: process.env.NPMJS_TOKEN,
     },
     {
       hostType: 'npm',
-      baseUrl:
-        'https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/npm/registry/',
+      matchHost:
+        'https://pkgs.dev.azure.com/{organization}/{project}/_packaging/{feed}/npm/registry/',
       username: 'VssSessionToken',
       password: process.env.AZURE_NPM_TOKEN,
     },
@@ -69,7 +69,7 @@ module.exports = {
       // https://www.jfrog.com/confluence/display/JFROG/npm+Registry
       // Will be passed as `//artifactory.my-company.com/artifactory/api/npm/npm:_auth=<TOKEN>` to `.npmrc`
       hostType: 'npm',
-      baseUrl: 'https://artifactory.my-company.com/artifactory/api/npm/npm',
+      matchHost: 'https://artifactory.my-company.com/artifactory/api/npm/npm/',
       token: process.env.ARTIFACTORY_NPM_TOKEN,
       authType: 'Basic',
     },
@@ -77,7 +77,7 @@ module.exports = {
 };
 ```
 
-**NOTE:** Do not use `NPM_TOKEN` as an environment variable.
+**NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
 
 ### Add npmrc string to Renovate config
 
@@ -151,3 +151,20 @@ The end-result looks like this:
 ```
 
 However be aware that if your `.npmrc` is too long to encrypt then the above command will fail.
+
+### Automatically authenticate for npm package stored in private GitHub npm repository
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://npm.pkg.github.com/",
+      "hostType": "npm",
+      "encrypted": {
+        "token": "<Encrypted PAT Token>"
+      }
+    }
+  ],
+  "npmrc": "@organizationName:registry=https://npm.pkg.github.com/"
+}
+```

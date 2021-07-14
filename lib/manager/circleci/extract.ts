@@ -1,4 +1,4 @@
-import * as datasourceOrb from '../../datasource/orb';
+import { OrbDatasource } from '../../datasource/orb';
 import { logger } from '../../logger';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
@@ -36,7 +36,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               depType: 'orb',
               depName,
               currentValue,
-              datasource: datasourceOrb.id,
+              datasource: OrbDatasource.id,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
               versioning: npmVersioning.id,

@@ -1,4 +1,3 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
@@ -43,8 +42,6 @@ describe(getName(), () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    httpMock.reset();
-    httpMock.setup();
     jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
     jest.mock('../../logger');
@@ -63,15 +60,12 @@ describe(getName(), () => {
 
     setBaseUrl(baseUrl);
   });
-  afterEach(() => {
-    httpMock.reset();
-  });
 
   async function initRepoMock(
     config?: Partial<RepoParams>,
     repoResp?: any,
-    existingScope?: nock.Scope
-  ): Promise<nock.Scope> {
+    existingScope?: httpMock.Scope
+  ): Promise<httpMock.Scope> {
     const repository = config?.repository || 'some/repo';
 
     const scope = existingScope || httpMock.scope(baseUrl);
@@ -84,7 +78,6 @@ describe(getName(), () => {
 
     await bitbucket.initRepo({
       repository: 'some/repo',
-      localDir: '',
       ...config,
     });
 
@@ -149,7 +142,6 @@ describe(getName(), () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

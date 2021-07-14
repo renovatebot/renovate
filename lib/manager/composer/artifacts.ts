@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import upath from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -15,7 +14,7 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
-  ensureDir,
+  ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
   localPathExists,
@@ -45,7 +44,7 @@ function getAuthJson(): string | null {
     .findAll({ hostType: PLATFORM_TYPE_GITLAB })
     ?.forEach((gitlabHostRule) => {
       if (gitlabHostRule?.token) {
-        const host = gitlabHostRule.hostName || 'gitlab.com';
+        const host = gitlabHostRule.resolvedHost || 'gitlab.com';
         authJson['gitlab-token'] = authJson['gitlab-token'] || {};
         authJson['gitlab-token'][host] = gitlabHostRule.token;
         // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
@@ -77,11 +76,10 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const cacheDir =
-    process.env.COMPOSER_CACHE_DIR ||
-    upath.join(config.cacheDir, './others/composer');
-  await ensureDir(cacheDir);
-  logger.debug(`Using composer cache ${cacheDir}`);
+  const cacheDir = await ensureCacheDir(
+    './others/composer',
+    'COMPOSER_CACHE_DIR'
+  );
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName);
@@ -117,8 +115,9 @@ export async function updateArtifacts({
       args = 'install';
     } else {
       args =
-        ('update ' + updatedDeps.map(quote).join(' ')).trim() +
-        ' --with-dependencies';
+        (
+          'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
+        ).trim() + ' --with-dependencies';
     }
     if (config.composerIgnorePlatformReqs) {
       args += ' --ignore-platform-reqs';

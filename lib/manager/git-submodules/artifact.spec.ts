@@ -7,7 +7,7 @@ describe(getName(), () => {
       expect(
         updateArtifacts({
           packageFileName: '',
-          updatedDeps: [''],
+          updatedDeps: [{ depName: '' }],
           newPackageFileContent: '',
           config: {},
         })
@@ -17,7 +17,7 @@ describe(getName(), () => {
       expect(
         updateArtifacts({
           packageFileName: '',
-          updatedDeps: ['renovate', 'renovate-pro'],
+          updatedDeps: [{ depName: 'renovate' }, { depName: 'renovate-pro' }],
           newPackageFileContent: '',
           config: {},
         })

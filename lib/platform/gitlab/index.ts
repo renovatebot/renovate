@@ -22,7 +22,7 @@ import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash, getQueryString } from '../../util/url';
+import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -52,7 +52,6 @@ import type {
 
 let config: {
   repository: string;
-  localDir: string;
   email: string;
   prList: any[];
   issueList: GitlabIssue[];
@@ -166,13 +165,11 @@ export async function getJsonFile(
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
-  localDir,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
-  config.localDir = localDir;
   config.cloneSubmodules = cloneSubmodules;
   config.ignorePrAuthor = ignorePrAuthor;
 
@@ -228,13 +225,15 @@ export async function initRepo({
       res.body.http_url_to_repo === null
     ) {
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
-      const { host, protocol } = URL.parse(defaults.endpoint);
-      url = git.getUrl({
-        protocol: protocol.slice(0, -1) as any,
+      const { protocol, host, pathname } = parseUrl(defaults.endpoint);
+      const newPathname = pathname.slice(0, pathname.indexOf('/api'));
+      url = URL.format({
+        protocol: protocol.slice(0, -1) || 'https',
         auth: 'oauth2:' + opts.token,
         host,
-        repository,
+        pathname: newPathname + '/' + repository + '.git',
       });
+      logger.debug({ url }, 'using URL based on configured endpoint');
     } else {
       logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
       const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
@@ -734,13 +733,12 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       author_id: `${authorId}`,
       state: 'opened',
     });
-    const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
-      `projects/${config.repository}/issues?${query}`,
-      {
-        useCache: false,
-        paginate: true,
-      }
-    );
+    const res = await gitlabApi.getJson<
+      { iid: number; title: string; labels: string[] }[]
+    >(`projects/${config.repository}/issues?${query}`, {
+      useCache: false,
+      paginate: true,
+    });
     // istanbul ignore if
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
@@ -749,9 +747,31 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     config.issueList = res.body.map((i) => ({
       iid: i.iid,
       title: i.title,
+      labels: i.labels,
     }));
   }
   return config.issueList;
+}
+
+export async function getIssue(
+  number: number,
+  useCache = true
+): Promise<Issue | null> {
+  try {
+    const issueBody = (
+      await gitlabApi.getJson<{ description: string }>(
+        `projects/${config.repository}/issues/${number}`,
+        { useCache }
+      )
+    ).body.description;
+    return {
+      number,
+      body: issueBody,
+    };
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, number }, 'Error getting issue');
+    return null;
+  }
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
@@ -762,15 +782,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    const issueBody = (
-      await gitlabApi.getJson<{ description: string }>(
-        `projects/${config.repository}/issues/${issue.iid}`
-      )
-    ).body.description;
-    return {
-      number: issue.iid,
-      body: issueBody,
-    };
+    return getIssue(issue.iid);
   } catch (err) /* istanbul ignore next */ {
     logger.warn('Error finding issue');
     return null;
@@ -781,6 +793,7 @@ export async function ensureIssue({
   title,
   reuseTitle,
   body,
+  labels,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
@@ -801,7 +814,7 @@ export async function ensureIssue({
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { title, description },
+            body: { title, description, labels: labels ?? issue.labels },
           }
         );
         return 'updated';
@@ -811,6 +824,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
+          labels,
         },
       });
       logger.info('Issue created');

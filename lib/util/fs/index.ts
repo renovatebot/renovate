@@ -1,17 +1,15 @@
+import stream from 'stream';
+import util from 'util';
+import is from '@sindresorhus/is';
 import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
-import type { RenovateConfig } from '../../config/types';
+import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
+import { getChildProcessEnv } from '../exec/env';
 
 export * from './proxies';
 
-let localDir = '';
-let cacheDir = '';
-
-export function setFsConfig(config: Partial<RenovateConfig>): void {
-  localDir = config.localDir;
-  cacheDir = config.cacheDir;
-}
+export const pipeline = util.promisify(stream.pipeline);
 
 export function getSubDirectory(fileName: string): string {
   return parse(fileName).dir;
@@ -34,6 +32,7 @@ export async function readLocalFile(
   fileName: string,
   encoding?: string
 ): Promise<string | Buffer> {
+  const { localDir } = getAdminConfig();
   const localFileName = join(localDir, fileName);
   try {
     const fileContent = await fs.readFile(localFileName, encoding);
@@ -48,11 +47,13 @@ export async function writeLocalFile(
   fileName: string,
   fileContent: string
 ): Promise<void> {
+  const { localDir } = getAdminConfig();
   const localFileName = join(localDir, fileName);
   await fs.outputFile(localFileName, fileContent);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
+  const { localDir } = getAdminConfig();
   if (localDir) {
     const localFileName = join(localDir, fileName);
     await fs.remove(localFileName);
@@ -64,28 +65,48 @@ export async function renameLocalFile(
   fromFile: string,
   toFile: string
 ): Promise<void> {
+  const { localDir } = getAdminConfig();
   await fs.move(join(localDir, fromFile), join(localDir, toFile));
 }
 
 // istanbul ignore next
 export async function ensureDir(dirName: string): Promise<void> {
-  await fs.ensureDir(dirName);
+  if (is.nonEmptyString(dirName)) {
+    await fs.ensureDir(dirName);
+  }
 }
 
 // istanbul ignore next
 export async function ensureLocalDir(dirName: string): Promise<void> {
+  const { localDir } = getAdminConfig();
   const localDirName = join(localDir, dirName);
   await fs.ensureDir(localDirName);
 }
 
 export async function ensureCacheDir(
-  dirName: string,
-  envPathVar?: string
+  adminCacheSubdir: string,
+  envCacheVar?: string
 ): Promise<string> {
-  const envCacheDirName = envPathVar ? process.env[envPathVar] : null;
-  const cacheDirName = envCacheDirName || join(cacheDir, dirName);
-  await fs.ensureDir(cacheDirName);
-  return cacheDirName;
+  let cacheDir: string;
+  if (envCacheVar) {
+    const env = getChildProcessEnv([envCacheVar]);
+    if (env[envCacheVar]) {
+      cacheDir = env[envCacheVar];
+      logger.debug(
+        { cacheDir },
+        `Using cache directory from environment: ${envCacheVar}`
+      );
+    }
+  }
+
+  if (!cacheDir) {
+    const { cacheDir: adminCacheDir } = getAdminConfig();
+    cacheDir = join(adminCacheDir, adminCacheSubdir);
+    logger.debug({ cacheDir }, `Using cache directory from admin config`);
+  }
+
+  await fs.ensureDir(cacheDir);
+  return cacheDir;
 }
 
 /**
@@ -94,10 +115,12 @@ export async function ensureCacheDir(
  * without risk of that information leaking to other repositories/users.
  */
 export function privateCacheDir(): string {
+  const { cacheDir } = getAdminConfig();
   return join(cacheDir, '__renovate-private-cache');
 }
 
 export function localPathExists(pathName: string): Promise<boolean> {
+  const { localDir } = getAdminConfig();
   // Works for both files as well as directories
   return fs
     .stat(join(localDir, pathName))
@@ -132,4 +155,18 @@ export async function findLocalSiblingOrParent(
   }
 
   return null;
+}
+
+/**
+ * Get files by name from directory
+ */
+export async function readLocalDirectory(path: string): Promise<string[]> {
+  const { localDir } = getAdminConfig();
+  const localPath = join(localDir, path);
+  const fileList = await fs.readdir(localPath);
+  return fileList;
+}
+
+export function createWriteStream(path: string): fs.WriteStream {
+  return fs.createWriteStream(path);
 }

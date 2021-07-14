@@ -14,7 +14,7 @@ You need the following dependencies for local development:
 - Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
-- Python `^3.8`
+- Python `^3.9`
 - Java between `8` and `12`
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
@@ -70,7 +70,7 @@ The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/inte
 
 ## Fork and Clone
 
-If you want to contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
+If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.
 The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:

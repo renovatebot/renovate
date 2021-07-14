@@ -1,5 +1,6 @@
 import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { setAdminConfig } from './admin';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
 import type {
@@ -298,9 +299,8 @@ describe(getName(), () => {
         enabled: true,
         separateMinorPatch: true,
       };
-      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-        config
-      );
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
       expect(isMigrated).toBe(false);
       expect(migratedConfig).toMatchObject(config);
     });
@@ -658,5 +658,46 @@ describe(getName(), () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
     expect(migratedConfig.packageRules).toHaveLength(3);
+  });
+  it('it migrates hostRules fields', () => {
+    const config: RenovateConfig = {
+      hostRules: [
+        {
+          baseUrl: 'https://some.domain.com',
+          token: 'abc123',
+        },
+        {
+          domainName: 'domain.com',
+          token: 'abc123',
+        },
+        {
+          hostName: 'some.domain.com',
+          token: 'abc123',
+        },
+      ],
+    } as any;
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
+  });
+  it('it migrates presets', () => {
+    setAdminConfig({
+      migratePresets: {
+        '@org': 'local>org/renovate-config',
+        '@org2/foo': '',
+      },
+    });
+    const config: RenovateConfig = {
+      extends: ['@org', '@org2/foo'],
+    } as any;
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
   });
 });

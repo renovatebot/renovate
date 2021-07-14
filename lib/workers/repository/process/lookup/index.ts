@@ -42,10 +42,13 @@ export async function lookupUpdates(
   } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   // Use the datasource's default versioning if none is configured
-  const versioning = allVersioning.get(
-    config.versioning || getDefaultVersioning(datasource)
-  );
-  const res: UpdateResult = { updates: [], warnings: [] } as any;
+  config.versioning ??= getDefaultVersioning(datasource);
+  const versioning = allVersioning.get(config.versioning);
+  const res: UpdateResult = {
+    updates: [],
+    warnings: [],
+    versioning: config.versioning,
+  } as any;
   // istanbul ignore if
   if (
     !isGetPkgReleasesConfig(config) ||
@@ -115,7 +118,7 @@ export async function lookupUpdates(
       versioning.matches(v.version, currentValue)
     );
     if (rollbackPrs && !allSatisfyingVersions.length) {
-      const rollback = getRollbackUpdate(config, allVersions);
+      const rollback = getRollbackUpdate(config, allVersions, versioning);
       // istanbul ignore if
       if (!rollback) {
         res.warnings.push({
@@ -185,7 +188,8 @@ export async function lookupUpdates(
       config,
       filterStart,
       latestVersion,
-      allVersions
+      allVersions,
+      versioning
     ).filter((v) =>
       // Leave only compatible versions
       versioning.isCompatible(v.version, currentValue)
@@ -212,12 +216,13 @@ export async function lookupUpdates(
       const sortedReleases = releases.sort((r1, r2) =>
         versioning.sortVersions(r1.version, r2.version)
       );
-      const { release, pendingChecks, pendingReleases } = filterInternalChecks(
-        depResultConfig,
-        versioning,
-        bucket,
-        sortedReleases
-      );
+      const { release, pendingChecks, pendingReleases } =
+        await filterInternalChecks(
+          depResultConfig,
+          versioning,
+          bucket,
+          sortedReleases
+        );
       // istanbul ignore next
       if (!release) {
         return res;
@@ -226,11 +231,12 @@ export async function lookupUpdates(
       const update = generateUpdate(
         config,
         versioning,
-        currentVersion,
+        rangeStrategy,
+        lockedVersion || currentVersion,
         bucket,
         release
       );
-      if (pendingChecks.length) {
+      if (pendingChecks) {
         update.pendingChecks = pendingChecks;
       }
       if (pendingReleases.length) {

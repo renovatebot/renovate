@@ -10,6 +10,7 @@ import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -22,7 +23,6 @@ import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
 } from './host-rules';
-import { getGemHome } from './utils';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
@@ -72,12 +72,8 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
-  const {
-    packageFileName,
-    updatedDeps,
-    newPackageFileContent,
-    config,
-  } = updateArtifact;
+  const { packageFileName, updatedDeps, newPackageFileContent, config } =
+    updateArtifact;
   const { constraints = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
@@ -105,7 +101,10 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundle lock';
     } else {
-      cmd = `bundle lock --update ${updatedDeps.map(quote).join(' ')}`;
+      cmd = `bundle lock --update ${updatedDeps
+        .map((dep) => dep.depName)
+        .map(quote)
+        .join(' ')}`;
     }
 
     let bundlerVersion = '';
@@ -173,11 +172,13 @@ export async function updateArtifacts(
       );
     }
 
+    const cacheDir = await ensureCacheDir('./others/gem', 'GEM_HOME');
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,
-        GEM_HOME: await getGemHome(config),
+        GEM_HOME: cacheDir,
       },
       docker: {
         image: 'ruby',

@@ -3,7 +3,7 @@ import { getChangeLogJSON } from '../../pr/changelog';
 import type { BranchUpgradeConfig } from '../../types';
 
 // istanbul ignore next
-async function embedChangelog(upgrade): Promise<void> {
+async function embedChangelog(upgrade: BranchUpgradeConfig): Promise<void> {
   upgrade.logJSON = await getChangeLogJSON(upgrade); // eslint-disable-line
 }
 

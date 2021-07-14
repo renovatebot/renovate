@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
+import { getAdminConfig } from './admin';
 import { getOptions } from './definitions';
 import { removedPresets } from './presets/common';
 import type {
@@ -54,6 +55,7 @@ export function migrateConfig(
       'optionalDependencies',
       'peerDependencies',
     ];
+    const { migratePresets } = getAdminConfig();
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
         delete migratedConfig[key];
@@ -67,9 +69,10 @@ export function migrateConfig(
         delete migratedConfig.pathRules;
       } else if (key === 'suppressNotifications') {
         if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
-          migratedConfig.suppressNotifications = migratedConfig.suppressNotifications.filter(
-            (item) => item !== 'prEditNotification'
-          );
+          migratedConfig.suppressNotifications =
+            migratedConfig.suppressNotifications.filter(
+              (item) => item !== 'prEditNotification'
+            );
         }
       } else if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
@@ -97,11 +100,20 @@ export function migrateConfig(
         migratedConfig.hostType = val;
         delete migratedConfig.platform;
       } else if (parentKey === 'hostRules' && key === 'endpoint') {
-        migratedConfig.baseUrl = val;
+        migratedConfig.matchHost ||= val;
         delete migratedConfig.endpoint;
       } else if (parentKey === 'hostRules' && key === 'host') {
-        migratedConfig.hostName = val;
+        migratedConfig.matchHost ||= val;
         delete migratedConfig.host;
+      } else if (parentKey === 'hostRules' && key === 'baseUrl') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.baseUrl;
+      } else if (parentKey === 'hostRules' && key === 'hostName') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.hostName;
+      } else if (parentKey === 'hostRules' && key === 'domainName') {
+        migratedConfig.matchHost ||= val;
+        delete migratedConfig.domainName;
       } else if (key === 'packageRules' && is.plainObject(val)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
@@ -118,8 +130,10 @@ export function migrateConfig(
               )
                 ? migratedConfig.packageRules
                 : [];
-              const payload = migrateConfig(packageFile as RenovateConfig, key)
-                .migratedConfig;
+              const payload = migrateConfig(
+                packageFile as RenovateConfig,
+                key
+              ).migratedConfig;
               for (const subrule of payload.packageRules || []) {
                 subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
@@ -143,8 +157,10 @@ export function migrateConfig(
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
           : [];
-        const depTypePackageRule = migrateConfig(val as RenovateConfig, key)
-          .migratedConfig;
+        const depTypePackageRule = migrateConfig(
+          val as RenovateConfig,
+          key
+        ).migratedConfig;
         depTypePackageRule.depTypeList = [key];
         delete depTypePackageRule.packageRules;
         migratedConfig.packageRules.push(depTypePackageRule);
@@ -246,7 +262,11 @@ export function migrateConfig(
         for (let i = 0; i < presets.length; i += 1) {
           const preset = presets[i];
           if (is.string(preset)) {
-            const newPreset = removedPresets[preset];
+            let newPreset = removedPresets[preset];
+            if (newPreset !== undefined) {
+              presets[i] = newPreset;
+            }
+            newPreset = migratePresets?.[preset];
             if (newPreset !== undefined) {
               presets[i] = newPreset;
             }

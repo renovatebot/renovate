@@ -38,16 +38,14 @@ describe(getName(), () => {
     beforeEach(() => {
       // reset module
       jest.resetAllMocks();
-      httpMock.setup();
       // clean up hostRules
       hostRules.clear();
       hostRules.add({
         hostType: 'any',
-        baseUrl,
+        matchHost: baseUrl,
         token: 'token',
       });
     });
-    afterEach(() => httpMock.reset());
 
     it('handles http error', async () => {
       httpMock

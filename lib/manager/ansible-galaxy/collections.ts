@@ -1,4 +1,4 @@
-import * as datasourceGalaxyCollection from '../../datasource/galaxy-collection';
+import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
@@ -77,7 +77,7 @@ function handleGitDep(
 
 function handleGalaxyDep(dep: PackageDependency): void {
   /* eslint-disable no-param-reassign */
-  dep.datasource = datasourceGalaxyCollection.id;
+  dep.datasource = GalaxyCollectionDatasource.id;
   dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
   dep.currentValue = dep.managerData.version;
@@ -109,7 +109,7 @@ function finalize(dependency: PackageDependency): boolean {
         break;
       }
       if (galaxyDepRegex.exec(dep.managerData.name)) {
-        dep.datasource = datasourceGalaxyCollection.id;
+        dep.datasource = GalaxyCollectionDatasource.id;
         dep.depName = dep.managerData.name;
         break;
       }

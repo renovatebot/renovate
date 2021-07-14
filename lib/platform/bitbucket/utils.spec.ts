@@ -8,12 +8,7 @@ const baseUrl = 'https://api.bitbucket.org';
 
 describe('accumulateValues()', () => {
   beforeEach(() => {
-    httpMock.setup();
     setBaseUrl(baseUrl);
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   it('paginates', async () => {
@@ -22,14 +17,12 @@ describe('accumulateValues()', () => {
       .get('/some-url?pagelen=10')
       .reply(200, {
         values: range(10),
-        next:
-          'https://api.bitbucket.org/2.0/repositories/?pagelen=10&after=9&role=contributor',
+        next: 'https://api.bitbucket.org/2.0/repositories/?pagelen=10&after=9&role=contributor',
       })
       .get('/2.0/repositories/?pagelen=10&after=9&role=contributor')
       .reply(200, {
         values: range(10),
-        next:
-          'https://api.bitbucket.org/2.0/repositories/?pagelen=10&after=19&role=contributor',
+        next: 'https://api.bitbucket.org/2.0/repositories/?pagelen=10&after=19&role=contributor',
       })
       .get('/2.0/repositories/?pagelen=10&after=19&role=contributor')
       .reply(200, {

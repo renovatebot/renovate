@@ -19,16 +19,16 @@ export const presets: Record<string, Preset> = {
     description: 'Disable requests to a particular domain',
     hostRules: [
       {
-        domainName: '{{arg0}}',
+        matchHost: '{{arg0}}',
         enabled: false,
       },
     ],
   },
   disableHost: {
-    description: 'Disable requests to a particular hostName',
+    description: 'Disable requests to a particular host',
     hostRules: [
       {
-        hostName: '{{arg0}}',
+        matchHost: 'https://{{arg0}}',
         enabled: false,
       },
     ],
@@ -552,10 +552,11 @@ export const presets: Record<string, Preset> = {
     ],
   },
   githubComToken: {
-    description: 'Use provided token for github.com lookups',
+    description:
+      'Use provided token for github.com lookups. Do not configure this if you are already running on github.com',
     hostRules: [
       {
-        domainName: 'github.com',
+        matchHost: 'github.com',
         encrypted: {
           token: '{{arg0}}',
         },

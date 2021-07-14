@@ -19,6 +19,8 @@ const manualChangelogUrls = {
     'react-native':
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
     sharp: 'https://github.com/lovell/sharp/blob/master/docs/changelog.md',
+    'tailwindcss-classnames':
+      'https://github.com/muhammadsammy/tailwindcss-classnames/blob/master/CHANGELOG.md',
     'zone.js':
       'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },
@@ -56,6 +58,7 @@ const manualChangelogUrls = {
       'https://gitlab.com/gitlab-org/gitlab-foss/-/blob/master/CHANGELOG.md',
     'gitlab/gitlab-runner':
       'https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md',
+    'google/cloud-sdk': 'https://cloud.google.com/sdk/docs/release-notes',
     neo4j: 'https://neo4j.com/release-notes/',
   },
 };

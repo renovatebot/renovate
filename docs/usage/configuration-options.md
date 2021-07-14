@@ -24,6 +24,7 @@ Renovate always uses the config from the repository's default branch, even if th
 Renovate does not read/override the config from within each base branch if present.
 
 Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
+Shareable config presets only work with the JSON format.
 
 If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
 We will do our best to answer your question(s).
@@ -282,6 +283,8 @@ For `npm` only you can also configure this field to `"mirror:x"` where `x` is th
 Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on.
 Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
+For `sbt` note that Renovate will update the version string only for packages that have the version string in their project's `built.sbt` file.
+
 ## cloneSubmodules
 
 ## commitBody
@@ -437,6 +440,11 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 ## dependencyDashboardFooter
 
 ## dependencyDashboardHeader
+
+## dependencyDashboardLabels
+
+The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
+It is pointless to edit the labels, as Renovate bot restores the labels on each run.
 
 ## dependencyDashboardTitle
 
@@ -673,6 +681,7 @@ Example:
 
 ## gitLabAutomerge
 
+If you enabled `automerge` in the Renovate config, you can speed up the automerge process by using GitLab's own automerge function.
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
@@ -742,11 +751,10 @@ Example: If you have set `branchPrefix: "deps-"` and `hashedBranchLength: 12` it
 
 ## hostRules
 
-Currently the purpose of `hostRules` is to configure credentials for host authentication.
+The primary purpose of `hostRules` is to configure credentials for host authentication.
 You tell Renovate how to match against the host you need authenticated, and then you also tell it which credentials to use.
 
-The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`.
-All are optional, but you can only have one of the last three per rule.
+The lookup keys for `hostRules` are: `hostType` and `matchHost`, both of which are optional.
 
 Supported credential fields are `token`, `username`, `password`, `timeout`, `enabled` and `insecureRegistry`.
 
@@ -756,7 +764,7 @@ Example for configuring `docker` auth:
 {
   "hostRules": [
     {
-      "domainName": "docker.io",
+      "matchHost": "docker.io",
       "username": "<some-username>",
       "password": "<some-password>"
     }
@@ -770,7 +778,7 @@ To disable requests to a particular host, you can configure a rule like:
 {
   "hostRules": [
     {
-      "hostName": "registry.npmjs.org",
+      "matchHost": "registry.npmjs.org",
       "enabled": false
     }
   ]
@@ -842,7 +850,7 @@ To abort Renovate for errors for a specific `docker` host:
 {
   "hostRules": [
     {
-      "hostName": "docker.company.com",
+      "matchHost": "docker.company.com",
       "abortOnError": true
     }
   ]
@@ -861,7 +869,7 @@ An example for npm basic auth with token:
 {
   "hostRules": [
     {
-      "domainName": "npm.custom.org",
+      "matchHost": "npm.custom.org",
       "token": "<some-token>",
       "authType": "Basic"
     }
@@ -870,13 +878,6 @@ An example for npm basic auth with token:
 ```
 
 This will generate the following header: `authorization: Basic <some-token>`.
-
-### baseUrl
-
-Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host.
-For example, `"baseUrl": "https://api.github.com"` is equivalent to `"hostName": "api.github.com"` but `"baseUrl": "https://api.github.com/google/"` is not.
-
-Renovate does not do a "longest match" algorithm to pick between multiple matching `baseUrl` values in different rules, so put the longer `baseUrl` rule _after_ the shorter one in your `hostRules`.
 
 ### concurrentRequestLimit
 
@@ -890,29 +891,22 @@ Example config:
 {
   "hostRules": [
     {
-      "hostName": "github.com",
+      "matchHost": "github.com",
       "concurrentRequestLimit": 2
     }
   ]
 }
 ```
 
-### domainName
-
-If you have any uncertainty about exactly which hosts a service uses, then it can be more reliable to use `domainName` instead of `hostName` or `baseUrl`.
-e.g. configure `"hostName": "docker.io"` to cover both `index.docker.io` and `auth.docker.io` and any other host that's in use.
-
 ### enableHttp2
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
 
-### hostName
-
 ### hostType
 
 `hostType` is another way to filter rules and can be either a platform such as `github` and `bitbucket-server`, or it can be a datasource such as `docker` and `rubygems`.
-You usually don't need to configure it in a host rule if you have already configured `domainName`, `hostName` or `baseUrl` and only one host type is in use for those, as is usually the case.
-`hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `baseUrl` rules could achieve the same thing.
+You usually don't need to configure it in a host rule if you have already configured `matchHost` and only one host type is in use for those, as is usually the case.
+`hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `matchHost` rules could achieve the same thing.
 
 ### insecureRegistry
 
@@ -927,7 +921,7 @@ Example:
 {
   "hostRules": [
     {
-      "hostName": "reg.insecure.com",
+      "matchHost": "reg.insecure.com",
       "insecureRegistry": true
     }
   ]
@@ -1228,7 +1222,7 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
 
 This field also supports Regular Expressions if they begin and end with `/`.
-For example, the following will enforce that only 3 or 4-section versions are supported, without any prefixes:
+For example, the following will enforce that only 3 or 4-part versions are supported, without any prefixes:
 
 ```json
 {
@@ -1794,7 +1788,7 @@ By default this label is `"rebase"` however you can configure it to anything you
 Possible values and meanings:
 
 - `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
-- `never`: Renovate will never rebase the branch
+- `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
@@ -1802,6 +1796,8 @@ Possible values and meanings:
 
 - It could result in a broken base branch if two updates are merged one after another without testing the new versions together
 - If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
+
+It is also recommended to avoid `rebaseWhen=never` as it can result in conflicted branches with outdated PR descriptions and/or status checks.
 
 ## recreateClosed
 
@@ -2004,11 +2000,21 @@ In the above example, each regex manager will match a single dependency each.
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### extractVersionTemplate
+
+If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
 ### lookupNameTemplate
 
 `lookupName` is used for looking up dependency versions.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
+
+### currentValueTemplate
+
+If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
 
 ### datasourceTemplate
 
@@ -2194,6 +2200,12 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
+Note: Renovate will wait for the set amount of `stabilityDays` to pass for each **separate** version.
+Renovate does not wait until the package has seen no releases for x `stabilityDays`.
+`stabilityDays` is not intended to help with slowing down fast releasing project updates.
+If you want to slow down PRs for a specific package, setup a custom schedule for that package.
+Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
+
 If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
 If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
 
@@ -2209,6 +2221,22 @@ There are a couple of uses for `stabilityDays`:
 
 If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
 It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
+
+#### Prevent holding broken npm packages
+
+npm packages less than 72 hours (3 days) old can be unpublished, which could result in a service impact if you have already updated to it.
+Set `stabilityDays` to 3 for npm packages to prevent relying on a package that can be removed from the registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "stabilityDays": 3
+    }
+  ]
+}
+```
 
 #### Await X days before Automerging
 
@@ -2264,18 +2292,23 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseStale=true and the base branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseWhen=behind-base-branch and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
 
 ## versioning
 
-Usually, each language or package manager has a specific type of "versioning". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc.
-At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
+Usually, each language or package manager has a specific type of "versioning":
+JavaScript uses npm's SemVer implementation, Python uses pep440, etc.
 
-By exposing `versioning` to config, it allows you to override the default versioning for a package manager if you really need.
-In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+Renovate also uses custom versioning, like `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries SemVer first but otherwise just does its best to sort and compare.
+
+By exposing `versioning` to config, you can override the default versioning for a package manager if needed.
+We do not recommend overriding the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+
+Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
+Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, any leading parts are sorted alphanumerically.
 
 ## vulnerabilityAlerts
 

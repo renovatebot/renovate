@@ -58,6 +58,7 @@ const staticGroups = {
       'group:hibernateCommons',
       'group:illuminate',
       'group:jekyllEcosystem',
+      'group:jestPlusTSJest',
       'group:polymer',
       'group:resilience4j',
       'group:rubyOmniauth',
@@ -569,6 +570,16 @@ const staticGroups = {
         extends: 'packages:test',
         matchUpdateTypes: ['minor', 'patch'],
         groupName: 'test packages',
+      },
+    ],
+  },
+  jestPlusTSJest: {
+    description: 'Add ts-jest major update to jest monorepo',
+    packageRules: [
+      {
+        matchSourceUrlPrefixes: ['https://github.com/kulshekhar/ts-jest'],
+        matchUpdateTypes: ['major'],
+        groupName: 'jest monorepo',
       },
     ],
   },

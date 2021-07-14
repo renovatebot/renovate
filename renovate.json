@@ -3,10 +3,10 @@
   "assignees": ["rarkins", "viceice"],
   "semanticCommitScope": "deps",
   "automergeType": "pr",
+  "prCreation": "immediate",
   "dockerfile": {
     "semanticCommitType": "build"
   },
-  "stabilityDays": 3,
   "packageRules": [
     {
       "matchPackageNames": [

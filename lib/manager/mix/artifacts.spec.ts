@@ -1,34 +1,41 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, getName } from '../../../test/util';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
 
-const config = {
+const adminConfig: RepoAdminConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
 };
 
+const config: UpdateArtifactsConfig = {};
+
 describe(getName(), () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(config);
+    setAdminConfig(adminConfig);
+  });
+
+  afterEach(() => {
+    setAdminConfig();
   });
 
   it('returns null if no mix.lock found', async () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -50,7 +57,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -64,7 +71,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -74,17 +81,15 @@ describe(getName(), () => {
 
   it('returns updated mix.lock', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({
-      ...config,
-      binarySource: BinarySource.Docker,
-    });
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -92,15 +97,31 @@ describe(getName(), () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('returns updated mix.lock in subdir', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
+    mockExecAll(exec);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'subdir/mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toBeNull();
+    expect(fs.readLocalFile).toHaveBeenCalledWith('subdir/mix.lock', 'utf8');
+  });
+
   it('catches write errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -109,13 +130,14 @@ describe(getName(), () => {
 
   it('catches exec errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })

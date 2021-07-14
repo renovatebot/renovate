@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
@@ -6,7 +7,6 @@ import * as versioning from '../../../versioning';
 import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
-  ExecConfig,
   Opt,
   VolumeOption,
   VolumesPair,
@@ -15,7 +15,7 @@ import {
 
 const prefetchedImages = new Set<string>();
 
-async function prefetchDockerImage(taggedImage: string): Promise<void> {
+export async function prefetchDockerImage(taggedImage: string): Promise<void> {
   if (prefetchedImages.has(taggedImage)) {
     logger.debug(`Docker image is already prefetched: ${taggedImage}`);
   } else {
@@ -31,12 +31,12 @@ export function resetPrefetchedImages(): void {
 }
 
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
-  if (typeof x === 'string') {
+  if (is.nonEmptyString(x)) {
     return [x, x];
   }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
-    if (typeof from === 'string' && typeof to === 'string') {
+    if (is.nonEmptyString(from) && is.nonEmptyString(to)) {
       return [from, to];
     }
   }
@@ -67,7 +67,7 @@ function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter((command) => command && typeof command === 'string');
 }
 
-async function getDockerTag(
+export async function getDockerTag(
   depName: string,
   constraint: string,
   scheme: string
@@ -102,7 +102,7 @@ async function getDockerTag(
       );
       return version;
     }
-  } /* istanbul ignore next */ else {
+  } else {
     logger.error(`No ${depName} releases found`);
     return 'latest';
   }
@@ -132,7 +132,6 @@ export async function removeDockerContainer(
       encoding: 'utf-8',
     });
     const containerId = res?.stdout?.trim() || '';
-    // istanbul ignore if
     if (containerId.length) {
       logger.debug({ containerId }, 'Removing container');
       cmd = `docker rm -f ${containerId}`;
@@ -142,7 +141,7 @@ export async function removeDockerContainer(
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.warn(
       { image, containerName, cmd, err },
       'Could not remove Docker container'
@@ -150,10 +149,14 @@ export async function removeDockerContainer(
   }
 }
 
-// istanbul ignore next
-export async function removeDanglingContainers(prefix: string): Promise<void> {
+export async function removeDanglingContainers(): Promise<void> {
+  const { binarySource, dockerChildPrefix } = getAdminConfig();
+  if (binarySource !== 'docker') {
+    return;
+  }
+
   try {
-    const containerLabel = getContainerLabel(prefix);
+    const containerLabel = getContainerLabel(dockerChildPrefix);
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
       {
@@ -173,7 +176,7 @@ export async function removeDanglingContainers(prefix: string): Promise<void> {
     } else {
       logger.debug('No dangling containers to remove');
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     if (err.errno === 'ENOMEM') {
       throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
     }
@@ -187,16 +190,20 @@ export async function removeDanglingContainers(prefix: string): Promise<void> {
 
 export async function generateDockerCommand(
   commands: string[],
-  options: DockerOptions,
-  config: ExecConfig
+  options: DockerOptions
 ): Promise<string> {
   const { envVars, cwd, tagScheme, tagConstraint } = options;
   let image = options.image;
   const volumes = options.volumes || [];
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
-  const { localDir, cacheDir } = config;
-  const { dockerUser, dockerChildPrefix, dockerImagePrefix } = getAdminConfig();
+  const {
+    localDir,
+    cacheDir,
+    dockerUser,
+    dockerChildPrefix,
+    dockerImagePrefix,
+  } = getAdminConfig();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);

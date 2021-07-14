@@ -39,7 +39,6 @@ import { smartLinks } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
-  localDir: string;
   mergeMethod: helper.PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
@@ -226,14 +225,12 @@ const platform: Platform = {
 
   async initRepo({
     repository,
-    localDir,
     cloneSubmodules,
   }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
     config = {} as any;
     config.repository = repository;
-    config.localDir = localDir;
     config.cloneSubmodules = cloneSubmodules;
 
     // Attempt to fetch information about repository
@@ -590,22 +587,41 @@ const platform: Platform = {
     return config.issueList;
   },
 
+  async getIssue(number: number, useCache = true): Promise<Issue> {
+    try {
+      const body = (
+        await helper.getIssue(config.repository, number, {
+          useCache,
+        })
+      ).body;
+      return {
+        number,
+        body,
+      };
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err, number }, 'Error getting issue');
+      return null;
+    }
+  },
+
   async findIssue(title: string): Promise<Issue> {
     const issueList = await platform.getIssueList();
     const issue = issueList.find(
       (i) => i.state === 'open' && i.title === title
     );
 
-    if (issue) {
-      logger.debug(`Found Issue #${issue.number}`);
+    if (!issue) {
+      return null;
     }
-    return issue ?? null;
+    logger.debug(`Found Issue #${issue.number}`);
+    return platform.getIssue(issue.number);
   },
 
   async ensureIssue({
     title,
     reuseTitle,
     body: content,
+    labels: labelNames,
     shouldReOpen,
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
@@ -618,6 +634,11 @@ const platform: Platform = {
       if (!issues.length) {
         issues = issueList.filter((i) => i.title === reuseTitle);
       }
+
+      const labels = Array.isArray(labelNames)
+        ? await Promise.all(labelNames.map(lookupLabelByName))
+        : undefined;
+
       // Update any matching issues which currently exist
       if (issues.length) {
         let activeIssue = issues.find((i) => i.state === 'open');
@@ -658,13 +679,36 @@ const platform: Platform = {
 
         // Update issue body and re-open if enabled
         logger.debug(`Updating Issue #${activeIssue.number}`);
-        await helper.updateIssue(config.repository, activeIssue.number, {
-          body,
-          title,
-          state: shouldReOpen
-            ? 'open'
-            : (activeIssue.state as helper.IssueState),
-        });
+        const existingIssue = await helper.updateIssue(
+          config.repository,
+          activeIssue.number,
+          {
+            body,
+            title,
+            state: shouldReOpen
+              ? 'open'
+              : (activeIssue.state as helper.IssueState),
+          }
+        );
+
+        // Test whether the issues need to be updated
+        const existingLabelIds = (existingIssue.labels ?? []).map(
+          (label) => label.id
+        );
+        if (
+          labels &&
+          (labels.length !== existingLabelIds.length ||
+            labels.filter((labelId) => !existingLabelIds.includes(labelId))
+              .length !== 0)
+        ) {
+          await helper.updateIssueLabels(
+            config.repository,
+            activeIssue.number,
+            {
+              labels,
+            }
+          );
+        }
 
         return 'updated';
       }
@@ -673,6 +717,7 @@ const platform: Platform = {
       const issue = await helper.createIssue(config.repository, {
         body,
         title,
+        labels,
       });
       logger.debug(`Created new Issue #${issue.number}`);
       config.issueList = null;
@@ -839,6 +884,7 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
+  getIssue,
   getRawFile,
   getJsonFile,
   getIssueList,

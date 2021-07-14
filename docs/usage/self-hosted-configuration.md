@@ -138,7 +138,7 @@ This configuration will be applied after all other environment variables so that
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
+If this is set to `myprefix_` the final container created from `renovate/node` image would be named `myprefix_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
 
 Note that dangling containers will not be removed until Renovate is run with the same prefix again.
 
@@ -217,6 +217,13 @@ The `gitAuthor` option accepts a RFC5322-compliant string.
 **Note** We strongly recommend that the Git author email you use is unique to Renovate.
 Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
+## gitNoVerify
+
+Controls when Renovate passes the `--no-verify` flag to `git`.
+The flag can be passed to `git commit` and/or `git push`.
+Read the documentation for [git commit --no-verify](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---no-verify) and [git push --no-verify](https://git-scm.com/docs/git-push#Documentation/git-push.txt---no-verify) to learn exactly what each flag does.
+To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
+
 ## gitPrivateKey
 
 This should be an armored private key, e.g. the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
@@ -239,6 +246,24 @@ If left as default (null), a random short ID will be selected.
 ## logFile
 
 ## logFileLevel
+
+## migratePresets
+
+Use this if you have repositories that extend from a particular preset, which has now been renamed or removed.
+This is handy if you have a large number of repositories that all extend from a particular preset which you want to rename, without the hassle of manually updating every repository individually.
+Use an empty string to indicate that the preset should be ignored rather than replaced.
+
+Example:
+
+```js
+modules.exports = {
+  migratePresets: {
+    '@company': 'local>org/renovate-config',
+  },
+};
+```
+
+In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
 
 ## onboarding
 
@@ -305,6 +330,14 @@ To create the key pair with OpenSSL use the following commands:
 - `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
 - `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
 
+To encrypt a secret with OpenSSL use the following command:
+
+```bash
+echo 'actual-secret' | openssl rsautl -encrypt -pubin -inkey rsa_pub.pem | base64
+```
+
+Replace `actual-secret` with the secret to encrypt.
+
 ## privateKeyPath
 
 Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
@@ -330,6 +363,8 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
+
+If this is set to `false`, it means that Renovate won't require a config file such as `renovate.json` to be present in each repository and will run even if one is missing.
 
 ## secrets
 
@@ -365,7 +400,7 @@ It could then be used in a repository config or preset like so:
 {
   "hostRules": [
     {
-      "domainName": "google.com",
+      "matchHost": "google.com",
       "token": "{{ secrets.GOOGLE_TOKEN }}"
     }
   ]
@@ -383,3 +418,5 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 ## token
 
 ## username
+
+Mandatory if a GitHub app token is in use using the CLI.

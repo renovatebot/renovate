@@ -1,6 +1,6 @@
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceTerragruntModule from '../../datasource/terraform-module';
+import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
@@ -8,8 +8,10 @@ import { TerragruntDependencyTypes } from './common';
 import { extractTerragruntProvider } from './providers';
 import type { ExtractionResult } from './types';
 
-export const githubRefMatchRegex = /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i;
-export const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
+export const githubRefMatchRegex =
+  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i;
+export const gitTagsRefMatchRegex =
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
 const hostnameMatchRegex = /^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/;
 
 export function extractTerragruntModule(
@@ -60,7 +62,7 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
       }
       dep.depType = 'terragrunt';
       dep.depName = moduleParts.join('/');
-      dep.datasource = datasourceTerragruntModule.id;
+      dep.datasource = TerraformModuleDatasource.id;
     }
   } else {
     logger.debug({ dep }, 'terragrunt dep has no source');

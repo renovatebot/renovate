@@ -8,27 +8,21 @@ import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import {
-  BinarySource,
-  ExecConfig,
-  RawExecOptions,
-  VolumeOption,
-} from './common';
+import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
-import { ExecOptions, exec, setExecConfig } from '.';
+import { ExecOptions, exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('child_process');
 
 interface TestInput {
-  execConfig: Partial<ExecConfig>;
   processEnv: Record<string, string>;
   inCmd: string | string[];
   inOpts: ExecOptions;
   outCmd: string[];
   outOpts: RawExecOptions[];
-  adminConfig?: RepoAdminConfig;
+  adminConfig?: Partial<RepoAdminConfig>;
 }
 
 describe(getName(), () => {
@@ -39,11 +33,6 @@ describe(getName(), () => {
 
   const defaultCwd = `-w "${cwd}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" -v "${cacheDir}":"${cacheDir}"`;
-
-  const execConfig = {
-    cacheDir,
-    localDir: cwd,
-  };
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
@@ -56,7 +45,6 @@ describe(getName(), () => {
 
   afterEach(() => {
     process.env = processEnvOrig;
-    setAdminConfig();
   });
 
   const image = 'image';
@@ -86,7 +74,6 @@ describe(getName(), () => {
     [
       'Single command',
       {
-        execConfig,
         processEnv,
         inCmd,
         inOpts: {},
@@ -106,7 +93,6 @@ describe(getName(), () => {
     [
       'Multiple commands',
       {
-        execConfig,
         processEnv,
         inCmd: ['echo "begin"', inCmd, "echo 'end'"],
         inOpts: {},
@@ -140,7 +126,6 @@ describe(getName(), () => {
     [
       'Explicit env option',
       {
-        execConfig,
         processEnv,
         inCmd,
         inOpts: { env: { FOO: 'BAR' } },
@@ -160,7 +145,6 @@ describe(getName(), () => {
     [
       'Low trust level',
       {
-        execConfig,
         processEnv,
         inCmd,
         inOpts: {},
@@ -180,7 +164,6 @@ describe(getName(), () => {
     [
       'High trust level',
       {
-        execConfig,
         processEnv: envMock.full,
         inCmd,
         inOpts: {},
@@ -201,7 +184,6 @@ describe(getName(), () => {
     [
       'Docker',
       {
-        execConfig: { ...execConfig, binarySource: BinarySource.Docker },
         processEnv,
         inCmd,
         inOpts: { docker, cwd },
@@ -221,13 +203,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Extra env vars',
       {
-        execConfig,
         processEnv,
         inCmd,
         inOpts: {
@@ -248,13 +230,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Extra env vars (Docker)',
       {
-        execConfig: { ...execConfig, binarySource: BinarySource.Docker },
         processEnv,
         inCmd,
         inOpts: {
@@ -283,13 +265,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Extra env vars defaults',
       {
-        execConfig,
         processEnv: envMock.basic,
         inCmd,
         inOpts: { cwd, extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
@@ -303,13 +285,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Extra env vars defaults (Docker)',
       {
-        execConfig: { ...execConfig, binarySource: BinarySource.Docker },
         processEnv: envMock.basic,
         inCmd,
         inOpts: {
@@ -333,13 +315,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Docker tags',
       {
-        execConfig: { ...execConfig, binarySource: BinarySource.Docker },
         processEnv,
         inCmd,
         inOpts: { docker: { image, tag }, cwd },
@@ -359,13 +341,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Docker volumes',
       {
-        execConfig: { ...execConfig, binarySource: BinarySource.Docker },
         processEnv,
         inCmd,
         inOpts: { cwd, docker: { image, volumes } },
@@ -385,16 +367,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Docker user',
       {
-        execConfig: {
-          ...execConfig,
-          binarySource: BinarySource.Docker,
-        },
         processEnv,
         inCmd,
         inOpts: { docker },
@@ -414,17 +393,16 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { dockerUser: 'foobar' },
+        adminConfig: {
+          dockerUser: 'foobar',
+          binarySource: 'docker',
+        },
       },
     ],
 
     [
       'Docker image prefix',
       {
-        execConfig: {
-          ...execConfig,
-          binarySource: BinarySource.Docker,
-        },
         processEnv,
         inCmd,
         inOpts: { docker },
@@ -444,17 +422,16 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { dockerImagePrefix: 'ghcr.io/renovatebot' },
+        adminConfig: {
+          dockerImagePrefix: 'ghcr.io/renovatebot',
+          binarySource: 'docker',
+        },
       },
     ],
 
     [
       'Docker child prefix',
       {
-        execConfig: {
-          ...execConfig,
-          binarySource: BinarySource.Docker,
-        },
         processEnv,
         inCmd,
         inOpts: { docker },
@@ -474,17 +451,16 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { dockerChildPrefix: 'myprefix_' },
+        adminConfig: {
+          dockerChildPrefix: 'myprefix_',
+          binarySource: 'docker',
+        },
       },
     ],
 
     [
       'Docker extra commands',
       {
-        execConfig: {
-          ...execConfig,
-          binarySource: BinarySource.Docker,
-        },
         processEnv,
         inCmd,
         inOpts: {
@@ -510,16 +486,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Docker commands are nullable',
       {
-        execConfig: {
-          ...execConfig,
-          binarySource: BinarySource.Docker,
-        },
         processEnv,
         inCmd,
         inOpts: {
@@ -545,13 +518,13 @@ describe(getName(), () => {
             maxBuffer: 10485760,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Explicit maxBuffer',
       {
-        execConfig,
         processEnv,
         inCmd,
         inOpts: {
@@ -567,15 +540,13 @@ describe(getName(), () => {
             maxBuffer: 1024,
           },
         ],
+        adminConfig: { binarySource: 'docker' },
       },
     ],
 
     [
       'Custom environment variables for child',
       {
-        execConfig: {
-          ...execConfig,
-        },
         processEnv: envMock.basic,
         inCmd,
         inOpts: {},
@@ -593,6 +564,7 @@ describe(getName(), () => {
           customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_VALUE',
           },
+          binarySource: 'docker',
         },
       },
     ],
@@ -600,9 +572,6 @@ describe(getName(), () => {
     [
       'Custom environment variables for child should override',
       {
-        execConfig: {
-          ...execConfig,
-        },
         processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
         inCmd,
         inOpts: {},
@@ -620,6 +589,7 @@ describe(getName(), () => {
           customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
           },
+          binarySource: 'docker',
         },
       },
     ],
@@ -627,10 +597,6 @@ describe(getName(), () => {
     [
       'Custom environment variables for child (Docker)',
       {
-        execConfig: {
-          ...execConfig,
-          binarySource: BinarySource.Docker,
-        },
         processEnv,
         inCmd,
         inOpts: { docker, cwd },
@@ -654,6 +620,7 @@ describe(getName(), () => {
           customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_VALUE',
           },
+          binarySource: 'docker',
         },
       },
     ],
@@ -661,10 +628,6 @@ describe(getName(), () => {
     [
       'Custom environment variables for child should override (Docker)',
       {
-        execConfig: {
-          ...execConfig,
-          binarySource: BinarySource.Docker,
-        },
         processEnv: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' },
         inCmd,
         inOpts: { docker, cwd },
@@ -688,6 +651,7 @@ describe(getName(), () => {
           customEnvVariables: {
             CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
           },
+          binarySource: 'docker',
         },
       },
     ],
@@ -695,7 +659,6 @@ describe(getName(), () => {
 
   test.each(testInputs)('%s', async (_msg, testOpts) => {
     const {
-      execConfig: config,
       processEnv: procEnv,
       inCmd: cmd,
       inOpts,
@@ -706,13 +669,6 @@ describe(getName(), () => {
 
     process.env = procEnv;
 
-    if (config) {
-      jest
-        .spyOn(dockerModule, 'removeDanglingContainers')
-        .mockResolvedValueOnce();
-      await setExecConfig(config);
-    }
-
     const actualCmd: string[] = [];
     const actualOpts: ChildProcessExecOptions[] = [];
     cpExec.mockImplementation((execCmd, execOpts, callback) => {
@@ -721,7 +677,7 @@ describe(getName(), () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-    setAdminConfig(adminConfig);
+    setAdminConfig({ cacheDir, localDir: cwd, ...adminConfig });
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
@@ -738,19 +694,19 @@ describe(getName(), () => {
       return undefined;
     });
 
-    await setExecConfig({ binarySource: BinarySource.Global });
+    setAdminConfig({ binarySource: 'global' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    await setExecConfig({ binarySource: BinarySource.Docker });
+    setAdminConfig({ binarySource: 'docker' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    await setExecConfig({ binarySource: BinarySource.Global });
+    setAdminConfig({ binarySource: 'global' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    await setExecConfig({ binarySource: BinarySource.Docker });
+    setAdminConfig({ binarySource: 'docker' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
@@ -773,10 +729,7 @@ describe(getName(), () => {
   });
 
   it('wraps error if removeDockerContainer throws an error', async () => {
-    cpExec.mockImplementationOnce((_execCmd, _execOpts, callback) =>
-      callback(null, { stdout: '', stderr: '' })
-    );
-    await setExecConfig({ binarySource: BinarySource.Docker });
+    setAdminConfig({ binarySource: 'docker' });
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });

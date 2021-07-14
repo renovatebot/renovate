@@ -51,7 +51,7 @@ export async function extractPackageFile(
   }
   if (fileName !== 'package.json' && packageJson.renovate) {
     const error = new Error(CONFIG_VALIDATION);
-    error.location = fileName;
+    error.validationSource = fileName;
     error.validationError =
       'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
@@ -381,7 +381,7 @@ export async function postExtract(
   packageFiles: PackageFile[],
   updateInternalDeps: boolean
 ): Promise<void> {
-  detectMonorepos(packageFiles, updateInternalDeps);
+  await detectMonorepos(packageFiles, updateInternalDeps);
   await getLockedVersions(packageFiles);
 }
 

@@ -1,4 +1,4 @@
-import { emojify } from 'node-emoji';
+import { emojify } from '../../../util/emoji';
 import { isBranchModified } from '../../../util/git';
 import { BranchConfig } from '../../types';
 

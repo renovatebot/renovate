@@ -48,13 +48,11 @@ const resGitHubEnterprise = `<!DOCTYPE html>
 
 describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);
   });
 
   afterEach(() => {
-    httpMock.reset();
     jest.resetAllMocks();
   });
 
@@ -263,9 +261,9 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.info).toHaveBeenCalledWith(
         { lookupName: 'some.unknown.website/example/module' },
-        'Unsupported dependency.'
+        'Unsupported go host - cannot look up versions'
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
       expect(logger.logger.fatal).not.toHaveBeenCalled();
@@ -374,7 +372,6 @@ describe(getName(), () => {
       const tags = [{ name: 'a/v1.0.0' }, { name: 'b/v2.0.0' }];
 
       for (const pkg of packages) {
-        httpMock.setup();
         httpMock
           .scope('https://api.github.com/')
           .get('/repos/x/text/tags?per_page=100')
@@ -389,7 +386,7 @@ describe(getName(), () => {
 
         const httpCalls = httpMock.getTrace();
         expect(httpCalls).toMatchSnapshot();
-        httpMock.reset();
+        httpMock.clear();
       }
     });
     it('returns none if no tags match submodules', async () => {
@@ -400,7 +397,6 @@ describe(getName(), () => {
       const tags = [{ name: 'v1.0.0' }, { name: 'v2.0.0' }];
 
       for (const pkg of packages) {
-        httpMock.setup();
         httpMock
           .scope('https://api.github.com/')
           .get('/repos/x/text/tags?per_page=100')
@@ -413,7 +409,7 @@ describe(getName(), () => {
 
         const httpCalls = httpMock.getTrace();
         expect(httpCalls).toMatchSnapshot();
-        httpMock.reset();
+        httpMock.clear();
       }
     });
     it('works for nested modules on github v2+ major upgrades', async () => {

@@ -352,6 +352,7 @@ describe(getName(), () => {
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             registryUrlTemplate: 'foobar',
+            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
           },
         ],
       };
@@ -460,7 +461,6 @@ describe(getName(), () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
-      expect(errors).toMatchSnapshot();
     });
 
     it('errors if aliases depth is more than 1', async () => {
@@ -475,8 +475,13 @@ describe(getName(), () => {
         config
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `aliases.aliases.sample` configuration: value is not a url',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
 
     it('errors if aliases have invalid url', async () => {
@@ -490,8 +495,13 @@ describe(getName(), () => {
         config
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `aliases.aliases.example1` configuration: value is not a url',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
 
     it('errors if fileMatch has wrong parent', async () => {
@@ -618,6 +628,39 @@ describe(getName(), () => {
       );
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
+    });
+
+    it('validates valid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 'https://www.example2.com/example',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+    it('errors on invalid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 123,
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
   });
 });
