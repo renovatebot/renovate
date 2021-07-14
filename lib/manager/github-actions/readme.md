@@ -16,7 +16,8 @@ jobs:
 
 Renovate will update the commit SHA but follow the GitHub tag you specified.
 Renovate can update digests that use SHA1 and SHA256 algorithms.
-You can also use the following PackageRule to automatically pin action digests.
+
+If you want to automatically pin action digests put the following configuration in a new `packageRules` array :
 
 ```json
 {
