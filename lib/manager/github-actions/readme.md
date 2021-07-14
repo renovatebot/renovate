@@ -14,7 +14,8 @@ jobs:
       - uses: actions/checkout@af513c7a016048ae468971c52ed77d9562c7c819 # renovate: tag=v1.0.0
 ```
 
-Renovate will update the commit SHA1 but follow the GitHub tag you specified.
+Renovate will update the commit SHA but follow the GitHub tag you specified.
+Renovate can update digests that use SHA1 and SHA256 algorithms.
 You can also use the following PackageRule to automatically pin action digests.
 
 ```json
