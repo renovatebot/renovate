@@ -9,6 +9,11 @@ on:
   schedule:
     - cron: '0 13 * * 1'
 
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+      
 jobs:
   CodeQL-Build:
     runs-on: ubuntu-latest
