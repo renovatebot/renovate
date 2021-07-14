@@ -1,5 +1,6 @@
 import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
+import { JsxEmit } from 'typescript';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
@@ -9,6 +10,7 @@ import {
   PLATFORM_TYPE_BITBUCKET,
   PLATFORM_TYPE_GITHUB,
 } from '../../constants/platforms';
+import { HostRule } from '../../types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -395,49 +397,70 @@ describe('.updateArtifacts()', () => {
 
 describe('.preLoadCommands', () => {
   beforeEach(() => {
-    hostRules.clear();
+    jest.resetAllMocks();
+  });
+  afterAll(() => {
+    jest.resetAllMocks();
   });
   it('successfully sets the github token in the url', () => {
-    hostRules.add({
-      hostType: PLATFORM_TYPE_GITHUB,
-      token: 'token',
-    });
-
-    expect(
-      hostRules.find({
-        hostType: PLATFORM_TYPE_GITHUB,
-        url: 'https://api.github.com/',
-      })?.token
-    ).toEqual('token');
+    hostRules.find.mockImplementation(
+      (host: _hostRules.HostRuleSearch): HostRule => {
+        if (host?.hostType === PLATFORM_TYPE_GITHUB) {
+          return { hostType: PLATFORM_TYPE_GITHUB, token: 'token' };
+        }
+        return {};
+      }
+    );
 
     expect(gomod.getPreCommands()).toEqual([
       `git config --global url.\"https://token@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
     ]);
   });
   it('successfully sets the github ssh git configuration', () => {
-    hostRules.add({
-      hostType: PLATFORM_TYPE_GITHUB,
-      authType: 'ssh',
-    });
+    hostRules.find.mockImplementation(
+      (host: _hostRules.HostRuleSearch): HostRule => {
+        if (host?.hostType === PLATFORM_TYPE_GITHUB) {
+          return { hostType: PLATFORM_TYPE_GITHUB, authType: 'ssh' };
+        }
+        return {};
+      }
+    );
 
     expect(gomod.getPreCommands()).toEqual([
       `git config --global url.\"git@github.com:\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
     ]);
   });
   it('successfully sets the bitbucket ssh git configuration', () => {
-    hostRules.add({
-      hostType: PLATFORM_TYPE_BITBUCKET,
-      authType: 'ssh',
-    });
+    hostRules.find.mockImplementation(
+      (host: _hostRules.HostRuleSearch): HostRule => {
+        if (host?.hostType === PLATFORM_TYPE_BITBUCKET) {
+          return { hostType: PLATFORM_TYPE_BITBUCKET, authType: 'ssh' };
+        }
+        return {};
+      }
+    );
 
     expect(gomod.getPreCommands()).toEqual([
       `git config --global url.\"git@bitbucket.org:\".insteadOf \"https://bitbucket.org/\"`, // eslint-disable-line no-useless-escape
     ]);
   });
   it('returns no arguement if no host details are set', () => {
-    hostRules.add({
-      hostType: PLATFORM_TYPE_BITBUCKET,
-    });
+    hostRules.find.mockImplementation(
+      (host: _hostRules.HostRuleSearch): HostRule => {
+        switch (host?.hostType) {
+          case PLATFORM_TYPE_BITBUCKET: {
+            return { hostType: PLATFORM_TYPE_BITBUCKET, authType: '' };
+          }
+          case PLATFORM_TYPE_GITHUB: {
+            return { hostType: PLATFORM_TYPE_GITHUB, authType: '' };
+          }
+          default: {
+            break;
+          }
+        }
+        return {};
+      }
+    );
 
     expect(gomod.getPreCommands()).toBeNull();
   });
