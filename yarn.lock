@@ -1925,10 +1925,10 @@
   resolved "https://registry.yarnpkg.com/@types/semver-stable/-/semver-stable-3.0.0.tgz#660cc139fc36749e0d3dae69ebfd079eb41327ac"
   integrity sha512-lKoRU5o4X5fBHVQes2YOvSGckuTG7SpOxBQmJTczKl85hgQQHf6eQR1Yi/nmJzQWDEL2JVTUeUYR4iGz1zgdGg==
 
-"@types/semver-utils@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@types/semver-utils/-/semver-utils-1.1.0.tgz#d35645238680d2297a8c9b67395d8b37f0500895"
-  integrity sha512-p3ZoozEL036SPVLpMh1LuDebYQkes1rhBfXSFCbact9/FF6dkvR1UV/UqNO5wN5tvdlq+4jK+xTwgWwqRlFUJA==
+"@types/semver-utils@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/semver-utils/-/semver-utils-1.1.1.tgz#4260b9ce13344725069a1ff86bd2f4d6c70a443e"
+  integrity sha512-WLZZQdwo5P+H6R+bDDCFqFSlP5Jtk6gyXpE0R0KAVQbcMGmxpVsNX8dah640hY4+PpRG2+Ph3dcwDHzrOAOZ7A==
 
 "@types/semver@7.3.7":
   version "7.3.7"
