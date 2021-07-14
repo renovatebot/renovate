@@ -34,11 +34,12 @@ export function extractPackageFile(content: string): PackageFile | null {
         const dep: PackageDependency = {
           depName,
           currentDigest: currentValue,
-          commitMessageTopic: '{{{depName}}} action',
+          commitMessageTopic: '{{{depName}}} action digest',
           datasource: githubTagsDatasource.id,
           versioning: dockerVersioning.id,
           depType: 'action',
           pinDigests: false,
+          replaceString: line,
         };
         deps.push(dep);
       } else {
