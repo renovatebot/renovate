@@ -1,6 +1,6 @@
 The `github-actions` manager extracts dependencies from GitHub Actions workflow and workflow template files.
 
-If you like to use digest pinning but following the action version, you can use the following sample:
+If you like to use digest pinning but want to follow the action version tag, you can use the following sample:
 
 ```yaml
 name: build
@@ -14,4 +14,4 @@ jobs:
       - uses: actions/checkout@af513c7a016048ae468971c52ed77d9562c7c819 # renovate: tag=v1.0.0
 ```
 
-So renovate will update the commit sha but follow the github tag you specified.
+Renovate will update the commit SHA1 but follow the GitHub tag you specified.
