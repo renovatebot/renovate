@@ -20,4 +20,13 @@ export const presets: Record<string, Preset> = {
       'Keep <typescript> version in sync with the <code>rc</code> tag',
     extends: [':followTag(typescript, rc)'],
   },
+  pinGitHubActionDigests: {
+    description: 'Pin <code>github-action</code> digests',
+    packageRules: [
+      {
+        matchDepTypes: ['action'],
+        pinDigests: true,
+      },
+    ],
+  },
 };
