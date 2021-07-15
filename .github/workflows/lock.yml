@@ -16,7 +16,7 @@ jobs:
   lock:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/lock-threads@v2.1.1
+      - uses: dessant/lock-threads@1621939cecf8586399a6b60d2a7af9469232b5b6 # renovate: tag=v2.1.1
         if: github.repository == 'renovatebot/renovate'
         with:
           github-token: ${{ github.token }}
