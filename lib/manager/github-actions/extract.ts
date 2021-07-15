@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFile } from '../types';
 
 const dockerRe = /^\s+uses: docker:\/\/([^"]+)\s*$/;
 const actionRe =
-  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/;
+  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/;
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
 const shaRe = /^[a-z0-9]{40}|[a-z0-9]{64}$/;
@@ -32,7 +32,13 @@ export function extractPackageFile(content: string): PackageFile | null {
 
     const tagMatch = actionRe.exec(line);
     if (tagMatch?.groups) {
-      const { depName, currentValue, tag, replaceString } = tagMatch.groups;
+      const {
+        depName,
+        currentValue,
+        path = '',
+        tag,
+        replaceString,
+      } = tagMatch.groups;
       const dep: PackageDependency = {
         depName,
         commitMessageTopic: '{{{depName}}} action',
@@ -40,8 +46,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
-        autoReplaceStringTemplate:
-          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        autoReplaceStringTemplate: `{{depName}}${path}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}`,
       };
       if (shaRe.test(currentValue)) {
         dep.currentValue = tag;
