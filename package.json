@@ -217,7 +217,7 @@
     "@types/jest": "26.0.24",
     "@types/js-yaml": "4.0.2",
     "@types/json-dup-key-validator": "1.0.0",
-    "@types/linkify-markdown": "1.0.0",
+    "@types/linkify-markdown": "1.0.1",
     "@types/luxon": "1.27.1",
     "@types/markdown-it": "12.0.3",
     "@types/markdown-table": "2.0.0",
