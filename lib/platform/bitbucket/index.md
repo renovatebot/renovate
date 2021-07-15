@@ -9,5 +9,3 @@
 
 - Creating issues not implemented yet, e.g. when there is a config error
 - Adding comments to PRs not implemented yet, e.g. when a PR has been edited or has a lockfile error
-
-[bcloud-16610]: https://jira.atlassian.com/browse/BCLOUD-16610

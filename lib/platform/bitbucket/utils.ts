@@ -4,6 +4,7 @@ import { BranchStatus, PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import type { Pr } from '../types';
+import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -57,19 +58,12 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   };
 }
 
-export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
 const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
   new Map([
     ['squash', 'squash'],
     ['merge-commit', 'merge_commit'],
     ['fast-forward', 'fast_forward'],
   ]);
-
-export interface MergeRequestBody {
-  close_source_branch?: boolean;
-  message: string;
-  merge_strategy?: BitbucketMergeStrategy;
-}
 
 export function mergeBodyTransformer(
   mergeStrategy: MergeStrategy
