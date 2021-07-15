@@ -41,6 +41,53 @@ If you're self hosting Renovate, use the latest release if possible.
 
 ## What if I need to .. ?
 
+### Tell Renovate to ask for approval before creating a Pull Request
+
+The default behavior is that Renovate creates a pull request right away whenever there's an update.
+But maybe you want Renovate to ask for your approval _before_ it creates a pull request.
+Use the "Dependency Dashboard approval" workflow to get updates for certain packages - or certain types of updates - only after you give approval via the Dependency Dashboard.
+
+The basic idea is that you create a new `packageRules` entry and describe what kind of package, or type of updates you want to approve beforehand.
+
+Say you want to manually approve all major `npm` package manager updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "matchManagers": ["npm"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
+
+Or say you want to manually approve all major Jest updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^jest"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
+
+You could even configure Renovate bot to ask for approval for _all_ updates.
+The `dependencyDashboardApproval` is not part of a `packageRules` array, and so applies to all updates:
+
+```json
+{
+  "dependencyDashboardApproval": true
+}
+```
+
+Read our documentation on the [dependencyDashboardApproval](https://docs.renovatebot.com/configuration-options/#dependencydashboardapproval) config option.
+
 ### Use an alternative branch as my Pull Request target
 
 Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
