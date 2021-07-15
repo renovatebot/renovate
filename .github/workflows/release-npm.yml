@@ -35,12 +35,12 @@ jobs:
             echo "NPM_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
           fi
 
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
         with:
           ref: ${{ env.GIT_SHA }}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.2.0
+        uses: actions/setup-node@38d90ce44d5275ad62cc48384b3d8a58c500bb5f # renovate: tag=v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
