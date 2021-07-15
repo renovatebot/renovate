@@ -1152,6 +1152,7 @@ export async function ensureIssue({
   title,
   reuseTitle,
   body: rawBody,
+  labels,
   once = false,
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
@@ -1201,12 +1202,16 @@ export async function ensureIssue({
       }
       if (shouldReOpen) {
         logger.debug('Patching issue');
+        const data: Record<string, unknown> = { body, state: 'open', title };
+        if (labels) {
+          data.labels = labels;
+        }
         await githubApi.patchJson(
           `repos/${config.parentRepo || config.repository}/issues/${
             issue.number
           }`,
           {
-            body: { body, state: 'open', title },
+            body: data,
           }
         );
         logger.debug('Issue updated');
@@ -1219,6 +1224,7 @@ export async function ensureIssue({
         body: {
           title,
           body,
+          labels,
         },
       }
     );

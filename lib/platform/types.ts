@@ -99,6 +99,7 @@ export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
   body: string;
+  labels?: string[];
   once?: boolean;
   shouldReOpen?: boolean;
 }

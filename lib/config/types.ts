@@ -183,6 +183,7 @@ export interface RenovateConfig
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
+  dependencyDashboardLabels?: string[];
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];

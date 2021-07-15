@@ -4,9 +4,6 @@ on:
   pull_request:
 
 env:
-  YARN_MODULES_CACHE_KEY: v1
-  YARN_PACKAGE_CACHE_KEY: v1
-  YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   PYTHON_VERSION: 3.9
   SKIP_JAVA_TESTS: true
@@ -19,13 +16,18 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+        with:
+          fetch-depth: 2
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@38d90ce44d5275ad62cc48384b3d8a58c500bb5f # renovate: tag=v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2.2.2
+        uses: actions/setup-python@dc73133d4da04e56a135ae2246682783cc7c7cb6 # renovate: tag=v2.2.2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -41,24 +43,6 @@ jobs:
           python --version
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2.3.4
-        with:
-          fetch-depth: 2
-
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
-
-      # Clear caches on cache miss, otherwise they will grow indefinitely
-      - name: Clear yarn cache
-        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
-        run: yarn cache clean
-
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
@@ -66,7 +50,7 @@ jobs:
         run: yarn jest --maxWorkers=2 --ci
 
       - name: Codecov
-        uses: codecov/codecov-action@v1.5.2
+        uses: codecov/codecov-action@29386c70ef20e286228c72b668a06fd0e8399192 # renovate: tag=v1.5.2
         if: always()
 
       # build after tests to exclude files
@@ -83,10 +67,15 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+        with:
+          fetch-depth: 2
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@38d90ce44d5275ad62cc48384b3d8a58c500bb5f # renovate: tag=v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Init platform
         run: |
@@ -97,22 +86,6 @@ jobs:
           npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
-
-      - uses: actions/checkout@v2.3.4
-
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
-
-      # Clear caches on cache miss, otherwise they will grow indefinitely
-      - name: Clear yarn cache
-        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
-        run: yarn cache clean
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
