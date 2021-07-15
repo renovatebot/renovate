@@ -1,4 +1,4 @@
-# GitLab and GitLab Hosted
+# GitLab
 
 ## Features awaiting implementation
 
