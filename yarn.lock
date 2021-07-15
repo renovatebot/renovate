@@ -1704,10 +1704,10 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/global-agent@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@types/global-agent/-/global-agent-2.1.0.tgz#1becbcb067c9c7a8d2cd70b786ca1d062538e299"
-  integrity sha512-xBOerse4Agekl7VZJclA9bfuA9aa3u9T24TDkBiMQrZgu4qe5HMBPzVGzAt2k4dx/v3uIFI6CzG0Z9X894LHrg==
+"@types/global-agent@2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@types/global-agent/-/global-agent-2.1.1.tgz#3f93185e48a3a36e377a52a8301320cd162a831b"
+  integrity sha512-sVox8Phk1UKgP6LQPAdeRxfww6vHKt7Bf59dXzYLsQBUEMEn8S10a+ESp/yO0i4fJ3WS4+CIuz42hgJcuA+3mA==
 
 "@types/graceful-fs@^4.1.2":
   version "4.1.5"
