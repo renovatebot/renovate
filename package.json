@@ -211,7 +211,7 @@
     "@types/eslint": "7.2.14",
     "@types/fs-extra": "9.0.12",
     "@types/git-url-parse": "9.0.1",
-    "@types/github-url-from-git": "1.5.0",
+    "@types/github-url-from-git": "1.5.1",
     "@types/global-agent": "2.1.1",
     "@types/ini": "1.3.30",
     "@types/jest": "26.0.24",

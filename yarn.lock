@@ -1691,10 +1691,10 @@
   resolved "https://registry.yarnpkg.com/@types/git-url-parse/-/git-url-parse-9.0.1.tgz#1c7cc89527ca8b5afcf260ead3b0e4e373c43938"
   integrity sha512-Zf9mY4Mz7N3Nyi341nUkOtgVUQn4j6NS4ndqEha/lOgEbTkHzpD7wZuRagYKzrXNtvawWfsrojoC1nhsQexvNA==
 
-"@types/github-url-from-git@1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@types/github-url-from-git/-/github-url-from-git-1.5.0.tgz#cfb8fda460cf22402d4465e1caee6f9063a30fdf"
-  integrity sha512-iz6JdiKBQdaBMznEtcDna4s8rSef4e71zJ45AMTpPl3ka1JhswOLdmKgjxPO0z3S+Zk5gi3HDtbJ77PD+TfoUQ==
+"@types/github-url-from-git@1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@types/github-url-from-git/-/github-url-from-git-1.5.1.tgz#73b1b6fa0490b903f50e7d7d9897d91769a15d8d"
+  integrity sha512-B/SvVZMrLRUI9mOoguNNz58gV8A5PDtcGIaUe5PYmzAUTsIJ+ZAn/ujwBIuGIU3mRHY5SfV9dyWfnhOWtOVh6A==
 
 "@types/glob@*":
   version "7.1.3"
