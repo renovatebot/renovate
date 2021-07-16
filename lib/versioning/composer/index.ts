@@ -99,7 +99,7 @@ const isSingleVersion = (input: string): string | boolean =>
   input && npm.isSingleVersion(composer2npm(input));
 
 const isStable = (version: string): boolean =>
-  version && npm.isStable(composer2npm(version));
+  version && npm.isStable(composer2npm(version.replace(/^-(p|patch)+[0-9]+$/, '')));
 
 export const isValid = (input: string): string | boolean =>
   input && npm.isValid(composer2npm(input));
