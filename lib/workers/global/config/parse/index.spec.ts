@@ -1,27 +1,35 @@
+import { readFile } from 'fs-extra';
 import upath from 'upath';
 import { getName } from '../../../../../test/util';
-import { readFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 
 jest.mock('../../../../datasource/npm');
+jest.mock('../../../../util/fs');
 try {
   jest.mock('../../config.js');
 } catch (err) {
   // file does not exist
 }
 
+type FsModule = jest.Mocked<typeof import('../../../../util/fs')>;
+
 describe(getName(), () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
+    let fs: FsModule;
     let defaultArgv: string[];
     let defaultEnv: NodeJS.ProcessEnv;
+
     beforeEach(async () => {
       jest.resetModules();
+      jest.resetAllMocks();
       configParser = await import('./index');
+      fs = (await import('../../../../util/fs')) as FsModule;
       defaultArgv = getArgv();
       defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
       jest.mock('delay', () => Promise.resolve());
     });
+
     it('supports token in env', async () => {
       const env: NodeJS.ProcessEnv = { ...defaultEnv, RENOVATE_TOKEN: 'abc' };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
@@ -58,6 +66,7 @@ describe(getName(), () => {
       ]);
       expect(parsedConfig).not.toContainKey('configFile');
     });
+
     it('supports config.force', async () => {
       const configPath = upath.join(__dirname, '__fixtures__/with-force.js');
       const env: NodeJS.ProcessEnv = {
@@ -75,6 +84,7 @@ describe(getName(), () => {
         ],
       ]);
     });
+
     it('reads private key from file', async () => {
       const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
       const env: NodeJS.ProcessEnv = {
@@ -82,10 +92,12 @@ describe(getName(), () => {
         RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
       };
       const expected = await readFile(privateKeyPath);
+      fs.readFile.mockResolvedValueOnce(expected as never);
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);
     });
+
     it('supports Bitbucket username/passwod', async () => {
       defaultArgv = defaultArgv.concat([
         '--platform=bitbucket',
@@ -102,12 +114,32 @@ describe(getName(), () => {
         ['password', 'pass'],
       ]);
     });
+
     it('massages trailing slash into endpoint', async () => {
       defaultArgv = defaultArgv.concat([
         '--endpoint=https://github.renovatebot.com/api/v3',
       ]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
+    });
+
+    it('reads home dir configs', async () => {
+      defaultArgv = defaultArgv.concat(['--read-home-dir-files=true']);
+      fs.readFile.mockResolvedValueOnce('registry=https://registry.npmjs.org/');
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.packageRules).toHaveLength(1);
+    });
+
+    it('logs if no home dir configs', async () => {
+      defaultArgv = defaultArgv.concat(['--read-home-dir-files=true']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.packageRules).toHaveLength(0);
+    });
+
+    it('logs if home dir configs but not reading them', async () => {
+      fs.readFile.mockResolvedValueOnce('registry=https://registry.npmjs.org/');
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.packageRules).toHaveLength(0);
     });
   });
 });

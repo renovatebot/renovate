@@ -178,6 +178,13 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'readHomeDirFiles',
+    description: `Enable reading of home directory config files.`,
+    stage: 'global',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'repositoryCache',
     description: 'Option to do repository extract caching.',
     admin: true,
