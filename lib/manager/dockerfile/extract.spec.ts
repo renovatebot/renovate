@@ -1,5 +1,5 @@
 import { getName, loadFixture } from '../../../test/util';
-import { extractPackageFile, getDep } from './extract';
+import { extractPackageFile, getDep, splitImageParts } from './extract';
 
 const d1 = loadFixture('1.Dockerfile');
 const d2 = loadFixture('2.Dockerfile');
@@ -61,15 +61,23 @@ describe(getName(), () => {
         'FROM registry2.something.info:5005/node:8\n'
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
+      expect(res[0].depName).toEqual('node');
       expect(res[0].currentValue).toEqual('8');
+    });
+    it('handles registries with a path', () => {
+      const res = extractPackageFile(
+        'FROM registry.example.com/proxy-cache/library/node:12.19.1\n'
+      ).deps;
+      expect(res).toMatchSnapshot();
+      expect(res[0].depName).toEqual('library/node');
+      expect(res[0].currentValue).toEqual('12.19.1');
     });
     it('handles custom hosts with port without tag', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info:5005/node\n'
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
+      expect(res[0].depName).toEqual('node');
     });
     it('handles namespaced images', () => {
       const res = extractPackageFile('FROM mynamespace/node:8\n').deps;
@@ -159,6 +167,43 @@ describe(getName(), () => {
   describe('getDep()', () => {
     it('rejects null', () => {
       expect(getDep(null)).toMatchSnapshot();
+    });
+  });
+  describe('splitImageParts()', () => {
+    it('handles docker hub', () => {
+      expect(splitImageParts('node:14')).toMatchInlineSnapshot(`
+        Object {
+          "currentDigest": undefined,
+          "currentValue": "14",
+          "depName": "node",
+        }
+      `);
+    });
+    it('handles docker hub with full host', () => {
+      expect(splitImageParts('docker.io/node:14')).toMatchInlineSnapshot(`
+        Object {
+          "currentDigest": undefined,
+          "currentValue": "14",
+          "depName": "node",
+          "registryUrls": Array [
+            "https://docker.io",
+          ],
+        }
+      `);
+    });
+
+    it('handles gitlab project images', () => {
+      expect(splitImageParts('registry.mygitlab.test/jobs/docker/base:latest'))
+        .toMatchInlineSnapshot(`
+        Object {
+          "currentDigest": undefined,
+          "currentValue": "latest",
+          "depName": "docker/base",
+          "registryUrls": Array [
+            "https://registry.mygitlab.test/jobs",
+          ],
+        }
+      `);
     });
   });
 });

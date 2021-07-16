@@ -7,8 +7,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "19.03.8",
     "datasource": "docker",
-    "depName": "gcr.io/cloud-builders/docker",
-    "replaceString": "gcr.io/cloud-builders/docker:19.03.8",
+    "depName": "cloud-builders/docker",
+    "registryUrls": Array [
+      "https://gcr.io",
+    ],
+    "replaceString": "cloud-builders/docker:19.03.8",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -23,8 +26,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
-    "depName": "gcr.io/cloud-builders/kubectl",
-    "replaceString": "gcr.io/cloud-builders/kubectl",
+    "depName": "cloud-builders/kubectl",
+    "registryUrls": Array [
+      "https://gcr.io",
+    ],
+    "replaceString": "cloud-builders/kubectl",
   },
 ]
 `;

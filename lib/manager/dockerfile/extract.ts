@@ -24,11 +24,31 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     currentValue = depTagSplit.pop();
     depName = depTagSplit.join(':');
   }
+  let registryUrl: string;
+  const split = depName.split('/');
+  if (split.length > 2) {
+    // Assume the last two segments are the image name
+    depName = split.slice(-2).join('/');
+    registryUrl = split.slice(0, -2).join('/');
+  } else if (
+    // Split a two-part image if the first looks for sure like a hostName
+    split.length === 2 &&
+    (split[0].includes('.') || split[0].includes(':'))
+  ) {
+    registryUrl = split[0];
+    depName = split[1];
+  }
+  if (registryUrl && !/^https?:\/\//.exec(registryUrl)) {
+    registryUrl = `https://${registryUrl}`;
+  }
   const dep: PackageDependency = {
     depName,
     currentValue,
     currentDigest,
   };
+  if (registryUrl) {
+    dep.registryUrls = [registryUrl];
+  }
   return dep;
 }
 
@@ -43,7 +63,7 @@ export function getDep(
   }
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
-    dep.replaceString = currentFrom;
+    dep.replaceString = currentFrom.substring(currentFrom.indexOf(dep.depName));
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }

@@ -7,8 +7,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "v2.1.0",
     "datasource": "docker",
-    "depName": "quay.io/external_storage/local-volume-provisioner",
-    "replaceString": "quay.io/external_storage/local-volume-provisioner:v2.1.0",
+    "depName": "external_storage/local-volume-provisioner",
+    "registryUrls": Array [
+      "https://quay.io",
+    ],
+    "replaceString": "external_storage/local-volume-provisioner:v2.1.0",
   },
 ]
 `;
@@ -28,8 +31,11 @@ Array [
     "currentDigest": undefined,
     "currentValue": "v1.11.1",
     "datasource": "docker",
-    "depName": "k8s.gcr.io/kube-proxy-amd64",
-    "replaceString": "k8s.gcr.io/kube-proxy-amd64:v1.11.1",
+    "depName": "kube-proxy-amd64",
+    "registryUrls": Array [
+      "https://k8s.gcr.io",
+    ],
+    "replaceString": "kube-proxy-amd64:v1.11.1",
   },
 ]
 `;

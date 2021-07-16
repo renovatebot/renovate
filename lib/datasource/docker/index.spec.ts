@@ -379,6 +379,25 @@ describe(getName(), () => {
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
+    it('supports gitlab project images', async () => {
+      httpMock
+        .scope(`https://registry.mygitlab.test/v2`)
+        .get('/')
+        .reply(200, '', {})
+        .get('/docker/base/manifests/latest')
+        .reply(401);
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'docker/base',
+          registryUrls: ['https://registry.mygitlab.test/jobs'],
+        },
+        'latest'
+      );
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('getReleases', () => {
     it('returns null if no token', async () => {
@@ -391,6 +410,7 @@ describe(getName(), () => {
       const res = await getPkgReleases({
         datasource: id,
         depName: 'node',
+        registryUrls: ['https://docker.io'],
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();

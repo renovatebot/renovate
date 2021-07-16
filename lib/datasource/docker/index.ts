@@ -3,6 +3,7 @@ import parseLinkHeader from 'parse-link-header';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
+import { ensurePathPrefix } from '../../util/url';
 import {
   api as dockerVersioning,
   id as dockerVersioningId,
@@ -65,7 +66,8 @@ async function getDockerApiTags(
   // AWS ECR limits the maximum number of results to 1000
   // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
   const limit = ecrRegex.test(registryHost) ? 1000 : 10000;
-  let url = `${registryHost}/v2/${dockerRepository}/tags/list?n=${limit}`;
+  let url = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+  url = ensurePathPrefix(url, '/v2');
   const headers = await getAuthHeaders(registryHost, dockerRepository);
   if (!headers) {
     logger.debug('Failed to get authHeaders for getTags lookup');
