@@ -689,6 +689,10 @@ This is caused by a race condition in GitLab's Merge Request API - [read the cor
 
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
+For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported.
+
+But when you use the `direct` or `off` keywords Renovate will fallback to its own fetching strategy (i.e. directly from GitHub, etc).
+
 ## group
 
 Caution: Advanced functionality only. Do not use unless you know what you're doing.
