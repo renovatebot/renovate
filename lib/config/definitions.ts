@@ -8,6 +8,13 @@ import type { RenovateOptions } from './types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowGitLfs',
+    description: 'If true allow git-lfs to pull files.',
+    type: 'boolean',
+    default: false,
+    admin: true,
+  },
+  {
     name: 'allowPostUpgradeCommandTemplating',
     description: 'If true allow templating for post-upgrade commands.',
     type: 'boolean',
