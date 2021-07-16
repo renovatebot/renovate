@@ -1,6 +1,6 @@
 import { load } from 'js-yaml';
 import * as datasourceDocker from '../../datasource/docker';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import * as dockerVersioning from '../../versioning/docker';
@@ -28,7 +28,7 @@ export function extractBase(base: string): PackageDependency | null {
   }
 
   return {
-    datasource: datasourceGitTags.id,
+    datasource: GitTagsDatasource.id,
     depName: match.groups.path.replace('.git', ''),
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,

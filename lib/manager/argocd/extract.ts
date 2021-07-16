@@ -1,5 +1,5 @@
 import { loadAll } from 'js-yaml';
-import * as gitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { ApplicationDefinition } from './types';
@@ -26,7 +26,7 @@ function createDependency(
   return {
     depName: source.repoURL,
     currentValue: source.targetRevision,
-    datasource: gitTags.id,
+    datasource: GitTagsDatasource.id,
   };
 }
 
