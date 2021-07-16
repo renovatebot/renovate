@@ -616,7 +616,7 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('supports labels', async () => {
+    it('supports labels default versioning', async () => {
       httpMock
         .scope('https://registry.company.com/v2')
         .get('/')
@@ -651,6 +651,50 @@ describe(getName(), () => {
         });
       const res = await getPkgReleases({
         datasource: id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
+    it('supports labels with semver versioning', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(3)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, {
+          tags: [
+            '2.0.0',
+            '2-alpine',
+            '1-alpine',
+            '1.0.0',
+            '1.2.3',
+            '1.2.3-alpine',
+            'abc',
+            '34567',
+          ],
+        })
+        .get('/node/manifests/2.0.0')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(200, {
+          config: {
+            Labels: {
+              'org.opencontainers.image.source':
+                'https://github.com/renovatebot/renovate',
+            },
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: id,
+        versioning: 'semver',
         depName: 'registry.company.com/node',
       });
       const trace = httpMock.getTrace();
