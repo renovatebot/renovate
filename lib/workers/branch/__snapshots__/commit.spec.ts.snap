@@ -17,3 +17,21 @@ Array [
   ],
 ]
 `;
+
+exports[`workers/branch/automerge commitFilesToBranch dry runs 1`] = `
+Array [
+  Array [
+    Object {
+      "commitMessage": "some commit message",
+      "updatedFiles": "
+package.json
+<<<
+some contents
+>>>
+
+",
+    },
+    "DRY-RUN: Would commit files to branch renovate/some-branch",
+  ],
+]
+`;

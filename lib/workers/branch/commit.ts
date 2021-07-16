@@ -31,9 +31,20 @@ export function commitFilesToBranch(
   }
   const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
   logger.debug(`${fileLength} file(s) to commit`);
-  // istanbul ignore if
   if (getAdminConfig().dryRun) {
-    logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
+    logger.info(
+      {
+        commitMessage: config.commitMessage,
+
+        // Piping f.contents to
+        // git diff -- ${f.name} -
+        // would be much better, but this seems to be impossible with simple-git
+        updatedFiles: `\n${updatedFiles
+          .map((f) => `${f.name}\n<<<\n${String(f.contents)}\n>>>\n`)
+          .join('\n')}\n`,
+      },
+      'DRY-RUN: Would commit files to branch ' + config.branchName
+    );
     return null;
   }
   // istanbul ignore if
