@@ -449,6 +449,8 @@ describe(getName(), () => {
       const tags = [{ name: '5.0.12' }];
       httpMock
         .scope('https://quay.io')
+        .get('/v2/')
+        .reply(200, '', {})
         .get(
           '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
         )
@@ -469,6 +471,8 @@ describe(getName(), () => {
     it('uses quay api and test error', async () => {
       httpMock
         .scope('https://quay.io')
+        .get('/v2/')
+        .reply(200, '', {})
         .get(
           '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
         )
