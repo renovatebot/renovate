@@ -2,7 +2,11 @@ import fs from 'fs-extra';
 import { getAdminConfig, setAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
-import { removeDanglingContainers } from '../../util/exec/docker';
+import {
+  ensureDockerTmpCache,
+  removeDanglingContainers,
+  removeDockerTmpCaches,
+} from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
@@ -31,7 +35,11 @@ export async function renovateRepository(
 ): Promise<ProcessResult> {
   splitInit();
   let config = setAdminConfig(repoConfig);
+
   await removeDanglingContainers();
+  await removeDockerTmpCaches();
+  await ensureDockerTmpCache();
+
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
@@ -67,6 +75,11 @@ export async function renovateRepository(
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
+  }
+  try {
+    await removeDockerTmpCaches();
+  } catch (err) /* istanbul ignore if */ {
+    logger.warn({ err }, 'Docker cache deletion error');
   }
   if (localDir && !config.persistRepoData) {
     try {

@@ -273,6 +273,15 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
+    name: 'dockerCache',
+    description:
+      'Change this to enable per-repository cache being mounted as a Docker volume or temporary directory (will be cleaned up after each run).',
+    type: 'string',
+    allowedValues: ['volume', 'mount', 'none'],
+    admin: true,
+    default: 'none',
+  },
+  {
     name: 'dockerImagePrefix',
     description:
       'Change this value in order to override the default Renovate Docker sidecar image name prefix.',

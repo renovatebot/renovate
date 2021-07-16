@@ -3,22 +3,35 @@ import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { ensureCacheDir, ensureDir } from '../fs';
 import {
   DockerOptions,
   ExecResult,
   Opt,
   RawExecOptions,
+  VolumesPair,
   rawExec,
 } from './common';
-import { generateDockerCommand, removeDockerContainer } from './docker';
+import {
+  generateDockerCommand,
+  getTmpCacheId,
+  getTmpCacheNs,
+  removeDockerContainer,
+} from './docker';
 import { getChildProcessEnv } from './env';
 
 type ExtraEnv<T = unknown> = Record<string, T>;
+
+export interface CacheDirOption {
+  path: string;
+  env: string;
+}
 
 export interface ExecOptions extends ChildProcessExecOptions {
   cwdFile?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
+  cacheTmpdir?: Opt<CacheDirOption>;
 }
 
 function createChildEnv(
@@ -69,9 +82,15 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, docker, cwdFile } = opts;
-  const { binarySource, dockerChildPrefix, customEnvVariables, localDir } =
-    getAdminConfig();
+  const { env, docker, cwdFile, cacheTmpdir } = opts;
+  const {
+    binarySource,
+    dockerChildPrefix,
+    dockerCache,
+    customEnvVariables,
+    localDir,
+  } = getAdminConfig();
+
   const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
   let cwd;
   // istanbul ignore if
@@ -85,6 +104,7 @@ export async function exec(
   delete execOptions.extraEnv;
   delete execOptions.docker;
   delete execOptions.cwdFile;
+  delete execOptions.cacheTmpdir;
 
   const rawExecOptions: RawExecOptions = {
     encoding: 'utf-8',
@@ -101,14 +121,47 @@ export async function exec(
   const useDocker = binarySource === 'docker' && docker;
   if (useDocker) {
     logger.debug('Using docker to execute');
-    const dockerOptions = {
-      ...docker,
-      cwd,
-      envVars: dockerEnvVars(extraEnv, childEnv),
-    };
+    const envVars = dockerEnvVars(extraEnv, childEnv);
+    const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
+
+    if (cacheTmpdir && dockerCache && dockerCache !== 'none') {
+      const tmpCacheNs = getTmpCacheNs();
+      const tmpCacheId = getTmpCacheId();
+      const tmpCacheName = `${tmpCacheNs}_${tmpCacheId}`;
+      const mountTarget = `/tmp`;
+      if (dockerCache === 'volume') {
+        const mountedCachePath = join(mountTarget, cacheTmpdir.path);
+        const mountPair: VolumesPair = [tmpCacheName, mountTarget];
+
+        dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
+        rawExecOptions.env[cacheTmpdir.env] = mountedCachePath;
+        dockerOptions.preCommands = [
+          `mkdir -p ${mountedCachePath}`,
+          ...(dockerOptions.preCommands || []),
+        ];
+      } else if (dockerCache === 'mount') {
+        const mountSource = join(
+          getAdminConfig().cacheDir,
+          tmpCacheNs,
+          tmpCacheId
+        );
+        const sourceCachePath = join(mountSource, cacheTmpdir.path);
+        const targetCachePath = join(mountTarget, cacheTmpdir.path);
+        const mountPair: VolumesPair = [mountSource, mountTarget];
+
+        dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
+        rawExecOptions.env[cacheTmpdir.env] = targetCachePath;
+        await ensureDir(sourceCachePath);
+      }
+
+      dockerOptions.envVars.push(cacheTmpdir.env);
+    }
 
     const dockerCommand = await generateDockerCommand(commands, dockerOptions);
     commands = [dockerCommand];
+  } else if (cacheTmpdir) {
+    const cacheLocalPath = await ensureCacheDir(cacheTmpdir.path);
+    rawExecOptions.env[cacheTmpdir.env] = cacheLocalPath;
   }
 
   let res: ExecResult | null = null;

@@ -134,6 +134,14 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer pack
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
+## dockerCache
+
+When set to 'volume', Renovate creates and mounts a temporary Docker volume that is used as a cache for package manager files.
+When set to 'mount', a temporary directory is created and mounted instead.
+
+The cache will be removed after repository processing.
+To disable per-repo caching for Docker containers, use 'none' (default).
+
 ## dockerChildPrefix
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.

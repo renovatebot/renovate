@@ -4,7 +4,7 @@ import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
 import { getHttpUrl } from '../../util/git/url';
@@ -93,8 +93,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
-  const goPath = await ensureCacheDir('./others/go', 'GOPATH');
-
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
@@ -165,7 +163,6 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
-        GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
         GOPRIVATE: goPrivate,
         GONOPROXY: process.env.GONOPROXY,
@@ -178,7 +175,10 @@ export async function updateArtifacts({
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
-        volumes: [goPath],
+      },
+      cacheTmpdir: {
+        env: 'GOPATH',
+        path: 'gomod',
       },
     };
 
