@@ -225,7 +225,8 @@ export type UpdateType =
   | 'lockFileMaintenance'
   | 'lockfileUpdate'
   | 'rollback'
-  | 'bump';
+  | 'bump'
+  | 'replacement';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 

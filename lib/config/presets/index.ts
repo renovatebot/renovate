@@ -111,6 +111,7 @@ export function parsePreset(input: string): ParsedPreset {
     'packages',
     'preview',
     'regexManagers',
+    'replacements',
     'schedule',
     'workarounds',
   ];

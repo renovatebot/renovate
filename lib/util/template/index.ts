@@ -71,6 +71,8 @@ export const allowedFields = {
     'The major version of the new version. e.g. "3" if the new version if "3.1.0"',
   newMinor:
     'The minor version of the new version. e.g. "1" if the new version if "3.1.0"',
+  newName:
+    'The name of the new dependency that replaces the current deprecated dependency',
   newValue:
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade, e.g. "3.1.0"',

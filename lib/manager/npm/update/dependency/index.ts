@@ -3,6 +3,55 @@ import { logger } from '../../../../logger';
 import { matchAt, replaceAt } from '../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
 
+function replaceAsString(
+  parsedContents: any,
+  fileContent: string,
+  depType: string,
+  depName: string,
+  oldVersion: string,
+  newValue: string
+): string | null {
+  // Update the file = this is what we want
+  // eslint-disable-next-line no-param-reassign
+  if (depName === oldVersion) {
+    delete Object.assign(parsedContents[depType], {
+      [newValue]: parsedContents[depType][oldVersion],
+    })[oldVersion];
+  } else if (depType === 'resolutions') {
+    // eslint-disable-next-line no-param-reassign
+    parsedContents.resolutions[depName] = newValue;
+  } else {
+    // eslint-disable-next-line no-param-reassign
+    parsedContents[depType][depName] = newValue;
+  }
+  // Look for the old version number
+  const searchString = `"${oldVersion}"`;
+  const newString = `"${newValue}"`;
+  // Skip ahead to depType section
+  let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
+  logger.trace(`Starting search at index ${searchIndex}`);
+  // Iterate through the rest of the file
+  for (; searchIndex < fileContent.length; searchIndex += 1) {
+    // First check if we have a hit for the old version
+    if (matchAt(fileContent, searchIndex, searchString)) {
+      logger.trace(`Found match at index ${searchIndex}`);
+      // Now test if the result matches
+      const testContent = replaceAt(
+        fileContent,
+        searchIndex,
+        searchString,
+        newString
+      );
+      // Compare the parsed JSON structure of old and new
+      if (dequal(parsedContents, JSON.parse(testContent))) {
+        return testContent;
+      }
+    }
+  }
+  // istanbul ignore next: not possible to get here
+  return null;
+}
+
 export function updateDependency({
   fileContent,
   upgrade,
@@ -37,33 +86,23 @@ export function updateDependency({
       logger.trace('Version is already updated');
       return fileContent;
     }
-    // Update the file = this is what we want
-    parsedContents[depType][depName] = newValue;
-    // Look for the old version number
-    const searchString = `"${oldVersion}"`;
-    const newString = `"${newValue}"`;
-    let newFileContent = null;
-    // Skip ahead to depType section
-    let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
-    logger.trace(`Starting search at index ${searchIndex}`);
-    // Iterate through the rest of the file
-    for (; searchIndex < fileContent.length; searchIndex += 1) {
-      // First check if we have a hit for the old version
-      if (matchAt(fileContent, searchIndex, searchString)) {
-        logger.trace(`Found match at index ${searchIndex}`);
-        // Now test if the result matches
-        const testContent = replaceAt(
-          fileContent,
-          searchIndex,
-          searchString,
-          newString
-        );
-        // Compare the parsed JSON structure of old and new
-        if (dequal(parsedContents, JSON.parse(testContent))) {
-          newFileContent = testContent;
-          break;
-        }
-      }
+    let newFileContent = replaceAsString(
+      parsedContents,
+      fileContent,
+      depType,
+      depName,
+      oldVersion,
+      newValue
+    );
+    if (upgrade.newName) {
+      newFileContent = replaceAsString(
+        parsedContents,
+        newFileContent,
+        depType,
+        depName,
+        depName,
+        upgrade.newName
+      );
     }
     // istanbul ignore if
     if (!newFileContent) {
@@ -93,33 +132,14 @@ export function updateDependency({
             'Upgraded dependency exists in yarn resolutions but is different version'
           );
         }
-        // Look for the old version number
-        const oldResolution = `"${String(parsedContents.resolutions[depKey])}"`;
-        const newResolution = `"${newValue}"`;
-        // Update the file = this is what we want
-        parsedContents.resolutions[depKey] = newValue;
-        // Skip ahead to depType section
-        searchIndex = newFileContent.indexOf(`"resolutions"`);
-        logger.trace(`Starting search at index ${searchIndex}`);
-        // Iterate through the rest of the file
-        for (; searchIndex < newFileContent.length; searchIndex += 1) {
-          // First check if we have a hit for the old version
-          if (matchAt(newFileContent, searchIndex, oldResolution)) {
-            logger.trace(`Found match at index ${searchIndex}`);
-            // Now test if the result matches
-            const testContent = replaceAt(
-              newFileContent,
-              searchIndex,
-              oldResolution,
-              newResolution
-            );
-            // Compare the parsed JSON structure of old and new
-            if (dequal(parsedContents, JSON.parse(testContent))) {
-              newFileContent = testContent;
-              break;
-            }
-          }
-        }
+        newFileContent = replaceAsString(
+          parsedContents,
+          newFileContent,
+          'resolutions',
+          depKey,
+          parsedContents.resolutions[depKey],
+          newValue
+        );
       }
     }
     return newFileContent;
