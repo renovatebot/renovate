@@ -1224,8 +1224,14 @@ const options: RenovateOptions[] = [
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
-    allowedValues: ['immediate', 'not-pending', 'status-success', 'approval'],
-    default: 'immediate',
+    allowedValues: [
+      'auto',
+      'immediate',
+      'not-pending',
+      'status-success',
+      'approval',
+    ],
+    default: 'auto',
   },
   {
     name: 'prNotPendingHours',
@@ -1488,6 +1494,24 @@ const options: RenovateOptions[] = [
     default: {
       branchTopic: '{{{groupSlug}}}',
       commitMessageTopic: '{{{groupName}}}',
+    },
+    cli: false,
+    env: false,
+    mergeable: true,
+  },
+  {
+    name: 'rollupName',
+    description: 'Rollup name.',
+    type: 'string',
+    default: null,
+  },
+  {
+    name: 'rollup',
+    description: 'Config if rollupName is enabled.',
+    type: 'object',
+    default: {
+      branchTopic: '{{{rollupSlug}}}',
+      commitMessageTopic: '{{{rollupName}}}',
     },
     cli: false,
     env: false,

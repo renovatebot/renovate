@@ -7,7 +7,6 @@ export const presets: Record<string, Preset> = {
       ':separateMajorReleases',
       ':combinePatchMinorReleases',
       ':ignoreUnstable',
-      ':prImmediately',
       ':semanticPrefixFixDepsChoreOthers',
       ':updateNotScheduled',
       ':automergeDisabled',

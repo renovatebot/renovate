@@ -27,6 +27,8 @@ export const exposedConfigOptions = [
   'group',
   'groupName',
   'groupSlug',
+  'rollup',
+  'rollupName',
   'labels',
   'prBodyColumns',
   'prBodyDefinitions',

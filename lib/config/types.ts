@@ -12,7 +12,7 @@ export type RenovateConfigStage =
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 
-export interface GroupConfig extends Record<string, unknown> {
+export interface GroupRollupConfig extends Record<string, unknown> {
   branchName?: string;
   branchTopic?: string;
 }
@@ -31,9 +31,11 @@ export interface RenovateSharedConfig {
   enabledManagers?: string[];
   extends?: string[];
   fileMatch?: string[];
-  group?: GroupConfig;
+  group?: GroupRollupConfig;
   groupName?: string;
   groupSlug?: string;
+  rollup?: GroupRollupConfig;
+  rollupName?: string;
   includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
@@ -46,7 +48,12 @@ export interface RenovateSharedConfig {
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
-  prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
+  prCreation?:
+    | 'auto'
+    | 'immediate'
+    | 'not-pending'
+    | 'status-success'
+    | 'approval';
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;

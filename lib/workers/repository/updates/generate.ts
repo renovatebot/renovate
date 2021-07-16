@@ -287,6 +287,22 @@ export function generateBranchConfig(
     (upgrade) => upgrade.prCreation === 'approval'
   );
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
+  const firstRollup = config.upgrades.find((upgrade) => upgrade.rollupName);
+  if (firstRollup) {
+    const { rollupName, rollup } = firstRollup;
+    if (
+      !config.upgrades.every((upgrade) => upgrade.rollupName === rollupName)
+    ) {
+      logger.warn({ rollupName }, `Branch has inconsistent rollupName config.`);
+    }
+    config.rollupName = rollupName;
+    config.rollup = rollup;
+    if (config.prCreation === 'auto') {
+      config.prCreation = 'approval';
+    }
+  } else if (config.prCreation === 'auto') {
+    config.prCreation = 'immediate';
+  }
   // combine all labels
   config.labels = [
     ...new Set(

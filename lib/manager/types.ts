@@ -110,6 +110,7 @@ export interface Package<T> extends ManagerData<T> {
   depType?: string;
   fileReplacePosition?: number;
   groupName?: string;
+  rollupName?: string;
   lineNumber?: number;
   lookupName?: string;
   repo?: string;
