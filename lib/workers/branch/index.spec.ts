@@ -1291,5 +1291,43 @@ describe(getName(), () => {
       ).toMatchObject({ result: BranchResult.NoWork });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
+
+    it('returns when rebaseWhen=newer-version when no newer version has been found', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          rebaseWhen: 'newer-version',
+        })
+      ).toMatchObject({ result: BranchResult.NoWork });
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+    });
+
+    it('rebases when rebaseWhen=newer-version and a newer version has been found', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+        dependencyMismatch: true,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValue(true);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          rebaseWhen: 'newer-version',
+        })
+      ).toMatchObject({ result: BranchResult.Done });
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+    });
   });
 });

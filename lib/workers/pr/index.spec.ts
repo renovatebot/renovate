@@ -335,6 +335,13 @@ describe(getName(), () => {
         'this Pin PR'
       );
     });
+    it('should add note about newer-version rebase', async () => {
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      config.rebaseWhen = 'newer-version';
+      const { pr } = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+    });
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.createPr = jest.fn();

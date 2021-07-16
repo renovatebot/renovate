@@ -45,6 +45,7 @@ Object {
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch needs update 1`] = `
 Object {
   "artifactErrors": Array [],
+  "dependencyMismatch": true,
   "reuseExistingBranch": false,
   "updatedArtifacts": Array [],
   "updatedPackageFiles": Array [
