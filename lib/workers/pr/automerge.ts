@@ -28,6 +28,7 @@ export async function checkAutoMerge(
   const {
     branchName,
     automergeType,
+    automergeStrategy,
     automergeComment,
     requiredStatusChecks,
     rebaseRequested,
@@ -99,14 +100,16 @@ export async function checkAutoMerge(
   // Let's merge this
   // istanbul ignore if
   if (getAdminConfig().dryRun) {
-    logger.info(`DRY-RUN: Would merge PR #${pr.number}`);
+    logger.info(
+      `DRY-RUN: Would merge PR #${pr.number} with strategy "${automergeStrategy}"`
+    );
     return {
       automerged: false,
       prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
     };
   }
-  logger.debug(`Automerging #${pr.number}`);
-  const res = await platform.mergePr(pr.number, branchName);
+  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy}`);
+  const res = await platform.mergePr(pr.number, branchName, automergeStrategy);
   if (res) {
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
     let branchRemoved = false;

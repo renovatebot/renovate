@@ -1285,6 +1285,14 @@ const options: RenovateOptions[] = [
     default: 'pr',
   },
   {
+    name: 'automergeStrategy',
+    description:
+      'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`',
+    type: 'string',
+    allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
+    default: 'auto',
+  },
+  {
     name: 'automergeComment',
     description:
       'PR comment to add to trigger automerge. Used only if automergeType=pr-comment.',
