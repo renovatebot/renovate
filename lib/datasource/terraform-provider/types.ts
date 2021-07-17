@@ -32,3 +32,21 @@ export type TerraformProviderReleaseBackend = Record<
 >;
 
 export type VersionsReleaseBackend = Record<string, VersionDetailResponse>;
+
+export interface TerraformRegistryVersions {
+  id: string;
+  versions: {
+    version: string;
+    platforms: {
+      os: string;
+      arch: string;
+    }[];
+  }[];
+}
+
+export interface TerraformRegistryBuildResponse {
+  os: string;
+  arch: string;
+  filename: string;
+  download_url: string;
+}

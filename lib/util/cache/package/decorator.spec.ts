@@ -34,6 +34,21 @@ describe(getName(), () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
+  it('Do not cache null', async () => {
+    class MyClass {
+      @cache({ namespace: 'namespace', key: (test) => test })
+      public async getString(test: string): Promise<string> {
+        await spy();
+        return test;
+      }
+    }
+    const myClass = new MyClass();
+    expect(await myClass.getString(null)).toBeNull();
+    expect(await myClass.getString('test')).toEqual('test');
+    expect(await myClass.getString('test')).not.toBeUndefined();
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
   it('should cache function', async () => {
     class MyClass {
       @cache({

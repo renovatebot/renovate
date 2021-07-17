@@ -30,7 +30,7 @@ Array [
       "version": 1,
     },
     "lookupName": "hashicorp/aws",
-    "registryUrl": "registry.terraform.io",
+    "registryUrl": "https://registry.terraform.io",
     "version": "3.0.0",
   },
   Object {
@@ -62,7 +62,7 @@ Array [
       "version": 1,
     },
     "lookupName": "hashicorp/azurerm",
-    "registryUrl": "registry.terraform.io",
+    "registryUrl": "https://registry.terraform.io",
     "version": "2.50.0",
   },
   Object {
@@ -95,7 +95,7 @@ Array [
       "version": 1,
     },
     "lookupName": "hashicorp/random",
-    "registryUrl": "registry.terraform.io",
+    "registryUrl": "https://registry.terraform.io",
     "version": "2.2.1",
   },
 ]
