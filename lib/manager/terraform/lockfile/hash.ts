@@ -79,27 +79,26 @@ export class TerraformProviderHash {
     const readStream = TerraformProviderHash.http.stream(build.url);
     const writeStream = fs.createWriteStream(downloadFileName);
 
-    let hash;
     try {
       await fs.pipeline(readStream, writeStream);
 
-      hash = await this.hashOfZipContent(downloadFileName, extractPath);
+      const hash = await this.hashOfZipContent(downloadFileName, extractPath);
       logger.trace(
         { hash },
         `Generated hash for ${build.name}-${build.version}`
       );
+      return hash;
     } finally {
       // delete zip file
       await fs.unlink(downloadFileName);
     }
-    return hash;
   }
 
   static async calculateHashes(builds: TerraformBuild[]): Promise<string[]> {
     const cacheDir = await ensureCacheDir('./others/terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files
-    return pMap(
+    return await pMap(
       builds,
       (build) => this.calculateSingleHash(build, cacheDir),
       { concurrency: 4 } // allow to look up 4 builds for this version in parallel
