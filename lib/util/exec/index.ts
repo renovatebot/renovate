@@ -12,12 +12,8 @@ import {
   VolumesPair,
   rawExec,
 } from './common';
-import {
-  generateDockerCommand,
-  getTmpCacheId,
-  getTmpCacheNs,
-  removeDockerContainer,
-} from './docker';
+import { generateDockerCommand, removeDockerContainer } from './docker';
+import { getCachedTmpDirId, getCachedTmpDirNs } from './docker/cache';
 import { getChildProcessEnv } from './env';
 
 type ExtraEnv<T = unknown> = Record<string, T>;
@@ -125,8 +121,8 @@ export async function exec(
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
     if (cacheTmpdir && dockerCache && dockerCache !== 'none') {
-      const tmpCacheNs = getTmpCacheNs();
-      const tmpCacheId = getTmpCacheId();
+      const tmpCacheNs = getCachedTmpDirNs();
+      const tmpCacheId = getCachedTmpDirId();
       const tmpCacheName = `${tmpCacheNs}_${tmpCacheId}`;
       const mountTarget = `/tmp`;
       if (dockerCache === 'volume') {

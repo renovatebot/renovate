@@ -1,12 +1,9 @@
 import is from '@sindresorhus/is';
-import cryptoRandomString from 'crypto-random-string';
-import { join } from 'upath';
 import { getAdminConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
-import { chmod, ensureCacheDir, exists, readdir, remove, stat } from '../../fs';
 import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
@@ -258,113 +255,4 @@ export async function generateDockerCommand(
   result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');
-}
-
-export async function volumePrune(
-  meta?: Record<string, string>
-): Promise<void> {
-  const cmdParts = ['docker', 'volume', 'prune', '--force'];
-
-  const kvPairs = Object.entries(meta);
-  const filterOptions = kvPairs.map(([k, v]) => `--filter label=${k}=${v}`);
-  cmdParts.push(...filterOptions);
-
-  const cmd = cmdParts.join(' ');
-  await rawExec(cmd, { encoding: 'utf-8' });
-}
-
-export async function volumeCreate(
-  name: string,
-  meta?: Record<string, string>
-): Promise<void> {
-  const cmdParts = ['docker', 'volume', 'create'];
-
-  if (meta) {
-    const kvPairs = Object.entries(meta);
-    const labelOptions = kvPairs.map(([k, v]) => `--label ${k}=${v}`);
-    cmdParts.push(...labelOptions);
-  }
-
-  cmdParts.push(name);
-
-  const cmd = cmdParts.join(' ');
-  await rawExec(cmd, { encoding: 'utf-8' });
-}
-
-let tmpId: string = null;
-
-export function getTmpCacheId(): string {
-  if (!tmpId) {
-    tmpId = cryptoRandomString({ length: 16 });
-  }
-  return tmpId;
-}
-
-export function resetTmpCacheId(): void {
-  tmpId = null;
-}
-
-export function getTmpCacheNs(): string {
-  const { dockerChildPrefix } = getAdminConfig();
-  return getContainerName('tmpdir_cache', dockerChildPrefix);
-}
-
-async function fixPermissionsBeforeDelete(entry: string): Promise<void> {
-  try {
-    if (await exists(entry)) {
-      const stats = await stat(entry);
-      if (stats.isDirectory()) {
-        await chmod(entry, '755');
-        const children = await readdir(entry);
-        for (const child of children) {
-          await fixPermissionsBeforeDelete(join(entry, child));
-        }
-      } else if (stats.isFile()) {
-        await chmod(entry, '644');
-      }
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Permissions fixing error');
-  }
-}
-
-export async function removeDockerTmpCaches(): Promise<void> {
-  resetTmpCacheId();
-
-  const { binarySource, cacheDir, dockerCache } = getAdminConfig();
-  if (binarySource === 'docker') {
-    const cacheNamespace = getTmpCacheNs();
-    if (dockerCache === 'volume') {
-      logger.trace(`Deleting Docker cache volume: ${cacheNamespace}_*`);
-      await volumePrune({ renovate: cacheNamespace });
-    } else if (dockerCache === 'mount') {
-      const cacheRoot = join(cacheDir, cacheNamespace);
-      if (await exists(cacheRoot)) {
-        logger.trace(`Deleting Docker cache directory: ${cacheRoot}`);
-        try {
-          await remove(cacheRoot);
-        } catch (err) {
-          await fixPermissionsBeforeDelete(cacheRoot);
-          await remove(cacheRoot);
-        }
-      }
-    }
-  }
-}
-
-export async function ensureDockerTmpCache(): Promise<void> {
-  const { binarySource, dockerCache } = getAdminConfig();
-  if (binarySource === 'docker') {
-    const cacheNs = getTmpCacheNs();
-    const cacheId = getTmpCacheId();
-    if (dockerCache === 'volume') {
-      const cacheName = `${cacheNs}_${cacheId}`;
-      logger.trace(`Creating Docker cache volume: ${cacheName}`);
-      await volumeCreate(cacheName, { renovate: cacheNs });
-    } else if (dockerCache === 'mount') {
-      const cacheRoot = join(cacheNs, cacheId);
-      logger.trace(`Creating Docker cache directory: ${cacheRoot}`);
-      await ensureCacheDir(cacheRoot);
-    }
-  }
 }
