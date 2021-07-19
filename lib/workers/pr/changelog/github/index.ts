@@ -9,7 +9,7 @@ import { GithubHttp } from '../../../../util/http/github';
 import { ensureTrailingSlash } from '../../../../util/url';
 import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
-const http = new GithubHttp();
+const http = new GithubHttp({});
 
 export async function getTags(
   endpoint: string,

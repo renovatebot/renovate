@@ -15,7 +15,7 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
   if (options.token) {
     if (options.hostType === PLATFORM_TYPE_GITEA) {
       options.headers.authorization = `token ${options.token}`;
-    } else if (options.hostType === PLATFORM_TYPE_GITHUB) {
+    } else if (options.hostType.includes(PLATFORM_TYPE_GITHUB)) {
       options.headers.authorization = `token ${options.token}`;
       if (options.token.startsWith('x-access-token:')) {
         const appToken = options.token.replace('x-access-token:', '');

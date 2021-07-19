@@ -17,7 +17,7 @@ export const registryStrategy = 'hunt';
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
 
-const githubHttp = new GithubHttp();
+const githubHttp = new GithubHttp({ hostType: id });
 const http = new Http(id);
 
 function shardParts(lookupName: string): string[] {

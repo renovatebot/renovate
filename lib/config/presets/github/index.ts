@@ -10,7 +10,7 @@ import {
 
 export const Endpoint = 'https://api.github.com/';
 
-const http = new GithubHttp();
+const http = new GithubHttp({});
 
 export async function fetchJSONFile(
   repo: string,

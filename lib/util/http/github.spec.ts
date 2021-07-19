@@ -6,6 +6,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import { id as GITHUB_RELEASES_ID } from '../../datasource/github-releases';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 
@@ -40,7 +41,7 @@ query(
 describe('util/http/github', () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
-    githubApi = new GithubHttp();
+    githubApi = new GithubHttp({});
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
   });
@@ -61,7 +62,24 @@ describe('util/http/github', () => {
       expect(req.headers.accept).toBe(
         'some-accept, application/vnd.github.machine-man-preview+json'
       );
+      expect(req.headers.authorization).toBe('token abc123');
     });
+    it('supports different datasources', async () => {
+      const githubApiDatasource = new GithubHttp({
+        hostType: GITHUB_RELEASES_ID,
+      });
+      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
+      hostRules.add({
+        hostType: GITHUB_RELEASES_ID,
+        token: 'x-access-token:def456',
+      });
+      httpMock.scope(githubApiHost).get('/some-url').reply(200);
+      await githubApiDatasource.get('/some-url');
+      const [req] = httpMock.getTrace();
+      expect(req).toBeDefined();
+      expect(req.headers.authorization).toBe('token def456');
+    });
+
     it('paginates', async () => {
       const url = '/some-url';
       httpMock
@@ -148,6 +166,7 @@ describe('util/http/github', () => {
           );
         await githubApi.getJson(url);
       }
+
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
         httpMock.scope(githubApiHost).get(url).replyWithError(error);
