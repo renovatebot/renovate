@@ -2,11 +2,11 @@ import fs from 'fs-extra';
 import { getAdminConfig, setAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
+import { removeDanglingContainers } from '../../util/exec/docker';
 import {
-  ensureDockerTmpCache,
-  removeDanglingContainers,
-  removeDockerTmpCaches,
-} from '../../util/exec/docker';
+  ensureCachedTmpDir,
+  purgeCachedTmpDirs,
+} from '../../util/exec/docker/cache';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
@@ -37,8 +37,8 @@ export async function renovateRepository(
   let config = setAdminConfig(repoConfig);
 
   await removeDanglingContainers();
-  await removeDockerTmpCaches();
-  await ensureDockerTmpCache();
+  await purgeCachedTmpDirs();
+  await ensureCachedTmpDir();
 
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
@@ -77,7 +77,7 @@ export async function renovateRepository(
     repoResult = processResult(config, errorRes);
   }
   try {
-    await removeDockerTmpCaches();
+    await purgeCachedTmpDirs();
   } catch (err) /* istanbul ignore if */ {
     logger.warn({ err }, 'Docker cache deletion error');
   }
