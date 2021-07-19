@@ -98,7 +98,7 @@ export class TerraformProviderHash {
     const cacheDir = await ensureCacheDir('./others/terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files
-    return await pMap(
+    return pMap(
       builds,
       (build) => this.calculateSingleHash(build, cacheDir),
       { concurrency: 4 } // allow to look up 4 builds for this version in parallel
