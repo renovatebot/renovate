@@ -50,7 +50,10 @@ export async function getReleases({
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: URL.resolve(depHost, repo),
+    sourceUrl: URL.resolve(
+      depHost,
+      repo + '/-/packages?search[]=' + urlEncodedPackageName
+    ),
     releases: null,
   };
   dependency.releases = gitlabPackage.map(({ version, created_at }) => ({
