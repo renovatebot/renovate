@@ -1,0 +1,9 @@
+build.gradel
+buildscript
+allprojects
+dependencies {
+  // ...
+
+  implementation 'com.google.mlkit:object-detection:16.2.6'
+
+} 
