@@ -60,6 +60,7 @@ import {
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
+import { massageMarkdownLinks } from './massage-markdown-links';
 
 const githubApi = new githubHttp.GithubHttp();
 
@@ -1572,11 +1573,7 @@ export function massageMarkdown(input: string): string {
   if (config.isGhe) {
     return smartTruncate(input, 60000);
   }
-  const massagedInput = input
-    // to be safe, replace all github.com links with renovatebot redirector
-    .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
-    .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
-    .replace(/]: https:\/\/github\.com\//g, ']: https://togithub.com/');
+  const massagedInput = massageMarkdownLinks(input);
   return smartTruncate(massagedInput, 60000);
 }
 
