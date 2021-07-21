@@ -61,10 +61,12 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
     const body = req.requestBodyBuffers?.[0]?.toString();
 
     if (body) {
+      let jsonBody: any;
       try {
-        result.graphql = makeGraphqlSnapshot(body);
+        jsonBody = JSON.parse(body);
+        result.graphql = makeGraphqlSnapshot(jsonBody);
       } catch (ex) {
-        result.body = body;
+        result.body = jsonBody || body;
       }
     }
     requestLog.push(result);

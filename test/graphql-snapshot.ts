@@ -177,8 +177,14 @@ function simplifyGraphqlTree(tree: DocumentNode): GraphqlSnapshot {
   return result;
 }
 
-export function makeGraphqlSnapshot(requestBodyStr: string): GraphqlSnapshot {
-  const requestBody = JSON.parse(requestBodyStr);
+interface GraphqlSnapshotInput {
+  query: string;
+  variables: Record<string, string>;
+}
+
+export function makeGraphqlSnapshot(
+  requestBody: GraphqlSnapshotInput
+): GraphqlSnapshot {
   const { query: queryStr, variables } = requestBody;
   const queryRawTree = parse(queryStr, { noLocation: true });
   const queryTree = simplifyGraphqlTree(queryRawTree);
