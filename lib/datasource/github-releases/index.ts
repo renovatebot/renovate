@@ -1,13 +1,14 @@
+import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
-  GetReleasesConfig,
   GetPkgReleasesConfig,
+  GetReleasesConfig,
+  Release,
   ReleaseResult,
 } from '../types';
-import type { GithubRelease } from './types';
-import { logger } from '../../logger';
+import type { GithubRelease, GithubReleaseAsset } from './types';
 
 export const id = 'github-releases';
 export const customRegistrySupport = true;
@@ -21,6 +22,70 @@ const http = new GithubHttp();
 function getCacheKey(depHost: string, repo: string): string {
   const type = 'tags';
   return `${depHost}:${repo}:${type}`;
+}
+
+type ChecksumAsset = {
+  assetName: string;
+  hashedFileName: string;
+};
+
+async function findChecksumAsset(
+  release: GithubRelease | null,
+  digest: string | null
+): Promise<ChecksumAsset | null> {
+  if (!release || !digest) {
+    return null;
+  }
+  const smallAssets = release.assets.filter(
+    (a: GithubReleaseAsset) => a.size < 5 * 1024
+  );
+  for (const asset of smallAssets) {
+    const res = await http.get(asset.browser_download_url);
+    for (const line of res.body.split('\n')) {
+      const lineSplit = line.split(/\s+/, 2);
+      if (lineSplit[0] === digest) {
+        return {
+          assetName: asset.name,
+          hashedFileName: lineSplit[1],
+        };
+      }
+    }
+  }
+  return null;
+}
+
+async function findNewDigest(
+  currentVersion: string,
+  checksumAsset: ChecksumAsset | null,
+  release: GithubRelease
+): Promise<string | null> {
+  if (!checksumAsset) {
+    return null;
+  }
+  const current = currentVersion.replace(/^v/, '');
+  const next = release.tag_name.replace(/^v/, '');
+  const releaseChecksumAssetName = checksumAsset.assetName.replaceAll(
+    current,
+    next
+  );
+  const releaseAsset = release.assets.find(
+    (a: GithubReleaseAsset) => a.name === releaseChecksumAssetName
+  );
+  if (!releaseAsset) {
+    return null;
+  }
+  const releaseFilename = checksumAsset.hashedFileName.replaceAll(
+    current,
+    next
+  );
+  const res = await http.get(releaseAsset.browser_download_url);
+  for (const line of res.body.split('\n')) {
+    const lineSplit = line.split(/\s+/, 2);
+    if (lineSplit[1] === releaseFilename) {
+      return lineSplit[0];
+    }
+  }
+  return null;
 }
 
 /**
@@ -63,18 +128,35 @@ export async function getReleases({
     paginate: true,
   });
   const githubReleases = res.body;
+  const currentRelease = githubReleases.find(
+    (r: GithubRelease) => r.tag_name === currentValue
+  );
+  const checksumAsset = await findChecksumAsset(currentRelease, currentDigest);
   const dependency: ReleaseResult = {
     sourceUrl: `${sourceUrlBase}${repo}`,
     releases: null,
   };
-  dependency.releases = githubReleases.map(
-    ({ tag_name, published_at, prerelease }) => ({
-      version: tag_name,
-      gitRef: tag_name,
-      releaseTimestamp: published_at,
-      isStable: prerelease ? false : undefined,
+  dependency.releases = await Promise.all(
+    githubReleases.map(async (release) => {
+      const mapped: Release = {
+        version: release.tag_name,
+        gitRef: release.tag_name,
+        releaseTimestamp: release.published_at,
+        isStable: release.prerelease ? false : undefined,
+      };
+
+      const newDigest = await findNewDigest(
+        currentValue,
+        checksumAsset,
+        release
+      );
+      if (newDigest) {
+        mapped.newDigest = newDigest;
+      }
+      return mapped;
     })
   );
+
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
