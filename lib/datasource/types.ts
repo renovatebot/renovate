@@ -26,6 +26,8 @@ export interface GetPkgReleasesConfig extends ReleasesConfigBase {
   versioning?: string;
   extractVersion?: string;
   constraints?: Record<string, string>;
+  currentValue?: string;
+  currentDigest?: string;
 }
 
 export interface Release {

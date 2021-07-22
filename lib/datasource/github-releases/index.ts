@@ -1,8 +1,13 @@
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  GetReleasesConfig,
+  GetPkgReleasesConfig,
+  ReleaseResult,
+} from '../types';
 import type { GithubRelease } from './types';
+import { logger } from '../../logger';
 
 export const id = 'github-releases';
 export const customRegistrySupport = true;
@@ -31,7 +36,12 @@ function getCacheKey(depHost: string, repo: string): string {
 export async function getReleases({
   lookupName: repo,
   registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+  currentValue,
+  currentDigest,
+}: GetReleasesConfig & GetPkgReleasesConfig): Promise<ReleaseResult | null> {
+  logger.debug(
+    `getReleases(${repo}, ${registryUrl}, ${currentValue}, ${currentDigest})`
+  );
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(registryUrl, repo)
