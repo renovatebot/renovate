@@ -1,3 +1,4 @@
+import hasha from 'hasha';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
@@ -79,10 +80,12 @@ export async function getReleases({
 
 type DigestAsset = {
   assetName: string;
-  digestedFileName: string;
+  currentVersion: string;
+  currentDigest: string;
+  digestedFileName?: string;
 };
 
-async function findDigestAsset(
+async function findDigestFile(
   release: GithubRelease,
   digest: string
 ): Promise<DigestAsset | null> {
@@ -97,20 +100,61 @@ async function findDigestAsset(
         return {
           assetName: asset.name,
           digestedFileName: lineFn,
+          currentVersion: release.tag_name,
+          currentDigest: lineDigest,
         };
       }
     }
   }
-  // TODO: it's not unreasonable to download assets to find a match
+  return null;
+}
+
+function inferHashAlg(digest: string): string {
+  switch (digest.length) {
+    case 64:
+      return 'sha256';
+    default:
+    case 96:
+      return 'sha512';
+  }
+}
+
+async function findAssetWithDigest(
+  release: GithubRelease,
+  digest: string
+): Promise<DigestAsset | null> {
+  const algorithm = inferHashAlg(digest);
+  const assetsBySize = release.assets.sort(
+    (a: GithubReleaseAsset, b: GithubReleaseAsset) => {
+      if (a.size < b.size) {
+        return -1;
+      }
+      if (a.size > b.size) {
+        return 1;
+      }
+      return 0;
+    }
+  );
+
+  for (const asset of assetsBySize) {
+    const res = http.stream(asset.browser_download_url);
+    const assetDigest = await hasha.fromStream(res, { algorithm });
+    if (assetDigest === digest) {
+      return {
+        assetName: asset.name,
+        currentVersion: release.tag_name,
+        currentDigest: assetDigest,
+      };
+    }
+  }
   return null;
 }
 
 async function findNewDigest(
-  currentVersion: string,
-  digestAsset: DigestAsset | null,
+  digestAsset: DigestAsset,
   release: GithubRelease
 ): Promise<string | null> {
-  const current = currentVersion.replace(/^v/, '');
+  const current = digestAsset.currentVersion.replace(/^v/, '');
   const next = release.tag_name.replace(/^v/, '');
   const releaseChecksumAssetName = digestAsset.assetName.replace(current, next);
   const releaseAsset = release.assets.find(
@@ -119,14 +163,22 @@ async function findNewDigest(
   if (!releaseAsset) {
     return null;
   }
-  const releaseFilename = digestAsset.digestedFileName.replace(current, next);
-  const res = await http.get(releaseAsset.browser_download_url);
-  for (const line of res.body.split('\n')) {
-    const [lineDigest, lineFn] = line.split(/\s+/, 2);
-    if (lineFn === releaseFilename) {
-      return lineDigest;
+  if (digestAsset.digestedFileName) {
+    const releaseFilename = digestAsset.digestedFileName.replace(current, next);
+    const res = await http.get(releaseAsset.browser_download_url);
+    for (const line of res.body.split('\n')) {
+      const [lineDigest, lineFn] = line.split(/\s+/, 2);
+      if (lineFn === releaseFilename) {
+        return lineDigest;
+      }
     }
+  } else {
+    const res = http.stream(releaseAsset.browser_download_url);
+    const algorithm = inferHashAlg(digestAsset.currentDigest);
+    const newDigest = await hasha.fromStream(res, { algorithm });
+    return newDigest;
   }
+  logger.debug({ releaseAsset }, 'fetch');
   return null;
 }
 
@@ -145,7 +197,7 @@ function getDigestCacheKey(
   newValue: string
 ): string {
   const type = 'digest';
-  return `${registryUrl}:${repo}:${currentValue}:${currentDigest}:${currentValue}:${type}`;
+  return `${registryUrl}:${repo}:${currentValue}:${currentDigest}:${newValue}:${type}`;
 }
 
 /**
@@ -157,6 +209,7 @@ function getDigestCacheKey(
  * There may be many assets attached to the release. This function will:
  *  - Identify the asset pinned by `currentDigest` in the `currentValue` release
  *     - Download small release assets, parse as checksum manifests (e.g. `SHASUMS.txt`).
+ *     - Download individual assets until `currentDigest` is encountered. This is limited to sha256 and sha512.
  *  - Map the hashed asset to `newValue` and return the updated digest as a string
  */
 export async function getDigest(
@@ -185,13 +238,16 @@ export async function getDigest(
 
   const apiBaseUrl = getApiBaseUrl(getSourceUrlBase(registryUrl));
   const currentRelease = await getGithubRelease(apiBaseUrl, repo, currentValue);
-  const digestAsset = await findDigestAsset(currentRelease, currentDigest);
+  let digestAsset = await findDigestFile(currentRelease, currentDigest);
+  if (!digestAsset) {
+    digestAsset = await findAssetWithDigest(currentRelease, currentDigest);
+  }
   let newDigest: string;
   if (!digestAsset || newValue === currentValue) {
     newDigest = currentDigest;
   } else {
     const newRelease = await getGithubRelease(apiBaseUrl, repo, newValue);
-    newDigest = await findNewDigest(currentValue, digestAsset, newRelease);
+    newDigest = await findNewDigest(digestAsset, newRelease);
   }
 
   const cacheMinutes = 10;

@@ -1,3 +1,4 @@
+import hasha from 'hasha';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
@@ -73,25 +74,33 @@ describe(getName(), () => {
     const currentValue = 'v1.0.0';
     const currentDigest = 'v1.0.0-digest';
 
-    const mockReleaseWithDigestFile = (version: string, digests: string[]) => {
-      const digestFile = digests.join('\n');
-      const digestFilePath = `/repos/${lookupName}/releases/download/${version}/SHASUMS.txt`;
+    const mockReleaseWithAssets = (
+      version: string,
+      assets: { [key: string]: string }
+    ) => {
       const releaseData = {
         tag_name: version,
         published_at: '2020-03-09T11:00:00Z',
-        assets: [
-          {
-            name: 'SHASUMS.txt',
-            size: digestFile.length,
-            browser_download_url: `${githubApiHost}${digestFilePath}`,
-          },
-        ],
+        assets: [],
       };
+      for (const assetFn of Object.keys(assets)) {
+        const assetPath = `/repos/${lookupName}/releases/download/${version}/${assetFn}`;
+        const assetData = assets[assetFn];
+        releaseData.assets.push({
+          name: assetFn,
+          size: assetData.length,
+          browser_download_url: `${githubApiHost}${assetPath}`,
+        });
+        httpMock.scope(githubApiHost).get(assetPath).reply(200, assetData);
+      }
       httpMock
         .scope(githubApiHost)
         .get(`/repos/${lookupName}/releases/tags/${version}`)
         .reply(200, releaseData);
-      httpMock.scope(githubApiHost).get(digestFilePath).reply(200, digestFile);
+    };
+
+    const mockReleaseWithDigestFile = (version: string, digests: string[]) => {
+      mockReleaseWithAssets(version, { 'SHASUMS.txt': digests.join('\n') });
     };
 
     it('requires currentDigest', async () => {
@@ -131,7 +140,7 @@ describe(getName(), () => {
     // TODO: reviewers - this is awkward, but I found returning `null` in this case to not produce an update
     // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
     it('ignores failures verifying currentDigest', async () => {
-      mockReleaseWithDigestFile(currentValue, []);
+      mockReleaseWithAssets(currentValue, {});
       const digest = await getDigest(
         {
           datasource,
@@ -233,6 +242,56 @@ describe(getName(), () => {
         nextValue
       );
       expect(digest).toEqual(nextDigest);
+    });
+
+    it('verifies currentDigest from asset', async () => {
+      const barContent = '1'.repeat(10 * 1024);
+      mockReleaseWithAssets(currentValue, {
+        'foo.txt': '0'.repeat(10 * 1024),
+        'bar.txt': barContent,
+      });
+
+      const barDigest = await hasha.async(barContent, { algorithm: 'sha512' });
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentValue,
+          currentDigest: barDigest,
+        },
+        currentValue
+      );
+      expect(digest).toEqual(barDigest);
+    });
+
+    it('digests assets in new release', async () => {
+      const barContent = '1'.repeat(10 * 1024);
+      mockReleaseWithAssets(currentValue, {
+        'foo.txt': '0'.repeat(8 * 1024),
+        'bar.txt': barContent,
+        'baz.txt': '2'.repeat(9 * 1024),
+      });
+      const barDigest = await hasha.async(barContent, { algorithm: 'sha256' });
+
+      const nextValue = 'v1.0.1';
+      const nextBarContent = '3'.repeat(10 * 1024);
+      mockReleaseWithAssets(nextValue, {
+        'bar.txt': nextBarContent,
+      });
+
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentValue,
+          currentDigest: barDigest,
+        },
+        nextValue
+      );
+      const nextBarDigest = await hasha.async(nextBarContent, {
+        algorithm: 'sha256',
+      });
+      expect(digest).toEqual(nextBarDigest);
     });
   });
 });
