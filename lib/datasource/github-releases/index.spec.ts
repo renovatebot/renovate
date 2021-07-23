@@ -95,16 +95,19 @@ describe(getName(), () => {
     };
 
     it('requires currentDigest', async () => {
-      const digest = await getDigest({ datasource, lookupName });
+      const digest = await getDigest({ datasource, lookupName }, currentValue);
       expect(digest).toBeNull();
     });
 
     it('defaults to currentDigest when currentVersion is missing', async () => {
-      const digest = await getDigest({
-        datasource,
-        lookupName,
-        currentDigest,
-      });
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentDigest,
+        },
+        currentValue
+      );
       expect(digest).toEqual(currentDigest);
     });
 

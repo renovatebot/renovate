@@ -14,9 +14,9 @@ const cacheNamespace = 'datasource-github-releases';
 
 const http = new GithubHttp();
 
-function getCacheKey(depHost: string, repo: string): string {
+function getReleasesCacheKey(registryUrl: string, repo: string): string {
   const type = 'tags';
-  return `${depHost}:${repo}:${type}`;
+  return `${registryUrl}:${repo}:${type}`;
 }
 
 function getSourceUrlBase(registryUrl: string): string {
@@ -44,9 +44,10 @@ export async function getReleases({
   lookupName: repo,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  const cacheKey = getReleasesCacheKey(registryUrl, repo);
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(registryUrl, repo)
+    cacheKey
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -72,12 +73,7 @@ export async function getReleases({
     })
   );
   const cacheMinutes = 10;
-  await packageCache.set(
-    cacheNamespace,
-    getCacheKey(registryUrl, repo),
-    dependency,
-    cacheMinutes
-  );
+  await packageCache.set(cacheNamespace, cacheKey, dependency, cacheMinutes);
   return dependency;
 }
 
@@ -150,6 +146,14 @@ export async function getGithubRelease(
   return res.body;
 }
 
+function getDigestCacheKey(
+  { lookupName: repo, currentValue, currentDigest, registryUrl }: DigestConfig,
+  newValue: string
+): string {
+  const type = 'digest';
+  return `${registryUrl}:${repo}:${currentValue}:${currentDigest}:${currentValue}:${type}`;
+}
+
 /**
  * github.getDigest
  *
@@ -169,13 +173,21 @@ export async function getDigest(
     { repo, currentValue, currentDigest, registryUrl, newValue },
     'getDigest'
   );
-  if (!currentDigest) {
+  if (!currentDigest || !newValue) {
     return null;
   }
   if (!currentValue) {
     return currentDigest;
   }
-  // TODO: cache.get()
+  const cacheKey = getDigestCacheKey(
+    { lookupName: repo, currentValue, currentDigest, registryUrl },
+    newValue
+  );
+  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
 
   const apiBaseUrl = getApiBaseUrl(getSourceUrlBase(registryUrl));
   const currentRelease = await getGithubRelease(apiBaseUrl, repo, currentValue);
@@ -188,6 +200,7 @@ export async function getDigest(
     newDigest = await findNewDigest(currentValue, digestAsset, newRelease);
   }
 
-  // TODO: cache.set()
+  const cacheMinutes = 10;
+  await packageCache.set(cacheNamespace, cacheKey, newDigest, cacheMinutes);
   return newDigest;
 }
