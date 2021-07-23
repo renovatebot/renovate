@@ -40,11 +40,13 @@ Renovate will commit all files changed within the `vendor/` folder.
 
 ### Go binary version
 
-By default, Renovate will keep up with the very latest version of `go`.
+By default, Renovate will keep up with the latest version of the `go` binary.
 
-You can "pin" the `go` version that Renovate uses.
-Say you want Renovate to use Go version 1.14, you can do this by adding `go 1.14` to your `go.mod` file.
-We do not support pinning Go versions to a specific patch level, so you cannot use `go 1.14.12`, but you can use `go 1.14` in your `go.mod` file.
+You can set the minimum version of `go` that Renovate uses.
+Say you want Renovate to use at least Go version 1.14, you would add `go 1.14` to your `go.mod` file.
+
+We do not support patch level versions for the minimum `go` version.
+This means you cannot use `go 1.14.12`, but you can use `go 1.14` in your `go.mod` file.
 
 ### Custom registry support, and authentication
 
