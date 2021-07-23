@@ -83,12 +83,9 @@ type DigestAsset = {
 };
 
 async function findDigestAsset(
-  release: GithubRelease | null,
-  digest: string | null
+  release: GithubRelease,
+  digest: string
 ): Promise<DigestAsset | null> {
-  if (!release || !digest) {
-    return null;
-  }
   const smallAssets = release.assets.filter(
     (a: GithubReleaseAsset) => a.size < 5 * 1024
   );
@@ -113,9 +110,6 @@ async function findNewDigest(
   digestAsset: DigestAsset | null,
   release: GithubRelease
 ): Promise<string | null> {
-  if (!digestAsset) {
-    return null;
-  }
   const current = currentVersion.replace(/^v/, '');
   const next = release.tag_name.replace(/^v/, '');
   const releaseChecksumAssetName = digestAsset.assetName.replace(current, next);
@@ -173,7 +167,7 @@ export async function getDigest(
     { repo, currentValue, currentDigest, registryUrl, newValue },
     'getDigest'
   );
-  if (!currentDigest || !newValue) {
+  if (!currentDigest) {
     return null;
   }
   if (!currentValue) {

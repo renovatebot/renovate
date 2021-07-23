@@ -167,6 +167,51 @@ describe(getName(), () => {
       expect(digest).toEqual(nextDigest);
     });
 
+    it('returns null when new digest file is not found', async () => {
+      mockReleaseWithDigestFile(currentValue, [
+        `${currentDigest} linux-amd64.tar.gz`,
+      ]);
+      const nextValue = 'v1.0.1';
+      const releaseData = {
+        tag_name: nextValue,
+        published_at: '2020-03-09T11:00:00Z',
+        assets: [],
+      };
+      httpMock
+        .scope(githubApiHost)
+        .get(`/repos/${lookupName}/releases/tags/${nextValue}`)
+        .reply(200, releaseData);
+
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentValue,
+          currentDigest,
+        },
+        nextValue
+      );
+      expect(digest).toBeNull();
+    });
+
+    it('returns null when missing from new digest file', async () => {
+      mockReleaseWithDigestFile(currentValue, [
+        `${currentDigest} linux-amd64.tar.gz`,
+      ]);
+      const nextValue = 'v1.0.1';
+      mockReleaseWithDigestFile(nextValue, []);
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentValue,
+          currentDigest,
+        },
+        nextValue
+      );
+      expect(digest).toBeNull();
+    });
+
     it('parses digest file in new release that embeds version in digested file', async () => {
       mockReleaseWithDigestFile(currentValue, [
         `${currentDigest} some-dep-1.0.0/linux-amd64.tar.gz`,
