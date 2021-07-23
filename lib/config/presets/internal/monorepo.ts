@@ -104,7 +104,10 @@ const repoGroups = {
   lerna: 'https://github.com/lerna/lerna',
   lingui: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',
-  loopback: 'https://github.com/strongloop/loopback-next',
+  loopback: [
+    'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
+    'https://github.com/loopbackio/loopback-next',
+  ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   MassTransit: 'https://github.com/MassTransit/MassTransit',
   material: 'https://github.com/material-components/material-components-web',
