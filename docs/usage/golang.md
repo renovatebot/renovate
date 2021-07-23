@@ -42,11 +42,11 @@ Renovate will commit all files changed within the `vendor/` folder.
 
 By default, Renovate will keep up with the latest version of the `go` binary.
 
-You can set the minimum version of `go` that Renovate uses.
-Say you want Renovate to use at least Go version 1.14, you would add `go 1.14` to your `go.mod` file.
+You can set a contraint in your `go.mod` file to force Renovate to use a specific version.
+As an example, say you want Renovate to use the latest patch version of the `1.16` Go binary, then you would put `contstraints.go=1.16` in your `go.mod` file.
 
 We do not support patch level versions for the minimum `go` version.
-This means you cannot use `go 1.14.12`, but you can use `go 1.14` in your `go.mod` file.
+This means you cannot use `go 1.16.6`, but you can use `go 1.16` in your `go.mod` file.
 
 ### Custom registry support, and authentication
 
