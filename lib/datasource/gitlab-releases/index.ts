@@ -1,65 +1,46 @@
-import URL from 'url';
-import * as packageCache from '../../util/cache/package';
-import { GitlabHttp } from '../../util/http/gitlab';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { cache } from '../../util/cache/package/decorator';
+import { Datasource } from '../datasource';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { GitlabRelease } from './types';
 
-const gitlabApi = new GitlabHttp();
+export class GitlabReleasesDatasource extends Datasource {
+  static readonly id = 'gitlab-releases';
 
-export const id = 'gitlab-releases';
-export const customRegistrySupport = true;
-export const defaultRegistryUrls = ['https://gitlab.com'];
-export const registryStrategy = 'first';
+  static readonly defaultRegistryUrls = ['https://gitlab.com'];
 
-const cacheNamespace = 'datasource-gitlab-releases';
+  static readonly registryStrategy = 'first';
 
-function getCacheKey(depHost: string, repo: string): string {
-  const type = 'tags';
-  return `${depHost}:${repo}:${type}`;
-}
-
-export async function getReleases({
-  registryUrl: depHost,
-  lookupName: repo,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    getCacheKey(depHost, repo)
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
+  constructor() {
+    super(GitlabReleasesDatasource.id);
   }
 
-  const urlEncodedRepo = encodeURIComponent(repo);
+  @cache({
+    namespace: `datasource-${GitlabReleasesDatasource.id}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      `${registryUrl}/${lookupName}`,
+  })
+  async getReleases({
+    registryUrl,
+    lookupName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const urlEncodedRepo = encodeURIComponent(lookupName);
+    const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
 
-  const url = URL.resolve(
-    depHost,
-    `/api/v4/projects/${urlEncodedRepo}/releases?per_page=100`
-  );
+    const gitlabReleasesResponse = (
+      await this.http.getJson<GitlabRelease[]>(apiUrl)
+    ).body;
 
-  const gitlabReleases = (
-    await gitlabApi.getJson<GitlabRelease[]>(url, {
-      paginate: true,
-    })
-  ).body;
-
-  const dependency: ReleaseResult = {
-    sourceUrl: URL.resolve(depHost, repo),
-    releases: null,
-  };
-  dependency.releases = gitlabReleases.map(({ tag_name, released_at }) => ({
-    version: tag_name,
-    gitRef: tag_name,
-    releaseTimestamp: released_at,
-  }));
-
-  const cacheMinutes = 10;
-  await packageCache.set(
-    cacheNamespace,
-    getCacheKey(depHost, repo),
-    dependency,
-    cacheMinutes
-  );
-  return dependency;
+    return {
+      sourceUrl: `${registryUrl}/${urlEncodedRepo}`,
+      releases: gitlabReleasesResponse.map(({ tag_name, released_at }) => {
+        const release: Release = {
+          registryUrl,
+          gitRef: tag_name,
+          version: tag_name,
+          releaseTimestamp: released_at,
+        };
+        return release;
+      }),
+    };
+  }
 }
