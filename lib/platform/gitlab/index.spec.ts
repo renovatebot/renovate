@@ -1352,10 +1352,7 @@ describe(getName(), () => {
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
-        platformOptions: {
-          azureAutoComplete: false,
-          gitLabAutomerge: true,
-        },
+        platformOptions: { usePlatformAutomerge: true },
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

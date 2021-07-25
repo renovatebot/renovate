@@ -115,15 +115,13 @@ export async function addAssigneesReviewers(
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
 ): PlatformPrOptions {
+  const usePlatformAutomerge =
+    config.automerge && config.automergeType === 'pr-auto';
   return {
+    usePlatformAutomerge,
     azureAutoApprove: config.azureAutoApprove,
-    azureAutoComplete: config.azureAutoComplete,
     azureWorkItemId: config.azureWorkItemId,
     bbUseDefaultReviewers: config.bbUseDefaultReviewers,
-    gitLabAutomerge:
-      config.automerge &&
-      config.automergeType === 'pr' &&
-      config.gitLabAutomerge,
   };
 }
 

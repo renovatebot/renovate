@@ -700,4 +700,49 @@ describe(getName(), () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
   });
+  it('migrates gitLabAutomerge and azureAutoComplete', () => {
+    expect(
+      configMigration.migrateConfig({ azureAutoComplete: true }, defaultConfig)
+    ).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, automergeType: 'pr-auto' },
+    });
+
+    expect(
+      configMigration.migrateConfig(
+        { automerge: false, azureAutoComplete: true },
+        defaultConfig
+      )
+    ).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, automergeType: 'pr-auto' },
+    });
+
+    expect(
+      configMigration.migrateConfig({ gitLabAutomerge: true }, defaultConfig)
+    ).toEqual({
+      isMigrated: true,
+      migratedConfig: { automergeType: 'pr-auto' },
+    });
+
+    expect(
+      configMigration.migrateConfig(
+        { automerge: false, gitLabAutomerge: true },
+        defaultConfig
+      )
+    ).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, automergeType: 'pr-auto' },
+    });
+
+    expect(
+      configMigration.migrateConfig(
+        { automerge: true, gitLabAutomerge: true },
+        defaultConfig
+      )
+    ).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, automergeType: 'pr-auto' },
+    });
+  });
 });
