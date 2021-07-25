@@ -98,6 +98,7 @@ const repoGroups = {
   infrastructure: 'https://github.com/instructure/instructure-ui',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
+  javascriptengineswitcher: 'https://github.com/Taritsyn/JavaScriptEngineSwitcher',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
   junit5: 'https://github.com/junit-team/junit5',
