@@ -34,3 +34,4 @@ jobs:
 
           # Never close any pull requests
           days-before-pr-close: -1
+          days-before-pr-stale: -1
