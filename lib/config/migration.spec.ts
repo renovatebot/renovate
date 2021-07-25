@@ -700,7 +700,7 @@ describe(getName(), () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
   });
-  it('migrates gitLabAutomerge and azureAutoComplete', () => {
+  it('migrates azureAutoComplete', () => {
     const migrate = (config: RenovateConfig): MigratedConfig =>
       configMigration.migrateConfig(config, defaultConfig);
 
@@ -718,6 +718,10 @@ describe(getName(), () => {
       isMigrated: true,
       migratedConfig: { automerge: true, automergeType: 'pr-auto' },
     });
+  });
+  it('migrates gitLabAutomerge', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
 
     expect(migrate({ gitLabAutomerge: true })).toEqual({
       isMigrated: true,
