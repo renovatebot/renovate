@@ -184,7 +184,9 @@ If Renovate is scheduled for hourly runs on the repository but commits are made 
 
 Note: if you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
 
-With `pr-auto` you can speed up the automerge process by using platform automerge facilities. Setting this will configure PRs to be merged after all (if any) branch policies have been met. Currently available for Azure and GitLab.
+With `pr-auto` you can speed up the automerge process by taking advance of platform-specific automerge facilities.
+Setting this will configure PRs to be merged after all (if any) branch policies have been met.
+Currently available for the Azure and GitLab platforms.
 
 You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
