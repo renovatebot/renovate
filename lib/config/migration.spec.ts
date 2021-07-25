@@ -701,46 +701,35 @@ describe(getName(), () => {
     expect(migratedConfig).toMatchSnapshot();
   });
   it('migrates gitLabAutomerge and azureAutoComplete', () => {
-    expect(
-      configMigration.migrateConfig({ azureAutoComplete: true }, defaultConfig)
-    ).toEqual({
-      isMigrated: true,
-      migratedConfig: { automerge: true, automergeType: 'pr-auto' },
-    });
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
 
-    expect(
-      configMigration.migrateConfig(
-        { automerge: false, azureAutoComplete: true },
-        defaultConfig
-      )
-    ).toEqual({
-      isMigrated: true,
-      migratedConfig: { automerge: true, automergeType: 'pr-auto' },
-    });
-
-    expect(
-      configMigration.migrateConfig({ gitLabAutomerge: true }, defaultConfig)
-    ).toEqual({
+    expect(migrate({ azureAutoComplete: true })).toEqual({
       isMigrated: true,
       migratedConfig: { automergeType: 'pr-auto' },
     });
 
-    expect(
-      configMigration.migrateConfig(
-        { automerge: false, gitLabAutomerge: true },
-        defaultConfig
-      )
-    ).toEqual({
+    expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: false, automergeType: 'pr-auto' },
     });
 
-    expect(
-      configMigration.migrateConfig(
-        { automerge: true, gitLabAutomerge: true },
-        defaultConfig
-      )
-    ).toEqual({
+    expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, automergeType: 'pr-auto' },
+    });
+
+    expect(migrate({ gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automergeType: 'pr-auto' },
+    });
+
+    expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, automergeType: 'pr-auto' },
+    });
+
+    expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: true, automergeType: 'pr-auto' },
     });

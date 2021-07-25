@@ -517,13 +517,7 @@ export function migrateConfig(
         }
       } else if (key === 'binarySource' && val === 'auto') {
         migratedConfig.binarySource = 'global';
-      } else if (key === 'azureAutoComplete') {
-        if (migratedConfig[key]) {
-          migratedConfig.automerge = true;
-          migratedConfig.automergeType = 'pr-auto';
-        }
-        delete migratedConfig[key];
-      } else if (key === 'gitLabAutomerge') {
+      } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
         if (migratedConfig[key]) {
           migratedConfig.automergeType = 'pr-auto';
         }
