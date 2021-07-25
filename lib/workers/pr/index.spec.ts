@@ -627,12 +627,12 @@ describe(getName(), () => {
     });
 
     it('should trigger GitLab automerge when configured', async () => {
-      config.gitLabAutomerge = true;
       config.automerge = true;
+      config.automergeType = 'pr-auto';
       await prWorker.ensurePr(config);
       const args = platform.createPr.mock.calls[0];
       expect(args[0].platformOptions).toMatchObject({
-        gitLabAutomerge: true,
+        usePlatformAutomerge: true,
       });
     });
 
