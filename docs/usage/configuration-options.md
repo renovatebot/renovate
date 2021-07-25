@@ -190,7 +190,7 @@ Currently available for the Azure and GitLab platforms.
 
 You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
-**Caution for GitLab < 12.7**: when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
+**Do not enable `pr-auto` when using GitLab < 12.7**: enabling `pr-auto` can lead to Merge Requests getting merged even though there are _failing_ pipelines.
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
 If you prefer that Renovate more silently automerge _without_ Pull Requests at all, you can configure `"automergeType": "branch"`. In this case Renovate will:
