@@ -177,8 +177,6 @@ Example use:
 
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
 
-### pr
-
 Automerging defaults to merging Pull Requests by Renovate itself.
 In that case Renovate first creates a branch and associated Pull Request, and then automerges the PR on a subsequent run once it detects the PR's status checks are "green".
 If by the next run the PR is already behind the base branch it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
