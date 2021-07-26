@@ -640,17 +640,10 @@ describe(getName(), () => {
       await initRepoMock(null, null, scope);
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&q=author.uuid="12345"&pagelen=50'
         )
         .reply(200, {
           values: [
-            {
-              id: 2,
-              author: { uuid: 'abcde' },
-              source: { branch: { name: 'branch-a' } },
-              destination: { branch: { name: 'branch-a' } },
-              state: 'OPEN',
-            },
             {
               id: 1,
               author: { uuid: '12345' },

@@ -425,6 +425,7 @@ const options: RenovateOptions[] = [
       'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
     type: 'array',
     subType: 'string',
+    default: null,
   },
   {
     name: 'configWarningReuseIssue',

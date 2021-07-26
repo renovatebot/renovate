@@ -66,6 +66,7 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/json",
@@ -147,6 +148,7 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/json",
@@ -179,6 +181,7 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/json",
@@ -211,6 +214,7 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/json",
@@ -243,6 +247,7 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/json",
@@ -275,6 +280,7 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/json",

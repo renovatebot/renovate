@@ -213,15 +213,11 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug('Retrieving PR list');
     let url = `/2.0/repositories/${config.repository}/pullrequests?`;
     url += utils.prStates.all.map((state) => 'state=' + state).join('&');
+    if (renovateUserUuid && !config.ignorePrAuthor) {
+      url += `&q=author.uuid="${renovateUserUuid}"`;
+    }
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
-    config.prList = prs
-      .filter((pr) => {
-        const prAuthorId = pr?.author?.uuid;
-        return renovateUserUuid && prAuthorId && !config.ignorePrAuthor
-          ? renovateUserUuid === prAuthorId
-          : true;
-      })
-      .map(utils.prInfo);
+    config.prList = prs.map(utils.prInfo);
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;

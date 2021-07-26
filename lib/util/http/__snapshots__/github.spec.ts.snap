@@ -12,7 +12,14 @@ Array [
           },
           "testItem": Object {
             "__args": Object {
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
               "first": "100",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -50,7 +57,14 @@ Array [
           "testItem": Object {
             "__args": Object {
               "after": "cursor1",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
               "first": "100",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -88,7 +102,14 @@ Array [
           "testItem": Object {
             "__args": Object {
               "after": "cursor1",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
               "first": "50",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -126,7 +147,14 @@ Array [
           "testItem": Object {
             "__args": Object {
               "after": "cursor2",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
               "first": "50",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
