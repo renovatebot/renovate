@@ -171,7 +171,7 @@
     "moo": "0.5.1",
     "node-html-parser": "3.3.5",
     "p-all": "3.0.0",
-    "p-map": "4.0.0",
+    "p-map": "5.1.0",
     "p-queue": "6.6.2",
     "parse-diff": "0.8.1",
     "parse-link-header": "1.0.1",
