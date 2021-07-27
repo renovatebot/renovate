@@ -1136,7 +1136,7 @@ export async function ensureIssue({
         body: {
           title,
           body,
-          labels,
+          labels: labels || [],
         },
       }
     );
