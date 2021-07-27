@@ -77,6 +77,7 @@ export type PlatformPrOptions = {
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabAutomerge?: boolean;
+  gitLabIgnoreApprovals?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;

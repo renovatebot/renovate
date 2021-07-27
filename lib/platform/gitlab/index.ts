@@ -440,12 +440,31 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
+async function ignoreApprovals(pr: number): Promise<void> {
+  const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
+  const { body: rules } = await gitlabApi.getJson<{ name: string }[]>(url);
+  const ruleName = 'renovateIgnoreApprovals';
+  const zeroApproversRule = rules.find(({ name }) => name === ruleName);
+  if (!zeroApproversRule) {
+    await gitlabApi.postJson(url, {
+      body: {
+        name: ruleName,
+        approvals_required: 0,
+      },
+    });
+  }
+}
+
 async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
   if (platformOptions?.gitLabAutomerge) {
     try {
+      if (platformOptions?.gitLabIgnoreApprovals) {
+        await ignoreApprovals(pr);
+      }
+
       const desiredStatus = 'can_be_merged';
       const retryTimes = 5;
 
