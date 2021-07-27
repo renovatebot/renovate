@@ -508,7 +508,7 @@ describe(getName(), () => {
 
         ## Awaiting Schedule
 
-        These updates are awaiting their schedule. Click on a checkbox to ignore the schedule.
+        These updates are awaiting their schedule. Click on a checkbox to get an update now.
          - [x] <!-- unschedule-branch=branchName3 -->pr3
 
          - [x] <!-- rebase-all-open-prs -->'
@@ -516,6 +516,21 @@ describe(getName(), () => {
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+    });
+
+    it('forwards configured labels to the ensure issue call', async () => {
+      const branches: BranchConfig[] = [];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardLabels = ['RenovateBot', 'Maintenance'];
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].labels).toStrictEqual([
+        'RenovateBot',
+        'Maintenance',
+      ]);
+
+      // same with dry run
+      await dryRun(branches, platform);
     });
   });
 });

@@ -160,7 +160,7 @@ export async function ensureDependencyDashboard(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to ignore the schedule.\n';
+      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -232,7 +232,7 @@ export async function ensureDependencyDashboard(
   );
   if (prPendingBranchAutomerge.length) {
     issueBody += '## Pending Branch Automerge\n\n';
-    issueBody += `These updates await pending status checks before automerging.\n\n`;
+    issueBody += `These updates await pending status checks before automerging. Click on a checkbox to abort the branch automerge, and create a PR instead.\n\n`;
     for (const branch of prPendingBranchAutomerge) {
       issueBody += getListItem(branch, 'approvePr');
     }
@@ -318,7 +318,7 @@ export async function ensureDependencyDashboard(
   }
 
   if (config.dependencyDashboardIssue) {
-    const updatedIssue = await platform.getIssue(
+    const updatedIssue = await platform?.getIssue(
       config.dependencyDashboardIssue,
       false
     );
@@ -349,6 +349,7 @@ export async function ensureDependencyDashboard(
       title: config.dependencyDashboardTitle,
       reuseTitle,
       body: issueBody,
+      labels: config.dependencyDashboardLabels,
     });
   }
 }

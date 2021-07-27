@@ -1,43 +1,44 @@
 import is from '@sindresorhus/is';
-import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { find } from '../../util/host-rules';
+import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
+import { getHttpUrl } from '../../util/git/url';
+import { parseUrl } from '../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
+  PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
 
-function getPreCommands(): string[] | null {
-  const credentials = find({
-    hostType: PLATFORM_TYPE_GITHUB,
-    url: 'https://api.github.com/',
-  });
-  let preCommands = null;
-  if (credentials?.token) {
-    const token = quote(credentials.token);
-    preCommands = [
-      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
-    ];
+function getGoEnvironmentVariables(registryUrls: string[]): NodeJS.ProcessEnv {
+  let goEnvVariables: NodeJS.ProcessEnv = {};
+
+  for (const registryUrl of registryUrls) {
+    const goPrivateWithProtocol = getHttpUrl(registryUrl);
+    goEnvVariables = getGitAuthenticatedEnvironmentVariables(
+      goPrivateWithProtocol,
+      goEnvVariables
+    );
   }
-  return preCommands;
+
+  return goEnvVariables;
 }
 
 function getUpdateImportPathCmds(
-  updatedDeps: string[],
+  updatedDeps: PackageDependency[],
   { constraints, newMajor }: UpdateArtifactsConfig
 ): string[] {
   const updateImportCommands = updatedDeps
+    .map((dep) => dep.depName)
     .filter((x) => !x.startsWith('gopkg.in'))
-    .map((depName) => `go mod upgrade --mod-name=${depName} -t=${newMajor}`);
+    .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
@@ -112,6 +113,51 @@ export async function updateArtifacts({
       logger.debug('Removed some relative replace statements from go.mod');
     }
     await writeLocalFile(goModFileName, massagedGoMod);
+    // array of GOMODULE registries which should be fetched from
+    // passed to go as GOPRIVATE
+    let registryUrls: string[] = [];
+    let goPrivates: string[] = [];
+
+    // add GOPRIVATE environment variables
+    if (process.env.GOPRIVATE) {
+      goPrivates = process.env.GOPRIVATE.split(',');
+      // GOPRIVATE is without protocol so we add the https protocol before adding it to the registryUrls
+      const goPrivatesWithProtocol = goPrivates.map(
+        (goPrivate) => `https://${goPrivate}`
+      );
+      registryUrls = registryUrls.concat(goPrivatesWithProtocol);
+    }
+
+    // add explicit registryUrls
+    if (config.registryUrls) {
+      for (const registryUrl of config.registryUrls) {
+        // if the registryUrl could not be parsed, retry with a protocol
+        const parsedRegistryUrl =
+          parseUrl(registryUrl) || parseUrl(`https://${registryUrl}`);
+
+        // Only allow http(s)
+        if (parsedRegistryUrl?.protocol?.startsWith('http')) {
+          // Add the full URL to the registryUrls
+          registryUrls.push(parsedRegistryUrl.toString());
+
+          // Add only the domain + path to the goPrivates
+          let goPrivate = parsedRegistryUrl.host;
+          // only add the pathname if it is not just the base path
+          if (parsedRegistryUrl.pathname !== '/') {
+            goPrivate += parsedRegistryUrl.pathname;
+          }
+          goPrivates.push(goPrivate);
+        } else {
+          // ignore if registryUrl could not be parsed
+          logger.warn(
+            `Could not parse registryUrl ${registryUrl} or not using http(s). Ignoring`
+          );
+        }
+      }
+    }
+
+    // create comma-separated GOPRIVATE environment variable if any goPrivates exist
+    const goPrivate = goPrivates.length > 0 ? goPrivates.join(',') : undefined;
 
     const cmd = 'go';
     const execOptions: ExecOptions = {
@@ -119,16 +165,18 @@ export async function updateArtifacts({
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
         GOPROXY: process.env.GOPROXY,
-        GOPRIVATE: process.env.GOPRIVATE,
+        GOPRIVATE: goPrivate,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: getAdminConfig().binarySource === 'docker' ? '0' : null,
+        ...getGoEnvironmentVariables(registryUrls),
       },
       docker: {
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
+        volumes: [goPath],
         preCommands: getPreCommands(),
       },
     };

@@ -163,10 +163,22 @@ export async function downloadMavenXml(
   return { authorization, xml: new XmlDocument(rawContent) };
 }
 
+export function getDependencyParts(lookupName: string): MavenDependency {
+  const [group, name] = lookupName.split(':');
+  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
+  return {
+    display: lookupName,
+    group,
+    name,
+    dependencyUrl,
+  };
+}
+
 export async function getDependencyInfo(
   dependency: MavenDependency,
   repoUrl: string,
-  version: string
+  version: string,
+  recursionLimit = 5
 ): Promise<Partial<ReleaseResult>> {
   const result: Partial<ReleaseResult> = {};
   const path = `${version}/${dependency.name}-${version}.pom`;
@@ -185,19 +197,46 @@ export async function getDependencyInfo(
 
   const sourceUrl = pomContent.valueWithPath('scm.url');
   if (sourceUrl && !containsPlaceholder(sourceUrl)) {
-    result.sourceUrl = sourceUrl.replace(/^scm:/, '');
+    result.sourceUrl = sourceUrl
+      .replace(/^scm:/, '')
+      .replace(/^git:/, '')
+      .replace(/^git@github.com:/, 'https://github.com/')
+      .replace(/^git@github.com\//, 'https://github.com/')
+      .replace(/\.git$/, '');
+
+    if (result.sourceUrl.startsWith('//')) {
+      // most likely the result of us stripping scm:, git: etc
+      // going with prepending https: here which should result in potential information retrival
+      result.sourceUrl = `https:${result.sourceUrl}`;
+    }
+  }
+
+  const parent = pomContent.childNamed('parent');
+  if (recursionLimit > 0 && parent && (!result.sourceUrl || !result.homepage)) {
+    // if we found a parent and are missing some information
+    // trying to get the scm/homepage information from it
+    const [parentGroupId, parentArtifactId, parentVersion] = [
+      'groupId',
+      'artifactId',
+      'version',
+    ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+    if (parentGroupId && parentArtifactId && parentVersion) {
+      const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
+      const parentDependency = getDependencyParts(parentDisplayId);
+      const parentInformation = await getDependencyInfo(
+        parentDependency,
+        repoUrl,
+        parentVersion,
+        recursionLimit - 1
+      );
+      if (!result.sourceUrl && parentInformation.sourceUrl) {
+        result.sourceUrl = parentInformation.sourceUrl;
+      }
+      if (!result.homepage && parentInformation.homepage) {
+        result.homepage = parentInformation.homepage;
+      }
+    }
   }
 
   return result;
-}
-
-export function getDependencyParts(lookupName: string): MavenDependency {
-  const [group, name] = lookupName.split(':');
-  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
-  return {
-    display: lookupName,
-    group,
-    name,
-    dependencyUrl,
-  };
 }

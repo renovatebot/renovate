@@ -119,7 +119,7 @@ export async function updateArtifacts({
     } else {
       for (let i = 0; i < updatedDeps.length; i += 1) {
         const dep = updatedDeps[i];
-        cmd.push(`poetry update --lock --no-interaction ${quote(dep)}`);
+        cmd.push(`poetry update --lock --no-interaction ${quote(dep.depName)}`);
       }
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);

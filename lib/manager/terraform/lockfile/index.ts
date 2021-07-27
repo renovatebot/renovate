@@ -82,7 +82,7 @@ export async function updateArtifacts({
     updates.push(...maintenanceUpdates);
   } else {
     // update only specific locks but with constrain updates
-    const lookupName = updatedDeps[0];
+    const lookupName = updatedDeps[0].lookupName;
     const repository = lookupName.includes('/')
       ? lookupName
       : `hashicorp/${lookupName}`;

@@ -1,4 +1,5 @@
 import { coerce } from 'semver';
+import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -172,20 +173,37 @@ function getNewValue({
       newVersion: padZeroes(normalizeVersion(newVersion)),
     });
   }
-  if (currentValue.includes(' || ')) {
-    const lastValue = currentValue.split('||').pop().trim();
-    const replacementValue = getNewValue({
-      currentValue: lastValue,
-      rangeStrategy,
-      currentVersion,
-      newVersion,
-    });
-    if (rangeStrategy === 'replace') {
-      newValue = replacementValue;
-    } else if (rangeStrategy === 'widen') {
-      newValue = currentValue + ' || ' + replacementValue;
+
+  if (rangeStrategy === 'widen' && matches(newVersion, currentValue)) {
+    newValue = currentValue;
+  } else {
+    const hasOr = currentValue.includes(' || ');
+    if (hasOr || rangeStrategy === 'widen') {
+      const lastValue = hasOr
+        ? currentValue.split('||').pop().trim()
+        : currentValue;
+      const replacementValue = getNewValue({
+        currentValue: lastValue,
+        rangeStrategy: 'replace',
+        currentVersion,
+        newVersion,
+      });
+      if (rangeStrategy === 'replace') {
+        newValue = replacementValue;
+      } else {
+        const parsedRange = parseRange(replacementValue);
+        const element = parsedRange[parsedRange.length - 1];
+        if (element.operator?.startsWith('<')) {
+          const splitCurrent = currentValue.split(element.operator);
+          splitCurrent.pop();
+          newValue = splitCurrent.join(element.operator) + replacementValue;
+        } else {
+          newValue = currentValue + ' || ' + replacementValue;
+        }
+      }
     }
   }
+
   if (!newValue) {
     logger.warn(
       { currentValue, rangeStrategy, currentVersion, newVersion },

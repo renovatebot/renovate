@@ -25,9 +25,9 @@ For example, all the following are valid tags:
 
 ```sh
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:24.53.0
-docker run --rm renovate/renovate:24.53
-docker run --rm renovate/renovate:24
+docker run --rm renovate/renovate:25.58.0
+docker run --rm renovate/renovate:25.58
+docker run --rm renovate/renovate:25
 ```
 
 Do not use the example tags listed above, as they will be out-of-date.
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:24.53.0
+              image: renovate/renovate:25.58.0
               args:
                 - user/repo
               # Environment Variables
@@ -121,7 +121,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:24.53.0
+            - image: renovate/renovate:25.58.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -216,10 +216,54 @@ Regardless of platform, you need to select a user account for `renovate` to assu
 It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
 It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
-### GitHub Enterprise
+### GitHub (Enterprise Server)
 
 First, [create a personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" permissions).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+
+For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
+
+#### Running as a GitHub App
+
+Instead of a bot account and a personal access token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
+
+When creating the GitHub App give it the following permissions:
+
+- Checks: Read & write
+- Contents: Read & write
+- Issues: Read & write
+- Metadata: Read-only
+- Pull requests: Read & write
+- Commit statuses: Read & write
+- Dependabot alerts: Read-only
+- Workflows: Read & write
+
+Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
+
+Inside your `config.js` you need to set the following values, assuming the name of your app is `self-hosted-renovate`:
+
+**`username:"self-hosted-renovate[bot]"`**
+
+The slug name of your app with `[bot]` appended
+
+**`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`**
+
+The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
+It needs to contain the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
+A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
+
+**`token:"x-access-token:${github-app-installation}"`**
+
+The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
+**Note** The installation tokens expire after 1 hour and need to be regenerated regularly.
+Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+
+**`repositories: ["orgname/repo-1","orgname/repo-2"]`**
+
+List of repositories to run on.
+Auto discovery does not work with a GitHub App.
+Alternatively as comma-seperated environment variable `RENOVATE_REPOSITORIES`.
+The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
 ### GitLab CE/EE
 
@@ -419,7 +463,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:24.53.0
+              image: renovate/renovate:25.58.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

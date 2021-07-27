@@ -76,7 +76,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const { allowScripts } = getAdminConfig();
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
@@ -111,14 +110,15 @@ export async function updateArtifacts({
       args = 'install';
     } else {
       args =
-        ('update ' + updatedDeps.map(quote).join(' ')).trim() +
-        ' --with-dependencies';
+        (
+          'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
+        ).trim() + ' --with-dependencies';
     }
     if (config.composerIgnorePlatformReqs) {
       args += ' --ignore-platform-reqs';
     }
     args += ' --no-ansi --no-interaction';
-    if (!allowScripts || config.ignoreScripts) {
+    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');

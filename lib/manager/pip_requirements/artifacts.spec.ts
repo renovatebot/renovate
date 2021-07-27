@@ -36,7 +36,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
-        updatedDeps: ['eventlet'],
+        updatedDeps: [{ depName: 'eventlet' }],
         newPackageFileContent,
         config,
       })
@@ -47,7 +47,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
-        updatedDeps: ['atomicwrites'],
+        updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
       })
@@ -58,7 +58,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
-        updatedDeps: ['atomicwrites'],
+        updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
       })
@@ -69,7 +69,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: null,
-        updatedDeps: ['atomicwrites'],
+        updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
       })

@@ -10,6 +10,11 @@ export const presets: Record<string, Preset> = {
       'angular-sanitize',
     ],
   },
+  react: {
+    description: 'All react packages',
+    matchPackageNames: ['@types/react'],
+    matchPackagePrefixes: ['react'],
+  },
   apollographql: {
     description: 'All packages published by Apollo GraphQL',
     matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
@@ -54,6 +59,17 @@ export const presets: Record<string, Preset> = {
   jsUnitTest: {
     description: 'Unit test packages for javascript',
     matchPackageNames: [
+      '@types/chai',
+      '@types/ember-mocha',
+      '@types/ember-qunit',
+      '@types/enzyme',
+      '@types/istanbul',
+      '@types/jest',
+      '@types/mocha',
+      '@types/mock-fs',
+      '@types/proxyquire',
+      '@types/sinon',
+      '@types/supertest',
       'coveralls',
       'ember-exam',
       'ember-mocha',
@@ -65,6 +81,7 @@ export const presets: Record<string, Preset> = {
       'nyc',
       'proxyquire',
       'supertest',
+      'ts-jest',
     ],
     matchPackagePrefixes: [
       '@testing-library',

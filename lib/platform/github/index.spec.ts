@@ -1067,8 +1067,10 @@ describe(getName(), () => {
   });
   describe('ensureIssue()', () => {
     it('creates issue', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1095,7 +1097,7 @@ describe(getName(), () => {
             },
           },
         })
-        .post('/repos/undefined/issues')
+        .post('/repos/some/repo/issues')
         .reply(200);
       const res = await github.ensureIssue({
         title: 'new-title',
@@ -1105,8 +1107,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('creates issue if not ensuring only once', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1133,7 +1137,7 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/1')
+        .get('/repos/some/repo/issues/1')
         .reply(404);
       const res = await github.ensureIssue({
         title: 'title-1',
@@ -1143,8 +1147,49 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('does not create issue if ensuring only once', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.post('/graphql').reply(200, {
+        data: {
+          repository: {
+            issues: {
+              pageInfo: {
+                startCursor: null,
+                hasNextPage: false,
+                endCursor: null,
+              },
+              nodes: [
+                {
+                  number: 2,
+                  state: 'open',
+                  title: 'title-2',
+                },
+                {
+                  number: 1,
+                  state: 'closed',
+                  title: 'title-1',
+                },
+              ],
+            },
+          },
+        },
+      });
+      const once = true;
+      const res = await github.ensureIssue({
+        title: 'title-1',
+        body: 'new-content',
+        once,
+      });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('creates issue with labels', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1155,34 +1200,27 @@ describe(getName(), () => {
                   hasNextPage: false,
                   endCursor: null,
                 },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'closed',
-                    title: 'title-1',
-                  },
-                ],
+                nodes: [],
               },
             },
           },
-        });
-      const once = true;
+        })
+        .post('/repos/some/repo/issues')
+        .reply(200);
       const res = await github.ensureIssue({
-        title: 'title-1',
+        title: 'new-title',
         body: 'new-content',
-        once,
+        labels: ['Renovate', 'Maintenance'],
       });
-      expect(res).toBeNull();
+      expect(res).toEqual('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('closes others if ensuring only once', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1214,7 +1252,7 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/3')
+        .get('/repos/some/repo/issues/3')
         .reply(404);
       const once = true;
       const res = await github.ensureIssue({
@@ -1226,8 +1264,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('updates issue', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1254,9 +1294,9 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' })
-        .patch('/repos/undefined/issues/2')
+        .patch('/repos/some/repo/issues/2')
         .reply(200);
       const res = await github.ensureIssue({
         title: 'title-3',
@@ -1266,9 +1306,12 @@ describe(getName(), () => {
       expect(res).toEqual('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('skips update if unchanged', async () => {
-      httpMock
-        .scope(githubApiHost)
+
+    it('updates issue with labels', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1295,7 +1338,52 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
+        .reply(200, { body: 'new-content' })
+        .patch('/repos/some/repo/issues/2')
+        .reply(200);
+      const res = await github.ensureIssue({
+        title: 'title-3',
+        reuseTitle: 'title-2',
+        body: 'newer-content',
+        labels: ['Renovate', 'Maintenance'],
+      });
+      expect(res).toEqual('updated');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('skips update if unchanged', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'newer-content' });
       const res = await github.ensureIssue({
         title: 'title-2',
@@ -1305,8 +1393,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('deletes if duplicate', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1333,9 +1423,9 @@ describe(getName(), () => {
             },
           },
         })
-        .patch('/repos/undefined/issues/1')
+        .patch('/repos/some/repo/issues/1')
         .reply(200)
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'newer-content' });
       const res = await github.ensureIssue({
         title: 'title-1',
@@ -1345,8 +1435,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('creates issue if reopen flag false and issue is not open', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1368,9 +1460,9 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' })
-        .post('/repos/undefined/issues')
+        .post('/repos/some/repo/issues')
         .reply(200);
       const res = await github.ensureIssue({
         title: 'title-2',
@@ -1382,8 +1474,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('does not create issue if reopen flag false and issue is already open', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1405,7 +1499,7 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' });
       const res = await github.ensureIssue({
         title: 'title-2',

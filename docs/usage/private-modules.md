@@ -128,8 +128,11 @@ Any `hostRules` with `hostType=packagist` are also included.
 
 ### gomod
 
-If a `github.com` token is found in `hostRules`, then it is written out to local git config prior to running `go` commands.
-The command run is `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`.
+The `GOPRIVATE` environment variable is used to decide if a package should be fetched from the `GOPROXY` or directly from the source.
+Most private modules will need to be fetched from the source directly, Renovate currently supports only Git for this.
+For each comma-separated module path in `GOPRIVATE` or `golang.registryUrls` Renovate will look for credentials in `hostRules`.
+Credentials are passed to Git via `GIT_CONFIG_KEY_x=url."https://${token}@${GOPRIVATE}/".insteadOf` and `GIT_CONFIG_VALUE_x=https://${GOPRIVATE}/` when running `go` commands.
+Glob syntax for `GOPRIVATE` is not supported.
 
 ### npm
 
@@ -198,7 +201,7 @@ The WhiteSource Renovate App does not run using GitHub Actions, but such secrets
 
 ## Admin/Bot config vs User/Repository config for Self-hosted users
 
-"AdminBot config" refers to the config which the Renovate Bot administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
+"Admin/Bot config" refers to the config which the Renovate Bot administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
 User/Repository config refers to the in-repository config file which defaults to `renovate.json` but has a large number of alternative filenames supported.
 
 If there is a need to supply custom rules for certain repository, it can still be done using the `config.js` file and the `repositories` array.
@@ -211,6 +214,8 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Replace the existing public key in the HTML with the public key you generated in the step prior
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
+
+Note: Encrypted values can't be used in the "Admin/Bot config".
 
 ### hostRules configuration using environment variables
 

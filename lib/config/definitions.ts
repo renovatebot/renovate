@@ -267,7 +267,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dockerChildPrefix',
     description:
-      'Change this value in order to add a prefix to the Renovate Docker sidecar image names and labels.',
+      'Change this value in order to add a prefix to the Renovate Docker sidecar container names and labels.',
     type: 'string',
     admin: true,
     default: 'renovate_',
@@ -418,6 +418,14 @@ const options: RenovateOptions[] = [
     description:
       'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
     type: 'string',
+  },
+  {
+    name: 'dependencyDashboardLabels',
+    description:
+      'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
+    type: 'array',
+    subType: 'string',
+    default: null,
   },
   {
     name: 'configWarningReuseIssue',
@@ -1195,6 +1203,17 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  /*
+   * Undocumented experimental feature
+  {
+    name: 'minimumConfidence',
+    description:
+      'Minimum Merge confidence level to filter by. Requires authentication to work.',
+    type: 'string',
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
+    default: 'low',
+  },
+  */
   {
     name: 'internalChecksFilter',
     description: 'When/how to filter based on internal checks.',
