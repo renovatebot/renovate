@@ -17,7 +17,7 @@ export class BitBucketTagsDatasource extends Datasource {
 
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
 
-  static readonly cacheNamespace = 'datasource-bitbucket';
+  static readonly cacheNamespace = `datasource-${BitBucketTagsDatasource.id}`;
 
   constructor() {
     super(BitBucketTagsDatasource.id);
@@ -39,7 +39,6 @@ export class BitBucketTagsDatasource extends Datasource {
     namespace: BitBucketTagsDatasource.cacheNamespace,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
       BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'tags'),
-    ttlMinutes: 10,
   })
   async getReleases({
     registryUrl,
@@ -72,7 +71,6 @@ export class BitBucketTagsDatasource extends Datasource {
     namespace: BitBucketTagsDatasource.cacheNamespace,
     key: (registryUrl, repo, tag: string) =>
       BitBucketTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
-    ttlMinutes: 10,
   })
   async getTagCommit(
     registryUrl: string,
@@ -107,7 +105,6 @@ export class BitBucketTagsDatasource extends Datasource {
     namespace: BitBucketTagsDatasource.cacheNamespace,
     key: ({ registryUrl, lookupName }: DigestConfig) =>
       BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'digest'),
-    ttlMinutes: 10,
   })
   async getDigest(
     { lookupName: repo, registryUrl }: DigestConfig,
