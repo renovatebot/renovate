@@ -192,7 +192,7 @@ describe(getName(), () => {
             displayId: 'master',
           });
         await bitbucket.initRepo({
-          endpoint: 'https://stash.renovatebot.com/vcs/',
+          endpoint: url.toString(),
           repository: 'SOME/repo',
           ...config,
         });
@@ -213,36 +213,75 @@ describe(getName(), () => {
         git.getBranchCommit.mockReturnValue(
           '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
         );
-        const endpoint =
-          scenarioName === 'endpoint with path'
-            ? 'https://stash.renovatebot.com/vcs/'
-            : 'https://stash.renovatebot.com';
         hostRules.find.mockReturnValue({
           username,
           password,
         });
+
+        httpMock
+          .scope(urlHost)
+          .persist()
+          .get(`${urlPath}/rest/api/1.0/repos`)
+          .query({
+            limit: '100',
+            permission: 'REPO_WRITE',
+            state: 'AVAILABLE',
+          })
+          .reply(200, {
+            size: 1,
+            limit: 100,
+            isLastPage: true,
+            values: [repoMock(url, 'SOME', 'repo')],
+            start: 0,
+          });
+
         await bitbucket.initPlatform({
-          endpoint,
+          endpoint: url.toString(),
           username,
           password,
         });
       });
 
       describe('initPlatform()', () => {
-        it('should throw if no endpoint', () => {
+        it('should throw if no endpoint', async () => {
           expect.assertions(1);
-          expect(() => bitbucket.initPlatform({})).toThrow();
+          await expect(bitbucket.initPlatform({})).rejects.toThrow();
         });
-        it('should throw if no username/password', () => {
+        it('should throw if no username/password', async () => {
           expect.assertions(1);
-          expect(() =>
+          await expect(
             bitbucket.initPlatform({ endpoint: 'endpoint' })
-          ).toThrow();
+          ).rejects.toThrow();
+        });
+        it('should throw if no write access', async () => {
+          httpMock
+            .scope('https://test.com')
+            .get('/rest/api/1.0/repos')
+            .query({
+              limit: '100',
+              permission: 'REPO_WRITE',
+              state: 'AVAILABLE',
+            })
+            .reply(200, {
+              size: 0,
+              limit: 100,
+              isLastPage: true,
+              values: [],
+              start: 0,
+            });
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'https://test.com',
+              username: 'abc',
+              password: '123',
+            })
+          ).rejects.toThrow();
         });
         it('should init', async () => {
           expect(
             await bitbucket.initPlatform({
-              endpoint: 'https://stash.renovatebot.com',
+              endpoint: url.toString(),
               username: 'abc',
               password: '123',
             })
@@ -253,18 +292,6 @@ describe(getName(), () => {
       describe('getRepos()', () => {
         it('returns repos', async () => {
           expect.assertions(2);
-          httpMock
-            .scope(urlHost)
-            .get(
-              `${urlPath}/rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE&limit=100`
-            )
-            .reply(200, {
-              size: 1,
-              limit: 100,
-              isLastPage: true,
-              values: [repoMock(url, 'SOME', 'repo')],
-              start: 0,
-            });
           expect(await bitbucket.getRepos()).toEqual(['some/repo']);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -285,7 +312,7 @@ describe(getName(), () => {
             });
           expect(
             await bitbucket.initRepo({
-              endpoint: 'https://stash.renovatebot.com/vcs/',
+              endpoint: url.toString(),
               repository: 'SOME/repo',
             })
           ).toMatchSnapshot();
@@ -308,7 +335,7 @@ describe(getName(), () => {
               displayId: 'master',
             });
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
+            endpoint: url.toString(),
             repository: 'SOME/repo',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
@@ -334,7 +361,7 @@ describe(getName(), () => {
               displayId: 'master',
             });
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
+            endpoint: url.toString(),
             repository: 'SOME/repo',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
@@ -367,7 +394,7 @@ describe(getName(), () => {
             });
           git.getUrl.mockReturnValueOnce(link);
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
+            endpoint: url.toString(),
             repository: 'SOME/repo',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
@@ -391,7 +418,7 @@ describe(getName(), () => {
             .reply(204);
           await expect(
             bitbucket.initRepo({
-              endpoint: 'https://stash.renovatebot.com/vcs/',
+              endpoint: url.toString(),
               repository: 'SOME/repo',
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);

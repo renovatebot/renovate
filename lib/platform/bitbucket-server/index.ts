@@ -77,28 +77,6 @@ function updatePrVersion(pr: number, version: number): number {
   return res;
 }
 
-export function initPlatform({
-  endpoint,
-  username,
-  password,
-}: PlatformParams): Promise<PlatformResult> {
-  if (!endpoint) {
-    throw new Error('Init: You must configure a Bitbucket Server endpoint');
-  }
-  if (!(username && password)) {
-    throw new Error(
-      'Init: You must configure a Bitbucket Server username/password'
-    );
-  }
-  // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
-  defaults.endpoint = ensureTrailingSlash(endpoint);
-  setBaseUrl(defaults.endpoint);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-  };
-  return Promise.resolve(platformConfig);
-}
-
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Server repositories');
@@ -116,6 +94,36 @@ export async function getRepos(): Promise<string[]> {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
   }
+}
+
+export async function initPlatform({
+  endpoint,
+  username,
+  password,
+}: PlatformParams): Promise<PlatformResult> {
+  if (!endpoint) {
+    throw new Error('Init: You must configure a Bitbucket Server endpoint');
+  }
+  if (!(username && password)) {
+    throw new Error(
+      'Init: You must configure a Bitbucket Server username/password'
+    );
+  }
+  // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
+  defaults.endpoint = ensureTrailingSlash(endpoint);
+  setBaseUrl(defaults.endpoint);
+
+  const repos = await getRepos();
+  if (repos.length === 0) {
+    throw new Error(
+      'Init: You must have write access at least to one repository'
+    );
+  }
+
+  const platformConfig: PlatformResult = {
+    endpoint: defaults.endpoint,
+  };
+  return Promise.resolve(platformConfig);
 }
 
 export async function getRawFile(
