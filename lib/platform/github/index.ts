@@ -42,6 +42,13 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import {
+  closedPrsQuery,
+  getIssuesQuery,
+  openPrsQuery,
+  repoInfoQuery,
+  vulnerabilityAlertsQuery,
+} from './graphql';
+import {
   BranchProtection,
   CombinedBranchStatus,
   Comment,
@@ -190,24 +197,12 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
-    repo = await githubApi.queryRepo<GhRepo>(
-      `{
-      repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-        isFork
-        isArchived
-        nameWithOwner
-        mergeCommitAllowed
-        rebaseMergeAllowed
-        squashMergeAllowed
-        defaultBranchRef {
-          name
-          target {
-            oid
-          }
-        }
-      }
-    }`
-    );
+    repo = await githubApi.queryRepo<GhRepo>(repoInfoQuery, {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+      },
+    });
     // istanbul ignore if
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
@@ -481,41 +476,22 @@ export async function getRepoForceRebase(): Promise<boolean> {
 async function getClosedPrs(): Promise<PrList> {
   if (!config.closedPrList) {
     config.closedPrList = {};
-    let query;
     try {
       // prettier-ignore
-      query = `
-      query {
-        repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [CLOSED, MERGED], orderBy: {field: UPDATED_AT, direction: DESC}) {
-            pageInfo {
-              endCursor
-              hasNextPage
-            }
-            nodes {
-              number
-              state
-              headRefName
-              title
-              comments(last: 100) {
-                nodes {
-                  databaseId
-                  body
-                }
-              }
-            }
-          }
-        }
-      }
-      `;
       const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        query,
-        'pullRequests'
+        closedPrsQuery,
+        'pullRequests',
+        {
+          variables: {
+            owner: config.repositoryOwner,
+            name: config.repositoryName,
+          },
+        }
       );
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
-        logger.debug({ query }, 'No graphql data, returning empty list');
+        logger.debug('getClosedPrs(): no graphql data');
         return {};
       }
       for (const pr of nodes) {
@@ -535,7 +511,7 @@ async function getClosedPrs(): Promise<PrList> {
       prNumbers.sort();
       logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
     } catch (err) /* istanbul ignore next */ {
-      logger.warn({ query, err }, 'getClosedPrs error');
+      logger.warn({ err }, 'getClosedPrs(): error');
     }
   }
   return config.closedPrList;
@@ -545,77 +521,23 @@ async function getOpenPrs(): Promise<PrList> {
   // The graphql query is supported in the current oldest GHE version 2.19
   if (!config.openPrList) {
     config.openPrList = {};
-    let query;
     try {
       // prettier-ignore
-      query = `
-      query {
-        repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [OPEN], orderBy: {field: UPDATED_AT, direction: DESC}) {
-            pageInfo {
-              endCursor
-              hasNextPage
-            }
-            nodes {
-              number
-              headRefName
-              baseRefName
-              title
-              mergeable
-              mergeStateStatus
-              labels(last: 100) {
-                nodes {
-                  name
-                }
-              }
-              assignees {
-                totalCount
-              }
-              reviewRequests {
-                totalCount
-              }
-              commits(first: 2) {
-                nodes {
-                  commit {
-                    author {
-                      email
-                    }
-                    committer {
-                      email
-                    }
-                    parents(last: 1) {
-                      edges {
-                        node {
-                          abbreviatedOid
-                          oid
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              body
-              reviews(first: 1, states:[CHANGES_REQUESTED]){
-                nodes{
-                  state
-                }
-              }
-            }
-          }
-        }
-      }
-      `;
       const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        query,
+        openPrsQuery,
         'pullRequests',
         {
+          variables: {
+            owner: config.repositoryOwner,
+            name: config.repositoryName,
+          },
           acceptHeader: 'application/vnd.github.merge-info-preview+json',
         }
       );
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
-        logger.debug({ query }, 'No graphql res.data');
+        logger.debug('getOpenPrs(): no graphql data');
         return {};
       }
       for (const pr of nodes) {
@@ -665,7 +587,7 @@ async function getOpenPrs(): Promise<PrList> {
       prNumbers.sort();
       logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
     } catch (err) /* istanbul ignore next */ {
-      logger.warn({ query, err }, 'getOpenPrs error');
+      logger.warn({ err }, 'getOpenPrs(): error');
     }
   }
   return config.openPrList;
@@ -1068,27 +990,17 @@ export async function setBranchStatus({
 
 /* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  // prettier-ignore
-  const query = `
-    query {
-      repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-        issues(orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "${config.renovateUsername}"}) {
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          nodes {
-            number
-            state
-            title
-            body
-          }
-        }
-      }
+  const result = await githubApi.queryRepoField<Issue>(
+    getIssuesQuery,
+    'issues',
+    {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        user: config.renovateUsername,
+      },
     }
-  `;
-
-  const result = await githubApi.queryRepoField<Issue>(query, 'issues');
+  );
 
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
@@ -1669,40 +1581,12 @@ export function massageMarkdown(input: string): string {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  // prettier-ignore
-  const query = `
-  query {
-    repository(owner:"${config.repositoryOwner}", name:"${config.repositoryName}") {
-      vulnerabilityAlerts(last: 100) {
-        edges {
-          node {
-            dismissReason
-            vulnerableManifestFilename
-            vulnerableManifestPath
-            vulnerableRequirements
-            securityAdvisory {
-              description
-              identifiers { type value }
-              references { url }
-              severity
-            }
-            securityVulnerability {
-              package { name ecosystem }
-              firstPatchedVersion { identifier }
-              vulnerableVersionRange
-            }
-          }
-        }
-      }
-    }
-  }`;
-  let vulnerabilityAlerts: {
-    node: VulnerabilityAlert;
-  }[];
+  let vulnerabilityAlerts: { node: VulnerabilityAlert }[];
   try {
     vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
-    }>(query, 'vulnerabilityAlerts', {
+    }>(vulnerabilityAlertsQuery, 'vulnerabilityAlerts', {
+      variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
     });
