@@ -31,3 +31,7 @@ jobs:
           # Close out issue after 7 stale days.
           days-before-issue-close: 7
           close-issue-message: 'This bug report has been closed as we need a reproduction to work on this. If the original poster or anybody else with the same problem discovers that they can reproduce it, please create a new issue, and reference this issue.'
+
+          # Never label/close any pull requests
+          days-before-pr-close: -1
+          days-before-pr-stale: -1
