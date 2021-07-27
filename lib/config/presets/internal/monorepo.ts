@@ -19,6 +19,7 @@ const repoGroups = {
   'aspnet Extensions': 'https://github.com/aspnet/Extensions',
   'aws-cdk': 'https://github.com/aws/aws-cdk',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
+  'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'azure azure-libraries-for-net':
     'https://github.com/Azure/azure-libraries-for-net',
   'azure azure-sdk-for-net': 'https://github.com/Azure/azure-sdk-for-net',
@@ -65,6 +66,10 @@ const repoGroups = {
   capacitor: 'https://github.com/ionic-team/capacitor',
   chromely: 'https://github.com/chromelyapps/Chromely',
   clarity: 'https://github.com/vmware/clarity',
+  clearscript: [
+    'https://github.com/microsoft/ClearScript',
+    'https://github.com/Microsoft/ClearScript',
+  ],
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   docusaurus: 'https://github.com/facebook/docusaurus',
   dotnet: [
@@ -97,6 +102,8 @@ const repoGroups = {
   infrastructure: 'https://github.com/instructure/instructure-ui',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
+  javascriptengineswitcher:
+    'https://github.com/Taritsyn/JavaScriptEngineSwitcher',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
   junit5: 'https://github.com/junit-team/junit5',
@@ -108,6 +115,7 @@ const repoGroups = {
   MassTransit: 'https://github.com/MassTransit/MassTransit',
   material: 'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
+  mstest: 'https://github.com/microsoft/testfx',
   mui: 'https://github.com/mui-org/material-ui',
   nest: 'https://github.com/nestjs/nest',
   neutrino: [

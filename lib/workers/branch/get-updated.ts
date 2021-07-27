@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import type { ArtifactError } from '../../manager/types';
+import type { ArtifactError, PackageDependency } from '../../manager/types';
 import { File, getFile } from '../../util/git';
 import type { BranchConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
@@ -25,14 +25,14 @@ export async function getUpdatedPackageFiles(
   let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
   const packageFileManagers: Record<string, string> = {};
-  const packageFileUpdatedDeps: Record<string, string[]> = {};
+  const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
     const { manager, packageFile, lockFile, depName } = upgrade;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
-    packageFileUpdatedDeps[packageFile].push(depName);
+    packageFileUpdatedDeps[packageFile].push({ ...upgrade });
     let packageFileContent = updatedFileContents[packageFile];
     if (!packageFileContent) {
       packageFileContent = await getFile(

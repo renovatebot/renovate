@@ -98,7 +98,8 @@ function extractDependency(
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
     if (match) {
-      const { hostname, depName } = match.groups;
+      const hostname = match.groups.hostname;
+      const depName = match.groups.depName.replace(/\.git$/i, '');
       const sourceDef = determineDatasource(repository, hostname);
       return {
         ...sourceDef,

@@ -35,7 +35,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -57,7 +57,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -71,7 +71,7 @@ describe(getName(), () => {
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       })
@@ -83,12 +83,13 @@ describe(getName(), () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -96,15 +97,31 @@ describe(getName(), () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('returns updated mix.lock in subdir', async () => {
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
+    mockExecAll(exec);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'subdir/mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toBeNull();
+    expect(fs.readLocalFile).toHaveBeenCalledWith('subdir/mix.lock', 'utf8');
+  });
+
   it('catches write errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -113,13 +130,14 @@ describe(getName(), () => {
 
   it('catches exec errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: ['plug'],
+        updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       })

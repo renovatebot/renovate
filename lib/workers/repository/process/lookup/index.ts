@@ -216,12 +216,13 @@ export async function lookupUpdates(
       const sortedReleases = releases.sort((r1, r2) =>
         versioning.sortVersions(r1.version, r2.version)
       );
-      const { release, pendingChecks, pendingReleases } = filterInternalChecks(
-        depResultConfig,
-        versioning,
-        bucket,
-        sortedReleases
-      );
+      const { release, pendingChecks, pendingReleases } =
+        await filterInternalChecks(
+          depResultConfig,
+          versioning,
+          bucket,
+          sortedReleases
+        );
       // istanbul ignore next
       if (!release) {
         return res;
