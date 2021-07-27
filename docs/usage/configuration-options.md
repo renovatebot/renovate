@@ -289,7 +289,7 @@ For `sbt` note that Renovate will update the version string only for packages th
 
 Enabling this option will mean that any detected git submodules will be cloned at time of repository clone.
 
-Important: private submodules aren't yet supported by Renovate, unless the underlying `ssh` layer already has the appropriate permissions.
+Important: private submodules aren't supported by Renovate, unless the underlying `ssh` layer already has the appropriate permissions.
 
 ## commitBody
 
