@@ -25,7 +25,7 @@ function parseDepName(depType: string, key: string): string {
     return key;
   }
 
-  const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key);
+  const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key) ?? [];
   return depName;
 }
 

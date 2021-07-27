@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up minimumConfidence settings from updateType 1`] = `
+Object {
+  "pendingChecks": false,
+  "pendingReleases": Array [
+    Object {
+      "releaseTimestamp": "2021-01-03T00:00:00.000Z",
+      "version": "1.0.2",
+    },
+    Object {
+      "releaseTimestamp": "2021-01-05T00:00:00.000Z",
+      "version": "1.0.3",
+    },
+    Object {
+      "releaseTimestamp": "2021-01-07T00:00:00.000Z",
+      "version": "1.0.4",
+    },
+  ],
+  "release": Object {
+    "releaseTimestamp": "2021-01-01T00:00:01.000Z",
+    "version": "1.0.1",
+  },
+}
+`;
+
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up stabilityDays settings from hostRules 1`] = `
 Object {
   "pendingChecks": false,

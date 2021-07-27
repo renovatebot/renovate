@@ -112,7 +112,7 @@ async function getTags(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    if (err.statusCode === 404 && !registryHost.includes('/')) {
+    if (err.statusCode === 404 && !dockerRepository.includes('/')) {
       logger.debug(
         `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`
       );

@@ -17,6 +17,7 @@ import type { WriteExistingFilesResult } from '../../manager/npm/post-update/typ
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
+import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
@@ -44,6 +45,7 @@ jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../pr/automerge');
 jest.mock('../../util/exec');
+jest.mock('../../util/merge-confidence');
 jest.mock('../../util/sanitize');
 jest.mock('../../util/git');
 jest.mock('fs-extra');
@@ -56,6 +58,7 @@ const reuse = mocked(_reuse);
 const npmPostExtract = mocked(_npmPostExtract);
 const automerge = mocked(_automerge);
 const commit = mocked(_commit);
+const mergeConfidence = mocked(_mergeConfidence);
 const prAutomerge = mocked(_prAutomerge);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
@@ -154,6 +157,35 @@ describe(getName(), () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toMatchSnapshot();
     });
+
+    it('skips branch if minimumConfidence not met', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.prCreation = 'not-pending';
+      (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
+        {
+          minimumConfidence: 'high',
+        },
+      ];
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(false);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toMatchSnapshot();
+    });
+
+    it('processes branch if minimumConfidence is met', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.prCreation = 'not-pending';
+      (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
+        {
+          minimumConfidence: 'high',
+        },
+      ];
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(true);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toMatchSnapshot();
+    });
+
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;

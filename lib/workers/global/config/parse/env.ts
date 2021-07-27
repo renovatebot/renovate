@@ -100,7 +100,7 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
       continue; // eslint-disable-line no-continue
     }
     // Double underscore __ is used in place of hyphen -
-    const splitEnv = envName.toLowerCase().replace('__', '-').split('_');
+    const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
     const hostType = splitEnv.shift();
     if (datasources.has(hostType)) {
       const suffix = splitEnv.pop();

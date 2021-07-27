@@ -5,6 +5,13 @@ import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
+const dockerRe = /^\s+uses: docker:\/\/([^"]+)\s*$/;
+const actionRe =
+  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/;
+
+// SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
+const shaRe = /^[a-z0-9]{40}|[a-z0-9]{64}$/;
+
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
@@ -13,7 +20,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue; // eslint-disable-line no-continue
     }
 
-    const dockerMatch = /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
+    const dockerMatch = dockerRe.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
@@ -23,23 +30,32 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue; // eslint-disable-line no-continue
     }
 
-    const tagMatch =
-      /^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
-        line
-      );
+    const tagMatch = actionRe.exec(line);
     if (tagMatch?.groups) {
-      const { depName, currentValue } = tagMatch.groups;
-      const dep: PackageDependency = {
+      const {
         depName,
         currentValue,
+        path = '',
+        tag,
+        replaceString,
+      } = tagMatch.groups;
+      const dep: PackageDependency = {
+        depName,
         commitMessageTopic: '{{{depName}}} action',
         datasource: githubTagsDatasource.id,
         versioning: dockerVersioning.id,
         depType: 'action',
-        pinDigests: false,
+        replaceString,
+        autoReplaceStringTemplate: `{{depName}}${path}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}`,
       };
-      if (!dockerVersioning.api.isValid(currentValue)) {
-        dep.skipReason = SkipReason.InvalidVersion;
+      if (shaRe.test(currentValue)) {
+        dep.currentValue = tag;
+        dep.currentDigest = currentValue;
+      } else {
+        dep.currentValue = currentValue;
+        if (!dockerVersioning.api.isValid(currentValue)) {
+          dep.skipReason = SkipReason.InvalidVersion;
+        }
       }
       deps.push(dep);
     }

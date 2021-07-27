@@ -205,7 +205,7 @@ export interface UpdateArtifactsResult {
 
 export interface UpdateArtifact {
   packageFileName: string;
-  updatedDeps: string[];
+  updatedDeps: PackageDependency[];
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }

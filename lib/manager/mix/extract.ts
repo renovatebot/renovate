@@ -1,4 +1,4 @@
-import * as datasourceHex from '../../datasource/hex';
+import { HexDatasource } from '../../datasource/hex';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
@@ -39,9 +39,9 @@ export async function extractPackageFile(
             managerData: {},
           };
 
-          dep.datasource = datasource || datasourceHex.id;
+          dep.datasource = datasource || HexDatasource.id;
 
-          if (dep.datasource === datasourceHex.id) {
+          if (dep.datasource === HexDatasource.id) {
             dep.currentValue = currentValue;
             dep.lookupName = depName;
           }
@@ -50,7 +50,7 @@ export async function extractPackageFile(
             dep.lookupName += ':' + organization;
           }
 
-          if (dep.datasource !== datasourceHex.id) {
+          if (dep.datasource !== HexDatasource.id) {
             dep.skipReason = SkipReason.NonHexDeptypes;
           }
 

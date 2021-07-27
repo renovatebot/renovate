@@ -11,11 +11,12 @@ jobs:
         # Isn't supported current
         uses: actions/bin/shellcheck@master
         run: ./entrypoint.sh
+      - uses: docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@1.0.0
-#      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145
       - name: Build
         uses: docker/build-push-action@v2
