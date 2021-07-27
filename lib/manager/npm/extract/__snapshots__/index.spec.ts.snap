@@ -1330,6 +1330,5 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": Array [],
-  "yarnrc": undefined,
 }
 `;
