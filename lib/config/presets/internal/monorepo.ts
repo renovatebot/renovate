@@ -66,6 +66,10 @@ const repoGroups = {
   capacitor: 'https://github.com/ionic-team/capacitor',
   chromely: 'https://github.com/chromelyapps/Chromely',
   clarity: 'https://github.com/vmware/clarity',
+  clearscript: [
+    'https://github.com/microsoft/ClearScript',
+    'https://github.com/Microsoft/ClearScript',
+  ],
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   docusaurus: 'https://github.com/facebook/docusaurus',
   dotnet: [
@@ -98,6 +102,8 @@ const repoGroups = {
   infrastructure: 'https://github.com/instructure/instructure-ui',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
+  javascriptengineswitcher:
+    'https://github.com/Taritsyn/JavaScriptEngineSwitcher',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
   junit5: 'https://github.com/junit-team/junit5',
