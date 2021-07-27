@@ -176,8 +176,6 @@ export async function updateArtifacts({
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
-        volumes: [goPath],
-        preCommands: getPreCommands(),
       },
     };
 
