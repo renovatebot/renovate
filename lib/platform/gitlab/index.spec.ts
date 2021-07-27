@@ -1248,6 +1248,7 @@ describe(getName(), () => {
       .scope(gitlabApiHost)
       .get('/api/v4/user')
       .reply(200, {
+        id: 123,
         email: 'a@b.com',
         name: 'Renovate Bot',
       })
@@ -1513,7 +1514,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=123'
         )
         .reply(200, [
           {
@@ -1528,12 +1529,33 @@ describe(getName(), () => {
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('updates the PR with ignorePrAuthor set', async () => {
+      await initPlatform('13.3.6-ee');
+      const scope = await initRepo({
+        repository: 'some/repo',
+        ignorePrAuthor: true,
+      });
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: PrState.Open,
+          },
+        ])
+        .put('/api/v4/projects/some%2Frepo/merge_requests/1')
+        .reply(200);
+      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('retains draft status when draft uses current prefix', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=123'
         )
         .reply(200, [
           {
@@ -1553,7 +1575,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=123'
         )
         .reply(200, [
           {
@@ -1573,7 +1595,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=123'
         )
         .reply(200, [
           {

@@ -397,7 +397,7 @@ async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
   } as any;
-  if (!config.ignorePrAuthor) {
+  if (`${authorId}` && !config.ignorePrAuthor) {
     searchParams.author_id = `${authorId}`;
   }
   const query = getQueryString(searchParams);
