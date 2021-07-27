@@ -126,8 +126,8 @@ export function getPlatformPrOptions(
       config.gitLabAutomerge,
   };
 
-  if (config.gitLabIgnoreApprovals) {
-    result.gitLabIgnoreApprovals = config.gitLabIgnoreApprovals;
+  if (config.gitLabIgnoreApprovals === true) {
+    result.gitLabIgnoreApprovals = true;
   }
 
   return result;
