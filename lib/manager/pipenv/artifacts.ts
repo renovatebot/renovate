@@ -78,7 +78,6 @@ export async function updateArtifacts({
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
   const cacheDir = await ensureCacheDir('./others/pipenv', 'PIPENV_CACHE_DIR');
-  logger.debug('Using pipenv cache ' + cacheDir);
 
   const lockFileName = pipfileName + '.lock';
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');

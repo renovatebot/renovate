@@ -63,7 +63,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['foo', 'bar'],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -78,7 +78,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['foo', 'bar'],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -93,7 +93,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -108,7 +108,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'otherfile.props',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -158,7 +158,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -174,7 +174,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -190,7 +190,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -222,7 +222,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -244,7 +244,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })

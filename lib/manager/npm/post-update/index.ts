@@ -11,7 +11,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
 import {
   deleteLocalFile,
-  ensureDir,
+  ensureCacheDir,
   getSiblingFileName,
   getSubDirectory,
   outputFile,
@@ -434,24 +434,16 @@ export async function getAdditionalFiles(
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
 
-  const env = getChildProcessEnv([
-    'NPM_CONFIG_CACHE',
-    'YARN_CACHE_FOLDER',
-    'npm_config_store',
-  ]);
-  env.NPM_CONFIG_CACHE =
-    env.NPM_CONFIG_CACHE ||
-    upath.join(getAdminConfig().cacheDir, './others/npm');
-  await ensureDir(env.NPM_CONFIG_CACHE);
-  env.YARN_CACHE_FOLDER =
-    env.YARN_CACHE_FOLDER ||
-    upath.join(getAdminConfig().cacheDir, './others/yarn');
-  await ensureDir(env.YARN_CACHE_FOLDER);
-  env.npm_config_store =
-    env.npm_config_store ||
-    upath.join(getAdminConfig().cacheDir, './others/pnpm');
-  await ensureDir(env.npm_config_store);
-  env.NODE_ENV = 'dev';
+  const env = {
+    ...getChildProcessEnv(),
+    NPM_CONFIG_CACHE: await ensureCacheDir('./others/npm', 'NPM_CONFIG_CACHE'),
+    YARN_CACHE_FOLDER: await ensureCacheDir(
+      './others/yarn',
+      'YARN_CACHE_FOLDER'
+    ),
+    npm_config_store: await ensureCacheDir('./others/pnpm', 'npm_config_store'),
+    NODE_ENV: 'dev',
+  };
 
   let token = '';
   try {
