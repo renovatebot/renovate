@@ -1590,12 +1590,12 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"new-title\\",\\"body\\":\\"new-content\\"}",
+    "body": "{\\"title\\":\\"new-title\\",\\"body\\":\\"new-content\\",\\"labels\\":[]}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "42",
+      "content-length": "54",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1840,12 +1840,12 @@ Array [
     "url": "https://api.github.com/repos/some/repo/issues/2",
   },
   Object {
-    "body": "{\\"title\\":\\"title-2\\",\\"body\\":\\"new-content\\"}",
+    "body": "{\\"title\\":\\"title-2\\",\\"body\\":\\"new-content\\",\\"labels\\":[]}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "40",
+      "content-length": "52",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
