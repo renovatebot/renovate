@@ -408,7 +408,59 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) fails silently on approval rules errors 1`] = `
+exports[`platform/gitlab/index createPr(branchName, title, body) returns the PR 1`] = `
+Object {
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "number": 12345,
+  "sourceBranch": "some-branch",
+  "title": "some title",
+}
+`;
+
+exports[`platform/gitlab/index createPr(branchName, title, body) returns the PR 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer some-token",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/user",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer some-token",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/version",
+  },
+  Object {
+    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "content-length": "144",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests",
+  },
+]
+`;
+
+exports[`platform/gitlab/index createPr(branchName, title, body) silently ignores approval rules adding errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -506,58 +558,6 @@ Array [
     },
     "method": "PUT",
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345/merge",
-  },
-]
-`;
-
-exports[`platform/gitlab/index createPr(branchName, title, body) returns the PR 1`] = `
-Object {
-  "displayNumber": "Merge Request #12345",
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`platform/gitlab/index createPr(branchName, title, body) returns the PR 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc123",
-      "content-length": "144",
-      "content-type": "application/json",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "POST",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests",
   },
 ]
 `;

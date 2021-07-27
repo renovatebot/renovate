@@ -455,7 +455,7 @@ async function ignoreApprovals(pr: number): Promise<void> {
       });
     }
   } catch (err) {
-    logger.debug({ err }, 'GitLab: Error adding approval rule');
+    logger.warn({ err }, 'GitLab: Error adding approval rule');
   }
 }
 
