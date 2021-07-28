@@ -88,7 +88,7 @@ const repoGroups = {
   ],
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
-  javahamcrest: 'https://github.com/hamcrest/JavaHamcrest', // use proper name?
+  javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
   hotchocolate: 'https://github.com/ChilliCream/hotchocolate',
