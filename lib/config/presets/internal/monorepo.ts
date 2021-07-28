@@ -107,7 +107,7 @@ const repoGroups = {
   'material-components-web':
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
-  'material-ui': 'https://github.com/mui-org/material-ui', // They use Material-UI as brandname.
+  'material-ui': 'https://github.com/mui-org/material-ui',
   nest: 'https://github.com/nestjs/nest',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
