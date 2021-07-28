@@ -73,7 +73,7 @@ Array [
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction",
+    "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

@@ -64,6 +64,10 @@ const repoGroups = {
   capacitor: 'https://github.com/ionic-team/capacitor',
   chromely: 'https://github.com/chromelyapps/Chromely',
   clarity: 'https://github.com/vmware/clarity',
+  clearscript: [
+    'https://github.com/microsoft/ClearScript',
+    'https://github.com/Microsoft/ClearScript',
+  ],
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   docusaurus: 'https://github.com/facebook/docusaurus',
   dotnet: [
@@ -95,19 +99,25 @@ const repoGroups = {
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
+  javascriptengineswitcher:
+    'https://github.com/Taritsyn/JavaScriptEngineSwitcher',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
   junit5: 'https://github.com/junit-team/junit5',
   lerna: 'https://github.com/lerna/lerna',
   linguijs: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',
-  loopback: 'https://github.com/strongloop/loopback-next', // Seems they use just LoopBack as brandname without the next part
+  loopback: [
+    'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
+    'https://github.com/loopbackio/loopback-next',
+  ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   'material-ui': 'https://github.com/mui-org/material-ui',
+  mstest: 'https://github.com/microsoft/testfx',
   nest: 'https://github.com/nestjs/nest',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',

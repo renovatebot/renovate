@@ -39,7 +39,7 @@ describe('.updateArtifacts()', () => {
     setAdminConfig();
   });
   it('returns null if no Chart.lock found', async () => {
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -63,7 +63,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('Current Chart.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current Chart.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -78,7 +78,7 @@ describe('.updateArtifacts()', () => {
     git.getFile.mockResolvedValueOnce('Old Chart.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Chart.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -110,7 +110,7 @@ describe('.updateArtifacts()', () => {
     git.getFile.mockResolvedValueOnce('Old Chart.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Chart.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -126,7 +126,7 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',

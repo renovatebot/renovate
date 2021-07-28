@@ -681,7 +681,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "www.ruby-lang.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://www.ruby-lang.org/en/downloads/releases/",
@@ -695,7 +695,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "www.ruby-lang.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://www.ruby-lang.org/en/downloads/releases/",
@@ -709,7 +709,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "www.ruby-lang.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://www.ruby-lang.org/en/downloads/releases/",
