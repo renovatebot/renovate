@@ -49,9 +49,7 @@ describe('.updateArtifacts()', () => {
     docker.resetPrefetchedImages();
     hostRules.clear();
     setAdminConfig(adminConfig);
-    fs.ensureCacheDir.mockResolvedValue(
-      join(adminConfig.cacheDir, './others/composer')
-    );
+    fs.ensureCacheDir.mockResolvedValue('/tmp/renovate/cache/others/composer');
   });
 
   afterEach(() => {
