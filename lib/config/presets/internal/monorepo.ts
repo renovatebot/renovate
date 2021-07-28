@@ -144,7 +144,7 @@ const repoGroups = {
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
   strapi: 'https://github.com/strapi/strapi',
-  'stryker-js': 'https://github.com/stryker-mutator/stryker-js', // Old link redirects to stryker-mutator/stryker-js
+  'stryker-js': 'https://github.com/stryker-mutator/stryker-js',
   surveyjs: 'https://github.com/surveyjs/surveyjs',
   'swashbuckle-aspnetcore':
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore', // Might want to specify this is the aspnetcore repo??
