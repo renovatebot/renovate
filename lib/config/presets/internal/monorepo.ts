@@ -37,7 +37,7 @@ const repoGroups = {
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   'reach-ui': 'https://github.com/reach/reach-ui',
-  'react-apollo': 'https://github.com/apollographql/react-apollo', // Deprecated by authors, do we want to keep it?
+  'react-apollo': 'https://github.com/apollographql/react-apollo',
   'react-dnd': 'https://github.com/react-dnd/react-dnd',
   'react-navigation': 'https://github.com/react-navigation/react-navigation',
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
