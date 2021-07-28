@@ -93,8 +93,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
-  const goPath = await ensureCacheDir('./others/go', 'GOPATH');
-
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
@@ -165,7 +163,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
-        GOPATH: goPath,
+        GOPATH: await ensureCacheDir('go'),
         GOPROXY: process.env.GOPROXY,
         GOPRIVATE: goPrivate,
         GONOPROXY: process.env.GONOPROXY,
@@ -178,7 +176,6 @@ export async function updateArtifacts({
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
-        volumes: [goPath],
       },
     };
 
