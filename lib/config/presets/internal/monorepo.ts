@@ -54,7 +54,7 @@ const repoGroups = {
   accounts: 'https://github.com/accounts-js/accounts',
   angularjs: 'https://github.com/angular/angular.js',
   angular: 'https://github.com/angular/angular',
-  'angular-cli': 'https://github.com/angular/angular-cli', // This was missing a hyphen
+  'angular-cli': 'https://github.com/angular/angular-cli',
   angularfire: 'https://github.com/angular/angularfire',
   apolloclient: 'https://github.com/apollographql/apollo-client',
   apollolink: 'https://github.com/apollographql/apollo-link', // Repo archived, read-only now, want to keep/delete?
