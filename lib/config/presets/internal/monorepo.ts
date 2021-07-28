@@ -57,7 +57,6 @@ const repoGroups = {
   'angular-cli': 'https://github.com/angular/angular-cli',
   angularfire: 'https://github.com/angular/angularfire',
   apolloclient: 'https://github.com/apollographql/apollo-client',
-  apollolink: 'https://github.com/apollographql/apollo-link', // Repo archived, read-only now, want to keep/delete?
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
   babel: 'https://github.com/babel/babel',
   baset: 'https://github.com/igmat/baset',
