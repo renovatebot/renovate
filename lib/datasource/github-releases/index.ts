@@ -4,7 +4,7 @@ import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import type { GithubRelease, GithubReleaseAsset } from './types';
+import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
 export const id = 'github-releases';
 export const customRegistrySupport = true;
@@ -77,13 +77,6 @@ export async function getReleases({
   await packageCache.set(cacheNamespace, cacheKey, dependency, cacheMinutes);
   return dependency;
 }
-
-type DigestAsset = {
-  assetName: string;
-  currentVersion: string;
-  currentDigest: string;
-  digestedFileName?: string;
-};
 
 async function findDigestFile(
   release: GithubRelease,
