@@ -52,7 +52,7 @@ const repoGroups = {
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   accounts: 'https://github.com/accounts-js/accounts',
-  angularjs: 'https://github.com/angular/angular.js', // why not use Angular JS as name here?
+  angularjs: 'https://github.com/angular/angular.js',
   angular: 'https://github.com/angular/angular',
   'angular-cli': 'https://github.com/angular/angular-cli', // This was missing a hyphen
   angularfire: 'https://github.com/angular/angularfire',
