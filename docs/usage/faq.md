@@ -45,7 +45,6 @@ If you're self hosting Renovate, use the latest release if possible.
 | --------------------------------------- | ------------------------------------------------- | --------------------- |
 | Dependency Dashboard                    | BitBucket, BitBucket Server, Azure                | #9592                 |
 | Hosted app                              | GitLab, BitBucket, BitBucket Server, Azure, Gitea |                       |
-| Cloning repo over SSH selfhosted        | GitLab                                            | #5406                 |
 | Configurable merge strategy and message | BitBucket, BitBucket Server                       | #7184                 |
 
 ## Major platform features not suported by Renovate
