@@ -250,7 +250,7 @@ export async function getDigest(
     newDigest = await findNewDigest(digestAsset, newRelease);
   }
 
-  const cacheMinutes = 10;
+  const cacheMinutes = 1440;
   await packageCache.set(cacheNamespace, cacheKey, newDigest, cacheMinutes);
   return newDigest;
 }
