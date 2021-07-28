@@ -365,7 +365,7 @@ export function getDigest(
   const datasource = getDatasourceFor(config.datasource);
   const lookupName = config.lookupName || config.depName;
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  const digestConfig = {
+  const digestConfig: DigestConfig = {
     registryUrl: registryUrls[0],
     currentValue: config.currentValue,
     currentDigest: config.currentDigest,

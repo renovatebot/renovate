@@ -5,7 +5,7 @@ export type GithubRelease = {
   assets: GithubReleaseAsset[];
 };
 
-export type GithubReleaseAsset = {
+export interface GithubReleaseAsset {
   name: string;
   browser_download_url: string;
   size: number;
