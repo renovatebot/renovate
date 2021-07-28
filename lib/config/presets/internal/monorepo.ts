@@ -92,7 +92,7 @@ const repoGroups = {
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
   hotchocolate: 'https://github.com/ChilliCream/hotchocolate',
-  'infrastructure-ui': 'https://github.com/instructure/instructure-ui', // use proper name?
+  'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
