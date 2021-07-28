@@ -3,7 +3,7 @@ It's based on Semantic versioning but includes its own concept of ranges.
 
 **Use of dots**
 
-A range can be expressed with dots `1.2..2`, it means `>=1.2.x <2.0.0`.
+A range is expressed with dots `1.2..2` means `>=1.2.x <2.0.0`.
 
 **No exact versions unless using two equals ==**
 
