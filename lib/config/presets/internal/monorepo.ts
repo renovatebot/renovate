@@ -133,23 +133,23 @@ const repoGroups = {
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
   orleans: 'https://github.com/dotnet/orleans',
-  feign: 'https://github.com/OpenFeign/feign', // Project uses Feign as brandname, not openfeign
+  feign: 'https://github.com/OpenFeign/feign',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   'opentelemetry-dotnet':
-    'https://github.com/open-telemetry/opentelemetry-dotnet', // Let's just use the reponame here, brandname is OpenTelemetry .NET
-  picassojs: 'https://github.com/qlik-oss/picasso.js', // Brandname: picasso.js
+    'https://github.com/open-telemetry/opentelemetry-dotnet',
+  picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
   react: 'https://github.com/facebook/react',
-  'react-router': 'https://github.com/ReactTraining/react-router', // Might as well put a hyphen in to clarify
+  'react-router': 'https://github.com/ReactTraining/react-router',
   reakit: 'https://github.com/reakit/reakit',
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
-  'sentry-javascript': 'https://github.com/getsentry/sentry-javascript', // Brandname Sentry, have variants Java/JavaScript/dotnet/unity/etc.
+  'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
@@ -160,7 +160,7 @@ const repoGroups = {
   'swashbuckle-aspnetcore':
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
   treat: 'https://github.com/seek-oss/treat',
-  typefaces: 'https://github.com/KyleAMathews/typefaces', // Project deprecated in README, project recommends fontsource. Do we want to keep this entry?
+  typefaces: 'https://github.com/KyleAMathews/typefaces',
   uppy: 'https://github.com/transloadit/uppy',
   vue: 'https://github.com/vuejs/vue',
   vuepress: 'https://github.com/vuejs/vuepress',
