@@ -90,25 +90,31 @@ describe(getName(), () => {
     it('supports isVersion', () => {
       expect(versioning.isVersion('1.2.3')).toBeTruthy();
     });
+
     it('understands rez version ranges', () => {
       expect(versioning.isValid('1.2.3..1.2.4')).toBeTruthy();
       expect(versioning.isValid('1.2..1.3')).toBeTruthy();
       expect(versioning.isValid('1.2..2')).toBeTruthy();
       expect(versioning.isValid('1..3')).toBeTruthy();
     });
+
     it('should return null for irregular versions', () => {
       expect(versioning.isValid('17.04.0')).toBeFalsy();
     });
+
     it('should support simple semver', () => {
       expect(versioning.isValid('1.2.3')).toBeTruthy();
       expect(versioning.isValid('v1.2.3')).toBeTruthy();
     });
+
     it('should support semver with dash', () => {
       expect(versioning.isValid('1.2.3-foo')).toBeTruthy();
     });
+
     it('should reject semver without dash', () => {
       expect(versioning.isValid('1.2.3foo')).toBeFalsy();
     });
+
     it('should support ranges', () => {
       expect(versioning.isValid('1.2.3+')).toBeTruthy();
       expect(versioning.isValid('1.2.3+<2')).toBeTruthy();
@@ -131,13 +137,16 @@ describe(getName(), () => {
       expect(versioning.isSingleVersion('1.2.3')).toBeTruthy();
       expect(versioning.isSingleVersion('1.2.3-alpha.1')).toBeTruthy();
     });
+
     it('returns true if equals', () => {
       expect(versioning.isSingleVersion('==1.2.3')).toBeTruthy();
     });
+
     it('returns false when not version', () => {
       expect(versioning.isSingleVersion('1.*')).toBeFalsy();
     });
   });
+
   describe('matches()', () => {
     it('handles dots', () => {
       expect(versioning.matches('4.2.0', '4.2.0..5.0.0')).toBe(true);
@@ -149,10 +158,12 @@ describe(getName(), () => {
       expect(versioning.matches('4.2.0', '2.0..3.0')).toBe(false);
       expect(versioning.matches('4.2.2', '4.2.0..4.2.4')).toBe(true);
     });
+
     it('handles short', () => {
       expect(versioning.matches('1.4', '1.4')).toBe(true);
     });
   });
+
   describe('isLessThanRange()', () => {
     it('handles dots', () => {
       expect(versioning.isLessThanRange('0.9.0', '1.0.0..2.0.0')).toBe(
@@ -163,6 +174,7 @@ describe(getName(), () => {
       );
     });
   });
+
   describe('minSatisfyingVersion()', () => {
     it('handles dots', () => {
       expect(
@@ -203,6 +215,7 @@ describe(getName(), () => {
       ).toBe('4.2.0');
     });
   });
+
   describe('getNewValue()', () => {
     it('supports dots range update', () => {
       [
