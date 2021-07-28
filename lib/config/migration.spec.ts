@@ -705,4 +705,27 @@ describe(getName(), () => {
     // FIXME: explicit assert condition
     expect(migratedConfig).toMatchSnapshot();
   });
+  it('it migrates gradle-lite', () => {
+    const config: RenovateConfig = {
+      gradle: {
+        enabled: false,
+      },
+      'gradle-lite': {
+        enabled: true,
+        fileMatch: ['foo'],
+      },
+      packageRules: [
+        {
+          matchManagers: ['gradle-lite'],
+          separateMinorPatch: true,
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
+  });
 });
