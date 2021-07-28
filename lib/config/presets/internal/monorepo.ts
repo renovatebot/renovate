@@ -105,7 +105,7 @@ const repoGroups = {
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
-    'https://github.com/material-components/material-components-web', // Might just as well use the repo name here
+    'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   'material-ui': 'https://github.com/mui-org/material-ui', // They use Material-UI as brandname.
   nest: 'https://github.com/nestjs/nest',
