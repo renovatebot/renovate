@@ -159,7 +159,7 @@ const repoGroups = {
 
 const patternGroups = {
   babel6: '^babel6$',
-  clarity: ['^@cds/', '^@clr/'], // This issue is resolved upstream (vmware/clarity), what to do with this entry now??? https://github.com/vmware/clarity/issues/5235
+  clarity: ['^@cds/', '^@clr/'],
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
