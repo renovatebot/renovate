@@ -1,9 +1,9 @@
 import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import type { ExtractConfig } from '../types';
+import { getName } from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
+import type { RepoAdminConfig } from '../../../config/types';
+import type { ExtractConfig } from '../../types';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import * as manager from '.';
 
