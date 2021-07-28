@@ -6,7 +6,6 @@ export const redactedFields = [
   'githubAppKey',
   'npmToken',
   'npmrc',
-  'yarnrc',
   'privateKey',
   'gitPrivateKey',
   'forkToken',
