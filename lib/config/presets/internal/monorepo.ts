@@ -99,7 +99,7 @@ const repoGroups = {
   jest: 'https://github.com/facebook/jest',
   junit5: 'https://github.com/junit-team/junit5',
   lerna: 'https://github.com/lerna/lerna',
-  linguijs: 'https://github.com/lingui/js-lingui', // Offical name is Linguijs with js in subscript...
+  linguijs: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',
   loopback: 'https://github.com/strongloop/loopback-next', // Seems they use just LoopBack as brandname without the next part
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
