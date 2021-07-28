@@ -13,19 +13,33 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 // - Replace (?P<...>) -> (?<...>)
 // - Replace ?(...) -> \k<...>
 // - Replace single \ -> double \
-const versionGroup = "([0-9a-zA-Z_]+(?:[.-][0-9a-zA-Z_]+)*)";
-const matchVersion = new RegExp(`^(?<version>${versionGroup})$`); /* Match a version number (e.g. 1.0.0) */
-const exactVersion = new RegExp(`^(?<exact_version>==(?<exact_version_group>${versionGroup})?)$`); /* Match an exact version number (e.g. ==1.0.0) */
+const versionGroup = '([0-9a-zA-Z_]+(?:[.-][0-9a-zA-Z_]+)*)';
+const matchVersion = new RegExp(
+  `^(?<version>${versionGroup})$`
+); /* Match a version number (e.g. 1.0.0) */
+const exactVersion = new RegExp(
+  `^(?<exact_version>==(?<exact_version_group>${versionGroup})?)$`
+); /* Match an exact version number (e.g. ==1.0.0) */
 // inclusiveBound is called inclusive but behaviour in rez is this:
 // package-1..3 will match versions 1.2.3, 2.3.4, but not 3.0.0 or above
-const inclusiveBound = new RegExp(`^(?<inclusive_bound>(?<inclusive_lower_version>${versionGroup})?\\.\\.(?<inclusive_upper_version>${versionGroup})?)$`); /* Match an inclusive bound (e.g. 1.0.0..2.0.0) */
+const inclusiveBound = new RegExp(
+  `^(?<inclusive_bound>(?<inclusive_lower_version>${versionGroup})?\\.\\.(?<inclusive_upper_version>${versionGroup})?)$`
+); /* Match an inclusive bound (e.g. 1.0.0..2.0.0) */
 // Add ? after |\\+) in order to match >=1.15
-const lowerBound = new RegExp(`^(?<lower_bound>(?<lower_bound_prefix>>|>=)?(?<lower_version>${versionGroup})?(\\k<lower_bound_prefix>|\\+)?)$`); /* Match a lower bound (e.g. 1.0.0+) */
-const upperBound = new RegExp(`^(?<upper_bound>(?<upper_bound_prefix><(?=${versionGroup})|<=)?(?<upper_version>${versionGroup})?)$`); /* Match an upper bound (e.g. <=1.0.0) */
+const lowerBound = new RegExp(
+  `^(?<lower_bound>(?<lower_bound_prefix>>|>=)?(?<lower_version>${versionGroup})?(\\k<lower_bound_prefix>|\\+)?)$`
+); /* Match a lower bound (e.g. 1.0.0+) */
+const upperBound = new RegExp(
+  `^(?<upper_bound>(?<upper_bound_prefix><(?=${versionGroup})|<=)?(?<upper_version>${versionGroup})?)$`
+); /* Match an upper bound (e.g. <=1.0.0) */
 // Add ,? to match >=7,<9 (otherwise it just matches >=7<9)
-const ascendingRange = new RegExp(`^(?<range_asc>(?<range_lower_asc>(?<range_lower_asc_prefix>>|>=)?(?<range_lower_asc_version>${versionGroup})?(\\k<range_lower_asc_prefix>|\\+)?),?(?<range_upper_asc>(\\k<range_lower_asc_version>,?|)(?<range_upper_asc_prefix><(?=${versionGroup})|<=)(?<range_upper_asc_version>${versionGroup})?))$`); /* Match a range in ascending order (e.g. 1.0.0+<2.0.0) */
+const ascendingRange = new RegExp(
+  `^(?<range_asc>(?<range_lower_asc>(?<range_lower_asc_prefix>>|>=)?(?<range_lower_asc_version>${versionGroup})?(\\k<range_lower_asc_prefix>|\\+)?),?(?<range_upper_asc>(\\k<range_lower_asc_version>,?|)(?<range_upper_asc_prefix><(?=${versionGroup})|<=)(?<range_upper_asc_version>${versionGroup})?))$`
+); /* Match a range in ascending order (e.g. 1.0.0+<2.0.0) */
 // Add , to match <9,>=7 (otherwise it just matches <9>=7)
-const descendingRange = new RegExp(`^(?<range_desc>(?<range_upper_desc>(?<range_upper_desc_prefix><|<=)?(?<range_upper_desc_version>${versionGroup})?(\\k<range_upper_desc_prefix>|\\+)?),(?<range_lower_desc>(\\k<range_upper_desc_version>,|)(?<range_lower_desc_prefix><(?=${versionGroup})|>=?)(?<range_lower_desc_version>${versionGroup})?))$`); /* Match a range in descending order (e.g. <=2.0.0,1.0.0+) */
+const descendingRange = new RegExp(
+  `^(?<range_desc>(?<range_upper_desc>(?<range_upper_desc_prefix><|<=)?(?<range_upper_desc_version>${versionGroup})?(\\k<range_upper_desc_prefix>|\\+)?),(?<range_lower_desc>(\\k<range_upper_desc_version>,|)(?<range_lower_desc_prefix><(?=${versionGroup})|>=?)(?<range_lower_desc_version>${versionGroup})?))$`
+); /* Match a range in descending order (e.g. <=2.0.0,1.0.0+) */
 
 function getVersionParts(input: string): [string, string] {
   const versionParts = input.split('-');
@@ -52,8 +66,8 @@ function padZeroes(input: string): string {
 }
 
 function plus2npm(input: string): string {
-  if (input.includes("+")) {
-    return ">=" + input.replace("+", " ");
+  if (input.includes('+')) {
+    return '>=' + input.replace('+', ' ');
   }
   return input;
 }
@@ -63,10 +77,10 @@ function rez2npm(input: string): string {
     return input;
   }
   if (exactVersion.test(input)) {
-    return input.replace("==", "=");
+    return input.replace('==', '=');
   }
   if (inclusiveBound.test(input)) {
-    return ">=" + input.replace("..", " <");
+    return '>=' + input.replace('..', ' <');
   }
   if (lowerBound.test(input)) {
     return plus2npm(input);
@@ -78,13 +92,13 @@ function rez2npm(input: string): string {
     const match = ascendingRange.exec(input);
     const lowerBoundAsc = match.groups.range_lower_asc;
     const upperBoundAsc = match.groups.range_upper_asc;
-    return plus2npm(lowerBoundAsc) + " " + plus2npm(upperBoundAsc);
+    return plus2npm(lowerBoundAsc) + ' ' + plus2npm(upperBoundAsc);
   }
   if (descendingRange.test(input)) {
     const match = descendingRange.exec(input);
     const upperBoundDesc = match.groups.range_upper_desc;
     const lowerBoundDesc = match.groups.range_lower_desc;
-    return plus2npm(lowerBoundDesc) + " " + plus2npm(upperBoundDesc);
+    return plus2npm(lowerBoundDesc) + ' ' + plus2npm(upperBoundDesc);
   }
   return input;
 }
@@ -97,7 +111,7 @@ function rez2pep440(input: string): string {
     return input;
   }
   if (inclusiveBound.test(input)) {
-    return ">=" + input.replace("..", ", <");
+    return '>=' + input.replace('..', ', <');
   }
   if (lowerBound.test(input)) {
     return plus2npm(input);
@@ -109,31 +123,31 @@ function rez2pep440(input: string): string {
     const match = ascendingRange.exec(input);
     const lowerBoundAsc = match.groups.range_lower_asc;
     const upperBoundAsc = match.groups.range_upper_asc;
-    return plus2npm(lowerBoundAsc) + ", " + plus2npm(upperBoundAsc);
+    return plus2npm(lowerBoundAsc) + ', ' + plus2npm(upperBoundAsc);
   }
   if (descendingRange.test(input)) {
     const match = descendingRange.exec(input);
     const upperBoundDesc = match.groups.range_upper_desc;
     const lowerBoundDesc = match.groups.range_lower_desc;
-    return plus2npm(lowerBoundDesc) + ", " + plus2npm(upperBoundDesc);
+    return plus2npm(lowerBoundDesc) + ', ' + plus2npm(upperBoundDesc);
   }
   return input;
 }
 
 function pep4402rez(input: string): string {
-  return input.replace(", ", "..").replace(/[+<>=~!]/g, '');
+  return input.replace(', ', '..').replace(/[+<>=~!]/g, '');
 }
 
 function pep4402rezInclusiveBound(input: string): string {
   return input
-    .split(",")
-    .map((v) => v.trim().replace(/[<>=]/g, ""))
-    .join("..");
+    .split(',')
+    .map((v) => v.trim().replace(/[<>=]/g, ''))
+    .join('..');
 }
 
 function npm2plus(input: string): string {
-  if (input.startsWith(">=")) {
-    return input.trim().replace(">=", "") + "+";
+  if (input.startsWith('>=')) {
+    return input.trim().replace('>=', '') + '+';
   }
   return input;
 }
@@ -215,7 +229,12 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
-  const pep440Value = pep440.getNewValue({currentValue: rez2pep440(currentValue), rangeStrategy, currentVersion, newVersion});
+  const pep440Value = pep440.getNewValue({
+    currentValue: rez2pep440(currentValue),
+    rangeStrategy,
+    currentVersion,
+    newVersion,
+  });
   if (exactVersion.test(currentValue)) {
     return pep4402rez(pep440Value);
   }
@@ -223,7 +242,7 @@ function getNewValue({
     return pep4402rezInclusiveBound(pep440Value);
   }
   if (lowerBound.test(currentValue)) {
-    if (currentValue.includes("+")) {
+    if (currentValue.includes('+')) {
       return npm2plus(pep440Value);
     }
     return pep440Value;
@@ -239,12 +258,22 @@ function getNewValue({
     const upperBoundAscCurrent = match.groups.range_upper_asc;
     const lowerAscVersionCurrent = match.groups.range_lower_asc_version;
     const upperAscVersionCurrent = match.groups.range_upper_asc_version;
-    const [lowerBoundAscPep440, upperBoundAscPep440] = pep440Value.split(", ");
-    const lowerAscVersionNew = new RegExp(versionGroup).exec(lowerBoundAscPep440)[0];
-    const upperAscVersionNew = new RegExp(versionGroup).exec(upperBoundAscPep440)[0];
-    const lowerBoundAscNew = lowerBoundAscCurrent.replace(lowerAscVersionCurrent, lowerAscVersionNew);
-    const upperBoundAscNew = upperBoundAscCurrent.replace(upperAscVersionCurrent, upperAscVersionNew);
-    const separator = currentValue.includes(",") ? "," : "";
+    const [lowerBoundAscPep440, upperBoundAscPep440] = pep440Value.split(', ');
+    const lowerAscVersionNew = new RegExp(versionGroup).exec(
+      lowerBoundAscPep440
+    )[0];
+    const upperAscVersionNew = new RegExp(versionGroup).exec(
+      upperBoundAscPep440
+    )[0];
+    const lowerBoundAscNew = lowerBoundAscCurrent.replace(
+      lowerAscVersionCurrent,
+      lowerAscVersionNew
+    );
+    const upperBoundAscNew = upperBoundAscCurrent.replace(
+      upperAscVersionCurrent,
+      upperAscVersionNew
+    );
+    const separator = currentValue.includes(',') ? ',' : '';
 
     return lowerBoundAscNew + separator + upperBoundAscNew;
   }
@@ -256,13 +285,24 @@ function getNewValue({
     const lowerBoundDescCurrent = match.groups.range_lower_desc;
     const upperDescVersionCurrent = match.groups.range_upper_desc_version;
     const lowerDescVersionCurrent = match.groups.range_lower_desc_version;
-    const [lowerBoundDescPep440, upperBoundDescPep440] = pep440Value.split(", ");
+    const [lowerBoundDescPep440, upperBoundDescPep440] =
+      pep440Value.split(', ');
 
-    const upperDescVersionNew = new RegExp(versionGroup).exec(upperBoundDescPep440)[0];
-    const lowerDescVersionNew = new RegExp(versionGroup).exec(lowerBoundDescPep440)[0];
-    const upperBoundDescNew = upperBoundDescCurrent.replace(upperDescVersionCurrent, upperDescVersionNew);
-    const lowerBoundDescNew = lowerBoundDescCurrent.replace(lowerDescVersionCurrent, lowerDescVersionNew);
-    const separator = currentValue.includes(",") ? "," : "";
+    const upperDescVersionNew = new RegExp(versionGroup).exec(
+      upperBoundDescPep440
+    )[0];
+    const lowerDescVersionNew = new RegExp(versionGroup).exec(
+      lowerBoundDescPep440
+    )[0];
+    const upperBoundDescNew = upperBoundDescCurrent.replace(
+      upperDescVersionCurrent,
+      upperDescVersionNew
+    );
+    const lowerBoundDescNew = lowerBoundDescCurrent.replace(
+      lowerDescVersionCurrent,
+      lowerDescVersionNew
+    );
+    const separator = currentValue.includes(',') ? ',' : '';
 
     return upperBoundDescNew + separator + lowerBoundDescNew;
   }

@@ -120,10 +120,16 @@ describe(getName(), () => {
       expect(versioning.isValid('1.2.3+<2')).toBeTruthy();
       expect(versioning.isValid('1.2.3..1.2.4')).toBeTruthy();
       expect(
-        versioning.minSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '1.2.3..1.2.4')
+        versioning.minSatisfyingVersion(
+          ['1.2.3', '1.2.4', '1.2.5'],
+          '1.2.3..1.2.4'
+        )
       ).toBe('1.2.3');
       expect(
-        versioning.getSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '1.2.3..1.2.4')
+        versioning.getSatisfyingVersion(
+          ['1.2.3', '1.2.4', '1.2.5'],
+          '1.2.3..1.2.4'
+        )
       ).toBe('1.2.3');
       expect(versioning.isLessThanRange('1.2.3', '1.2.3..1.2.4')).toBe(false);
       expect(versioning.isLessThanRange('1.2.3', '1.2.4..1.2.5')).toBe(true);
@@ -166,12 +172,8 @@ describe(getName(), () => {
 
   describe('isLessThanRange()', () => {
     it('handles dots', () => {
-      expect(versioning.isLessThanRange('0.9.0', '1.0.0..2.0.0')).toBe(
-        true
-      );
-      expect(versioning.isLessThanRange('1.9.0', '1.0.0..2.0.0')).toBe(
-        false
-      );
+      expect(versioning.isLessThanRange('0.9.0', '1.0.0..2.0.0')).toBe(true);
+      expect(versioning.isLessThanRange('1.9.0', '1.0.0..2.0.0')).toBe(false);
     });
   });
 
@@ -246,15 +248,17 @@ describe(getName(), () => {
         ['1.2..2.0', 'widen', '1.2.3', '2.2.5', '1.2..2.3'],
         ['1.2.3..2.0', 'widen', '1.2.3', '2.2.5', '1.2.3..2.3'],
         ['1.2.3..2.0.0', 'widen', '1.2.3', '2.2.5', '1.2.3..2.3.0'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports lower bounds + range update', () => {
@@ -268,15 +272,17 @@ describe(getName(), () => {
         ['1+', 'widen', '1.2.3', '2.2.5', '1+'],
         ['1.2+', 'widen', '1.2.3', '2.2.5', '1.2+'],
         ['1.2.3+', 'widen', '1.2.3', '2.2.5', '1.2.3+'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports lower bounds >=/> range update', () => {
@@ -299,15 +305,17 @@ describe(getName(), () => {
         ['>1', 'widen', '1.2.3', '2.2.5', '>1'],
         ['>1.2', 'widen', '1.2.3', '2.2.5', '>1.2'],
         ['>1.2.3', 'widen', '1.2.3', '2.2.5', '>1.2.3'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports upper bounds <=/< range update', () => {
@@ -330,15 +338,17 @@ describe(getName(), () => {
         ['<2', 'widen', '1.2.3', '2.2.5', '<3'],
         ['<1.3', 'widen', '1.2.3', '2.2.5', '<3.0'],
         ['<1.2.4', 'widen', '1.2.3', '2.2.5', '<3.0.0'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports ascending range +< update', () => {
@@ -366,15 +376,17 @@ describe(getName(), () => {
         ['1.2+<2.0', 'widen', '1.2.3', '2.2.5', '1.2+<2.3'],
         ['1.2.3+<2.0', 'widen', '1.2.3', '2.2.5', '1.2.3+<2.3'],
         ['1.2.3+<2.0.0', 'widen', '1.2.3', '2.2.5', '1.2.3+<2.3.0'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports ascending range >=,< update', () => {
@@ -402,15 +414,17 @@ describe(getName(), () => {
         ['>=1.2,<2.0', 'widen', '1.2.3', '2.2.5', '>=1.2,<2.3'],
         ['>=1.2.3,<2.0', 'widen', '1.2.3', '2.2.5', '>=1.2.3,<2.3'],
         ['>=1.2.3,<2.0.0', 'widen', '1.2.3', '2.2.5', '>=1.2.3,<2.3.0'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports ascending range >= < update', () => {
@@ -438,15 +452,17 @@ describe(getName(), () => {
         ['>=1.2<2.0', 'widen', '1.2.3', '2.2.5', '>=1.2<2.3'],
         ['>=1.2.3<2.0', 'widen', '1.2.3', '2.2.5', '>=1.2.3<2.3'],
         ['>=1.2.3<2.0.0', 'widen', '1.2.3', '2.2.5', '>=1.2.3<2.3.0'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports ascending range >,< update', () => {
@@ -474,15 +490,17 @@ describe(getName(), () => {
         ['>1.1,<2.0', 'widen', '1.2.3', '2.2.5', '>1.1,<2.3'],
         ['>1.2.0,<2.0', 'widen', '1.2.3', '2.2.5', '>1.2.0,<2.3'],
         ['>1.2.0,<2.0.0', 'widen', '1.2.3', '2.2.5', '>1.2.0,<2.3.0'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports ascending range > < update', () => {
@@ -510,15 +528,17 @@ describe(getName(), () => {
         ['>1.1<2.0', 'widen', '1.2.3', '2.2.5', '>1.1<2.3'],
         ['>1.2.0<2.0', 'widen', '1.2.3', '2.2.5', '>1.2.0<2.3'],
         ['>1.2.0<2.0.0', 'widen', '1.2.3', '2.2.5', '>1.2.0<2.3.0'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports descending range <,>= update', () => {
@@ -546,15 +566,17 @@ describe(getName(), () => {
         ['<2.0,>=1.2', 'widen', '1.2.3', '2.2.5', '<2.3,>=1.2'],
         ['<2.0,>=1.2.3', 'widen', '1.2.3', '2.2.5', '<2.3,>=1.2.3'],
         ['<2.0.0,>=1.2.3', 'widen', '1.2.3', '2.2.5', '<2.3.0,>=1.2.3'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
 
     it('supports descending range <,> update', () => {
@@ -582,15 +604,17 @@ describe(getName(), () => {
         ['<2.0,>1.1', 'widen', '1.2.3', '2.2.5', '<2.3,>1.1'],
         ['<2.0,>1.2.0', 'widen', '1.2.3', '2.2.5', '<2.3,>1.2.0'],
         ['<2.0.0,>1.2.0', 'widen', '1.2.3', '2.2.5', '<2.3.0,>1.2.0'],
-      ].forEach(([range, rangeStrategy, currentVersion, newVersion, result]) => {
-        const newValue = versioning.getNewValue({
-          currentValue: range,
-          rangeStrategy: rangeStrategy as RangeStrategy,
-          currentVersion,
-          newVersion,
-        });
-        expect(newValue).toEqual(result);
-      });
+      ].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
     });
   });
 });
