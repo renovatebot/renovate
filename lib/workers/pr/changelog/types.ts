@@ -27,6 +27,7 @@ export interface ChangeLogProject {
   apiBaseUrl?: string;
   baseUrl: string;
   repository: string;
+  sourceDirectory?: string;
 }
 
 export enum ChangeLogError {

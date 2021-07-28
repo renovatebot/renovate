@@ -7,5 +7,5 @@ export { getRangeStrategy } from './range';
 export const language = LANGUAGE_PYTHON;
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)([\\w-]*)requirements.(txt|pip)$'],
+  fileMatch: ['(^|/)([\\w-]*)requirements\\.(txt|pip)$'],
 };

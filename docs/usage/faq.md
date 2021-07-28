@@ -31,7 +31,7 @@ It therefore makes sense for Renovate to replace `master` with `main` where poss
 A branch name has no special meaning within the Git program, it's just a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
-## Which Renovate versions are officialy supported?
+## Which Renovate versions are officially supported?
 
 The Renovate maintainers only support the latest version of Renovate.
 The Renovate team will only create bugfixes for an older version if the hosted app needs to stay on an older major version for a short time or if some critical bug needs to be fixed and the new major is blocked.
@@ -58,6 +58,53 @@ Some major platform features are not supported at all by Renovate.
 | Configurable merge strategy and message | None, BitBucket will get support first | #7184                 |
 
 ## What if I need to .. ?
+
+### Tell Renovate to ask for approval before creating a Pull Request
+
+The default behavior is that Renovate creates a pull request right away whenever there's an update.
+But maybe you want Renovate to ask for your approval _before_ it creates a pull request.
+Use the "Dependency Dashboard approval" workflow to get updates for certain packages - or certain types of updates - only after you give approval via the Dependency Dashboard.
+
+The basic idea is that you create a new `packageRules` entry and describe what kind of package, or type of updates you want to approve beforehand.
+
+Say you want to manually approve all major `npm` package manager updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "matchManagers": ["npm"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
+
+Or say you want to manually approve all major Jest updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^jest"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
+
+You could even configure Renovate bot to ask for approval for _all_ updates.
+The `dependencyDashboardApproval` is not part of a `packageRules` array, and so applies to all updates:
+
+```json
+{
+  "dependencyDashboardApproval": true
+}
+```
+
+Read our documentation on the [dependencyDashboardApproval](https://docs.renovatebot.com/configuration-options/#dependencydashboardapproval) config option.
 
 ### Use an alternative branch as my Pull Request target
 
