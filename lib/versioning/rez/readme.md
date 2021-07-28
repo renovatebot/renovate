@@ -12,4 +12,5 @@ If you want to use an exact version use two equal characters, like this: `==1.2.
 
 **Use of pipes**
 
-This has not been implemented yet. The current iteration of rez versioning does not support pipes yet.
+This has not been implemented yet.
+The current iteration of rez versioning does not support pipes yet.
