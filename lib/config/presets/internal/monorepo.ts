@@ -147,7 +147,7 @@ const repoGroups = {
   'stryker-js': 'https://github.com/stryker-mutator/stryker-js',
   surveyjs: 'https://github.com/surveyjs/surveyjs',
   'swashbuckle-aspnetcore':
-    'https://github.com/domaindrivendev/Swashbuckle.AspNetCore', // Might want to specify this is the aspnetcore repo??
+    'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
   treat: 'https://github.com/seek-oss/treat',
   typefaces: 'https://github.com/KyleAMathews/typefaces', // Project deprecated in README, project recommends fontsource. Do we want to keep this entry?
   uppy: 'https://github.com/transloadit/uppy',
