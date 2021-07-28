@@ -1,6 +1,7 @@
 import { getName } from '../../../test/util';
 import type { RangeStrategy } from '../../types';
 import { api as versioning } from '.';
+import semver from '../semver';
 
 describe(getName(), () => {
   describe('equals', () => {
@@ -119,6 +120,8 @@ describe(getName(), () => {
       expect(versioning.isValid('1.2.3+')).toBeTruthy();
       expect(versioning.isValid('1.2.3+<2')).toBeTruthy();
       expect(versioning.isValid('1.2.3..1.2.4')).toBeTruthy();
+      expect(versioning.isValid('<=1.2.3')).toBeTruthy();
+      expect(versioning.isValid('<=2.0.0,>1.0.0')).toBeTruthy();
       expect(
         versioning.minSatisfyingVersion(
           ['1.2.3', '1.2.4', '1.2.5'],
@@ -138,6 +141,21 @@ describe(getName(), () => {
     });
   });
 
+  describe('sortVersions(v1, v2)', () => {
+    it('behaves like semver.sortVersions', () => {
+      [
+        ['1.1.1', '1.2.3'],
+        ['1.2.3', '1.3.4'],
+        ['2.0.1', '1.2.3'],
+        ['1.2.3', '0.9.5'],
+      ].forEach((pair) => {
+        expect(versioning.sortVersions(pair[0], pair[1])).toBe(
+          semver.sortVersions(pair[0], pair[1])
+        );
+      });
+    });
+  });
+
   describe('isSingleVersion()', () => {
     it('returns true if naked version', () => {
       expect(versioning.isSingleVersion('1.2.3')).toBeTruthy();
@@ -146,6 +164,7 @@ describe(getName(), () => {
 
     it('returns true if equals', () => {
       expect(versioning.isSingleVersion('==1.2.3')).toBeTruthy();
+      expect(versioning.isValid('==1.2.3')).toBeTruthy();
     });
 
     it('returns false when not version', () => {
@@ -219,6 +238,34 @@ describe(getName(), () => {
   });
 
   describe('getNewValue()', () => {
+    it('supports exact version update', () => {
+      [['==1.2.3', 'replace', '1.2.3', '1.2.4', '==1.2.4']].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion, result]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toEqual(result);
+        }
+      );
+    });
+
+    it('should return null because this versioning is not supported', () => {
+      [['<=1.2.5, >1.2.0', 'widen', '1.2.3', '1.2.4']].forEach(
+        ([range, rangeStrategy, currentVersion, newVersion]) => {
+          const newValue = versioning.getNewValue({
+            currentValue: range,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          expect(newValue).toBeFalsy();
+        }
+      );
+    });
+
     it('supports dots range update', () => {
       [
         ['1.2.3', 'auto', '1.2.3', '1.2.4', '1.2.4'],

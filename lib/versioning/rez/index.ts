@@ -134,10 +134,6 @@ function rez2pep440(input: string): string {
   return input;
 }
 
-function pep4402rez(input: string): string {
-  return input.replace(', ', '..').replace(/[+<>=~!]/g, '');
-}
-
 function pep4402rezInclusiveBound(input: string): string {
   return input
     .split(',')
@@ -145,11 +141,8 @@ function pep4402rezInclusiveBound(input: string): string {
     .join('..');
 }
 
-function npm2plus(input: string): string {
-  if (input.startsWith('>=')) {
-    return input.trim().replace('>=', '') + '+';
-  }
-  return input;
+function npm2rezplus(input: string): string {
+  return input.trim().replace('>=', '') + '+';
 }
 
 const equals = (a: string, b: string): boolean => {
@@ -236,14 +229,14 @@ function getNewValue({
     newVersion,
   });
   if (exactVersion.test(currentValue)) {
-    return pep4402rez(pep440Value);
+    return pep440Value;
   }
   if (inclusiveBound.test(currentValue)) {
     return pep4402rezInclusiveBound(pep440Value);
   }
   if (lowerBound.test(currentValue)) {
     if (currentValue.includes('+')) {
-      return npm2plus(pep440Value);
+      return npm2rezplus(pep440Value);
     }
     return pep440Value;
   }
@@ -302,7 +295,8 @@ function getNewValue({
       lowerDescVersionCurrent,
       lowerDescVersionNew
     );
-    const separator = currentValue.includes(',') ? ',' : '';
+    // Descending ranges are only supported with a comma.
+    const separator = ',';
 
     return upperBoundDescNew + separator + lowerBoundDescNew;
   }
