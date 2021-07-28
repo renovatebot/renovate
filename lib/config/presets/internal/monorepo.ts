@@ -87,7 +87,6 @@ const repoGroups = {
     'https://github.com/dotansimha/graphql-codegen',
   ],
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
-  'graphql-toolkit': 'https://github.com/ardatan/graphql-toolkit', // Deprecated, merged into GraphQL Tools.
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest', // use proper name?
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
