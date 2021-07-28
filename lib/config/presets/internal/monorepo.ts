@@ -111,7 +111,7 @@ const repoGroups = {
   nest: 'https://github.com/nestjs/nest',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
-    'https://github.com/mozilla-neutrino/neutrino-dev', // neutrino-dev URL redirects to neutrinojs/neutrino repo, keep/delete?
+    'https://github.com/mozilla-neutrino/neutrino-dev',
   ],
   nextjs: [
     'https://github.com/zeit/next.js', // old repo
