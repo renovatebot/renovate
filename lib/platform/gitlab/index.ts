@@ -70,7 +70,6 @@ const defaults = {
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
-let authorId: number;
 let draftPrefix = DRAFT_PREFIX;
 
 export async function initPlatform({
@@ -96,7 +95,6 @@ export async function initPlatform({
       )
     ).body;
     gitAuthor = `${user.name} <${user.email}>`;
-    authorId = user.id;
     // version is 'x.y.z-edition', so not strictly semver; need to strip edition
     gitlabVersion = (
       await gitlabApi.getJson<{ version: string }>('version', { token })
@@ -397,8 +395,9 @@ async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
   } as any;
-  if (`${authorId}` && !config.ignorePrAuthor) {
-    searchParams.author_id = `${authorId}`;
+  // istanbul ignore if
+  if (!config.ignorePrAuthor) {
+    searchParams.scope = 'created_by_me';
   }
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
@@ -727,7 +726,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
     const query = getQueryString({
       per_page: '100',
-      author_id: `${authorId}`,
+      scope: 'created_by_me',
       state: 'opened',
     });
     const res = await gitlabApi.getJson<
