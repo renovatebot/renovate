@@ -63,6 +63,7 @@ export async function generateLockFile(
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && gte(minYarnVersion, '2.2.0');
+    const isYarnModeAvailable = minYarnVersion && gte(minYarnVersion, '3.0.0');
 
     let installYarn = 'npm i -g yarn';
     if (isYarn1 && minYarnVersion) {
@@ -77,19 +78,25 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    if (isYarn1 && config.skipInstalls !== false) {
-      const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
-      if (!offlineMirror) {
-        logger.debug('Updating yarn.lock only - skipping node_modules');
-        // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-        preCommands.push(getOptimizeCommand());
-        if (yarnPath) {
-          preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
-        }
-      }
-    }
     const commands = [];
     let cmdOptions = '';
+    if (config.skipInstalls !== false) {
+      if (isYarn1) {
+        const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
+        if (!offlineMirror) {
+          logger.debug('Updating yarn.lock only - skipping node_modules');
+          // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+          preCommands.push(getOptimizeCommand());
+          if (yarnPath) {
+            preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
+          }
+        }
+      } else if (isYarnModeAvailable) {
+        // Don't run the link step and only fetch what's necessary to compute an updated lockfile
+        cmdOptions += '--mode=update-lockfile';
+      }
+    }
+
     if (isYarn1) {
       cmdOptions +=
         '--ignore-engines --ignore-platform --network-timeout 100000';
@@ -100,6 +107,11 @@ export async function generateLockFile(
     if (!getAdminConfig().allowScripts || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
+      } else if (isYarnModeAvailable) {
+        if (config.skipInstalls === false) {
+          // Don't run the build scripts
+          cmdOptions += '--mode=skip-build';
+        }
       } else {
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
       }
@@ -141,7 +153,7 @@ export async function generateLockFile(
         commands.push(
           `yarn up ${lockUpdates
             .map((update) => `${update.depName}@${update.newValue}`)
-            .join(' ')}`
+            .join(' ')} ${cmdOptions}`.trim()
         );
       }
     }
@@ -163,7 +175,7 @@ export async function generateLockFile(
         // Run yarn again in case any changes are necessary
         commands.push(`yarn install ${cmdOptions}`.trim());
       } else {
-        commands.push('yarn dedupe --strategy highest');
+        commands.push(`yarn dedupe --strategy highest ${cmdOptions}`.trim());
       }
     }
 
