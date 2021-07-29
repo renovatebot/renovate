@@ -1,7 +1,11 @@
+import fs from 'fs-extra';
 import hasha from 'hasha';
+import { DirectoryResult, dir } from 'tmp-promise';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
+import * as memCache from '../../util/cache/memory';
+import * as packageCache from '../../util/cache/package';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 import * as github from '.';
@@ -91,7 +95,11 @@ describe(getName(), () => {
           size: assetData.length,
           browser_download_url: `${githubApiHost}${assetPath}`,
         });
-        httpMock.scope(githubApiHost).get(assetPath).reply(200, assetData);
+        httpMock
+          .scope(githubApiHost)
+          .get(assetPath)
+          .once()
+          .reply(200, assetData);
       }
       httpMock
         .scope(githubApiHost)
@@ -292,6 +300,50 @@ describe(getName(), () => {
         algorithm: 'sha256',
       });
       expect(digest).toEqual(nextBarDigest);
+    });
+
+    describe('with cache', () => {
+      let tmpDir: DirectoryResult;
+      beforeEach(async () => {
+        tmpDir = await dir();
+        packageCache.init({ cacheDir: tmpDir.path });
+        memCache.init();
+      });
+
+      afterEach(() => {
+        fs.rmdirSync(tmpDir.path, { recursive: true });
+      });
+
+      it('caches digested assets', async () => {
+        const barContent = '1'.repeat(10 * 1024);
+        mockReleaseWithAssets(currentValue, {
+          'bar.txt': barContent,
+        });
+        const algorithm = 'sha256';
+        const barDigest = await hasha.async(barContent, { algorithm });
+
+        for (const nextValue of ['v1.0.1', 'v1.0.2']) {
+          const nextBarContent = '3'.repeat(10 * 1024);
+          mockReleaseWithAssets(nextValue, {
+            'bar.txt': nextBarContent,
+          });
+
+          const digest = await getDigest(
+            {
+              datasource,
+              lookupName,
+              currentValue,
+              currentDigest: barDigest,
+            },
+            nextValue
+          );
+          const nextBarDigest = await hasha.async(nextBarContent, {
+            algorithm,
+          });
+          expect(digest).toEqual(nextBarDigest);
+        }
+        // `currentValue` assets were only mocked once, therefore asset digests were cached
+      });
     });
   });
 });

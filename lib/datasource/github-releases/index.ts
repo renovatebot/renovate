@@ -112,6 +112,33 @@ function inferHashAlg(digest: string): string {
   }
 }
 
+function getAssetDigestCacheKey(
+  downloadUrl: string,
+  algorithm: string
+): string {
+  const type = 'assetDigest';
+  return `${downloadUrl}:${algorithm}:${type}`;
+}
+
+async function getAssetDigest(
+  asset: GithubReleaseAsset,
+  algorithm: string
+): Promise<string> {
+  const downloadUrl = asset.browser_download_url;
+  const cacheKey = getAssetDigestCacheKey(downloadUrl, algorithm);
+  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
+  if (cachedResult) {
+    return cachedResult;
+  }
+
+  const res = http.stream(downloadUrl);
+  const digest = await hasha.fromStream(res, { algorithm });
+
+  const cacheMinutes = 1440;
+  await packageCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
+  return digest;
+}
+
 async function findAssetWithDigest(
   release: GithubRelease,
   digest: string
@@ -130,8 +157,7 @@ async function findAssetWithDigest(
   );
 
   for (const asset of assetsBySize) {
-    const res = http.stream(asset.browser_download_url);
-    const assetDigest = await hasha.fromStream(res, { algorithm });
+    const assetDigest = await getAssetDigest(asset, algorithm);
     if (assetDigest === digest) {
       return {
         assetName: asset.name,
@@ -166,9 +192,8 @@ async function findNewDigest(
       }
     }
   } else {
-    const res = http.stream(releaseAsset.browser_download_url);
     const algorithm = inferHashAlg(digestAsset.currentDigest);
-    const newDigest = await hasha.fromStream(res, { algorithm });
+    const newDigest = await getAssetDigest(releaseAsset, algorithm);
     return newDigest;
   }
   logger.debug({ releaseAsset }, 'fetch');
