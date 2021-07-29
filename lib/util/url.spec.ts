@@ -1,5 +1,6 @@
 import { getName } from '../../test/util';
 import {
+  ensurePathPrefix,
   parseUrl,
   resolveBaseUrl,
   trimTrailingSlash,
@@ -76,5 +77,17 @@ describe(getName(), () => {
     expect(trimTrailingSlash('/foo/bar')).toBe('/foo/bar');
     expect(trimTrailingSlash('foo/')).toBe('foo');
     expect(trimTrailingSlash('foo//////')).toBe('foo');
+  });
+
+  it('ensures path prefix', () => {
+    expect(ensurePathPrefix('https://index.docker.io', '/v2')).toBe(
+      'https://index.docker.io/v2'
+    );
+    expect(ensurePathPrefix('https://index.docker.io/v2', '/v2')).toBe(
+      'https://index.docker.io/v2'
+    );
+    expect(
+      ensurePathPrefix('https://index.docker.io/v2/something', '/v2')
+    ).toBe('https://index.docker.io/v2/something');
   });
 });
