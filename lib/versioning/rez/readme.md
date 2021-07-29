@@ -1,5 +1,5 @@
 rez versioning was developed to support the [rez Package Manager](https://github.com/nerdvegas/rez).
-It's based on Semantic versioning but includes its own concept of ranges.
+It's based on Semantic Versioning but includes its own concept of ranges.
 
 **Use of dots**
 
