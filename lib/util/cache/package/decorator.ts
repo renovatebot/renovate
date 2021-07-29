@@ -114,10 +114,7 @@ export function cache<T>({
 
     const result = await callback();
 
-    // only cache if we got a valid result
-    if (result !== undefined) {
-      await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
-    }
+    await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
     return result;
   });
 }
