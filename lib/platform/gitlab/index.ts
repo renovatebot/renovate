@@ -847,7 +847,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels,
+          labels: labels || [],
         },
       });
       logger.info('Issue created');
