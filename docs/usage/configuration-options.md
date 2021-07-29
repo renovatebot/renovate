@@ -687,7 +687,8 @@ This is caused by a race condition in GitLab's Merge Request API - [read the cor
 
 ## gitLabIgnoreApprovals
 
-Ignore default project level approvals, so that an automerge can be completed without those approvals. Under the hood, it creates MR-level approval rule with `approvals_required=0` parameter.
+Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 
 ## golang
 
