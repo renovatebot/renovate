@@ -124,7 +124,7 @@ export async function updateArtifacts({
     }
     args += ' --no-ansi --no-interaction';
     if (!getAdminConfig().allowScripts || config.ignoreScripts) {
-      args += ' --no-scripts --no-autoloader';
+      args += ' --no-scripts --no-autoloader --no-plugins';
     }
     logger.debug({ cmd, args }, 'composer command');
     await exec(`${cmd} ${args}`, execOptions);
