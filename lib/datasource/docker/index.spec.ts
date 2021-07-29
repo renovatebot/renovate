@@ -391,6 +391,7 @@ describe(getName(), () => {
       const res = await getPkgReleases({
         datasource: id,
         depName: 'node',
+        registryUrls: ['https://docker.io'],
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
