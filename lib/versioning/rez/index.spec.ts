@@ -1,7 +1,7 @@
 import { getName } from '../../../test/util';
 import type { RangeStrategy } from '../../types';
-import { api as versioning } from '.';
 import semver from '../semver';
+import { api as versioning } from '.';
 
 describe(getName(), () => {
   describe('equals', () => {
