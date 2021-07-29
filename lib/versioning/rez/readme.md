@@ -12,5 +12,7 @@ If you want to use an exact version use two equal characters, like this: `==1.2.
 
 **Use of pipes**
 
+rez uses pipes as an OR operator, "2.7..3|4" means ">=2.7 <3 OR 4.x.x".
+
 This has not been implemented yet.
 The current iteration of rez versioning does not support pipes yet.
