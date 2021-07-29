@@ -15,7 +15,7 @@ export function get<T = any>(namespace: string, key: string): Promise<T> {
     return undefined;
   }
   const globalKey = getGlobalKey(namespace, key);
-  if (!memCache.get(globalKey)) {
+  if (memCache.get(globalKey) === undefined) {
     memCache.set(globalKey, cacheProxy.get(namespace, key));
   }
   return memCache.get(globalKey);
