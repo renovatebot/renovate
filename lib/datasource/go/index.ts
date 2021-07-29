@@ -5,7 +5,7 @@ import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
-import * as bitbucket from '../bitbucket-tags';
+import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -16,6 +16,7 @@ export const customRegistrySupport = false;
 
 const http = new Http(id);
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
+const bitbucket = new BitBucketTagsDatasource();
 
 async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (goModule.startsWith('gopkg.in/')) {
