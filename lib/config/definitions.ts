@@ -420,6 +420,14 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
+    name: 'dependencyDashboardLabels',
+    description:
+      'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+  },
+  {
     name: 'configWarningReuseIssue',
     description:
       'Set this to false and Renovate will open each config warning in a new issue instead of reopening/reusing an existing issue.',
@@ -1276,6 +1284,14 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['branch', 'pr', 'pr-comment'],
     default: 'pr',
+  },
+  {
+    name: 'automergeStrategy',
+    description:
+      'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
+    type: 'string',
+    allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
+    default: 'auto',
   },
   {
     name: 'automergeComment',

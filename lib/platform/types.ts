@@ -1,3 +1,4 @@
+import type { MergeStrategy } from '../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../types';
 
 type VulnerabilityKey = string;
@@ -98,6 +99,7 @@ export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
   body: string;
+  labels?: string[];
   once?: boolean;
   shouldReOpen?: boolean;
 }
@@ -151,7 +153,11 @@ export interface Platform {
   ): Promise<EnsureIssueResult | null>;
   massageMarkdown(prBody: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
-  mergePr(number: number, branchName: string): Promise<boolean>;
+  mergePr(
+    number: number,
+    branchName: string,
+    mergeStrategy?: MergeStrategy
+  ): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr>;

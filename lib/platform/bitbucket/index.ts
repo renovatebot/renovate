@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
+import type { MergeStrategy } from '../../config/types';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -29,7 +30,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody } from './utils';
+import { PrResponse, RepoInfoBody, mergeBodyTransformer } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -212,15 +213,11 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug('Retrieving PR list');
     let url = `/2.0/repositories/${config.repository}/pullrequests?`;
     url += utils.prStates.all.map((state) => 'state=' + state).join('&');
+    if (renovateUserUuid && !config.ignorePrAuthor) {
+      url += `&q=author.uuid="${renovateUserUuid}"`;
+    }
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
-    config.prList = prs
-      .filter((pr) => {
-        const prAuthorId = pr?.author?.uuid;
-        return renovateUserUuid && prAuthorId && !config.ignorePrAuthor
-          ? renovateUserUuid === prAuthorId
-          : true;
-      })
-      .map(utils.prInfo);
+    config.prList = prs.map(utils.prInfo);
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
@@ -395,7 +392,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || /* istanbul ignore next */ 'http://bitbucket.org';
+  const url = targetUrl || /* istanbul ignore next */ 'https://bitbucket.org';
 
   const body = {
     name: context,
@@ -752,19 +749,22 @@ export async function updatePr({
 
 export async function mergePr(
   prNo: number,
-  branchName: string
+  branchName: string,
+  mergeStrategy: MergeStrategy
 ): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName})`);
+  logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
+
+  // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610
+  if (mergeStrategy === 'rebase') {
+    logger.warn('Bitbucket Cloud does not support a "rebase" strategy.');
+    return false;
+  }
 
   try {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/merge`,
       {
-        body: {
-          close_source_branch: true,
-          merge_strategy: 'merge_commit',
-          message: 'auto merged',
-        },
+        body: mergeBodyTransformer(mergeStrategy),
       }
     );
     logger.debug('Automerging succeeded');

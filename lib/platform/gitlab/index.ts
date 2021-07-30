@@ -70,7 +70,6 @@ const defaults = {
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
-let authorId: number;
 let draftPrefix = DRAFT_PREFIX;
 
 export async function initPlatform({
@@ -96,7 +95,6 @@ export async function initPlatform({
       )
     ).body;
     gitAuthor = `${user.name} <${user.email}>`;
-    authorId = user.id;
     // version is 'x.y.z-edition', so not strictly semver; need to strip edition
     gitlabVersion = (
       await gitlabApi.getJson<{ version: string }>('version', { token })
@@ -398,10 +396,8 @@ async function fetchPrList(): Promise<Pr[]> {
     per_page: '100',
   } as any;
   // istanbul ignore if
-  if (config.ignorePrAuthor) {
-    // https://docs.gitlab.com/ee/api/merge_requests.html#list-merge-requests
-    // default: `scope=created_by_me`
-    searchParams.scope = 'all';
+  if (!config.ignorePrAuthor) {
+    searchParams.scope = 'created_by_me';
   }
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
@@ -730,16 +726,15 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
     const query = getQueryString({
       per_page: '100',
-      author_id: `${authorId}`,
+      scope: 'created_by_me',
       state: 'opened',
     });
-    const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
-      `projects/${config.repository}/issues?${query}`,
-      {
-        useCache: false,
-        paginate: true,
-      }
-    );
+    const res = await gitlabApi.getJson<
+      { iid: number; title: string; labels: string[] }[]
+    >(`projects/${config.repository}/issues?${query}`, {
+      useCache: false,
+      paginate: true,
+    });
     // istanbul ignore if
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
@@ -748,6 +743,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     config.issueList = res.body.map((i) => ({
       iid: i.iid,
       title: i.title,
+      labels: i.labels,
     }));
   }
   return config.issueList;
@@ -793,6 +789,7 @@ export async function ensureIssue({
   title,
   reuseTitle,
   body,
+  labels,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
@@ -813,7 +810,7 @@ export async function ensureIssue({
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { title, description },
+            body: { title, description, labels: labels ?? issue.labels },
           }
         );
         return 'updated';
@@ -823,6 +820,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
+          labels: labels || [],
         },
       });
       logger.info('Issue created');

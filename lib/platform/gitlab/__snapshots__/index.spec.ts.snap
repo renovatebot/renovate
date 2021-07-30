@@ -681,15 +681,45 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
   Object {
-    "body": "{\\"title\\":\\"new-title\\",\\"description\\":\\"new-content\\"}",
+    "body": "{\\"title\\":\\"new-title\\",\\"description\\":\\"new-content\\",\\"labels\\":[]}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer abc123",
-      "content-length": "49",
+      "content-length": "61",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues",
+  },
+]
+`;
+
+exports[`platform/gitlab/index ensureIssue() sets issue labels 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
+  },
+  Object {
+    "body": "{\\"title\\":\\"new-title\\",\\"description\\":\\"new-content\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "content-length": "85",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -711,7 +741,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
   Object {
     "headers": Object {
@@ -738,7 +768,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
   Object {
     "headers": Object {
@@ -768,6 +798,47 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab/index ensureIssue() updates issue with labels 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
+  },
+  Object {
+    "body": "{\\"title\\":\\"title-2\\",\\"description\\":\\"newer-content\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "content-length": "85",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
+  },
+]
+`;
+
 exports[`platform/gitlab/index ensureIssueClosing() closes issue 1`] = `
 Array [
   Object {
@@ -779,7 +850,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
   Object {
     "body": "{\\"state_event\\":\\"close\\"}",
@@ -886,7 +957,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
   Object {
     "headers": Object {
@@ -913,7 +984,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
 ]
 `;
@@ -929,7 +1000,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
 ]
 `;
@@ -945,7 +1016,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
 ]
 `;
@@ -961,7 +1032,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
 ]
 `;
@@ -977,7 +1048,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
 ]
 `;
@@ -993,7 +1064,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
 ]
 `;
@@ -1009,7 +1080,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
 ]
 `;
@@ -1036,7 +1107,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me",
   },
 ]
 `;
@@ -1079,7 +1150,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
     "headers": Object {
@@ -1145,7 +1216,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
     "headers": Object {
@@ -1211,7 +1282,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
     "headers": Object {
@@ -2394,7 +2465,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"state_event\\":\\"close\\"}",
@@ -2446,7 +2517,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
     "body": "{\\"title\\":\\"Draft: title\\",\\"description\\":\\"body\\"}",
@@ -2498,7 +2569,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
     "body": "{\\"title\\":\\"Draft: title\\",\\"description\\":\\"body\\"}",
@@ -2550,7 +2621,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\"}",

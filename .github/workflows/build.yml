@@ -11,13 +11,11 @@ on:
       dryRun:
         description: 'Dry-Run'
         default: 'true'
+        required: false
 
 env:
   # Currently no way to detect automatically (#8153)
   DEFAULT_BRANCH: main
-  YARN_MODULES_CACHE_KEY: v1
-  YARN_PACKAGE_CACHE_KEY: v1
-  YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   DRY_RUN: true
 
@@ -42,19 +40,24 @@ jobs:
       JAVA_VERSION: ${{ matrix.java-version }}
 
     steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+        with:
+          fetch-depth: 2
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7 # renovate: tag=v2.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2.2.2
+        uses: actions/setup-python@dc73133d4da04e56a135ae2246682783cc7c7cb6 # renovate: tag=v2.2.2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
         if: env.NODE_VERSION == '14'
-        uses: actions/setup-java@v2.1.0
+        uses: actions/setup-java@d9126d7df2f1b080b603441eaf5810ced3614e78 # renovate: tag=v2.1.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
@@ -77,24 +80,6 @@ jobs:
           python --version
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2.3.4
-        with:
-          fetch-depth: 2
-
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
-
-      # Clear caches on cache miss, otherwise they will grow indefinitely
-      - name: Clear yarn cache
-        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
-        run: yarn cache clean
-
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
@@ -102,7 +87,7 @@ jobs:
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@v1.5.2
+        uses: codecov/codecov-action@51d810878be5422784e86451c0e7c14e5860ec47 # renovate: tag=v2.0.2
         if: always() && env.coverage == 'true'
 
       # build after tests to exclude build files from tests
@@ -120,10 +105,15 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+        with:
+          fetch-depth: 2
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7 # renovate: tag=v2.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Init platform
         run: |
@@ -134,22 +124,6 @@ jobs:
           npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
-
-      - uses: actions/checkout@v2.3.4
-
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
-
-      # Clear caches on cache miss, otherwise they will grow indefinitely
-      - name: Clear yarn cache
-        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
-        run: yarn cache clean
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
@@ -174,10 +148,16 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      # full checkout for semantic-release
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+        with:
+          fetch-depth: 0
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7 # renovate: tag=v2.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Init platform
         run: |
@@ -198,24 +178,14 @@ jobs:
             echo "DRY_RUN=false" >> $GITHUB_ENV
           fi
 
-      # full checkout for semantic-release
-      - uses: actions/checkout@v2.3.4
-        with:
-          fetch-depth: 0
-
-      - name: Cache Yarn packages
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
       - name: semantic-release
         run: |
-          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
           npx semantic-release --dry-run ${{env.DRY_RUN}}
+          git checkout -- .npmrc
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

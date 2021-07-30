@@ -14,8 +14,8 @@ If you change the `branchPrefix` while you have ignored some upgrades (closed PR
 
 `branchName` default value is `{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}`.
 
-The most common branch name you will see looks like this: `renovate/react-16.x`.
-In this example, the `branchPrefix` is the default `renovate/`, `additionalBranchPrefix` is empty, and `branchTopic` is `react-16.x`.
+The most common branch name you will see looks like this: `renovate/react-17.x`.
+In this example, the `branchPrefix` is the default `renovate/`, `additionalBranchPrefix` is empty, and `branchTopic` is `react-17.x`.
 
 Most users will be happy with the default `branchPrefix` of `renovate/`, but you can change this if you don't like the default.
 Say you don't want the forward slashes, in that case you would use `renovate-` as your `branchPrefix`.
@@ -47,7 +47,7 @@ You may want to edit this.
 If you think your new `commitMessageTopic` is helpful for others, please [open a PR](https://github.com/renovatebot/renovate/pulls).
 
 `commitMessageExtra` refers to the version being updated to.
-e.g. `to v16` for a major upgrade, or `to v16.0.3` for a patch update.
+e.g. `to v17` for a major upgrade, or `to v17.0.2` for a patch update.
 It can be empty in some cases, like if the action/topic doesn't change a package version, e.g. `Pin Docker digests`.
 
 `commitMessageSuffix` defaults to empty but is currently used in two cases:

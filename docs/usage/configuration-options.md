@@ -173,6 +173,25 @@ Example use:
 }
 ```
 
+## automergeStrategy
+
+This setting is only applicable if you opt-in by configuring `automerge` to `true` and `automergeType` to `pr` for any of your dependencies.
+
+The automerge strategy defaults to `auto`, in which Renovate will make its best guess as to how to merge pull requests.
+This generally results in Renovate respecting the strategy configured in the platform itself for the repository if possible.
+Acceptable values are:
+
+- `auto`, in which the choice is left to Renovate
+- `fast-forward`, which generally involves no new commits in the resultant tree, but "fast-forwarding" the main branch reference
+- `merge-commit`, which generally involves synthesizing a new merge commit
+- `rebase`, which generally involves rewriting history as part of the merge — but usually retaining the individual commits
+- `squash`, which generally involves flattening the commits that are being merged into a single new commit
+
+Not all platforms support all pull request merge strategies.
+In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
+
+The only platform that supports `automergeStrategy` is Bitbucket Cloud.
+
 ## automergeType
 
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
@@ -344,9 +363,10 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 Constraints are used in package managers which use third party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
+Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
 
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
-For now this only supports `python`, other compatibility restrictions will be added in the future.
+For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
 {
@@ -440,6 +460,11 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 ## dependencyDashboardFooter
 
 ## dependencyDashboardHeader
+
+## dependencyDashboardLabels
+
+The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
+It is pointless to edit the labels, as Renovate bot restores the labels on each run.
 
 ## dependencyDashboardTitle
 
@@ -676,6 +701,7 @@ Example:
 
 ## gitLabAutomerge
 
+If you enabled `automerge` in the Renovate config, you can speed up the automerge process by using GitLab's own automerge function.
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
@@ -1216,7 +1242,7 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
 
 This field also supports Regular Expressions if they begin and end with `/`.
-For example, the following will enforce that only 3 or 4-section versions are supported, without any prefixes:
+For example, the following will enforce that only 3 or 4-part versions are supported, without any prefixes:
 
 ```json
 {
@@ -2293,11 +2319,16 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 ## versioning
 
-Usually, each language or package manager has a specific type of "versioning". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc.
-At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
+Usually, each language or package manager has a specific type of "versioning":
+JavaScript uses npm's SemVer implementation, Python uses pep440, etc.
 
-By exposing `versioning` to config, it allows you to override the default versioning for a package manager if you really need.
-In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+Renovate also uses custom versioning, like `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries SemVer first but otherwise just does its best to sort and compare.
+
+By exposing `versioning` to config, you can override the default versioning for a package manager if needed.
+We do not recommend overriding the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+
+Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
+Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, any leading parts are sorted alphanumerically.
 
 ## vulnerabilityAlerts
 
