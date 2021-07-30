@@ -121,19 +121,19 @@ Array [
 exports[`.updateArtifacts() supports docker mode 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/composer:1.10.17",
+    "cmd": "docker pull renovate/php:latest",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_composer -aq",
+    "cmd": "docker ps --filter name=renovate_php -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_composer --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/composer:1.10.17 bash -l -c \\"composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins\\"",
+    "cmd": "docker run --rm --name=renovate_php --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/php:latest bash -l -c \\"install-tool composer 1.10.17 && composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

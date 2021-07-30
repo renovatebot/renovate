@@ -52,6 +52,16 @@ describe('.updateArtifacts()', () => {
     fs.ensureCacheDir.mockResolvedValue(
       join(adminConfig.cacheDir, './others/composer')
     );
+
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.3.0' },
+        { version: '2.0.14' },
+        { version: '2.1.0' },
+      ],
+    });
   });
 
   afterEach(() => {
@@ -214,12 +224,23 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
 
     fs.readLocalFile.mockResolvedValueOnce('{  }');
+    datasource.getPkgReleases.mockReset();
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
         { version: '1.10.0' },
         { version: '1.10.17' },
         { version: '2.0.0' },
         { version: '2.0.7' },
+      ],
+    });
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.3.0' },
+        { version: '1.10.15' },
+        { version: '2.0.14' },
+        { version: '2.1.0' },
       ],
     });
 
@@ -233,7 +254,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, constraints: { composer: '^1.10.0' } },
+        config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
