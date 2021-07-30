@@ -7,6 +7,7 @@ import { getName } from '../../../test/util';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as _hostRules from '../../util/host-rules';
+import { GitHubReleaseMocker } from './__testutil__';
 import { id as datasource } from '.';
 import * as github from '.';
 
@@ -78,38 +79,7 @@ describe(getName(), () => {
     const currentValue = 'v1.0.0';
     const currentDigest = 'v1.0.0-digest';
 
-    const mockReleaseWithAssets = (
-      version: string,
-      assets: { [key: string]: string }
-    ) => {
-      const releaseData = {
-        tag_name: version,
-        published_at: '2020-03-09T11:00:00Z',
-        assets: [],
-      };
-      for (const assetFn of Object.keys(assets)) {
-        const assetPath = `/repos/${lookupName}/releases/download/${version}/${assetFn}`;
-        const assetData = assets[assetFn];
-        releaseData.assets.push({
-          name: assetFn,
-          size: assetData.length,
-          browser_download_url: `${githubApiHost}${assetPath}`,
-        });
-        httpMock
-          .scope(githubApiHost)
-          .get(assetPath)
-          .once()
-          .reply(200, assetData);
-      }
-      httpMock
-        .scope(githubApiHost)
-        .get(`/repos/${lookupName}/releases/tags/${version}`)
-        .reply(200, releaseData);
-    };
-
-    const mockReleaseWithDigestFile = (version: string, digests: string[]) => {
-      mockReleaseWithAssets(version, { 'SHASUMS.txt': digests.join('\n') });
-    };
+    const releaseMock = new GitHubReleaseMocker(githubApiHost, lookupName);
 
     it('requires currentDigest', async () => {
       const digest = await getDigest({ datasource, lookupName }, currentValue);
@@ -129,10 +99,11 @@ describe(getName(), () => {
     });
 
     it('verifies currentDigest from digest file', async () => {
-      mockReleaseWithDigestFile(currentValue, [
+      releaseMock.withDigestFileAsset(
+        currentValue,
         `${currentDigest} linux-amd64.tar.gz`,
-        `another-digest   linux-arm64.tar.gz`,
-      ]);
+        `another-digest   linux-arm64.tar.gz`
+      );
       const digest = await getDigest(
         {
           datasource,
@@ -148,7 +119,7 @@ describe(getName(), () => {
     // TODO: reviewers - this is awkward, but I found returning `null` in this case to not produce an update
     // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
     it('ignores failures verifying currentDigest', async () => {
-      mockReleaseWithAssets(currentValue, {});
+      releaseMock.withAssets(currentValue, {});
       const digest = await getDigest(
         {
           datasource,
@@ -162,16 +133,18 @@ describe(getName(), () => {
     });
 
     it('parses digest file in new release', async () => {
-      mockReleaseWithDigestFile(currentValue, [
+      releaseMock.withDigestFileAsset(
+        currentValue,
         `${currentDigest} linux-amd64.tar.gz`,
-        `another-digest   linux-arm64.tar.gz`,
-      ]);
+        `another-digest   linux-arm64.tar.gz`
+      );
       const nextValue = 'v1.0.1';
       const nextDigest = 'v1.0.1-digest';
-      mockReleaseWithDigestFile(nextValue, [
+      releaseMock.withDigestFileAsset(
+        nextValue,
         `a-next-digest  linux-arm64.tar.gz`,
-        `${nextDigest}  linux-amd64.tar.gz`,
-      ]);
+        `${nextDigest}  linux-amd64.tar.gz`
+      );
       const digest = await getDigest(
         {
           datasource,
@@ -185,9 +158,10 @@ describe(getName(), () => {
     });
 
     it('returns null when new digest file is not found', async () => {
-      mockReleaseWithDigestFile(currentValue, [
-        `${currentDigest} linux-amd64.tar.gz`,
-      ]);
+      releaseMock.withDigestFileAsset(
+        currentValue,
+        `${currentDigest} linux-amd64.tar.gz`
+      );
       const nextValue = 'v1.0.1';
       const releaseData = {
         tag_name: nextValue,
@@ -212,11 +186,12 @@ describe(getName(), () => {
     });
 
     it('returns null when missing from new digest file', async () => {
-      mockReleaseWithDigestFile(currentValue, [
-        `${currentDigest} linux-amd64.tar.gz`,
-      ]);
+      releaseMock.withDigestFileAsset(
+        currentValue,
+        `${currentDigest} linux-amd64.tar.gz`
+      );
       const nextValue = 'v1.0.1';
-      mockReleaseWithDigestFile(nextValue, []);
+      releaseMock.withDigestFileAsset(nextValue);
       const digest = await getDigest(
         {
           datasource,
@@ -230,16 +205,18 @@ describe(getName(), () => {
     });
 
     it('parses digest file in new release that embeds version in digested file', async () => {
-      mockReleaseWithDigestFile(currentValue, [
+      releaseMock.withDigestFileAsset(
+        currentValue,
         `${currentDigest} some-dep-1.0.0/linux-amd64.tar.gz`,
-        `another-digest   some-dep-1.0.0/linux-arm64.tar.gz`,
-      ]);
+        `another-digest   some-dep-1.0.0/linux-arm64.tar.gz`
+      );
       const nextValue = 'v1.0.1';
       const nextDigest = 'v1.0.1-digest';
-      mockReleaseWithDigestFile(nextValue, [
+      releaseMock.withDigestFileAsset(
+        nextValue,
         `a-next-digest  some-dep-1.0.1/linux-arm64.tar.gz`,
-        `${nextDigest}  some-dep-1.0.1/linux-amd64.tar.gz`,
-      ]);
+        `${nextDigest}  some-dep-1.0.1/linux-amd64.tar.gz`
+      );
       const digest = await getDigest(
         {
           datasource,
@@ -254,7 +231,7 @@ describe(getName(), () => {
 
     it('verifies currentDigest from asset', async () => {
       const barContent = '1'.repeat(10 * 1024);
-      mockReleaseWithAssets(currentValue, {
+      releaseMock.withAssets(currentValue, {
         'foo.txt': '0'.repeat(10 * 1024),
         'bar.txt': barContent,
       });
@@ -274,7 +251,7 @@ describe(getName(), () => {
 
     it('digests assets in new release', async () => {
       const barContent = '1'.repeat(10 * 1024);
-      mockReleaseWithAssets(currentValue, {
+      releaseMock.withAssets(currentValue, {
         'foo.txt': '0'.repeat(8 * 1024),
         'bar.txt': barContent,
         'baz.txt': '2'.repeat(9 * 1024),
@@ -283,7 +260,7 @@ describe(getName(), () => {
 
       const nextValue = 'v1.0.1';
       const nextBarContent = '3'.repeat(10 * 1024);
-      mockReleaseWithAssets(nextValue, {
+      releaseMock.withAssets(nextValue, {
         'bar.txt': nextBarContent,
       });
 
@@ -316,7 +293,7 @@ describe(getName(), () => {
 
       it('caches digested assets', async () => {
         const barContent = '1'.repeat(10 * 1024);
-        mockReleaseWithAssets(currentValue, {
+        releaseMock.withAssets(currentValue, {
           'bar.txt': barContent,
         });
         const algorithm = 'sha256';
@@ -324,7 +301,7 @@ describe(getName(), () => {
 
         for (const nextValue of ['v1.0.1', 'v1.0.2']) {
           const nextBarContent = '3'.repeat(10 * 1024);
-          mockReleaseWithAssets(nextValue, {
+          releaseMock.withAssets(nextValue, {
             'bar.txt': nextBarContent,
           });
 
