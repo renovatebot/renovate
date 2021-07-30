@@ -16,7 +16,6 @@ export { id } from './common';
 
 export const customRegistrySupport = false;
 
-const http = new Http(id);
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab\.[^/]*)\/(.*)$/;
 const bitbucket = new BitBucketTagsDatasource();
 
