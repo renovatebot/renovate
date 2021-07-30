@@ -51,6 +51,8 @@ describe(getName(), () => {
     expect(compare('1.0', '1.0-20150201.121010-123')).toEqual(-1);
     expect(compare('1.0-20150201.121010-123', '1.1')).toEqual(-1);
     expect(compare('Hoxton.RELEASE', 'Hoxton.SR1')).toEqual(-1);
+    expect(compare('1.0-release', '1.0-sp-1')).toEqual(-1);
+    expect(compare('1.0-sp-1', '1.0-sp-2')).toEqual(-1);
   });
   it('returns greater than', () => {
     expect(compare('1.2', '1.1')).toEqual(1);
@@ -76,6 +78,8 @@ describe(getName(), () => {
     expect(compare('1.0-20150201.121010-123', '1.0')).toEqual(1);
     expect(compare('1.1', '1.0-20150201.121010-123')).toEqual(1);
     expect(compare('Hoxton.SR1', 'Hoxton.RELEASE')).toEqual(1);
+    expect(compare('1.0-sp-1', '1.0-release')).toEqual(1);
+    expect(compare('1.0-sp-2', '1.0-sp-1')).toEqual(1);
   });
 
   const invalidPrefixRanges = [
