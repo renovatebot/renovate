@@ -16,7 +16,7 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 **Note** You need to also set the Git commands that Renovate passes to the `gitNoVerify` option.
 This way Renovate can commit and push Git LFS objects.
 
-**Note** This currently don't work in official renovate docker images, see [containerbase/buildpack#13](https://github.com/containerbase/buildpack/issues/13)
+**Note** `allowGitLfs` does not work in the official Renovate docker images, see issue [containerbase/buildpack#13](https://github.com/containerbase/buildpack/issues/13) for more information.
 
 ## allowPostUpgradeCommandTemplating
 

@@ -707,15 +707,15 @@ This is caused by a race condition in GitLab's Merge Request API - [read the cor
 
 ## gitLfsExclude
 
-See also `allowGitLfs` and `gitNoVerify` option.
+See also the `allowGitLfs` and `gitNoVerify` options.
 
-**Note** This is not supported in WhiteSource Renovate Hosted App.
+**Note** This is not supported in the WhiteSource Renovate Hosted App.
 
 ## gitLfsInclude
 
-See also `allowGitLfs` and `gitNoVerify` option.
+See also the `allowGitLfs` and `gitNoVerify` options.
 
-**Note** This is not supported in WhiteSource Renovate Hosted App.
+**Note** This is not supported in the WhiteSource Renovate Hosted App.
 
 ## golang
 
