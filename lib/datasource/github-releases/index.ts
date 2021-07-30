@@ -2,8 +2,8 @@ import hasha from 'hasha';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
-import { ensureTrailingSlash } from '../../util/url';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { getApiBaseUrl, getSourceUrlBase } from './common';
 import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
 export const id = 'github-releases';
@@ -18,17 +18,6 @@ const http = new GithubHttp();
 function getReleasesCacheKey(registryUrl: string, repo: string): string {
   const type = 'tags';
   return `${registryUrl}:${repo}:${type}`;
-}
-
-function getSourceUrlBase(registryUrl: string): string {
-  // default to GitHub.com if no GHE host is specified.
-  return ensureTrailingSlash(registryUrl ?? 'https://github.com/');
-}
-
-function getApiBaseUrl(sourceUrlBase: string): string {
-  return sourceUrlBase === 'https://github.com/'
-    ? `https://api.github.com/`
-    : `${sourceUrlBase}api/v3/`;
 }
 
 /**
