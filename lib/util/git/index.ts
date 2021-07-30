@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import Git, {
   DiffResult as DiffResult_,
@@ -56,6 +57,10 @@ interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
+
+  gitLfsInclude?: string;
+  gitLfsExclude?: string;
+
   ignoredAuthors: string[];
 }
 
@@ -185,6 +190,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  config.gitLfsInclude = undefined;
+  config.gitLfsExclude = undefined;
   const { localDir } = getAdminConfig();
   git = Git(localDir);
   gitInitialized = false;
@@ -237,9 +244,13 @@ async function setBranchPrefix(branchPrefix: string): Promise<void> {
 export async function setUserRepoConfig({
   branchPrefix,
   gitIgnoredAuthors,
+  gitLfsInclude,
+  gitLfsExclude,
 }: RenovateConfig): Promise<void> {
   await setBranchPrefix(branchPrefix);
   config.ignoredAuthors = gitIgnoredAuthors ?? [];
+  config.gitLfsInclude = gitLfsInclude;
+  config.gitLfsExclude = gitLfsExclude;
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -305,11 +316,19 @@ export async function syncGit(): Promise<void> {
           opts.push(e[0], `${e[1]}`)
         );
       }
-      // will be changed in future, see #6842
+
       // istanbul ignore if
-      if (!allowGitLfs) {
+      if (allowGitLfs) {
+        if (is.nonEmptyString(config.gitLfsInclude)) {
+          opts.push('-c', `lfs.fetchinclude=${config.gitLfsInclude}`);
+        }
+        if (is.nonEmptyString(config.gitLfsExclude)) {
+          opts.push('-c', `lfs.fetchexclude=${config.gitLfsExclude}`);
+        }
+      } else {
         opts.push('-c', 'lfs.fetchexclude=*');
       }
+
       await git.clone(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');

@@ -9,9 +9,9 @@ import type { RenovateOptions } from './types';
 const options: RenovateOptions[] = [
   {
     name: 'allowGitLfs',
-    description: 'If true allow git-lfs to pull files.',
+    description: 'If false disallow git-lfs to pull files.',
     type: 'boolean',
-    default: false,
+    default: true,
     admin: true,
   },
   {
@@ -2030,6 +2030,19 @@ const options: RenovateOptions[] = [
     default: ['commit', 'push'],
     stage: 'global',
     admin: true,
+  },
+  {
+    name: 'gitLfsInclude',
+    description: 'Which files should be included in git-lfs checkout',
+    stage: 'repository',
+    type: 'string',
+    default: '.yarn,yarn.lock,**/package-lock.json',
+  },
+  {
+    name: 'gitLfsExclude',
+    description: 'Which files should be excluded in git-lfs checkout',
+    stage: 'repository',
+    type: 'string',
   },
 ];
 

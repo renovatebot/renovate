@@ -168,6 +168,9 @@ export interface RenovateConfig
 
   gitAuthor?: string;
 
+  gitLfsInclude?: string;
+  gitLfsExclude?: string;
+
   hostRules?: HostRule[];
 
   ignorePresets?: string[];

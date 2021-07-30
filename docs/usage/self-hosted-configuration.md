@@ -16,6 +16,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 **Note** You need to also set the Git commands that Renovate passes to the `gitNoVerify` option.
 This way Renovate can commit and push Git LFS objects.
 
+**Note** This currently don't work in official renovate docker images, see [containerbase/buildpack#13](https://github.com/containerbase/buildpack/issues/13)
+
 ## allowPostUpgradeCommandTemplating
 
 Set to true to allow templating of dependency level post-upgrade commands.
@@ -228,8 +230,6 @@ Controls when Renovate passes the `--no-verify` flag to `git`.
 The flag can be passed to `git commit` and/or `git push`.
 Read the documentation for [git commit --no-verify](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---no-verify) and [git push --no-verify](https://git-scm.com/docs/git-push#Documentation/git-push.txt---no-verify) to learn exactly what each flag does.
 To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
-
-**Note** If you use Git LFS you also need to set the `allowGitLfs` option to `true`.
 
 ## gitPrivateKey
 

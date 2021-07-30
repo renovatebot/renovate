@@ -705,6 +705,18 @@ If you enabled `automerge` in the Renovate config, you can speed up the automerg
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
+## gitLfsExclude
+
+See also `allowGitLfs` and `gitNoVerify` option.
+
+**Note** This is not supported in WhiteSource Renovate Hosted App.
+
+## gitLfsInclude
+
+See also `allowGitLfs` and `gitNoVerify` option.
+
+**Note** This is not supported in WhiteSource Renovate Hosted App.
+
 ## golang
 
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
