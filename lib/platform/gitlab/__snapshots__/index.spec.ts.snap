@@ -218,69 +218,6 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) raises with squash enabled 1`] = `
-Object {
-  "displayNumber": "Merge Request #12345",
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`platform/gitlab/index createPr(branchName, title, body) raises with squash enabled 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc123",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null,\\"squash\\":true}",
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc123",
-      "content-length": "158",
-      "content-type": "application/json",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "POST",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests",
-  },
-]
-`;
-
 exports[`platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is always 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
