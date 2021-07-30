@@ -1,4 +1,4 @@
-import * as bitbucketTags from './bitbucket-tags';
+import { BitBucketTagsDatasource } from './bitbucket-tags';
 import { CdnJsDatasource } from './cdnjs';
 import { ClojureDatasource } from './clojure';
 import * as crate from './crate';
@@ -35,7 +35,7 @@ import type { DatasourceApi } from './types';
 const api = new Map<string, DatasourceApi>();
 export default api;
 
-api.set('bitbucket-tags', bitbucketTags);
+api.set('bitbucket-tags', new BitBucketTagsDatasource());
 api.set('cdnjs', new CdnJsDatasource());
 api.set('clojure', new ClojureDatasource());
 api.set('crate', crate);
