@@ -1,19 +1,19 @@
-import hasha from 'hasha';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
-import { GithubHttp } from '../../util/http/github';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { getApiBaseUrl, getSourceUrlBase } from './common';
+import {
+  cacheNamespace,
+  getApiBaseUrl,
+  getSourceUrlBase,
+  http,
+} from './common';
+import { downloadAndDigest, findDigestAsset, inferHashAlg } from './digest';
 import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
 export const id = 'github-releases';
 export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
-
-const cacheNamespace = 'datasource-github-releases';
-
-const http = new GithubHttp();
 
 function getReleasesCacheKey(registryUrl: string, repo: string): string {
   const type = 'tags';
@@ -67,97 +67,6 @@ export async function getReleases({
   return dependency;
 }
 
-async function findDigestFile(
-  release: GithubRelease,
-  digest: string
-): Promise<DigestAsset | null> {
-  const smallAssets = release.assets.filter(
-    (a: GithubReleaseAsset) => a.size < 5 * 1024
-  );
-  for (const asset of smallAssets) {
-    const res = await http.get(asset.browser_download_url);
-    for (const line of res.body.split('\n')) {
-      const [lineDigest, lineFn] = line.split(/\s+/, 2);
-      if (lineDigest === digest) {
-        return {
-          assetName: asset.name,
-          digestedFileName: lineFn,
-          currentVersion: release.tag_name,
-          currentDigest: lineDigest,
-        };
-      }
-    }
-  }
-  return null;
-}
-
-function inferHashAlg(digest: string): string {
-  switch (digest.length) {
-    case 64:
-      return 'sha256';
-    default:
-    case 96:
-      return 'sha512';
-  }
-}
-
-function getAssetDigestCacheKey(
-  downloadUrl: string,
-  algorithm: string
-): string {
-  const type = 'assetDigest';
-  return `${downloadUrl}:${algorithm}:${type}`;
-}
-
-async function getAssetDigest(
-  asset: GithubReleaseAsset,
-  algorithm: string
-): Promise<string> {
-  const downloadUrl = asset.browser_download_url;
-  const cacheKey = getAssetDigestCacheKey(downloadUrl, algorithm);
-  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
-  if (cachedResult) {
-    return cachedResult;
-  }
-
-  const res = http.stream(downloadUrl);
-  const digest = await hasha.fromStream(res, { algorithm });
-
-  const cacheMinutes = 1440;
-  await packageCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
-  return digest;
-}
-
-async function findAssetWithDigest(
-  release: GithubRelease,
-  digest: string
-): Promise<DigestAsset | null> {
-  const algorithm = inferHashAlg(digest);
-  const assetsBySize = release.assets.sort(
-    (a: GithubReleaseAsset, b: GithubReleaseAsset) => {
-      if (a.size < b.size) {
-        return -1;
-      }
-      if (a.size > b.size) {
-        return 1;
-      }
-      return 0;
-    }
-  );
-
-  for (const asset of assetsBySize) {
-    const assetDigest = await getAssetDigest(asset, algorithm);
-    if (assetDigest === digest) {
-      return {
-        assetName: asset.name,
-        currentVersion: release.tag_name,
-        currentDigest: assetDigest,
-      };
-    }
-  }
-  return null;
-}
-
 async function findNewDigest(
   digestAsset: DigestAsset,
   release: GithubRelease
@@ -182,7 +91,7 @@ async function findNewDigest(
     }
   } else {
     const algorithm = inferHashAlg(digestAsset.currentDigest);
-    const newDigest = await getAssetDigest(releaseAsset, algorithm);
+    const newDigest = await downloadAndDigest(releaseAsset, algorithm);
     return newDigest;
   }
   logger.debug({ releaseAsset }, 'fetch');
@@ -245,10 +154,7 @@ export async function getDigest(
 
   const apiBaseUrl = getApiBaseUrl(getSourceUrlBase(registryUrl));
   const currentRelease = await getGithubRelease(apiBaseUrl, repo, currentValue);
-  let digestAsset = await findDigestFile(currentRelease, currentDigest);
-  if (!digestAsset) {
-    digestAsset = await findAssetWithDigest(currentRelease, currentDigest);
-  }
+  const digestAsset = await findDigestAsset(currentRelease, currentDigest);
   let newDigest: string;
   if (!digestAsset || newValue === currentValue) {
     newDigest = currentDigest;
