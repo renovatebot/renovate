@@ -1,6 +1,6 @@
+import { api } from '.';
 import { getName } from '../../../test/util';
 import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
-import { api } from '.';
 
 describe(getName(), () => {
   it('returns equality', () => {
@@ -39,16 +39,17 @@ describe(getName(), () => {
     expect(compare('1.0-dev', '1.0-alpha')).toEqual(-1);
     expect(compare('1.0-alpha', '1.0-rc')).toEqual(-1);
     expect(compare('1.0-zeta', '1.0-rc')).toEqual(-1);
+    expect(compare('1.0-rc', '1.0-final')).toEqual(-1);
+    expect(compare('1.0-final', '1.0-ga')).toEqual(-1);
+    expect(compare('1.0-ga', '1.0-release')).toEqual(-1);
     expect(compare('1.0-rc', '1.0-release')).toEqual(-1);
-    expect(compare('1.0-release', '1.0-final')).toEqual(-1);
     expect(compare('1.0-final', '1.0')).toEqual(-1);
     expect(compare('1.0-alpha', '1.0-SNAPSHOT')).toEqual(-1);
-    expect(compare('1.0-SNAPSHOT', '1.0-zeta')).toEqual(-1);
+    expect(compare('1.0-zeta', '1.0-SNAPSHOT')).toEqual(-1);
     expect(compare('1.0-zeta', '1.0-rc')).toEqual(-1);
     expect(compare('1.0-rc', '1.0')).toEqual(-1);
     expect(compare('1.0', '1.0-20150201.121010-123')).toEqual(-1);
     expect(compare('1.0-20150201.121010-123', '1.1')).toEqual(-1);
-    expect(compare('sNaPsHoT', 'snapshot')).toEqual(-1);
     expect(compare('Hoxton.RELEASE', 'Hoxton.SR1')).toEqual(-1);
   });
   it('returns greater than', () => {
@@ -63,15 +64,17 @@ describe(getName(), () => {
     expect(compare('1.0-rc', '1.0-alpha')).toEqual(1);
     expect(compare('1.0-rc', '1.0-zeta')).toEqual(1);
     expect(compare('1.0-release', '1.0-rc')).toEqual(1);
-    expect(compare('1.0-final', '1.0-release')).toEqual(1);
+    expect(compare('1.0-final', '1.0-rc')).toEqual(1);
+    expect(compare('1.0-ga', '1.0-final')).toEqual(1);
+    expect(compare('1.0-release', '1.0-ga')).toEqual(1);
+    expect(compare('1.0-release', '1.0-final')).toEqual(1);
     expect(compare('1.0', '1.0-final')).toEqual(1);
     expect(compare('1.0-SNAPSHOT', '1.0-alpha')).toEqual(1);
-    expect(compare('1.0-zeta', '1.0-SNAPSHOT')).toEqual(1);
+    expect(compare('1.0-SNAPSHOT', '1.0-zeta')).toEqual(1);
     expect(compare('1.0-rc', '1.0-zeta')).toEqual(1);
     expect(compare('1.0', '1.0-rc')).toEqual(1);
     expect(compare('1.0-20150201.121010-123', '1.0')).toEqual(1);
     expect(compare('1.1', '1.0-20150201.121010-123')).toEqual(1);
-    expect(compare('snapshot', 'sNaPsHoT')).toEqual(1);
     expect(compare('Hoxton.SR1', 'Hoxton.RELEASE')).toEqual(1);
   });
 
