@@ -98,24 +98,6 @@ describe(getName(), () => {
       expect(digest).toEqual(currentDigest);
     });
 
-    it('verifies currentDigest from digest file', async () => {
-      releaseMock.withDigestFileAsset(
-        currentValue,
-        `${currentDigest} linux-amd64.tar.gz`,
-        `another-digest   linux-arm64.tar.gz`
-      );
-      const digest = await getDigest(
-        {
-          datasource,
-          lookupName,
-          currentValue,
-          currentDigest,
-        },
-        currentValue
-      );
-      expect(digest).toEqual(currentDigest);
-    });
-
     // TODO: reviewers - this is awkward, but I found returning `null` in this case to not produce an update
     // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
     it('ignores failures verifying currentDigest', async () => {
@@ -227,26 +209,6 @@ describe(getName(), () => {
         nextValue
       );
       expect(digest).toEqual(nextDigest);
-    });
-
-    it('verifies currentDigest from asset', async () => {
-      const barContent = '1'.repeat(10 * 1024);
-      releaseMock.withAssets(currentValue, {
-        'foo.txt': '0'.repeat(10 * 1024),
-        'bar.txt': barContent,
-      });
-
-      const barDigest = await hasha.async(barContent, { algorithm: 'sha512' });
-      const digest = await getDigest(
-        {
-          datasource,
-          lookupName,
-          currentValue,
-          currentDigest: barDigest,
-        },
-        currentValue
-      );
-      expect(digest).toEqual(barDigest);
     });
 
     it('digests assets in new release', async () => {

@@ -94,7 +94,6 @@ async function findNewDigest(
     const newDigest = await downloadAndDigest(releaseAsset, algorithm);
     return newDigest;
   }
-  logger.debug({ releaseAsset }, 'fetch');
   return null;
 }
 

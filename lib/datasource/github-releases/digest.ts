@@ -96,6 +96,7 @@ async function findAssetWithDigest(
   return null;
 }
 
+/** Identify the asset associated with a known digest. */
 export async function findDigestAsset(
   release: GithubRelease,
   digest: string

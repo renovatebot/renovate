@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
+import { GithubRelease } from '../types';
 
 export class GitHubReleaseMocker {
   constructor(
@@ -6,10 +7,14 @@ export class GitHubReleaseMocker {
     private readonly lookupName: string
   ) {}
 
-  withAssets(version: string, assets: { [key: string]: string }): void {
+  withAssets(
+    version: string,
+    assets: { [key: string]: string }
+  ): GithubRelease {
     const releaseData = {
       tag_name: version,
       published_at: '2020-03-09T11:00:00Z',
+      prerelease: false,
       assets: [],
     };
     for (const assetFn of Object.keys(assets)) {
@@ -29,10 +34,12 @@ export class GitHubReleaseMocker {
     httpMock
       .scope(this.githubApiHost)
       .get(`/repos/${this.lookupName}/releases/tags/${version}`)
+      .optionally()
       .reply(200, releaseData);
+    return releaseData;
   }
 
-  withDigestFileAsset(version: string, ...digests: string[]): void {
-    this.withAssets(version, { 'SHASUMS.txt': digests.join('\n') });
+  withDigestFileAsset(version: string, ...digests: string[]): GithubRelease {
+    return this.withAssets(version, { 'SHASUMS.txt': digests.join('\n') });
   }
 }
