@@ -1,5 +1,6 @@
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
+import type { GithubRelease } from './types';
 
 const defaultSourceUrlBase = 'https://github.com/';
 
@@ -15,4 +16,14 @@ export function getApiBaseUrl(sourceUrlBase: string): string {
   return sourceUrlBase === defaultSourceUrlBase
     ? `https://api.github.com/`
     : `${sourceUrlBase}api/v3/`;
+}
+
+export async function getGithubRelease(
+  apiBaseUrl: string,
+  repo: string,
+  version: string
+): Promise<GithubRelease> {
+  const url = `${apiBaseUrl}repos/${repo}/releases/tags/${version}`;
+  const res = await http.getJson<GithubRelease>(url);
+  return res.body;
 }

@@ -101,7 +101,7 @@ describe(getName(), () => {
     // TODO: reviewers - this is awkward, but I found returning `null` in this case to not produce an update
     // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
     it('ignores failures verifying currentDigest', async () => {
-      releaseMock.withAssets(currentValue, {});
+      releaseMock.release(currentValue);
       const digest = await getDigest(
         {
           datasource,

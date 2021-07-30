@@ -39,7 +39,7 @@ describe(getName(), () => {
     });
 
     it('returns null when not found', async () => {
-      const release = releaseMock.withAssets('v1.0.0', {});
+      const release = releaseMock.release('v1.0.0');
       const digestAsset = await findDigestAsset(release, 'test-digest');
       expect(digestAsset).toBeNull();
     });

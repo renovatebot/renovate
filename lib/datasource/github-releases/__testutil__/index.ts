@@ -7,6 +7,10 @@ export class GitHubReleaseMocker {
     private readonly lookupName: string
   ) {}
 
+  release(version: string): GithubRelease {
+    return this.withAssets(version, {});
+  }
+
   withAssets(
     version: string,
     assets: { [key: string]: string }

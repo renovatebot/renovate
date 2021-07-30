@@ -4,11 +4,12 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import {
   cacheNamespace,
   getApiBaseUrl,
+  getGithubRelease,
   getSourceUrlBase,
   http,
 } from './common';
-import { downloadAndDigest, findDigestAsset, inferHashAlg } from './digest';
-import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
+import { findDigestAsset, mapDigestAssetToRelease } from './digest';
+import type { GithubRelease } from './types';
 
 export const id = 'github-releases';
 export const customRegistrySupport = true;
@@ -67,46 +68,6 @@ export async function getReleases({
   return dependency;
 }
 
-async function findNewDigest(
-  digestAsset: DigestAsset,
-  release: GithubRelease
-): Promise<string | null> {
-  const current = digestAsset.currentVersion.replace(/^v/, '');
-  const next = release.tag_name.replace(/^v/, '');
-  const releaseChecksumAssetName = digestAsset.assetName.replace(current, next);
-  const releaseAsset = release.assets.find(
-    (a: GithubReleaseAsset) => a.name === releaseChecksumAssetName
-  );
-  if (!releaseAsset) {
-    return null;
-  }
-  if (digestAsset.digestedFileName) {
-    const releaseFilename = digestAsset.digestedFileName.replace(current, next);
-    const res = await http.get(releaseAsset.browser_download_url);
-    for (const line of res.body.split('\n')) {
-      const [lineDigest, lineFn] = line.split(/\s+/, 2);
-      if (lineFn === releaseFilename) {
-        return lineDigest;
-      }
-    }
-  } else {
-    const algorithm = inferHashAlg(digestAsset.currentDigest);
-    const newDigest = await downloadAndDigest(releaseAsset, algorithm);
-    return newDigest;
-  }
-  return null;
-}
-
-export async function getGithubRelease(
-  apiBaseUrl: string,
-  repo: string,
-  version: string
-): Promise<GithubRelease> {
-  const url = `${apiBaseUrl}repos/${repo}/releases/tags/${version}`;
-  const res = await http.getJson<GithubRelease>(url);
-  return res.body;
-}
-
 function getDigestCacheKey(
   { lookupName: repo, currentValue, currentDigest, registryUrl }: DigestConfig,
   newValue: string
@@ -159,7 +120,7 @@ export async function getDigest(
     newDigest = currentDigest;
   } else {
     const newRelease = await getGithubRelease(apiBaseUrl, repo, newValue);
-    newDigest = await findNewDigest(digestAsset, newRelease);
+    newDigest = await mapDigestAssetToRelease(digestAsset, newRelease);
   }
 
   const cacheMinutes = 1440;

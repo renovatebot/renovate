@@ -1,5 +1,6 @@
 import { getName } from '../../../test/util';
-import { getApiBaseUrl, getSourceUrlBase } from './common';
+import { GitHubReleaseMocker } from './__testutil__';
+import { getApiBaseUrl, getGithubRelease, getSourceUrlBase } from './common';
 
 describe(getName(), () => {
   describe('getSourceUrlBase', () => {
@@ -22,6 +23,20 @@ describe(getName(), () => {
     it('supports local github installations', () => {
       const apiUrl = getApiBaseUrl('https://gh.my-company.com/');
       expect(apiUrl).toBe('https://gh.my-company.com/api/v3/');
+    });
+  });
+
+  describe('getGithubRelease', () => {
+    const apiUrl = 'https://github.com/';
+    const lookupName = 'someDep';
+    const releaseMock = new GitHubReleaseMocker(apiUrl, lookupName);
+
+    it('returns release', async () => {
+      const version = 'v1.0.0';
+      releaseMock.release(version);
+
+      const release = await getGithubRelease(apiUrl, lookupName, version);
+      expect(release.tag_name).toBe(version);
     });
   });
 });

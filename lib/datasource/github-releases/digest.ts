@@ -27,8 +27,7 @@ async function findDigestFile(
   return null;
 }
 
-// TODO: remove export
-export function inferHashAlg(digest: string): string {
+function inferHashAlg(digest: string): string {
   switch (digest.length) {
     case 64:
       return 'sha256';
@@ -46,8 +45,7 @@ function getAssetDigestCacheKey(
   return `${downloadUrl}:${algorithm}:${type}`;
 }
 
-// TODO: remove export
-export async function downloadAndDigest(
+async function downloadAndDigest(
   asset: GithubReleaseAsset,
   algorithm: string
 ): Promise<string> {
@@ -108,4 +106,35 @@ export async function findDigestAsset(
 
   const asset = await findAssetWithDigest(release, digest);
   return asset;
+}
+
+/** Given a digest asset, find the equivalent digest in a different release. */
+export async function mapDigestAssetToRelease(
+  digestAsset: DigestAsset,
+  release: GithubRelease
+): Promise<string | null> {
+  const current = digestAsset.currentVersion.replace(/^v/, '');
+  const next = release.tag_name.replace(/^v/, '');
+  const releaseChecksumAssetName = digestAsset.assetName.replace(current, next);
+  const releaseAsset = release.assets.find(
+    (a: GithubReleaseAsset) => a.name === releaseChecksumAssetName
+  );
+  if (!releaseAsset) {
+    return null;
+  }
+  if (digestAsset.digestedFileName) {
+    const releaseFilename = digestAsset.digestedFileName.replace(current, next);
+    const res = await http.get(releaseAsset.browser_download_url);
+    for (const line of res.body.split('\n')) {
+      const [lineDigest, lineFn] = line.split(/\s+/, 2);
+      if (lineFn === releaseFilename) {
+        return lineDigest;
+      }
+    }
+  } else {
+    const algorithm = inferHashAlg(digestAsset.currentDigest);
+    const newDigest = await downloadAndDigest(releaseAsset, algorithm);
+    return newDigest;
+  }
+  return null;
 }
