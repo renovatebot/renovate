@@ -1,6 +1,6 @@
-import { api } from '.';
 import { getName } from '../../../test/util';
 import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
+import { api } from '.';
 
 describe(getName(), () => {
   it('returns equality', () => {
