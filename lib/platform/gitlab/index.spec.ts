@@ -1379,6 +1379,70 @@ describe(getName(), () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('raises with squash enabled when repository squash option is default_on', async () => {
+      await initPlatform('14.0.0-ee');
+
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo')
+        .reply(200, {
+          squash_option: 'default_on',
+          default_branch: 'master',
+          url: 'https://some-url',
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo',
+      });
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        });
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: null,
+      });
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('raises with squash enabled when repository squash option is always', async () => {
+      await initPlatform('14.0.0-ee');
+
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo')
+        .reply(200, {
+          squash_option: 'always',
+          default_branch: 'master',
+          url: 'https://some-url',
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo',
+      });
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        });
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: null,
+      });
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {
