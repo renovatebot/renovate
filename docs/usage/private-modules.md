@@ -128,11 +128,8 @@ Any `hostRules` with `hostType=packagist` are also included.
 
 ### gomod
 
-The `GOPRIVATE` environment variable is used to decide if a package should be fetched from the `GOPROXY` or directly from the source.
-Most private modules will need to be fetched from the source directly, Renovate currently supports only Git for this.
-For each comma-separated module path in `GOPRIVATE` or `golang.registryUrls` Renovate will look for credentials in `hostRules`.
-Credentials are passed to Git via `GIT_CONFIG_KEY_x=url."https://${token}@${GOPRIVATE}/".insteadOf` and `GIT_CONFIG_VALUE_x=https://${GOPRIVATE}/` when running `go` commands.
-Glob syntax for `GOPRIVATE` is not supported.
+If a `github.com` token is found in `hostRules`, then it is written out to local git config prior to running `go` commands.
+The command run is `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`.
 
 ### npm
 
