@@ -4573,7 +4573,7 @@ globalthis@^1.0.1:
   dependencies:
     define-properties "^1.1.3"
 
-globby@^11.0.0, globby@^11.0.1, globby@^11.0.3, globby@~11.0.3:
+globby@^11.0.0, globby@^11.0.1, globby@^11.0.3, globby@~11.0.4:
   version "11.0.4"
   resolved "https://registry.yarnpkg.com/globby/-/globby-11.0.4.tgz#2cbaff77c2f2a62e71e9b2813a67b97a3a3001a5"
   integrity sha512-9O4MVG9ioZJ08ffbcyVYyLOJLk5JQ688pJ4eMGLpdWLHq/Wr1D9BlriLQyL0E+jbkuePVZXYFj47QM/v093wHg==
@@ -6433,16 +6433,16 @@ markdownlint-cli2-formatter-default@^0.0.2:
   resolved "https://registry.yarnpkg.com/markdownlint-cli2-formatter-default/-/markdownlint-cli2-formatter-default-0.0.2.tgz#76f1a064d70966178dfe3bb489af9423d830ca79"
   integrity sha512-jIz1X3SIC8sX4NDFqQFUXL+JEtfnDoN4i+xocEu+etcxGX455pHb6sx86f/yVk4mKJ2o7aNe2ydSx9an22BfBg==
 
-markdownlint-cli2@0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/markdownlint-cli2/-/markdownlint-cli2-0.1.3.tgz#15ac14edea7816c96978f5f1de9256e637b691c5"
-  integrity sha512-4pbrSEDe/G9PjJnrxKXKTQXyXERHvFH+RjvZrCRiNrVPB0p1/wmQXCkdsKNWlaf+gc4gz4k9u1fj2x28GvFenw==
+markdownlint-cli2@0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/markdownlint-cli2/-/markdownlint-cli2-0.2.0.tgz#cecbd8a85ab21b070668e57c3aaa7f6f3056e2fc"
+  integrity sha512-/MIaG2MOlm39SBApQbeHK847/bgX6FfUPZMpCzA2UMYXR8NTwzTdjQAXjjLBK6+zG52GWKyhdmBKobkhLnq8wQ==
   dependencies:
-    globby "~11.0.3"
+    globby "~11.0.4"
     markdownlint "~0.23.1"
     markdownlint-cli2-formatter-default "^0.0.2"
     markdownlint-rule-helpers "~0.14.0"
-    micromatch "~4.0.2"
+    micromatch "~4.0.4"
     strip-json-comments "~3.1.1"
     yaml "~1.10.2"
 
@@ -6605,7 +6605,7 @@ micromatch@^3.1.10:
     snapdragon "^0.8.1"
     to-regex "^3.0.2"
 
-micromatch@^4.0.2, micromatch@^4.0.4, micromatch@~4.0.2:
+micromatch@^4.0.2, micromatch@^4.0.4, micromatch@~4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-4.0.4.tgz#896d519dfe9db25fce94ceb7a500919bf881ebf9"
   integrity sha512-pRmzw/XUcwXGpD9aI9q/0XOwLNygjETJ8y0ao0wdqprrzDa4YnxLcz7fQRZr8voh8V10kGhABbNcHVk5wHgWwg==
