@@ -1379,8 +1379,9 @@ describe(getName(), () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('raises with squash enabled when repository squash option is default_on', async () => {
-      await initPlatform('14.0.0-ee');
+      await initPlatform('14.0.0');
 
       httpMock
         .scope(gitlabApiHost)
@@ -1411,8 +1412,9 @@ describe(getName(), () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('raises with squash enabled when repository squash option is always', async () => {
-      await initPlatform('14.0.0-ee');
+      await initPlatform('14.0.0');
 
       httpMock
         .scope(gitlabApiHost)
