@@ -1302,7 +1302,74 @@ Array [
 
 exports[`platform/bitbucket/index massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket/index mergePr() posts Merge 1`] = `
+exports[`platform/bitbucket/index mergePr() posts Merge with auto 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": Object {
+      "close_source_branch": true,
+      "message": "auto merged",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "52",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index mergePr() posts Merge with fast-forward 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": Object {
+      "close_source_branch": true,
+      "merge_strategy": "fast_forward",
+      "message": "auto merged",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "84",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index mergePr() posts Merge with merge-commit 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1326,6 +1393,73 @@ Array [
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
       "content-length": "84",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index mergePr() posts Merge with optional merge strategy 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": Object {
+      "close_source_branch": true,
+      "message": "auto merged",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "52",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index mergePr() posts Merge with squash 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": Object {
+      "close_source_branch": true,
+      "merge_strategy": "squash",
+      "message": "auto merged",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "78",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
