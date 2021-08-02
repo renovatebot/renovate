@@ -93,6 +93,26 @@ describe(getName(), () => {
       expect(digest).toEqual(currentDigest);
     });
 
+    it('returns updated digest in new release', async () => {
+      releaseMock.withDigestFileAsset(
+        currentValue,
+        `${currentDigest} asset.zip`
+      );
+      const nextValue = 'v1.0.1';
+      const nextDigest = 'updated-digest';
+      releaseMock.withDigestFileAsset(nextValue, `${nextDigest} asset.zip`);
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentValue,
+          currentDigest,
+        },
+        nextValue
+      );
+      expect(digest).toEqual(nextDigest);
+    });
+
     // This is awkward, but I found returning `null` in this case to not produce an update
     // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
     it('ignores failures verifying currentDigest', async () => {
