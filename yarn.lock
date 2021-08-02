@@ -2157,15 +2157,7 @@
     "@types/emscripten" "^1.38.0"
     tslib "^1.13.0"
 
-"@yarnpkg/parsers@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/parsers/-/parsers-2.3.0.tgz#7b9564c6df02f4921d5cfe8287c4b648e93ea84b"
-  integrity sha512-qgz0QUgOvnhtF92kaluIhIIKBUHlYlHUBQxqh5v9+sxEQvUeF6G6PKiFlzo3E6O99XwvNEGpVu1xZPoSGyGscQ==
-  dependencies:
-    js-yaml "^3.10.0"
-    tslib "^1.13.0"
-
-"@yarnpkg/parsers@^2.3.0":
+"@yarnpkg/parsers@2.4.0", "@yarnpkg/parsers@^2.3.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/parsers/-/parsers-2.4.0.tgz#5d092939022c96b256eaea461816ef2b7d77fa1b"
   integrity sha512-XWgiNGh4MkhdBTJVEbXEqzk66JKjvxTtKGeLPqo3rnJ7JiJnRaK2n9MLTKQB0uoRMWYzPlISdIlok6H9OdlOVQ==
