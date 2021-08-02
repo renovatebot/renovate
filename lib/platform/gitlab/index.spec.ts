@@ -354,7 +354,9 @@ describe(getName(), () => {
     it('should return null if no PR exists', async () => {
       const scope = await initRepo();
       scope
-        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, []);
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toBeNull();
@@ -363,7 +365,9 @@ describe(getName(), () => {
     it('should return the PR object', async () => {
       const scope = await initRepo();
       scope
-        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 91,
@@ -400,7 +404,9 @@ describe(getName(), () => {
     it('should strip draft prefix from title', async () => {
       const scope = await initRepo();
       scope
-        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 91,
@@ -437,7 +443,9 @@ describe(getName(), () => {
     it('should strip deprecated draft prefix from title', async () => {
       const scope = await initRepo();
       scope
-        .get('/api/v4/projects/some%2Frepo/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 91,
@@ -677,7 +685,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
         )
         .reply(200, [
           {
@@ -697,7 +705,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
         )
         .reply(200, [
           {
@@ -721,7 +729,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
         )
         .reply(200, [
           {
@@ -747,7 +755,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
         )
         .reply(200, [])
         .post('/api/v4/projects/undefined/issues')
@@ -765,7 +773,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
         )
         .reply(200, [
           {
@@ -793,7 +801,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
         )
         .reply(200, [
           {
@@ -822,7 +830,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
         )
         .reply(200, [
           {
@@ -849,7 +857,7 @@ describe(getName(), () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
         )
         .reply(200, [
           {
@@ -1108,7 +1116,9 @@ describe(getName(), () => {
     it('returns true if no title and all state', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1126,7 +1136,9 @@ describe(getName(), () => {
     it('returns true if not open', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1146,7 +1158,9 @@ describe(getName(), () => {
     it('returns true if open and with title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1167,7 +1181,9 @@ describe(getName(), () => {
     it('returns true with title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1186,7 +1202,9 @@ describe(getName(), () => {
     it('returns true with draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1205,7 +1223,9 @@ describe(getName(), () => {
     it('returns true with deprecated draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1489,7 +1509,9 @@ describe(getName(), () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1507,7 +1529,9 @@ describe(getName(), () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1525,7 +1549,9 @@ describe(getName(), () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1543,7 +1569,9 @@ describe(getName(), () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, [
           {
             iid: 1,

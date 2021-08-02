@@ -154,20 +154,6 @@ export async function writeExistingFiles(
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
-    if (packageFile.yarnrc) {
-      logger.debug(`Writing .yarnrc to ${basedir}`);
-      const yarnrcFilename = upath.join(basedir, '.yarnrc');
-      try {
-        await outputFile(
-          yarnrcFilename,
-          packageFile.yarnrc
-            .replace('--install.pure-lockfile true', '')
-            .replace('--install.frozen-lockfile true', '')
-        );
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
-      }
-    }
     const { npmLock } = packageFile;
     if (npmLock) {
       const npmLockPath = upath.join(localDir, npmLock);
@@ -434,16 +420,15 @@ export async function getAdditionalFiles(
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
 
-  const env = {
-    ...getChildProcessEnv(),
-    NPM_CONFIG_CACHE: await ensureCacheDir('./others/npm', 'NPM_CONFIG_CACHE'),
-    YARN_CACHE_FOLDER: await ensureCacheDir(
-      './others/yarn',
-      'YARN_CACHE_FOLDER'
-    ),
-    npm_config_store: await ensureCacheDir('./others/pnpm', 'npm_config_store'),
-    NODE_ENV: 'dev',
-  };
+  const env = getChildProcessEnv([
+    'NPM_CONFIG_CACHE',
+    'YARN_CACHE_FOLDER',
+    'npm_config_store',
+  ]);
+  env.NPM_CONFIG_CACHE = await ensureCacheDir('npm');
+  env.YARN_CACHE_FOLDER = await ensureCacheDir('yarn');
+  env.npm_config_store = await ensureCacheDir('pnpm');
+  env.NODE_ENV = 'dev';
 
   let token = '';
   try {

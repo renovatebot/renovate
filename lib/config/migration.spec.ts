@@ -700,6 +700,29 @@ describe(getName(), () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
   });
+  it('it migrates gradle-lite', () => {
+    const config: RenovateConfig = {
+      gradle: {
+        enabled: false,
+      },
+      'gradle-lite': {
+        enabled: true,
+        fileMatch: ['foo'],
+      },
+      packageRules: [
+        {
+          matchManagers: ['gradle-lite'],
+          separateMinorPatch: true,
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
+  });
   it('migrates azureAutoComplete', () => {
     const migrate = (config: RenovateConfig): MigratedConfig =>
       configMigration.migrateConfig(config, defaultConfig);

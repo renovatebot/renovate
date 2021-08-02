@@ -83,8 +83,11 @@ export enum QualifierRank {
   Dev = -1,
   Default = 0,
   RC,
-  Release,
+  Snapshot,
   Final,
+  GA,
+  Release,
+  SP,
 }
 
 export function qualifierRank(input: string): number {
@@ -95,11 +98,20 @@ export function qualifierRank(input: string): number {
   if (val === 'rc' || val === 'cr') {
     return QualifierRank.RC;
   }
-  if (val === 'ga' || val === 'release' || val === 'latest' || val === 'sr') {
-    return QualifierRank.Release;
+  if (val === 'snapshot') {
+    return QualifierRank.Snapshot;
+  }
+  if (val === 'ga') {
+    return QualifierRank.GA;
   }
   if (val === 'final') {
     return QualifierRank.Final;
+  }
+  if (val === 'release' || val === 'latest' || val === 'sr') {
+    return QualifierRank.Release;
+  }
+  if (val === 'sp') {
+    return QualifierRank.SP;
   }
   return QualifierRank.Default;
 }
@@ -108,22 +120,12 @@ function stringTokenCmp(left: string, right: string): number {
   const leftRank = qualifierRank(left);
   const rightRank = qualifierRank(right);
   if (leftRank === 0 && rightRank === 0) {
-    if (left === 'SNAPSHOT' || right === 'SNAPSHOT') {
-      if (left.toLowerCase() < right.toLowerCase()) {
-        return -1;
-      }
+    if (left < right) {
+      return -1;
+    }
 
-      if (left.toLowerCase() > right.toLowerCase()) {
-        return 1;
-      }
-    } else {
-      if (left < right) {
-        return -1;
-      }
-
-      if (left > right) {
-        return 1;
-      }
+    if (left > right) {
+      return 1;
     }
   } else {
     if (leftRank < rightRank) {

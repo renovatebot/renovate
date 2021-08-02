@@ -1,10 +1,18 @@
 import * as upath from 'upath';
-import { id as datasource, defaultRegistryUrls } from '../../datasource/maven';
-import { logger } from '../../logger';
-import { readLocalFile } from '../../util/fs';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import {
+  id as datasource,
+  defaultRegistryUrls,
+} from '../../../datasource/maven';
+import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+} from '../../types';
+import type { GradleManagerData } from '../types';
 import { parseGradle, parseProps } from './parser';
-import type { ManagerData, PackageVariables, VariableRegistry } from './types';
+import type { PackageVariables, VariableRegistry } from './types';
 import {
   getVars,
   isGradleFile,
@@ -20,8 +28,8 @@ import {
 //
 // https://github.com/renovatebot/renovate/issues/8224
 function elevateFileReplacePositionField(
-  deps: PackageDependency<ManagerData>[]
-): PackageDependency<ManagerData>[] {
+  deps: PackageDependency<GradleManagerData>[]
+): PackageDependency<GradleManagerData>[] {
   return deps.map((dep) => ({
     ...dep,
     fileReplacePosition: dep?.managerData?.fileReplacePosition,
@@ -32,7 +40,7 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  const extractedDeps: PackageDependency<ManagerData>[] = [];
+  const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const registry: VariableRegistry = {};
   const packageFilesByName: Record<string, PackageFile> = {};
   const registryUrls = [];

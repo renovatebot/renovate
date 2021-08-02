@@ -178,6 +178,14 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'deepExtract',
+    description: `Enable extraction of dependencies using package managers.`,
+    type: 'boolean',
+    default: false,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'repositoryCache',
     description: 'Option to do repository extract caching.',
     admin: true,
@@ -425,6 +433,7 @@ const options: RenovateOptions[] = [
       'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
     type: 'array',
     subType: 'string',
+    default: null,
   },
   {
     name: 'configWarningReuseIssue',
@@ -568,12 +577,6 @@ const options: RenovateOptions[] = [
   {
     name: 'npmToken',
     description: 'npm token used for authenticating with the default registry.',
-    stage: 'branch',
-    type: 'string',
-  },
-  {
-    name: 'yarnrc',
-    description: 'String copy of yarnrc file. Use \\n instead of line breaks.',
     stage: 'branch',
     type: 'string',
   },
@@ -1278,6 +1281,14 @@ const options: RenovateOptions[] = [
     default: 'pr',
   },
   {
+    name: 'automergeStrategy',
+    description:
+      'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
+    type: 'string',
+    allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
+    default: 'auto',
+  },
+  {
     name: 'automergeComment',
     description:
       'PR comment to add to trigger automerge. Used only if automergeType=pr-comment.',
@@ -1979,9 +1990,9 @@ const options: RenovateOptions[] = [
   {
     name: 'cloneSubmodules',
     description:
-      'Set to false to disable initialization of submodules during repository clone.',
+      'Set to true to enable initialization of submodules during repository clone.',
     type: 'boolean',
-    default: true,
+    default: false,
   },
   {
     name: 'ignorePrAuthor',
