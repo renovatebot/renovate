@@ -158,15 +158,18 @@ describe(getName(), () => {
 
   describe('ensureCacheDir', () => {
     it('creates cache directory according to admin config', async () => {
-      await withDir(async ({ path }) => {
-        setAdminConfig({ cacheDir: join(path) });
-        const dir1 = await ensureCacheDir('deeply/nested');
-        const dir2 = await ensureCacheDir('./deeply/nested');
-        const dir3 = await ensureCacheDir('/deeply/nested');
-        expect(dir1).toEqual(dir2);
-        expect(dir1).toEqual(dir3);
-        expect(await exists(dir1)).toBeTrue();
-      });
+      await withDir(
+        async ({ path }) => {
+          setAdminConfig({ cacheDir: join(path) });
+          const dir1 = await ensureCacheDir('deeply/nested');
+          const dir2 = await ensureCacheDir('./deeply/nested');
+          const dir3 = await ensureCacheDir('/deeply/nested');
+          expect(dir1).toEqual(dir2);
+          expect(dir1).toEqual(dir3);
+          expect(await exists(dir1)).toBeTrue();
+        },
+        { unsafeCleanup: true }
+      );
     });
   });
 });
