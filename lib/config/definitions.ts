@@ -178,6 +178,14 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'deepExtract',
+    description: `Enable extraction of dependencies using package managers.`,
+    type: 'boolean',
+    default: false,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'repositoryCache',
     description: 'Option to do repository extract caching.',
     admin: true,
@@ -569,12 +577,6 @@ const options: RenovateOptions[] = [
   {
     name: 'npmToken',
     description: 'npm token used for authenticating with the default registry.',
-    stage: 'branch',
-    type: 'string',
-  },
-  {
-    name: 'yarnrc',
-    description: 'String copy of yarnrc file. Use \\n instead of line breaks.',
     stage: 'branch',
     type: 'string',
   },
@@ -2001,9 +2003,9 @@ const options: RenovateOptions[] = [
   {
     name: 'cloneSubmodules',
     description:
-      'Set to false to disable initialization of submodules during repository clone.',
+      'Set to true to enable initialization of submodules during repository clone.',
     type: 'boolean',
-    default: true,
+    default: false,
   },
   {
     name: 'ignorePrAuthor',

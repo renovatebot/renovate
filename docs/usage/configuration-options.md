@@ -306,6 +306,10 @@ For `sbt` note that Renovate will update the version string only for packages th
 
 ## cloneSubmodules
 
+Enabling this option will mean that any detected Git submodules will be cloned at time of repository clone.
+
+Important: private submodules aren't supported by Renovate, unless the underlying `ssh` layer already has the appropriate permissions.
+
 ## commitBody
 
 Configure this if you wish Renovate to add a commit body, otherwise Renovate just uses a regular single-line commit.
@@ -389,6 +393,12 @@ If you need to _override_ constraints that Renovate detects from the repository,
 ```
 
 Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
+
+## deepExtract
+
+If configured to `true`, then dependency extraction will be done using the relevant package manager instead of JavaScript-based parsing.
+
+This option applies only to the `gradle` manager.
 
 ## dependencyDashboard
 
@@ -2365,5 +2375,3 @@ To disable the vulnerability alerts functionality completely, configure like thi
   }
 }
 ```
-
-## yarnrc

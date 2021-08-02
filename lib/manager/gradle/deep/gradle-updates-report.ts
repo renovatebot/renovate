@@ -1,7 +1,7 @@
 import { exists, readFile, writeFile } from 'fs-extra';
 import { join } from 'upath';
-import * as datasourceSbtPackage from '../../datasource/sbt-package';
-import { logger } from '../../logger';
+import * as datasourceSbtPackage from '../../../datasource/sbt-package';
+import { logger } from '../../../logger';
 import type {
   BuildDependency,
   GradleDependencyWithRepos,
