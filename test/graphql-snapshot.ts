@@ -184,12 +184,16 @@ interface GraphqlSnapshotInput {
 
 export function makeGraphqlSnapshot(
   requestBody: GraphqlSnapshotInput
-): GraphqlSnapshot {
-  const { query: queryStr, variables } = requestBody;
-  const queryRawTree = parse(queryStr, { noLocation: true });
-  const queryTree = simplifyGraphqlTree(queryRawTree);
-  if (variables) {
-    return { variables, ...queryTree };
+): GraphqlSnapshot | null {
+  try {
+    const { query: queryStr, variables } = requestBody;
+    const queryRawTree = parse(queryStr, { noLocation: true });
+    const queryTree = simplifyGraphqlTree(queryRawTree);
+    if (variables) {
+      return { variables, ...queryTree };
+    }
+    return queryTree;
+  } catch (ex) {
+    return null;
   }
-  return queryTree;
 }

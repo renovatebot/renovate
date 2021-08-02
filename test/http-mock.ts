@@ -58,18 +58,15 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
     const { headers, method } = req;
     const url = req.options?.href;
     const result: RequestLogItem = { headers, method, url };
-    const body = req.requestBodyBuffers?.[0]?.toString();
+    const requestBody = req.requestBodyBuffers?.[0]?.toString();
 
-    if (body) {
-      if (headers['content-type'] === 'application/json') {
-        const jsonBody = JSON.parse(body);
-        if (jsonBody?.query) {
-          try {
-            result.graphql = makeGraphqlSnapshot(jsonBody);
-          } catch (ex) {
-            result.body = jsonBody || body;
-          }
-        }
+    if (requestBody && headers['content-type'] === 'application/json') {
+      const body = JSON.parse(requestBody);
+      const graphql = makeGraphqlSnapshot(body);
+      if (graphql) {
+        result.graphql = graphql;
+      } else {
+        result.body = body;
       }
     }
     requestLog.push(result);
