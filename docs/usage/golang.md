@@ -40,27 +40,16 @@ Renovate will commit all files changed within the `vendor/` folder.
 
 ### Go binary version
 
-By default, Renovate will keep up with the very latest version of `go`.
+By default, Renovate will keep up with the latest version of the `go` binary.
 
-You can "pin" the `go` version that Renovate uses.
-Say you want Renovate to use Go version 1.14, you can do this by adding `go 1.14` to your `go.mod` file.
-We do not support pinning Go versions to a specific patch level, so you cannot use `go 1.14.12`, but you can use `go 1.14` in your `go.mod` file.
+You can force Renovate to use a specific version of Go by setting a constraint.
+As an example, say you want Renovate to use the latest patch version of the `1.16` Go binary, you'd put this in your Renovate config:
 
-### Custom registry support, and authentication
-
-This example shows how you can use a `config.js` file to configure Renovate for use with a custom private Go module source using Git to pull the modules.
-We're using environment variables to pass the Git token to Renovate bot.
-
-```js
-module.exports = {
-  hostRules: [
-    {
-      matchHost: 'github.enterprise.com',
-      token: process.env.GO_GIT_TOKEN,
-    },
-  ],
-  golang: {
-    registryUrls: ['github.enterprise.com'],
-  },
-};
+```json
+  "constraints": {
+    "go": "1.16"
+  }
 ```
+
+We do not support patch level versions for the minimum `go` version.
+This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a contraint.

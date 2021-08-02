@@ -24,7 +24,11 @@ import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson } from './types';
-import { composerVersioningId, getConstraint } from './utils';
+import {
+  composerVersioningId,
+  extractContraints,
+  getConstraint,
+} from './utils';
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
@@ -76,7 +80,7 @@ export async function updateArtifacts({
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
     return null;
@@ -87,6 +91,15 @@ export async function updateArtifacts({
   await ensureLocalDir(vendorDir);
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+
+    const constraints = {
+      ...extractContraints(
+        JSON.parse(newPackageFileContent),
+        JSON.parse(existingLockFileContent)
+      ),
+      ...config.constraints,
+    };
+
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
@@ -98,7 +111,7 @@ export async function updateArtifacts({
       },
       docker: {
         image: 'composer',
-        tagConstraint: getConstraint(config),
+        tagConstraint: getConstraint(constraints),
         tagScheme: composerVersioningId,
       },
       cacheTmpdir: {
@@ -121,7 +134,7 @@ export async function updateArtifacts({
     }
     args += ' --no-ansi --no-interaction';
     if (!getAdminConfig().allowScripts || config.ignoreScripts) {
-      args += ' --no-scripts --no-autoloader';
+      args += ' --no-scripts --no-autoloader --no-plugins';
     }
     logger.debug({ cmd, args }, 'composer command');
     await exec(`${cmd} ${args}`, execOptions);

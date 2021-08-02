@@ -25,7 +25,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -148,7 +147,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -311,7 +309,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -360,7 +357,6 @@ Object {
   "skipInstalls": false,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -420,7 +416,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -474,7 +469,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -610,7 +604,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -746,7 +739,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -882,7 +874,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": "yarn.lock",
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -906,7 +897,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1042,7 +1032,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -1066,7 +1055,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1090,7 +1078,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1226,6 +1213,122 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
+}
+`;
+
+exports[`manager/npm/extract/index .extractPackageFile() returns an array of dependencies with resolution comments 1`] = `
+Object {
+  "constraints": Object {},
+  "deps": Array [
+    Object {
+      "currentValue": "6.5.0",
+      "datasource": "npm",
+      "depName": "autoprefixer",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "currentValue": "~1.6.0",
+      "datasource": "npm",
+      "depName": "bower",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "currentValue": "13.1.0",
+      "datasource": "npm",
+      "depName": "browserify",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "currentValue": "0.9.2",
+      "datasource": "npm",
+      "depName": "browserify-css",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "currentValue": "=0.22.0",
+      "datasource": "npm",
+      "depName": "cheerio",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "currentValue": "1.21.0",
+      "datasource": "npm",
+      "depName": "config",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "depName": "enabled",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+      "skipReason": "invalid-value",
+    },
+    Object {
+      "currentValue": "^1.5.8",
+      "datasource": "npm",
+      "depName": "angular",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+    },
+    Object {
+      "currentValue": "1.5.8",
+      "datasource": "npm",
+      "depName": "angular-touch",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+    },
+    Object {
+      "currentValue": "1.5.8",
+      "datasource": "npm",
+      "depName": "angular-sanitize",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+    },
+    Object {
+      "currentValue": "4.0.0-beta.1",
+      "datasource": "npm",
+      "depName": "@angular/core",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+    },
+    Object {
+      "depName": undefined,
+      "depType": "resolutions",
+      "managerData": Object {
+        "key": "//",
+      },
+      "prettyDepType": "resolutions",
+      "skipReason": "invalid-name",
+    },
+    Object {
+      "currentValue": "1.21.0",
+      "datasource": "npm",
+      "depName": "config",
+      "depType": "resolutions",
+      "managerData": Object {
+        "key": "**/config",
+      },
+      "prettyDepType": "resolutions",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+  },
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageFileVersion": "1.0.0",
+  "packageJsonName": "renovate",
+  "packageJsonType": "app",
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": Array [],
 }
 `;

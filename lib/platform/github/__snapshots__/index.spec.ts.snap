@@ -5,10 +5,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -24,12 +28,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -59,10 +67,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -78,12 +90,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -127,10 +143,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -146,12 +166,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -195,10 +219,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -214,12 +242,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -277,10 +309,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -296,12 +332,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -331,10 +371,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -350,12 +394,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -382,10 +430,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -401,12 +453,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -417,14 +473,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -448,12 +519,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -494,10 +571,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -513,12 +594,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -529,14 +614,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -560,12 +660,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -606,10 +712,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -625,12 +735,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -641,14 +755,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -672,12 +801,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -707,10 +842,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -726,12 +865,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -742,14 +885,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -773,12 +931,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -805,10 +969,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -824,12 +992,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -840,14 +1012,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -871,12 +1058,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -903,10 +1096,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -922,12 +1119,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -938,14 +1139,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -969,12 +1185,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1012,10 +1234,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -1031,12 +1257,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1047,14 +1277,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -1078,12 +1323,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1121,14 +1372,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1143,12 +1452,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1165,7 +1480,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/issues/3",
+    "url": "https://api.github.com/repos/some/repo/issues/3",
   },
 ]
 `;
@@ -1175,14 +1490,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1197,12 +1570,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1211,18 +1590,18 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"new-title\\",\\"body\\":\\"new-content\\"}",
+    "body": "{\\"title\\":\\"new-title\\",\\"body\\":\\"new-content\\",\\"labels\\":[]}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "42",
+      "content-length": "54",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
-    "url": "https://api.github.com/repos/undefined/issues",
+    "url": "https://api.github.com/repos/some/repo/issues",
   },
 ]
 `;
@@ -1232,14 +1611,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1254,12 +1691,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1276,7 +1719,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/issues/1",
+    "url": "https://api.github.com/repos/some/repo/issues/1",
   },
 ]
 `;
@@ -1286,14 +1729,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1308,12 +1809,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1330,21 +1837,21 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/issues/2",
+    "url": "https://api.github.com/repos/some/repo/issues/2",
   },
   Object {
-    "body": "{\\"title\\":\\"title-2\\",\\"body\\":\\"new-content\\"}",
+    "body": "{\\"title\\":\\"title-2\\",\\"body\\":\\"new-content\\",\\"labels\\":[]}",
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "40",
+      "content-length": "52",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
-    "url": "https://api.github.com/repos/undefined/issues",
+    "url": "https://api.github.com/repos/some/repo/issues",
   },
 ]
 `;
@@ -1354,14 +1861,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1376,12 +1941,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1401,7 +1972,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
-    "url": "https://api.github.com/repos/undefined/issues",
+    "url": "https://api.github.com/repos/some/repo/issues",
   },
 ]
 `;
@@ -1411,14 +1982,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1433,12 +2062,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1458,7 +2093,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "PATCH",
-    "url": "https://api.github.com/repos/undefined/issues/1",
+    "url": "https://api.github.com/repos/some/repo/issues/1",
   },
   Object {
     "headers": Object {
@@ -1469,7 +2104,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/issues/2",
+    "url": "https://api.github.com/repos/some/repo/issues/2",
   },
 ]
 `;
@@ -1479,14 +2114,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1501,12 +2194,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1522,14 +2221,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1544,12 +2301,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1566,7 +2329,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/issues/2",
+    "url": "https://api.github.com/repos/some/repo/issues/2",
   },
 ]
 `;
@@ -1576,14 +2339,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1598,12 +2419,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1620,7 +2447,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/issues/2",
+    "url": "https://api.github.com/repos/some/repo/issues/2",
   },
 ]
 `;
@@ -1630,14 +2457,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1652,12 +2537,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1674,7 +2565,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/issues/2",
+    "url": "https://api.github.com/repos/some/repo/issues/2",
   },
   Object {
     "body": "{\\"body\\":\\"newer-content\\",\\"state\\":\\"open\\",\\"title\\":\\"title-3\\"}",
@@ -1688,7 +2579,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "PATCH",
-    "url": "https://api.github.com/repos/undefined/issues/2",
+    "url": "https://api.github.com/repos/some/repo/issues/2",
   },
 ]
 `;
@@ -1698,14 +2589,72 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token abc123",
+      "content-length": "351",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1720,12 +2669,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "560",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1742,7 +2697,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/issues/2",
+    "url": "https://api.github.com/repos/some/repo/issues/2",
   },
   Object {
     "body": "{\\"body\\":\\"newer-content\\",\\"state\\":\\"open\\",\\"title\\":\\"title-3\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
@@ -1756,7 +2711,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "PATCH",
-    "url": "https://api.github.com/repos/undefined/issues/2",
+    "url": "https://api.github.com/repos/some/repo/issues/2",
   },
 ]
 `;
@@ -1766,14 +2721,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1788,12 +2758,16 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "531",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1823,14 +2797,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1845,12 +2834,16 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "531",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1877,14 +2870,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+          "$user": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
           },
           "issues": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "$user",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -1899,12 +2907,16 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "425",
+      "content-length": "531",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1936,10 +2948,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -1955,12 +2971,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2003,10 +3023,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -2022,12 +3046,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2054,10 +3082,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -2073,12 +3105,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2119,10 +3155,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -2138,12 +3178,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2222,10 +3266,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -2241,12 +3289,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2296,14 +3348,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -2355,6 +3421,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -2369,12 +3438,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2385,14 +3460,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -2416,12 +3506,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2448,10 +3544,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -2467,12 +3567,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2523,10 +3627,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -2542,12 +3650,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2569,14 +3681,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -2628,6 +3754,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -2642,12 +3771,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2658,14 +3793,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -2689,12 +3839,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2745,10 +3901,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -2764,12 +3924,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2827,14 +3991,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -2886,6 +4064,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -2900,12 +4081,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2916,14 +4103,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -2947,12 +4149,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2979,10 +4187,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -2998,12 +4210,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3041,10 +4257,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3060,12 +4280,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3081,10 +4305,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3100,12 +4328,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3121,10 +4353,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3140,12 +4376,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3183,10 +4423,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3202,12 +4446,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3245,10 +4493,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3264,12 +4516,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3307,10 +4563,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3326,12 +4586,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3369,10 +4633,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3388,12 +4656,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3431,10 +4703,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3450,12 +4726,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3482,10 +4762,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3501,12 +4785,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3533,10 +4821,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3552,12 +4844,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3584,10 +4880,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3603,12 +4903,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3635,10 +4939,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3654,12 +4962,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3709,10 +5021,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3728,12 +5044,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3744,14 +5064,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -3803,6 +5137,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -3817,12 +5154,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3833,14 +5176,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -3864,12 +5222,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3901,10 +5265,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -3920,12 +5288,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3936,14 +5308,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -3995,6 +5381,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -4009,12 +5398,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4043,10 +5438,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -4062,12 +5461,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4078,14 +5481,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -4137,6 +5554,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -4151,12 +5571,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4167,14 +5593,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -4198,12 +5639,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4248,10 +5695,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -4267,12 +5718,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4283,14 +5738,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -4342,6 +5811,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -4356,12 +5828,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4372,14 +5850,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -4403,12 +5896,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4451,10 +5950,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -4470,12 +5973,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4486,14 +5993,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -4545,6 +6066,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -4559,12 +6083,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4575,14 +6105,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -4606,12 +6151,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4638,10 +6189,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -4657,12 +6212,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4673,14 +6232,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "OPEN",
+              ],
             },
             "nodes": Object {
               "assignees": Object {
@@ -4732,6 +6305,9 @@ Array [
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
+                  "states": Array [
+                    "CHANGES_REQUESTED",
+                  ],
                 },
                 "nodes": Object {
                   "state": null,
@@ -4746,12 +6322,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "1504",
+      "content-length": "1377",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4762,14 +6344,29 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "pullRequests": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+              "states": Array [
+                "CLOSED",
+                "MERGED",
+              ],
             },
             "nodes": Object {
               "comments": Object {
@@ -4793,12 +6390,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "604",
+      "content-length": "674",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4914,10 +6517,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
           },
           "vulnerabilityAlerts": Object {
             "__args": Object {
@@ -4955,12 +6562,13 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "697",
+      "content-length": "684",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4976,10 +6584,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
           },
           "vulnerabilityAlerts": Object {
             "__args": Object {
@@ -5017,12 +6629,13 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "697",
+      "content-length": "684",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5038,10 +6651,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
           },
           "vulnerabilityAlerts": Object {
             "__args": Object {
@@ -5079,12 +6696,13 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "697",
+      "content-length": "684",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5100,10 +6718,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "undefined",
-            "owner": "undefined",
+            "name": "$name",
+            "owner": "$owner",
           },
           "vulnerabilityAlerts": Object {
             "__args": Object {
@@ -5141,12 +6763,13 @@ Array [
           },
         },
       },
+      "variables": Object {},
     },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "697",
+      "content-length": "684",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5333,10 +6956,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5352,12 +6979,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5444,10 +7075,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5463,12 +7098,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5513,10 +7152,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5532,12 +7175,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5560,10 +7207,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5579,12 +7230,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5607,10 +7262,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5626,12 +7285,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5654,10 +7317,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5673,12 +7340,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5694,10 +7365,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5713,12 +7388,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5734,10 +7413,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5753,12 +7436,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5781,10 +7468,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5800,12 +7491,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5857,10 +7552,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5876,12 +7575,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5919,10 +7622,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5938,12 +7645,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "github.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5961,10 +7672,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -5980,12 +7695,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6057,10 +7776,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6076,12 +7799,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6139,10 +7866,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6158,12 +7889,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6193,10 +7928,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6212,12 +7951,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6247,10 +7990,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6266,12 +8013,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6301,10 +8052,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6320,12 +8075,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6355,10 +8114,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6374,12 +8137,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6406,10 +8173,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6425,12 +8196,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6493,10 +8268,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6512,12 +8291,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6547,10 +8330,14 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "repo",
-            "owner": "some",
+            "name": "$name",
+            "owner": "$owner",
           },
           "defaultBranchRef": Object {
             "name": null,
@@ -6566,12 +8353,16 @@ Array [
           "squashMergeAllowed": null,
         },
       },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "330",
+      "content-length": "351",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

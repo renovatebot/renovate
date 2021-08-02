@@ -25,7 +25,7 @@ function parseDepName(depType: string, key: string): string {
     return key;
   }
 
-  const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key);
+  const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key) ?? [];
   return depName;
 }
 
@@ -117,12 +117,6 @@ export async function extractPackageFile(
       }
     }
   }
-  const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
-  let yarnrc;
-  if (!is.string(config.yarnrc)) {
-    yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
-  }
-
   let lernaJsonFile: string;
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
@@ -364,7 +358,6 @@ export async function extractPackageFile(
     packageFileVersion,
     packageJsonType,
     npmrc,
-    yarnrc,
     ...lockFiles,
     managerData: {
       lernaJsonFile,

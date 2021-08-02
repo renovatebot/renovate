@@ -9,6 +9,7 @@ const fs: any = _fs;
 const defaultConfig = getConfig();
 
 const input01Content = loadFixture('inputs/01.json', '..');
+const input01GlobContent = loadFixture('inputs/01-glob.json', '..');
 const workspacesContent = loadFixture('inputs/workspaces.json', '..');
 const workspacesSimpleContent = loadFixture(
   'inputs/workspaces-simple.json',
@@ -77,6 +78,15 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      expect(res).toMatchSnapshot();
+    });
+    it('returns an array of dependencies with resolution comments', async () => {
+      const res = await npmExtract.extractPackageFile(
+        input01GlobContent,
+        'package.json',
+        defaultConfig
+      );
+      expect(res?.deps).toHaveLength(13);
       expect(res).toMatchSnapshot();
     });
     it('finds a lock file', async () => {

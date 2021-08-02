@@ -114,6 +114,21 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
       expect(res.hostRules).toHaveLength(2);
     });
+    it('regression test for #10937', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_USERNAME: 'some-user',
+        GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_PASSWORD: 'some-password',
+      };
+      const res = env.getConfig(envParam);
+      expect(res.hostRules).toMatchObject([
+        {
+          hostType: 'git-tags',
+          matchHost: 'gitlab.example-domain.net',
+          password: 'some-password',
+          username: 'some-user',
+        },
+      ]);
+    });
     it('supports datasource env token', () => {
       const envParam: NodeJS.ProcessEnv = {
         PYPI_TOKEN: 'some-token',
