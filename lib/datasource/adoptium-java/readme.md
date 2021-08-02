@@ -1,4 +1,4 @@
-This datasource returns releases from https://adoptium.net/ API.
+This datasource returns releases from [Adoptium](https://adoptium.net/) API.
 
 It uses `project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium` as filter parameters.
 
