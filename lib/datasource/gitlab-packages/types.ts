@@ -1,4 +1,4 @@
-export type GitlabPackage = {
+export interface GitlabPackage {
   version: string;
   created_at: string;
-};
+}

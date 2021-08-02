@@ -1,59 +1,42 @@
-import URL from 'url';
-import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
+import * as url from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabPackage } from './types';
 
 const gitlabApi = new GitlabHttp();
 
-export const id = 'gitlab-package';
+export const id = 'gitlab-packages';
 export const customRegistrySupport = true;
-export const defaultRegistryUrls = ['https://gitlab.com'];
 export const registryStrategy = 'first';
+export const defaultVersioning = 'loose';
+export const caching = true;
 
-const cacheNamespace = 'datasource-gitlab';
+function getGitlabPackageApiUrl(registryUrl, lookupName): string {
+  const parsedRegistryUrl = url.parseUrl(registryUrl);
+  const packageName = encodeURIComponent(lookupName);
 
-function getCacheKey(depHost: string, lookupName: string): string {
-  const type = 'packages';
-  return `${depHost}:${lookupName}:${type}`;
+  const server = parsedRegistryUrl.origin;
+  const project = encodeURIComponent(parsedRegistryUrl.pathname.substring(1)); // remove leading /
+
+  return url.resolveBaseUrl(
+    server,
+    `/api/v4/projects/${project}/packages?package_name=${packageName}&per_page=100`
+  );
 }
 
 export async function getReleases({
-  registryUrl: depHost,
+  registryUrl,
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    getCacheKey(depHost, lookupName)
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-
-  const packageName = lookupName.split('/-/').pop();
-  const repo = lookupName.slice(0, -1 * (packageName.length + '/-/'.length));
-
-  const urlEncodedPackageName = encodeURIComponent(packageName);
-  const urlEncodedRepo = encodeURIComponent(repo);
-
-  // tag
-  const url = URL.resolve(
-    depHost,
-    `/api/v4/projects/${urlEncodedRepo}/packages?package_name=${urlEncodedPackageName}&per_page=100`
-  );
+  const gitlabPackageApiUrl = getGitlabPackageApiUrl(registryUrl, lookupName);
 
   const gitlabPackage = (
-    await gitlabApi.getJson<GitlabPackage[]>(url, {
+    await gitlabApi.getJson<GitlabPackage[]>(gitlabPackageApiUrl, {
       paginate: true,
     })
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: URL.resolve(
-      depHost,
-      repo + '/-/packages?search[]=' + urlEncodedPackageName
-    ),
     releases: null,
   };
   dependency.releases = gitlabPackage.map(({ version, created_at }) => ({
@@ -61,12 +44,5 @@ export async function getReleases({
     releaseTimestamp: created_at,
   }));
 
-  const cacheMinutes = 10;
-  await packageCache.set(
-    cacheNamespace,
-    getCacheKey(depHost, lookupName),
-    dependency,
-    cacheMinutes
-  );
   return dependency;
 }
