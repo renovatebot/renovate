@@ -1,6 +1,6 @@
 import { getName } from '../../../test/util';
-import { GitHubReleaseMocker } from './__testutil__';
 import { getApiBaseUrl, getGithubRelease, getSourceUrlBase } from './common';
+import { GitHubReleaseMocker } from './test';
 
 describe(getName(), () => {
   describe('getSourceUrlBase', () => {

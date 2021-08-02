@@ -2,7 +2,7 @@ import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
-import { GitHubReleaseMocker } from './__testutil__';
+import { GitHubReleaseMocker } from './test';
 import { id as datasource } from '.';
 import * as github from '.';
 

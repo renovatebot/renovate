@@ -1,8 +1,8 @@
 import hasha from 'hasha';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
-import { GitHubReleaseMocker } from './__testutil__';
 import { findDigestAsset, mapDigestAssetToRelease } from './digest';
+import { GitHubReleaseMocker } from './test';
 import { DigestAsset } from './types';
 
 describe(getName(), () => {
