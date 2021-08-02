@@ -201,7 +201,7 @@
     "@jest/globals": "27.0.6",
     "@jest/reporters": "27.0.6",
     "@jest/test-result": "27.0.6",
-    "@ls-lint/ls-lint": "1.9.2",
+    "@ls-lint/ls-lint": "1.10.0",
     "@semantic-release/exec": "5.0.0",
     "@types/bunyan": "1.8.7",
     "@types/cacache": "15.0.1",
