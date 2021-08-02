@@ -374,8 +374,9 @@ Array [
     "currentDigest": undefined,
     "currentValue": "12.19.1",
     "datasource": "docker",
-    "depName": "library/node",
+    "depName": "node",
     "depType": "final",
+    "lookupName": "library/node",
     "registryUrls": Array [
       "https://registry.example.com/proxy-cache",
     ],

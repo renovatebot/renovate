@@ -69,7 +69,7 @@ describe(getName(), () => {
         'FROM registry.example.com/proxy-cache/library/node:12.19.1\n'
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].depName).toEqual('library/node');
+      expect(res[0].depName).toEqual('node');
       expect(res[0].currentValue).toEqual('12.19.1');
     });
     it('handles custom hosts with port without tag', () => {
