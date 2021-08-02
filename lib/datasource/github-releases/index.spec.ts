@@ -1,11 +1,6 @@
-import fs from 'fs-extra';
-import hasha from 'hasha';
-import { DirectoryResult, dir } from 'tmp-promise';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
-import * as memCache from '../../util/cache/memory';
-import * as packageCache from '../../util/cache/package';
 import * as _hostRules from '../../util/host-rules';
 import { GitHubReleaseMocker } from './__testutil__';
 import { id as datasource } from '.';
@@ -98,7 +93,7 @@ describe(getName(), () => {
       expect(digest).toEqual(currentDigest);
     });
 
-    // TODO: reviewers - this is awkward, but I found returning `null` in this case to not produce an update
+    // This is awkward, but I found returning `null` in this case to not produce an update
     // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
     it('ignores failures verifying currentDigest', async () => {
       releaseMock.release(currentValue);
@@ -112,50 +107,6 @@ describe(getName(), () => {
         currentValue
       );
       expect(digest).toEqual(currentDigest);
-    });
-
-    describe('with cache', () => {
-      let tmpDir: DirectoryResult;
-      beforeEach(async () => {
-        tmpDir = await dir();
-        packageCache.init({ cacheDir: tmpDir.path });
-        memCache.init();
-      });
-
-      afterEach(() => {
-        fs.rmdirSync(tmpDir.path, { recursive: true });
-      });
-
-      it('caches digested assets', async () => {
-        const barContent = '1'.repeat(10 * 1024);
-        releaseMock.withAssets(currentValue, {
-          'bar.txt': barContent,
-        });
-        const algorithm = 'sha256';
-        const barDigest = await hasha.async(barContent, { algorithm });
-
-        for (const nextValue of ['v1.0.1', 'v1.0.2']) {
-          const nextBarContent = '3'.repeat(10 * 1024);
-          releaseMock.withAssets(nextValue, {
-            'bar.txt': nextBarContent,
-          });
-
-          const digest = await getDigest(
-            {
-              datasource,
-              lookupName,
-              currentValue,
-              currentDigest: barDigest,
-            },
-            nextValue
-          );
-          const nextBarDigest = await hasha.async(nextBarContent, {
-            algorithm,
-          });
-          expect(digest).toEqual(nextBarDigest);
-        }
-        // `currentValue` assets were only mocked once, therefore asset digests were cached
-      });
     });
   });
 });
