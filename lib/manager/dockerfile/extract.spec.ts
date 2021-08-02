@@ -64,6 +64,7 @@ describe(getName(), () => {
       expect(res[0].depName).toEqual('node');
       expect(res[0].currentValue).toEqual('8');
     });
+
     it('handles registries with a path', () => {
       const res = extractPackageFile(
         'FROM registry.example.com/proxy-cache/library/node:12.19.1\n'
@@ -72,7 +73,8 @@ describe(getName(), () => {
       expect(res[0].depName).toEqual('node');
       expect(res[0].currentValue).toEqual('12.19.1');
     });
-    it('handles custom hosts with port without tag', () => {
+
+     it('handles custom hosts with port without tag', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info:5005/node\n'
       ).deps;
@@ -179,6 +181,7 @@ describe(getName(), () => {
         }
       `);
     });
+
     it('handles docker hub with full host', () => {
       expect(splitImageParts('docker.io/node:14')).toMatchInlineSnapshot(`
         Object {
