@@ -1,3 +1,4 @@
+import { AdoptiumJavaDatasource } from './adoptium-java';
 import { BitBucketTagsDatasource } from './bitbucket-tags';
 import { CdnJsDatasource } from './cdnjs';
 import { ClojureDatasource } from './clojure';
@@ -35,6 +36,7 @@ import type { DatasourceApi } from './types';
 const api = new Map<string, DatasourceApi>();
 export default api;
 
+api.set(AdoptiumJavaDatasource.id, new AdoptiumJavaDatasource());
 api.set('bitbucket-tags', new BitBucketTagsDatasource());
 api.set('cdnjs', new CdnJsDatasource());
 api.set('clojure', new ClojureDatasource());
