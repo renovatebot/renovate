@@ -4,9 +4,7 @@ import { extractContraints, getConstraint } from './utils';
 describe(getName(), () => {
   describe('getConstraint', () => {
     it('returns from config', () => {
-      expect(getConstraint({ constraints: { composer: '1.1.0' } })).toEqual(
-        '1.1.0'
-      );
+      expect(getConstraint({ composer: '1.1.0' })).toEqual('1.1.0');
     });
 
     it('returns from null', () => {
