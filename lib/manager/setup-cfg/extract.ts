@@ -1,4 +1,4 @@
-import { id as datasource } from '../../datasource/pypi';
+import { PypiDatasource } from '../../datasource/pypi';
 import pep440 from '../../versioning/pep440';
 import type { PackageDependency, PackageFile, Result } from '../types';
 
@@ -41,7 +41,11 @@ function parseDep(
     currentValue &&
     pep440.isValid(currentValue)
   ) {
-    const dep: PackageDependency = { datasource, depName, currentValue };
+    const dep: PackageDependency = {
+      datasource: PypiDatasource.id,
+      depName,
+      currentValue,
+    };
     const depType = getDepType(section, record);
     if (depType) {
       dep.depType = depType;

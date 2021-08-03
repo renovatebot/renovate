@@ -2,7 +2,7 @@ import { getName } from '../../test/util';
 import * as datasourceMaven from './maven';
 import { addMetaData } from './metadata';
 import * as datasourceNpm from './npm';
-import * as datasourcePypi from './pypi';
+import { PypiDatasource } from './pypi';
 
 describe(getName(), () => {
   it('Should do nothing if dep is not specified', () => {
@@ -22,7 +22,7 @@ describe(getName(), () => {
       ],
     };
 
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'django';
 
     addMetaData(dep, datasource, lookupName);
@@ -42,7 +42,7 @@ describe(getName(), () => {
       ],
     };
 
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'mkdocs';
 
     addMetaData(dep, datasource, lookupName);
@@ -62,7 +62,7 @@ describe(getName(), () => {
         { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
       ],
     };
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'django-filter';
 
     addMetaData(dep, datasource, lookupName);
