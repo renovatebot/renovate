@@ -216,6 +216,7 @@ describe('manager/dockerfile/extract', () => {
       expect(res[0].depName).toEqual('node');
       expect(res[0].currentValue).toEqual('12.19.1');
     });
+
     it('handles custom hosts with port without tag', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info:5005/node\n'

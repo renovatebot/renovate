@@ -65,7 +65,10 @@ export function getDep(
     };
   }
   const dep = splitImageParts(currentFrom);
-  if (specifyReplaceString) {
+  if (dep.skipReason) {
+    return dep; // currentFrom contains variable
+  }
+  if (specifyReplaceString && dep.depName) {
     dep.replaceString = currentFrom.substring(currentFrom.indexOf(dep.depName));
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
