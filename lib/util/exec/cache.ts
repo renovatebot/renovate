@@ -1,9 +1,9 @@
 import cryptoRandomString from 'crypto-random-string';
 import { join } from 'upath';
-import { getAdminConfig } from '../../../config/admin';
-import { logger } from '../../../logger';
-import { chmod, ensureCacheDir, exists, readdir, remove, stat } from '../../fs';
-import { volumeCreate, volumePrune } from './volume';
+import { getAdminConfig } from '../../config/admin';
+import { logger } from '../../logger';
+import { chmod, ensureCacheDir, exists, readdir, remove, stat } from '../fs';
+import { volumeCreate, volumePrune } from './docker/volume';
 
 let cachedTmpDirId: string = null;
 

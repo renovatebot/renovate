@@ -5,6 +5,7 @@ import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ensureCacheDir } from '../fs';
+import { getCachedTmpDirId, getCachedTmpDirNs } from './cache';
 import {
   DockerOptions,
   ExecResult,
@@ -14,7 +15,6 @@ import {
   rawExec,
 } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
-import { getCachedTmpDirId, getCachedTmpDirNs } from './docker/cache';
 import { getChildProcessEnv } from './env';
 
 type ExtraEnv<T = unknown> = Record<string, T>;

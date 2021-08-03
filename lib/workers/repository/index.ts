@@ -2,11 +2,8 @@ import fs from 'fs-extra';
 import { getAdminConfig, setAdminConfig } from '../../config/admin';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
+import { ensureCachedTmpDir, purgeCachedTmpDirs } from '../../util/exec/cache';
 import { removeDanglingContainers } from '../../util/exec/docker';
-import {
-  ensureCachedTmpDir,
-  purgeCachedTmpDirs,
-} from '../../util/exec/docker/cache';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';

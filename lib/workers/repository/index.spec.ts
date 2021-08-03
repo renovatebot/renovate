@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { RenovateConfig, getConfig, getName, mocked } from '../../../test/util';
-import { resetCachedTmpDirId } from '../../util/exec/docker/cache';
+import { resetCachedTmpDirId } from '../../util/exec/cache';
 import * as _process from './process';
 import { ExtractResult } from './process/extract-update';
 import { renovateRepository } from '.';

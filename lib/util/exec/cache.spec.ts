@@ -1,6 +1,6 @@
-import { exec, mockExecAll } from '../../../../test/exec-util';
-import { fs, getName } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { exec, mockExecAll } from '../../../test/exec-util';
+import { fs, getName } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
 import {
   ensureCachedTmpDir,
   getCachedTmpDirId,

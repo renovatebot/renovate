@@ -10,7 +10,7 @@ import type { RepoAdminConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
-import { resetCachedTmpDirId } from './docker/cache';
+import { resetCachedTmpDirId } from './cache';
 import { ExecOptions, exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
