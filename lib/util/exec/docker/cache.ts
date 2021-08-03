@@ -26,6 +26,7 @@ export function getCachedTmpDirNs(): string {
   return `${prefix}_${suffix}`;
 }
 
+// @See https://github.com/renovatebot/renovate/issues/9748
 async function fixFilePermissionsBeforeDelete(entry: string): Promise<void> {
   try {
     if (await exists(entry)) {
