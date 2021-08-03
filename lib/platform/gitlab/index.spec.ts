@@ -1403,7 +1403,7 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('does not trying to create already existing approval rule', async () => {
+    it('does not try to create already existing approval rule', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)

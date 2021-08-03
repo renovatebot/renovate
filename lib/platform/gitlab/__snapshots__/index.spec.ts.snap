@@ -320,7 +320,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) does not trying to create already existing approval rule 1`] = `
+exports[`platform/gitlab/index createPr(branchName, title, body) does not try to create already existing approval rule 1`] = `
 Array [
   Object {
     "headers": Object {
