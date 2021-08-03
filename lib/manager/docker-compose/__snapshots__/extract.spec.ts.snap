@@ -62,9 +62,6 @@ Array [
     "replaceString": "dockersamples/visualizer:stable",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "datasource": "docker",
-    "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "skipReason": "contains-variable",
   },
 ]
@@ -132,9 +129,6 @@ Array [
     "replaceString": "dockersamples/visualizer:stable",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "datasource": "docker",
-    "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "skipReason": "contains-variable",
   },
 ]
@@ -202,9 +196,6 @@ Array [
     "replaceString": "dockersamples/visualizer:stable",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "datasource": "docker",
-    "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "skipReason": "contains-variable",
   },
 ]

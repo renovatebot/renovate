@@ -74,7 +74,7 @@ describe(getName(), () => {
       expect(res[0].currentValue).toEqual('12.19.1');
     });
 
-     it('handles custom hosts with port without tag', () => {
+    it('handles custom hosts with port without tag', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info:5005/node\n'
       ).deps;
