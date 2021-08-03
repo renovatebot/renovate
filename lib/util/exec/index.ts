@@ -30,38 +30,33 @@ export interface ExecOptions extends ChildProcessExecOptions {
   cacheTmpdir?: Opt<CacheDirOption>;
 }
 
-function createChildEnv(
-  env: NodeJS.ProcessEnv,
-  extraEnv: ExtraEnv
-): ExtraEnv<string> {
-  const extraEnvEntries = Object.entries({ ...extraEnv }).filter(([_, val]) => {
-    if (val === null) {
-      return false;
-    }
-    if (val === undefined) {
-      return false;
-    }
-    return true;
-  });
-  const extraEnvKeys = Object.keys(extraEnvEntries);
+function getChildEnv({
+  extraEnv = {},
+  env: forcedEnv = {},
+}: ExecOptions): ExtraEnv<string> {
+  const { customEnvVariables: globalConfigEnv } = getAdminConfig();
 
-  const childEnv = {
+  const inheritedKeys = Object.entries(extraEnv).reduce(
+    (acc, [key, val]) =>
+      val === null || val === undefined ? acc : [...acc, key],
+    []
+  );
+  const parentEnv = getChildProcessEnv(inheritedKeys);
+
+  const childEnv = Object.entries({
     ...extraEnv,
-    ...getChildProcessEnv(extraEnvKeys),
-    ...env,
-  };
+    ...parentEnv,
+    ...globalConfigEnv,
+    ...forcedEnv,
+  }).reduce(
+    (acc, [key, val]) =>
+      val === null || val === undefined
+        ? acc
+        : { ...acc, [key]: val.toString() },
+    {}
+  );
 
-  const result: ExtraEnv<string> = {};
-  Object.entries(childEnv).forEach(([key, val]) => {
-    if (val === null) {
-      return;
-    }
-    if (val === undefined) {
-      return;
-    }
-    result[key] = val.toString();
-  });
-  return result;
+  return childEnv;
 }
 
 function dockerEnvVars(
@@ -74,34 +69,21 @@ function dockerEnvVars(
   );
 }
 
-export async function exec(
-  cmd: string | string[],
-  opts: ExecOptions = {}
-): Promise<ExecResult> {
-  const { env, docker, cwdFile, cacheTmpdir } = opts;
-  const {
-    binarySource,
-    dockerChildPrefix,
-    dockerCache,
-    customEnvVariables,
-    localDir,
-  } = getAdminConfig();
+function getCwd({ cwd, cwdFile }: ExecOptions = {}): string {
+  const { localDir: defaultCwd } = getAdminConfig();
+  const paramCwd = cwdFile ? join(defaultCwd, dirname(cwdFile)) : cwd;
+  return paramCwd || defaultCwd;
+}
 
-  const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
-  let cwd;
-  // istanbul ignore if
-  if (cwdFile) {
-    cwd = join(localDir, dirname(cwdFile));
-  }
-  cwd = cwd || opts.cwd || localDir;
-  const childEnv = createChildEnv(env, extraEnv);
-
+function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   const execOptions: ExecOptions = { ...opts };
   delete execOptions.extraEnv;
   delete execOptions.docker;
   delete execOptions.cwdFile;
   delete execOptions.cacheTmpdir;
 
+  const childEnv = getChildEnv(opts);
+  const cwd = getCwd(opts);
   const rawExecOptions: RawExecOptions = {
     encoding: 'utf-8',
     ...execOptions,
@@ -113,13 +95,39 @@ export async function exec(
   // Set default max buffer size to 10MB
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
 
-  let commands = typeof cmd === 'string' ? [cmd] : cmd;
+  return rawExecOptions;
+}
+
+function isDocker({ docker }: ExecOptions): boolean {
+  const { binarySource } = getAdminConfig();
+  return binarySource === 'docker' && !!docker;
+}
+
+interface RawExecArguments {
+  rawCommands: string[];
+  rawOptions: RawExecOptions;
+}
+
+async function prepareRawExec(
+  cmd: string | string[],
+  opts: ExecOptions = {}
+): Promise<RawExecArguments> {
+  const { cacheTmpdir, docker } = opts;
+  const { customEnvVariables, dockerCache } = getAdminConfig();
+
+  const rawOptions = getRawExecOptions(opts);
+
   const tmpCacheNs = getCachedTmpDirNs();
   const tmpCacheId = getCachedTmpDirId();
-  const useDocker = binarySource === 'docker' && docker;
-  if (useDocker) {
+
+  let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
+
+  if (isDocker(opts)) {
     logger.debug('Using docker to execute');
+    const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
+    const childEnv = getChildEnv(opts);
     const envVars = dockerEnvVars(extraEnv, childEnv);
+    const cwd = getCwd();
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
     if (cacheTmpdir && dockerCache && dockerCache !== 'none') {
@@ -130,7 +138,7 @@ export async function exec(
         const mountPair: VolumesPair = [tmpCacheName, mountTarget];
 
         dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
-        rawExecOptions.env[cacheTmpdir.env] = mountedCachePath;
+        rawOptions.env[cacheTmpdir.env] = mountedCachePath;
         dockerOptions.preCommands = [
           `mkdir -p ${mountedCachePath}`,
           ...(dockerOptions.preCommands || []),
@@ -141,34 +149,49 @@ export async function exec(
         const mountPair: VolumesPair = [mountSource, mountTarget];
         dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
         const targetCachePath = join(mountTarget, cacheTmpdir.path);
-        rawExecOptions.env[cacheTmpdir.env] = targetCachePath;
+        rawOptions.env[cacheTmpdir.env] = targetCachePath;
       }
 
       dockerOptions.envVars.push(cacheTmpdir.env);
     }
 
-    const dockerCommand = await generateDockerCommand(commands, dockerOptions);
-    commands = [dockerCommand];
+    const dockerCommand = await generateDockerCommand(
+      rawCommands,
+      dockerOptions
+    );
+    rawCommands = [dockerCommand];
   } else if (cacheTmpdir) {
     const mountSource = join(tmpCacheNs, tmpCacheId);
     const sourceCachePath = join(mountSource, cacheTmpdir.path);
     const cacheLocalPath = await ensureCacheDir(sourceCachePath);
-    rawExecOptions.env[cacheTmpdir.env] = cacheLocalPath;
+    rawOptions.env[cacheTmpdir.env] = cacheLocalPath;
   }
 
+  return { rawCommands, rawOptions };
+}
+
+export async function exec(
+  cmd: string | string[],
+  opts: ExecOptions = {}
+): Promise<ExecResult> {
+  const { docker } = opts;
+  const { dockerChildPrefix } = getAdminConfig();
+
+  const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
+
   let res: ExecResult | null = null;
-  for (const rawExecCommand of commands) {
+  for (const rawCmd of rawCommands) {
     const startTime = Date.now();
-    if (useDocker) {
+    if (isDocker(opts)) {
       await removeDockerContainer(docker.image, dockerChildPrefix);
     }
-    logger.debug({ command: rawExecCommand }, 'Executing command');
-    logger.trace({ commandOptions: rawExecOptions }, 'Command options');
+    logger.debug({ command: rawCommands }, 'Executing command');
+    logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
-      res = await rawExec(rawExecCommand, rawExecOptions);
+      res = await rawExec(rawCmd, rawOptions);
     } catch (err) {
       logger.debug({ err }, 'rawExec err');
-      if (useDocker) {
+      if (isDocker(opts)) {
         await removeDockerContainer(docker.image, dockerChildPrefix).catch(
           (removeErr: Error) => {
             const message: string = err.message;
@@ -191,7 +214,7 @@ export async function exec(
     if (res) {
       logger.debug(
         {
-          cmd: rawExecCommand,
+          cmd: rawCmd,
           durationMs,
           stdout: res.stdout,
           stderr: res.stderr,
