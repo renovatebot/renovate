@@ -3,7 +3,6 @@ import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,
 } from 'child_process';
-import _cryptoRandomString from 'crypto-random-string';
 import { envMock } from '../../../test/exec-util';
 import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
@@ -11,14 +10,11 @@ import type { RepoAdminConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
+import { resetCachedTmpDirId } from './docker/cache';
 import { ExecOptions, exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 jest.mock('child_process');
-
-const cryptoRandomString: jest.Mock<typeof _cryptoRandomString> =
-  _cryptoRandomString as any;
-jest.mock('crypto-random-string');
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -38,7 +34,7 @@ describe(getName(), () => {
   const defaultCwd = `-w "${cwd}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" -v "${cacheDir}":"${cacheDir}"`;
 
-  const tmpVolumeId = '0123456789abcdef';
+  const cacheId = '0123456789abcdef';
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
@@ -47,7 +43,7 @@ describe(getName(), () => {
     jest.resetModules();
     processEnvOrig = process.env;
     setAdminConfig();
-    cryptoRandomString.mockReturnValue(tmpVolumeId as never);
+    resetCachedTmpDirId(cacheId);
   });
 
   afterEach(() => {
@@ -676,7 +672,7 @@ describe(getName(), () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_tmpdir_cache_${tmpVolumeId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/foo/bar && ${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_tmpdir_cache_${cacheId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/foo/bar && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -709,7 +705,7 @@ describe(getName(), () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${cacheDir}renovate_tmpdir_cache/${tmpVolumeId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${cacheDir}renovate_tmpdir_cache/${cacheId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -744,7 +740,7 @@ describe(getName(), () => {
             encoding,
             env: {
               ...envMock.basic,
-              FOO_BAR: '/tmp/renovate/cache/foo/bar',
+              FOO_BAR: `/tmp/renovate/cache/renovate_tmpdir_cache/${cacheId}/foo/bar`,
             },
             timeout: 900000,
             maxBuffer: 10485760,

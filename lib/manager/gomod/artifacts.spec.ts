@@ -6,6 +6,7 @@ import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
+import { resetCachedTmpDirId } from '../../util/exec/docker/cache';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
@@ -63,6 +64,7 @@ describe('.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
+    resetCachedTmpDirId('1234');
   });
   afterEach(() => {
     setAdminConfig();

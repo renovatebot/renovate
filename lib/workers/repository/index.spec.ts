@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { RenovateConfig, getConfig, getName, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { resetCachedTmpDirId } from '../../util/exec/docker/cache';
 import * as _process from './process';
 import { ExtractResult } from './process/extract-update';
 import { renovateRepository } from '.';
@@ -17,8 +17,8 @@ describe(getName(), () => {
   describe('renovateRepository()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
-      config = getConfig();
-      setAdminConfig({ localDir: '' });
+      config = { ...getConfig(), localDir: '', cacheDir: '' };
+      resetCachedTmpDirId('123');
     });
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());

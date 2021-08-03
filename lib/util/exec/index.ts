@@ -1,9 +1,10 @@
 import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import { ensureDir } from 'fs-extra';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ensureCacheDir, ensureDir } from '../fs';
+import { ensureCacheDir } from '../fs';
 import {
   DockerOptions,
   ExecResult,
@@ -114,6 +115,8 @@ export async function exec(
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
+  const tmpCacheNs = getCachedTmpDirNs();
+  const tmpCacheId = getCachedTmpDirId();
   const useDocker = binarySource === 'docker' && docker;
   if (useDocker) {
     logger.debug('Using docker to execute');
@@ -121,11 +124,9 @@ export async function exec(
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
     if (cacheTmpdir && dockerCache && dockerCache !== 'none') {
-      const tmpCacheNs = getCachedTmpDirNs();
-      const tmpCacheId = getCachedTmpDirId();
-      const tmpCacheName = `${tmpCacheNs}_${tmpCacheId}`;
       const mountTarget = `/tmp`;
       if (dockerCache === 'volume') {
+        const tmpCacheName = `${tmpCacheNs}_${tmpCacheId}`;
         const mountedCachePath = join(mountTarget, cacheTmpdir.path);
         const mountPair: VolumesPair = [tmpCacheName, mountTarget];
 
@@ -136,18 +137,13 @@ export async function exec(
           ...(dockerOptions.preCommands || []),
         ];
       } else if (dockerCache === 'mount') {
-        const mountSource = join(
-          getAdminConfig().cacheDir,
-          tmpCacheNs,
-          tmpCacheId
-        );
-        const sourceCachePath = join(mountSource, cacheTmpdir.path);
-        const targetCachePath = join(mountTarget, cacheTmpdir.path);
+        const { cacheDir } = getAdminConfig();
+        const mountSource = join(cacheDir, tmpCacheNs, tmpCacheId);
         const mountPair: VolumesPair = [mountSource, mountTarget];
-
         dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
+        const targetCachePath = join(mountTarget, cacheTmpdir.path);
         rawExecOptions.env[cacheTmpdir.env] = targetCachePath;
-        await ensureDir(sourceCachePath);
+        await ensureDir(mountSource);
       }
 
       dockerOptions.envVars.push(cacheTmpdir.env);
@@ -156,7 +152,9 @@ export async function exec(
     const dockerCommand = await generateDockerCommand(commands, dockerOptions);
     commands = [dockerCommand];
   } else if (cacheTmpdir) {
-    const cacheLocalPath = await ensureCacheDir(cacheTmpdir.path);
+    const mountSource = join(tmpCacheNs, tmpCacheId);
+    const sourceCachePath = join(mountSource, cacheTmpdir.path);
+    const cacheLocalPath = await ensureCacheDir(sourceCachePath);
     rawExecOptions.env[cacheTmpdir.env] = cacheLocalPath;
   }
 

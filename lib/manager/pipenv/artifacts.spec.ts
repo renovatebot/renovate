@@ -6,6 +6,7 @@ import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
+import { resetCachedTmpDirId } from '../../util/exec/docker/cache';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
 import type { UpdateArtifactsConfig } from '../types';
@@ -49,6 +50,7 @@ describe('.updateArtifacts()', () => {
       default: { pipenv: {} },
       develop: { pipenv: {} },
     };
+    resetCachedTmpDirId('1234');
   });
 
   it('returns if no Pipfile.lock found', async () => {

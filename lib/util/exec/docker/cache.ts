@@ -14,8 +14,8 @@ export function getCachedTmpDirId(): string {
   return cachedTmpDirId;
 }
 
-export function resetCachedTmpDirId(): void {
-  cachedTmpDirId = null;
+export function resetCachedTmpDirId(cacheId: string = null): void {
+  cachedTmpDirId = cacheId;
 }
 
 export function getCachedTmpDirNs(): string {
@@ -45,43 +45,58 @@ async function fixFilePermissionsBeforeDelete(entry: string): Promise<void> {
   }
 }
 
-export async function purgeCachedTmpDirs(): Promise<void> {
-  resetCachedTmpDirId();
-
-  const { binarySource, cacheDir, dockerCache } = getAdminConfig();
-  if (binarySource === 'docker') {
-    const cacheNamespace = getCachedTmpDirNs();
-    if (dockerCache === 'volume') {
-      logger.trace(`Deleting Docker cache volume: ${cacheNamespace}_*`);
-      await volumePrune({ renovate: cacheNamespace });
-    } else if (dockerCache === 'mount') {
-      const cacheRoot = join(cacheDir, cacheNamespace);
-      if (await exists(cacheRoot)) {
-        logger.trace(`Deleting Docker cache directory: ${cacheRoot}`);
-        try {
-          await remove(cacheRoot);
-        } catch (err) {
-          await fixFilePermissionsBeforeDelete(cacheRoot);
-          await remove(cacheRoot);
-        }
-      }
+async function purgeCacheRoot(): Promise<void> {
+  const { cacheDir } = getAdminConfig();
+  const cacheNs = getCachedTmpDirNs();
+  const cacheRoot = join(cacheDir, cacheNs);
+  if (await exists(cacheRoot)) {
+    logger.trace(`Deleting cache root: ${cacheRoot}`);
+    try {
+      await remove(cacheRoot);
+    } catch (err) {
+      await fixFilePermissionsBeforeDelete(cacheRoot);
+      await remove(cacheRoot);
     }
   }
 }
 
-export async function ensureCachedTmpDir(): Promise<void> {
+export async function purgeCachedTmpDirs(): Promise<void> {
+  resetCachedTmpDirId();
   const { binarySource, dockerCache } = getAdminConfig();
   if (binarySource === 'docker') {
     const cacheNs = getCachedTmpDirNs();
-    const cacheId = getCachedTmpDirId();
+    if (dockerCache === 'volume') {
+      logger.trace(`Deleting Docker cache volume: ${cacheNs}_*`);
+      await volumePrune({ renovate: cacheNs });
+    } else if (dockerCache === 'mount') {
+      await purgeCacheRoot();
+    }
+  } else {
+    await purgeCacheRoot();
+  }
+}
+
+async function ensureCacheRoot(): Promise<void> {
+  const cacheNs = getCachedTmpDirNs();
+  const cacheId = getCachedTmpDirId();
+  const cacheRoot = join(cacheNs, cacheId);
+  logger.trace(`Creating cache root: ${cacheRoot}`);
+  await ensureCacheDir(cacheRoot);
+}
+
+export async function ensureCachedTmpDir(): Promise<void> {
+  const { binarySource, dockerCache } = getAdminConfig();
+  const cacheNs = getCachedTmpDirNs();
+  const cacheId = getCachedTmpDirId();
+  if (binarySource === 'docker') {
     if (dockerCache === 'volume') {
       const cacheName = `${cacheNs}_${cacheId}`;
       logger.trace(`Creating Docker cache volume: ${cacheName}`);
       await volumeCreate(cacheName, { renovate: cacheNs });
     } else if (dockerCache === 'mount') {
-      const cacheRoot = join(cacheNs, cacheId);
-      logger.trace(`Creating Docker cache directory: ${cacheRoot}`);
-      await ensureCacheDir(cacheRoot);
+      await ensureCacheRoot();
     }
+  } else {
+    await ensureCacheRoot();
   }
 }

@@ -1,4 +1,3 @@
-import _cryptoRandomString from 'crypto-random-string';
 import { exec, mockExecAll } from '../../../../test/exec-util';
 import { fs, getName } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
@@ -11,10 +10,6 @@ import {
 
 jest.mock('child_process');
 
-const cryptoRandomString: jest.Mock<typeof _cryptoRandomString> =
-  _cryptoRandomString as any;
-jest.mock('crypto-random-string');
-
 jest.mock('../../../util/fs');
 
 describe(getName(), () => {
@@ -22,39 +17,32 @@ describe(getName(), () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    resetCachedTmpDirId();
-    cryptoRandomString.mockReturnValue(tmpVolumeId as never);
+    resetCachedTmpDirId(tmpVolumeId);
   });
 
   describe('getCachedTmpDirId', () => {
-    it('preserves same volume name until reset', () => {
-      cryptoRandomString.mockReturnValue('foo' as never);
-      const res1 = getCachedTmpDirId();
-
-      cryptoRandomString.mockReturnValue('bar' as never);
-      const res2 = getCachedTmpDirId();
-      const res3 = getCachedTmpDirId();
-
+    it('returns new volume after reset', () => {
       resetCachedTmpDirId();
-      const res4 = getCachedTmpDirId();
+      const res1 = getCachedTmpDirId();
+      resetCachedTmpDirId();
+      const res2 = getCachedTmpDirId();
+      expect(res1).not.toEqual(res2);
+    });
+
+    it('preserves same volume name until reset', () => {
+      resetCachedTmpDirId('foo');
+      const res1 = getCachedTmpDirId();
+      const res2 = getCachedTmpDirId();
+      resetCachedTmpDirId('bar');
+      const res3 = getCachedTmpDirId();
 
       expect(res1).toBe('foo');
       expect(res2).toBe('foo');
-      expect(res3).toBe('foo');
-      expect(res4).toBe('bar');
+      expect(res3).toBe('bar');
     });
   });
 
   describe('purgeCachedTmpDirs', () => {
-    it('short-circuits in non-Docker environment', async () => {
-      const execSnapshots = mockExecAll(exec);
-
-      setAdminConfig({ binarySource: 'global' });
-      await purgeCachedTmpDirs();
-
-      expect(execSnapshots).toBeEmpty();
-    });
-
     it('removes volume cache', async () => {
       const execSnapshots = mockExecAll(exec);
 
@@ -94,6 +82,21 @@ describe(getName(), () => {
 
       setAdminConfig({
         binarySource: 'docker',
+        cacheDir: '/foo/bar',
+        dockerCache: 'mount',
+      });
+      await purgeCachedTmpDirs();
+
+      expect(execSnapshots).toBeEmpty();
+      expect(fs.remove).toHaveBeenCalledWith('/foo/bar/renovate_tmpdir_cache');
+    });
+
+    it('removes cache root in non-Docker environment', async () => {
+      fs.exists.mockResolvedValue(true);
+      const execSnapshots = mockExecAll(exec);
+
+      setAdminConfig({
+        binarySource: 'global',
         cacheDir: '/foo/bar',
         dockerCache: 'mount',
       });
@@ -178,15 +181,6 @@ describe(getName(), () => {
   });
 
   describe('ensureCachedTmpDir', () => {
-    it('short-circuits in non-Docker environment', async () => {
-      const execSnapshots = mockExecAll(exec);
-
-      setAdminConfig({ binarySource: 'global' });
-      await ensureCachedTmpDir();
-
-      expect(execSnapshots).toBeEmpty();
-    });
-
     it('creates new volume', async () => {
       const execSnapshots = mockExecAll(exec);
 
@@ -220,7 +214,7 @@ describe(getName(), () => {
       ]);
     });
 
-    it('creates cache directory', async () => {
+    it('creates cache root in Docker environment', async () => {
       const expected = `renovate_tmpdir_cache/${tmpVolumeId}`;
       const execSnapshots = mockExecAll(exec);
       fs.ensureCacheDir.mockResolvedValueOnce(`/foo/bar/${expected}` as never);
@@ -236,5 +230,20 @@ describe(getName(), () => {
       expect(execSnapshots).toBeEmpty();
       expect(fs.ensureCacheDir).toHaveBeenCalledWith(expected);
     });
+  });
+
+  it('creates cache root in non-Docker environment', async () => {
+    const expected = `renovate_tmpdir_cache/${tmpVolumeId}`;
+    const execSnapshots = mockExecAll(exec);
+
+    setAdminConfig({
+      binarySource: 'global',
+      cacheDir: '/foo/bar',
+      dockerCache: 'mount',
+    });
+    await ensureCachedTmpDir();
+
+    expect(execSnapshots).toBeEmpty();
+    expect(fs.ensureCacheDir).toHaveBeenCalledWith(expected);
   });
 });

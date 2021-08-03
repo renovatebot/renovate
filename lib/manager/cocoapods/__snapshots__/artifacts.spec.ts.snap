@@ -97,7 +97,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "CP_HOME_DIR": "/tmp/cache/cocoapods",
+        "CP_HOME_DIR": "/tmp/cache/renovate_tmpdir_cache/1234/cocoapods",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -134,7 +134,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "CP_HOME_DIR": "/tmp/cache/cocoapods",
+        "CP_HOME_DIR": "/tmp/cache/renovate_tmpdir_cache/1234/cocoapods",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
