@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,
@@ -8,9 +7,9 @@ import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
+import { resetCachedTmpDirId } from './cache';
 import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
-import { resetCachedTmpDirId } from './cache';
 import { ExecOptions, exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
@@ -56,14 +55,14 @@ describe(getName(), () => {
   const tag = '1.2.3';
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
-  const volume_1 = '/path/to/volume-1';
-  const volume_2_from = '/path/to/volume-2';
-  const volume_2_to = '/path/to/volume-3';
+  const volume1 = '/path/to/volume-1';
+  const volume2From = '/path/to/volume-2';
+  const volume2To = '/path/to/volume-3';
   const volumes: VolumeOption[] = [
-    volume_1,
+    volume1,
     null,
     undefined,
-    [volume_2_from, volume_2_to],
+    [volume2From, volume2To],
   ];
   const encoding = 'utf-8';
   const docker = { image };
@@ -357,7 +356,7 @@ describe(getName(), () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume1}":"${volume1}" -v "${volume2From}":"${volume2To}" -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,

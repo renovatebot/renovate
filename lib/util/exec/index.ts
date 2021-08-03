@@ -1,5 +1,4 @@
 import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { ensureDir } from 'fs-extra';
 import { dirname, join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
@@ -137,13 +136,12 @@ export async function exec(
           ...(dockerOptions.preCommands || []),
         ];
       } else if (dockerCache === 'mount') {
-        const { cacheDir } = getAdminConfig();
-        const mountSource = join(cacheDir, tmpCacheNs, tmpCacheId);
+        const tmpCacheSubdir = join(tmpCacheNs, tmpCacheId);
+        const mountSource = await ensureCacheDir(tmpCacheSubdir);
         const mountPair: VolumesPair = [mountSource, mountTarget];
         dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
         const targetCachePath = join(mountTarget, cacheTmpdir.path);
         rawExecOptions.env[cacheTmpdir.env] = targetCachePath;
-        await ensureDir(mountSource);
       }
 
       dockerOptions.envVars.push(cacheTmpdir.env);

@@ -425,9 +425,9 @@ export async function getAdditionalFiles(
     'YARN_CACHE_FOLDER',
     'npm_config_store',
   ]);
-  env.NPM_CONFIG_CACHE = await ensureCacheDir('npm');
-  env.YARN_CACHE_FOLDER = await ensureCacheDir('yarn');
-  env.npm_config_store = await ensureCacheDir('pnpm');
+  env.NPM_CONFIG_CACHE = await ensureCacheDir('others/npm');
+  env.YARN_CACHE_FOLDER = await ensureCacheDir('others/yarn');
+  env.npm_config_store = await ensureCacheDir('others/pnpm');
   env.NODE_ENV = 'dev';
 
   let token = '';

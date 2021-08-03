@@ -10,7 +10,7 @@ import {
 
 jest.mock('child_process');
 
-jest.mock('../../../util/fs');
+jest.mock('../../util/fs');
 
 describe(getName(), () => {
   const tmpVolumeId = '0123456789abcdef';
