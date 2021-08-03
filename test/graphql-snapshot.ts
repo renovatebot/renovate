@@ -177,7 +177,7 @@ function simplifyGraphqlTree(tree: DocumentNode): GraphqlSnapshot {
   return result;
 }
 
-interface GraphqlSnapshotInput {
+export interface GraphqlSnapshotInput {
   query: string;
   variables: Record<string, string>;
 }
