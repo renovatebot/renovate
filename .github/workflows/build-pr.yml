@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7 # renovate: tag=v2.3.0
+        uses: actions/setup-node@d6e3b5539ed7e5ccd26c3459e26c7c817f4e9068 # renovate: tag=v2.3.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -72,7 +72,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7 # renovate: tag=v2.3.0
+        uses: actions/setup-node@d6e3b5539ed7e5ccd26c3459e26c7c817f4e9068 # renovate: tag=v2.3.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
