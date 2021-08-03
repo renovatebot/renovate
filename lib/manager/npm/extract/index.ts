@@ -215,7 +215,6 @@ export async function extractPackageFile(
         dep.commitMessageTopic = 'Yarn';
       } else if (depName === 'npm') {
         dep.datasource = npmId;
-        dep.commitMessageTopic = 'npm';
       } else {
         dep.skipReason = SkipReason.UnknownVolta;
       }
