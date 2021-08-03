@@ -7,7 +7,7 @@ import type { ExtractConfig } from '../../types';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import * as manager from '.';
 
-const fixtures = 'lib/manager/gradle/deep/__fixtures__';
+const fixtures = 'lib/manager/gradle/__fixtures__';
 
 const baseConfig = {
   gradle: {

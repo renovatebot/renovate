@@ -11,7 +11,7 @@ import {
 import { extraEnv } from './utils';
 import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from '.';
 
-const fixtures = 'lib/manager/gradle/deep/__fixtures__';
+const fixtures = 'lib/manager/gradle/__fixtures__';
 
 describe(getName(), () => {
   for (const gradleVersion of [5, 6]) {
