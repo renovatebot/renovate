@@ -2,6 +2,7 @@ import { getName, loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
+import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
 import {
   extractBase,
@@ -230,9 +231,10 @@ describe(getName(), () => {
     it('should extract out image versions', () => {
       const res = extractPackageFile(gitImages);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(5);
+      expect(res.deps).toHaveLength(6);
       expect(res.deps[0].currentValue).toEqual('v0.1.0');
       expect(res.deps[1].currentValue).toEqual('v0.0.1');
+      expect(res.deps[5].skipReason).toEqual(SkipReason.InvalidValue);
     });
     it('ignores non-Kubernetes empty files', () => {
       expect(extractPackageFile('')).toBeNull();
