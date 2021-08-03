@@ -399,7 +399,6 @@ Object {
       "prettyDepType": "volta",
     },
     Object {
-      "commitMessageTopic": "npm",
       "currentValue": "5.9.0",
       "datasource": "npm",
       "depName": "npm",
