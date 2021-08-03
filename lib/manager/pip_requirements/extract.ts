@@ -1,7 +1,7 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import { getAdminConfig } from '../../config/admin';
-import * as datasourcePypi from '../../datasource/pypi';
+import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
@@ -69,7 +69,7 @@ export function extractPackageFile(
         ...dep,
         depName,
         currentValue,
-        datasource: datasourcePypi.id,
+        datasource: PypiDatasource.id,
       };
       if (currentValue?.startsWith('==')) {
         dep.currentVersion = currentValue.replace(/^==\s*/, '');

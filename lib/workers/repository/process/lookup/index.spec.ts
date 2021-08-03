@@ -15,7 +15,7 @@ import * as datasourceGithubReleases from '../../../../datasource/github-release
 import { id as datasourceGithubTagsId } from '../../../../datasource/github-tags';
 import { id as datasourceNpmId } from '../../../../datasource/npm';
 import { id as datasourcePackagistId } from '../../../../datasource/packagist';
-import { id as datasourcePypiId } from '../../../../datasource/pypi';
+import { PypiDatasource } from '../../../../datasource/pypi';
 import { id as dockerVersioningId } from '../../../../versioning/docker';
 import { id as gitVersioningId } from '../../../../versioning/git';
 import { id as npmVersioningId } from '../../../../versioning/npm';
@@ -1011,7 +1011,7 @@ describe(getName(), () => {
     });
     it('handles pypi 404', async () => {
       config.depName = 'foo';
-      config.datasource = datasourcePypiId;
+      config.datasource = PypiDatasource.id;
       config.packageFile = 'requirements.txt';
       config.currentValue = '1.0.0';
       httpMock
