@@ -105,79 +105,78 @@ describe(getName(), () => {
       expect(execSnapshots).toBeEmpty();
       expect(fs.remove).toHaveBeenCalledWith('/foo/bar/renovate_tmpdir_cache');
     });
-  });
 
-  it('removes cache directory with custom namespace', async () => {
-    fs.exists.mockResolvedValue(true);
-    const execSnapshots = mockExecAll(exec);
+    it('removes cache directory with custom namespace', async () => {
+      fs.exists.mockResolvedValue(true);
+      const execSnapshots = mockExecAll(exec);
 
-    setAdminConfig({
-      binarySource: 'docker',
-      cacheDir: '/foo/bar',
-      dockerCache: 'mount',
-      dockerChildPrefix: 'custom_prefix_',
+      setAdminConfig({
+        binarySource: 'docker',
+        cacheDir: '/foo/bar',
+        dockerCache: 'mount',
+        dockerChildPrefix: 'custom_prefix_',
+      });
+      await purgeCachedTmpDirs();
+
+      expect(execSnapshots).toBeEmpty();
+      expect(fs.remove).toHaveBeenCalledWith(
+        '/foo/bar/custom_prefix_tmpdir_cache'
+      );
     });
-    await purgeCachedTmpDirs();
+    it('handles errors while removing cache directory', async () => {
+      fs.exists.mockResolvedValue(true);
 
-    expect(execSnapshots).toBeEmpty();
-    expect(fs.remove).toHaveBeenCalledWith(
-      '/foo/bar/custom_prefix_tmpdir_cache'
-    );
-  });
+      fs.remove.mockRejectedValueOnce('unknown');
 
-  it('handles errors while removing cache directory', async () => {
-    fs.exists.mockResolvedValue(true);
+      fs.stat.mockResolvedValueOnce({ isDirectory: () => true } as never);
+      fs.stat.mockResolvedValue({
+        isDirectory: () => false,
+        isFile: () => true,
+      } as never);
 
-    fs.remove.mockRejectedValueOnce('unknown');
+      fs.readdir.mockResolvedValueOnce(['foo', 'bar']);
 
-    fs.stat.mockResolvedValueOnce({ isDirectory: () => true } as never);
-    fs.stat.mockResolvedValue({
-      isDirectory: () => false,
-      isFile: () => true,
-    } as never);
+      fs.chmod.mockResolvedValueOnce();
+      fs.chmod.mockResolvedValueOnce();
+      fs.chmod.mockRejectedValueOnce('unknown');
 
-    fs.readdir.mockResolvedValueOnce(['foo', 'bar']);
+      fs.remove.mockResolvedValueOnce();
 
-    fs.chmod.mockResolvedValueOnce();
-    fs.chmod.mockResolvedValueOnce();
-    fs.chmod.mockRejectedValueOnce('unknown');
+      const execSnapshots = mockExecAll(exec);
 
-    fs.remove.mockResolvedValueOnce();
+      setAdminConfig({
+        binarySource: 'docker',
+        cacheDir: '/foo/bar',
+        dockerCache: 'mount',
+      });
+      await purgeCachedTmpDirs();
 
-    const execSnapshots = mockExecAll(exec);
+      expect(execSnapshots).toBeEmpty();
+      expect(fs.remove).toHaveBeenNthCalledWith(
+        1,
+        '/foo/bar/renovate_tmpdir_cache'
+      );
+      expect(fs.remove).toHaveBeenNthCalledWith(
+        2,
+        '/foo/bar/renovate_tmpdir_cache'
+      );
 
-    setAdminConfig({
-      binarySource: 'docker',
-      cacheDir: '/foo/bar',
-      dockerCache: 'mount',
+      expect(fs.chmod).toHaveBeenNthCalledWith(
+        1,
+        '/foo/bar/renovate_tmpdir_cache',
+        '755'
+      );
+      expect(fs.chmod).toHaveBeenNthCalledWith(
+        2,
+        '/foo/bar/renovate_tmpdir_cache/foo',
+        '644'
+      );
+      expect(fs.chmod).toHaveBeenNthCalledWith(
+        3,
+        '/foo/bar/renovate_tmpdir_cache/bar',
+        '644'
+      );
     });
-    await purgeCachedTmpDirs();
-
-    expect(execSnapshots).toBeEmpty();
-    expect(fs.remove).toHaveBeenNthCalledWith(
-      1,
-      '/foo/bar/renovate_tmpdir_cache'
-    );
-    expect(fs.remove).toHaveBeenNthCalledWith(
-      2,
-      '/foo/bar/renovate_tmpdir_cache'
-    );
-
-    expect(fs.chmod).toHaveBeenNthCalledWith(
-      1,
-      '/foo/bar/renovate_tmpdir_cache',
-      '755'
-    );
-    expect(fs.chmod).toHaveBeenNthCalledWith(
-      2,
-      '/foo/bar/renovate_tmpdir_cache/foo',
-      '644'
-    );
-    expect(fs.chmod).toHaveBeenNthCalledWith(
-      3,
-      '/foo/bar/renovate_tmpdir_cache/bar',
-      '644'
-    );
   });
 
   describe('ensureCachedTmpDir', () => {
@@ -230,20 +229,20 @@ describe(getName(), () => {
       expect(execSnapshots).toBeEmpty();
       expect(fs.ensureCacheDir).toHaveBeenCalledWith(expected);
     });
-  });
 
-  it('creates cache root in non-Docker environment', async () => {
-    const expected = `renovate_tmpdir_cache/${tmpVolumeId}`;
-    const execSnapshots = mockExecAll(exec);
+    it('creates cache root in non-Docker environment', async () => {
+      const expected = `renovate_tmpdir_cache/${tmpVolumeId}`;
+      const execSnapshots = mockExecAll(exec);
 
-    setAdminConfig({
-      binarySource: 'global',
-      cacheDir: '/foo/bar',
-      dockerCache: 'mount',
+      setAdminConfig({
+        binarySource: 'global',
+        cacheDir: '/foo/bar',
+        dockerCache: 'mount',
+      });
+      await ensureCachedTmpDir();
+
+      expect(execSnapshots).toBeEmpty();
+      expect(fs.ensureCacheDir).toHaveBeenCalledWith(expected);
     });
-    await ensureCachedTmpDir();
-
-    expect(execSnapshots).toBeEmpty();
-    expect(fs.ensureCacheDir).toHaveBeenCalledWith(expected);
   });
 });
