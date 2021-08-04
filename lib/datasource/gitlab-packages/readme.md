@@ -5,7 +5,8 @@ As an example, `https://gitlab.com/gitlab-org/ci-cd/package-stage/feature-testin
 
 **Usage Example**
 
-A real world example for this specific datasource would be maintaining packages versions in a config file. This can be achieved by configuring a generic regex manager in `renovate.json` for files named `versions.ini`:
+A real world example for this specific datasource would be maintaining packages versions in a config file.
+This can be achieved by configuring a generic regex manager in `renovate.json` for files named `versions.ini`:
 
 ```json
 {
