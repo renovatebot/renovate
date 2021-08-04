@@ -18,3 +18,5 @@ images:
 - name: this-lives/on-docker-hub
   newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
   newTag: v0.0.4
+- name: nginx
+  newTag: 2.5
