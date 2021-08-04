@@ -2024,6 +2024,12 @@ const options: RenovateOptions[] = [
     stage: 'global',
     admin: true,
   },
+  {
+    name: 'updatePinnedDependencies',
+    description: 'Set to false to disable pinned dependencies updates.',
+    type: 'boolean',
+    default: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

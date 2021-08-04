@@ -2307,6 +2307,10 @@ In such case dependency versions won't be updated by Renovate.
 
 To opt in to letting Renovate update internal package versions normally, set this configuration option to true.
 
+## updatePinnedDependencies
+
+This defaults to `true`. Set to false to disable pinned dependencies updates.
+
 ## updateLockFiles
 
 ## updateNotScheduled

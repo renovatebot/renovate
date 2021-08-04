@@ -783,6 +783,33 @@ describe(getName(), () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toEqual('3.0.1');
     });
+    it('should update pinned versions if updatePinnedDependencies=true', async () => {
+      config.currentValue = '0.0.34';
+      config.updatePinnedDependencies = true;
+      config.depName = '@types/helmet';
+      config.datasource = datasourceNpmId;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/@types%2Fhelmet')
+        .reply(200, helmetJson);
+      const res = await lookup.lookupUpdates(config);
+      // expect(res.updates).toMatchSnapshot(); //TODO
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newValue).toEqual('0.0.35');
+    });
+    it('should not update pinned versions if updatePinnedDependencies=false', async () => {
+      config.currentValue = '0.0.34';
+      config.updatePinnedDependencies = false;
+      config.depName = '@types/helmet';
+      config.datasource = datasourceNpmId;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/@types%2Fhelmet')
+        .reply(200, helmetJson);
+      const res = await lookup.lookupUpdates(config);
+      // expect(res.updates).toMatchSnapshot(); //TODO
+      expect(res.updates).toHaveLength(0);
+    });
     it('should follow dist-tag even if newer version exists', async () => {
       config.currentValue = '3.0.1-insiders.20180713';
       config.depName = 'typescript';
