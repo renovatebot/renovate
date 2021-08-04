@@ -1,7 +1,7 @@
 import { GitlabHttp } from '../../util/http/gitlab';
 import * as url from '../../util/url';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult, Release } from '../types';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabPackage } from './types';
 import { datasource } from './common';
 

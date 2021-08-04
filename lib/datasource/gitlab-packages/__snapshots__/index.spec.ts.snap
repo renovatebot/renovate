@@ -1,5 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/gitlab-packages/index getReleases returns null for 404 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/user%2Fproject1/packages?package_name=mypkg&per_page=100",
+  },
+]
+`;
+
+exports[`datasource/gitlab-packages/index getReleases returns null for empty 200 OK 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/user%2Fproject1/packages?package_name=mypkg&per_page=100",
+  },
+]
+`;
+
 exports[`datasource/gitlab-packages/index getReleases returns package from custom registry 1`] = `
 Object {
   "registryUrl": "https://gitlab.com/user/project1",
@@ -24,6 +54,21 @@ Object {
 `;
 
 exports[`datasource/gitlab-packages/index getReleases returns package from custom registry 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/user%2Fproject1/packages?package_name=mypkg&per_page=100",
+  },
+]
+`;
+
+exports[`datasource/gitlab-packages/index getReleases throws for 5xx 1`] = `
 Array [
   Object {
     "headers": Object {
