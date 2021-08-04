@@ -17,6 +17,7 @@ if [ "$BRANCH_NAME" = "chore/husky-git-hooks" ]; then
   echo "Use git checkout -b <new_branch> to create a new feature branch."
   echo
   echo "If you're sure you want to commit to the main branch, run git commit with the --no-verify flag."
+  echo
 
   exit 1
 fi
