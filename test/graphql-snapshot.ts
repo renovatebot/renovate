@@ -187,6 +187,9 @@ export function makeGraphqlSnapshot(
 ): GraphqlSnapshot | null {
   try {
     const { query: queryStr, variables } = requestBody;
+    if (!queryStr) {
+        return null;
+    }
     const queryRawTree = parse(queryStr, { noLocation: true });
     const queryTree = simplifyGraphqlTree(queryRawTree);
     if (variables) {
