@@ -783,6 +783,7 @@ describe(getName(), () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toEqual('3.0.1');
     });
+
     it('should update pinned versions if updatePinnedDependencies=true', async () => {
       config.currentValue = '0.0.34';
       config.updatePinnedDependencies = true;
@@ -793,7 +794,7 @@ describe(getName(), () => {
         .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot(); //TODO
+      expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toEqual('0.0.35');
     });
