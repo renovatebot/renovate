@@ -2,6 +2,11 @@
 
 Datasources are used in Renovate primarily to fetch released versions of packages.
 
+## Follow the class-based programming style
+
+New datasources _must_ follow the class-based programming style.
+Use the `adoptium-java` datasource as a reference.
+
 ## getReleases
 
 The minimum exported interface for a datasource is a function called `getReleases` that takes a lookup config as input.
