@@ -142,7 +142,7 @@ Depending on the platform, having a `CODEOWNERS` file could block automerging, b
 ### Disabling automerge in select repos, rest of org should automerge
 
 You might have setup a global configuration in a `.github` repository, that has a `renovate.json` file that turns on automerge for certain dependencies.
-Repositories in the organization all extend from this global configurtion, and so they "inherit" the automerge settings as well.
+Repositories in the organization all extend from this global configuration, and so they "inherit" the automerge settings as well.
 To turn off automerge in full for select repositories, you need to make a config that overrides all `packageRules` in the repository's `renovate.json` file, like this:
 
 ```json
