@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
-import { datasource } from './common';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import { datasource } from './common';
 
 describe(getName(), () => {
   describe('getReleases', () => {

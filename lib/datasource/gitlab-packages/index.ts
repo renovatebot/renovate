@@ -2,17 +2,20 @@ import { GitlabHttp } from '../../util/http/gitlab';
 import * as url from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { GitlabPackage } from './types';
 import { datasource } from './common';
+import type { GitlabPackage } from './types';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
 export class GitlabPackagesDatasource extends Datasource {
   static readonly id = datasource;
+
   protected http: GitlabHttp;
 
   caching = true;
+
   customRegistrySupport = true;
+
   defaultVersioning = 'docker';
 
   constructor() {
@@ -20,7 +23,10 @@ export class GitlabPackagesDatasource extends Datasource {
     this.http = new GitlabHttp();
   }
 
-  getGitlabPackageApiUrl(parsedRegistryUrl, lookupName): string {
+  static getGitlabPackageApiUrl(
+    parsedRegistryUrl: URL,
+    lookupName: string
+  ): string {
     const packageName = encodeURIComponent(lookupName);
 
     const server = parsedRegistryUrl.origin;
@@ -38,7 +44,10 @@ export class GitlabPackagesDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const parsedRegistryUrl = url.parseUrl(registryUrl);
     const server = parsedRegistryUrl.origin;
-    const api_url = this.getGitlabPackageApiUrl(parsedRegistryUrl, lookupName);
+    const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
+      parsedRegistryUrl,
+      lookupName
+    );
     const result: ReleaseResult = {
       releases: null,
     };
@@ -46,7 +55,7 @@ export class GitlabPackagesDatasource extends Datasource {
     let response: GitlabPackage[];
     try {
       response = (
-        await this.http.getJson<GitlabPackage[]>(api_url, { paginate: true })
+        await this.http.getJson<GitlabPackage[]>(apiUrl, { paginate: true })
       ).body;
 
       result.releases = response
