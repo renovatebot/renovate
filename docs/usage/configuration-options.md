@@ -709,7 +709,7 @@ This is caused by a race condition in GitLab's Merge Request API - [read the cor
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`.
+This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`. Also, approval rules ovveriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
 
 ## golang
 
