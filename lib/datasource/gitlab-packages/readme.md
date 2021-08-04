@@ -30,4 +30,4 @@ NKJS_VERSION=3.4.0
 
 ```
 
-By default, `gitlab-packages` uses the `loose` versioning scheme.
+By default, `gitlab-packages` uses the `docker` versioning scheme.
