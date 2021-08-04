@@ -1445,6 +1445,135 @@ describe(getName(), () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('adds approval rule to ignore all approvals', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            id: 29626725,
+            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
+            ref: 'patch-28',
+            status: 'success',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .reply(200);
+      await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: [],
+        platformOptions: {
+          azureAutoComplete: false,
+          gitLabAutomerge: true,
+          gitLabIgnoreApprovals: true,
+        },
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('does not try to create already existing approval rule', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            id: 29626725,
+            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
+            ref: 'patch-28',
+            status: 'success',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .reply(200, [
+          { name: 'renovateIgnoreApprovals', approvals_required: 0 },
+        ]);
+      await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: [],
+        platformOptions: {
+          azureAutoComplete: false,
+          gitLabAutomerge: true,
+          gitLabIgnoreApprovals: true,
+        },
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('silently ignores approval rules adding errors', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            id: 29626725,
+            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
+            ref: 'patch-28',
+            status: 'success',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .replyWithError('Unknown');
+      await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: [],
+        platformOptions: {
+          azureAutoComplete: false,
+          gitLabAutomerge: true,
+          gitLabIgnoreApprovals: true,
+        },
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {
