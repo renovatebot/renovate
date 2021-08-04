@@ -1,4 +1,4 @@
-import URL from 'url';
+import { URL } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import { DateTime } from 'luxon';
@@ -118,6 +118,13 @@ export async function initPlatform({
     gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
+
+  // Generic github hostRule that per default all datasources using github api are enabled
+  const genericGithubHostRule = {
+    matchHost: new URL(defaults.endpoint).hostname,
+    token,
+  };
+  hostRules.add(genericGithubHostRule);
   return platformConfig;
 }
 
@@ -194,7 +201,7 @@ export async function initRepo({
     hostType: PLATFORM_TYPE_GITHUB,
     url: defaults.endpoint,
   });
-  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
+  config.isGhe = new URL(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
@@ -396,24 +403,24 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = URL.parse(defaults.endpoint);
+  const parsedEndpoint = new URL(defaults.endpoint);
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = config.forkToken;
+    parsedEndpoint.password = config.forkToken;
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
-    parsedEndpoint.auth = opts.token;
+    parsedEndpoint.password = opts.token;
   }
   parsedEndpoint.host = parsedEndpoint.host.replace(
     'api.github.com',
     'github.com'
   );
   parsedEndpoint.pathname = config.repository + '.git';
-  const url = URL.format(parsedEndpoint);
+  const url = parsedEndpoint.toString();
   await git.initRepo({
     ...config,
     url,
