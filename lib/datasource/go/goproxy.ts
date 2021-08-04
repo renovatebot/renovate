@@ -7,6 +7,8 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GoproxyFallback, http } from './common';
 import type { GoproxyItem, VersionInfo } from './types';
 
+const parsedGoproxy: Record<string, GoproxyItem[]> = {};
+
 /**
  * Parse `GOPROXY` to the sequence of url + fallback strategy tags.
  *
@@ -25,6 +27,10 @@ export function parseGoproxy(
 ): GoproxyItem[] {
   if (!is.string(input)) {
     return [];
+  }
+
+  if (parsedGoproxy[input]) {
+    return parsedGoproxy[input];
   }
 
   let result: GoproxyItem[] = input
@@ -48,6 +54,7 @@ export function parseGoproxy(
     }
   }
 
+  parsedGoproxy[input] = result;
   return result;
 }
 
