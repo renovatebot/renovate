@@ -59,6 +59,7 @@ let config: {
   defaultBranch: string;
   cloneSubmodules: boolean;
   ignorePrAuthor: boolean;
+  squash: boolean;
 } = {} as any;
 
 const defaults = {
@@ -210,6 +211,11 @@ export async function initRepo({
       throw new Error(TEMPORARY_ERROR);
     }
     config.mergeMethod = res.body.merge_method || 'merge';
+    if (res.body.squash_option) {
+      config.squash =
+        res.body.squash_option === 'always' ||
+        res.body.squash_option === 'default_on';
+    }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
@@ -521,6 +527,7 @@ export async function createPr({
         title,
         description,
         labels: is.array(labels) ? labels.join(',') : null,
+        squash: config.squash,
       },
     }
   );
