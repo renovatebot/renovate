@@ -75,7 +75,7 @@ describe(getName(), () => {
           package_name: 'mypkg',
           per_page: '100',
         })
-        .reply(200, { versions: [] });
+        .reply(200, []);
       expect(
         await getPkgReleases({
           datasource,
