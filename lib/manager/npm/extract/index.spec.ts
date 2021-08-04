@@ -270,6 +270,7 @@ describe(getName(), () => {
           node: '8.9.2',
           yarn: '1.12.3',
           npm: '5.9.0',
+          pnpm: '6.11.2',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
