@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
-import { id as datasource } from '.';
+import { datasource } from './common';
 
 describe(getName(), () => {
   describe('getReleases', () => {
@@ -10,14 +10,25 @@ describe(getName(), () => {
         {
           version: '1.0.0',
           created_at: '2020-03-04T12:01:37.000-06:00',
+          name: 'mypkg',
         },
         {
           version: 'v1.1.0',
           created_at: '2020-04-04T12:01:37.000-06:00',
+          name: 'mypkg',
+          _links: {
+            web_path: '/user/project1/-/packages/3',
+          },
         },
         {
           version: 'v1.1.1',
           created_at: '2020-05-04T12:01:37.000-06:00',
+          name: 'mypkg',
+        },
+        {
+          version: 'v2.0.0',
+          created_at: '2020-05-04T12:01:37.000-06:00',
+          name: 'otherpkg',
         },
       ];
       httpMock

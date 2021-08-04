@@ -5,14 +5,17 @@ Object {
   "registryUrl": "https://gitlab.com/user/project1",
   "releases": Array [
     Object {
+      "registryUrl": null,
       "releaseTimestamp": "2020-03-04T18:01:37.000Z",
       "version": "1.0.0",
     },
     Object {
+      "registryUrl": "https://gitlab.com/user/project1/-/packages/3",
       "releaseTimestamp": "2020-04-04T18:01:37.000Z",
       "version": "v1.1.0",
     },
     Object {
+      "registryUrl": null,
       "releaseTimestamp": "2020-05-04T18:01:37.000Z",
       "version": "v1.1.1",
     },

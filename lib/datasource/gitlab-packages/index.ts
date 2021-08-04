@@ -1,48 +1,67 @@
 import { GitlabHttp } from '../../util/http/gitlab';
 import * as url from '../../util/url';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { Datasource } from '../datasource';
+import type { GetReleasesConfig, ReleaseResult, Release } from '../types';
 import type { GitlabPackage } from './types';
+import { datasource } from './common';
 
-const gitlabApi = new GitlabHttp();
+// Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
-export const id = 'gitlab-packages';
-export const customRegistrySupport = true;
-export const registryStrategy = 'first';
-export const defaultVersioning = 'loose';
-export const caching = true;
+export class GitlabPackagesDatasource extends Datasource {
+  static readonly id = datasource;
+  protected http: GitlabHttp;
 
-function getGitlabPackageApiUrl(registryUrl, lookupName): string {
-  const parsedRegistryUrl = url.parseUrl(registryUrl);
-  const packageName = encodeURIComponent(lookupName);
+  caching = true;
+  customRegistrySupport = true;
+  defaultVersioning = 'loose';
 
-  const server = parsedRegistryUrl.origin;
-  const project = encodeURIComponent(parsedRegistryUrl.pathname.substring(1)); // remove leading /
+  constructor() {
+    super(datasource);
+    this.http = new GitlabHttp();
+  }
 
-  return url.resolveBaseUrl(
-    server,
-    `/api/v4/projects/${project}/packages?package_name=${packageName}&per_page=100`
-  );
-}
+  getGitlabPackageApiUrl(parsedRegistryUrl, lookupName): string {
+    const packageName = encodeURIComponent(lookupName);
 
-export async function getReleases({
-  registryUrl,
-  lookupName,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const gitlabPackageApiUrl = getGitlabPackageApiUrl(registryUrl, lookupName);
+    const server = parsedRegistryUrl.origin;
+    const project = encodeURIComponent(parsedRegistryUrl.pathname.substring(1)); // remove leading /
 
-  const gitlabPackage = (
-    await gitlabApi.getJson<GitlabPackage[]>(gitlabPackageApiUrl, {
-      paginate: true,
-    })
-  ).body;
+    return url.resolveBaseUrl(
+      server,
+      `/api/v4/projects/${project}/packages?package_name=${packageName}&per_page=100`
+    );
+  }
 
-  const dependency: ReleaseResult = {
-    releases: null,
-  };
-  dependency.releases = gitlabPackage.map(({ version, created_at }) => ({
-    version,
-    releaseTimestamp: created_at,
-  }));
+  async getReleases({
+    registryUrl,
+    lookupName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const parsedRegistryUrl = url.parseUrl(registryUrl);
+    const server = parsedRegistryUrl.origin;
+    const api_url = this.getGitlabPackageApiUrl(parsedRegistryUrl, lookupName);
+    const result: ReleaseResult = {
+      releases: null,
+    };
 
-  return dependency;
+    let response: GitlabPackage[];
+    try {
+      response = (
+        await this.http.getJson<GitlabPackage[]>(api_url, { paginate: true })
+      ).body;
+
+      result.releases = response
+        // Settings the package_name option when calling the Gitlab API isn't enought to filter information about other package
+        // because this option is only implemented on Gitlab > 12.9 and it only do a fuzzy search.
+        .filter((r) => r.name === lookupName)
+        .map(({ version, created_at, _links }) => ({
+          version,
+          releaseTimestamp: created_at,
+          registryUrl: _links? url.resolveBaseUrl(server, _links?.web_path) : null,
+        }));
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
+
+    return result.releases.length ? result : null;
+  }
 }
