@@ -2,3 +2,21 @@
 . "$(dirname "$0")/_/husky.sh"
 
 yarn pretty-quick --staged
+
+BRANCH_NAME=$(git branch --show-current)
+
+# I'm using "chore/husky-git-hooks" so that you can test my work in the PR branch
+# TODO: Replace "chore/husky-git-hooks" with "main" in the IF statement, and remove both comments before marking this "ready to merge" on GitHub
+
+if [ "$BRANCH_NAME" = "chore/husky-git-hooks" ]; then
+  echo
+  echo "Aborting commit."
+  echo "You're committing to the main branch, usually this is not what you want to do."
+  echo "Did you forget to make a new feature branch to put your work on?"
+  echo
+  echo "Use git checkout -b <new_branch> to create a new feature branch."
+  echo
+  echo "If you're sure you want to commit to the main branch, run git commit with the --no-verify flag."
+
+  exit 1
+fi
