@@ -2319,8 +2319,8 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 ## updatePinnedDependencies
 
-This defaults to `true`.
-Set to false to disable pinned dependencies updates.
+By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
+You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
 
 ## versioning
 

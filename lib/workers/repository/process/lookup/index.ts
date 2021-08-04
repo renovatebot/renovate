@@ -60,6 +60,11 @@ export async function lookupUpdates(
   }
   const isValid = currentValue && versioning.isValid(currentValue);
   if (isValid) {
+    if (!updatePinnedDependencies && versioning.isSingleVersion(currentValue)) {
+      res.skipReason = SkipReason.IsPinned;
+      return res;
+    }
+
     const dependency = clone(await getPkgReleases(config));
     if (!dependency) {
       // If dependency lookup fails then warn and return
@@ -83,11 +88,6 @@ export async function lookupUpdates(
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
     res.dependencyUrl = dependency?.dependencyUrl;
-
-    if (!updatePinnedDependencies && versioning.isSingleVersion(currentValue)) {
-      res.fixedVersion = currentValue.replace(/^=+/, '');
-      return res;
-    }
 
     const latestVersion = dependency.tags?.latest;
     // Filter out any results from datasource that don't comply with our versioning

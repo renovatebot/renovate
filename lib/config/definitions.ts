@@ -2026,7 +2026,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'updatePinnedDependencies',
-    description: 'Set to false to disable pinned dependencies updates.',
+    description:
+      'Whether to update pinned (single version) dependencies or not.',
     type: 'boolean',
     default: true,
   },
