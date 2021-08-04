@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import type { HttpResponse } from '../../util/http';
 import * as hexVersioning from '../../versioning/hex';
+import * as hostRules from '../../util/host-rules';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HexRelease } from './types';
@@ -32,12 +33,17 @@ export class HexDatasource extends Datasource {
     // hexPackageName:organizationName
     // hexPackageName is used to pass it in hex dep url
     // organizationName is used for accessing to private deps
-    const hexPackageName = lookupName.split(':')[0];
-    const hexUrl = `${registryUrl}api/packages/${hexPackageName}`;
+    const [hexPackageName, organizationName] = lookupName.split(':');
+    const organizationUrlPrefix = organizationName
+      ? `repos/${organizationName}/`
+      : '';
+    const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
+    const { token } = hostRules.find({ url: hexUrl });
+    const httpOptions = token ? { headers: { authorization: token } } : {};
 
     let response: HttpResponse<HexRelease>;
     try {
-      response = await this.http.getJson<HexRelease>(hexUrl);
+      response = await this.http.getJson<HexRelease>(hexUrl, httpOptions);
     } catch (err) {
       this.handleGenericErrors(err);
     }
