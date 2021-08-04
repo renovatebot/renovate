@@ -59,7 +59,7 @@ export class GitlabPackagesDatasource extends Datasource {
       ).body;
 
       result.releases = response
-        // Setting the package_name option when calling the GitLab API isn't enough to filter information about other package
+        // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
         // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
         .filter((r) => r.name === lookupName)
         .map(({ version, created_at, _links }) => ({
