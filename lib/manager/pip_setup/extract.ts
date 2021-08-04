@@ -1,5 +1,5 @@
 import { getAdminConfig } from '../../config/admin';
-import * as datasourcePypi from '../../datasource/pypi';
+import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { exec } from '../../util/exec';
@@ -122,7 +122,7 @@ export async function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: datasourcePypi.id,
+        datasource: PypiDatasource.id,
       };
       return dep;
     })

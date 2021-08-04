@@ -264,7 +264,7 @@ You can use the `branchName`, `commitMessage`, `prTitle` or `prBody` configurati
 
 ### Automatically merge passing Pull Requests
 
-Set the configuration option `autoMerge` to `true`.
+Set the configuration option `automerge` to `true`.
 Nest it inside config objects `patch` or `minor` if you want it to apply to certain types only.
 
 ### Separate patch releases from minor releases

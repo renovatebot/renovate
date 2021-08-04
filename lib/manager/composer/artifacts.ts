@@ -25,7 +25,12 @@ import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson } from './types';
-import { composerVersioningId, getConstraint } from './utils';
+import {
+  composerVersioningId,
+  extractContraints,
+  getComposerConstraint,
+  getPhpConstraint,
+} from './utils';
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
@@ -82,7 +87,7 @@ export async function updateArtifacts({
   );
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
     return null;
@@ -93,9 +98,22 @@ export async function updateArtifacts({
   await ensureLocalDir(vendorDir);
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+
+    const constraints = {
+      ...extractContraints(
+        JSON.parse(newPackageFileContent),
+        JSON.parse(existingLockFileContent)
+      ),
+      ...config.constraints,
+    };
+
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
+
+    const preCommands: string[] = [
+      `install-tool composer ${await getComposerConstraint(constraints)}`,
+    ];
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -104,8 +122,9 @@ export async function updateArtifacts({
         COMPOSER_AUTH: getAuthJson(),
       },
       docker: {
-        image: 'composer',
-        tagConstraint: getConstraint(config),
+        preCommands,
+        image: 'php',
+        tagConstraint: getPhpConstraint(constraints),
         tagScheme: composerVersioningId,
       },
     };

@@ -147,6 +147,8 @@ We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again.
 You usually don't need to fix any Prettier errors by hand.
 
+If you're only working on the documentation files, you can use the `yarn doc-fix` command to format your work.
+
 ## Keeping your Renovate fork up to date
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
