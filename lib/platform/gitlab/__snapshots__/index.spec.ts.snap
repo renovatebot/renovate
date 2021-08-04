@@ -166,7 +166,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": Object {
+      "description": "the-body",
+      "labels": "",
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -191,7 +198,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345/approval_rules",
   },
   Object {
-    "body": "{\\"name\\":\\"renovateIgnoreApprovals\\",\\"approvals_required\\":0}",
+    "body": Object {
+      "approvals_required": 0,
+      "name": "renovateIgnoreApprovals",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -227,7 +237,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
   },
   Object {
-    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
+    "body": Object {
+      "merge_when_pipeline_succeeds": true,
+      "should_remove_source_branch": true,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -355,7 +368,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": Object {
+      "description": "the-body",
+      "labels": "",
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -402,7 +422,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
   },
   Object {
-    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
+    "body": Object {
+      "merge_when_pipeline_succeeds": true,
+      "should_remove_source_branch": true,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -502,7 +525,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": Object {
+      "description": "the-body",
+      "labels": "",
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -527,7 +557,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345/approval_rules",
   },
   Object {
-    "body": "{\\"name\\":\\"renovateIgnoreApprovals\\",\\"approvals_required\\":0}",
+    "body": Object {
+      "approvals_required": 0,
+      "name": "renovateIgnoreApprovals",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -563,7 +596,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
   },
   Object {
-    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
+    "body": Object {
+      "merge_when_pipeline_succeeds": true,
+      "should_remove_source_branch": true,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
