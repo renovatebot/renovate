@@ -13,7 +13,7 @@ export class GitlabPackagesDatasource extends Datasource {
 
   caching = true;
   customRegistrySupport = true;
-  defaultVersioning = 'loose';
+  defaultVersioning = 'docker';
 
   constructor() {
     super(datasource);
@@ -56,7 +56,9 @@ export class GitlabPackagesDatasource extends Datasource {
         .map(({ version, created_at, _links }) => ({
           version,
           releaseTimestamp: created_at,
-          registryUrl: _links? url.resolveBaseUrl(server, _links?.web_path) : null,
+          registryUrl: _links
+            ? url.resolveBaseUrl(server, _links?.web_path)
+            : null,
         }));
     } catch (err) {
       this.handleGenericErrors(err);
