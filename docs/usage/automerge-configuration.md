@@ -139,7 +139,7 @@ These approval helper apps are only available for GitHub.
 
 Depending on the platform, having a `CODEOWNERS` file could block automerging, because it means a code owner must review the PR.
 
-### Disabling automerge in select repos, rest of org should automerge
+### Overriding global automerge
 
 You might have setup a global configuration in a `.github` repository, that has a `renovate.json` file that turns on automerge for certain dependencies.
 Repositories in the organization all extend from this global configuration, and so they "inherit" the automerge settings as well.
