@@ -8,6 +8,10 @@ env:
   PYTHON_VERSION: 3.9
   SKIP_JAVA_TESTS: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+  
 jobs:
   test:
     runs-on: ubuntu-latest
