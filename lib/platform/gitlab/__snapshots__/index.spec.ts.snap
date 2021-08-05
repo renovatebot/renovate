@@ -488,7 +488,15 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null,\\"squash\\":true}",
+    "body": Object {
+      "description": "the-body",
+      "labels": null,
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "squash": true,
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -551,7 +559,15 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null,\\"squash\\":true}",
+    "body": Object {
+      "description": "the-body",
+      "labels": null,
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "squash": true,
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
