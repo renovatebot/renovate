@@ -52,6 +52,7 @@ async function downloadAndDigest(
   const downloadUrl = asset.browser_download_url;
   const cacheKey = getAssetDigestCacheKey(downloadUrl, algorithm);
   const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
+  // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
