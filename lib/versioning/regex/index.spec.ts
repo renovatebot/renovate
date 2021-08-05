@@ -413,10 +413,16 @@ describe('regex', () => {
       expect(
         re.isGreaterThan('12.7.0-debian-10-r69', '12.7.0-debian-10-r100')
       ).toBe(false);
-
       expect(
         re.isGreaterThan('12.7.0-debian-10-r169', '12.7.0-debian-10-r100')
       ).toBe(true);
+
+      expect(re.matches('12.7.0-debian-9-r69', '12.7.0-debian-10-r69')).toBe(
+        true
+      );
+      expect(re.matches('12.7.0-debian-9-r69', '12.7.0-debian-10-r68')).toBe(
+        true
+      );
     });
   });
 });
