@@ -40,7 +40,7 @@ jobs:
           ref: ${{ env.GIT_SHA }}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@4d0182af5ead0b7bf53e87e49aa959476f5501d3 # renovate: tag=v2.3.2
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954 # renovate: tag=v2.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
