@@ -107,6 +107,28 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('updates Cargo.lock based on the lookupName, when given', async () => {
+    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    const updatedDeps = [
+      {
+        depName: 'renamedDep1',
+        lookupName: 'dep1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('returns updated workspace Cargo.lock', async () => {
     fs.stat.mockRejectedValueOnce(new Error('crates/one/Cargo.lock not found'));
     fs.stat.mockRejectedValueOnce(new Error('crates/Cargo.lock not found'));
