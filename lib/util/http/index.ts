@@ -172,6 +172,23 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     return this.request<string>(url, { ...options, method: 'head' });
   }
 
+  protected requestBuffer<T>(
+    url: string | URL,
+    httpOptions?: InternalHttpOptions
+  ): Promise<HttpResponse<T> | null> {
+    return this.request<T>(url, {
+      ...httpOptions,
+      responseType: 'buffer' as any,
+    });
+  }
+
+  getBuffer(
+    url: string,
+    options: HttpOptions = {}
+  ): Promise<HttpResponse<Buffer> | null> {
+    return this.requestBuffer(url, options);
+  }
+
   private async requestJson<T = unknown>(
     url: string,
     options: InternalHttpOptions

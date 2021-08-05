@@ -86,6 +86,14 @@ export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
 }
 
+export function loadBinaryFixture(
+  fixtureFile: string,
+  fixtureRoot = '.'
+): Buffer {
+  const fixtureAbsFile = getFixturePath(fixtureFile, fixtureRoot);
+  return readFileSync(fixtureAbsFile);
+}
+
 export function loadFixture(fixtureFile: string, fixtureRoot = '.'): string {
   const fixtureAbsFile = getFixturePath(fixtureFile, fixtureRoot);
   return readFileSync(fixtureAbsFile, { encoding: 'utf8' });

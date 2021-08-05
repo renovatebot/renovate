@@ -1,6 +1,11 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture, loadJsonFixture } from '../../../test/util';
+import {
+  getName,
+  loadBinaryFixture,
+  loadFixture,
+  loadJsonFixture,
+} from '../../../test/util';
 import * as rubyVersioning from '../../versioning/ruby';
 import { resetCache } from './get-rubygems-org';
 import * as rubygems from '.';
@@ -8,6 +13,7 @@ import * as rubygems from '.';
 const rubygemsOrgVersions = loadFixture('rubygems-org.txt');
 const railsInfo = loadJsonFixture('rails/info.json');
 const railsVersions = loadJsonFixture('rails/versions.json');
+const railsDependencies = loadBinaryFixture('dependencies-rails.dat');
 
 describe(getName(), () => {
   describe('getReleases', () => {
@@ -42,6 +48,23 @@ describe(getName(), () => {
         .scope('https://thirdparty.com')
         .get('/api/v1/gems/rails.json')
         .reply(200, null);
+      expect(await getPkgReleases(params)).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns null for 404', async () => {
+      httpMock
+        .scope('https://firstparty.com')
+        .get('/basepath/api/v1/gems/rails.json')
+        .reply(404, null)
+        .get('/basepath/api/v1/dependencies?gems=rails')
+        .reply(404, null);
+      httpMock
+        .scope('https://thirdparty.com')
+        .get('/api/v1/gems/rails.json')
+        .reply(404, null)
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(404, null);
       expect(await getPkgReleases(params)).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -147,6 +170,18 @@ describe(getName(), () => {
         .get('/basepath/api/v1/gems/rails.json')
         .reply(200, null);
       expect(await getPkgReleases(params)).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('falls back to dependencies when info request fails', async () => {
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(404, null)
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(200, railsDependencies);
+      const res = await getPkgReleases(params);
+      expect(res.releases).toHaveLength(339);
+      expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('falls back to info when version request fails', async () => {

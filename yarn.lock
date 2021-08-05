@@ -858,7 +858,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.14.5"
 
-"@babel/runtime-corejs3@^7.12.1":
+"@babel/runtime-corejs3@^7.12.1", "@babel/runtime-corejs3@^7.14.9":
   version "7.14.9"
   resolved "https://registry.yarnpkg.com/@babel/runtime-corejs3/-/runtime-corejs3-7.14.9.tgz#fb21b1cf11650dcb8fcf4de2e6b3b8cf411da3f3"
   integrity sha512-64RiH2ON4/y8qYtoa8rUiyam/tUVyGqRyNYhe+vCRGmjnV4bUlZvY+mwd0RrmLoCpJpdq3RsrNqKb7SJdw/4kw==
@@ -1457,6 +1457,13 @@
   integrity sha512-Y8GR0BJHQDpO09qw/ZQpN+DXrFzCWaE0pvK4frDm3zJ+h99AktsFfBoDazbCtHxiL8d0jD8xRH4BeynlKLeChg==
   dependencies:
     "@octokit/openapi-types" "^9.2.0"
+
+"@qnighy/marshal@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@qnighy/marshal/-/marshal-0.1.0.tgz#3a1115892cfb18719b928d92af71b11935a954c2"
+  integrity sha512-Ob5phlXfAUfq98pOj/ZwS8BGJq87m424zzBShohITNgBfho+aArCC1y1qqs6Eew1EmNx0AaoWOGNZdMvXoKzUA==
+  dependencies:
+    "@babel/runtime-corejs3" "^7.14.9"
 
 "@renovate/pep440@1.0.0":
   version "1.0.0"
