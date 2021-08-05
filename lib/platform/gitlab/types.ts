@@ -53,6 +53,7 @@ export interface RepoResponse {
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   merge_method: MergeMethod;
   path_with_namespace: string;
+  squash_option?: 'never' | 'always' | 'default_on' | 'default_off';
 }
 
 // See https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/user_status_type.rb

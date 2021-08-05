@@ -1,5 +1,5 @@
 import { getName, loadFixture } from '../../../test/util';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const multidocYaml = loadFixture('multidoc.yaml');
 
