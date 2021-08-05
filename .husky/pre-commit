@@ -5,10 +5,7 @@ yarn pretty-quick --staged
 
 BRANCH_NAME=$(git branch --show-current)
 
-# I'm using "chore/husky-git-hooks" so that you can test my work in the PR branch
-# TODO: Replace "chore/husky-git-hooks" with "main" in the IF statement, and remove both comments before marking this "ready to merge" on GitHub
-
-if [ "$BRANCH_NAME" = "chore/husky-git-hooks" ]; then
+if [ "$BRANCH_NAME" = "main" ]; then
   echo
   echo "Aborting commit."
   echo "You're committing to the main branch, usually this is not what you want to do."
