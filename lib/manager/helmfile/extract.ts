@@ -39,12 +39,19 @@ export function extractPackageFile(
       let depName = dep.chart;
       let repoName = null;
 
+      if (!is.string(dep.chart)) {
+        return {
+          depName: dep.name,
+          skipReason: SkipReason.InvalidName,
+        };
+      }
+
       // If starts with ./ is for sure a local path
       if (dep.chart.startsWith('./')) {
         return {
           depName,
-          skipReason: 'local-chart',
-        } as PackageDependency;
+          skipReason: SkipReason.LocalChart,
+        };
       }
 
       if (dep.chart.includes('/')) {
