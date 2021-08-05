@@ -39,6 +39,24 @@ The Renovate team will only create bugfixes for an older version if the hosted a
 If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
 If you're self hosting Renovate, use the latest release if possible.
 
+## Renovate core features not supported on all platforms
+
+| Feature              | Platforms which lack feature                      | See Renovate issue(s) |
+| -------------------- | ------------------------------------------------- | --------------------- |
+| Dependency Dashboard | BitBucket, BitBucket Server, Azure                | #9592                 |
+| Hosted app           | GitLab, BitBucket, BitBucket Server, Azure, Gitea |                       |
+
+## Major platform features not suported by Renovate
+
+Some major platform features are not supported at all by Renovate.
+
+| Feature name                            | Platform                               | See Renovate issue(s) |
+| --------------------------------------- | -------------------------------------- | --------------------- |
+| Jira issues                             | BitBucket                              | #3796                 |
+| Merge trains                            | GitLab                                 | #5573                 |
+| Cloning repo over SSH selfhosted        | None                                   | #5406                 |
+| Configurable merge strategy and message | None, BitBucket will get support first | #7184                 |
+
 ## What if I need to .. ?
 
 ### Tell Renovate to ask for approval before creating a Pull Request
