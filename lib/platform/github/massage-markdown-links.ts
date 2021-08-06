@@ -11,7 +11,8 @@ const urlRegex =
 function massageLink(input: string): string {
   return urlRegex.test(input)
     ? input.replace(/(?:to)?github\.com/, 'togithub.com')
-    : input;
+    : /* istanbul ignore next */
+      input;
 }
 
 function linkifyText(url: string): Node | boolean {

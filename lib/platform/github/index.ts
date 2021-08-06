@@ -48,6 +48,7 @@ import {
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
+import { massageMarkdownLinks } from './massage-markdown-links';
 import {
   BranchProtection,
   CombinedBranchStatus,
@@ -60,7 +61,6 @@ import {
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
-import { massageMarkdownLinks } from './massage-markdown-links';
 
 const githubApi = new githubHttp.GithubHttp();
 
