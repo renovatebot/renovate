@@ -18,6 +18,12 @@ export interface ComposerConfig {
 
   require?: Record<string, string>;
   'require-dev'?: Record<string, string>;
+
+  config?: ComposerConfiguration;
+}
+
+export interface ComposerConfiguration {
+  platform?: Record<string, string>;
 }
 
 export interface ComposerLockPackage {

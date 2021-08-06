@@ -84,5 +84,17 @@ describe(getName(), () => {
     it('fallback to 1.*', () => {
       expect(extractContraints({}, {})).toEqual({ composer: '1.*' });
     });
+
+    it('returns from config.platform', () => {
+      expect(
+        extractContraints(
+          {
+            require: { php: '>=7.0.33' },
+            config: { platform: { php: '7.0.0' } },
+          },
+          {}
+        )
+      ).toEqual({ php: '7.0.0', composer: '1.*' });
+    });
   });
 });
