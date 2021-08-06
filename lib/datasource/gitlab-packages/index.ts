@@ -39,6 +39,10 @@ export class GitlabPackagesDatasource extends Datasource {
     );
   }
 
+ @cache({
+    namespace: `datasource-${datasource}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) => `${registryUrl}-${lookupName}`,
+  })
   async getReleases({
     registryUrl,
     lookupName,
