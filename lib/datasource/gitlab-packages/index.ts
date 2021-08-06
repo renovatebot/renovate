@@ -70,9 +70,6 @@ export class GitlabPackagesDatasource extends Datasource {
         .map(({ version, created_at, _links }) => ({
           version,
           releaseTimestamp: created_at,
-          registryUrl: _links
-            ? url.resolveBaseUrl(server, _links?.web_path)
-            : null,
         }));
     } catch (err) {
       this.handleGenericErrors(err);
