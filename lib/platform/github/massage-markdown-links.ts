@@ -4,6 +4,7 @@ import type { Plugin, Transformer } from 'unified';
 // eslint-disable-next-line import/no-unresolved
 import type { Node } from 'unist';
 import visit from 'unist-util-visit';
+import { logger } from '../../logger';
 
 const urlRegex =
   /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com(?:[/?#][^\s")'.,]*)?/i;
@@ -47,7 +48,8 @@ export function massageMarkdownLinks(content: string): string {
   try {
     const output = remark().use(githubExtra).processSync(content);
     return output.toString();
-  } catch (_e) /* istanbul ignore next */ {
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, `Unable to massage markdown text`);
     return content;
   }
 }
