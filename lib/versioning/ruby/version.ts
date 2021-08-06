@@ -30,9 +30,6 @@ const parse = (version: string): RubyVersion => ({
 const adapt = (left: string, right: string): string =>
   left.split('.').slice(0, right.split('.').length).join('.');
 
-const floor = (version: string): string =>
-  [...releaseSegments(version).slice(0, -1), 0].join('.');
-
 // istanbul ignore next
 const incrementLastSegment = (version: string): string => {
   const segments = releaseSegments(version);
@@ -118,4 +115,4 @@ const decrement = (version: string): string => {
   return nextSegments.reverse().join('.');
 };
 
-export { parse, floor, increment, decrement };
+export { parse, increment, decrement, releaseSegments };
