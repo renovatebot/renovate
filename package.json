@@ -133,7 +133,7 @@
     "azure-devops-node-api": "10.2.2",
     "bunyan": "1.8.15",
     "cacache": "15.2.0",
-    "chalk": "4.1.1",
+    "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
     "commander": "7.2.0",
