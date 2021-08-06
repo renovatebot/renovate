@@ -1,3 +1,4 @@
+import { cache } from '../../util/cache/package/decorator';
 import { GitlabHttp } from '../../util/http/gitlab';
 import * as url from '../../util/url';
 import { Datasource } from '../datasource';
