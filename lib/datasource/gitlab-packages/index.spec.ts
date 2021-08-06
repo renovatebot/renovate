@@ -49,6 +49,7 @@ describe(getName(), () => {
       expect(res.releases).toHaveLength(3);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for 404', async () => {
       httpMock
         .scope('https://gitlab.com')
