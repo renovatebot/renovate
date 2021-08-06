@@ -6,6 +6,7 @@ import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { getQueryString } from '../../util/url';
 import type { ReleaseResult } from '../types';
 import { id } from './common';
+import type { MarshalledVersionInfo } from './types';
 
 const http = new Http(id);
 
@@ -35,7 +36,7 @@ export async function fetch(
 export async function fetchDependencies(
   dependencies: string[],
   registry: string
-): Promise<any> {
+): Promise<MarshalledVersionInfo[]> {
   const headers = getHeaders();
 
   const url = urlJoin(
@@ -55,7 +56,7 @@ export async function fetchDependencies(
     return null;
   }
 
-  return Marshal.parse(response.body);
+  return Marshal.parse(response.body) as MarshalledVersionInfo[];
 }
 
 async function getDependencyFromV1Dependencies(
