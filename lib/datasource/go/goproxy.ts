@@ -97,15 +97,22 @@ const lexer = moo.states({
   },
 });
 
+const parsedNoproxy: Record<string, RegExp | null> = {};
+
 export function parseNoproxy(
   input: unknown = process.env.GONOPROXY || process.env.GOPRIVATE
 ): RegExp | null {
   if (!is.string(input)) {
     return null;
   }
+  if (parsedNoproxy[input] !== undefined) {
+    return parsedNoproxy[input];
+  }
   lexer.reset(input);
   const noproxyPattern = [...lexer].map(({ value }) => value).join('');
-  return noproxyPattern ? regEx(`^(?:${noproxyPattern})$`) : null;
+  const result = noproxyPattern ? regEx(`^(?:${noproxyPattern})$`) : null;
+  parsedNoproxy[input] = result;
+  return result;
 }
 
 /**
