@@ -86,6 +86,7 @@ describe(getName(), () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for 5xx', async () => {
       httpMock
         .scope('https://gitlab.com')
