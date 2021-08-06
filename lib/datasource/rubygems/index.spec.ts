@@ -172,6 +172,7 @@ describe(getName(), () => {
       expect(await getPkgReleases(params)).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('falls back to dependencies when info request fails', async () => {
       httpMock
         .scope('https://thirdparty.com/')
