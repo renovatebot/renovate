@@ -46,7 +46,12 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"assignees\\":[\\"someuser\\",\\"someotheruser\\"]}",
+    "body": Object {
+      "assignees": Array [
+        "someuser",
+        "someotheruser",
+      ],
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -108,7 +113,15 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"reviewers\\":[\\"someuser\\",\\"someotheruser\\"],\\"team_reviewers\\":[\\"someteam\\"]}",
+    "body": Object {
+      "reviewers": Array [
+        "someuser",
+        "someotheruser",
+      ],
+      "team_reviewers": Array [
+        "someteam",
+      ],
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -184,7 +197,13 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"PR draft\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"This is a result of a draft\\",\\"draft\\":true}",
+    "body": Object {
+      "base": "master",
+      "body": "This is a result of a draft",
+      "draft": true,
+      "head": "some:some-branch",
+      "title": "PR draft",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -260,7 +279,13 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"dev\\",\\"body\\":\\"Hello world\\",\\"draft\\":false}",
+    "body": Object {
+      "base": "dev",
+      "body": "Hello world",
+      "draft": false,
+      "head": "some:some-branch",
+      "title": "The Title",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -274,7 +299,10 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls",
   },
   Object {
-    "body": "[\\"deps\\",\\"renovate\\"]",
+    "body": Array [
+      "deps",
+      "renovate",
+    ],
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -350,7 +378,13 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"Hello world\\",\\"draft\\":false}",
+    "body": Object {
+      "base": "master",
+      "body": "Hello world",
+      "draft": false,
+      "head": "some:some-branch",
+      "title": "The Title",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -550,7 +584,12 @@ Array [
     "url": "https://api.github.com/repos/some/repo/issues/42/comments?per_page=100",
   },
   Object {
-    "body": "{\\"body\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}",
+    "body": Object {
+      "body": "### some-subject
+
+some
+content",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -691,7 +730,12 @@ Array [
     "url": "https://api.github.com/repos/some/repo/issues/42/comments?per_page=100",
   },
   Object {
-    "body": "{\\"body\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}",
+    "body": Object {
+      "body": "### some-subject
+
+some
+content",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -821,7 +865,12 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"body\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}",
+    "body": Object {
+      "body": "### some-subject
+
+some
+content",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -1590,7 +1639,11 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"new-title\\",\\"body\\":\\"new-content\\",\\"labels\\":[]}",
+    "body": Object {
+      "body": "new-content",
+      "labels": Array [],
+      "title": "new-title",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -1840,7 +1893,11 @@ Array [
     "url": "https://api.github.com/repos/some/repo/issues/2",
   },
   Object {
-    "body": "{\\"title\\":\\"title-2\\",\\"body\\":\\"new-content\\",\\"labels\\":[]}",
+    "body": Object {
+      "body": "new-content",
+      "labels": Array [],
+      "title": "title-2",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -1961,7 +2018,14 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"new-title\\",\\"body\\":\\"new-content\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "body": Object {
+      "body": "new-content",
+      "labels": Array [
+        "Renovate",
+        "Maintenance",
+      ],
+      "title": "new-title",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -2082,7 +2146,9 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "state": "closed",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -2568,7 +2634,11 @@ Array [
     "url": "https://api.github.com/repos/some/repo/issues/2",
   },
   Object {
-    "body": "{\\"body\\":\\"newer-content\\",\\"state\\":\\"open\\",\\"title\\":\\"title-3\\"}",
+    "body": Object {
+      "body": "newer-content",
+      "state": "open",
+      "title": "title-3",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -2700,7 +2770,15 @@ Array [
     "url": "https://api.github.com/repos/some/repo/issues/2",
   },
   Object {
-    "body": "{\\"body\\":\\"newer-content\\",\\"state\\":\\"open\\",\\"title\\":\\"title-3\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "body": Object {
+      "body": "newer-content",
+      "labels": Array [
+        "Renovate",
+        "Maintenance",
+      ],
+      "state": "open",
+      "title": "title-3",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -2776,7 +2854,9 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "state": "closed",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -3134,7 +3214,9 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
   },
   Object {
-    "body": "{\\"ref\\":\\"refs/heads/somebranch\\"}",
+    "body": Object {
+      "ref": "refs/heads/somebranch",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -3207,7 +3289,9 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
   },
   Object {
-    "body": "{\\"ref\\":\\"refs/heads/somebranch\\"}",
+    "body": Object {
+      "ref": "refs/heads/somebranch",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -3221,7 +3305,10 @@ Array [
     "url": "https://api.github.com/repos/some/repo/git/refs",
   },
   Object {
-    "body": "{\\"state\\":\\"open\\",\\"title\\":\\"old title\\"}",
+    "body": Object {
+      "state": "open",
+      "title": "old title",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -3318,7 +3405,9 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
   },
   Object {
-    "body": "{\\"ref\\":\\"refs/heads/somebranch\\"}",
+    "body": Object {
+      "ref": "refs/heads/somebranch",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -3332,7 +3421,10 @@ Array [
     "url": "https://api.github.com/repos/some/repo/git/refs",
   },
   Object {
-    "body": "{\\"state\\":\\"open\\",\\"title\\":\\"old title\\"}",
+    "body": Object {
+      "state": "open",
+      "title": "old title",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -3964,7 +4056,10 @@ Array [
     "url": "https://api.github.com/repos/some/repo/forks",
   },
   Object {
-    "body": "{\\"sha\\":\\"1234\\",\\"force\\":true}",
+    "body": Object {
+      "force": true,
+      "sha": "1234",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7019,7 +7114,10 @@ Array [
     "url": "https://api.github.com/repos/some/repo/forks",
   },
   Object {
-    "body": "{\\"ref\\":\\"refs/heads/master\\",\\"sha\\":\\"1234\\"}",
+    "body": Object {
+      "ref": "refs/heads/master",
+      "sha": "1234",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7033,7 +7131,10 @@ Array [
     "url": "https://api.github.com/repos/forked/repo/git/refs",
   },
   Object {
-    "body": "{\\"name\\":\\"repo\\",\\"default_branch\\":\\"master\\"}",
+    "body": Object {
+      "default_branch": "master",
+      "name": "repo",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7047,7 +7148,10 @@ Array [
     "url": "https://api.github.com/repos/forked/repo",
   },
   Object {
-    "body": "{\\"sha\\":\\"1234\\",\\"force\\":true}",
+    "body": Object {
+      "force": true,
+      "sha": "1234",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7531,7 +7635,10 @@ Array [
     "url": "https://api.github.com/repos/some/repo/forks",
   },
   Object {
-    "body": "{\\"sha\\":\\"1234\\",\\"force\\":true}",
+    "body": Object {
+      "force": true,
+      "sha": "1234",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7713,7 +7820,9 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"rebase\\"}",
+    "body": Object {
+      "merge_method": "rebase",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7727,7 +7836,9 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls/1237/merge",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"rebase\\"}",
+    "body": Object {
+      "merge_method": "rebase",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7741,7 +7852,9 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls/1237/merge",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"squash\\"}",
+    "body": Object {
+      "merge_method": "squash",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7755,7 +7868,9 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls/1237/merge",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"merge\\"}",
+    "body": Object {
+      "merge_method": "merge",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7817,7 +7932,9 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"rebase\\"}",
+    "body": Object {
+      "merge_method": "rebase",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7831,7 +7948,9 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls/1237/merge",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"rebase\\"}",
+    "body": Object {
+      "merge_method": "rebase",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7845,7 +7964,9 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls/1237/merge",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"squash\\"}",
+    "body": Object {
+      "merge_method": "squash",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7907,7 +8028,9 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"rebase\\"}",
+    "body": Object {
+      "merge_method": "rebase",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7969,7 +8092,9 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"rebase\\"}",
+    "body": Object {
+      "merge_method": "rebase",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -8031,7 +8156,9 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"rebase\\"}",
+    "body": Object {
+      "merge_method": "rebase",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -8093,7 +8220,9 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"merge_method\\":\\"rebase\\"}",
+    "body": Object {
+      "merge_method": "rebase",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -8225,7 +8354,12 @@ Array [
     "url": "https://api.github.com/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
   Object {
-    "body": "{\\"state\\":\\"success\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
+    "body": Object {
+      "context": "some-context",
+      "description": "some-description",
+      "state": "success",
+      "target_url": "some-url",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -8309,7 +8443,11 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"The New Title\\",\\"body\\":\\"Hello world again\\",\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "body": "Hello world again",
+      "state": "closed",
+      "title": "The New Title",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -8371,7 +8509,10 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"title\\":\\"The New Title\\",\\"body\\":\\"Hello world again\\"}",
+    "body": Object {
+      "body": "Hello world again",
+      "title": "The New Title",
+    },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",

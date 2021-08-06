@@ -11,7 +11,7 @@ on:
 
 permissions:
   security-events: write
-      
+
 jobs:
   CodeQL-Build:
     runs-on: ubuntu-latest
