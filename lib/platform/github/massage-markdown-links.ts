@@ -44,6 +44,10 @@ function transformer(tree: Node): void {
 const githubExtra: Plugin<any> = (): Transformer => transformer;
 
 export function massageMarkdownLinks(content: string): string {
-  const output = remark().use(githubExtra).processSync(content);
-  return output.toString();
+  try {
+    const output = remark().use(githubExtra).processSync(content);
+    return output.toString();
+  } catch (_e) /* istanbul ignore next */ {
+    return content;
+  }
 }
