@@ -73,6 +73,6 @@ export class GitlabPackagesDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
-    return result.releases.length ? result : null;
+    return result.releases?.length ? result : null;
   }
 }
