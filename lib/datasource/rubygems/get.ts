@@ -64,7 +64,7 @@ async function getDependencyFromV1Dependencies(
   registry: string
 ): Promise<ReleaseResult | null> {
   logger.debug({ dependency }, 'falling back to dependencies endpoint');
-  let depInfo = null;
+  let depInfo: MarshalledVersionInfo[] | null = null;
   try {
     depInfo = await fetchDependencies([dependency], registry);
   } catch (err) {
@@ -75,18 +75,9 @@ async function getDependencyFromV1Dependencies(
     return null;
   }
   const releases = depInfo.map(
-    ({
-      number: version,
-      platform: rubyPlatform,
-      created_at: releaseTimestamp,
-      rubygems_version: rubygemsVersion,
-      ruby_version: rubyVersion,
-    }) => ({
+    ({ number: version, platform: rubyPlatform }) => ({
       version,
       rubyPlatform,
-      releaseTimestamp,
-      rubygemsVersion,
-      rubyVersion,
     })
   );
   return {
