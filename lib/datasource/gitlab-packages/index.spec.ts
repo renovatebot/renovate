@@ -17,9 +17,6 @@ describe(getName(), () => {
           version: 'v1.1.0',
           created_at: '2020-04-04T12:01:37.000-06:00',
           name: 'mypkg',
-          _links: {
-            web_path: '/user/project1/-/packages/3',
-          },
         },
         {
           version: 'v1.1.1',
