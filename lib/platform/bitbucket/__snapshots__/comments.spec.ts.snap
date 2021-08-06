@@ -13,7 +13,13 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
   },
   Object {
-    "body": "{\\"content\\":{\\"raw\\":\\"### topic\\\\n\\\\ncontent\\"}}",
+    "body": Object {
+      "content": Object {
+        "raw": "### topic
+
+content",
+      },
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -41,7 +47,14 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
   },
   Object {
-    "body": "{\\"content\\":{\\"raw\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}}",
+    "body": Object {
+      "content": Object {
+        "raw": "### some-subject
+
+some
+content",
+      },
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
