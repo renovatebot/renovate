@@ -344,4 +344,49 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
+  it('adds all ignorePlatformReq items', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
+    git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          composerIgnorePlatformReqs: false,
+          composerIgnorePlatformReq: ['ext-posix', 'ext-sodium'],
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('only adds ignorePlatformReqs when ignorePlatformReq has also been set', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
+    git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          composerIgnorePlatformReq: ['ext-posix', 'ext-sodium'],
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });
