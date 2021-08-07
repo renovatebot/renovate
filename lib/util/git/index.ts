@@ -841,7 +841,9 @@ export async function commitFiles({
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = branchName;
       error.validationError = 'Bitbucket committer error';
-      error.validationMessage = err.message;
+      error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: "${String(
+        err.message
+      )}"`;
       throw error;
     }
     if (err.message.includes('remote: error: cannot lock ref')) {
