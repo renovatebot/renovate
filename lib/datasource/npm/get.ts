@@ -4,10 +4,9 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http, HttpOptions } from '../../util/http';
-import type { Release, ReleaseResult } from '../types';
 import { id } from './common';
 import { resolvePackage } from './npmrc';
-import { NpmResponse } from './types';
+import type { NpmDependency, NpmRelease, NpmResponse } from './types';
 
 const http = new Http(id);
 
@@ -20,20 +19,6 @@ export function resetMemCache(): void {
 
 export function resetCache(): void {
   resetMemCache();
-}
-
-export interface NpmRelease extends Release {
-  gitRef?: string;
-}
-export interface NpmDependency extends ReleaseResult {
-  releases: NpmRelease[];
-  deprecationSource?: string;
-  name: string;
-  homepage: string;
-  sourceUrl: string;
-  versions: Record<string, any>;
-  'dist-tags': Record<string, string>;
-  sourceDirectory?: string;
 }
 
 export async function getDependency(
@@ -133,7 +118,7 @@ export async function getDependency(
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 15;
-    // TODO: use dynamic detection of public repos instead of a static list
+    // TODO: use dynamic detection of public repos instead of a static list (#9587)
     const whitelistedPublicScopes = [
       '@graphql-codegen',
       '@storybook',

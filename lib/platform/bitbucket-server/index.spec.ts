@@ -1,4 +1,3 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
@@ -169,7 +168,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -181,7 +180,7 @@ describe(getName(__filename), () => {
       const username = 'abc';
       const password = '123';
 
-      async function initRepo(config = {}): Promise<nock.Scope> {
+      async function initRepo(config = {}): Promise<httpMock.Scope> {
         const scope = httpMock
           .scope(urlHost)
           .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
@@ -195,7 +194,6 @@ describe(getName(__filename), () => {
         await bitbucket.initRepo({
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
-          localDir: '',
           ...config,
         });
         return scope;
@@ -204,8 +202,6 @@ describe(getName(__filename), () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        httpMock.reset();
-        httpMock.setup();
         jest.mock('delay');
         jest.mock('../../util/git');
         jest.mock('../../util/host-rules');
@@ -230,9 +226,6 @@ describe(getName(__filename), () => {
           username,
           password,
         });
-      });
-      afterEach(() => {
-        httpMock.reset();
       });
 
       describe('initPlatform()', () => {
@@ -294,7 +287,6 @@ describe(getName(__filename), () => {
             await bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-              localDir: '',
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -318,7 +310,6 @@ describe(getName(__filename), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({ url: sshLink('SOME', 'repo') })
@@ -345,7 +336,6 @@ describe(getName(__filename), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -379,7 +369,6 @@ describe(getName(__filename), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -404,7 +393,6 @@ describe(getName(__filename), () => {
             bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-              localDir: '',
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);
           expect(httpMock.getTrace()).toMatchSnapshot();

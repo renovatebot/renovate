@@ -1,11 +1,9 @@
-import { readFileSync } from 'fs';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const multidocYaml = readFileSync(
-  'lib/manager/helmfile/__fixtures__/multidoc.yaml',
-  'utf8'
-);
-describe('lib/manager/helmfile/extract', () => {
+const multidocYaml = loadFixture('multidoc.yaml');
+
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

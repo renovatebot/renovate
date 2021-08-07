@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
+import type { RenovateConfig } from '../../../config/types';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,

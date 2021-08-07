@@ -7,6 +7,8 @@ export interface CargoDep {
   version?: string;
   /** Name of a registry whose URL is configured in `.cargo/config.toml` */
   registry?: string;
+  /** Name of a package to look up */
+  package?: string;
 }
 
 export type CargoDeps = Record<string, CargoDep | string>;

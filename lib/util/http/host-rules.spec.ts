@@ -1,4 +1,3 @@
-import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITEA,
@@ -12,7 +11,7 @@ const url = 'https://github.com';
 
 jest.mock('global-agent');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   const options = {
     hostType: PLATFORM_TYPE_GITHUB,
   };
@@ -38,14 +37,10 @@ describe(getName(__filename), () => {
       authType: 'Basic',
       token: 'XXX',
     });
-
-    httpMock.reset();
-    httpMock.setup();
   });
 
   afterEach(() => {
     delete process.env.HTTP_PROXY;
-    httpMock.reset();
   });
 
   it('adds token', () => {

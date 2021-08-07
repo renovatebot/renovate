@@ -29,13 +29,13 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
-        baseUrl: 'https://api.github.com/',
+        matchHost: 'https://api.github.com/',
         token: 'abc',
       });
     });
@@ -146,7 +146,7 @@ describe(getName(__filename), () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
         token: 'super_secret',
-        baseUrl: 'https://github-enterprise.example.com/',
+        matchHost: 'https://github-enterprise.example.com/',
       });
       expect(
         await getChangeLogJSON({
@@ -158,7 +158,7 @@ describe(getName(__filename), () => {
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
-        baseUrl: 'https://github-enterprise.example.com/',
+        matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';

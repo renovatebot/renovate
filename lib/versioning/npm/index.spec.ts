@@ -325,4 +325,38 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('>= 1.0.1 < 2');
   });
+  it('widens', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '<=1.2.3',
+        rangeStrategy: 'widen',
+        currentVersion: '1.0.0',
+        newVersion: '1.2.3',
+      })
+    ).toEqual('<=1.2.3');
+    expect(
+      semver.getNewValue({
+        currentValue: '<=1.2.3',
+        rangeStrategy: 'widen',
+        currentVersion: '1.0.0',
+        newVersion: '1.2.4',
+      })
+    ).toEqual('<=1.2.4');
+    expect(
+      semver.getNewValue({
+        currentValue: '>=1.2.3',
+        rangeStrategy: 'widen',
+        currentVersion: '1.0.0',
+        newVersion: '1.2.3',
+      })
+    ).toEqual('>=1.2.3');
+    expect(
+      semver.getNewValue({
+        currentValue: '>=1.2.3',
+        rangeStrategy: 'widen',
+        currentVersion: '1.0.0',
+        newVersion: '1.2.1',
+      })
+    ).toEqual('>=1.2.3 || 1.2.1');
+  });
 });

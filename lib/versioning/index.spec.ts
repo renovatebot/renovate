@@ -22,7 +22,7 @@ describe('allVersioning.get(versioning)', () => {
       // eslint-disable-next-line new-cap
       const mod = isVersioningApiConstructor(module) ? new module() : module;
 
-      // TODO: test required api
+      // TODO: test required api (#9715)
       if (!mod.isValid || !mod.isVersion) {
         throw Error(`Missing api on ${name}`);
       }

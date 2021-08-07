@@ -1,18 +1,12 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../../../test/util';
+import { getName, loadJsonFixture } from '../../../../../test/util';
 import { findDepConstraints } from './dep-constraints';
 
 jest.mock('../../../../util/fs');
 
-const packageJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/package.json'), 'utf8')
-);
-const packageLockJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/package-lock.json'), 'utf8')
-);
+const packageJson = loadJsonFixture('package.json');
+const packageLockJson = loadJsonFixture('package-lock.json');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('findDepConstraints()', () => {
     it('finds indirect dependency', () => {
       expect(

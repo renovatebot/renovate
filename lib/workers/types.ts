@@ -66,20 +66,14 @@ export interface BranchUpgradeConfig
   sourceUrl?: string;
 }
 
-export enum PrResult {
-  AwaitingApproval = 'AwaitingApproval',
-  AwaitingGreenBranch = 'AwaitingGreenBranch',
-  AwaitingNotPending = 'AwaitingNotPending',
-  BlockedByBranchAutomerge = 'BlockedByBranchAutomerge',
-  Created = 'Created',
-  Error = 'Error',
-  ErrorAlreadyExists = 'ErrorAlreadyExists',
-  NotUpdated = 'NotUpdated',
-  Updated = 'Updated',
-  LimitReached = 'LimitReached',
-}
+export type PrBlockedBy =
+  | 'BranchAutomerge'
+  | 'NeedsApproval'
+  | 'AwaitingTests'
+  | 'RateLimited'
+  | 'Error';
 
-export enum ProcessBranchResult {
+export enum BranchResult {
   AlreadyExisted = 'already-existed',
   Automerged = 'automerged',
   Done = 'done',
@@ -95,6 +89,7 @@ export enum ProcessBranchResult {
   CommitLimitReached = 'commit-limit-reached',
   BranchLimitReached = 'branch-limit-reached',
   Rebase = 'rebase',
+  UpdateNotScheduled = 'update-not-scheduled',
 }
 
 export interface BranchConfig
@@ -110,7 +105,9 @@ export interface BranchConfig
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;
-  res?: ProcessBranchResult;
+  result?: BranchResult;
   upgrades: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;
+  prBlockedBy?: PrBlockedBy;
+  prNo?: number;
 }

@@ -67,7 +67,7 @@ exports[`manager/homebrew/update returns unchanged content if both got requests 
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -76,7 +76,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -90,7 +90,7 @@ exports[`manager/homebrew/update returns unchanged content if fromStream promise
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -99,7 +99,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -113,7 +113,7 @@ exports[`manager/homebrew/update returns unchanged content if repoName in upgrad
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -122,7 +122,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -136,7 +136,7 @@ exports[`manager/homebrew/update returns unchanged content if repoName in upgrad
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -145,7 +145,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -159,7 +159,7 @@ exports[`manager/homebrew/update returns unchanged content if sha256 field in Fo
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -173,7 +173,7 @@ exports[`manager/homebrew/update returns unchanged content if sha256 field in Fo
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -187,7 +187,7 @@ exports[`manager/homebrew/update returns unchanged content if url field in Formu
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -201,7 +201,7 @@ exports[`manager/homebrew/update returns unchanged content if url field in Formu
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -266,7 +266,7 @@ exports[`manager/homebrew/update updates "archive" github dependency 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -343,7 +343,7 @@ exports[`manager/homebrew/update updates "releases" github dependency 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

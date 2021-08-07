@@ -1,8 +1,14 @@
 version: 2.1
 
+# There are blank lines and comments in this orbs section intentionally!
 orbs:
   release-workflows: hutson/library-release-workflows@4.1.0
+  # Comments help me understand my work.
+  # The next line is intentionally just whitespace!
+  
   no-version: abc/def
+
+  # Comments help me understand my work.
   volatile: zzz/zzz@volatile
 
 test_plan: &test_plan

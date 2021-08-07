@@ -60,6 +60,9 @@ module.exports = {
       },
     ],
 
+    // disallow direct `nock` module usage as it causes memory issues.
+    'no-restricted-imports': [2, { paths: ['nock'] }],
+
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
       'error',
@@ -123,6 +126,8 @@ module.exports = {
         '@typescript-eslint/unbound-method': 0,
 
         'jest/valid-title': [0, { ignoreTypeOfDescribeName: true }],
+        'max-classes-per-file': 0,
+        'class-methods-use-this': 0,
       },
     },
     {

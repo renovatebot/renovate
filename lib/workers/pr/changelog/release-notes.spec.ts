@@ -1,7 +1,7 @@
-import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
-import { getName, mocked } from '../../../../test/util';
+import { getName, loadFixture, mocked } from '../../../../test/util';
+import { clone } from '../../../util/clone';
 import * as _hostRules from '../../../util/host-rules';
 import {
   addReleaseNotes,
@@ -16,34 +16,12 @@ jest.mock('../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
-const angularJsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/angular-js.md',
-  'utf8'
-);
-const jestChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/jest.md',
-  'utf8'
-);
-
-const jsYamlChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/js-yaml.md',
-  'utf8'
-);
-
-const yargsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/yargs.md',
-  'utf8'
-);
-
-const adapterutilsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/adapter-utils.md',
-  'utf8'
-);
-
-const gitterWebappChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/gitter-webapp.md',
-  'utf8'
-);
+const angularJsChangelogMd = loadFixture('angular-js.md', '..');
+const jestChangelogMd = loadFixture('jest.md', '..');
+const jsYamlChangelogMd = loadFixture('js-yaml.md', '..');
+const yargsChangelogMd = loadFixture('yargs.md', '..');
+const adapterutilsChangelogMd = loadFixture('adapter-utils.md', '..');
+const gitterWebappChangelogMd = loadFixture('gitter-webapp.md', '..');
 
 const githubTreeResponse = {
   tree: [
@@ -59,15 +37,13 @@ const gitlabTreeResponse = [
   { path: 'README.md', type: 'blob' },
 ];
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);
   });
 
   afterEach(() => {
-    httpMock.reset();
     jest.resetAllMocks();
   });
 
@@ -124,8 +100,7 @@ describe(getName(__filename), () => {
           { tag_name: `v1.0.0` },
           {
             tag_name: `v1.0.1`,
-            body:
-              'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
           },
         ]);
 
@@ -146,8 +121,7 @@ describe(getName(__filename), () => {
           { tag_name: `v1.0.0` },
           {
             tag_name: `v1.0.1`,
-            body:
-              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+            body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
           },
         ]);
       const res = await getReleaseList(
@@ -168,8 +142,7 @@ describe(getName(__filename), () => {
           { tag_name: `v1.0.0` },
           {
             tag_name: `v1.0.1`,
-            body:
-              'some body #123, [#124](https://my.custom.domain/some/yet-other-repository/issues/124)',
+            body: 'some body #123, [#124](https://my.custom.domain/some/yet-other-repository/issues/124)',
           },
         ]);
       const res = await getReleaseList(
@@ -206,8 +179,7 @@ describe(getName(__filename), () => {
             { tag_name: `${prefix}1.0.0` },
             {
               tag_name: `${prefix}1.0.1`,
-              body:
-                'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+              body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
             },
           ]);
         const res = await getReleaseNotes(
@@ -231,8 +203,7 @@ describe(getName(__filename), () => {
             { tag_name: `${prefix}1.0.0` },
             {
               tag_name: `${prefix}1.0.1`,
-              body:
-                'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+              body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
             },
           ]);
 
@@ -415,6 +386,33 @@ describe(getName(__filename), () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
+    it('handles github sourceDirectory', async () => {
+      const sourceDirectory = 'packages/foo';
+      const subdirTree = clone(githubTreeResponse);
+      for (const file of subdirTree.tree) {
+        file.path = `${sourceDirectory}/${file.path}`;
+      }
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/nodeca/js-yaml')
+        .reply(200)
+        .get('/repos/nodeca/js-yaml/git/trees/master?recursive=1')
+        .reply(200, subdirTree)
+        .get('/repos/nodeca/js-yaml/git/blobs/abcd')
+        .reply(200, {
+          content: Buffer.from(jsYamlChangelogMd).toString('base64'),
+        });
+      const res = await getReleaseNotesMd(
+        'nodeca/js-yaml',
+        '3.10.0',
+        'https://github.com/',
+        'https://api.github.com/',
+        sourceDirectory
+      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
     it('parses js-yaml', async () => {
       httpMock
         .scope('https://api.github.com')
@@ -499,6 +497,34 @@ describe(getName(__filename), () => {
           '4.33.0',
           'https://gitlab.com/',
           'https://gitlab.com/api/v4/'
+        );
+        versionTwoNotes = res;
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res).not.toBeNull();
+        expect(res).toMatchSnapshot();
+      });
+      it('handles gitlab sourceDirectory', async () => {
+        const sourceDirectory = 'packages/foo';
+        const response = clone(gitlabTreeResponse).map((file) => ({
+          ...file,
+          path: `${sourceDirectory}/${file.path}`,
+        }));
+        httpMock
+          .scope('https://gitlab.com/')
+          .get(
+            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100'
+          )
+          .reply(200, response)
+          .get(
+            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/blobs/abcd/raw'
+          )
+          .reply(200, adapterutilsChangelogMd);
+        const res = await getReleaseNotesMd(
+          'itentialopensource/adapter-utils',
+          '4.33.0',
+          'https://gitlab.com/',
+          'https://gitlab.com/api/v4/',
+          sourceDirectory
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();

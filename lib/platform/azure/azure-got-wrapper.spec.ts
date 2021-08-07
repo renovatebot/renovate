@@ -1,7 +1,8 @@
+import { getName } from '../../../test/util';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import * as _hostRules from '../../util/host-rules';
 
-describe('platform/azure/azure-got-wrapper', () => {
+describe(getName(), () => {
   let azure: typeof import('./azure-got-wrapper');
   let hostRules: typeof _hostRules;
   beforeEach(() => {
@@ -21,7 +22,7 @@ describe('platform/azure/azure-got-wrapper', () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_AZURE,
         token: '1234567890123456789012345678901234567890123456789012',
-        baseUrl: 'https://dev.azure.com/renovate1',
+        matchHost: 'https://dev.azure.com/renovate1',
       });
       azure.setEndpoint('https://dev.azure.com/renovate1');
 
@@ -37,7 +38,7 @@ describe('platform/azure/azure-got-wrapper', () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_AZURE,
         token: 'token',
-        baseUrl: 'https://dev.azure.com/renovate2',
+        matchHost: 'https://dev.azure.com/renovate2',
       });
       azure.setEndpoint('https://dev.azure.com/renovate2');
 
@@ -55,7 +56,7 @@ describe('platform/azure/azure-got-wrapper', () => {
         hostType: PLATFORM_TYPE_AZURE,
         username: 'user',
         password: 'pass',
-        baseUrl: 'https://dev.azure.com/renovate3',
+        matchHost: 'https://dev.azure.com/renovate3',
       });
       azure.setEndpoint('https://dev.azure.com/renovate3');
 

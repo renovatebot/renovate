@@ -6,6 +6,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { localPathExists } from '../../util/fs';
 import type { PackageDependency, PackageFile } from '../types';
+import type { PipFile } from './types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
@@ -16,27 +17,6 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
   '?:'
 )}\\s*`;
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
-interface PipSource {
-  name: string;
-  url: string;
-}
-
-interface PipFile {
-  source: PipSource[];
-
-  packages?: Record<string, PipRequirement>;
-  'dev-packages'?: Record<string, PipRequirement>;
-  requires?: Record<string, string>;
-}
-
-interface PipRequirement {
-  index?: string;
-  version?: string;
-  path?: string;
-  file?: string;
-  git?: string;
-}
-
 function extractFromSection(
   pipfile: PipFile,
   section: 'packages' | 'dev-packages'
@@ -126,7 +106,7 @@ export async function extractPackageFile(
 
   let pipfile: PipFile;
   try {
-    // TODO: fix type
+    // TODO: fix type (#9610)
     pipfile = toml.parse(content) as any;
   } catch (err) {
     logger.debug({ err }, 'Error parsing Pipfile');

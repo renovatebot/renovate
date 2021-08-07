@@ -1,0 +1,55 @@
+{
+  "id": 2800,
+  "href": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/0.11.1/",
+  "download_url": "https://galaxy.ansible.com/download/community-kubernetes-0.11.1.tar.gz",
+  "artifact": {
+    "filename": "community-kubernetes-0.11.1.tar.gz",
+    "size": 78870,
+    "sha256": "cd197084b32f8976394f269eb005bf475eff2122fddbb48380c76154ab4d4530"
+  },
+  "namespace": {
+    "id": 17693,
+    "href": "https://galaxy.ansible.com/api/v1/namespaces/17693/",
+    "name": "community"
+  },
+  "collection": {
+    "id": 201,
+    "href": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
+    "name": "kubernetes"
+  },
+  "version": "0.11.1",
+  "hidden": false,
+  "metadata": {
+    "name": "kubernetes",
+    "tags": [
+      "kubernetes",
+      "k8s",
+      "cloud",
+      "infrastructure",
+      "openshift",
+      "okd",
+      "cluster"
+    ],
+    "issues": "https://github.com/ansible-collections/community.kubernetes/issues",
+    "readme": "README.md",
+    "authors": [
+      "chouseknecht (https://github.com/chouseknecht)",
+      "geerlingguy (https://www.jeffgeerling.com/)",
+      "maxamillion (https://github.com/maxamillion)",
+      "jmontleon (https://github.com/jmontleon)",
+      "fabianvf (https://github.com/fabianvf)",
+      "willthames (https://github.com/willthames)",
+      "mmazur (https://github.com/mmazur)",
+      "jamescassell (https://github.com/jamescassell)"
+    ],
+    "license": [],
+    "version": "0.11.1",
+    "homepage": "",
+    "namespace": "community",
+    "repository": "https://github.com/ansible-collections/community.kubernetes",
+    "description": "Kubernetes Collection for Ansible.",
+    "dependencies": {},
+    "license_file": "LICENSE",
+    "documentation": ""
+  }
+}

@@ -5,8 +5,9 @@ import {
 } from '../constants/error-messages';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
+import { Datasource } from './datasource';
 import * as datasourceDocker from './docker';
-import * as datasourceGalaxy from './galaxy';
+import { GalaxyDatasource } from './galaxy';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
 import * as datasourceNpm from './npm';
@@ -15,18 +16,16 @@ import type { DatasourceApi } from './types';
 import * as datasource from '.';
 
 jest.mock('./docker');
-jest.mock('./galaxy');
 jest.mock('./maven');
 jest.mock('./npm');
 jest.mock('./packagist');
 
 const dockerDatasource = mocked(datasourceDocker);
-const galaxyDatasource = mocked(datasourceGalaxy);
 const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -34,19 +33,29 @@ describe(getName(__filename), () => {
     expect(datasource.getDatasources()).toBeDefined();
     expect(datasource.getDatasourceList()).toBeDefined();
   });
-  it('validates dataource', () => {
+  it('validates datasource', () => {
     function validateDatasource(module: DatasourceApi, name: string): boolean {
       if (!module.getReleases) {
         return false;
       }
-      if (module.id !== name) {
-        return false;
-      }
-      return true;
+      return module.id === name;
     }
-    const dss = datasource.getDatasources();
+    function filterClassBasedDatasources(name: string): boolean {
+      return !(datasource.getDatasources().get(name) instanceof Datasource);
+    }
+    const dss = new Map(datasource.getDatasources());
 
-    const loadedDs = loadModules(__dirname, validateDatasource);
+    for (const ds of dss.values()) {
+      if (ds instanceof Datasource) {
+        dss.delete(ds.id);
+      }
+    }
+
+    const loadedDs = loadModules(
+      __dirname,
+      validateDatasource,
+      filterClassBasedDatasources
+    );
     expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
 
     for (const dsName of dss.keys()) {
@@ -80,6 +89,14 @@ describe(getName(__filename), () => {
       await datasource.getPkgReleases({
         datasource: 'gitbucket',
         depName: 'some/dep',
+      })
+    ).toBeNull();
+  });
+  it('returns class datasource', async () => {
+    expect(
+      await datasource.getPkgReleases({
+        datasource: 'cdnjs',
+        depName: null,
       })
     ).toBeNull();
   });
@@ -132,9 +149,8 @@ describe(getName(__filename), () => {
     expect(res.sourceUrl).toBeDefined();
   });
   it('ignores and warns for registryUrls', async () => {
-    galaxyDatasource.getReleases.mockResolvedValue(null);
     await datasource.getPkgReleases({
-      datasource: datasourceGalaxy.id,
+      datasource: GalaxyDatasource.id,
       depName: 'some.dep',
       registryUrls: ['https://google.com/'],
     });
@@ -264,6 +280,7 @@ describe(getName(__filename), () => {
     });
     expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');
   });
+
   it('applies replacements', async () => {
     npmDatasource.getReleases.mockResolvedValue({
       releases: [{ version: '1.0.0' }],

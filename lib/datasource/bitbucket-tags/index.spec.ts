@@ -3,14 +3,7 @@ import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { id as datasource } from '.';
 
-describe(getName(__filename), () => {
-  beforeEach(() => {
-    httpMock.reset();
-    httpMock.setup();
-  });
-  afterEach(() => {
-    httpMock.reset();
-  });
+describe(getName(), () => {
   describe('getReleases', () => {
     it('returns tags from bitbucket cloud', async () => {
       const body = {

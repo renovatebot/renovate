@@ -19,16 +19,16 @@ export const presets: Record<string, Preset> = {
     description: 'Disable requests to a particular domain',
     hostRules: [
       {
-        domainName: '{{arg0}}',
+        matchHost: '{{arg0}}',
         enabled: false,
       },
     ],
   },
   disableHost: {
-    description: 'Disable requests to a particular hostName',
+    description: 'Disable requests to a particular host',
     hostRules: [
       {
-        hostName: '{{arg0}}',
+        matchHost: 'https://{{arg0}}',
         enabled: false,
       },
     ],
@@ -304,16 +304,6 @@ export const presets: Record<string, Preset> = {
       'If automerging, push the new commit directly to base branch (no PR)',
     automergeType: 'branch',
   },
-  automergeBranchMergeCommit: {
-    description:
-      'If automerging, perform a merge-commit on branch (no PR) - deprecated, use :automergeBranch instead',
-    automergeType: 'branch-merge-commit',
-  },
-  automergeBranchPush: {
-    description:
-      'If automerging, push the new commit directly to base branch (no PR) - deprecated, use :automergeBranch instead',
-    automergeType: 'branch-push',
-  },
   automergePr: {
     description: 'Raise a PR first before any automerging',
     automergeType: 'pr',
@@ -565,24 +555,12 @@ export const presets: Record<string, Preset> = {
     description: 'Use provided token for github.com lookups',
     hostRules: [
       {
-        domainName: 'github.com',
+        matchHost: 'github.com',
         encrypted: {
           token: '{{arg0}}',
         },
       },
     ],
-  },
-  base: {
-    description: 'deprecated alias for config:base',
-    extends: ['config:base'],
-  },
-  app: {
-    description: 'deprecated alias for config:js-app',
-    extends: ['config:js-app'],
-  },
-  library: {
-    description: 'deprecated alias for config:js-lib',
-    extends: ['config:js-lib'],
   },
   disablePrControls: {
     description: 'Remove the checkbox controls from PRs',

@@ -1,15 +1,15 @@
-/* eslint-disable no-template-curly-in-string */
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import * as datasourceClojure from '../../datasource/clojure';
-import { extractFromVectors, extractPackageFile, trimAtKey } from './extract';
+import { getName, loadFixture } from '../../../test/util';
+import { ClojureDatasource } from '../../datasource/clojure';
+import {
+  extractFromVectors,
+  extractPackageFile,
+  extractVariables,
+  trimAtKey,
+} from './extract';
 
-const leinProjectClj = readFileSync(
-  resolve(__dirname, `./__fixtures__/project.clj`),
-  'utf8'
-);
+const leinProjectClj = loadFixture(`project.clj`);
 
-describe('manager/clojure/extract', () => {
+describe(getName(), () => {
   it('trimAtKey', () => {
     expect(trimAtKey('foo', 'bar')).toBeNull();
     expect(trimAtKey(':dependencies    ', 'dependencies')).toBeNull();
@@ -23,7 +23,16 @@ describe('manager/clojure/extract', () => {
     expect(extractFromVectors('[[]]')).toEqual([]);
     expect(extractFromVectors('[[foo/bar "1.2.3"]]')).toEqual([
       {
-        datasource: datasourceClojure.id,
+        datasource: ClojureDatasource.id,
+        depName: 'foo:bar',
+        currentValue: '1.2.3',
+      },
+    ]);
+    expect(
+      extractFromVectors('[[foo/bar ~baz]]', {}, { baz: '1.2.3' })
+    ).toEqual([
+      {
+        datasource: ClojureDatasource.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
       },
@@ -32,12 +41,12 @@ describe('manager/clojure/extract', () => {
       extractFromVectors('[\t[foo/bar "1.2.3"]\n["foo/baz"  "4.5.6"] ]')
     ).toEqual([
       {
-        datasource: datasourceClojure.id,
+        datasource: ClojureDatasource.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
       },
       {
-        datasource: datasourceClojure.id,
+        datasource: ClojureDatasource.id,
         depName: 'foo:baz',
         currentValue: '4.5.6',
       },
@@ -45,5 +54,13 @@ describe('manager/clojure/extract', () => {
   });
   it('extractPackageFile', () => {
     expect(extractPackageFile(leinProjectClj)).toMatchSnapshot();
+  });
+  it('extractVariables', () => {
+    expect(extractVariables('(def foo "1")')).toEqual({ foo: '1' });
+    expect(extractVariables('(def foo"2")')).toEqual({ foo: '2' });
+    expect(extractVariables('(def foo "3")\n(def bar "4")')).toEqual({
+      foo: '3',
+      bar: '4',
+    });
   });
 });

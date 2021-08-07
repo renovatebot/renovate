@@ -3,7 +3,7 @@ import { addMeta, logger, removeMeta } from '../../../logger';
 import { branchExists } from '../../../util/git';
 import { processBranch } from '../../branch';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import { BranchConfig, ProcessBranchResult } from '../../types';
+import { BranchConfig, BranchResult } from '../../types';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
@@ -12,7 +12,7 @@ export async function writeUpdates(
   config: RenovateConfig,
   allBranches: BranchConfig[]
 ): Promise<WriteUpdateResult> {
-  let branches = allBranches;
+  const branches = allBranches;
   logger.debug(
     `Processing ${branches.length} branch${
       branches.length === 1 ? '' : 'es'
@@ -21,19 +21,11 @@ export async function writeUpdates(
       .sort()
       .join(', ')}`
   );
-  branches = branches.filter((branchConfig) => {
-    if (branchConfig.blockedByPin) {
-      logger.debug(`Branch ${branchConfig.branchName} is blocked by a Pin PR`);
-      return false;
-    }
-    return true;
-  });
-
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining);
 
-  const branchesRemaining = getBranchesRemaining(config, branches);
+  const branchesRemaining = await getBranchesRemaining(config, branches);
   logger.debug(
     { branchesRemaining },
     'Calculated maximum branches remaining this run'
@@ -44,9 +36,11 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     const res = await processBranch(branch);
-    branch.res = res;
+    branch.prBlockedBy = res?.prBlockedBy;
+    branch.prNo = res?.prNo;
+    branch.result = res?.result;
     if (
-      res === ProcessBranchResult.Automerged &&
+      branch.result === BranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
     ) {
       // Stop processing other branches because base branch has been changed

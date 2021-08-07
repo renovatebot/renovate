@@ -3,7 +3,7 @@
  * https://docs.docker.com/registry/spec/manifest-v2-2/#media-types
  */
 export enum MediaType {
-  manifestV1 = 'pplication/vnd.docker.distribution.manifest.v1+json',
+  manifestV1 = 'application/vnd.docker.distribution.manifest.v1+json',
   manifestV2 = 'application/vnd.docker.distribution.manifest.v2+json',
   manifestListV2 = 'application/vnd.docker.distribution.manifest.list.v2+json',
 }
@@ -39,4 +39,9 @@ export interface Image extends MediaObject {
   readonly mediaType: MediaType.manifestV2;
 
   readonly config: MediaObject;
+}
+
+export interface RegistryRepository {
+  registryHost: string;
+  dockerRepository: string;
 }

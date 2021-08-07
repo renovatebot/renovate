@@ -5,19 +5,13 @@ import * as comments from './comments';
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   const config: comments.CommentsConfig = { repository: 'some/repo' };
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    httpMock.reset();
-    httpMock.setup();
-
     setBaseUrl(baseUrl);
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('ensureComment()', () => {

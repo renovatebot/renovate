@@ -382,6 +382,7 @@ describe('semverRuby', () => {
           '3.1.5',
           '3.2.1',
         ],
+        ["'0.0.11'", "'0.0.10'", 'auto', '0.0.10', '0.0.11'],
         ["'0.0.11'", "'0.0.10'", 'replace', '0.0.10', '0.0.11'],
       ].forEach(
         ([
@@ -547,6 +548,36 @@ describe('semverRuby', () => {
               newVersion,
             })
           ).toEqual(expected);
+        }
+      );
+    });
+
+    it('falls back to "replace" from "auto" and "widen" strategies', () => {
+      [
+        ['< 1.2.5', '< 1.0.3', 'auto', '1.0.3', '1.2.4'],
+        ['< 1.2.5', '< 1.0.3', 'widen', '1.0.3', '1.2.4'],
+      ].forEach(
+        ([
+          expected,
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        ]) => {
+          const res = semverRuby.getNewValue({
+            currentValue,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          const fallbackRes = semverRuby.getNewValue({
+            currentValue,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          });
+          expect(res).toEqual(expected);
+          expect(res).toEqual(fallbackRes);
         }
       );
     });

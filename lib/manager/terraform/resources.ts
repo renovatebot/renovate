@@ -1,12 +1,10 @@
-import * as datasourceHelm from '../../datasource/helm';
+import { HelmDatasource } from '../../datasource/helm';
 import { SkipReason } from '../../types';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
+import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import type { ExtractionResult, ResourceManagerData } from './types';
 import {
-  ExtractionResult,
-  ResourceManagerData,
-  TerraformDependencyTypes,
-  TerraformResourceTypes,
   checkIfStringIsPath,
   keyValueExtractionRegex,
   resourceTypeExtractionRegex,
@@ -73,6 +71,7 @@ export function analyseTerraformResource(
     case TerraformResourceTypes.docker_container:
       if (dep.managerData.image) {
         applyDockerDependency(dep, dep.managerData.image);
+        dep.depType = 'docker_container';
       } else {
         dep.skipReason = SkipReason.InvalidDependencySpecification;
       }
@@ -81,6 +80,7 @@ export function analyseTerraformResource(
     case TerraformResourceTypes.docker_image:
       if (dep.managerData.name) {
         applyDockerDependency(dep, dep.managerData.name);
+        dep.depType = 'docker_image';
       } else {
         dep.skipReason = SkipReason.InvalidDependencySpecification;
       }
@@ -89,6 +89,7 @@ export function analyseTerraformResource(
     case TerraformResourceTypes.docker_service:
       if (dep.managerData.image) {
         applyDockerDependency(dep, dep.managerData.image);
+        dep.depType = 'docker_service';
       } else {
         dep.skipReason = SkipReason.InvalidDependencySpecification;
       }
@@ -100,10 +101,10 @@ export function analyseTerraformResource(
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
         dep.skipReason = SkipReason.LocalChart;
       }
-      dep.depType = 'helm';
+      dep.depType = 'helm_release';
       dep.registryUrls = [dep.managerData.repository];
       dep.depName = dep.managerData.chart;
-      dep.datasource = datasourceHelm.id;
+      dep.datasource = HelmDatasource.id;
       break;
 
     default:

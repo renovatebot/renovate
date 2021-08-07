@@ -50,7 +50,7 @@ export function getNewValue({
   }
   const ranges: Range[] = parseRange(currentValue);
   if (!ranges) {
-    logger.warn('Invalid currentValue: ' + currentValue);
+    logger.warn({ currentValue }, 'Invalid pep440 currentValue');
     return null;
   }
   if (!ranges.length) {
@@ -59,7 +59,7 @@ export function getNewValue({
     logger.warn('Empty currentValue: ' + currentValue);
     return currentValue;
   }
-  if (rangeStrategy === 'replace') {
+  if (rangeStrategy === 'auto' || rangeStrategy === 'replace') {
     if (satisfies(newVersion, currentValue)) {
       return currentValue;
     }

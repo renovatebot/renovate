@@ -5,6 +5,7 @@ import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import type { PackageDependency, PackageFile } from '../types';
+import type { ParseContext, ParseOptions } from './types';
 
 const stripComment = (str: string): string => str.replace(/(^|\s+)\/\/.*$/, '');
 
@@ -85,6 +86,16 @@ const isVarDef = (str: string): boolean =>
     str
   );
 
+const isVarSeqSingleLine = (str: string): boolean =>
+  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*Seq\(.*\).*\s*$/.test(
+    str
+  );
+
+const isVarSeqMultipleLine = (str: string): boolean =>
+  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*Seq\(.*[^)]*.*$/.test(
+    str
+  );
+
 const getVarName = (str: string): string =>
   str
     .replace(/^\s*(private\s*)?(lazy\s*)?val\s+/, '')
@@ -101,12 +112,6 @@ const getVarInfo = (str: string, ctx: ParseContext): { val: string } => {
   const val = rightPart.replace(/"\s*$/, '');
   return { val };
 };
-
-interface ParseContext {
-  scalaVersion: string;
-  variables: any;
-  depType?: string;
-}
 
 function parseDepExpr(
   expr: string,
@@ -198,12 +203,6 @@ function parseDepExpr(
   return result;
 }
 
-interface ParseOptions {
-  isMultiDeps?: boolean;
-  scalaVersion?: string;
-  variables?: Record<string, any>;
-}
-
 function parseSbtLine(
   acc: PackageFile & ParseOptions,
   line: string,
@@ -242,6 +241,18 @@ function parseSbtLine(
       isMultiDeps = false;
       const url = getResolverUrl(line);
       registryUrls.push(url);
+    } else if (isVarSeqSingleLine(line)) {
+      isMultiDeps = false;
+      const depExpr = line.replace(/^.*Seq\(\s*/, '').replace(/\).*$/, '');
+      dep = parseDepExpr(depExpr, {
+        ...ctx,
+      });
+    } else if (isVarSeqMultipleLine(line)) {
+      isMultiDeps = true;
+      const depExpr = line.replace(/^.*Seq\(\s*/, '');
+      dep = parseDepExpr(depExpr, {
+        ...ctx,
+      });
     } else if (isVarDef(line)) {
       variables[getVarName(line)] = getVarInfo(line, ctx);
     } else if (isVarDependency(line)) {

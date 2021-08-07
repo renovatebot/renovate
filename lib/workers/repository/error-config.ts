@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { PrState } from '../../types';
@@ -10,8 +10,8 @@ export async function raiseConfigWarningIssue(
 ): Promise<void> {
   logger.debug('raiseConfigWarningIssue()');
   let body = `There is an error with this repository's Renovate configuration that needs to be fixed. As a precaution, Renovate will stop PRs until it is resolved.\n\n`;
-  if (error.location) {
-    body += `Location: \`${error.location}\`\n`;
+  if (error.validationSource) {
+    body += `Location: \`${error.validationSource}\`\n`;
   }
   body += `Error type: ${error.validationError}\n`;
   if (error.validationMessage) {
@@ -25,11 +25,15 @@ export async function raiseConfigWarningIssue(
     if (getAdminConfig().dryRun) {
       logger.info(`DRY-RUN: Would update PR #${pr.number}`);
     } else {
-      await platform.updatePr({
-        number: pr.number,
-        prTitle: config.onboardingPrTitle,
-        prBody: body,
-      });
+      try {
+        await platform.updatePr({
+          number: pr.number,
+          prTitle: config.onboardingPrTitle,
+          prBody: body,
+        });
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ err }, 'Error updating onboarding PR');
+      }
     }
   } else if (getAdminConfig().dryRun) {
     logger.info('DRY-RUN: Would ensure config error issue');

@@ -1,14 +1,14 @@
-import { readFileSync } from 'fs';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const tf1 = readFileSync('lib/manager/terraform/__fixtures__/1.tf', 'utf8');
+const tf1 = loadFixture('1.tf');
 const tf2 = `module "relative" {
   source = "../../modules/fe"
 }
 `;
-const helm = readFileSync('lib/manager/terraform/__fixtures__/helm.tf', 'utf8');
+const helm = loadFixture('helm.tf');
 
-describe('lib/manager/terraform/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

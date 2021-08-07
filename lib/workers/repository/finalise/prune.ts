@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../../config';
 import { getAdminConfig } from '../../../config/admin';
+import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';

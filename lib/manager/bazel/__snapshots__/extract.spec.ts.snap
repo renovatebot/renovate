@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/bazel/extract extractPackageFile() extracts dependencies for container_pull deptype 1`] = `
+exports[`manager/bazel/extract extractPackageFile() extracts dependencies for container_pull deptype 1`] = `
 Array [
   Object {
     "currentDigest": "sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
@@ -27,7 +27,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/bazel/extract extractPackageFile() extracts dependencies from *.bzl files 1`] = `
+exports[`manager/bazel/extract extractPackageFile() extracts dependencies from *.bzl files 1`] = `
 Array [
   Object {
     "currentDigest": "0356bef3fbbabec5f0e196ecfacdeb6db62d48c0",
@@ -65,7 +65,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/bazel/extract extractPackageFile() extracts github tags 1`] = `
+exports[`manager/bazel/extract extractPackageFile() extracts github tags 1`] = `
 Array [
   Object {
     "currentValue": "6.3.0",
@@ -134,7 +134,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/bazel/extract extractPackageFile() extracts multiple types of dependencies 1`] = `
+exports[`manager/bazel/extract extractPackageFile() extracts multiple types of dependencies 1`] = `
 Array [
   Object {
     "currentValue": "v1.0.5",
@@ -363,7 +363,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/bazel/extract extractPackageFile() handle comments and strings 1`] = `
+exports[`manager/bazel/extract extractPackageFile() handle comments and strings 1`] = `
 Array [
   Object {
     "currentDigest": "98495a618246683c9058dd87c2c78a2c06087999",

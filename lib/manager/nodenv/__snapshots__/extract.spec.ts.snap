@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/nvm/extract extractPackageFile() returns a result 1`] = `
+exports[`manager/nodenv/extract extractPackageFile() returns a result 1`] = `
 Array [
   Object {
     "currentValue": "8.4.0",
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/nvm/extract extractPackageFile() skips non ranges 1`] = `
+exports[`manager/nodenv/extract extractPackageFile() skips non ranges 1`] = `
 Array [
   Object {
     "currentValue": "latestn",
@@ -22,7 +22,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/nvm/extract extractPackageFile() supports ranges 1`] = `
+exports[`manager/nodenv/extract extractPackageFile() supports ranges 1`] = `
 Array [
   Object {
     "currentValue": "8.4",

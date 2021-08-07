@@ -1,3 +1,4 @@
+import { getName } from '../../../test/util';
 import {
   autoExtendMavenRange,
   compare,
@@ -17,7 +18,7 @@ const {
   getNewValue,
 } = maven;
 
-describe('versioning/maven/compare', () => {
+describe(getName(), () => {
   it('returns equality', () => {
     expect(compare('1.0.0', '1')).toEqual(0);
     expect(compare('1-a1', '1-alpha-1')).toEqual(0);
@@ -278,6 +279,17 @@ describe('versioning/maven/compare', () => {
       ['(,1.0]', '2.0.0', '(,2.0]'],
       ['(,1]', '2.0.0', '(,2]'],
       ['(,1.0.0-foobar]', '2.0.0', '(,2.0.0]'],
+
+      ['[1,2]', '2', '[1,2]'],
+      ['[1,2)', '2', '[2,3)'],
+      ['[0,2)', '2', '[0,3)'],
+      ['[1.2,1.3]', '1.3', '[1.2,1.3]'],
+      ['[1.2,1.3)', '1.3', '[1.3,1.4)'],
+      ['[1.1,1.3)', '1.3', '[1.1,1.4)'],
+      ['[1.2.3,1.2.4]', '1.2.4', '[1.2.3,1.2.4]'],
+      ['[1.2.3,1.2.4)', '1.2.4', '[1.2.4,1.2.5)'],
+      ['[1.2.1,1.2.4)', '1.2.4', '[1.2.1,1.2.5)'],
+      ['[1,1.2.3)', '1.2.3', '[1,1.2.4)'],
     ];
     sample.forEach(([oldRepr, newValue, newRepr]) => {
       expect(autoExtendMavenRange(oldRepr, newValue)).toEqual(newRepr);
@@ -285,7 +297,7 @@ describe('versioning/maven/compare', () => {
   });
 });
 
-describe('versioning/maven/index', () => {
+describe(getName(), () => {
   it('returns valid', () => {
     expect(isValid('1.0.0')).toBe(true);
     expect(isValid('[1.12.6,1.18.6]')).toBe(true);

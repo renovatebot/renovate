@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { logger, mocked } from '../../../test/util';
+import { getName, logger, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource, getDigest } from '.';
 
@@ -46,15 +46,13 @@ const resGitHubEnterprise = `<!DOCTYPE html>
 </body>
 </html>`;
 
-describe('datasource/go', () => {
+describe(getName(), () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);
   });
 
   afterEach(() => {
-    httpMock.reset();
     jest.resetAllMocks();
   });
 
@@ -132,6 +130,7 @@ describe('datasource/go', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock
@@ -262,9 +261,9 @@ describe('datasource/go', () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.info).toHaveBeenCalledWith(
         { lookupName: 'some.unknown.website/example/module' },
-        'Unsupported dependency.'
+        'Unsupported go host - cannot look up versions'
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
       expect(logger.logger.fatal).not.toHaveBeenCalled();
@@ -373,7 +372,6 @@ describe('datasource/go', () => {
       const tags = [{ name: 'a/v1.0.0' }, { name: 'b/v2.0.0' }];
 
       for (const pkg of packages) {
-        httpMock.setup();
         httpMock
           .scope('https://api.github.com/')
           .get('/repos/x/text/tags?per_page=100')
@@ -388,10 +386,10 @@ describe('datasource/go', () => {
 
         const httpCalls = httpMock.getTrace();
         expect(httpCalls).toMatchSnapshot();
-        httpMock.reset();
+        httpMock.clear();
       }
     });
-    it('falls back to old behaviour', async () => {
+    it('returns none if no tags match submodules', async () => {
       const packages = [
         { datasource, depName: 'github.com/x/text/a' },
         { datasource, depName: 'github.com/x/text/b' },
@@ -399,7 +397,6 @@ describe('datasource/go', () => {
       const tags = [{ name: 'v1.0.0' }, { name: 'v2.0.0' }];
 
       for (const pkg of packages) {
-        httpMock.setup();
         httpMock
           .scope('https://api.github.com/')
           .get('/repos/x/text/tags?per_page=100')
@@ -408,14 +405,11 @@ describe('datasource/go', () => {
           .reply(200, []);
 
         const result = await getPkgReleases(pkg);
-        expect(result.releases).toHaveLength(2);
-        expect(result.releases.map(({ version }) => version)).toStrictEqual(
-          tags.map(({ name }) => name)
-        );
+        expect(result.releases).toHaveLength(0);
 
         const httpCalls = httpMock.getTrace();
         expect(httpCalls).toMatchSnapshot();
-        httpMock.reset();
+        httpMock.clear();
       }
     });
     it('works for nested modules on github v2+ major upgrades', async () => {
@@ -427,7 +421,6 @@ describe('datasource/go', () => {
         { name: 'b/v3.0.0' },
       ];
 
-      httpMock.setup();
       httpMock
         .scope('https://api.github.com/')
         .get('/repos/x/text/tags?per_page=100')
@@ -443,7 +436,6 @@ describe('datasource/go', () => {
 
       const httpCalls = httpMock.getTrace();
       expect(httpCalls).toMatchSnapshot();
-      httpMock.reset();
     });
     it('handles fyne.io', async () => {
       httpMock

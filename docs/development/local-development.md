@@ -14,7 +14,7 @@ You need the following dependencies for local development:
 - Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
-- Python `^3.8`
+- Python `^3.9`
 - Java between `8` and `12`
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
@@ -70,12 +70,11 @@ The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/inte
 
 ## Fork and Clone
 
-If you want to contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
+If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.
 The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
 
-1. Make sure you don't have a local `.npmrc` file that overrides npm's default registry
 1. Install all dependencies with `yarn install`
 1. Make a build with `yarn build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`
@@ -150,9 +149,9 @@ You usually don't need to fix any Prettier errors by hand.
 
 ## Keeping your Renovate fork up to date
 
-First of all, never commit to the `master` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
+First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
 
-Make sure your fork is up to date with the Renovate `master` branch, check this each time before you create a new branch.
+Make sure your fork is up to date with the Renovate `main` branch, check this each time before you create a new branch.
 To do this, see these GitHub guides:
 
 [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)

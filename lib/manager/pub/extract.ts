@@ -1,5 +1,5 @@
-import { safeLoad } from 'js-yaml';
-import * as datasourceDart from '../../datasource/dart';
+import { load } from 'js-yaml';
+import { DartDatasource } from '../../datasource/dart';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -40,8 +40,8 @@ export function extractPackageFile(
   packageFile: string
 ): PackageFile | null {
   try {
-    // TODO: fix me
-    const doc = safeLoad(content, { json: true }) as any;
+    // TODO: fix me (#9610)
+    const doc = load(content, { json: true }) as any;
     const deps = [
       ...getDeps(doc.dependencies, {
         depType: 'dependencies',
@@ -54,7 +54,7 @@ export function extractPackageFile(
     if (deps.length) {
       return {
         packageFile,
-        datasource: datasourceDart.id,
+        datasource: DartDatasource.id,
         deps,
       };
     }

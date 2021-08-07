@@ -1,6 +1,5 @@
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import * as upath from 'upath';
-
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
@@ -13,10 +12,11 @@ import type {
   BatectFileInclude,
   BatectGitInclude,
   BatectInclude,
+  ExtractionResult,
 } from './types';
 
 function loadConfig(content: string): BatectConfig {
-  const config = safeLoad(content);
+  const config = load(content);
 
   if (typeof config !== 'object') {
     throw new Error(
@@ -114,11 +114,6 @@ function extractReferencedConfigFiles(
   ].filter((p) => p !== undefined && p !== null);
 
   return paths.map((p) => upath.join(dirName, p));
-}
-
-interface ExtractionResult {
-  deps: PackageDependency[];
-  referencedConfigFiles: string[];
 }
 
 export function extractPackageFile(

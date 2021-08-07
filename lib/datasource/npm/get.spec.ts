@@ -11,16 +11,11 @@ function getPath(s = ''): string {
   return `${prePath}/@myco%2Ftest`;
 }
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetMemCache();
-    httpMock.setup();
     hostRules.clear();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('has bearer auth', () => {
@@ -114,7 +109,7 @@ describe(getName(__filename), () => {
     expect.assertions(1);
     const npmrc = `registry=https://test.org`;
     hostRules.add({
-      baseUrl: 'https://test.org',
+      matchHost: 'https://test.org',
       username: 'test',
       password: 'test',
     });
@@ -136,7 +131,7 @@ describe(getName(__filename), () => {
     expect.assertions(1);
     const npmrc = ``;
     hostRules.add({
-      baseUrl: 'https://registry.npmjs.org',
+      matchHost: 'https://registry.npmjs.org',
       token: 'XXX',
     });
 
@@ -157,7 +152,7 @@ describe(getName(__filename), () => {
     expect.assertions(1);
     const npmrc = ``;
     hostRules.add({
-      baseUrl: 'https://registry.npmjs.org',
+      matchHost: 'https://registry.npmjs.org',
       token: 'XXX',
       authType: 'Basic',
     });

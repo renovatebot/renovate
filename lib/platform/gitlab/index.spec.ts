@@ -1,7 +1,7 @@
 // TODO fix mocks
-import nock from 'nock';
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -16,7 +16,7 @@ import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
 
-describe('platform/gitlab', () => {
+describe(getName(), () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
@@ -42,11 +42,7 @@ describe('platform/gitlab', () => {
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
-    httpMock.reset();
-    httpMock.setup();
-  });
-  afterEach(() => {
-    httpMock.reset();
+    delete process.env.GITLAB_IGNORE_REPO_URL;
   });
 
   async function initFakePlatform(version: string) {
@@ -163,11 +159,10 @@ describe('platform/gitlab', () => {
   async function initRepo(
     repoParams: RepoParams = {
       repository: 'some/repo',
-      localDir: '',
     },
     repoResp = null,
     scope = httpMock.scope(gitlabApiHost)
-  ): Promise<nock.Scope> {
+  ): Promise<httpMock.Scope> {
     const repo = repoParams.repository;
     const justRepo = repo.split('/').slice(0, 2).join('/');
     scope.get(`/api/v4/projects/${encodeURIComponent(repo)}`).reply(
@@ -190,7 +185,6 @@ describe('platform/gitlab', () => {
         .reply(200, okReturn);
       await gitlab.initRepo({
         repository: 'some/repo/project',
-        localDir: '',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -202,7 +196,6 @@ describe('platform/gitlab', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow('always error');
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -215,7 +208,6 @@ describe('platform/gitlab', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -228,7 +220,6 @@ describe('platform/gitlab', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -241,7 +232,6 @@ describe('platform/gitlab', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -254,7 +244,6 @@ describe('platform/gitlab', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -267,7 +256,6 @@ describe('platform/gitlab', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -280,7 +268,6 @@ describe('platform/gitlab', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -295,8 +282,39 @@ describe('platform/gitlab', () => {
         });
       await gitlab.initRepo({
         repository: 'some/repo/project',
-        localDir: '',
       });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
+      process.env.GITLAB_IGNORE_REPO_URL = 'true';
+      const selfHostedUrl = 'http://mycompany.com/gitlab';
+      httpMock
+        .scope(selfHostedUrl)
+        .get('/api/v4/user')
+        .reply(200, {
+          email: 'a@b.com',
+          name: 'Renovate Bot',
+        })
+        .get('/api/v4/version')
+        .reply(200, {
+          version: '13.8.0',
+        });
+      await gitlab.initPlatform({
+        endpoint: `${selfHostedUrl}/api/v4`,
+        token: 'mytoken',
+      });
+      httpMock
+        .scope(selfHostedUrl)
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `http://other.host.com/gitlab/some/repo/project.git`,
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo/project',
+      });
+      expect(git.initRepo.mock.calls).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -305,7 +323,6 @@ describe('platform/gitlab', () => {
       await initRepo(
         {
           repository: 'some/repo/project',
-          localDir: '',
         },
         {
           default_branch: 'master',
@@ -321,7 +338,6 @@ describe('platform/gitlab', () => {
       await initRepo(
         {
           repository: 'some/repo/project',
-          localDir: '',
         },
         {
           default_branch: 'master',
@@ -1610,6 +1626,46 @@ These updates have all been created already. Click a checkbox below to force a r
         )
         .replyWithError('some error');
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+  describe('filterUnavailableUsers(users)', () => {
+    it('filters users that are busy', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users/maria/status')
+        .reply(200, {
+          availability: 'busy',
+        })
+        .get('/api/v4/users/john/status')
+        .reply(200, {
+          availability: 'not_set',
+        });
+      const filteredUsers = await gitlab.filterUnavailableUsers([
+        'maria',
+        'john',
+      ]);
+      expect(filteredUsers).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('keeps users with missing availability', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users/maria/status')
+        .reply(200, {});
+      const filteredUsers = await gitlab.filterUnavailableUsers(['maria']);
+      expect(filteredUsers).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('keeps users with failing requests', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users/maria/status')
+        .reply(404);
+      const filteredUsers = await gitlab.filterUnavailableUsers(['maria']);
+      expect(filteredUsers).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

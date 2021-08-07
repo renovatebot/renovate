@@ -1,4 +1,3 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
@@ -13,17 +12,15 @@ import { GithubHttp, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
-    httpMock.setup();
   });
 
   afterEach(() => {
-    httpMock.reset();
     hostRules.clear();
   });
 
@@ -59,6 +56,36 @@ describe(getName(__filename), () => {
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(3);
     });
+    it('uses paginationField', async () => {
+      const url = '/some-url';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(
+          200,
+          { the_field: ['a'], total: 4 },
+          {
+            link: `<${url}?page=2>; rel="next", <${url}?page=3>; rel="last"`,
+          }
+        )
+        .get(`${url}?page=2`)
+        .reply(
+          200,
+          { the_field: ['b', 'c'], total: 4 },
+          {
+            link: `<${url}?page=3>; rel="next", <${url}?page=3>; rel="last"`,
+          }
+        )
+        .get(`${url}?page=3`)
+        .reply(200, { the_field: ['d'], total: 4 });
+      const res: any = await githubApi.getJson('some-url', {
+        paginate: true,
+        paginationField: 'the_field',
+      });
+      expect(res.body.the_field).toEqual(['a', 'b', 'c', 'd']);
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(3);
+    });
     it('attempts to paginate', async () => {
       const url = '/some-url';
       httpMock
@@ -77,7 +104,7 @@ describe(getName(__filename), () => {
       async function fail(
         code: number,
         body: any = undefined,
-        headers: nock.ReplyHeaders = undefined
+        headers: httpMock.ReplyHeaders = undefined
       ) {
         const url = '/some-url';
         httpMock

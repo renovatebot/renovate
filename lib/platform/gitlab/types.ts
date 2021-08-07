@@ -51,3 +51,11 @@ export interface RepoResponse {
   merge_method: MergeMethod;
   path_with_namespace: string;
 }
+
+// See https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/user_status_type.rb
+export interface GitlabUserStatus {
+  message?: string;
+  message_html?: string;
+  emoji?: string;
+  availability: 'not_set' | 'busy';
+}

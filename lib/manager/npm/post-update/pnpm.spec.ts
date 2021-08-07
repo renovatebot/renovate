@@ -24,7 +24,6 @@ describe('generateLockFile', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {
-    config.dockerMapDotfiles = true;
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);

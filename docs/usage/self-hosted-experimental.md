@@ -27,11 +27,6 @@ If set to any integer, Renovate will use this integer instead of the default npm
 If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
 Skiping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
 
-## RENOVATE_LEGACY_GIT_AUTHOR_EMAIL
-
-An additional `gitAuthor` email to ignore.
-This variable is deprecated: use `ignoredAuthors` instead.
-
 ## RENOVATE_PAGINATE_ALL
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
@@ -39,6 +34,10 @@ If set to any value, Renovate will always paginate requests to GitHub fully, ins
 ## RENOVATE_REUSE_PACKAGE_LOCK
 
 If set to "false" (string), Renovate will remove any existing `package-lock.json` before attempting to update it.
+
+## RENOVATE_X_TERRAFORM_LOCK_FILE
+
+If set to any value, Renovate will update Terraform lock files and allow lockfile maintenance.
 
 ## RENOVATE_USER_AGENT
 

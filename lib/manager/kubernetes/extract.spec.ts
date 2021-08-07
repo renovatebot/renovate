@@ -1,27 +1,12 @@
-import { readFileSync } from 'fs';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const kubernetesImagesFile = readFileSync(
-  'lib/manager/kubernetes/__fixtures__/kubernetes.yaml',
-  'utf8'
-);
+const kubernetesImagesFile = loadFixture('kubernetes.yaml');
+const kubernetesConfigMapFile = loadFixture('configmap.yaml');
+const kubernetesArraySyntaxFile = loadFixture('array-syntax.yaml');
+const otherYamlFile = loadFixture('gitlab-ci.yaml');
 
-const kubernetesConfigMapFile = readFileSync(
-  'lib/manager/kubernetes/__fixtures__/configmap.yaml',
-  'utf8'
-);
-
-const kubernetesArraySyntaxFile = readFileSync(
-  'lib/manager/kubernetes/__fixtures__/array-syntax.yaml',
-  'utf8'
-);
-
-const otherYamlFile = readFileSync(
-  'lib/manager/kubernetes/__fixtures__/gitlab-ci.yaml',
-  'utf8'
-);
-
-describe('lib/manager/kubernetes/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile(kubernetesConfigMapFile)).toBeNull();

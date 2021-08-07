@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 
+import { logger } from './logger';
 import * as proxy from './proxy';
 import * as globalWorker from './workers/global';
+
+// istanbul ignore next
+process.on('unhandledRejection', (err) => {
+  logger.error({ err }, 'unhandledRejection');
+});
 
 proxy.bootstrap();
 

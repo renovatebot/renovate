@@ -1,6 +1,7 @@
+import { getName } from '../../../test/util';
 import updateArtifacts from './artifacts';
 
-describe('lib/manager/gitsubmodules/artifacts', () => {
+describe(getName(), () => {
   describe('updateArtifacts()', () => {
     it('returns empty content', () => {
       expect(

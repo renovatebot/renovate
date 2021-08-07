@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 import * as github from '.';
@@ -22,17 +23,12 @@ const responseBody = [
   },
 ];
 
-describe('datasource/github-releases', () => {
+describe(getName(), () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
       token: 'some-token',
     });
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('getReleases', () => {

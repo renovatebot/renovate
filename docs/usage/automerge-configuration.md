@@ -79,7 +79,7 @@ And this is especially so if your repository needs rebasing, e.g. because you us
 e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
 
 - At the start of the schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
-- After `abc` passes tests, `Renovate` will automerge it to `master`
+- After `abc` passes tests, `Renovate` will automerge it into the base branch
 - The `xyz` branch probably now has `yarn.lock` conflicts
 - Renovate will immediately check all other branches and rebase them
 - The change to `xyz` branch will trigger another round of CI tests
@@ -98,7 +98,7 @@ For this reason we recommend you consider setting `automergeType=branch` which w
 
 Add the `renovate/**` branch to your testing workflow files, or Renovate will not work properly with the `automergeType=branch` setting.
 
-The result is that passing updates are essentially "silent" - the only sign of them are the commits to your `master` branch.
+The result is that passing updates are essentially "silent" - the only sign of them are the commits to your base branch.
 If you have enabled branch protection which prevents Renovate from automerging directly to the base branch, then this won't work and you should stick with the default PR-based automerging instead.
 
 ## Assignees and Reviewers

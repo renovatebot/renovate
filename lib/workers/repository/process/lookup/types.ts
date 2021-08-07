@@ -48,9 +48,13 @@ export interface UpdateResult {
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string;
+  currentVersion?: string;
+  isSingleVersion?: boolean;
   skipReason: SkipReason;
   releases: Release[];
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
+
+  versioning: string;
 }

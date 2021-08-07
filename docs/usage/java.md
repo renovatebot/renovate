@@ -46,7 +46,7 @@ module.exports = {
   hostRules: [
     {
       hostType: 'maven',
-      baseUrl: 'https://artifactory.yourcompany.com/',
+      matchHost: 'https://artifactory.yourcompany.com/',
       username: process.env.ARTIFACTORY_USERNAME,
       password: process.env.ARTIFACTORY_PASSWORD,
     },

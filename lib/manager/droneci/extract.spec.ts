@@ -1,14 +1,10 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
+import { getName, loadFixture } from '../../../test/util';
 
 import { extractPackageFile } from './extract';
 
-const droneYAML = readFileSync(
-  resolve('lib/manager/droneci/__fixtures__/.drone.yml'),
-  'utf8'
-);
+const droneYAML = loadFixture('.drone.yml');
 
-describe('lib/manager/droneci/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

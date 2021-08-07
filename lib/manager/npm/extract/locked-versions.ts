@@ -24,9 +24,9 @@ export async function getLockedVersions(
       if (!isYarn1) {
         if (lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
-          packageFile.constraints.yarn = '>= 2.2.0';
+          packageFile.constraints.yarn = '^2.2.0';
         } else {
-          packageFile.constraints.yarn = '>= 2.0.0';
+          packageFile.constraints.yarn = '^2.0.0';
         }
       }
       for (const dep of packageFile.deps) {
@@ -34,6 +34,9 @@ export async function getLockedVersions(
           lockFileCache[yarnLock].lockedVersions[
             `${dep.depName}@${dep.currentValue}`
           ];
+        if (dep.depType === 'engines' && dep.depName === 'yarn' && !isYarn1) {
+          dep.lookupName = '@yarnpkg/cli';
+        }
       }
     } else if (npmLock) {
       logger.debug('Found ' + npmLock + ' for ' + packageFile.packageFile);
