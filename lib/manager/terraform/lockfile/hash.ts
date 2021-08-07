@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 import extract from 'extract-zip';
-import pMap from 'p-map';
 import { join } from 'upath';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/types';
@@ -95,6 +94,7 @@ export class TerraformProviderHash {
   }
 
   static async calculateHashes(builds: TerraformBuild[]): Promise<string[]> {
+    const pMap = (await import('p-map')).default;
     const cacheDir = await ensureCacheDir('./others/terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files

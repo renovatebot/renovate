@@ -1,4 +1,3 @@
-import pMap from 'p-map';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { logger } from '../../../logger';
@@ -17,6 +16,8 @@ import {
 async function updateAllLocks(
   locks: ProviderLock[]
 ): Promise<ProviderLockUpdate[]> {
+  const pMap = (await import('p-map')).default;
+
   const updates = await pMap(
     locks,
     async (lock) => {

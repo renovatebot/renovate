@@ -1,4 +1,3 @@
-import pMap from 'p-map';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import type { HttpResponse } from '../../util/http';
@@ -72,6 +71,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     });
 
     let newestVersionDetails: VersionsDetailResult;
+    const pMap = (await import('p-map')).default;
     // asynchronously get release details
     const enrichedReleases: Release[] = await pMap(
       releases,

@@ -1,4 +1,3 @@
-import pMap from 'p-map';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
@@ -192,6 +191,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       );
       return null;
     }
+
+    const pMap = (await import('p-map')).default;
+
     const result = await pMap(
       builds.platforms,
       async (platform) => {
