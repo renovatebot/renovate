@@ -78,7 +78,7 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    const commands = [];
+    let commands = [];
     let cmdOptions = '';
     if (config.skipInstalls !== false) {
       if (isYarn1) {
@@ -134,7 +134,7 @@ export async function generateLockFile(
     }
 
     // This command updates the lock file based on package.json
-    commands.push(`yarn install ${cmdOptions}`.trim());
+    commands.push('yarn install');
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
@@ -146,14 +146,14 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
-            .join(' ')} ${cmdOptions}`.trim()
+            .join(' ')}`
         );
       } else {
         // `yarn up` updates to the latest release, so the range should be specified
         commands.push(
           `yarn up ${lockUpdates
             .map((update) => `${update.depName}@${update.newValue}`)
-            .join(' ')} ${cmdOptions}`.trim()
+            .join(' ')}`
         );
       }
     }
@@ -163,7 +163,7 @@ export async function generateLockFile(
       logger.debug('Performing yarn dedupe fewer');
       commands.push('npx yarn-deduplicate --strategy fewer');
       // Run yarn again in case any changes are necessary
-      commands.push(`yarn install ${cmdOptions}`.trim());
+      commands.push('yarn install');
     }
     if (
       (isYarn1 || isYarnDedupeAvailable) &&
@@ -173,11 +173,15 @@ export async function generateLockFile(
       if (isYarn1) {
         commands.push('npx yarn-deduplicate --strategy highest');
         // Run yarn again in case any changes are necessary
-        commands.push(`yarn install ${cmdOptions}`.trim());
+        commands.push('yarn install');
       } else {
-        commands.push(`yarn dedupe --strategy highest ${cmdOptions}`.trim());
+        commands.push('yarn dedupe --strategy highest');
       }
     }
+
+    commands = commands.map((c) =>
+      c.startsWith('yarn') ? `${c} ${cmdOptions}`.trim() : c
+    );
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
