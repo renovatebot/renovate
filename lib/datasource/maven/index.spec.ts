@@ -305,4 +305,28 @@ describe(getName(), () => {
     expect(res).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
+
+  it('should apply relocation information when provided', async () => {
+    const artifact = 'ant';
+    const group = 'ant';
+    const depName = `${group}:${artifact}`;
+    const depPath = `${group}/${artifact}`;
+    const latestVersion = '1.7.0';
+
+    const repo = 'plugins.gradle.org/m2';
+    const latestVersionPom = `/${depPath}/${latestVersion}/${artifact}-${latestVersion}.pom`;
+    httpMock
+      .scope(`https://${repo}`)
+      .get(`/${depPath}/maven-metadata.xml`)
+      .reply(200, loadFixture(`${repo}/${depPath}/maven-metadata.xml`))
+      .head(latestVersionPom)
+      .reply(200, '')
+      .get(latestVersionPom)
+      .reply(200, loadFixture(`${repo}/${latestVersionPom}`));
+
+    const releases = await get(depName, `https://${repo}/`);
+    expect(releases).not.toBeNull();
+    expect(releases.replacementName).toEqual('org.apache.ant:ant');
+    expect(releases.replacementVersion).toEqual(latestVersion);
+  });
 });

@@ -1,0 +1,13 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>ant</groupId>
+  <artifactId>ant</artifactId>
+  <version>1.7.0</version>
+
+  <distributionManagement>
+    <relocation>
+      <groupId>org.apache.ant</groupId>
+    </relocation>
+  </distributionManagement>
+
+</project>

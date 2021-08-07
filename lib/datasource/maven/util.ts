@@ -178,14 +178,39 @@ export async function getDependencyInfo(
     return result;
   }
 
+  function isValidForUse(...values: string[]): boolean {
+    return (
+      values.some((v) => v) && values.every((v) => !containsPlaceholder(v))
+    );
+  }
+
   const homepage = pomContent.valueWithPath('url');
-  if (homepage && !containsPlaceholder(homepage)) {
+  if (isValidForUse(homepage)) {
     result.homepage = homepage;
   }
 
   const sourceUrl = pomContent.valueWithPath('scm.url');
-  if (sourceUrl && !containsPlaceholder(sourceUrl)) {
+  if (isValidForUse(sourceUrl)) {
     result.sourceUrl = sourceUrl.replace(/^scm:/, '');
+  }
+
+  function relocationProperty(property: string): string | undefined {
+    return pomContent.valueWithPath(
+      `distributionManagement.relocation.${property}`
+    );
+  }
+  const replacementGroupId = relocationProperty('groupId');
+  const replacementArtifactId = relocationProperty('artifactId');
+  const replacementVersion = relocationProperty('version');
+  if (
+    isValidForUse(replacementGroupId, replacementArtifactId, replacementVersion)
+  ) {
+    const group = replacementGroupId || dependency.group;
+    const name = replacementArtifactId || dependency.name;
+    result.replacementName = `${group}:${name}`;
+    result.replacementVersion =
+      replacementVersion || pomContent.valueWithPath('version');
+    result.deprecationMessage = relocationProperty('message');
   }
 
   return result;
