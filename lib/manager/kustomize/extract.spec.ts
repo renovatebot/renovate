@@ -252,10 +252,10 @@ describe(getName(), () => {
       expect(res.deps[1].currentValue).toEqual('1.19.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
     });
-    it('extracts sha256 instead of tag', () => {
+    it('extracts sha256 from newTag', () => {
       expect(extractPackageFile(sha)).toMatchSnapshot();
     });
-    it('extracts digest', () => {
+    it('extracts digest, ignoring newTag', () => {
       expect(extractPackageFile(digest)).toMatchSnapshot();
     });
   });

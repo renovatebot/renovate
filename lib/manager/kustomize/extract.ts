@@ -6,6 +6,7 @@ import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
+import { splitImageParts } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Image, Kustomize } from './types';
 
@@ -43,21 +44,7 @@ export function extractImage(image: Image): PackageDependency | null {
   }
   const depName = image.newName ?? image.name;
   if (image.digest) {
-    // newTag is ignored if digest is present; use tag@digest in newTag instead
-    return {
-      datasource: datasourceDocker.id,
-      versioning: dockerVersioning.id,
-      depName,
-      currentValue: undefined,
-      currentDigest: image.digest,
-      replaceString: image.digest,
-    };
-  }
-
-  if (image.newTag) {
-    const replaceString = image.newTag;
-    let currentValue: string | undefined;
-    let currentDigest: string | undefined;
+    const replaceString = image.digest;
     if (!is.string(replaceString)) {
       return {
         depName,
@@ -65,20 +52,37 @@ export function extractImage(image: Image): PackageDependency | null {
         skipReason: SkipReason.InvalidValue,
       };
     }
-    if (replaceString.startsWith('sha256:')) {
-      currentDigest = replaceString;
-      currentValue = undefined;
-    } else {
-      currentValue = replaceString;
-    }
     return {
       datasource: datasourceDocker.id,
       versioning: dockerVersioning.id,
       depName,
-      currentValue,
-      currentDigest,
+      currentValue: undefined,
+      currentDigest: image.digest,
       replaceString,
     };
+  }
+
+  if (image.newTag) {
+    const replaceString = image.newTag;
+    if (!is.string(replaceString)) {
+      return {
+        depName,
+        currentValue: replaceString,
+        skipReason: SkipReason.InvalidValue,
+      };
+    }
+    let dep: PackageDependency;
+    if (replaceString.startsWith('sha256:')) {
+      dep = splitImageParts(`${depName}@${image.newTag}`);
+    } else {
+      dep = splitImageParts(`${depName}:${image.newTag}`);
+    }
+    Object.assign(dep, {
+      datasource: datasourceDocker.id,
+      versioning: dockerVersioning.id,
+      replaceString,
+    });
+    return dep;
   }
 
   return null;

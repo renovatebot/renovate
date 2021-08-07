@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/kustomize/extract extractPackageFile() extracts digest 1`] = `
+exports[`manager/kustomize/extract extractPackageFile() extracts digest, ignoring newTag 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -10,6 +10,11 @@ Object {
       "depName": "postgres",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "versioning": "docker",
+    },
+    Object {
+      "currentValue": 595005649444,
+      "depName": "redis",
+      "skipReason": "invalid-value",
     },
   ],
 }
@@ -47,7 +52,7 @@ Array [
 ]
 `;
 
-exports[`manager/kustomize/extract extractPackageFile() extracts sha256 instead of tag 1`] = `
+exports[`manager/kustomize/extract extractPackageFile() extracts sha256 from newTag 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -56,6 +61,14 @@ Object {
       "datasource": "docker",
       "depName": "postgres",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "versioning": "docker",
+    },
+    Object {
+      "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "currentValue": "11",
+      "datasource": "docker",
+      "depName": "postgres",
+      "replaceString": "11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "versioning": "docker",
     },
   ],
