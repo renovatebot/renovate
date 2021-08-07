@@ -38,13 +38,29 @@ export function extractBase(base: string): PackageDependency | null {
 }
 
 export function extractImage(image: Image): PackageDependency | null {
-  if (image?.name && image.newTag) {
+  if (!image?.name) {
+    return null;
+  }
+  const depName = image.newName ?? image.name;
+  if (image.digest) {
+    // newTag is ignored if digest is present; use tag@digest in newTag instead
+    return {
+      datasource: datasourceDocker.id,
+      versioning: dockerVersioning.id,
+      depName,
+      currentValue: undefined,
+      currentDigest: image.digest,
+      replaceString: image.digest,
+    };
+  }
+
+  if (image.newTag) {
     const replaceString = image.newTag;
     let currentValue: string | undefined;
     let currentDigest: string | undefined;
     if (!is.string(replaceString)) {
       return {
-        depName: image.newName ?? image.name,
+        depName,
         currentValue: replaceString,
         skipReason: SkipReason.InvalidValue,
       };
@@ -58,7 +74,7 @@ export function extractImage(image: Image): PackageDependency | null {
     return {
       datasource: datasourceDocker.id,
       versioning: dockerVersioning.id,
-      depName: image.newName ?? image.name,
+      depName,
       currentValue,
       currentDigest,
       replaceString,

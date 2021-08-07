@@ -20,6 +20,7 @@ const nonKustomize = loadFixture('service.yaml');
 const gitImages = loadFixture('gitImages.yaml');
 const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
 const sha = loadFixture('sha.yaml');
+const digest = loadFixture('digest.yaml');
 
 describe(getName(), () => {
   it('should successfully parse a valid kustomize file', () => {
@@ -253,6 +254,9 @@ describe(getName(), () => {
     });
     it('extracts sha256 instead of tag', () => {
       expect(extractPackageFile(sha)).toMatchSnapshot();
+    });
+    it('extracts digest', () => {
+      expect(extractPackageFile(digest)).toMatchSnapshot();
     });
   });
 });
