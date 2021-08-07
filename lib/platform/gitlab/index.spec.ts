@@ -1796,7 +1796,9 @@ describe(getName(), () => {
         .scope(gitlabApiHost)
         .put('/api/v4/projects/undefined/merge_requests/1/merge')
         .reply(200);
-      await gitlab.mergePr(1, undefined);
+      await gitlab.mergePr({
+        id: 1,
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
