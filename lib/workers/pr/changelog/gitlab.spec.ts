@@ -72,6 +72,7 @@ describe(getName(), () => {
       ).toBeNull();
     });
     it('works without GitLab', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -96,6 +97,7 @@ describe(getName(), () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -114,6 +116,7 @@ describe(getName(), () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -132,6 +135,7 @@ describe(getName(), () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -178,6 +182,7 @@ describe(getName(), () => {
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -194,6 +199,7 @@ describe(getName(), () => {
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,

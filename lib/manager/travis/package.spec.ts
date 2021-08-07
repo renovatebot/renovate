@@ -45,6 +45,7 @@ describe(getName(), () => {
     it('returns result if needing updates', async () => {
       config.currentValue = ['6', '8', '10'];
       config.supportPolicy = ['lts'];
+      // FIXME: explicit assert condition
       expect(await getPackageUpdates(config)).toMatchSnapshot();
     });
     it('detects pinning', async () => {
@@ -78,6 +79,7 @@ describe(getName(), () => {
           },
         ],
       });
+      // FIXME: explicit assert condition
       expect(await getPackageUpdates(config)).toMatchSnapshot();
     });
   });

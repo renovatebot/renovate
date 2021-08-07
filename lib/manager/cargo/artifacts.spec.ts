@@ -201,6 +201,7 @@ describe('.updateArtifacts()', () => {
         depName: 'dep1',
       },
     ];
+    // FIXME: explicit assert condition
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
