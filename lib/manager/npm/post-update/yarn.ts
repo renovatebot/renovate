@@ -78,7 +78,7 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    let commands = [];
+    let commands: string[] = [];
     let cmdOptions = '';
     if (config.skipInstalls !== false) {
       if (isYarn1) {
