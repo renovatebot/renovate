@@ -118,6 +118,7 @@ describe(getName(), () => {
       .get('/workingpreset')
       .reply(200, presetPackage);
     const res = await npm.getPreset({ packageName: 'workingpreset' });
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
   });
 });

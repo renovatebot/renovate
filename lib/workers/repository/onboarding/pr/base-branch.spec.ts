@@ -16,11 +16,13 @@ describe(getName(), () => {
     it('describes baseBranch', () => {
       config.baseBranches = ['some-branch'];
       const res = getBaseBranchDesc(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('describes baseBranches', () => {
       config.baseBranches = ['some-branch', 'some-other-branch'];
       const res = getBaseBranchDesc(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

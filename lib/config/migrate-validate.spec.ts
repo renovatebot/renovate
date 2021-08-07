@@ -11,11 +11,13 @@ describe(getName(), () => {
   describe('migrateAndValidate()', () => {
     it('handles empty', async () => {
       const res = await migrateAndValidate(config, {});
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles migration', async () => {
       const input: RenovateConfig = { automerge: 'none' as any };
       const res = await migrateAndValidate(config, input);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles invalid', async () => {

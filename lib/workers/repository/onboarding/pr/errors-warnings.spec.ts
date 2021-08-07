@@ -17,6 +17,7 @@ describe(getName(), () => {
         },
       ];
       const res = getWarnings(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });
@@ -57,6 +58,7 @@ describe(getName(), () => {
         ],
       };
       const res = getDepWarnings(packageFiles);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });
@@ -74,6 +76,7 @@ describe(getName(), () => {
         },
       ];
       const res = getErrors(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

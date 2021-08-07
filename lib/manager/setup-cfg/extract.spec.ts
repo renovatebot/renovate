@@ -10,6 +10,7 @@ describe(getName(), () => {
     });
     it('extracts dependencies', () => {
       const res = extractPackageFile(content);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

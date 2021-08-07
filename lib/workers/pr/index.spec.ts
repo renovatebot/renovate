@@ -242,6 +242,7 @@ describe(getName(), () => {
       config.schedule = ['before 5am'];
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      // FIXME: explicit assert condition
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
       config.branchName = 'renovate/dummy-1.x';
@@ -257,6 +258,7 @@ describe(getName(), () => {
       config.schedule = ['before 5am'];
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      // FIXME: explicit assert condition
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
@@ -317,6 +319,7 @@ describe(getName(), () => {
       }
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      // FIXME: explicit assert condition
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
     });
     it('should add note about Pin', async () => {
@@ -330,6 +333,7 @@ describe(getName(), () => {
       config.logJSON = await getChangeLogJSON(config);
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      // FIXME: explicit assert condition
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       expect(platform.createPr.mock.calls[0][0].prBody).toContain(
         'this Pin PR'
@@ -545,6 +549,7 @@ describe(getName(), () => {
       config.logJSON = await getChangeLogJSON(config);
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       const { pr } = await prWorker.ensurePr(config);
+      // FIXME: explicit assert condition
       expect(pr).toMatchSnapshot();
     });
     it('should return modified existing PR title', async () => {
@@ -554,6 +559,7 @@ describe(getName(), () => {
         title: 'wrong',
       });
       const { pr } = await prWorker.ensurePr(config);
+      // FIXME: explicit assert condition
       expect(pr).toMatchSnapshot();
     });
     it('should create PR if branch tests failed', async () => {

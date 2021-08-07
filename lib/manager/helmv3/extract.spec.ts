@@ -59,6 +59,7 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
+      // FIXME: explicit assert condition
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
     });
@@ -123,6 +124,7 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
+      // FIXME: explicit assert condition
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
     });
