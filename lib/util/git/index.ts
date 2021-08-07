@@ -840,7 +840,7 @@ export async function commitFiles({
     if (err.message.includes('can only push your own commits')) {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = branchName;
-      error.validationError = 'Access denied';
+      error.validationError = 'Bitbucket committer error';
       error.validationMessage = err.message;
       throw error;
     }
