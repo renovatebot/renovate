@@ -159,6 +159,7 @@
     "handy-redis": "2.2.2",
     "hasha": "5.2.2",
     "ignore": "5.1.8",
+    "inclusion": "1.0.0",
     "ini": "2.0.0",
     "js-yaml": "4.1.0",
     "json-dup-key-validator": "1.0.3",
