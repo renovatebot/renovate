@@ -6,7 +6,11 @@ import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import {
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -19,6 +23,7 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
 import type { NpmPackage, NpmPackageDependency } from './types';
+import { getZeroInstallPaths } from './yarn';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -121,6 +126,20 @@ export async function extractPackageFile(
   let yarnrc;
   if (!is.string(config.yarnrc)) {
     yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
+  }
+
+  const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
+  const yarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  let yarnZeroInstall = false;
+  if (is.string(yarnrcYml)) {
+    const paths = getZeroInstallPaths(yarnrcYml);
+    for (const p of paths) {
+      if (await localPathExists(getSiblingFileName(fileName, p))) {
+        logger.debug({ p }, 'Yarn zero-install is detected');
+        yarnZeroInstall = true;
+        break;
+      }
+    }
   }
 
   let lernaJsonFile: string;
@@ -346,11 +365,12 @@ export async function extractPackageFile(
   }
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
-    if (hasFancyRefs && lockFiles.npmLock) {
+    if ((hasFancyRefs && lockFiles.npmLock) || yarnZeroInstall) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
       //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
+      //  - Also, do not skip install if Yarn zero-install is used
       logger.debug('Automatically setting skipInstalls to false');
       skipInstalls = false;
     } else {

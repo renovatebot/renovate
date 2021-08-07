@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { parseSyml } from '@yarnpkg/parsers';
 import deepmerge from 'deepmerge';
 import { dump, load } from 'js-yaml';
 import upath from 'upath';
@@ -25,6 +24,7 @@ import {
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
+import { getZeroInstallPaths } from '../extract/yarn';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
@@ -344,15 +344,8 @@ async function updateYarnOffline(
     // both files may exist, so check for .yarnrc.yml first
     if (yarnrcYml) {
       // Yarn 2 (offline cache and zero-installs)
-      const config = parseSyml(yarnrcYml);
-      resolvedPaths.push(
-        upath.join(lockFileDir, config.cacheFolder || './.yarn/cache')
-      );
-
-      resolvedPaths.push(upath.join(lockFileDir, '.pnp'));
-      if (config.pnpDataPath) {
-        resolvedPaths.push(upath.join(lockFileDir, config.pnpDataPath));
-      }
+      const paths = getZeroInstallPaths(yarnrcYml);
+      resolvedPaths.push(...paths.map((p) => upath.join(lockFileDir, p)));
     } else if (yarnrc) {
       // Yarn 1 (offline mirror)
       const mirrorLine = yarnrc

@@ -22,6 +22,7 @@ describe(getName(), () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
       fs.readLocalFile = jest.fn(() => null);
+      fs.localPathExists = jest.fn(() => false);
     });
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractPackageFile(
@@ -344,6 +345,25 @@ describe(getName(), () => {
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+
+    it('sets skipInstalls false if Yarn zero-install is used', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === 'yarn.lock') {
+          return '# yarn.lock';
+        }
+        if (fileName === '.yarnrc.yml') {
+          return 'pnpEnableInlining: false';
+        }
+        return null;
+      });
+      fs.localPathExists = jest.fn(() => true);
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
         'package.json',
         defaultConfig
       );

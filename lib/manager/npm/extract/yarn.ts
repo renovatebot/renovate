@@ -1,4 +1,4 @@
-import { structUtils } from '@yarnpkg/core';
+import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -35,4 +35,13 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
     return { isYarn1: true, lockedVersions: {} };
   }
+}
+
+export function getZeroInstallPaths(yarnrcYml: string): string[] {
+  const conf = parseSyml(yarnrcYml);
+  const paths = [conf.cacheFolder || './.yarn/cache', '.pnp.cjs', '.pnp.js'];
+  if (miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false) {
+    paths.push(conf.pnpDataPath || './.pnp.data.json');
+  }
+  return paths;
 }
