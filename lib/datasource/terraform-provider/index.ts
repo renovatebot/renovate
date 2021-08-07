@@ -1,3 +1,4 @@
+import inclusion from 'inclusion';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
@@ -192,7 +193,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       return null;
     }
 
-    const pMap = (await import('p-map')).default;
+    const pMap: typeof import('p-map')['default'] = (await inclusion('p-map'))
+      .default;
 
     const result = await pMap(
       builds.platforms,

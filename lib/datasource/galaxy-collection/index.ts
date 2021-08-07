@@ -1,3 +1,4 @@
+import inclusion from 'inclusion';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import type { HttpResponse } from '../../util/http';
@@ -71,7 +72,8 @@ export class GalaxyCollectionDatasource extends Datasource {
     });
 
     let newestVersionDetails: VersionsDetailResult;
-    const pMap = (await import('p-map')).default;
+    const pMap: typeof import('p-map')['default'] = (await inclusion('p-map'))
+      .default;
     // asynchronously get release details
     const enrichedReleases: Release[] = await pMap(
       releases,

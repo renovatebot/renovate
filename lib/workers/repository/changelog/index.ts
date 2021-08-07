@@ -1,3 +1,4 @@
+import inclusion from 'inclusion';
 import { getChangeLogJSON } from '../../pr/changelog';
 import type { BranchUpgradeConfig } from '../../types';
 
@@ -10,7 +11,8 @@ async function embedChangelog(upgrade: BranchUpgradeConfig): Promise<void> {
 export async function embedChangelogs(
   branchUpgrades: Record<string, BranchUpgradeConfig[]>
 ): Promise<void> {
-  const pMap = (await import('p-map')).default;
+  const pMap: typeof import('p-map')['default'] = (await inclusion('p-map'))
+    .default;
   const upgrades = [];
   for (const branchName of Object.keys(branchUpgrades)) {
     for (const upgrade of branchUpgrades[branchName]) {

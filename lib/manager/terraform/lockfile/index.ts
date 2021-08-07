@@ -1,3 +1,4 @@
+import inclusion from 'inclusion';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { logger } from '../../../logger';
@@ -16,7 +17,8 @@ import {
 async function updateAllLocks(
   locks: ProviderLock[]
 ): Promise<ProviderLockUpdate[]> {
-  const pMap = (await import('p-map')).default;
+  const pMap: typeof import('p-map')['default'] = (await inclusion('p-map'))
+    .default;
 
   const updates = await pMap(
     locks,
