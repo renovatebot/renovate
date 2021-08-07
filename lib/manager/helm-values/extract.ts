@@ -1,13 +1,10 @@
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-
-import {
-  HelmDockerImageDependency,
-  matchesHelmValuesDockerHeuristic,
-} from './util';
+import type { HelmDockerImageDependency } from './types';
+import { matchesHelmValuesDockerHeuristic } from './util';
 
 function getHelmDep({
   registry,
@@ -60,8 +57,8 @@ export function extractPackageFile(content: string): PackageFile {
   try {
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
-    // TODO: fix me
-    parsedContent = yaml.safeLoad(content, { json: true }) as any;
+    // TODO: fix me (#9610)
+    parsedContent = load(content, { json: true }) as any;
   } catch (err) {
     logger.debug({ err }, 'Failed to parse helm-values YAML');
     return null;

@@ -1,11 +1,11 @@
-import { defaultConfig, git, partial } from '../../../test/util';
+import { defaultConfig, getName, git, partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { BranchConfig } from '../types';
 import { commitFilesToBranch } from './commit';
 
 jest.mock('../../util/git');
 
-describe('workers/branch/automerge', () => {
+describe(getName(), () => {
   describe('commitFilesToBranch', () => {
     let config: BranchConfig;
     beforeEach(() => {

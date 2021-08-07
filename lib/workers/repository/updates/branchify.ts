@@ -1,5 +1,5 @@
 import type { Merge } from 'type-fest';
-import { RenovateConfig, ValidationMessage } from '../../../config';
+import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { embedChangelogs } from '../changelog';
@@ -50,13 +50,8 @@ export async function branchifyUpgrades(
     branchUpgrades[branchName] = branchUpgrades[branchName]
       .reverse()
       .filter((upgrade) => {
-        const {
-          manager,
-          packageFile,
-          depName,
-          currentValue,
-          newValue,
-        } = upgrade;
+        const { manager, packageFile, depName, currentValue, newValue } =
+          upgrade;
         const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
         const previousNewValue = seenUpdates[upgradeKey];
         if (previousNewValue && previousNewValue !== newValue) {

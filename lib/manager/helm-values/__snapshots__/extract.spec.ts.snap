@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/helm-values/extract extractPackageFile() extracts from complex values file correctly" 1`] = `
+exports[`manager/helm-values/extract extractPackageFile() extracts from complex values file correctly" 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -43,7 +43,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/helm-values/extract extractPackageFile() extracts from values.yaml correctly with same structure as "helm create" 1`] = `
+exports[`manager/helm-values/extract extractPackageFile() extracts from values.yaml correctly with same structure as "helm create" 1`] = `
 Object {
   "deps": Array [
     Object {

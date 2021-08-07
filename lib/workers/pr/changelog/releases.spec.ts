@@ -5,7 +5,7 @@ import * as npmVersioning from '../../../versioning/npm';
 import type { BranchUpgradeConfig } from '../../types';
 import * as releases from './releases';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getReleaseNotes()', () => {
     beforeEach(() => {
       jest.spyOn(datasource, 'getPkgReleases').mockResolvedValueOnce({

@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { getName, loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
@@ -10,49 +10,17 @@ import {
   parseKustomize,
 } from './extract';
 
-const kustomizeGitSSHBase = readFileSync(
-  'lib/manager/kustomize/__fixtures__/gitSshBase.yaml',
-  'utf8'
-);
+const kustomizeGitSSHBase = loadFixture('gitSshBase.yaml');
+const kustomizeEmpty = loadFixture('kustomizeEmpty.yaml');
+const kustomizeGitSSHSubdir = loadFixture('gitSubdir.yaml');
+const kustomizeHTTP = loadFixture('kustomizeHttp.yaml');
+const kustomizeWithLocal = loadFixture('kustomizeWithLocal.yaml');
+const nonKustomize = loadFixture('service.yaml');
+const gitImages = loadFixture('gitImages.yaml');
+const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
+const sha = loadFixture('sha.yaml');
 
-const kustomizeEmpty = readFileSync(
-  'lib/manager/kustomize/__fixtures__/kustomizeEmpty.yaml',
-  'utf8'
-);
-
-const kustomizeGitSSHSubdir = readFileSync(
-  'lib/manager/kustomize/__fixtures__/gitSubdir.yaml',
-  'utf8'
-);
-
-const kustomizeHTTP = readFileSync(
-  'lib/manager/kustomize/__fixtures__/kustomizeHttp.yaml',
-  'utf8'
-);
-
-const kustomizeWithLocal = readFileSync(
-  'lib/manager/kustomize/__fixtures__/kustomizeWithLocal.yaml',
-  'utf8'
-);
-
-const nonKustomize = readFileSync(
-  'lib/manager/kustomize/__fixtures__/service.yaml',
-  'utf8'
-);
-
-const gitImages = readFileSync(
-  'lib/manager/kustomize/__fixtures__/gitImages.yaml',
-  'utf8'
-);
-
-const kustomizeDepsInResources = readFileSync(
-  'lib/manager/kustomize/__fixtures__/depsInResources.yaml',
-  'utf8'
-);
-
-const sha = readFileSync('lib/manager/kustomize/__fixtures__/sha.yaml', 'utf8');
-
-describe('manager/kustomize/extract', () => {
+describe(getName(), () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
     expect(file).not.toBeNull();
@@ -87,6 +55,17 @@ describe('manager/kustomize/extract', () => {
         datasource: datasourceGitTags.id,
         depName: 'bitbucket.com/user/test-repo',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
+      });
+    });
+    it('should extract the depName if the URL includes a port number', () => {
+      const pkg = extractBase(
+        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3'
+      );
+      expect(pkg).toEqual({
+        currentValue: 'v1.2.3',
+        datasource: datasourceGitTags.id,
+        depName: 'bitbucket.com:7999/user/test-repo',
+        lookupName: 'ssh://git@bitbucket.com:7999/user/test-repo',
       });
     });
     it('should extract the version of a non http base with subdir', () => {

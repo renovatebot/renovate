@@ -1,20 +1,12 @@
-import fs from 'fs';
-import upath from 'upath';
-
-import { getName } from '../../../../../test/util';
+import { getName, loadFixture } from '../../../../../test/util';
 import * as npmUpdater from '.';
 
-function readFixture(fixture: string) {
-  return fs.readFileSync(
-    upath.resolve(__dirname, `../../__fixtures__/${fixture}`),
-    'utf8'
-  );
-}
+const readFixture = (x: string): string => loadFixture(x, '../..');
 
 const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {
@@ -200,6 +192,7 @@ describe(getName(__filename), () => {
       });
       expect(testContent).toBeNull();
     });
+
     it('returns null if empty file', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -212,6 +205,7 @@ describe(getName(__filename), () => {
       });
       expect(testContent).toBeNull();
     });
+
     it('replaces package', () => {
       const upgrade = {
         depType: 'dependencies',

@@ -1,5 +1,5 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
+import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -34,7 +34,7 @@ lxml==3.6.0
 mccabe==0.6.1
 `;
 
-describe('platform/bitbucket', () => {
+describe(getName(), () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -42,8 +42,6 @@ describe('platform/bitbucket', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    httpMock.reset();
-    httpMock.setup();
     jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
     jest.mock('../../logger');
@@ -62,15 +60,12 @@ describe('platform/bitbucket', () => {
 
     setBaseUrl(baseUrl);
   });
-  afterEach(() => {
-    httpMock.reset();
-  });
 
   async function initRepoMock(
     config?: Partial<RepoParams>,
     repoResp?: any,
-    existingScope?: nock.Scope
-  ): Promise<nock.Scope> {
+    existingScope?: httpMock.Scope
+  ): Promise<httpMock.Scope> {
     const repository = config?.repository || 'some/repo';
 
     const scope = existingScope || httpMock.scope(baseUrl);
@@ -83,7 +78,6 @@ describe('platform/bitbucket', () => {
 
     await bitbucket.initRepo({
       repository: 'some/repo',
-      localDir: '',
       ...config,
     });
 
@@ -148,7 +142,6 @@ describe('platform/bitbucket', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-          localDir: '',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

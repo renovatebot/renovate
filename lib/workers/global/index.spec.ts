@@ -1,6 +1,5 @@
 import { ERROR, WARN } from 'bunyan';
-import { logger } from '../../../test/util';
-import * as _configParser from '../../config';
+import { getName, logger } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
@@ -8,6 +7,7 @@ import {
 import * as datasourceDocker from '../../datasource/docker';
 import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';
+import * as _configParser from './config/parse';
 import * as _limits from './limits';
 import * as globalWorker from '.';
 
@@ -19,7 +19,7 @@ const configParser: jest.Mocked<typeof _configParser> = _configParser as never;
 const platform: jest.Mocked<typeof _platform> = _platform as never;
 const limits = _limits;
 
-describe('lib/workers/global', () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     logger.getProblems.mockImplementationOnce(() => []);
@@ -50,7 +50,6 @@ describe('lib/workers/global', () => {
       hostRules: [
         {
           hostType: datasourceDocker.id,
-          host: 'docker.io',
           username: 'some-user',
           password: 'some-password',
         },
@@ -70,7 +69,6 @@ describe('lib/workers/global', () => {
       hostRules: [
         {
           hostType: datasourceDocker.id,
-          host: 'docker.io',
           username: 'some-user',
           password: 'some-password',
         },

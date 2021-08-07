@@ -34,7 +34,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
-import type { AzurePr } from './types';
+import { AzurePr, AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -89,7 +89,7 @@ export function initPlatform({
       'Init: You must configure an Azure DevOps token, or a username and password'
     );
   }
-  // TODO: Add a connection check that endpoint/token combination are valid
+  // TODO: Add a connection check that endpoint/token combination are valid (#9593)
   const res = {
     endpoint: ensureTrailingSlash(endpoint),
   };
@@ -138,7 +138,6 @@ export async function getJsonFile(
 
 export async function initRepo({
   repository,
-  localDir,
   cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -178,7 +177,6 @@ export async function initRepo({
   const url = repo.remoteUrl || manualUrl;
   await git.initRepo({
     ...config,
-    localDir,
     url,
     extraCloneOpts: getStorageExtraCloneOpts(opts),
     gitAuthorName: global.gitAuthor?.name,
@@ -410,10 +408,24 @@ export async function createPr({
         completionOptions: {
           mergeStrategy: config.defaultMergeMethod,
           deleteSourceBranch: true,
+          mergeCommitMessage: title,
         },
       },
       config.repoId,
       pr.pullRequestId
+    );
+  }
+  if (platformOptions?.azureAutoApprove) {
+    pr = await azureApiGit.createPullRequestReviewer(
+      {
+        reviewerUrl: pr.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      },
+      config.repoId,
+      pr.pullRequestId,
+      pr.createdBy.id
     );
   }
   await Promise.all(
@@ -619,6 +631,7 @@ export async function mergePr(
     completionOptions: {
       mergeStrategy: mergeMethod,
       deleteSourceBranch: true,
+      mergeCommitMessage: pr.title,
     },
   };
 
@@ -703,7 +716,7 @@ export function ensureIssueClosing(): Promise<void> {
 /* istanbul ignore next */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
-  // TODO: Needs implementation
+  // TODO: Needs implementation (#9592)
   return Promise.resolve([]);
 }
 

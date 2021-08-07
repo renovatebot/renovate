@@ -1,49 +1,22 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
 import * as httpMock from '../../../../../test/http-mock';
-import { getName } from '../../../../../test/util';
+import { getName, loadFixture } from '../../../../../test/util';
 import { clone } from '../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 import { updateLockedDependency } from '.';
 
-const packageFileContent = readFileSync(
-  resolve(__dirname, './__fixtures__/package.json'),
-  'utf8'
-);
-const lockFileContent = readFileSync(
-  resolve(__dirname, './__fixtures__/package-lock.json'),
-  'utf8'
-);
+const packageFileContent = loadFixture('package.json');
+const lockFileContent = loadFixture('package-lock.json');
+const acceptsJson = JSON.parse(loadFixture('accepts.json'));
+const expressJson = JSON.parse(loadFixture('express.json'));
+const mimeJson = JSON.parse(loadFixture('mime.json'));
+const serveStaticJson = JSON.parse(loadFixture('serve-static.json'));
+const sendJson = JSON.parse(loadFixture('send.json'));
+const typeIsJson = JSON.parse(loadFixture('type-is.json'));
 
-const acceptsJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/accepts.json'), 'utf8')
-);
-
-const expressJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/express.json'), 'utf8')
-);
-
-const mimeJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/mime.json'), 'utf8')
-);
-
-const serveStaticJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/serve-static.json'), 'utf8')
-);
-
-const sendJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/send.json'), 'utf8')
-);
-
-const typeIsJson = JSON.parse(
-  readFileSync(resolve(__dirname, './__fixtures__/type-is.json'), 'utf8')
-);
-
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
     beforeEach(() => {
-      httpMock.setup();
       config = {
         packageFile: 'package.json',
         packageFileContent,
@@ -54,9 +27,7 @@ describe(getName(__filename), () => {
         newVersion: '1.0.1',
       };
     });
-    afterEach(() => {
-      httpMock.reset();
-    });
+
     it('validates filename', async () => {
       expect(
         await updateLockedDependency({ ...config, lockFile: 'yarn.lock' })
@@ -142,14 +113,6 @@ describe(getName(__filename), () => {
       config.newVersion = '1.4.1';
       httpMock
         .scope('https://registry.npmjs.org')
-        .get('/accepts')
-        .reply(200, acceptsJson);
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
-      httpMock
-        .scope('https://registry.npmjs.org')
         .get('/mime')
         .reply(200, mimeJson);
       httpMock
@@ -168,6 +131,7 @@ describe(getName(__filename), () => {
       const packageLock = JSON.parse(res['package-lock.json']);
       expect(packageLock.dependencies.mime.version).toEqual('1.4.1');
       expect(packageLock.dependencies.express.version).toEqual('4.16.0');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

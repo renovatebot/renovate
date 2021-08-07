@@ -1,24 +1,14 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
-import { getName } from '../../../test/util';
+import { getName, loadFixture } from '../../../test/util';
 import { logger } from '../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
 
-const dockerfileContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/Dockerfile`),
-  'utf8'
-);
-const ansibleYamlContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/ansible.yml`),
-  'utf8'
-);
-const exampleJsonContent = readFileSync(
-  resolve(__dirname, `./__fixtures__/example.json`),
-  'utf8'
-);
+const dockerfileContent = loadFixture(`Dockerfile`);
+const ansibleYamlContent = loadFixture(`ansible.yml`);
+const exampleJsonContent = loadFixture(`example.json`);
+const exampleGitlabCiYml = loadFixture(`gitlab-ci.yml`);
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
       pinDigests: false,
@@ -205,6 +195,24 @@ describe(getName(__filename), () => {
     const res = await extractPackageFile(
       ansibleYamlContent,
       'ansible.yml',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+  });
+  it('extracts with combination strategy and registry url', async () => {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
+      matchStrings: [
+        'CHART_VERSION: (?<currentValue>.*?)\n',
+        'CHART_REPOSITORY_URL: "(?<registryUrl>.*?)"',
+        'CHART_NAME: "(?<depName>.*?)"',
+      ],
+      datasourceTemplate: 'helm',
+    };
+    const res = await extractPackageFile(
+      exampleGitlabCiYml,
+      '.gitlab-ci.yml',
       config
     );
     expect(res).toMatchSnapshot();

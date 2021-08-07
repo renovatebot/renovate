@@ -1,8 +1,11 @@
+import { getName } from '../../../../test/util';
 import { detectMonorepos } from './monorepo';
 
-describe('manager/npm/extract', () => {
+jest.mock('./pnpm');
+
+describe(getName(), () => {
   describe('.extractPackageFile()', () => {
-    it('uses lerna package settings', () => {
+    it('uses lerna package settings', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -46,7 +49,7 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ] as any;
-      detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
       expect(
@@ -55,7 +58,7 @@ describe('manager/npm/extract', () => {
         )
       ).toBe(true);
     });
-    it('updates internal packages', () => {
+    it('updates internal packages', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -99,7 +102,7 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ] as any;
-      detectMonorepos(packageFiles, true);
+      await detectMonorepos(packageFiles, true);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
       expect(
@@ -108,7 +111,7 @@ describe('manager/npm/extract', () => {
         )
       ).toBe(false);
     });
-    it('uses yarn workspaces package settings with lerna', () => {
+    it('uses yarn workspaces package settings with lerna', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -128,14 +131,15 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
     });
-    it('uses yarn workspaces package settings without lerna', () => {
+    it('uses yarn workspaces package settings without lerna', async () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
+          npmrc: '@org:registry=//registry.some.org\n',
           yarnWorkspacesPackages: 'packages/*',
         },
         {
@@ -148,7 +152,7 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
     });
   });

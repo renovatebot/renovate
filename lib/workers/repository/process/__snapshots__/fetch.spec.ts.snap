@@ -30,12 +30,11 @@ Object {
           ],
         },
         Object {
+          "0": "a",
+          "1": "b",
           "depName": "bbb",
           "depType": "dependencies",
-          "updates": Array [
-            "a",
-            "b",
-          ],
+          "updates": Array [],
         },
       ],
       "packageFile": "package.json",

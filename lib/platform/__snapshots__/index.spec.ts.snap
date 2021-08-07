@@ -8,8 +8,8 @@ Object {
   "gitAuthor": "user@domain.com",
   "hostRules": Array [
     Object {
-      "hostName": "api.bitbucket.org",
       "hostType": "bitbucket",
+      "matchHost": "api.bitbucket.org",
       "password": "123",
       "username": "abc",
     },
@@ -23,8 +23,8 @@ Object {
   "endpoint": "https://api.bitbucket.org/",
   "hostRules": Array [
     Object {
-      "hostName": "api.bitbucket.org",
       "hostType": "bitbucket",
+      "matchHost": "api.bitbucket.org",
       "password": "123",
       "username": "abc",
     },

@@ -1,7 +1,8 @@
+import { getName } from '../../test/util';
 import * as massage from './massage';
-import { RenovateConfig } from '.';
+import type { RenovateConfig } from './types';
 
-describe('config/massage', () => {
+describe(getName(), () => {
   describe('massageConfig', () => {
     it('returns empty', () => {
       const config: RenovateConfig = {};
@@ -26,6 +27,7 @@ describe('config/massage', () => {
         packageRules: [
           {
             matchPackageNames: ['foo'],
+            separateMajorMinor: false,
             minor: {
               semanticCommitType: 'feat',
             },

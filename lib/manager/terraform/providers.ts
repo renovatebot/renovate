@@ -1,15 +1,14 @@
 import is from '@sindresorhus/is';
-import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
+import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
-import {
-  ExtractionResult,
-  TerraformDependencyTypes,
-  keyValueExtractionRegex,
-} from './util';
+import { TerraformDependencyTypes } from './common';
+import type { ExtractionResult } from './types';
+import { keyValueExtractionRegex } from './util';
 
-export const sourceExtractionRegex = /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
+export const sourceExtractionRegex =
+  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
 
 export function extractTerraformProvider(
   startingLine: number,
@@ -61,9 +60,9 @@ export function extractTerraformProvider(
 
 export function analyzeTerraformProvider(dep: PackageDependency): void {
   /* eslint-disable no-param-reassign */
-  dep.depType = 'terraform';
+  dep.depType = 'provider';
   dep.depName = dep.managerData.moduleName;
-  dep.datasource = datasourceTerraformProvider.id;
+  dep.datasource = TerraformProviderDatasource.id;
 
   if (is.nonEmptyString(dep.managerData.source)) {
     const source = sourceExtractionRegex.exec(dep.managerData.source);

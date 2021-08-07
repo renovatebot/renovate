@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { RenovateConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import * as memCache from '../../../util/cache/memory';
 import * as repositoryCache from '../../../util/cache/repository';
 import { privateCacheDir } from '../../../util/fs';

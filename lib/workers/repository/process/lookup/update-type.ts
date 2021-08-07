@@ -1,4 +1,4 @@
-import { UpdateType } from '../../../../config';
+import type { UpdateType } from '../../../../config/types';
 import * as allVersioning from '../../../../versioning';
 
 export interface UpdateTypeConfig {
@@ -19,8 +19,5 @@ export function getUpdateType(
   if (versioning.getMinor(newVersion) > versioning.getMinor(currentVersion)) {
     return 'minor';
   }
-  if (config.separateMinorPatch) {
-    return 'patch';
-  }
-  return 'minor';
+  return 'patch';
 }

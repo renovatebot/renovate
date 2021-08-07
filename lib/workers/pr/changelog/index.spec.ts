@@ -31,20 +31,15 @@ const upgrade: BranchConfig = partial<BranchConfig>({
   ],
 });
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      httpMock.setup();
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
-        baseUrl: 'https://api.github.com/',
+        matchHost: 'https://api.github.com/',
         token: 'abc',
       });
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('returns null if @types', async () => {
@@ -194,7 +189,7 @@ describe(getName(__filename), () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
         token: 'super_secret',
-        baseUrl: 'https://github-enterprise.example.com/',
+        matchHost: 'https://github-enterprise.example.com/',
       });
       expect(
         await getChangeLogJSON({
@@ -212,7 +207,7 @@ describe(getName(__filename), () => {
         .reply(200, []);
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
-        baseUrl: 'https://github-enterprise.example.com/',
+        matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
@@ -234,7 +229,7 @@ describe(getName(__filename), () => {
         .reply(200, []);
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
-        baseUrl: 'https://github-enterprise.example.com/',
+        matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
       expect(

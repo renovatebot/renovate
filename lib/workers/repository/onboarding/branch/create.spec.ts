@@ -1,11 +1,11 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
+import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
 import { commitFiles } from '../../../../util/git';
 import { COMMIT_MESSAGE_PREFIX_SEPARATOR } from '../../util/commit-message';
 import { createOnboardingBranch } from './create';
 
 jest.mock('../../../../util/git');
 jest.mock('./config', () => ({
-  getOnboardingConfig: () =>
+  getOnboardingConfigContents: () =>
     JSON.stringify({
       foo: 'bar',
     }),
@@ -25,7 +25,7 @@ const buildExpectedCommitFilesArgument = (
   message,
 });
 
-describe('workers/repository/onboarding/branch', () => {
+describe(getName(), () => {
   let config: RenovateConfig;
   beforeEach(() => {
     jest.clearAllMocks();

@@ -94,6 +94,147 @@ Array [
 ]
 `;
 
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler < 2 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler < 2 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:1.2.0",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler -v 1.2 && bundler config --local gems-private.com some-user:some-password && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler == latest 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler == latest 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:1.2.0",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler && bundler config set --local gems-private.com some-user:some-password && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler >= 2 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler >= 2 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:1.2.0",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler -v 2.1 && bundler config set --local gems-private.com some-user:some-password && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GEM_HOME": "/tmp/cache/others/gem",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`bundler.updateArtifacts() Docker injects bundler host configuration environment variables 1`] = `
 Array [
   Object {

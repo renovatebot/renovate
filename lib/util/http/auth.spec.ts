@@ -7,7 +7,7 @@ import {
 import { applyAuthorization, removeAuthorization } from './auth';
 import { GotOptions } from './types';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('applyAuthorization', () => {
     it('does nothing', () => {
       const opts: GotOptions = {
@@ -205,8 +205,7 @@ describe(getName(__filename), () => {
           authorization: 'auth',
         },
         hostname: 'store123.blob.core.windows.net',
-        href:
-          'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+        href: 'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
       });
 
       removeAuthorization(opts);
@@ -214,8 +213,7 @@ describe(getName(__filename), () => {
       expect(opts).toEqual({
         headers: {},
         hostname: 'store123.blob.core.windows.net',
-        href:
-          'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+        href: 'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
       });
     });
 

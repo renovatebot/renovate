@@ -6,7 +6,7 @@ import {
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { add } from '../util/sanitize';
-import { GlobalConfig, RenovateConfig } from './types';
+import { AllConfig, RenovateConfig } from './types';
 
 const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
 
@@ -40,7 +40,7 @@ function validateSecrets(secrets_: unknown): void {
   }
 }
 
-export function validateConfigSecrets(config: GlobalConfig): void {
+export function validateConfigSecrets(config: AllConfig): void {
   validateSecrets(config.secrets);
   if (config.repositories) {
     for (const repository of config.repositories) {
@@ -64,7 +64,7 @@ function replaceSecretsInString(
   const disallowedPrefixes = ['branch', 'commit', 'group', 'pr', 'semantic'];
   if (disallowedPrefixes.some((prefix) => key.startsWith(prefix))) {
     const error = new Error(CONFIG_VALIDATION);
-    error.location = 'config';
+    error.validationSource = 'config';
     error.validationError = 'Disallowed secret substitution';
     error.validationMessage = `The field ${key} may not use secret substitution`;
     throw error;
@@ -74,7 +74,7 @@ function replaceSecretsInString(
       return secrets[secretName];
     }
     const error = new Error(CONFIG_VALIDATION);
-    error.location = 'config';
+    error.validationSource = 'config';
     error.validationError = 'Unknown secret name';
     error.validationMessage = `The following secret name was not found in config: ${String(
       secretName
@@ -113,12 +113,15 @@ function replaceSecretsinObject(
   return config;
 }
 
-export function applySecretsToConfig(config: RenovateConfig): RenovateConfig {
+export function applySecretsToConfig(
+  config: RenovateConfig,
+  secrets = config.secrets
+): RenovateConfig {
   // Add all secrets to be sanitized
-  if (is.plainObject(config.secrets)) {
-    for (const secret of Object.values(config.secrets)) {
+  if (is.plainObject(secrets)) {
+    for (const secret of Object.values(secrets)) {
       add(String(secret));
     }
   }
-  return replaceSecretsinObject(config, config.secrets);
+  return replaceSecretsinObject(config, secrets);
 }

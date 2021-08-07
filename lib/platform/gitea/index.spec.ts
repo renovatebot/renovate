@@ -20,7 +20,7 @@ import * as ght from './gitea-helper';
  */
 const GITEA_VERSION = '1.14.0+dev-754-g5d2b7ba63';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
@@ -184,7 +184,6 @@ describe(getName(__filename), () => {
 
     return gitea.initRepo({
       repository: mockRepo.full_name,
-      localDir: '',
       ...config,
     });
   }
@@ -251,7 +250,6 @@ describe(getName(__filename), () => {
   describe('initRepo', () => {
     const initRepoCfg: RepoParams = {
       repository: mockRepo.full_name,
-      localDir: '',
     };
 
     it('should propagate API errors', async () => {
@@ -907,10 +905,24 @@ describe(getName(__filename), () => {
     });
   });
 
+  describe('getIssue', () => {
+    it('should return the issue', async () => {
+      const mockIssue = mockIssues.find((i) => i.number === 1);
+      helper.getIssue.mockResolvedValueOnce(mockIssue);
+      await initFakeRepo();
+
+      expect(await gitea.getIssue(mockIssue.number)).toHaveProperty(
+        'number',
+        mockIssue.number
+      );
+    });
+  });
+
   describe('findIssue', () => {
     it('should return existing open issue', async () => {
       const mockIssue = mockIssues.find((i) => i.title === 'open-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
 
       expect(await gitea.findIssue(mockIssue.title)).toHaveProperty(

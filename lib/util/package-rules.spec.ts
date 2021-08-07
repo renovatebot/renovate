@@ -1,4 +1,4 @@
-import { UpdateType } from '../config';
+import type { PackageRuleInputConfig, UpdateType } from '../config/types';
 import {
   LANGUAGE_DOCKER,
   LANGUAGE_JAVASCRIPT,
@@ -7,10 +7,14 @@ import {
 } from '../constants/languages';
 
 import * as datasourceDocker from '../datasource/docker';
-import * as datasourceOrb from '../datasource/orb';
-import { Config, applyPackageRules } from './package-rules';
+import { OrbDatasource } from '../datasource/orb';
+import { applyPackageRules } from './package-rules';
 
-type TestConfig = Config & { x?: number; y?: number };
+type TestConfig = PackageRuleInputConfig & {
+  x?: number;
+  y?: number;
+  groupName?: string;
+};
 
 describe('applyPackageRules()', () => {
   const config1: TestConfig = {
@@ -29,10 +33,15 @@ describe('applyPackageRules()', () => {
         excludePackagePatterns: ['d'],
         y: 2,
       },
+      {
+        matchPackagePrefixes: ['xyz/'],
+        excludePackageNames: ['xyz/foo'],
+        groupName: 'xyz',
+      },
     ],
   };
   it('applies', () => {
-    const config: Config = {
+    const config: PackageRuleInputConfig = {
       depName: 'a',
       isBump: true,
       currentValue: '1.0.0',
@@ -70,6 +79,7 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
     expect(res.y).toBe(2);
+    expect(res.groupName).toBeUndefined();
   });
   it('applies both rules for b', () => {
     const dep = {
@@ -78,6 +88,7 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
     expect(res.y).toBe(2);
+    expect(res.groupName).toBeUndefined();
   });
   it('applies the second rule', () => {
     const dep = {
@@ -86,6 +97,7 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
     expect(res.y).toBe(2);
+    expect(res.groupName).toBeUndefined();
   });
   it('applies matchPackagePrefixes', () => {
     const dep = {
@@ -94,13 +106,24 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
     expect(res.y).toBe(2);
+    expect(res.groupName).toBe('xyz');
   });
+
+  it('applies excludePackageNames', () => {
+    const dep = {
+      depName: 'xyz/foo',
+    };
+    const res = applyPackageRules({ ...config1, ...dep });
+    expect(res.groupName).toBeUndefined();
+  });
+
   it('applies excludePackagePrefixes', () => {
     const dep = {
       depName: 'xyz/foo-a',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
+    expect(res.groupName).toBe('xyz');
   });
   it('applies the second second rule', () => {
     const dep = {
@@ -295,14 +318,14 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [datasourceOrb.id, datasourceDocker.id],
+          matchDatasources: [OrbDatasource.id, datasourceDocker.id],
           x: 1,
         },
       ],
     };
     const dep = {
       depType: 'dependencies',
-      datasource: datasourceOrb.id,
+      datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -319,7 +342,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      datasource: datasourceOrb.id,
+      datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -329,7 +352,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [datasourceOrb.id],
+          matchDatasources: [OrbDatasource.id],
           x: 1,
         },
       ],

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { getDep } from '../dockerfile/extract';
@@ -61,9 +61,10 @@ export function extractPackageFile(content: string): PackageFile | null {
           foundImage = false;
           const serviceImageLine = skipCommentLines(lines, lineNumber + 1);
           logger.trace(`serviceImageLine: "${serviceImageLine.line}"`);
-          const serviceImageMatch = /^\s*-\s*'?"?([^\s'"]+)'?"?\s*$/.exec(
-            serviceImageLine.line
-          );
+          const serviceImageMatch =
+            /^\s*-\s*(?:name:\s*)?'?"?([^\s'"]+)'?"?\s*$/.exec(
+              serviceImageLine.line
+            );
           if (serviceImageMatch) {
             logger.trace('serviceImageMatch');
             foundImage = true;
@@ -98,9 +99,14 @@ export async function extractAllPackageFiles(
     const file = filesToExamine.pop();
 
     const content = await readLocalFile(file, 'utf8');
+    if (!content) {
+      logger.debug({ file }, 'Empty or non existent gitlabci file');
+      // eslint-disable-next-line no-continue
+      continue;
+    }
     let doc: GitlabPipeline;
     try {
-      doc = yaml.safeLoad(replaceReferenceTags(content), {
+      doc = load(replaceReferenceTags(content), {
         json: true,
       }) as GitlabPipeline;
     } catch (err) {

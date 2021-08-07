@@ -1,31 +1,15 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'upath';
+import { getName, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const sbt = readFileSync(
-  resolve(__dirname, `./__fixtures__/sample.sbt`),
-  'utf8'
-);
-const sbtScalaVersionVariable = readFileSync(
-  resolve(__dirname, `./__fixtures__/scala-version-variable.sbt`),
-  'utf8'
-);
-const sbtMissingScalaVersion = readFileSync(
-  resolve(__dirname, `./__fixtures__/missing-scala-version.sbt`),
-  'utf8'
+const sbt = loadFixture(`sample.sbt`);
+const sbtScalaVersionVariable = loadFixture(`scala-version-variable.sbt`);
+const sbtMissingScalaVersion = loadFixture(`missing-scala-version.sbt`);
+const sbtDependencyFile = loadFixture(`dependency-file.scala`);
+const sbtPrivateVariableDependencyFile = loadFixture(
+  `private-variable-dependency-file.scala`
 );
 
-const sbtDependencyFile = readFileSync(
-  resolve(__dirname, `./__fixtures__/dependency-file.scala`),
-  'utf8'
-);
-
-const sbtPrivateVariableDependencyFile = readFileSync(
-  resolve(__dirname, `./__fixtures__/private-variable-dependency-file.scala`),
-  'utf8'
-);
-
-describe('lib/manager/sbt/extract', () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile(null)).toBeNull();

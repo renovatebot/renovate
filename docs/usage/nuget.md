@@ -33,8 +33,8 @@ Alternative feeds can be specified either [in a `NuGet.config` file](https://doc
 "nuget": {
   "registryUrls": [
     "https://api.nuget.org/v3/index.json",
-    "http://example1.com/nuget/"
-    "http://example2.com/nuget/v3/index.json"
+    "https://example1.com/nuget/",
+    "https://example2.com/nuget/v3/index.json"
   ]
 }
 ```
@@ -65,7 +65,7 @@ Credentials for authenticated/private feeds can be provided via host rules in th
 "hostRules": [
   {
     "hostType": "nuget",
-    "baseUrl": "http://example1.com/nuget",
+    "matchHost": "http://example1.com/nuget",
     "username": "root",
     "password": "p4$$w0rd"
   }

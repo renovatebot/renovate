@@ -1,17 +1,18 @@
 import * as _fs from 'fs-extra';
-import { mocked } from '../../../../test/util';
+import { getName, mocked } from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
 import * as repositoryCache from '.';
 
 jest.mock('fs-extra');
 
 const fs = mocked(_fs);
 
-describe('lib/util/cache/repository', () => {
+describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    setAdminConfig({ cacheDir: '/tmp/renovate/cache/' });
   });
   const config = {
-    cacheDir: '/tmp/renovate/cache/',
     platform: 'github',
     repository: 'abc/def',
   };

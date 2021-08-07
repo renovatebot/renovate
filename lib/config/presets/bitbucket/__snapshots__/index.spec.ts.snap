@@ -4,7 +4,7 @@ exports[`config/presets/bitbucket/index fetchJSONFile() returns JSON 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -18,7 +18,7 @@ exports[`config/presets/bitbucket/index fetchJSONFile() throws on error 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
@@ -32,7 +32,7 @@ exports[`config/presets/bitbucket/index fetchJSONFile() throws on invalid json 1
 Array [
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate",
+      "accept-encoding": "gzip, deflate, br",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

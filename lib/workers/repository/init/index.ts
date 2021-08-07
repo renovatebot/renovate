@@ -1,6 +1,7 @@
-import { RenovateConfig } from '../../../config';
 import { applySecretsToConfig } from '../../../config/secrets';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { platform } from '../../../platform';
 import { clone } from '../../../util/clone';
 import { setUserRepoConfig } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
@@ -13,6 +14,14 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
   return { ...clone(config), errors: [], warnings: [], branchList: [] };
 }
 
+function warnOnUnsupportedOptions(config: RenovateConfig): void {
+  if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
+    logger.warn(
+      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${config.platform}'.`
+    );
+  }
+}
+
 export async function initRepo(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {
@@ -21,6 +30,7 @@ export async function initRepo(
   config = await initApis(config);
   config = await getRepoConfig(config);
   checkIfConfigured(config);
+  warnOnUnsupportedOptions(config);
   config = applySecretsToConfig(config);
   await setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);

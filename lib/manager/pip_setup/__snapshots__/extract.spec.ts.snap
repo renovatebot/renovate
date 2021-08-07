@@ -7,7 +7,7 @@ Array [
   Object {
     "cmd": "python --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/foo/bar",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -25,7 +25,7 @@ Array [
   Object {
     "cmd": "python3 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/foo/bar",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -43,7 +43,7 @@ Array [
   Object {
     "cmd": "python3.8 --version",
     "options": Object {
-      "cwd": null,
+      "cwd": "/tmp/foo/bar",
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/ruby-version/extract extractPackageFile() returns a result 1`] = `
+exports[`manager/ruby-version/extract extractPackageFile() returns a result 1`] = `
 Array [
   Object {
     "currentValue": "8.4.0",
@@ -10,7 +10,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/ruby-version/extract extractPackageFile() skips non ranges 1`] = `
+exports[`manager/ruby-version/extract extractPackageFile() skips non ranges 1`] = `
 Array [
   Object {
     "currentValue": "latestn",
@@ -20,7 +20,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/ruby-version/extract extractPackageFile() supports ranges 1`] = `
+exports[`manager/ruby-version/extract extractPackageFile() supports ranges 1`] = `
 Array [
   Object {
     "currentValue": "8.4",

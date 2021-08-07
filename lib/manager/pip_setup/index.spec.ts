@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs';
 import {
   ExecSnapshots,
   envMock,
@@ -6,23 +5,24 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../test/exec-util';
-import { env, getName } from '../../../test/util';
-import { setUtilConfig } from '../../util';
-import { BinarySource } from '../../util/exec/common';
+import { env, getName, loadFixture } from '../../../test/util';
+import { setAdminConfig } from '../../config/admin';
+import type { RepoAdminConfig } from '../../config/types';
 import * as fs from '../../util/fs';
+import type { ExtractConfig } from '../types';
 import * as extract from './extract';
 import { extractPackageFile } from '.';
 
-const packageFile = 'lib/manager/pip_setup/__fixtures__/setup.py';
-const content = readFileSync(packageFile, 'utf8');
+const packageFile = 'setup.py';
+const content = loadFixture(packageFile);
+const jsonContent = loadFixture('setup.py.json');
 
-const packageFileJson = 'lib/manager/pip_setup/__fixtures__/setup.py.json';
-const jsonContent = readFileSync(packageFileJson, 'utf8');
-
-const config = {
+const adminConfig: RepoAdminConfig = {
   localDir: '/tmp/github/some/repo',
   cacheDir: '/tmp/renovate/cache',
 };
+
+const config: ExtractConfig = {};
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
@@ -32,25 +32,29 @@ const pythonVersionCallResults = [
   { stdout: 'Python 3.7.5\\n', stderr: '' },
 ];
 
-// TODO: figure out snapshot similarity for each CI platform
+// TODO: figure out snapshot similarity for each CI platform (#9617)
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map((snapshot) => ({
     ...snapshot,
     cmd: snapshot.cmd.replace(/^.*extract\.py"\s+/, '<extract.py> '),
   }));
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('extractPackageFile()', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       jest.resetAllMocks();
       jest.resetModules();
       extract.resetModule();
 
-      await setUtilConfig(config);
+      setAdminConfig(adminConfig);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py
       jest.spyOn(fs, 'writeLocalFile').mockResolvedValue();
+    });
+
+    afterEach(() => {
+      setAdminConfig();
     });
 
     it('returns found deps', async () => {
@@ -71,18 +75,14 @@ describe(getName(__filename), () => {
     });
 
     it('returns found deps (docker)', async () => {
-      const execSnapshots = mockExecSequence(exec, [
-        { stdout: '', stderr: '' },
-      ]);
+      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
 
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(jsonContent);
       expect(
-        await extractPackageFile(content, packageFile, {
-          ...config,
-          binarySource: BinarySource.Docker,
-        })
+        await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
-      expect(execSnapshots).toHaveLength(1); // TODO: figure out volume arguments in Windows
+      expect(execSnapshots).toHaveLength(3); // TODO: figure out volume arguments in Windows (#9617)
     });
 
     it('returns no deps', async () => {

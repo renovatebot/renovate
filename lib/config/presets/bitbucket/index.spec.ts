@@ -9,17 +9,9 @@ jest.unmock('../../../platform');
 const baseUrl = 'https://api.bitbucket.org';
 const basePath = '/2.0/repositories/some/repo/src/HEAD';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   beforeAll(() => {
     setPlatformApi('bitbucket');
-  });
-
-  beforeEach(() => {
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('fetchJSONFile()', () => {

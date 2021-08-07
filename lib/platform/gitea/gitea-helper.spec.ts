@@ -4,7 +4,7 @@ import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
@@ -140,12 +140,7 @@ describe(getName(__filename), () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
-    httpMock.setup();
     setBaseUrl(baseUrl);
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('getCurrentUser', () => {
@@ -509,6 +504,19 @@ describe(getName(__filename), () => {
         state: 'open',
       });
       expect(res).toEqual([mockIssue]);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('getIssue', () => {
+    it('should call /api/v1/repos/[repo]/issues/[issue] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
+        .reply(200, mockIssue);
+
+      const res = await ght.getIssue(mockRepo.full_name, mockIssue.number);
+      expect(res).toEqual(mockIssue);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

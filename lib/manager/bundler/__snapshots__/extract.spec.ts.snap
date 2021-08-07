@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/bundler/extract extractPackageFile() parse Ruby CI Gemfile 1`] = `
+exports[`manager/bundler/extract extractPackageFile() parse Ruby CI Gemfile 1`] = `
 Object {
   "constraints": Object {
     "bundler": "2.0.2",
@@ -152,7 +152,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/bundler/extract extractPackageFile() parse mastodon Gemfile 1`] = `
+exports[`manager/bundler/extract extractPackageFile() parse mastodon Gemfile 1`] = `
 Object {
   "constraints": Object {
     "ruby": ">= 2.4.0",
@@ -1391,7 +1391,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/bundler/extract extractPackageFile() parse webpacker Gemfile 1`] = `
+exports[`manager/bundler/extract extractPackageFile() parse webpacker Gemfile 1`] = `
 Object {
   "constraints": Object {
     "bundler": "1.17.3",
@@ -1455,7 +1455,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
+exports[`manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
   "constraints": Object {
     "bundler": "1.17.2",
@@ -2156,7 +2156,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
+exports[`manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
 Object {
   "constraints": Object {
     "ruby": "~> 1.5.3",
@@ -2226,7 +2226,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/bundler/extract parse Gitlab Foss Gemfile 1`] = `
+exports[`manager/bundler/extract parse Gitlab Foss Gemfile 1`] = `
 Object {
   "constraints": Object {
     "bundler": "1.17.3",
@@ -4705,7 +4705,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/bundler/extract parse source blocks in Gemfile 1`] = `
+exports[`manager/bundler/extract parse source blocks in Gemfile 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -4738,7 +4738,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/bundler/extract parse source blocks with spaces in Gemfile 1`] = `
+exports[`manager/bundler/extract parse source blocks with spaces in Gemfile 1`] = `
 Object {
   "constraints": Object {
     "bundler": "1.16.6",

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with private variables 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extract deps from native scala file with private variables 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -37,7 +37,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with variables 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extract deps from native scala file with variables 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -69,12 +69,42 @@ Object {
         "https://repo.maven.apache.org/maven2",
       ],
     },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc-a",
+      "groupName": "abcVersion for com.abc",
+      "lookupName": "com.abc:abc-a",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc-b",
+      "groupName": "abcVersion for com.abc",
+      "lookupName": "com.abc:abc-b",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc-c",
+      "groupName": "abcVersion for com.abc",
+      "lookupName": "com.abc:abc-c",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
   ],
   "packageFileVersion": undefined,
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extracts deps for generic use-cases 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extracts deps for generic use-cases 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -258,7 +288,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -398,7 +428,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -415,7 +445,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined with a trailing comma 1`] = `
+exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined with a trailing comma 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -442,7 +472,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() skips deps when scala version is missing 1`] = `
+exports[`manager/sbt/extract extractPackageFile() skips deps when scala version is missing 1`] = `
 Object {
   "deps": Array [
     Object {

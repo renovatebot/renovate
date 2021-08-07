@@ -20,7 +20,6 @@ export function updateDependency({
       quote = '';
     }
     let newString = `node_js:\n`;
-    // TODO: `newValue` is a string!
     upgrade.newValue.split(',').forEach((version) => {
       newString += `${indent}- ${quote}${version}${quote}\n`;
     });

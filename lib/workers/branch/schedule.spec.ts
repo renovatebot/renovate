@@ -1,8 +1,9 @@
 import mockDate from 'mockdate';
-import { RenovateConfig } from '../../config';
+import { getName } from '../../../test/util';
+import type { RenovateConfig } from '../../config/types';
 import * as schedule from './schedule';
 
-describe('workers/branch/schedule', () => {
+describe(getName(), () => {
   describe('hasValidTimezone(schedule)', () => {
     it('returns false for invalid timezone', () => {
       expect(schedule.hasValidTimezone('Asia')[0]).toBe(false);
@@ -155,12 +156,30 @@ describe('workers/branch/schedule', () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
-    it('supports timezone', () => {
-      config.schedule = ['after 4:00pm'];
-      config.timezone = 'Asia/Singapore';
-      mockDate.set('2017-06-30T10:50:00.000Z'); // Globally 2017-06-30 10:50am
-      const res = schedule.isScheduledNow(config);
-      expect(res).toBe(true);
+    describe('supports timezone', () => {
+      const cases: [string, string, string, boolean][] = [
+        ['after 4pm', 'Asia/Singapore', '2017-06-30T15:59:00.000+0800', false],
+        ['after 4pm', 'Asia/Singapore', '2017-06-30T16:01:00.000+0800', true],
+        [
+          'before 3am on Monday',
+          'Asia/Tokyo',
+          '2017-06-26T02:59:00.000+0900',
+          true,
+        ],
+        [
+          'before 3am on Monday',
+          'Asia/Tokyo',
+          '2017-06-26T03:01:00.000+0900',
+          false,
+        ],
+      ];
+
+      test.each(cases)('%p, %p, %p', (sched, tz, datetime, expected) => {
+        config.schedule = [sched];
+        config.timezone = tz;
+        mockDate.set(datetime);
+        expect(schedule.isScheduledNow(config)).toBe(expected);
+      });
     });
     it('supports multiple schedules', () => {
       config.schedule = ['after 4:00pm', 'before 11:00am'];
@@ -255,6 +274,20 @@ describe('workers/branch/schedule', () => {
       mockDate.set('2017-02-01T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
+    });
+    it('supports weekday instances', () => {
+      config.schedule = ['on Monday on the first day instance'];
+
+      const cases: [string, boolean][] = [
+        ['2017-02-01T06:00:00.000', false], // Locally Thursday, 2 February 2017 6am
+        ['2017-02-06T06:00:00.000', true], // Locally Monday, 6 February 2017 6am
+        ['2017-02-13T06:00:00.000', false], // Locally Monday, 13 February 2017 6am
+      ];
+
+      cases.forEach(([datetime, expected]) => {
+        mockDate.set(datetime);
+        expect(schedule.isScheduledNow(config)).toBe(expected);
+      });
     });
   });
 });

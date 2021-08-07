@@ -1,10 +1,13 @@
 import url from 'url';
+import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
 
+import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
+import type { MavenDependency, MavenXml } from './types';
 
 const http: Record<string, Http> = {};
 
@@ -103,12 +106,8 @@ export async function isHttpResourceExists(
   try {
     const httpClient = httpByHostType(hostType);
     const res = await httpClient.head(pkgUrl.toString());
-    const pkgUrlHost = url.parse(pkgUrl.toString()).host;
-    if (pkgUrlHost === 'repo.maven.apache.org') {
-      const timestamp = res?.headers?.['last-modified'] as string;
-      return timestamp || true;
-    }
-    return true;
+    const timestamp = res?.headers?.['last-modified'] as string;
+    return timestamp || true;
   } catch (err) {
     if (isNotFoundError(err)) {
       return false;
@@ -118,4 +117,87 @@ export async function isHttpResourceExists(
     logger.debug({ failedUrl }, `Can't check HTTP resource existence`);
     return null;
   }
+}
+
+function containsPlaceholder(str: string): boolean {
+  return /\${.*?}/g.test(str);
+}
+
+export function getMavenUrl(
+  dependency: MavenDependency,
+  repoUrl: string,
+  path: string
+): url.URL | null {
+  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+}
+
+export async function downloadMavenXml(
+  pkgUrl: url.URL | null
+): Promise<MavenXml | null> {
+  /* istanbul ignore if */
+  if (!pkgUrl) {
+    return {};
+  }
+  let rawContent: string;
+  let authorization: boolean;
+  switch (pkgUrl.protocol) {
+    case 'http:':
+    case 'https:':
+      ({ authorization, body: rawContent } = await downloadHttpProtocol(
+        pkgUrl
+      ));
+      break;
+    case 's3:':
+      logger.debug('Skipping s3 dependency');
+      return {};
+    default:
+      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
+      return {};
+  }
+
+  if (!rawContent) {
+    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
+    return {};
+  }
+
+  return { authorization, xml: new XmlDocument(rawContent) };
+}
+
+export async function getDependencyInfo(
+  dependency: MavenDependency,
+  repoUrl: string,
+  version: string
+): Promise<Partial<ReleaseResult>> {
+  const result: Partial<ReleaseResult> = {};
+  const path = `${version}/${dependency.name}-${version}.pom`;
+
+  const pomUrl = getMavenUrl(dependency, repoUrl, path);
+  const { xml: pomContent } = await downloadMavenXml(pomUrl);
+  // istanbul ignore if
+  if (!pomContent) {
+    return result;
+  }
+
+  const homepage = pomContent.valueWithPath('url');
+  if (homepage && !containsPlaceholder(homepage)) {
+    result.homepage = homepage;
+  }
+
+  const sourceUrl = pomContent.valueWithPath('scm.url');
+  if (sourceUrl && !containsPlaceholder(sourceUrl)) {
+    result.sourceUrl = sourceUrl.replace(/^scm:/, '');
+  }
+
+  return result;
+}
+
+export function getDependencyParts(lookupName: string): MavenDependency {
+  const [group, name] = lookupName.split(':');
+  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
+  return {
+    display: lookupName,
+    group,
+    name,
+    dependencyUrl,
+  };
 }

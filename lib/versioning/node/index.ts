@@ -34,7 +34,7 @@ export function isStable(version: string): boolean {
     const major = npm.getMajor(version);
     const schedule = nodeSchedule[`v${major}`];
     if (schedule?.lts) {
-      // TODO: use the exact release that started LTS
+      // TODO: use the exact release that started LTS (#9716)
       return DateTime.local() > DateTime.fromISO(schedule.lts);
     }
   }

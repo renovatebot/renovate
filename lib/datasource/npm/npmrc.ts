@@ -1,4 +1,3 @@
-import { OutgoingHttpHeaders } from 'http';
 import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
@@ -6,13 +5,13 @@ import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
+import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
 import { add } from '../../util/sanitize';
+import type { Npmrc, PackageResolution } from './types';
 
-let npmrc: Record<string, any> | null = null;
-let npmrcRaw: string;
-
-export type Npmrc = Record<string, any>;
+let npmrc: Record<string, any> = {};
+let npmrcRaw = '';
 
 export function getNpmrc(): Npmrc | null {
   return npmrc;
@@ -36,7 +35,7 @@ function envReplace(value: any, env = process.env): any {
 }
 
 const envRe = /(\\*)\$\{([^}]+)\}/;
-// TODO: better add to host rules
+// TODO: better add to host rules (#9588)
 function sanitize(key: string, val: string): void {
   if (!val || envRe.test(val)) {
     return;
@@ -61,13 +60,13 @@ export function setNpmrc(input?: string): void {
     npmrcRaw = input;
     logger.debug('Setting npmrc');
     npmrc = ini.parse(input.replace(/\\n/g, '\n'));
-    const { trustLevel } = getAdminConfig();
+    const { exposeAllEnv } = getAdminConfig();
     for (const [key, val] of Object.entries(npmrc)) {
-      if (trustLevel !== 'high') {
+      if (!exposeAllEnv) {
         sanitize(key, val);
       }
       if (
-        trustLevel !== 'high' &&
+        !exposeAllEnv &&
         key.endsWith('registry') &&
         val &&
         val.includes('localhost')
@@ -80,7 +79,7 @@ export function setNpmrc(input?: string): void {
         return;
       }
     }
-    if (trustLevel !== 'high') {
+    if (!exposeAllEnv) {
       return;
     }
     for (const key of Object.keys(npmrc)) {
@@ -89,15 +88,9 @@ export function setNpmrc(input?: string): void {
     }
   } else if (npmrc) {
     logger.debug('Resetting npmrc');
-    npmrc = null;
-    npmrcRaw = null;
+    npmrc = {};
+    npmrcRaw = '';
   }
-}
-
-export interface PackageResolution {
-  headers: OutgoingHttpHeaders;
-  packageUrl: string;
-  registryUrl: string;
 }
 
 export function resolvePackage(packageName: string): PackageResolution {
@@ -106,7 +99,7 @@ export function resolvePackage(packageName: string): PackageResolution {
   try {
     registryUrl = getRegistryUrl(scope, getNpmrc());
   } catch (err) {
-    registryUrl = 'https://registry.npmjs.org';
+    registryUrl = 'https://registry.npmjs.org/';
   }
   const packageUrl = url.resolve(
     registryUrl,
@@ -129,11 +122,6 @@ export function resolvePackage(packageName: string): PackageResolution {
       { token: maskToken(authInfo.token), npmName: packageName },
       'Using auth (via npmrc) for npm lookup'
     );
-  } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
-    logger.warn(
-      'Support for NPM_TOKEN in env will be dropped in the next major release'
-    );
-    headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
   }
   return { headers, packageUrl, registryUrl };
 }

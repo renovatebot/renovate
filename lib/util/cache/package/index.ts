@@ -1,8 +1,8 @@
-import type { GlobalConfig } from '../../../config/types';
+import type { AllConfig } from '../../../config/types';
 import * as memCache from '../memory';
-import type { PackageCache } from './common';
 import * as fileCache from './file';
 import * as redisCache from './redis';
+import type { PackageCache } from './types';
 
 let cacheProxy: PackageCache;
 
@@ -35,7 +35,7 @@ export function set(
   return cacheProxy.set(namespace, key, value, minutes);
 }
 
-export function init(config: GlobalConfig): void {
+export function init(config: AllConfig): void {
   if (config.redisUrl) {
     redisCache.init(config.redisUrl);
     cacheProxy = {
@@ -51,7 +51,7 @@ export function init(config: GlobalConfig): void {
   }
 }
 
-export function cleanup(config: GlobalConfig): void {
+export function cleanup(config: AllConfig): void {
   if (config?.redisUrl) {
     redisCache.end();
   }

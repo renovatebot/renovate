@@ -1,17 +1,63 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
-import { RenovateConfig } from '../../config';
 import { getAdminConfig } from '../../config/admin';
+import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
-import { Pr, platform } from '../../platform';
-import { PrState } from '../../types';
-import { BranchConfig, ProcessBranchResult } from '../types';
+import { platform } from '../../platform';
+import { BranchConfig, BranchResult } from '../types';
 
-function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
+interface DependencyDashboard {
+  dependencyDashboardChecks: Record<string, string>;
+  dependencyDashboardRebaseAllOpen: boolean;
+}
+
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
+  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+  const checked = issueBody.match(new RegExp(checkMatch, 'g'));
+  const dependencyDashboardChecks: Record<string, string> = {};
+  if (checked?.length) {
+    const re = new RegExp(checkMatch);
+    checked.forEach((check) => {
+      const [, type, branchName] = re.exec(check);
+      dependencyDashboardChecks[branchName] = type;
+    });
+  }
+  const checkedRebaseAll = issueBody.includes(
+    ' - [x] <!-- rebase-all-open-prs -->'
+  );
+  let dependencyDashboardRebaseAllOpen = false;
+  if (checkedRebaseAll) {
+    dependencyDashboardRebaseAllOpen = true;
+    /* eslint-enable no-param-reassign */
+  }
+  return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
+}
+
+export async function readDashboardBody(config: RenovateConfig): Promise<void> {
+  /* eslint-disable no-param-reassign */
+  config.dependencyDashboardChecks = {};
+  const stringifiedConfig = JSON.stringify(config);
+  if (
+    config.dependencyDashboard ||
+    stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
+    stringifiedConfig.includes('"prCreation":"approval"')
+  ) {
+    config.dependencyDashboardTitle =
+      config.dependencyDashboardTitle || `Dependency Dashboard`;
+    const issue = await platform.findIssue(config.dependencyDashboardTitle);
+    if (issue) {
+      config.dependencyDashboardIssue = issue.number;
+      Object.assign(config, parseDashboardIssue(issue.body));
+    }
+  }
+  /* eslint-enable no-param-reassign */
+}
+
+function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
-  if (pr) {
-    item += `[${branch.prTitle}](../pull/${pr.number})`;
+  if (branch.prNo) {
+    item += `[${branch.prTitle}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
@@ -49,7 +95,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   return newIssueBody;
 }
 
-export async function ensureMasterIssue(
+export async function ensureDependencyDashboard(
   config: RenovateConfig,
   branches: BranchConfig[]
 ): Promise<void> {
@@ -77,7 +123,7 @@ export async function ensureMasterIssue(
   logger.debug('Ensuring Dependency Dashboard');
   const hasBranches =
     is.nonEmptyArray(branches) &&
-    branches.some((branch) => branch.res !== ProcessBranchResult.Automerged);
+    branches.some((branch) => branch.result !== BranchResult.Automerged);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
     if (getAdminConfig().dryRun) {
       logger.info(
@@ -98,7 +144,7 @@ export async function ensureMasterIssue(
   issueBody = appendRepoProblems(config, issueBody);
 
   const pendingApprovals = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.NeedsApproval
+    (branch) => branch.result === BranchResult.NeedsApproval
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
@@ -109,12 +155,12 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.NotScheduled
+    (branch) => branch.result === BranchResult.NotScheduled
   );
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to ignore the schedule.\n';
+      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -122,9 +168,9 @@ export async function ensureMasterIssue(
   }
   const rateLimited = branches.filter(
     (branch) =>
-      branch.res === ProcessBranchResult.BranchLimitReached ||
-      branch.res === ProcessBranchResult.PrLimitReached ||
-      branch.res === ProcessBranchResult.CommitLimitReached
+      branch.result === BranchResult.BranchLimitReached ||
+      branch.result === BranchResult.PrLimitReached ||
+      branch.result === BranchResult.CommitLimitReached
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -136,7 +182,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const errorList = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.Error
+    (branch) => branch.result === BranchResult.Error
   );
   if (errorList.length) {
     issueBody += '## Errored\n\n';
@@ -148,7 +194,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingPr = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.NeedsPrApproval
+    (branch) => branch.result === BranchResult.NeedsPrApproval
   );
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
@@ -160,19 +206,18 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const prEdited = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.PrEdited
+    (branch) => branch.result === BranchResult.PrEdited
   );
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
     issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, check the box below.\n\n`;
     for (const branch of prEdited) {
-      const pr = await platform.getBranchPr(branch.branchName);
-      issueBody += getListItem(branch, 'rebase', pr);
+      issueBody += getListItem(branch, 'rebase');
     }
     issueBody += '\n';
   }
   const prPending = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.Pending
+    (branch) => branch.result === BranchResult.Pending
   );
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
@@ -182,29 +227,64 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
+  const prPendingBranchAutomerge = branches.filter(
+    (branch) => branch.prBlockedBy === 'BranchAutomerge'
+  );
+  if (prPendingBranchAutomerge.length) {
+    issueBody += '## Pending Branch Automerge\n\n';
+    issueBody += `These updates await pending status checks before automerging.\n\n`;
+    for (const branch of prPendingBranchAutomerge) {
+      issueBody += getListItem(branch, 'approvePr');
+    }
+    issueBody += '\n';
+  }
   const otherRes = [
-    ProcessBranchResult.Pending,
-    ProcessBranchResult.NeedsApproval,
-    ProcessBranchResult.NeedsPrApproval,
-    ProcessBranchResult.NotScheduled,
-    ProcessBranchResult.PrLimitReached,
-    ProcessBranchResult.CommitLimitReached,
-    ProcessBranchResult.BranchLimitReached,
-    ProcessBranchResult.AlreadyExisted,
-    ProcessBranchResult.Error,
-    ProcessBranchResult.Automerged,
-    ProcessBranchResult.PrEdited,
+    BranchResult.Pending,
+    BranchResult.NeedsApproval,
+    BranchResult.NeedsPrApproval,
+    BranchResult.NotScheduled,
+    BranchResult.PrLimitReached,
+    BranchResult.CommitLimitReached,
+    BranchResult.BranchLimitReached,
+    BranchResult.AlreadyExisted,
+    BranchResult.Error,
+    BranchResult.Automerged,
+    BranchResult.PrEdited,
   ];
-  const inProgress = branches.filter(
-    (branch) => !otherRes.includes(branch.res)
+  let inProgress = branches.filter(
+    (branch) =>
+      !otherRes.includes(branch.result) &&
+      branch.prBlockedBy !== 'BranchAutomerge'
+  );
+  const otherBranches = inProgress.filter(
+    (branch) => branch.prBlockedBy || !branch.prNo
+  );
+  // istanbul ignore if
+  if (otherBranches.length) {
+    issueBody += '## Other Branches\n\n';
+    issueBody += `These updates are pending. To force PRs open, check the box below.\n\n`;
+    for (const branch of otherBranches) {
+      logger.info(
+        {
+          prBlockedBy: branch.prBlockedBy,
+          prNo: branch.prNo,
+          result: branch.result,
+        },
+        'Blocked PR'
+      );
+      issueBody += getListItem(branch, 'other');
+    }
+    issueBody += '\n';
+  }
+  inProgress = inProgress.filter(
+    (branch) => branch.prNo && !branch.prBlockedBy
   );
   if (inProgress.length) {
     issueBody += '## Open\n\n';
     issueBody +=
       'These updates have all been created already. Click a checkbox below to force a retry/rebase of any.\n\n';
     for (const branch of inProgress) {
-      const pr = await platform.getBranchPr(branch.branchName);
-      issueBody += getListItem(branch, 'rebase', pr);
+      issueBody += getListItem(branch, 'rebase');
     }
     if (inProgress.length > 2) {
       issueBody += ' - [ ] ';
@@ -216,19 +296,14 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.AlreadyExisted
+    (branch) => branch.result === BranchResult.AlreadyExisted
   );
   if (alreadyExisted.length) {
     issueBody += '## Ignored or Blocked\n\n';
     issueBody +=
       'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
-      const pr = await platform.findPr({
-        branchName: branch.branchName,
-        prTitle: branch.prTitle,
-        state: PrState.NotOpen,
-      });
-      issueBody += getListItem(branch, 'recreate', pr);
+      issueBody += getListItem(branch, 'recreate');
     }
     issueBody += '\n';
   }
@@ -240,6 +315,28 @@ export async function ensureMasterIssue(
 
   if (config.dependencyDashboardFooter?.length) {
     issueBody += `---\n${config.dependencyDashboardFooter}\n`;
+  }
+
+  if (config.dependencyDashboardIssue) {
+    const updatedIssue = await platform?.getIssue(
+      config.dependencyDashboardIssue,
+      false
+    );
+    if (updatedIssue) {
+      const { dependencyDashboardChecks } = parseDashboardIssue(
+        updatedIssue.body
+      );
+      for (const branchName of Object.keys(config.dependencyDashboardChecks)) {
+        delete dependencyDashboardChecks[branchName];
+      }
+      for (const branchName of Object.keys(dependencyDashboardChecks)) {
+        const checkText = `- [ ] <!-- ${dependencyDashboardChecks[branchName]}-branch=${branchName} -->`;
+        issueBody = issueBody.replace(
+          checkText,
+          checkText.replace('[ ]', '[x]')
+        );
+      }
+    }
   }
 
   if (getAdminConfig().dryRun) {

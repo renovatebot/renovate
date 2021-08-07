@@ -17,13 +17,8 @@ export const presets: Record<string, Preset> = {
       ':prConcurrentLimit20',
       'group:monorepos',
       'group:recommended',
-      'helpers:disableTypesNodeMajor',
       'workarounds:all',
     ],
-  },
-  'base-js': {
-    description: 'Base configuration for Javascript (deprecated)',
-    extends: ['config:base'],
   },
   'js-app': {
     description: 'Default configuration for webapps',

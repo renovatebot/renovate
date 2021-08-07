@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import {
   RenovateConfig,
   getConfig,
+  getName,
   git,
   platform,
 } from '../../../../test/util';
@@ -17,7 +18,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe('workers/repository/process/limits', () => {
+describe(getName(), () => {
   describe('getPrHourlyRemaining()', () => {
     it('calculates hourly limit remaining', async () => {
       const time = DateTime.local();
@@ -126,13 +127,30 @@ describe('workers/repository/process/limits', () => {
   });
 
   describe('getBranchesRemaining()', () => {
-    it('returns concurrent branches', () => {
-      config.branchConcurrentLimit = 20;
-      git.branchExists.mockReturnValueOnce(true);
-      const res = limits.getBranchesRemaining(config, [
-        { branchName: 'foo' },
-      ] as never);
-      expect(res).toEqual(19);
+    it('returns minimal of both limits', async () => {
+      platform.getPrList.mockResolvedValue([]);
+
+      await expect(
+        limits.getBranchesRemaining(
+          {
+            ...config,
+            prHourlyLimit: 3,
+            branchConcurrentLimit: 5,
+          },
+          []
+        )
+      ).resolves.toEqual(3);
+
+      await expect(
+        limits.getBranchesRemaining(
+          {
+            ...config,
+            prHourlyLimit: 11,
+            branchConcurrentLimit: 7,
+          },
+          []
+        )
+      ).resolves.toEqual(7);
     });
   });
 });

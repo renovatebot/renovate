@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/cocoapods/extract extractPackageFile() extracts all dependencies 1`] = `
+exports[`manager/cocoapods/extract extractPackageFile() extracts all dependencies 1`] = `
 Array [
   Object {
     "depName": "a",
@@ -68,7 +68,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/cocoapods/extract extractPackageFile() extracts all dependencies 2`] = `
+exports[`manager/cocoapods/extract extractPackageFile() extracts all dependencies 2`] = `
 Array [
   Object {
     "currentValue": "~> 6.5.0",

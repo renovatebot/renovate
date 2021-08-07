@@ -3,6 +3,7 @@ import { logger } from '../../../../logger';
 import type {
   GithubGitBlob,
   GithubGitTree,
+  GithubGitTreeNode,
 } from '../../../../types/platform/github';
 import { GithubHttp } from '../../../../util/http/github';
 import { ensureTrailingSlash } from '../../../../util/url';
@@ -42,7 +43,8 @@ export async function getTags(
 
 export async function getReleaseNotesMd(
   repository: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  sourceDirectory: string
 ): Promise<ChangeLogFile> | null {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
@@ -52,7 +54,9 @@ export async function getReleaseNotesMd(
 
   // https://docs.github.com/en/rest/reference/git#get-a-tree
   const res = await http.getJson<GithubGitTree>(
-    `${apiPrefix}/git/trees/${defaultBranch}`
+    `${apiPrefix}/git/trees/${defaultBranch}${
+      sourceDirectory ? '?recursive=1' : ''
+    }`
   );
 
   // istanbul ignore if
@@ -60,10 +64,20 @@ export async function getReleaseNotesMd(
     logger.debug({ repository }, 'Git tree truncated');
   }
 
-  const files = res.body.tree
-    .filter((f) => f.type === 'blob')
-    .filter((f) => changelogFilenameRegex.test(f.path));
-
+  const allFiles = res.body.tree.filter((f) => f.type === 'blob');
+  let files: GithubGitTreeNode[] = [];
+  if (sourceDirectory?.length) {
+    files = allFiles
+      .filter((f) => f.path.startsWith(sourceDirectory))
+      .filter((f) =>
+        changelogFilenameRegex.test(
+          f.path.replace(ensureTrailingSlash(sourceDirectory), '')
+        )
+      );
+  }
+  if (!files.length) {
+    files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
+  }
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;

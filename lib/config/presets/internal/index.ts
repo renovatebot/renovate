@@ -1,4 +1,5 @@
 import type { Preset, PresetConfig } from '../types';
+import * as compatibilityPreset from './compatibility';
 import * as configPreset from './config';
 import * as defaultPreset from './default';
 import * as dockerPreset from './docker';
@@ -9,10 +10,12 @@ import * as npm from './npm';
 import * as packagesPreset from './packages';
 import * as previewPreset from './preview';
 import * as regexManagersPreset from './regex-managers';
+import * as replacements from './replacements';
 import * as schedulePreset from './schedule';
 import * as workaroundsPreset from './workarounds';
 
 export const groups: Record<string, Record<string, Preset>> = {
+  compatibility: compatibilityPreset.presets,
   config: configPreset.presets,
   default: defaultPreset.presets,
   docker: dockerPreset.presets,
@@ -23,6 +26,7 @@ export const groups: Record<string, Record<string, Preset>> = {
   packages: packagesPreset.presets,
   preview: previewPreset.presets,
   regexManagers: regexManagersPreset.presets,
+  replacements: replacements.presets,
   schedule: schedulePreset.presets,
   workarounds: workaroundsPreset.presets,
 };

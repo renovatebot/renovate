@@ -1,7 +1,7 @@
 import { getName } from '../../test/util';
 import { sampleSize } from '.';
 
-describe(getName(__filename), () => {
+describe(getName(), () => {
   describe('sampleSize', () => {
     const array = ['a', 'b', 'c', 'd'];
     it('returns correct sized array', () => {

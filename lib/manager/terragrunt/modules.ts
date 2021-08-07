@@ -4,11 +4,14 @@ import * as datasourceTerragruntModule from '../../datasource/terraform-module';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
+import { TerragruntDependencyTypes } from './common';
 import { extractTerragruntProvider } from './providers';
-import { ExtractionResult, TerragruntDependencyTypes } from './util';
+import type { ExtractionResult } from './types';
 
-const githubRefMatchRegex = /github.com([/:])(?<project>[^/]+\/[a-z0-9-.]+).*\?ref=(?<tag>.*)$/;
-const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
+export const githubRefMatchRegex =
+  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i;
+export const gitTagsRefMatchRegex =
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
 const hostnameMatchRegex = /^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/;
 
 export function extractTerragruntModule(

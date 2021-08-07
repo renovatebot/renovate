@@ -10,12 +10,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
-
-interface UrlParsedResult {
-  datasource: string;
-  repo: string;
-  currentValue: string;
-}
+import type { UrlParsedResult } from './types';
 
 function parseUrl(urlString: string): UrlParsedResult | null {
   // istanbul ignore if
@@ -53,7 +48,7 @@ function parseUrl(urlString: string): UrlParsedResult | null {
   return null;
 }
 
-const dummyLexer = {
+const lexer = moo.states({
   main: {
     lineComment: { match: /#.*?$/ },
     leftParen: { match: '(' },
@@ -85,29 +80,29 @@ const dummyLexer = {
         ].join('|')
       ),
     },
-    unknown: { match: /[^]/, lineBreaks: true },
+    unknown: moo.fallback,
   },
   longDoubleQuoted: {
     stringFinish: { match: '"""', pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   doubleQuoted: {
     stringFinish: { match: '"', pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   longSingleQuoted: {
     stringFinish: { match: "'''", pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
   singleQuoted: {
     stringFinish: { match: "'", pop: 1 },
-    char: { match: /[^]/, lineBreaks: true },
+    char: moo.fallback,
   },
-};
+});
 
 function parseContent(content: string): string[] {
-  const lexer = moo.states(dummyLexer);
   lexer.reset(content);
+
   let balance = 0;
 
   let def: null | string = null;
@@ -242,7 +237,7 @@ export function extractPackageFile(
       if (commit) {
         dep.currentDigest = commit;
       }
-      // TODO: Check if we really need to use parse here or if it should always be a plain https url
+      // TODO: Check if we really need to use parse here or if it should always be a plain https url (#9605)
       const githubURL = parse(remote);
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);
@@ -261,9 +256,10 @@ export function extractPackageFile(
       dep.datasource = datasourceGo.id;
       dep.lookupName = importpath;
       if (remote) {
-        const remoteMatch = /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/.exec(
-          remote
-        );
+        const remoteMatch =
+          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/.exec(
+            remote
+          );
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.lookupName = remote.replace('https://', '');
         } else {

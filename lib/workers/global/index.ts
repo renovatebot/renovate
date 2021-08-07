@@ -5,18 +5,21 @@ import { satisfies } from 'semver';
 import upath from 'upath';
 import * as pkg from '../../../package.json';
 import * as configParser from '../../config';
-import { GlobalConfig } from '../../config';
+import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
+import type {
+  AllConfig,
+  RenovateConfig,
+  RenovateRepository,
+} from '../../config/types';
+import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { getProblems, logger, setMeta } from '../../logger';
-import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
+import { parseConfigs } from './config/parse';
 import { globalFinalize, globalInitialize } from './initialize';
 import { Limit, isLimitReached } from './limits';
-
-type RenovateConfig = configParser.RenovateConfig;
-type RenovateRepository = configParser.RenovateRepository;
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -36,7 +39,7 @@ export async function getRepositoryConfig(
 }
 
 function getGlobalConfig(): Promise<RenovateConfig> {
-  return configParser.parseConfigs(process.env, process.argv);
+  return parseConfigs(process.env, process.argv);
 }
 
 function haveReachedLimits(): boolean {
@@ -69,13 +72,23 @@ function checkEnv(): void {
   }
 }
 
+export async function validatePresets(config: AllConfig): Promise<void> {
+  try {
+    await resolveConfigPresets(config);
+  } catch (err) /* istanbul ignore next */ {
+    throw new Error(CONFIG_PRESETS_INVALID);
+  }
+}
+
 export async function start(): Promise<number> {
-  let config: GlobalConfig;
+  let config: AllConfig;
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
     // initialize all submodules
     config = await globalInitialize(config);
+
+    await validatePresets(config);
 
     checkEnv();
 
@@ -90,7 +103,6 @@ export async function start(): Promise<number> {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
-      await setUtilConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
         repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
