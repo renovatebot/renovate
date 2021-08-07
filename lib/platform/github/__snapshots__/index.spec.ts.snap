@@ -7772,7 +7772,10 @@ Array [
 ]
 `;
 
-exports[`platform/github/index massageMarkdown(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://togithub.com/foo/bar/issues/5)"`;
+exports[`platform/github/index massageMarkdown(input) returns updated pr body 1`] = `
+"[https://github.com/foo/bar/issues/5](https://togithub.com/foo/bar/issues/5) plus also [a link](https://togithub.com/foo/bar/issues/5)
+"
+`;
 
 exports[`platform/github/index mergePr(prNo) - autodetection should give up 1`] = `
 Array [
