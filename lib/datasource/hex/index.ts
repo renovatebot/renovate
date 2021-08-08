@@ -1,8 +1,8 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
+import * as hostRules from '../../util/host-rules';
 import type { HttpResponse } from '../../util/http';
 import * as hexVersioning from '../../versioning/hex';
-import * as hostRules from '../../util/host-rules';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HexRelease } from './types';
