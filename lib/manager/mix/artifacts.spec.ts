@@ -4,12 +4,16 @@ import { env, fs, getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
+import * as _hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
+
+const hostRules: any = _hostRules;
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
+jest.mock('../../util/host-rules');
 
 const adminConfig: RepoAdminConfig = {
   // `join` fixes Windows CI
@@ -86,10 +90,17 @@ describe(getName(), () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    hostRules.find.mockReturnValueOnce({ token: 'valid_token' });
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
-        updatedDeps: [{ depName: 'plug' }],
+        updatedDeps: [
+          { depName: 'plug' },
+          {
+            depName: 'private_package',
+            lookupName: 'private_package:renovate_test',
+          },
+        ],
         newPackageFileContent: '{}',
         config,
       })
