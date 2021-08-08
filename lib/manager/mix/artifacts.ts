@@ -7,7 +7,11 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import * as hostRules from '../../util/host-rules';
+
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+
+const hexRepoUrl = 'https://hex.pm/';
 
 export async function updateArtifacts({
   packageFileName,
@@ -41,9 +45,35 @@ export async function updateArtifacts({
     return null;
   }
 
+  const organizations = new Set<string>();
+
+  for (const { lookupName } of updatedDeps) {
+    const [, organization] = lookupName.split(':');
+
+    if (organization) {
+      organizations.add(organization);
+    }
+  }
+
+  const preCommands = Array.from(organizations).reduce((acc, organization) => {
+    const url = `${hexRepoUrl}api/repos/${organization}/`;
+    const { token } = hostRules.find({ url });
+
+    if (token) {
+      logger.debug(`Authenticating to hex organization ${organization}`);
+      const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
+      return [...acc, authCommand];
+    }
+
+    return acc;
+  }, []);
+
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    docker: { image: 'elixir' },
+    docker: {
+      image: 'elixir',
+      preCommands,
+    },
   };
   const command = [
     'mix',
