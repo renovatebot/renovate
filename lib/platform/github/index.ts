@@ -34,6 +34,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformResult,
   Pr,
   RepoParams,
@@ -1477,10 +1478,10 @@ export async function updatePr({
   }
 }
 
-export async function mergePr(
-  prNo: number,
-  branchName: string
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: prNo,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
   if (config.prReviewsRequired) {
