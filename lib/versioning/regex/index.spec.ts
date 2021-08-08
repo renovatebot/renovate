@@ -396,4 +396,33 @@ describe('regex', () => {
       expect(regex.matches('1.2.4a1-foo', '1.2.3a1-bar')).toBe(false);
     });
   });
+
+  describe('Supported 4th number as build', () => {
+    it('supports Bitnami docker versioning', () => {
+      const re = get(
+        'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$'
+      );
+
+      expect(re.isValid('12.7.0-debian-10-r69')).toBe(true);
+      expect(re.isValid('12.7.0-debian-10-r100')).toBe(true);
+
+      expect(
+        re.isCompatible('12.7.0-debian-10-r69', '12.7.0-debian-10-r100')
+      ).toBe(true);
+
+      expect(
+        re.isGreaterThan('12.7.0-debian-10-r69', '12.7.0-debian-10-r100')
+      ).toBe(false);
+      expect(
+        re.isGreaterThan('12.7.0-debian-10-r169', '12.7.0-debian-10-r100')
+      ).toBe(true);
+
+      expect(re.matches('12.7.0-debian-9-r69', '12.7.0-debian-10-r69')).toBe(
+        true
+      );
+      expect(re.matches('12.7.0-debian-9-r69', '12.7.0-debian-10-r68')).toBe(
+        true
+      );
+    });
+  });
 });

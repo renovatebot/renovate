@@ -279,6 +279,7 @@ describe('.updateArtifacts()', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -296,6 +297,7 @@ describe('.updateArtifacts()', () => {
         'fooYour requirements could not be resolved to an installable set of packages.bar'
       );
     });
+    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',

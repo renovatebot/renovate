@@ -61,6 +61,7 @@ describe('logger', () => {
     logger.error({ some: 'meta' }, 'message');
     logger.warn('a warning with a p4$$w0rd');
     logger.info('ignored');
+    // FIXME: explicit assert condition
     expect(getProblems()).toMatchSnapshot();
     clearProblems();
     expect(getProblems()).toHaveLength(0);

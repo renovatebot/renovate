@@ -166,7 +166,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": Object {
+      "description": "the-body",
+      "labels": "",
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -191,7 +198,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345/approval_rules",
   },
   Object {
-    "body": "{\\"name\\":\\"renovateIgnoreApprovals\\",\\"approvals_required\\":0}",
+    "body": Object {
+      "approvals_required": 0,
+      "name": "renovateIgnoreApprovals",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -227,7 +237,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
   },
   Object {
-    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
+    "body": Object {
+      "merge_when_pipeline_succeeds": true,
+      "should_remove_source_branch": true,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -268,7 +281,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": Object {
+      "description": "the-body",
+      "labels": "",
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -304,7 +324,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
   },
   Object {
-    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
+    "body": Object {
+      "merge_when_pipeline_succeeds": true,
+      "should_remove_source_branch": true,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -345,7 +368,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": Object {
+      "description": "the-body",
+      "labels": "",
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -392,7 +422,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
   },
   Object {
-    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
+    "body": Object {
+      "merge_when_pipeline_succeeds": true,
+      "should_remove_source_branch": true,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -455,7 +488,15 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null,\\"squash\\":true}",
+    "body": Object {
+      "description": "the-body",
+      "labels": null,
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "squash": true,
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -518,7 +559,15 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null,\\"squash\\":true}",
+    "body": Object {
+      "description": "the-body",
+      "labels": null,
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "squash": true,
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -570,7 +619,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
+    "body": Object {
+      "description": "the-body",
+      "labels": null,
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -611,7 +667,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": Object {
+      "description": "the-body",
+      "labels": "",
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -636,7 +699,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345/approval_rules",
   },
   Object {
-    "body": "{\\"name\\":\\"renovateIgnoreApprovals\\",\\"approvals_required\\":0}",
+    "body": Object {
+      "approvals_required": 0,
+      "name": "renovateIgnoreApprovals",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -672,7 +738,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
   },
   Object {
-    "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
+    "body": Object {
+      "merge_when_pipeline_succeeds": true,
+      "should_remove_source_branch": true,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -725,7 +794,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"WIP: some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
+    "body": Object {
+      "description": "the-body",
+      "labels": null,
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "WIP: some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -778,7 +854,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"Draft: some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
+    "body": Object {
+      "description": "the-body",
+      "labels": null,
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "Draft: some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -830,7 +913,14 @@ Array [
     "url": "https://gitlab.com/api/v4/version",
   },
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": Object {
+      "description": "the-body",
+      "labels": "",
+      "remove_source_branch": true,
+      "source_branch": "some-branch",
+      "target_branch": "master",
+      "title": "some-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -860,7 +950,9 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1",
   },
   Object {
-    "body": "{\\"labels\\":\\"foo,renovate\\"}",
+    "body": Object {
+      "labels": "foo,renovate",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -901,7 +993,12 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes",
   },
   Object {
-    "body": "{\\"body\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}",
+    "body": Object {
+      "body": "### some-subject
+
+some
+content",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -942,7 +1039,12 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes",
   },
   Object {
-    "body": "{\\"body\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\"}",
+    "body": Object {
+      "body": "### some-subject
+
+some
+content",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -1102,7 +1204,11 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
   Object {
-    "body": "{\\"title\\":\\"new-title\\",\\"description\\":\\"new-content\\",\\"labels\\":[]}",
+    "body": Object {
+      "description": "new-content",
+      "labels": Array [],
+      "title": "new-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -1132,7 +1238,14 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
   Object {
-    "body": "{\\"title\\":\\"new-title\\",\\"description\\":\\"new-content\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "body": Object {
+      "description": "new-content",
+      "labels": Array [
+        "Renovate",
+        "Maintenance",
+      ],
+      "title": "new-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -1200,7 +1313,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
   },
   Object {
-    "body": "{\\"title\\":\\"title-2\\",\\"description\\":\\"newer-content\\"}",
+    "body": Object {
+      "description": "newer-content",
+      "title": "title-2",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -1241,7 +1357,14 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
   },
   Object {
-    "body": "{\\"title\\":\\"title-2\\",\\"description\\":\\"newer-content\\",\\"labels\\":[\\"Renovate\\",\\"Maintenance\\"]}",
+    "body": Object {
+      "description": "newer-content",
+      "labels": Array [
+        "Renovate",
+        "Maintenance",
+      ],
+      "title": "title-2",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -1271,7 +1394,9 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
   },
   Object {
-    "body": "{\\"state_event\\":\\"close\\"}",
+    "body": Object {
+      "state_event": "close",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -2711,7 +2836,9 @@ These updates have all been created already. Click a checkbox below to force a r
 exports[`platform/gitlab/index mergePr(pr) merges the PR 1`] = `
 Array [
   Object {
-    "body": "{\\"should_remove_source_branch\\":true}",
+    "body": Object {
+      "should_remove_source_branch": true,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -2741,7 +2868,12 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
   Object {
-    "body": "{\\"state\\":\\"success\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
+    "body": Object {
+      "context": "some-context",
+      "description": "some-description",
+      "state": "success",
+      "target_url": "some-url",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -2782,7 +2914,12 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
   Object {
-    "body": "{\\"state\\":\\"failed\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
+    "body": Object {
+      "context": "some-context",
+      "description": "some-description",
+      "state": "failed",
+      "target_url": "some-url",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -2823,7 +2960,12 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
   Object {
-    "body": "{\\"state\\":\\"pending\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
+    "body": Object {
+      "context": "some-context",
+      "description": "some-description",
+      "state": "pending",
+      "target_url": "some-url",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -2886,7 +3028,11 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"state_event\\":\\"close\\"}",
+    "body": Object {
+      "description": "body",
+      "state_event": "close",
+      "title": "title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -2938,7 +3084,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
-    "body": "{\\"title\\":\\"Draft: title\\",\\"description\\":\\"body\\"}",
+    "body": Object {
+      "description": "body",
+      "title": "Draft: title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -2990,7 +3139,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
-    "body": "{\\"title\\":\\"Draft: title\\",\\"description\\":\\"body\\"}",
+    "body": Object {
+      "description": "body",
+      "title": "Draft: title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3042,7 +3194,10 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\"}",
+    "body": Object {
+      "description": "body",
+      "title": "title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",

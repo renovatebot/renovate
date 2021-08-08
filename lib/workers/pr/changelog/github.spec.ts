@@ -73,6 +73,7 @@ describe(getName(), () => {
       ).toBeNull();
     });
     it('works without Github', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -80,6 +81,7 @@ describe(getName(), () => {
       ).toMatchSnapshot();
     });
     it('uses GitHub tags', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -87,6 +89,7 @@ describe(getName(), () => {
       ).toMatchSnapshot();
     });
     it('filters unnecessary warns', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -95,6 +98,7 @@ describe(getName(), () => {
       ).toMatchSnapshot();
     });
     it('supports node engines', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -148,6 +152,7 @@ describe(getName(), () => {
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -162,6 +167,7 @@ describe(getName(), () => {
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
