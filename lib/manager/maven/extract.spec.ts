@@ -16,10 +16,12 @@ describe(getName(), () => {
 
     it('extract dependencies from any XML position', () => {
       const res = extractPackage(simpleContent);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('tries minimum manifests', () => {
       const res = extractPackage(minimumContent);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

@@ -273,6 +273,7 @@ describe(getName(), () => {
         parentConfig
       );
       expect(isMigrated).toBe(true);
+      // FIXME: explicit assert condition
       expect(migratedConfig).toMatchSnapshot();
     });
     it('overrides existing automerge setting', () => {
@@ -444,6 +445,7 @@ describe(getName(), () => {
         config,
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
     });
@@ -625,6 +627,7 @@ describe(getName(), () => {
         defaultConfig
       );
       expect(isMigrated).toBe(true);
+      // FIXME: explicit assert condition
       expect(migratedConfig).toMatchSnapshot();
     });
   });
@@ -681,6 +684,7 @@ describe(getName(), () => {
       defaultConfig
     );
     expect(isMigrated).toBe(true);
+    // FIXME: explicit assert condition
     expect(migratedConfig).toMatchSnapshot();
   });
   it('it migrates presets', () => {
@@ -698,6 +702,7 @@ describe(getName(), () => {
       defaultConfig
     );
     expect(isMigrated).toBe(true);
+    // FIXME: explicit assert condition
     expect(migratedConfig).toMatchSnapshot();
   });
 });

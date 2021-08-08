@@ -4,6 +4,7 @@ import updateArtifacts from './artifacts';
 describe(getName(), () => {
   describe('updateArtifacts()', () => {
     it('returns empty content', () => {
+      // FIXME: explicit assert condition
       expect(
         updateArtifacts({
           packageFileName: '',
@@ -14,6 +15,7 @@ describe(getName(), () => {
       ).toMatchSnapshot();
     });
     it('returns two modules', () => {
+      // FIXME: explicit assert condition
       expect(
         updateArtifacts({
           packageFileName: '',

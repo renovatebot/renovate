@@ -67,6 +67,7 @@ describe(getName(), () => {
     });
     it('extracts example pipfile', async () => {
       const res = await extractPackageFile(pipfile4, 'Pipfile');
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('supports custom index', async () => {
